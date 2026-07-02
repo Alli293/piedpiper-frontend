@@ -1,59 +1,152 @@
-# CarbonhubFrontend
+# CarbonHub — Proyecto Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.5.
+Aplicación web para gestión de huella de carbono, construida con Angular y consumiendo la API REST del backend de CarbonHub.
 
-## Development server
+---
 
-To start a local development server, run:
+## Requisitos previos
+
+- **Node.js** `v24.17.0`
+- **npm** `11.13.0` (definido como `packageManager` en `package.json`)
+- **Angular CLI** `22.0.5` (se instala automáticamente vía `devDependencies`, pero puedes instalarlo global con `npm install -g @angular/cli` si prefieres correr `ng` directamente)
+- El [backend de CarbonHub](https://github.com/Alli293/piedpiper-backend) corriendo localmente (ver su propio README) si vas a probar funcionalidades que dependen de la API
+
+> 💡 Si trabajás en Windows, se recomienda usar **nvm-windows** para manejar versiones de Node sin conflictos.
+
+---
+
+## Configuración del entorno
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/Alli293/piedpiper-frontend.git
+cd piedpiper-frontend
+```
+
+> ⚠️ **Importante (Windows + Google Drive/OneDrive):** si tu carpeta de proyectos está sincronizada con Google Drive o OneDrive, clona el repo **fuera** de esa carpeta sincronizada (por ejemplo en `C:\Users\<usuario>\Documents\Angular\`). La sincronización interfiere con `node_modules` y puede causar errores difíciles de diagnosticar.
+
+### 2. Instalar dependencias
+
+```bash
+npm install
+```
+
+Esto instala Angular, Prettier, y el resto de dependencias del proyecto con las versiones exactas definidas en `package-lock.json`.
+
+---
+
+## Correr el proyecto localmente
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Una vez levantado el servidor, abre el navegador en:
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+```
+http://localhost:4200/
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+La aplicación se recarga automáticamente cada vez que modificas un archivo fuente.
+
+---
+
+## Formato de código (Prettier)
+
+El proyecto usa [Prettier](https://prettier.io/) para mantener un formato consistente (indentación de 2 espacios, comillas simples en TS/JS, ancho máximo de línea de 100 caracteres, etc.) en toda la base de código.
+
+### Configuración recomendada del editor (VSCode)
+
+Este repo incluye `.vscode/settings.json` y `.vscode/extensions.json` con la configuración necesaria. Al abrir el proyecto en VSCode:
+
+1. Te va a salir una notificación sugiriendo instalar las extensiones recomendadas (**Prettier** y **Angular Language Service**). Acepta la instalación.
+2. Con eso, el formato se aplica automáticamente cada vez que guardas un archivo (`Ctrl+S` / `Cmd+S`).
+
+### Formatear manualmente desde la terminal
+
+Si preferís no depender del editor, o querés formatear todo el proyecto de una vez:
+
+```bash
+npm run format
+```
+
+Para solo **verificar** si hay archivos mal formateados sin modificarlos (útil antes de un commit o en CI):
+
+```bash
+npm run format:check
+```
+
+---
+
+## Generación de código (scaffolding)
+
+Angular CLI incluye herramientas para generar código automáticamente. Por ejemplo, para generar un nuevo componente:
+
+```bash
+ng generate component nombre-del-componente
+```
+
+Para ver todos los schematics disponibles (`component`, `directive`, `pipe`, etc.):
 
 ```bash
 ng generate --help
 ```
 
-## Building
+---
 
-To build the project run:
+## Build
+
+Para compilar el proyecto para producción:
 
 ```bash
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Los artefactos compilados quedan en la carpeta `dist/`. Por defecto, el build de producción viene optimizado para performance.
 
-## Running unit tests
+---
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Testing
+
+### Pruebas unitarias
+
+El proyecto usa [Karma](https://karma-runner.github.io/) + [Jasmine](https://jasmine.github.io/) como test runner:
 
 ```bash
 ng test
 ```
 
-## Running end-to-end tests
+Esto abre una instancia de Chrome y corre los tests en modo watch, con reporte en vivo vía `karma-jasmine-html-reporter`. Para ver el reporte de cobertura (`karma-coverage`), revisa la carpeta que se genera tras correr los tests (normalmente `coverage/`).
 
-For end-to-end (e2e) testing, run:
+---
 
-```bash
-ng e2e
+## Estructura del proyecto
+
+```
+src/
+ ├── app/              # Componentes, servicios, módulos de la aplicación
+ ├── environments/     # Configuración por ambiente (dev, prod)
+ └── assets/           # Recursos estáticos
+.vscode/               # Configuración compartida del editor (formato, extensiones)
+.prettierrc            # Reglas de formato de código
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+---
 
-## Additional Resources
+## Notas importantes
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- No subir archivos de configuración con credenciales reales al repositorio.
+- Antes de levantar el frontend, asegurate de que el backend esté corriendo (ver [README del backend](https://github.com/Alli293/piedpiper-backend)).
+- Si ves errores relacionados con módulos de `node_modules` (por ejemplo `ERR_MODULE_NOT_FOUND`), probá reinstalando las dependencias:
+  ```bash
+  rm -rf node_modules package-lock.json
+  npm install
+  ```
+- Corré `npm run format:check` antes de hacer push para evitar conflictos de formato en los PRs.
+
+---
+
+## Recursos adicionales
+
+Para más información sobre Angular CLI, incluyendo referencia detallada de comandos, visitá la [documentación oficial de Angular CLI](https://angular.dev/tools/cli).
