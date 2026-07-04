@@ -1,0 +1,30 @@
+.ui-kit-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-8);
+  max-width: 960px;
+}
+
+.ui-kit-page__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-4);
+}
+
+.ui-kit-page__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--ch-space-4);
+
+    &--dark {
+    background: var(--ch-dark);
+    padding: var(--ch-space-4);
+    border-radius: var(--ch-radius-lg);
+  }
+}
+
+.ui-kit-page__card {
+  flex: 1;
+  min-width: 280px;
+}

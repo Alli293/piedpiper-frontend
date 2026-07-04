@@ -1,0 +1,50 @@
+<div class="ch-sidebar__logo">
+  <!-- TODO: replace with real fingerprint icon -->
+  <svg class="ch-sidebar__logo-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5" />
+    <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.5" />
+  </svg>
+  <span class="ch-sidebar__logo-text">
+    <span class="ch-sidebar__logo-carbon">Carbon</span><span class="ch-sidebar__logo-hub">Hub</span>
+  </span>
+</div>
+
+<div class="ch-sidebar__company">
+  <app-avatar [initials]="companyInitials()" size="sm" />
+  <div class="ch-sidebar__company-info">
+    <span class="ch-sidebar__company-name">{{ companyName() }}</span>
+    <span class="ch-sidebar__company-role">{{ companyRole() }}</span>
+  </div>
+</div>
+
+<nav class="ch-sidebar__nav" aria-label="Main navigation">
+  @for (item of menuItems(); track item.id) {
+    <button
+      type="button"
+      class="ch-sidebar__item"
+      [class.ch-sidebar__item--active]="item.active"
+      [attr.aria-current]="item.active ? 'page' : null"
+      (click)="menuItemClicked.emit(item.id)"
+    >
+      <!-- TODO: replace with real icon: {{ item.icon }} -->
+      <span class="ch-sidebar__item-icon" aria-hidden="true"></span>
+      <span class="ch-sidebar__item-label">{{ item.label }}</span>
+    </button>
+  }
+</nav>
+
+<div class="ch-sidebar__spacer"></div>
+
+<div class="ch-sidebar__bottom">
+  @for (item of bottomItems(); track item.id) {
+    <button
+      type="button"
+      class="ch-sidebar__item"
+      (click)="menuItemClicked.emit(item.id)"
+    >
+      <!-- TODO: replace with real icon: {{ item.icon }} -->
+      <span class="ch-sidebar__item-icon" aria-hidden="true"></span>
+      <span class="ch-sidebar__item-label">{{ item.label }}</span>
+    </button>
+  }
+</div>

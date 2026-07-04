@@ -1,0 +1,23 @@
+<app-sidebar
+  [menuItems]="sidebarConfig().menuItems"
+  [bottomItems]="sidebarConfig().bottomItems"
+  [companyName]="sidebarConfig().companyName"
+  [companyRole]="sidebarConfig().companyRole"
+  [companyInitials]="sidebarConfig().companyInitials"
+  (menuItemClicked)="menuItemClicked.emit($event)"
+/>
+
+<div class="ch-page-layout__main">
+  <app-header
+    [sectionLabel]="headerConfig().sectionLabel"
+    [pageTitle]="headerConfig().pageTitle"
+    [showNotificationDot]="headerConfig().showNotificationDot"
+    [userInitials]="headerConfig().userInitials"
+    (notificationClicked)="notificationClicked.emit()"
+    (profileClicked)="profileClicked.emit()"
+  />
+
+  <main class="ch-page-layout__content">
+    <ng-content />
+  </main>
+</div>

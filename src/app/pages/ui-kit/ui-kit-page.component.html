@@ -1,0 +1,83 @@
+<app-page-layout [sidebarConfig]="sidebarConfig()" [headerConfig]="headerConfig()">
+  <div class="ui-kit-page">
+    <section class="ui-kit-page__section">
+      <h2 class="ch-h3">Buttons</h2>
+      <div class="ui-kit-page__row">
+        <app-button variant="primary">Primary</app-button>
+        <app-button variant="secondary">Secondary</app-button>
+        <app-button variant="danger">Danger</app-button>
+      </div>
+      <div class="ui-kit-page__row">
+        <app-button size="sm">Small</app-button>
+        <app-button size="md">Medium</app-button>
+        <app-button size="lg">Large</app-button>
+      </div>
+      <div class="ui-kit-page__row">
+        <app-button [disabled]="true">Disabled</app-button>
+        <app-button [loading]="true">Loading</app-button>
+      </div>
+    </section>
+
+    <section class="ui-kit-page__section">
+      <h2 class="ch-h3">Avatars</h2>
+      <div class="ui-kit-page__row">
+        <app-avatar initials="CA" size="sm" />
+        <app-avatar initials="CA" size="md" />
+        <app-avatar initials="CA" size="lg" />
+      </div>
+    </section>
+
+    <section class="ui-kit-page__section">
+      <h2 class="ch-h3">Badges</h2>
+      <div class="ui-kit-page__row">
+        <app-badge variant="success">Aprobado</app-badge>
+        <app-badge variant="warning">Pendiente</app-badge>
+        <app-badge variant="danger">Rechazado</app-badge>
+        <app-badge variant="info">Info</app-badge>
+        <app-badge variant="neutral">Neutral</app-badge>
+      </div>
+    </section>
+
+    <section class="ui-kit-page__section">
+      <h2 class="ch-h3">Cards</h2>
+      <div class="ui-kit-page__row">
+        <app-card variant="elevated" class="ui-kit-page__card">
+          <span card-header class="ch-h5">Encabezado</span>
+          <p class="ch-body">Este es un card elevado con contenido de ejemplo.</p>
+          <span card-footer class="ch-body-sm">Pie de tarjeta</span>
+        </app-card>
+        <app-card variant="outlined" class="ui-kit-page__card">
+          <p class="ch-body">Este es un card con borde, sin header ni footer.</p>
+        </app-card>
+      </div>
+    </section>
+
+    <section class="ui-kit-page__section">
+      <h2 class="ch-h3">Stat Cards</h2>
+      <div class="ui-kit-page__row ui-kit-page__row--dark">
+        <app-stat-card value="999+" label="Empresas registradas" />
+        <app-stat-card value="99" label="Reportes generados" />
+        <app-stat-card value="99,999" label="Toneladas de CO2" />
+      </div>
+    </section>
+
+    <section class="ui-kit-page__section">
+      <h2 class="ch-h3">Inputs</h2>
+      <div class="ui-kit-page__row">
+        <app-text-input label="Nombre" placeholder="Escribe tu nombre" hint="Nombre completo" />
+        <app-text-input label="Correo" type="email" placeholder="correo@empresa.com" error="Correo inválido" />
+        <app-text-input label="Deshabilitado" [disabled]="true" placeholder="No editable" />
+      </div>
+      <div class="ui-kit-page__row">
+        <app-select-input label="País" [options]="selectOptions" />
+        <app-select-input label="País (error)" [options]="selectOptions" error="Selecciona un país" />
+        <app-select-input label="Deshabilitado" [options]="selectOptions" [disabled]="true" />
+      </div>
+      <div class="ui-kit-page__row">
+        <app-textarea label="Comentarios" placeholder="Escribe un comentario" hint="Máximo 200 caracteres" />
+        <app-textarea label="Con error" error="Este campo es requerido" />
+        <app-textarea label="Deshabilitado" [disabled]="true" />
+      </div>
+    </section>
+  </div>
+</app-page-layout>

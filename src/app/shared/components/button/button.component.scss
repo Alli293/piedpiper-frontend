@@ -1,0 +1,94 @@
+@use '../../styles/mixins';
+
+:host {
+  display: inline-block;
+}
+
+.ch-button__inner {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ch-space-2);
+  font-family: var(--ch-font-body);
+  font-weight: 600;
+  border-radius: var(--ch-radius-md);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: background-color var(--ch-transition), border-color var(--ch-transition), color var(--ch-transition);
+  width: 100%;
+
+  &:focus-visible {
+    @include mixins.focus-ring;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.ch-button__spinner {
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: ch-button-spin 0.6s linear infinite;
+}
+
+@keyframes ch-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// === Sizes ===
+:host(.ch-button--sm) .ch-button__inner {
+  height: 32px;
+  padding: 0 var(--ch-space-3);
+  font-size: 0.875rem;
+}
+
+:host(.ch-button--md) .ch-button__inner {
+  height: 40px;
+  padding: 0 var(--ch-space-4);
+  font-size: 1rem;
+}
+
+:host(.ch-button--lg) .ch-button__inner {
+  height: 48px;
+  padding: 0 var(--ch-space-6);
+  font-size: 1.125rem;
+}
+
+// === Variants ===
+:host(.ch-button--primary) .ch-button__inner {
+  background: var(--ch-green);
+  color: var(--ch-text-on-dark);
+
+  &:hover:not(:disabled) {
+    background: var(--ch-green-dark);
+  }
+}
+
+:host(.ch-button--secondary) .ch-button__inner {
+  background: transparent;
+  border-color: var(--ch-green);
+  color: var(--ch-green);
+
+  &:hover:not(:disabled) {
+    background: var(--ch-green-soft);
+  }
+}
+
+:host(.ch-button--danger) .ch-button__inner {
+  background: var(--ch-danger);
+  color: var(--ch-text-on-dark);
+
+  &:hover:not(:disabled) {
+    filter: brightness(0.9);
+  }
+}
+

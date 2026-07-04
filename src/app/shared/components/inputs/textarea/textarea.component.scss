@@ -1,0 +1,59 @@
+@use '../../../styles/mixins';
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-2);
+}
+
+.ch-textarea__label {
+  font-family: var(--ch-font-body);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--ch-text-primary);
+}
+
+.ch-textarea__field {
+  padding: var(--ch-space-3) var(--ch-space-4);
+  border-radius: var(--ch-radius-md);
+  border: 1.5px solid var(--ch-border);
+  font-family: var(--ch-font-body);
+  font-size: 1rem;
+  color: var(--ch-text-primary);
+  background: var(--ch-bg-white);
+  resize: vertical;
+  transition: border-color var(--ch-transition);
+
+  &::placeholder {
+    color: var(--ch-text-muted);
+  }
+
+  &:focus-visible {
+    @include mixins.focus-ring;
+    border-color: var(--ch-border-focus);
+  }
+
+  &:disabled {
+    background: var(--ch-bg-main);
+    color: var(--ch-text-muted);
+    cursor: not-allowed;
+  }
+
+  &--error {
+    border-color: var(--ch-danger);
+  }
+}
+
+.ch-textarea__hint {
+  margin: 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.75rem;
+  color: var(--ch-text-muted);
+}
+
+.ch-textarea__error {
+  margin: 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.75rem;
+  color: var(--ch-danger);
+}

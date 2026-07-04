@@ -1,0 +1,17 @@
+:host {
+  display: block;
+}
+
+.ch-page-layout__main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin-left: var(--ch-sidebar-width);
+}
+
+.ch-page-layout__content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--ch-bg-main);
+  padding: var(--ch-space-8);
+}

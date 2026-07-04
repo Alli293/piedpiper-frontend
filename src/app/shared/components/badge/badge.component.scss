@@ -1,0 +1,45 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+  border-radius: var(--ch-radius-full);
+  padding: var(--ch-space-1) var(--ch-space-3);
+  font-family: var(--ch-font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+:host::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+:host(.ch-badge--success) {
+  background: var(--ch-green-soft);
+  color: var(--ch-green-dark);
+}
+
+:host(.ch-badge--warning) {
+  background: #fdf1d6;
+  color: #8a5a06;
+}
+
+:host(.ch-badge--danger) {
+  background: #fbe1e1;
+  color: var(--ch-danger);
+}
+
+:host(.ch-badge--info) {
+  background: #dbe7fc;
+  color: var(--ch-info);
+}
+
+:host(.ch-badge--neutral) {
+  background: var(--ch-bg-main);
+  color: var(--ch-text-secondary);
+}
