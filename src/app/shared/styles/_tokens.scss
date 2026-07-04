@@ -33,8 +33,14 @@
   // Semantic
   --ch-success: #1f8a5b;
   --ch-warning: #e6a817;
+  --ch-warning-dark: #8a5a06;
+  --ch-warning-bg: #fdf1d6;
   --ch-danger: #dc2626;
+  --ch-danger-bg: #fbe1e1;
   --ch-info: #2563eb;
+  --ch-info-bg: #dbe7fc;
+  --ch-new: #6b17cf;
+  --ch-new-bg: #f0dfff;
 
   // Accent blues (links, focus rings, KPI figures)
   --ch-sky: #4fc1e9;
@@ -71,8 +77,20 @@
   --ch-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
 
   // === SIDEBAR ===
-  --ch-sidebar-width: 250px;
+  --ch-sidebar-width: 60px;
+  --ch-sidebar-width-expanded: 250px;
 
   // === TRANSITIONS ===
   --ch-transition: 150ms ease-in-out;
+}
+
+// Below 992px the sidebar is collapsed to icons/avatar only (mobile + tablet).
+// At 992px and up it expands to show full labels/text.
+// The sidebar is a flex item sized by this var; the main content is the
+// adjacent flex item and stretches/shrinks to fill the remaining space,
+// so no separate offset is needed to keep them in sync.
+@media (min-width: 992px) {
+  :root {
+    --ch-sidebar-width: var(--ch-sidebar-width-expanded);
+  }
 }

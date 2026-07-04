@@ -10,16 +10,7 @@
     aria-label="Notificaciones"
     (click)="notificationClicked.emit()"
   >
-    <!-- TODO: replace with real bell icon -->
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path
-        d="M12 3a5 5 0 0 0-5 5v3.2c0 .5-.2 1-.5 1.4L5 15h14l-1.5-2.4a2.3 2.3 0 0 1-.5-1.4V8a5 5 0 0 0-5-5Z"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"
-      />
-      <path d="M9.5 18a2.5 2.5 0 0 0 5 0" fill="none" stroke="currentColor" stroke-width="1.5" />
-    </svg>
+    <app-icon name="notificacion" [size]="18" />
     @if (showNotificationDot()) {
       <span class="ch-header__notification-dot" aria-hidden="true"></span>
     }

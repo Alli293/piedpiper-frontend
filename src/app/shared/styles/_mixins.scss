@@ -11,6 +11,12 @@
   white-space: nowrap;
 }
 
+@mixin desktop-up {
+  @media (min-width: 992px) {
+    @content;
+  }
+}
+
 @mixin visually-hidden {
   position: absolute;
   width: 1px;

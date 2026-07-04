@@ -26,6 +26,8 @@
       class="ch-sidebar__item"
       [class.ch-sidebar__item--active]="item.active"
       [attr.aria-current]="item.active ? 'page' : null"
+      [attr.aria-label]="item.label"
+      [attr.title]="item.label"
       (click)="menuItemClicked.emit(item.id)"
     >
       <app-icon class="ch-sidebar__item-icon" [name]="item.icon" [size]="18" />
@@ -34,11 +36,15 @@
   }
 </nav>
 
-<div class="ch-sidebar__spacer"></div>
-
 <div class="ch-sidebar__bottom">
   @for (item of bottomItems(); track item.id) {
-    <button type="button" class="ch-sidebar__item" (click)="menuItemClicked.emit(item.id)">
+    <button
+      type="button"
+      class="ch-sidebar__item"
+      [attr.aria-label]="item.label"
+      [attr.title]="item.label"
+      (click)="menuItemClicked.emit(item.id)"
+    >
       <app-icon class="ch-sidebar__item-icon" [name]="item.icon" [size]="18" />
       <span class="ch-sidebar__item-label">{{ item.label }}</span>
     </button>

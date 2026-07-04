@@ -3,6 +3,7 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { CardComponent } from '../../shared/components/card/card.component';
+import { SemanticCardComponent } from '../../shared/components/semantic-card/semantic-card.component';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
 import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
 import { LinkDirective } from '../../shared/components/link/link.directive';
@@ -28,6 +29,7 @@ import {
     AvatarComponent,
     BadgeComponent,
     CardComponent,
+    SemanticCardComponent,
     StatCardComponent,
     CardStatComponent,
     LinkDirective,

@@ -1,7 +1,12 @@
 <app-page-layout [sidebarConfig]="sidebarConfig()" [headerConfig]="headerConfig()">
   <div class="ui-kit-page">
     <section class="ui-kit-page__section">
-      <h2 class="ch-h3">Buttons</h2>
+      <h2 class="ch-h3">Botones</h2>
+      <p class="ch-body">
+        <code>app-button</code> es el elemento principal de llamado a la acción. Usa
+        <code>variant</code> para indicar la intención y <code>size</code> para adaptarlo a la
+        densidad del contenido que lo rodea.
+      </p>
       <div class="ui-kit-page__row">
         <app-button variant="primary">Primary</app-button>
         <app-button variant="primary" [disabled]="true">Disabled</app-button>
@@ -31,10 +36,60 @@
         <app-button size="md">Medium</app-button>
         <app-button size="lg">Large</app-button>
       </div>
+      <table class="ui-kit-page__props">
+        <thead>
+          <tr>
+            <th>Propiedad</th>
+            <th>Tipo</th>
+            <th>Valor por defecto</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>variant</code></td>
+            <td><code>'primary' | 'secondary' | 'tertiary' | 'danger' | 'link'</code></td>
+            <td><code>'primary'</code></td>
+            <td>Estilo visual / intención del botón.</td>
+          </tr>
+          <tr>
+            <td><code>size</code></td>
+            <td><code>'sm' | 'md' | 'lg'</code></td>
+            <td><code>'md'</code></td>
+            <td>Escala de altura y espaciado interno.</td>
+          </tr>
+          <tr>
+            <td><code>disabled</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Deshabilita la interacción y aplica el estilo de deshabilitado.</td>
+          </tr>
+          <tr>
+            <td><code>loading</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Muestra un estado de carga en lugar de la etiqueta.</td>
+          </tr>
+          <tr>
+            <td><code>type</code></td>
+            <td><code>'button' | 'submit' | 'reset'</code></td>
+            <td><code>'button'</code></td>
+            <td>Atributo <code>type</code> nativo del <code>&lt;button&gt;</code>.</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="ui-kit-page__section">
-      <h2 class="ch-h3">Links</h2>
+      <h2 class="ch-h3">Enlaces</h2>
+      <p class="ch-body">
+        <code>appLink</code> es una directiva (no un componente) que se aplica a un
+        <code>&lt;a&gt;</code> real para enlaces de texto dentro de un párrafo. No tiene
+        propiedades — solo agrega la clase de estilo del enlace. Para una acción que no sea
+        navegación real, usa <code>app-button</code> con <code>variant="link"</code>, ya que
+        renderiza un <code>&lt;button&gt;</code> y así la tecnología de asistencia lo anuncia
+        correctamente.
+      </p>
       <div class="ui-kit-page__row">
         <p class="ch-body">
           Consulta nuestros <a href="#" appLink>términos y condiciones</a> antes de continuar.
@@ -43,7 +98,11 @@
     </section>
 
     <section class="ui-kit-page__section">
-      <h2 class="ch-h3">Avatars</h2>
+      <h2 class="ch-h3">Avatares</h2>
+      <p class="ch-body">
+        <code>app-avatar</code> muestra la foto de un usuario, o recurre a sus
+        <code>initials</code> cuando no se define <code>imageUrl</code>.
+      </p>
       <div class="ui-kit-page__row">
         <app-avatar initials="CA" size="sm" />
         <app-avatar initials="CA" size="md" />
@@ -52,21 +111,87 @@
         <app-avatar initials="CA" size="md" shape="square" />
         <app-avatar initials="CA" size="lg" shape="square" />
       </div>
+      <table class="ui-kit-page__props">
+        <thead>
+          <tr>
+            <th>Propiedad</th>
+            <th>Tipo</th>
+            <th>Valor por defecto</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>initials</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Texto de respaldo mostrado cuando no hay imagen.</td>
+          </tr>
+          <tr>
+            <td><code>imageUrl</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Origen de la imagen; si se define, se muestra en lugar de las iniciales.</td>
+          </tr>
+          <tr>
+            <td><code>size</code></td>
+            <td><code>'sm' | 'md' | 'lg'</code></td>
+            <td><code>'md'</code></td>
+            <td>Diámetro del avatar.</td>
+          </tr>
+          <tr>
+            <td><code>shape</code></td>
+            <td><code>'round' | 'square'</code></td>
+            <td><code>'round'</code></td>
+            <td>Forma del contorno.</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="ui-kit-page__section">
-      <h2 class="ch-h3">Badges</h2>
+      <h2 class="ch-h3">Insignias</h2>
+      <p class="ch-body">
+        <code>app-badge</code> es una etiqueta de estado pequeña. Su contenido se proyecta, por
+        lo que acepta cualquier texto mediante <code>&lt;ng-content&gt;</code>.
+      </p>
       <div class="ui-kit-page__row">
         <app-badge variant="success">Aprobado</app-badge>
         <app-badge variant="warning">Pendiente</app-badge>
         <app-badge variant="danger">Rechazado</app-badge>
         <app-badge variant="info">Info</app-badge>
+        <app-badge variant="new">Nuevo</app-badge>
         <app-badge variant="neutral">Neutral</app-badge>
       </div>
+      <table class="ui-kit-page__props">
+        <thead>
+          <tr>
+            <th>Propiedad</th>
+            <th>Tipo</th>
+            <th>Valor por defecto</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>variant</code></td>
+            <td><code>'success' | 'warning' | 'danger' | 'info' | 'new' | 'neutral'</code></td>
+            <td><code>'neutral'</code></td>
+            <td>Color semántico de la insignia.</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="ui-kit-page__section">
-      <h2 class="ch-h3">Cards</h2>
+      <h2 class="ch-h3">Tarjetas</h2>
+      <p class="ch-body">
+        <code>app-card</code> es un contenedor de contenido con tres slots proyectados: un
+        elemento marcado con <code>card-header</code>, el contenido por defecto (sin marcar) como
+        cuerpo, y un elemento marcado con <code>card-footer</code>. Ambos slots son opcionales.
+        <code>app-card-stat</code> es un bloque pequeño de KPI pensado para colocarse dentro del
+        slot <code>card-header</code>.
+      </p>
       <div class="ui-kit-page__row">
         <app-card variant="elevated" class="ui-kit-page__card">
           <span card-header class="ch-h5">Encabezado</span>
@@ -86,19 +211,199 @@
           <p class="ch-body">KPI proyectado dentro del encabezado de un card.</p>
         </app-card>
       </div>
+      <table class="ui-kit-page__props">
+        <thead>
+          <tr>
+            <th>Propiedad</th>
+            <th>Tipo</th>
+            <th>Valor por defecto</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="4"><strong>app-card</strong></td>
+          </tr>
+          <tr>
+            <td><code>variant</code></td>
+            <td><code>'elevated' | 'outlined'</code></td>
+            <td><code>'elevated'</code></td>
+            <td>Estilo de superficie: con sombra o con borde.</td>
+          </tr>
+          <tr>
+            <td><code>padding</code></td>
+            <td><code>'none' | 'sm' | 'md' | 'lg'</code></td>
+            <td><code>'md'</code></td>
+            <td>Espaciado interno del cuerpo de la tarjeta.</td>
+          </tr>
+          <tr>
+            <td><code>card-header</code> (attr)</td>
+            <td>—</td>
+            <td>—</td>
+            <td>
+              Proyecta un elemento en el slot de encabezado, p. ej.
+              <code>&lt;span card-header&gt;</code>.
+            </td>
+          </tr>
+          <tr>
+            <td><code>card-footer</code> (attr)</td>
+            <td>—</td>
+            <td>—</td>
+            <td>Proyecta un elemento en el slot de pie de tarjeta.</td>
+          </tr>
+          <tr>
+            <td colspan="4"><strong>app-card-stat</strong></td>
+          </tr>
+          <tr>
+            <td><code>value</code></td>
+            <td><code>string | number</code></td>
+            <td><em>requerido</em></td>
+            <td>La cifra del KPI.</td>
+          </tr>
+          <tr>
+            <td><code>label</code></td>
+            <td><code>string</code></td>
+            <td><em>requerido</em></td>
+            <td>Texto que describe la cifra.</td>
+          </tr>
+          <tr>
+            <td><code>delta</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Línea opcional de tendencia/comparación mostrada debajo del valor.</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="ui-kit-page__section">
-      <h2 class="ch-h3">Stat Cards</h2>
+      <h2 class="ch-h3">Tarjetas semánticas</h2>
+      <p class="ch-body">
+        <code>app-semantic-card</code> combina un ícono con color según la variante junto con un
+        título y un texto, para mensajes destacados (aprobaciones, advertencias, anuncios). Cada
+        variante tiene un ícono por defecto, que la propiedad <code>icon</code> puede sobrescribir.
+      </p>
+      <div class="ui-kit-page__row">
+        <app-semantic-card
+          variant="success"
+          title="Reporte aprobado"
+          text="Tu reporte de emisiones fue validado correctamente."
+        />
+        <app-semantic-card
+          variant="warning"
+          title="Acción pendiente"
+          text="Completa la información faltante antes del cierre del periodo."
+        />
+        <app-semantic-card
+          variant="danger"
+          title="Reporte rechazado"
+          text="Revisa los errores señalados y vuelve a enviarlo."
+        />
+        <app-semantic-card
+          variant="info"
+          title="Información"
+          text="Los nuevos lineamientos entran en vigor el próximo mes."
+        />
+        <app-semantic-card
+          variant="new"
+          title="Nueva función"
+          text="Ahora puedes exportar tus reportes en formato PDF."
+        />
+        <app-semantic-card
+          variant="danger"
+          icon="error"
+          title="Icono personalizado"
+          text="Puedes sobreescribir el ícono por defecto."
+        />
+      </div>
+      <table class="ui-kit-page__props">
+        <thead>
+          <tr>
+            <th>Propiedad</th>
+            <th>Tipo</th>
+            <th>Valor por defecto</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>variant</code></td>
+            <td><code>'success' | 'warning' | 'danger' | 'info' | 'new'</code></td>
+            <td><code>'info'</code></td>
+            <td>Color e ícono por defecto de la tarjeta.</td>
+          </tr>
+          <tr>
+            <td><code>title</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Línea de título en negrita.</td>
+          </tr>
+          <tr>
+            <td><code>text</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Texto de apoyo.</td>
+          </tr>
+          <tr>
+            <td><code>icon</code></td>
+            <td><code>IconName | null</code></td>
+            <td><code>null</code></td>
+            <td>
+              Sobrescribe el ícono por defecto de la variante (ver <code>icon-registry.ts</code>
+              para los nombres disponibles).
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="ui-kit-page__section">
+      <h2 class="ch-h3">Tarjetas de estadísticas</h2>
+      <p class="ch-body">
+        <code>app-stat-card</code> es un par valor/etiqueta mínimo para franjas destacadas de
+        estilo dashboard, normalmente colocado sobre una superficie oscura.
+      </p>
       <div class="ui-kit-page__row ui-kit-page__row--dark">
         <app-stat-card value="999+" label="Empresas registradas" />
         <app-stat-card value="99" label="Reportes generados" />
         <app-stat-card value="99,999" label="Toneladas de CO2" />
       </div>
+      <table class="ui-kit-page__props">
+        <thead>
+          <tr>
+            <th>Propiedad</th>
+            <th>Tipo</th>
+            <th>Valor por defecto</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>value</code></td>
+            <td><code>string</code></td>
+            <td><em>requerido</em></td>
+            <td>La cifra principal.</td>
+          </tr>
+          <tr>
+            <td><code>label</code></td>
+            <td><code>string</code></td>
+            <td><em>requerido</em></td>
+            <td>Texto que describe la cifra.</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="ui-kit-page__section">
-      <h2 class="ch-h3">Inputs</h2>
+      <h2 class="ch-h3">Campos de entrada</h2>
+      <p class="ch-body">
+        <code>app-text-input</code>, <code>app-select-input</code> y <code>app-textarea</code>
+        son campos de formulario con etiqueta que comparten el mismo patrón de error/ayuda: define
+        <code>error</code> para mostrar un mensaje de validación (esto también toma el control de
+        <code>aria-describedby</code>), o <code>hint</code> para un texto de ayuda cuando no hay
+        error. Los tres emiten <code>valueChange</code> en cada entrada del usuario en lugar de
+        usar binding bidireccional.
+      </p>
       <div class="ui-kit-page__row">
         <app-text-input label="Nombre" placeholder="Escribe tu nombre" hint="Nombre completo" />
         <app-text-input
@@ -133,24 +438,286 @@
         <app-textarea label="Con error" error="Este campo es requerido" />
         <app-textarea label="Deshabilitado" [disabled]="true" value="Contenido deshabilitado" />
       </div>
+      <table class="ui-kit-page__props">
+        <thead>
+          <tr>
+            <th>Propiedad</th>
+            <th>Tipo</th>
+            <th>Valor por defecto</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="4"><strong>app-text-input</strong></td>
+          </tr>
+          <tr>
+            <td><code>label</code></td>
+            <td><code>string</code></td>
+            <td>—</td>
+            <td>Etiqueta del campo.</td>
+          </tr>
+          <tr>
+            <td><code>value</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Valor actual del campo (unidireccional — escucha <code>valueChange</code>).</td>
+          </tr>
+          <tr>
+            <td><code>placeholder</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Texto de placeholder.</td>
+          </tr>
+          <tr>
+            <td><code>type</code></td>
+            <td><code>'text' | 'email' | 'password' | 'number'</code></td>
+            <td><code>'text'</code></td>
+            <td>Tipo nativo del input.</td>
+          </tr>
+          <tr>
+            <td><code>error</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Mensaje de validación; se muestra en lugar de <code>hint</code> cuando no está vacío.</td>
+          </tr>
+          <tr>
+            <td><code>hint</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Texto de ayuda mostrado cuando no hay error.</td>
+          </tr>
+          <tr>
+            <td><code>disabled</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Deshabilita el campo.</td>
+          </tr>
+          <tr>
+            <td><code>required</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Marca el campo como requerido.</td>
+          </tr>
+          <tr>
+            <td><code>valueChange</code> (output)</td>
+            <td><code>string</code></td>
+            <td>—</td>
+            <td>Se emite en cada evento de entrada.</td>
+          </tr>
+          <tr>
+            <td colspan="4"><strong>app-select-input</strong></td>
+          </tr>
+          <tr>
+            <td><code>label</code></td>
+            <td><code>string</code></td>
+            <td>—</td>
+            <td>Etiqueta del campo.</td>
+          </tr>
+          <tr>
+            <td><code>value</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Valor de la opción seleccionada actualmente.</td>
+          </tr>
+          <tr>
+            <td><code>options</code></td>
+            <td><code>{{ '{' }} value: string; label: string {{ '}' }}[]</code></td>
+            <td><em>requerido</em></td>
+            <td>Opciones que se muestran en el desplegable.</td>
+          </tr>
+          <tr>
+            <td><code>placeholder</code></td>
+            <td><code>string</code></td>
+            <td><code>'Seleccionar...'</code></td>
+            <td>Texto de la opción de placeholder.</td>
+          </tr>
+          <tr>
+            <td><code>error</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Mensaje de validación.</td>
+          </tr>
+          <tr>
+            <td><code>disabled</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Deshabilita el campo.</td>
+          </tr>
+          <tr>
+            <td><code>valueChange</code> (output)</td>
+            <td><code>string</code></td>
+            <td>—</td>
+            <td>Se emite al cambiar la selección.</td>
+          </tr>
+          <tr>
+            <td colspan="4"><strong>app-textarea</strong></td>
+          </tr>
+          <tr>
+            <td><code>label</code></td>
+            <td><code>string</code></td>
+            <td>—</td>
+            <td>Etiqueta del campo.</td>
+          </tr>
+          <tr>
+            <td><code>value</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Valor actual del textarea.</td>
+          </tr>
+          <tr>
+            <td><code>placeholder</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Texto de placeholder.</td>
+          </tr>
+          <tr>
+            <td><code>rows</code></td>
+            <td><code>number</code></td>
+            <td><code>4</code></td>
+            <td>Cantidad de filas visibles.</td>
+          </tr>
+          <tr>
+            <td><code>error</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Mensaje de validación.</td>
+          </tr>
+          <tr>
+            <td><code>hint</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Texto de ayuda mostrado cuando no hay error.</td>
+          </tr>
+          <tr>
+            <td><code>disabled</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Deshabilita el campo.</td>
+          </tr>
+          <tr>
+            <td><code>valueChange</code> (output)</td>
+            <td><code>string</code></td>
+            <td>—</td>
+            <td>Se emite en cada evento de entrada.</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="ui-kit-page__section">
-      <h2 class="ch-h3">Checkboxes</h2>
+      <h2 class="ch-h3">Casillas de verificación</h2>
+      <p class="ch-body">
+        <code>app-checkbox</code> admite binding bidireccional mediante <code>[(checked)]</code> y
+        también implementa <code>ControlValueAccessor</code>, por lo que funciona con Reactive
+        Forms (<code>formControlName</code>) sin necesidad de la sintaxis banana-in-a-box.
+      </p>
       <div class="ui-kit-page__row">
         <app-checkbox label="Acepto los términos" [(checked)]="termsAccepted" />
         <app-checkbox label="Deshabilitado" [disabled]="true" />
         <app-checkbox label="Deshabilitado (marcado)" [checked]="true" [disabled]="true" />
       </div>
+      <table class="ui-kit-page__props">
+        <thead>
+          <tr>
+            <th>Propiedad</th>
+            <th>Tipo</th>
+            <th>Valor por defecto</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>checked</code> (model)</td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>
+              Estado marcado/desmarcado con binding bidireccional; también se puede definir desde
+              un control de Reactive Forms.
+            </td>
+          </tr>
+          <tr>
+            <td><code>disabled</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Deshabilita la casilla.</td>
+          </tr>
+          <tr>
+            <td><code>label</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Texto que se muestra junto a la casilla.</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="ui-kit-page__section">
       <h2 class="ch-h3">Radios</h2>
+      <p class="ch-body">
+        Las opciones <code>app-radio</code> deben anidarse dentro de un contenedor con la
+        directiva <code>appRadioGroup</code>, que administra el <code>name</code> compartido y el
+        <code>value</code> seleccionado actualmente (con binding bidireccional y compatible con
+        Reactive Forms). Cada <code>app-radio</code> lee su estado marcado desde el grupo.
+      </p>
       <div class="ui-kit-page__row" appRadioGroup name="plan" [(value)]="selectedPlan">
         <app-radio value="basic" label="Básico" />
         <app-radio value="pro" label="Pro" />
         <app-radio value="enterprise" label="Enterprise" />
       </div>
+      <table class="ui-kit-page__props">
+        <thead>
+          <tr>
+            <th>Propiedad</th>
+            <th>Tipo</th>
+            <th>Valor por defecto</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="4"><strong>appRadioGroup</strong> (host directive)</td>
+          </tr>
+          <tr>
+            <td><code>name</code></td>
+            <td><code>string</code></td>
+            <td>autogenerado</td>
+            <td>
+              <code>name</code> compartido para los inputs de radio nativos dentro del grupo.
+            </td>
+          </tr>
+          <tr>
+            <td><code>value</code> (model)</td>
+            <td><code>string | null</code></td>
+            <td><code>null</code></td>
+            <td>
+              Valor de la opción seleccionada actualmente; con binding bidireccional y compatible
+              con Reactive Forms.
+            </td>
+          </tr>
+          <tr>
+            <td colspan="4"><strong>app-radio</strong></td>
+          </tr>
+          <tr>
+            <td><code>value</code></td>
+            <td><code>string</code></td>
+            <td><em>requerido</em></td>
+            <td>Valor que representa esta opción dentro del grupo.</td>
+          </tr>
+          <tr>
+            <td><code>disabled</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Deshabilita esta opción (independiente del estado deshabilitado del grupo).</td>
+          </tr>
+          <tr>
+            <td><code>label</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Texto que se muestra junto al radio.</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
   </div>
 </app-page-layout>

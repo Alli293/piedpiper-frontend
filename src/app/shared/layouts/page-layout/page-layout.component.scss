@@ -1,12 +1,13 @@
 :host {
-  display: block;
+  display: flex;
+  min-height: 100vh;
 }
 
 .ch-page-layout__main {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  margin-left: var(--ch-sidebar-width);
+  flex: 1;
+  min-width: 0;
 }
 
 .ch-page-layout__content {

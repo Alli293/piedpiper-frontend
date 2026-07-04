@@ -4,21 +4,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  height: 64px;
+  box-sizing: border-box;
   background: var(--ch-bg-white);
   border-bottom: 1px solid var(--ch-border);
-  padding: var(--ch-space-4) var(--ch-space-8);
+  padding: 0 var(--ch-space-8);
 }
 
 .ch-header__left {
   display: flex;
   flex-direction: column;
-  gap: var(--ch-space-1);
+  justify-content: center;
+  gap: 0;
 }
 
 .ch-header__eyebrow {
   font-family: var(--ch-font-mono);
   font-size: 0.75rem;
   font-weight: 500;
+  line-height: 1;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--ch-text-muted);
@@ -27,7 +31,8 @@
 .ch-header__title {
   font-family: var(--ch-font-heading);
   font-weight: 600;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
+  line-height: 1.2;
   color: var(--ch-text-primary);
   margin: 0;
 }
@@ -51,11 +56,6 @@
   color: var(--ch-text-secondary);
   cursor: pointer;
   transition: background-color var(--ch-transition);
-
-  svg {
-    width: 22px;
-    height: 22px;
-  }
 
   &:hover {
     background: var(--ch-bg-main);

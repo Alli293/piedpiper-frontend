@@ -1,0 +1,63 @@
+:host {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ch-space-3);
+  border-radius: var(--ch-radius-md);
+  padding: var(--ch-space-4);
+  font-family: var(--ch-font-body);
+}
+
+.ch-semantic-card__icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ch-semantic-card__icon ::ng-deep svg path {
+  fill: currentColor;
+}
+
+.ch-semantic-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-1);
+}
+
+.ch-semantic-card__title,
+.ch-semantic-card__text {
+  margin: 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.875rem;
+}
+
+.ch-semantic-card__title {
+  font-weight: 600;
+}
+
+.ch-semantic-card__text {
+  font-weight: 400;
+}
+
+:host(.ch-semantic-card--success) {
+  background: var(--ch-green-soft);
+  color: var(--ch-green-dark);
+}
+
+:host(.ch-semantic-card--warning) {
+  background: var(--ch-warning-bg);
+  color: var(--ch-warning-dark);
+}
+
+:host(.ch-semantic-card--danger) {
+  background: var(--ch-danger-bg);
+  color: var(--ch-danger);
+}
+
+:host(.ch-semantic-card--info) {
+  background: var(--ch-info-bg);
+  color: var(--ch-info);
+}
+
+:host(.ch-semantic-card--new) {
+  background: var(--ch-new-bg);
+  color: var(--ch-new);
+}
