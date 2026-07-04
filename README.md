@@ -111,13 +111,13 @@ Los artefactos compilados quedan en la carpeta `dist/`. Por defecto, el build de
 
 ### Pruebas unitarias
 
-El proyecto usa [Karma](https://karma-runner.github.io/) + [Jasmine](https://jasmine.github.io/) como test runner:
+El proyecto usa [Vitest](https://vitest.dev/) como test runner (opción por defecto de Angular CLI):
 
 ```bash
-ng test
+ng test -- --watch=false
 ```
 
-Esto abre una instancia de Chrome y corre los tests en modo watch, con reporte en vivo vía `karma-jasmine-html-reporter`. Para ver el reporte de cobertura (`karma-coverage`), revisa la carpeta que se genera tras correr los tests (normalmente `coverage/`).
+Esto corre los tests una sola vez (sin watch) usando el motor de Vitest, con salida en terminal (no abre navegador).
 
 ---
 
