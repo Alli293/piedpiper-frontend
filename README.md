@@ -39,7 +39,7 @@ Esto instala Angular, Prettier, y el resto de dependencias del proyecto con las 
 ## Correr el proyecto localmente
 
 ```bash
-ng serve
+npm start
 ```
 
 Una vez levantado el servidor, abre el navegador en:
@@ -125,9 +125,7 @@ Esto abre una instancia de Chrome y corre los tests en modo watch, con reporte e
 
 ```
 src/
- ├── app/              # Componentes, servicios, módulos de la aplicación
- ├── environments/     # Configuración por ambiente (dev, prod)
- └── assets/           # Recursos estáticos
+ └── app/              # Componentes, servicios, módulos de la aplicación
 .vscode/               # Configuración compartida del editor (formato, extensiones)
 .prettierrc            # Reglas de formato de código
 ```
@@ -140,8 +138,8 @@ src/
 - Antes de levantar el frontend, asegurate de que el backend esté corriendo (ver [README del backend](https://github.com/Alli293/piedpiper-backend)).
 - Si ves errores relacionados con módulos de `node_modules` (por ejemplo `ERR_MODULE_NOT_FOUND`), probá reinstalando las dependencias:
   ```bash
-  rm -rf node_modules package-lock.json
-  npm install
+  rm -rf node_modules
+  npm ci
   ```
 - Corré `npm run format:check` antes de hacer push para evitar conflictos de formato en los PRs.
 
