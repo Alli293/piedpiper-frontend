@@ -5,10 +5,11 @@
   class="ch-select-input__field"
   [class.ch-select-input__field--error]="hasError()"
   [id]="inputId"
-  [disabled]="disabled()"
+  [disabled]="effectiveDisabled()"
   [attr.aria-invalid]="hasError() ? 'true' : null"
   [attr.aria-describedby]="hasError() ? errorId : null"
-  (change)="onChange($event)"
+  (change)="onChangeEvent($event)"
+  (blur)="onBlur()"
 >
   <option value="" disabled [selected]="!value()">{{ placeholder() }}</option>
   @for (option of options(); track option.value) {

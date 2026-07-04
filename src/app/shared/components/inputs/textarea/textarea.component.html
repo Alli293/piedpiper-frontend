@@ -8,10 +8,11 @@
   [rows]="rows()"
   [value]="value()"
   [placeholder]="placeholder()"
-  [disabled]="disabled()"
+  [disabled]="effectiveDisabled()"
   [attr.aria-invalid]="hasError() ? 'true' : null"
   [attr.aria-describedby]="describedBy()"
   (input)="onInput($event)"
+  (blur)="onBlur()"
 ></textarea>
 @if (hasError()) {
   <p class="ch-textarea__error" [id]="errorId">{{ error() }}</p>

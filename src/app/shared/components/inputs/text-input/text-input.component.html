@@ -13,11 +13,12 @@
   [type]="type()"
   [value]="value()"
   [placeholder]="placeholder()"
-  [disabled]="disabled()"
+  [disabled]="effectiveDisabled()"
   [required]="required()"
   [attr.aria-invalid]="hasError() ? 'true' : null"
   [attr.aria-describedby]="describedBy()"
   (input)="onInput($event)"
+  (blur)="onBlur()"
 />
 @if (hasError()) {
   <p class="ch-text-input__error" [id]="errorId">{{ error() }}</p>
