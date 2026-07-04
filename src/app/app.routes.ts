@@ -6,4 +6,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),
   },
+  {
+    path: '',
+    redirectTo: 'ui-kit',
+    pathMatch: 'full',
+  },
 ];
