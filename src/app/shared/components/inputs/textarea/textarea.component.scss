@@ -16,7 +16,7 @@
 .ch-textarea__field {
   padding: var(--ch-space-3) var(--ch-space-4);
   border-radius: var(--ch-radius-md);
-  border: 1.5px solid var(--ch-border);
+  border: 2px solid var(--ch-border);
   font-family: var(--ch-font-body);
   font-size: 1rem;
   color: var(--ch-text-primary);
@@ -36,7 +36,6 @@
   &:disabled {
     background: var(--ch-bg-main);
     color: var(--ch-text-muted);
-    cursor: not-allowed;
   }
 
   &--error {

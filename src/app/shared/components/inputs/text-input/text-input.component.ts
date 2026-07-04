@@ -14,6 +14,7 @@ let nextId = 0;
 })
 export class TextInputComponent {
   label = input<string>();
+  value = input('');
   placeholder = input('');
   type = input<TextInputType>('text');
   error = input('');

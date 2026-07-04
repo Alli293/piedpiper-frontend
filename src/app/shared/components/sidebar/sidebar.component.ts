@@ -1,22 +1,23 @@
 import { Component, input, output } from '@angular/core';
 import { AvatarComponent } from '../avatar/avatar.component';
+import { IconComponent, IconName } from '../icon/icon.component';
 
 export interface SidebarMenuItem {
   label: string;
-  icon: string;
+  icon: IconName;
   id: string;
   active: boolean;
 }
 
 export interface SidebarBottomItem {
   label: string;
-  icon: string;
+  icon: IconName;
   id: string;
 }
 
 @Component({
   selector: 'app-sidebar',
-  imports: [AvatarComponent],
+  imports: [AvatarComponent, IconComponent],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
   host: {

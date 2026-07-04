@@ -9,7 +9,6 @@
   width: var(--ch-sidebar-width);
   height: 100vh;
   background: var(--ch-dark);
-  padding: var(--ch-space-6) var(--ch-space-4);
   box-sizing: border-box;
 }
 
@@ -17,39 +16,43 @@
   display: flex;
   align-items: center;
   gap: var(--ch-space-2);
-  padding: 0 var(--ch-space-2);
-  margin-bottom: var(--ch-space-6);
+  padding: var(--ch-space-4);
+  border-bottom: 1px solid var(--ch-border-on-dark);
 }
 
 .ch-sidebar__logo-icon {
-  width: 24px;
-  height: 24px;
-  color: var(--ch-green-light);
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
 }
 
 .ch-sidebar__logo-text {
   font-family: var(--ch-font-heading);
-  font-weight: 700;
   font-size: 1.25rem;
 }
 
 .ch-sidebar__logo-carbon {
   color: var(--ch-text-on-dark);
+  font-weight: 600;
 }
 
 .ch-sidebar__logo-hub {
   color: var(--ch-green-light);
+  font-weight: 500;
 }
 
 .ch-sidebar__company {
+  padding: var(--ch-space-4);
+  border-bottom: 1px solid var(--ch-border-on-dark);
+}
+
+.ch-sidebar__company-card {
   display: flex;
   align-items: center;
   gap: var(--ch-space-3);
   background: var(--ch-dark-card);
   border-radius: var(--ch-radius-md);
   padding: var(--ch-space-3);
-  margin-bottom: var(--ch-space-6);
 }
 
 .ch-sidebar__company-info {
@@ -67,7 +70,7 @@
 }
 
 .ch-sidebar__company-role {
-  font-family: var(--ch-font-body);
+  font-family: var(--ch-font-mono);
   font-size: 0.75rem;
   color: var(--ch-text-on-dark-muted);
   @include mixins.truncate;
@@ -88,7 +91,7 @@
   flex-direction: column;
   gap: var(--ch-space-1);
   border-top: 1px solid var(--ch-dark-hover);
-  padding-top: var(--ch-space-3);
+  padding: var(--ch-space-3) 0;
 }
 
 .ch-sidebar__item {
@@ -97,7 +100,7 @@
   gap: var(--ch-space-3);
   width: 100%;
   border: none;
-  border-left: 3px solid transparent;
+  border-left: 4px solid transparent;
   background: transparent;
   color: var(--ch-text-on-dark-muted);
   font-family: var(--ch-font-body);
@@ -107,7 +110,9 @@
   padding: var(--ch-space-3) var(--ch-space-3);
   border-radius: var(--ch-radius-sm);
   cursor: pointer;
-  transition: background-color var(--ch-transition), color var(--ch-transition);
+  transition:
+    background-color var(--ch-transition),
+    color var(--ch-transition);
 
   &:hover {
     background: var(--ch-dark-hover);
@@ -122,14 +127,13 @@
     color: var(--ch-text-on-dark);
     background: var(--ch-dark-hover);
     border-left-color: var(--ch-green);
+
+    .ch-sidebar__item-icon {
+      color: var(--ch-green-light);
+    }
   }
 }
 
 .ch-sidebar__item-icon {
-  width: 24px;
-  height: 24px;
   flex-shrink: 0;
-  border-radius: var(--ch-radius-sm);
-  background: currentColor;
-  opacity: 0.35;
 }

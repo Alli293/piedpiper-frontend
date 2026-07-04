@@ -1,8 +1,8 @@
 // === _mixins.scss ===
 
 @mixin focus-ring {
-  outline: 2px solid var(--ch-border-focus);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(43, 166, 222, 0.45);
 }
 
 @mixin truncate {

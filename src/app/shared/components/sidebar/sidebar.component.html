@@ -1,19 +1,21 @@
 <div class="ch-sidebar__logo">
-  <!-- TODO: replace with real fingerprint icon -->
-  <svg class="ch-sidebar__logo-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5" />
-    <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.5" />
-  </svg>
+  <img
+    src="/images/logos/isotipo-mono-white.svg"
+    alt="Fingerprint icon"
+    class="ch-sidebar__logo-icon"
+  />
   <span class="ch-sidebar__logo-text">
     <span class="ch-sidebar__logo-carbon">Carbon</span><span class="ch-sidebar__logo-hub">Hub</span>
   </span>
 </div>
 
 <div class="ch-sidebar__company">
-  <app-avatar [initials]="companyInitials()" size="sm" />
-  <div class="ch-sidebar__company-info">
-    <span class="ch-sidebar__company-name">{{ companyName() }}</span>
-    <span class="ch-sidebar__company-role">{{ companyRole() }}</span>
+  <div class="ch-sidebar__company-card">
+    <app-avatar [initials]="companyInitials()" shape="square" />
+    <div class="ch-sidebar__company-info">
+      <span class="ch-sidebar__company-name">{{ companyName() }}</span>
+      <span class="ch-sidebar__company-role">{{ companyRole() }}</span>
+    </div>
   </div>
 </div>
 
@@ -26,8 +28,7 @@
       [attr.aria-current]="item.active ? 'page' : null"
       (click)="menuItemClicked.emit(item.id)"
     >
-      <!-- TODO: replace with real icon: {{ item.icon }} -->
-      <span class="ch-sidebar__item-icon" aria-hidden="true"></span>
+      <app-icon class="ch-sidebar__item-icon" [name]="item.icon" [size]="18" />
       <span class="ch-sidebar__item-label">{{ item.label }}</span>
     </button>
   }
@@ -37,13 +38,8 @@
 
 <div class="ch-sidebar__bottom">
   @for (item of bottomItems(); track item.id) {
-    <button
-      type="button"
-      class="ch-sidebar__item"
-      (click)="menuItemClicked.emit(item.id)"
-    >
-      <!-- TODO: replace with real icon: {{ item.icon }} -->
-      <span class="ch-sidebar__item-icon" aria-hidden="true"></span>
+    <button type="button" class="ch-sidebar__item" (click)="menuItemClicked.emit(item.id)">
+      <app-icon class="ch-sidebar__item-icon" [name]="item.icon" [size]="18" />
       <span class="ch-sidebar__item-label">{{ item.label }}</span>
     </button>
   }

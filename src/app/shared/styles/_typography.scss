@@ -129,3 +129,26 @@ $latin-ext-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB,
   font-size: 0.875rem;
   line-height: 1.5;
 }
+
+.ch-link {
+  color: var(--ch-sky);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 1px;
+  transition: color var(--ch-transition), border-color var(--ch-transition);
+
+  &:hover {
+    color: var(--ch-blue-mid);
+    border-bottom-color: var(--ch-blue-mid);
+  }
+
+  &:visited {
+    color: var(--ch-blue-mid);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ch-border-focus);
+    outline-offset: 2px;
+  }
+}

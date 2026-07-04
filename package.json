@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "icons:generate": "node scripts/generate-icons.js",
     "start": "ng serve",
+    "prebuild": "npm run icons:generate",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",

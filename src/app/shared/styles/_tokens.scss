@@ -1,40 +1,44 @@
 :root {
   // === COLORS ===
   // Primary
-  --ch-green: #1F8A5B;
-  --ch-green-dark: #14603F;
-  --ch-green-light: #7AD3A5;
-  --ch-green-soft: #E6F4EC;
+  --ch-green: #1f8a5b;
+  --ch-green-dark: #14603f;
+  --ch-green-light: #7ad3a5;
+  --ch-green-soft: #e6f4ec;
 
   // Dark / Sidebar
-  --ch-dark: #0E2A3B;
+  --ch-dark: #0e2a3b;
   --ch-dark-hover: #153248;
-  --ch-dark-card: #1A3A50;
+  --ch-dark-card: #1a3a50;
 
   // Surfaces
-  --ch-bg-main: #F0F2F5;
-  --ch-bg-white: #FFFFFF;
+  --ch-bg-main: #f0f2f5;
+  --ch-bg-white: #ffffff;
 
   // Text
-  --ch-text-primary: #0E2A3B;
-  --ch-text-secondary: #64748B;
-  --ch-text-muted: #8A9BAE;
-  --ch-text-on-dark: #FFFFFF;
+  --ch-text-primary: #0e2a3b;
+  --ch-text-secondary: #64748b;
+  --ch-text-muted: #8a9bae;
+  --ch-text-on-dark: #ffffff;
   --ch-text-on-dark-muted: rgba(255, 255, 255, 0.6);
 
   // Borders
-  --ch-border: #E2E8F0;
-  --ch-border-focus: #1F8A5B;
+  --ch-border: #e2e8f0;
+  --ch-border-focus: #1f8a5b;
   --ch-border-on-dark: rgba(255, 255, 255, 0.1);
 
   // Surfaces on dark
   --ch-surface-on-dark: rgba(255, 255, 255, 0.07);
 
   // Semantic
-  --ch-success: #1F8A5B;
-  --ch-warning: #E6A817;
-  --ch-danger: #DC2626;
-  --ch-info: #2563EB;
+  --ch-success: #1f8a5b;
+  --ch-warning: #e6a817;
+  --ch-danger: #dc2626;
+  --ch-info: #2563eb;
+
+  // Accent blues (links, focus rings, KPI figures)
+  --ch-sky: #4fc1e9;
+  --ch-blue-mid: #2ba6de;
 
   // === TYPOGRAPHY ===
   --ch-font-heading: 'Sora', sans-serif;
@@ -57,7 +61,9 @@
   --ch-radius-sm: 4px;
   --ch-radius-md: 8px;
   --ch-radius-lg: 12px;
-  --ch-radius-full: 9999px;
+  --ch-radius-xl: 16px;
+  --ch-radius-pill: 100px;
+  --ch-radius-full: 50%;
 
   // === SHADOWS ===
   --ch-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);

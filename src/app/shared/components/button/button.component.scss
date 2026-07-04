@@ -13,9 +13,12 @@
   font-family: var(--ch-font-body);
   font-weight: 600;
   border-radius: var(--ch-radius-md);
-  border: 1.5px solid transparent;
+  border: 2px solid transparent;
   cursor: pointer;
-  transition: background-color var(--ch-transition), border-color var(--ch-transition), color var(--ch-transition);
+  transition:
+    background-color var(--ch-transition),
+    border-color var(--ch-transition),
+    color var(--ch-transition);
   width: 100%;
 
   &:focus-visible {
@@ -92,3 +95,41 @@
   }
 }
 
+:host(.ch-button--link) .ch-button__inner {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ch-sky);
+  text-decoration: none;
+
+  &:hover:not(:disabled) {
+    color: var(--ch-blue-mid);
+    text-decoration: underline;
+  }
+}
+
+:host(.ch-button--tertiary) .ch-button__inner {
+  background: var(--ch-bg-main);
+  color: var(--ch-blue-mid);
+  border-color: var(--ch-border);
+
+  &:hover:not(:disabled) {
+    background: var(--ch-border);
+    color: var(--ch-text-primary);
+    border-color: var(--ch-border);
+  }
+
+  &:focus-visible {
+    @include mixins.focus-ring;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+  }
+}
+
+:host(.ch-button--tertiary) .ch-button__spinner {
+  width: 16px;
+  height: 16px;
+  border-color: rgba(27, 73, 101, 0.3);
+  border-top-color: var(--ch-blue-mid);
+}

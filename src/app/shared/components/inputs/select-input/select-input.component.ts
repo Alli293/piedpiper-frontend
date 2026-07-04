@@ -17,6 +17,7 @@ let nextId = 0;
 })
 export class SelectInputComponent {
   label = input<string>();
+  value = input('');
   options = input.required<SelectOption[]>();
   placeholder = input('Seleccionar...');
   error = input('');

@@ -23,6 +23,10 @@
   height: 56px;
 }
 
+:host(.ch-avatar--square) {
+  border-radius: var(--ch-radius-md);
+}
+
 .ch-avatar__image {
   width: 100%;
   height: 100%;

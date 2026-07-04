@@ -4,17 +4,41 @@
       <h2 class="ch-h3">Buttons</h2>
       <div class="ui-kit-page__row">
         <app-button variant="primary">Primary</app-button>
+        <app-button variant="primary" [disabled]="true">Disabled</app-button>
+        <app-button variant="primary" [loading]="true">Loading</app-button>
+      </div>
+      <div class="ui-kit-page__row">
         <app-button variant="secondary">Secondary</app-button>
+        <app-button variant="secondary" [disabled]="true">Disabled</app-button>
+        <app-button variant="secondary" [loading]="true">Loading</app-button>
+      </div>
+      <div class="ui-kit-page__row">
+        <app-button variant="tertiary">Tertiary</app-button>
+        <app-button variant="tertiary" [disabled]="true">Disabled</app-button>
+        <app-button variant="tertiary" [loading]="true">Loading</app-button>
+      </div>
+      <div class="ui-kit-page__row">
         <app-button variant="danger">Danger</app-button>
+        <app-button variant="danger" [disabled]="true">Disabled</app-button>
+        <app-button variant="danger" [loading]="true">Loading</app-button>
+      </div>
+      <div class="ui-kit-page__row">
+        <app-button variant="link">Link button</app-button>
+        <app-button variant="link" [disabled]="true">Disabled</app-button>
       </div>
       <div class="ui-kit-page__row">
         <app-button size="sm">Small</app-button>
         <app-button size="md">Medium</app-button>
         <app-button size="lg">Large</app-button>
       </div>
+    </section>
+
+    <section class="ui-kit-page__section">
+      <h2 class="ch-h3">Links</h2>
       <div class="ui-kit-page__row">
-        <app-button [disabled]="true">Disabled</app-button>
-        <app-button [loading]="true">Loading</app-button>
+        <p class="ch-body">
+          Consulta nuestros <a href="#" appLink>términos y condiciones</a> antes de continuar.
+        </p>
       </div>
     </section>
 
@@ -24,6 +48,9 @@
         <app-avatar initials="CA" size="sm" />
         <app-avatar initials="CA" size="md" />
         <app-avatar initials="CA" size="lg" />
+        <app-avatar initials="CA" size="sm" shape="square" />
+        <app-avatar initials="CA" size="md" shape="square" />
+        <app-avatar initials="CA" size="lg" shape="square" />
       </div>
     </section>
 
@@ -49,6 +76,15 @@
         <app-card variant="outlined" class="ui-kit-page__card">
           <p class="ch-body">Este es un card con borde, sin header ni footer.</p>
         </app-card>
+        <app-card variant="elevated" class="ui-kit-page__card">
+          <app-card-stat
+            card-header
+            value="1,204"
+            label="Toneladas de CO2"
+            delta="+18% vs periodo anterior"
+          />
+          <p class="ch-body">KPI proyectado dentro del encabezado de un card.</p>
+        </app-card>
       </div>
     </section>
 
@@ -65,18 +101,55 @@
       <h2 class="ch-h3">Inputs</h2>
       <div class="ui-kit-page__row">
         <app-text-input label="Nombre" placeholder="Escribe tu nombre" hint="Nombre completo" />
-        <app-text-input label="Correo" type="email" placeholder="correo@empresa.com" error="Correo inválido" />
-        <app-text-input label="Deshabilitado" [disabled]="true" placeholder="No editable" />
+        <app-text-input
+          label="Correo"
+          type="email"
+          placeholder="correo@empresa.com"
+          error="Correo inválido"
+        />
+        <app-text-input
+          label="Deshabilitado"
+          [disabled]="true"
+          placeholder="No editable"
+          value="No editable"
+        />
       </div>
       <div class="ui-kit-page__row">
         <app-select-input label="País" [options]="selectOptions" />
-        <app-select-input label="País (error)" [options]="selectOptions" error="Selecciona un país" />
+        <app-select-input
+          label="País (error)"
+          [options]="selectOptions"
+          error="Selecciona un país"
+        />
+        <app-select-input label="País (prefilled)" [options]="selectOptions" value="cr" />
         <app-select-input label="Deshabilitado" [options]="selectOptions" [disabled]="true" />
       </div>
       <div class="ui-kit-page__row">
-        <app-textarea label="Comentarios" placeholder="Escribe un comentario" hint="Máximo 200 caracteres" />
+        <app-textarea
+          label="Comentarios"
+          placeholder="Escribe un comentario"
+          hint="Máximo 200 caracteres"
+        />
         <app-textarea label="Con error" error="Este campo es requerido" />
-        <app-textarea label="Deshabilitado" [disabled]="true" />
+        <app-textarea label="Deshabilitado" [disabled]="true" value="Contenido deshabilitado" />
+      </div>
+    </section>
+
+    <section class="ui-kit-page__section">
+      <h2 class="ch-h3">Checkboxes</h2>
+      <div class="ui-kit-page__row">
+        <app-checkbox label="Acepto los términos" [(checked)]="termsAccepted" />
+        <app-checkbox label="Deshabilitado" [disabled]="true" />
+        <app-checkbox label="Deshabilitado (marcado)" [checked]="true" [disabled]="true" />
+      </div>
+    </section>
+
+    <section class="ui-kit-page__section">
+      <h2 class="ch-h3">Radios</h2>
+      <div class="ui-kit-page__row" appRadioGroup name="plan" [(value)]="selectedPlan">
+        <app-radio value="basic" label="Básico" />
+        <app-radio value="pro" label="Pro" />
+        <app-radio value="enterprise" label="Enterprise" />
       </div>
     </section>
   </div>

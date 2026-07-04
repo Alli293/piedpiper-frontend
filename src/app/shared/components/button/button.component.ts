@@ -1,6 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'danger';
+export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'tertiary' | 'link';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 @Component({

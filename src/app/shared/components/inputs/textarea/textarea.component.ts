@@ -12,6 +12,7 @@ let nextId = 0;
 })
 export class TextareaComponent {
   label = input<string>();
+  value = input('');
   placeholder = input('');
   rows = input(4);
   error = input('');

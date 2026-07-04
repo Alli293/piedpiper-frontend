@@ -1,0 +1,19 @@
+.ch-icon-host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.ch-icon-host .ch-icon {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.ch-icon-host .ch-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
