@@ -1,0 +1,50 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+  border-radius: var(--ch-radius-pill);
+  padding: var(--ch-space-1) var(--ch-space-3);
+  font-family: var(--ch-font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+:host::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+:host(.ch-badge--success) {
+  background: var(--ch-green-soft);
+  color: var(--ch-green-dark);
+}
+
+:host(.ch-badge--warning) {
+  background: var(--ch-warning-bg);
+  color: var(--ch-warning-dark);
+}
+
+:host(.ch-badge--danger) {
+  background: var(--ch-danger-bg);
+  color: var(--ch-danger);
+}
+
+:host(.ch-badge--info) {
+  background: var(--ch-info-bg);
+  color: var(--ch-info);
+}
+
+:host(.ch-badge--new) {
+  background: var(--ch-new-bg);
+  color: var(--ch-new);
+}
+
+:host(.ch-badge--neutral) {
+  background: var(--ch-bg-main);
+  color: var(--ch-text-secondary);
+}

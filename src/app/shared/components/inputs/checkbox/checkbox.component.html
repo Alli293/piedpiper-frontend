@@ -1,0 +1,16 @@
+<label class="ch-checkbox__wrapper" [class.ch-checkbox__wrapper--disabled]="effectiveDisabled()" [for]="inputId">
+  <input
+    type="checkbox"
+    class="ch-checkbox__input"
+    [id]="inputId"
+    [checked]="checked()"
+    [disabled]="effectiveDisabled()"
+    (change)="onInputChange($event)"
+    (blur)="onBlur()"
+  />
+  @if (label()) {
+    <span class="ch-checkbox__label">{{ label() }}</span>
+  } @else {
+    <span class="ch-checkbox__label"><ng-content /></span>
+  }
+</label>

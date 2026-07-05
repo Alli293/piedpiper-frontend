@@ -1,0 +1,96 @@
+:root {
+  // === COLORS ===
+  // Primary
+  --ch-green: #1f8a5b;
+  --ch-green-dark: #14603f;
+  --ch-green-light: #7ad3a5;
+  --ch-green-soft: #e6f4ec;
+
+  // Dark / Sidebar
+  --ch-dark: #0e2a3b;
+  --ch-dark-hover: #153248;
+  --ch-dark-card: #1a3a50;
+
+  // Surfaces
+  --ch-bg-main: #f0f2f5;
+  --ch-bg-white: #ffffff;
+
+  // Text
+  --ch-text-primary: #0e2a3b;
+  --ch-text-secondary: #64748b;
+  --ch-text-muted: #8a9bae;
+  --ch-text-on-dark: #ffffff;
+  --ch-text-on-dark-muted: rgba(255, 255, 255, 0.6);
+
+  // Borders
+  --ch-border: #e2e8f0;
+  --ch-border-focus: #1f8a5b;
+  --ch-border-on-dark: rgba(255, 255, 255, 0.1);
+
+  // Surfaces on dark
+  --ch-surface-on-dark: rgba(255, 255, 255, 0.07);
+
+  // Semantic
+  --ch-success: #1f8a5b;
+  --ch-warning: #e6a817;
+  --ch-warning-dark: #8a5a06;
+  --ch-warning-bg: #fdf1d6;
+  --ch-danger: #dc2626;
+  --ch-danger-bg: #fbe1e1;
+  --ch-info: #2563eb;
+  --ch-info-bg: #dbe7fc;
+  --ch-new: #6b17cf;
+  --ch-new-bg: #f0dfff;
+
+  // Accent blues (links, focus rings, KPI figures)
+  --ch-sky: #4fc1e9;
+  --ch-blue-mid: #2ba6de;
+
+  // === TYPOGRAPHY ===
+  --ch-font-heading: 'Sora', sans-serif;
+  --ch-font-body: 'Manrope', sans-serif;
+  --ch-font-mono: 'JetBrains Mono', monospace;
+
+  // === SPACING (4px base) ===
+  --ch-space-1: 4px;
+  --ch-space-2: 8px;
+  --ch-space-3: 12px;
+  --ch-space-4: 16px;
+  --ch-space-5: 20px;
+  --ch-space-6: 24px;
+  --ch-space-8: 32px;
+  --ch-space-10: 40px;
+  --ch-space-12: 48px;
+  --ch-space-16: 64px;
+
+  // === RADII ===
+  --ch-radius-sm: 4px;
+  --ch-radius-md: 8px;
+  --ch-radius-lg: 12px;
+  --ch-radius-xl: 16px;
+  --ch-radius-pill: 100px;
+  --ch-radius-full: 50%;
+
+  // === SHADOWS ===
+  --ch-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --ch-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --ch-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  // === SIDEBAR ===
+  --ch-sidebar-width: 60px;
+  --ch-sidebar-width-expanded: 250px;
+
+  // === TRANSITIONS ===
+  --ch-transition: 150ms ease-in-out;
+}
+
+// Below 992px the sidebar is collapsed to icons/avatar only (mobile + tablet).
+// At 992px and up it expands to show full labels/text.
+// The sidebar is a flex item sized by this var; the main content is the
+// adjacent flex item and stretches/shrinks to fill the remaining space,
+// so no separate offset is needed to keep them in sync.
+@media (min-width: 992px) {
+  :root {
+    --ch-sidebar-width: var(--ch-sidebar-width-expanded);
+  }
+}

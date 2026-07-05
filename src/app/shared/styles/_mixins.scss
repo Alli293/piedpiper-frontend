@@ -1,0 +1,30 @@
+// === _mixins.scss ===
+
+@mixin focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(43, 166, 222, 0.45);
+}
+
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin desktop-up {
+  @media (min-width: 992px) {
+    @content;
+  }
+}
+
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -1,0 +1,27 @@
+<div class="ch-header__left">
+  <span class="ch-header__eyebrow">{{ sectionLabel() }}</span>
+  <h1 class="ch-header__title">{{ pageTitle() }}</h1>
+</div>
+
+<div class="ch-header__right">
+  <button
+    type="button"
+    class="ch-header__icon-button"
+    aria-label="Notificaciones"
+    (click)="notificationClicked.emit()"
+  >
+    <app-icon name="notificacion" [size]="18" />
+    @if (showNotificationDot()) {
+      <span class="ch-header__notification-dot" aria-hidden="true"></span>
+    }
+  </button>
+
+  <button
+    type="button"
+    class="ch-header__profile-button"
+    aria-label="Perfil de usuario"
+    (click)="profileClicked.emit()"
+  >
+    <app-avatar [initials]="userInitials()" size="sm" />
+  </button>
+</div>

@@ -1,0 +1,21 @@
+@if (label()) {
+  <label class="ch-textarea__label" [for]="inputId">{{ label() }}</label>
+}
+<textarea
+  class="ch-textarea__field"
+  [class.ch-textarea__field--error]="hasError()"
+  [id]="inputId"
+  [rows]="rows()"
+  [value]="value()"
+  [placeholder]="placeholder()"
+  [disabled]="effectiveDisabled()"
+  [attr.aria-invalid]="hasError() ? 'true' : null"
+  [attr.aria-describedby]="describedBy()"
+  (input)="onInput($event)"
+  (blur)="onBlur()"
+></textarea>
+@if (hasError()) {
+  <p class="ch-textarea__error" [id]="errorId">{{ error() }}</p>
+} @else if (hint()) {
+  <p class="ch-textarea__hint" [id]="hintId">{{ hint() }}</p>
+}
