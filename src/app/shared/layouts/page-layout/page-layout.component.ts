@@ -1,5 +1,9 @@
 import { Component, input, output } from '@angular/core';
-import { SidebarComponent, SidebarMenuItem, SidebarBottomItem } from '../../components/sidebar/sidebar.component';
+import {
+  SidebarComponent,
+  SidebarMenuItem,
+  SidebarBottomItem,
+} from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 
 export interface SidebarConfig {

@@ -14,7 +14,7 @@ const OUTPUT_FILE = path.join(
   'shared',
   'components',
   'icon',
-  'icon-registry.ts',
+  'icon-registry.ts'
 );
 const SUFFIX = '-icon.svg';
 

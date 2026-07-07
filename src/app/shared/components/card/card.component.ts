@@ -16,6 +16,6 @@ export class CardComponent {
   padding = input<CardPadding>('md');
 
   protected readonly hostClass = computed(
-    () => `ch-card ch-card--${this.variant()} ch-card--padding-${this.padding()}`,
+    () => `ch-card ch-card--${this.variant()} ch-card--padding-${this.padding()}`
   );
 }

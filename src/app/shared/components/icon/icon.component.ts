@@ -21,5 +21,7 @@ export class IconComponent {
 
   private readonly sanitizer = inject(DomSanitizer);
 
-  protected readonly svg = computed(() => this.sanitizer.bypassSecurityTrustHtml(ICONS[this.name()]));
+  protected readonly svg = computed(() =>
+    this.sanitizer.bypassSecurityTrustHtml(ICONS[this.name()])
+  );
 }

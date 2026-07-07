@@ -18,7 +18,7 @@ export class AvatarComponent {
   shape = input<AvatarShape>('round');
 
   protected readonly hostClass = computed(
-    () => `ch-avatar ch-avatar--${this.size()} ch-avatar--${this.shape()}`,
+    () => `ch-avatar ch-avatar--${this.size()} ch-avatar--${this.shape()}`
   );
   protected readonly showImage = computed(() => this.imageUrl().length > 0);
 }

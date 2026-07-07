@@ -27,6 +27,8 @@ export class SemanticCardComponent {
   text = input('');
   icon = input<IconName | null>(null);
 
-  protected readonly hostClass = computed(() => `ch-semantic-card ch-semantic-card--${this.variant()}`);
+  protected readonly hostClass = computed(
+    () => `ch-semantic-card ch-semantic-card--${this.variant()}`
+  );
   protected readonly effectiveIcon = computed(() => this.icon() ?? DEFAULT_ICONS[this.variant()]);
 }

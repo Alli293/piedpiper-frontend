@@ -84,11 +84,10 @@
       <h2 class="ch-h3">Enlaces</h2>
       <p class="ch-body">
         <code>appLink</code> es una directiva (no un componente) que se aplica a un
-        <code>&lt;a&gt;</code> real para enlaces de texto dentro de un párrafo. No tiene
-        propiedades — solo agrega la clase de estilo del enlace. Para una acción que no sea
-        navegación real, usa <code>app-button</code> con <code>variant="link"</code>, ya que
-        renderiza un <code>&lt;button&gt;</code> y así la tecnología de asistencia lo anuncia
-        correctamente.
+        <code>&lt;a&gt;</code> real para enlaces de texto dentro de un párrafo. No tiene propiedades
+        — solo agrega la clase de estilo del enlace. Para una acción que no sea navegación real, usa
+        <code>app-button</code> con <code>variant="link"</code>, ya que renderiza un
+        <code>&lt;button&gt;</code> y así la tecnología de asistencia lo anuncia correctamente.
       </p>
       <div class="ui-kit-page__row">
         <p class="ch-body">
@@ -152,8 +151,8 @@
     <section class="ui-kit-page__section">
       <h2 class="ch-h3">Insignias</h2>
       <p class="ch-body">
-        <code>app-badge</code> es una etiqueta de estado pequeña. Su contenido se proyecta, por
-        lo que acepta cualquier texto mediante <code>&lt;ng-content&gt;</code>.
+        <code>app-badge</code> es una etiqueta de estado pequeña. Su contenido se proyecta, por lo
+        que acepta cualquier texto mediante <code>&lt;ng-content&gt;</code>.
       </p>
       <div class="ui-kit-page__row">
         <app-badge variant="success">Aprobado</app-badge>
@@ -186,9 +185,9 @@
     <section class="ui-kit-page__section">
       <h2 class="ch-h3">Tarjetas</h2>
       <p class="ch-body">
-        <code>app-card</code> es un contenedor de contenido con tres slots proyectados: un
-        elemento marcado con <code>card-header</code>, el contenido por defecto (sin marcar) como
-        cuerpo, y un elemento marcado con <code>card-footer</code>. Ambos slots son opcionales.
+        <code>app-card</code> es un contenedor de contenido con tres slots proyectados: un elemento
+        marcado con <code>card-header</code>, el contenido por defecto (sin marcar) como cuerpo, y
+        un elemento marcado con <code>card-footer</code>. Ambos slots son opcionales.
         <code>app-card-stat</code> es un bloque pequeño de KPI pensado para colocarse dentro del
         slot <code>card-header</code>.
       </p>
@@ -360,8 +359,8 @@
     <section class="ui-kit-page__section">
       <h2 class="ch-h3">Tarjetas de estadísticas</h2>
       <p class="ch-body">
-        <code>app-stat-card</code> es un par valor/etiqueta mínimo para franjas destacadas de
-        estilo dashboard, normalmente colocado sobre una superficie oscura.
+        <code>app-stat-card</code> es un par valor/etiqueta mínimo para franjas destacadas de estilo
+        dashboard, normalmente colocado sobre una superficie oscura.
       </p>
       <div class="ui-kit-page__row ui-kit-page__row--dark">
         <app-stat-card value="999+" label="Empresas registradas" />
@@ -401,8 +400,8 @@
         son campos de formulario con etiqueta que comparten el mismo patrón de error/ayuda: define
         <code>error</code> para mostrar un mensaje de validación (esto también toma el control de
         <code>aria-describedby</code>), o <code>hint</code> para un texto de ayuda cuando no hay
-        error. Los tres emiten <code>valueChange</code> en cada entrada del usuario en lugar de
-        usar binding bidireccional.
+        error. Los tres emiten <code>valueChange</code> en cada entrada del usuario en lugar de usar
+        binding bidireccional.
       </p>
       <div class="ui-kit-page__row">
         <app-text-input label="Nombre" placeholder="Escribe tu nombre" hint="Nombre completo" />
@@ -479,7 +478,9 @@
             <td><code>error</code></td>
             <td><code>string</code></td>
             <td><code>''</code></td>
-            <td>Mensaje de validación; se muestra en lugar de <code>hint</code> cuando no está vacío.</td>
+            <td>
+              Mensaje de validación; se muestra en lugar de <code>hint</code> cuando no está vacío.
+            </td>
           </tr>
           <tr>
             <td><code>hint</code></td>
@@ -522,7 +523,9 @@
           </tr>
           <tr>
             <td><code>options</code></td>
-            <td><code>{{ '{' }} value: string; label: string {{ '}' }}[]</code></td>
+            <td>
+              <code>{{ '{' }} value: string; label: string {{ '}' }}[]</code>
+            </td>
             <td><em>requerido</em></td>
             <td>Opciones que se muestran en el desplegable.</td>
           </tr>
@@ -609,8 +612,8 @@
       <h2 class="ch-h3">Casillas de verificación</h2>
       <p class="ch-body">
         <code>app-checkbox</code> admite binding bidireccional mediante <code>[(checked)]</code> y
-        también implementa <code>ControlValueAccessor</code>, por lo que funciona con Reactive
-        Forms (<code>formControlName</code>) sin necesidad de la sintaxis banana-in-a-box.
+        también implementa <code>ControlValueAccessor</code>, por lo que funciona con Reactive Forms
+        (<code>formControlName</code>) sin necesidad de la sintaxis banana-in-a-box.
       </p>
       <div class="ui-kit-page__row">
         <app-checkbox label="Acepto los términos" [(checked)]="termsAccepted" />
@@ -632,8 +635,8 @@
             <td><code>boolean</code></td>
             <td><code>false</code></td>
             <td>
-              Estado marcado/desmarcado con binding bidireccional; también se puede definir desde
-              un control de Reactive Forms.
+              Estado marcado/desmarcado con binding bidireccional; también se puede definir desde un
+              control de Reactive Forms.
             </td>
           </tr>
           <tr>
@@ -655,8 +658,8 @@
     <section class="ui-kit-page__section">
       <h2 class="ch-h3">Radios</h2>
       <p class="ch-body">
-        Las opciones <code>app-radio</code> deben anidarse dentro de un contenedor con la
-        directiva <code>appRadioGroup</code>, que administra el <code>name</code> compartido y el
+        Las opciones <code>app-radio</code> deben anidarse dentro de un contenedor con la directiva
+        <code>appRadioGroup</code>, que administra el <code>name</code> compartido y el
         <code>value</code> seleccionado actualmente (con binding bidireccional y compatible con
         Reactive Forms). Cada <code>app-radio</code> lee su estado marcado desde el grupo.
       </p>
@@ -682,9 +685,7 @@
             <td><code>name</code></td>
             <td><code>string</code></td>
             <td>autogenerado</td>
-            <td>
-              <code>name</code> compartido para los inputs de radio nativos dentro del grupo.
-            </td>
+            <td><code>name</code> compartido para los inputs de radio nativos dentro del grupo.</td>
           </tr>
           <tr>
             <td><code>value</code> (model)</td>

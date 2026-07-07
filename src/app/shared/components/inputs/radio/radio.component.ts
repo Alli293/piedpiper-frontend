@@ -21,7 +21,9 @@ export class RadioComponent {
   protected readonly inputId = `ch-radio-${nextId++}`;
   protected readonly name = computed(() => this.group?.name() ?? '');
   protected readonly checked = computed(() => this.group?.value() === this.value());
-  protected readonly effectiveDisabled = computed(() => this.disabled() || (this.group?.disabled() ?? false));
+  protected readonly effectiveDisabled = computed(
+    () => this.disabled() || (this.group?.disabled() ?? false)
+  );
 
   protected onChange(): void {
     if (this.effectiveDisabled()) return;
