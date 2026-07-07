@@ -1,0 +1,118 @@
+:host {
+  display: block;
+}
+
+.login {
+  display: flex;
+  flex-direction: column;
+}
+
+.login__header {
+  margin-bottom: var(--ch-space-8);
+}
+
+.login__title {
+  margin: 0;
+  font-family: var(--ch-font-heading);
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--ch-text-primary);
+}
+
+.login__subtitle {
+  margin: var(--ch-space-2) 0 0;
+  color: var(--ch-text-secondary);
+  font-size: 15px;
+}
+
+.login__google {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.login__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-4);
+  margin: var(--ch-space-6) 0;
+  color: var(--ch-text-muted);
+  font-size: 13px;
+}
+
+.login__divider::before,
+.login__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--ch-border);
+}
+
+.login__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-5);
+}
+
+.login__password {
+  position: relative;
+}
+
+.login__password ::ng-deep .ch-text-input__field {
+  padding-right: 44px;
+}
+
+.login__password-toggle {
+  position: absolute;
+  top: 28px;
+  right: var(--ch-space-2);
+  height: 40px;
+  width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--ch-text-muted);
+  cursor: pointer;
+}
+
+.login__password-toggle:hover {
+  color: var(--ch-text-primary);
+}
+
+.login__password-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.login__forgot {
+  align-self: flex-end;
+  margin-top: calc(-1 * var(--ch-space-2));
+  color: var(--ch-blue-mid);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login__forgot:hover {
+  text-decoration: underline;
+}
+
+.login__signup {
+  margin: var(--ch-space-8) 0 0;
+  text-align: center;
+  color: var(--ch-text-secondary);
+  font-size: 14px;
+}
+
+.login__signup a {
+  color: var(--ch-blue-mid);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login__signup a:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,44 @@
+<aside class="ch-auth-layout__hero">
+  <div class="ch-auth-layout__brand">
+    <img
+      class="ch-auth-layout__logo"
+      src="images/logos/isotipo-mono-white.svg"
+      alt=""
+      aria-hidden="true"
+    />
+    <span class="ch-auth-layout__brand-name">CarbonHub</span>
+  </div>
+
+  <div class="ch-auth-layout__hero-body">
+    <h2 class="ch-auth-layout__tagline">Gestiona tu huella.<br />Certifica tu impacto.</h2>
+    <p class="ch-auth-layout__subtitle">
+      La plataforma costarricense de gestión de carbono, certificación ambiental verificada y
+      turismo sostenible.
+    </p>
+
+    <ul class="ch-auth-layout__stats">
+      @for (stat of stats; track stat.label) {
+        <li class="ch-auth-layout__stat">
+          <span class="ch-auth-layout__stat-value">{{ stat.value }}</span>
+          @if (stat.unit) {
+            <span class="ch-auth-layout__stat-unit">{{ stat.unit }}</span>
+          }
+          <span class="ch-auth-layout__stat-label">{{ stat.label }}</span>
+        </li>
+      }
+    </ul>
+  </div>
+
+  <img
+    class="ch-auth-layout__watermark"
+    src="images/logos/isotipo-mono-white.svg"
+    alt=""
+    aria-hidden="true"
+  />
+</aside>
+
+<section class="ch-auth-layout__panel">
+  <div class="ch-auth-layout__panel-inner">
+    <ng-content />
+  </div>
+</section>
