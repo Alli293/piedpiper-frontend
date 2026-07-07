@@ -19,6 +19,6 @@ export class ButtonComponent {
   type = input<'button' | 'submit' | 'reset'>('button');
 
   protected readonly hostClass = computed(
-    () => `ch-button ch-button--${this.variant()} ch-button--${this.size()}`,
+    () => `ch-button ch-button--${this.variant()} ch-button--${this.size()}`
   );
 }
