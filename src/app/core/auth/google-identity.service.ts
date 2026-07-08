@@ -32,7 +32,8 @@ export class GoogleIdentityService {
 
   async renderizarBoton(
     contenedor: HTMLElement,
-    onCredential: (idToken: string) => void
+    onCredential: (idToken: string) => void,
+    texto: 'continue_with' | 'signup_with' | 'signin_with' = 'continue_with'
   ): Promise<void> {
     await this.cargarScript();
     google.accounts.id.initialize({
@@ -43,7 +44,7 @@ export class GoogleIdentityService {
       type: 'standard',
       theme: 'outline',
       size: 'large',
-      text: 'continue_with',
+      text: texto,
       shape: 'rectangular',
       logo_alignment: 'center',
       locale: 'es',

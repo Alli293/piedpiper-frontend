@@ -1,0 +1,90 @@
+:host {
+  display: block;
+}
+
+.registro {
+  display: flex;
+  flex-direction: column;
+}
+
+.registro__back {
+  align-self: flex-start;
+  margin-bottom: var(--ch-space-5);
+  color: var(--ch-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.registro__back:hover {
+  color: var(--ch-text-primary);
+}
+
+.registro__badge {
+  align-self: flex-start;
+  padding: var(--ch-space-1) var(--ch-space-3);
+  border-radius: var(--ch-radius-pill);
+  background: var(--ch-green-soft);
+  color: var(--ch-green-dark);
+  font-family: var(--ch-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.registro__header {
+  margin: var(--ch-space-5) 0 var(--ch-space-6);
+}
+
+.registro__title {
+  margin: 0;
+  font-family: var(--ch-font-heading);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ch-text-primary);
+}
+
+.registro__subtitle {
+  margin: var(--ch-space-2) 0 0;
+  color: var(--ch-text-secondary);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.registro__google {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.registro__error {
+  margin: var(--ch-space-3) 0 0;
+  color: var(--ch-danger);
+  font-size: 14px;
+}
+
+.registro__terms {
+  margin: var(--ch-space-5) 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ch-text-secondary);
+}
+
+.registro__terms a,
+.registro__login a {
+  color: var(--ch-blue-mid);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.registro__terms a:hover,
+.registro__login a:hover {
+  text-decoration: underline;
+}
+
+.registro__login {
+  margin: var(--ch-space-8) 0 0;
+  text-align: center;
+  color: var(--ch-text-secondary);
+  font-size: 14px;
+}

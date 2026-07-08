@@ -21,6 +21,15 @@ export class AuthService {
     return this.login({ metodo: 'GOOGLE', idToken });
   }
 
+  registrarConGoogle(
+    tipo: 'usuario' | 'empresa' | 'auditor',
+    idToken: string
+  ): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.baseUrl}/registro/${tipo}`, { idToken, aceptaTerminos: true })
+      .pipe(tap((response) => this.guardarSesion(response)));
+  }
+
   private login(request: LoginRequest): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.baseUrl}/login`, request)
