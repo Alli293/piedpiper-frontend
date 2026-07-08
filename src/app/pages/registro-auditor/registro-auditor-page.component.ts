@@ -2,6 +2,8 @@ import { Component, DestroyRef, inject, OnInit, signal, computed } from '@angula
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { timeout, finalize, TimeoutError } from 'rxjs';
 
 import { TextInputComponent } from '../../shared/components/inputs/text-input/text-input.component';
 import {
@@ -12,8 +14,10 @@ import { CheckboxComponent } from '../../shared/components/inputs/checkbox/check
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { FileInputComponent } from '../../shared/components/inputs/file-input/file-input.component';
 
+import { AuthService } from '../../core/services/auth.service';
 import { CatalogService } from '../../core/services/catalog.service';
 import { EntidadCertificadora } from '../../core/models/entidad-certificadora.model';
+import { ToastService } from '../../shared/components/toast/toast.service';
 
 import { nombreCompletoValidator, numeroCertificacionValidator, entidadCertificadoraOtraValidator } from '../../core/validators/text-validators';
 import { emailValidator } from '../../core/validators/email-validator';
@@ -23,6 +27,7 @@ import { pdfValidator } from '../../core/validators/pdf-validator';
 import { matchPasswordValidator, futureDateValidator } from '../../shared/validators/form-validators';
 
 const OTRA_VALUE = 'otra';
+const SUBMIT_TIMEOUT_MS = 30000;
 
 @Component({
   selector: 'app-registro-auditor-page',
@@ -41,11 +46,14 @@ const OTRA_VALUE = 'otra';
 })
 export class RegistroAuditorPageComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
   private catalogService = inject(CatalogService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  private toastService = inject(ToastService);
 
   entidades = signal<EntidadCertificadora[]>([]);
+  isSubmitting = signal(false);
   showOtraEntidad = signal(false);
 
   form = this.fb.group({
@@ -99,6 +107,109 @@ export class RegistroAuditorPageComponent implements OnInit {
     otraControl.updateValueAndValidity();
   }
 
+  onSubmit(): void {
+    // Mark all controls as touched to show validation errors
+    this.form.markAllAsTouched();
+
+    // If form invalid, scroll to first error field
+    if (this.form.invalid) {
+      this.scrollToFirstError();
+      return;
+    }
+
+    // Set submitting state
+    this.isSubmitting.set(true);
+
+    // Build FormData
+    const formData = this.buildFormData();
+
+    // Call backend
+    this.authService
+      .registrarAuditor(formData)
+      .pipe(
+        timeout(SUBMIT_TIMEOUT_MS),
+        finalize(() => this.isSubmitting.set(false))
+      )
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/confirmacion-registro']);
+        },
+        error: (error) => this.handleSubmitError(error),
+      });
+  }
+
+  private buildFormData(): FormData {
+    const formData = new FormData();
+
+    const values = this.form.getRawValue();
+
+    const entidadId = values.entidadCertificadora === OTRA_VALUE
+      ? null
+      : Number(values.entidadCertificadora);
+
+    const entidadOtra = values.entidadCertificadora === OTRA_VALUE
+      ? values.entidadCertificadoraOtra
+      : null;
+
+    const datos = {
+      nombreCompleto: values.nombreCompleto,
+      email: values.email,
+      contrasena: values.contrasena,
+      numeroCertificacion: values.numeroCertificacion,
+      entidadCertificadoraId: entidadId,
+      entidadCertificadoraOtra: entidadOtra,
+      fechaVigenciaCert: values.fechaVigenciaCert,
+      aniosExperiencia: values.aniosExperiencia,
+      aceptaTerminos: values.aceptaTerminos,
+    };
+
+    const datosBlob = new Blob([JSON.stringify(datos)], { type: 'application/json' });
+    formData.append('datos', datosBlob);
+
+    if (values.docCertificadoPdf) {
+      formData.append('doc_certificado', values.docCertificadoPdf);
+    }
+
+    if (values.docIdentificacionPdf) {
+      formData.append('doc_identificacion', values.docIdentificacionPdf);
+    }
+
+    return formData;
+  }
+
+  private handleSubmitError(error: unknown): void {
+    if (error instanceof TimeoutError) {
+      this.toastService.show('La operación excedió el tiempo de espera.', 'error');
+      return;
+    }
+
+    if (error instanceof HttpErrorResponse) {
+      if (error.status === 409) {
+        // Email already registered - set inline error on email field
+        this.form.controls.email.setErrors({ emailAlreadyExists: true });
+        this.form.controls.email.markAsTouched();
+        return;
+      }
+
+      if (error.status >= 500 || error.status === 0) {
+        this.toastService.show('Error del servidor. Intenta más tarde.', 'error');
+        return;
+      }
+    }
+
+    // Network errors (status 0) or other unknown errors
+    this.toastService.show('Error del servidor. Intenta más tarde.', 'error');
+  }
+
+  private scrollToFirstError(): void {
+    setTimeout(() => {
+      const firstErrorEl = document.querySelector('.ng-invalid[formControlName]');
+      if (firstErrorEl) {
+        firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  }
+
   getFieldError(fieldName: string): string {
     const control = this.form.get(fieldName);
     if (!control || !control.touched || !control.errors) return '';
@@ -115,6 +226,7 @@ export class RegistroAuditorPageComponent implements OnInit {
 
       case 'email':
         if (errors['required']) return 'El correo electrónico es obligatorio.';
+        if (errors['emailAlreadyExists']) return 'El correo ya está registrado.';
         if (errors['invalidEmail']) return 'El formato de correo es inválido.';
         break;
 

@@ -12,7 +12,7 @@
     <div class="registro-auditor__form-container">
       <h2 class="registro-auditor__title">Registro de Auditor Certificado</h2>
 
-      <form [formGroup]="form" class="registro-auditor__form" novalidate>
+      <form [formGroup]="form" class="registro-auditor__form" novalidate (ngSubmit)="onSubmit()">
         <!-- Nombre completo -->
         <app-text-input
           label="Nombre completo"
@@ -136,7 +136,8 @@
           type="submit"
           variant="primary"
           size="lg"
-          [disabled]="!form.controls.aceptaTerminos.value"
+          [disabled]="!form.controls.aceptaTerminos.value || isSubmitting()"
+          [loading]="isSubmitting()"
         >
           Registrarme
         </app-button>
