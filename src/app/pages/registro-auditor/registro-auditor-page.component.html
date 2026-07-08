@@ -1,0 +1,151 @@
+<div class="registro-auditor">
+  <!-- Panel izquierdo -->
+  <aside class="registro-auditor__panel-left">
+    <div class="registro-auditor__branding">
+      <h1 class="registro-auditor__logo">CarbonHub</h1>
+      <p class="registro-auditor__tagline">Plataforma de gestión de huella de carbono</p>
+    </div>
+  </aside>
+
+  <!-- Panel derecho -->
+  <main class="registro-auditor__panel-right">
+    <div class="registro-auditor__form-container">
+      <h2 class="registro-auditor__title">Registro de Auditor Certificado</h2>
+
+      <form [formGroup]="form" class="registro-auditor__form" novalidate>
+        <!-- Nombre completo -->
+        <app-text-input
+          label="Nombre completo"
+          formControlName="nombreCompleto"
+          placeholder="Ingresa tu nombre completo"
+          [required]="true"
+          [error]="getFieldError('nombreCompleto')"
+        />
+
+        <!-- Email -->
+        <app-text-input
+          label="Correo electrónico"
+          formControlName="email"
+          type="email"
+          placeholder="correo@ejemplo.com"
+          [required]="true"
+          [error]="getFieldError('email')"
+        />
+
+        <!-- Contraseña -->
+        <app-text-input
+          label="Contraseña"
+          formControlName="contrasena"
+          type="password"
+          placeholder="Mínimo 8 caracteres"
+          hint="Debe contener al menos 1 letra y 1 número"
+          [required]="true"
+          [error]="getFieldError('contrasena')"
+        />
+
+        <!-- Confirmar contraseña -->
+        <app-text-input
+          label="Confirmar contraseña"
+          formControlName="confirmarContrasena"
+          type="password"
+          placeholder="Repite tu contraseña"
+          [required]="true"
+          [error]="getFieldError('confirmarContrasena')"
+        />
+
+        <!-- Número de certificación -->
+        <app-text-input
+          label="Número de certificación"
+          formControlName="numeroCertificacion"
+          placeholder="Ej: ABC-12345"
+          [required]="true"
+          [error]="getFieldError('numeroCertificacion')"
+        />
+
+        <!-- Entidad certificadora -->
+        <app-select-input
+          label="Entidad certificadora"
+          formControlName="entidadCertificadora"
+          [options]="entidadesOptions()"
+          placeholder="Seleccionar entidad..."
+          [error]="getFieldError('entidadCertificadora')"
+        />
+
+        <!-- Entidad certificadora otra (condicional) -->
+        @if (showOtraEntidad()) {
+          <app-text-input
+            label="Nombre de la entidad certificadora"
+            formControlName="entidadCertificadoraOtra"
+            placeholder="Ingresa el nombre de la entidad"
+            [required]="true"
+            [error]="getFieldError('entidadCertificadoraOtra')"
+          />
+        }
+
+        <!-- Fecha vigencia certificación -->
+        <div class="registro-auditor__field">
+          <label class="registro-auditor__label" for="fechaVigenciaCert">
+            Fecha de vigencia de certificación <span aria-hidden="true">*</span>
+          </label>
+          <input
+            id="fechaVigenciaCert"
+            type="date"
+            class="registro-auditor__date-input"
+            [class.registro-auditor__date-input--error]="getFieldError('fechaVigenciaCert')"
+            formControlName="fechaVigenciaCert"
+            [attr.aria-invalid]="getFieldError('fechaVigenciaCert') ? 'true' : null"
+          />
+          @if (getFieldError('fechaVigenciaCert')) {
+            <p class="registro-auditor__error">{{ getFieldError('fechaVigenciaCert') }}</p>
+          }
+        </div>
+
+        <!-- Años de experiencia -->
+        <app-text-input
+          label="Años de experiencia"
+          formControlName="aniosExperiencia"
+          type="number"
+          placeholder="Ej: 5"
+          [required]="true"
+          [error]="getFieldError('aniosExperiencia')"
+        />
+
+        <!-- Documento certificado PDF -->
+        <app-file-input
+          label="Certificado (PDF)"
+          formControlName="docCertificadoPdf"
+          [required]="true"
+          [error]="getFieldError('docCertificadoPdf')"
+        />
+
+        <!-- Documento identificación PDF -->
+        <app-file-input
+          label="Identificación oficial (PDF)"
+          formControlName="docIdentificacionPdf"
+          [required]="true"
+          [error]="getFieldError('docIdentificacionPdf')"
+        />
+
+        <!-- Acepta términos -->
+        <app-checkbox formControlName="aceptaTerminos">
+          Acepto los <a href="/terminos" class="ch-link" target="_blank">términos y condiciones</a>
+        </app-checkbox>
+
+        <!-- Botón de envío -->
+        <app-button
+          type="submit"
+          variant="primary"
+          size="lg"
+          [disabled]="!form.controls.aceptaTerminos.value"
+        >
+          Registrarme
+        </app-button>
+      </form>
+
+      <!-- Enlace a login -->
+      <p class="registro-auditor__login-link">
+        ¿Ya tienes cuenta? <a routerLink="/login" class="ch-link">Inicia sesión</a>
+      </p>
+    </div>
+  </main>
+</div>

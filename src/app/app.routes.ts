@@ -21,6 +21,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'registro-auditor',
+    loadComponent: () =>
+      import('./pages/registro-auditor/registro-auditor-page.component').then(
+        (m) => m.RegistroAuditorPageComponent,
+      ),
+  },
+  {
     path: 'ui-kit',
     loadComponent: () =>
       import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),
