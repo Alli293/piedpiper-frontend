@@ -1,0 +1,52 @@
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.validacion-pendiente {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--ch-bg-main);
+  padding: var(--ch-space-8);
+
+  &__card {
+    background-color: var(--ch-bg-white);
+    border-radius: var(--ch-radius-lg);
+    box-shadow: var(--ch-shadow-md);
+    padding: var(--ch-space-12) var(--ch-space-10);
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+  }
+
+  &__icon {
+    font-size: 3rem;
+    margin-bottom: var(--ch-space-5);
+  }
+
+  &__title {
+    font-family: var(--ch-font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ch-text-primary);
+    margin: 0 0 var(--ch-space-4) 0;
+  }
+
+  &__message {
+    font-family: var(--ch-font-body);
+    font-size: 1rem;
+    color: var(--ch-text-secondary);
+    margin: 0 0 var(--ch-space-4) 0;
+    line-height: 1.5;
+  }
+
+  &__hint {
+    font-family: var(--ch-font-body);
+    font-size: 0.875rem;
+    color: var(--ch-text-muted);
+    margin: 0;
+  }
+}

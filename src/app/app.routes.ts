@@ -28,6 +28,27 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'confirmacion-registro',
+    loadComponent: () =>
+      import('./pages/confirmacion-registro/confirmacion-registro-page.component').then(
+        (m) => m.ConfirmacionRegistroPageComponent,
+      ),
+  },
+  {
+    path: 'verificar-email',
+    loadComponent: () =>
+      import('./pages/verificacion-email/verificacion-email-page.component').then(
+        (m) => m.VerificacionEmailPageComponent,
+      ),
+  },
+  {
+    path: 'validacion-pendiente',
+    loadComponent: () =>
+      import('./pages/validacion-pendiente/validacion-pendiente-page.component').then(
+        (m) => m.ValidacionPendientePageComponent,
+      ),
+  },
+  {
     path: 'ui-kit',
     loadComponent: () =>
       import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),

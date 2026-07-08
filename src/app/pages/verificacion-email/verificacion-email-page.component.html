@@ -1,0 +1,50 @@
+<div class="verificacion-email">
+  <div class="verificacion-email__card">
+    <!-- Loading -->
+    @if (estado() === 'loading') {
+      <div class="verificacion-email__loading">
+        <div class="verificacion-email__spinner" aria-label="Verificando..."></div>
+        <p class="verificacion-email__message">Verificando tu correo electrónico...</p>
+      </div>
+    }
+
+    <!-- Success -->
+    @if (estado() === 'success') {
+      <div class="verificacion-email__icon" aria-hidden="true">✅</div>
+      <h1 class="verificacion-email__title">¡Email verificado!</h1>
+      <p class="verificacion-email__message">{{ mensaje() }}</p>
+      <p class="verificacion-email__hint">
+        Un administrador revisará tu solicitud. Te notificaremos por correo cuando haya una actualización.
+      </p>
+    }
+
+    <!-- Error -->
+    @if (estado() === 'error') {
+      <div class="verificacion-email__icon" aria-hidden="true">⚠️</div>
+      <h1 class="verificacion-email__title">Enlace inválido</h1>
+      <p class="verificacion-email__message">{{ mensaje() }}</p>
+
+      @if (puedeReenviar() && emailReenvio() && !reenvioExitoso()) {
+        <app-button
+          variant="primary"
+          size="md"
+          [loading]="reenviando()"
+          [disabled]="reenviando()"
+          (click)="reenviarVerificacion()"
+        >
+          Solicitar nuevo enlace
+        </app-button>
+      }
+
+      @if (reenvioExitoso()) {
+        <p class="verificacion-email__reenvio-ok">
+          ✉️ Se ha enviado un nuevo enlace de verificación a tu correo.
+        </p>
+      }
+
+      @if (!puedeReenviar() || !emailReenvio()) {
+        <a routerLink="/" class="verificacion-email__link">Volver al inicio</a>
+      }
+    }
+  </div>
+</div>
