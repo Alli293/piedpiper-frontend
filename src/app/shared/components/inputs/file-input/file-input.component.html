@@ -1,0 +1,58 @@
+@if (label()) {
+  <label class="ch-file-input__label" [for]="inputId">
+    {{ label() }}
+    @if (required()) {
+      <span aria-hidden="true"> *</span>
+    }
+  </label>
+}
+
+<input
+  #fileInputRef
+  type="file"
+  class="ch-file-input__native"
+  [id]="inputId"
+  [accept]="accept()"
+  [disabled]="effectiveDisabled()"
+  [attr.aria-invalid]="hasError() ? 'true' : null"
+  [attr.aria-describedby]="describedBy()"
+  (change)="onFileSelected($event)"
+/>
+
+<div
+  class="ch-file-input__drop-zone"
+  [class.ch-file-input__drop-zone--error]="hasError()"
+  [class.ch-file-input__drop-zone--disabled]="effectiveDisabled()"
+  [class.ch-file-input__drop-zone--has-file]="fileName()"
+>
+  @if (fileName()) {
+    <div class="ch-file-input__file-info">
+      <span class="ch-file-input__file-name">{{ fileName() }}</span>
+      <button
+        type="button"
+        class="ch-file-input__remove-btn"
+        [disabled]="effectiveDisabled()"
+        (click)="removeFile()"
+        aria-label="Eliminar archivo"
+      >
+        ✕
+      </button>
+    </div>
+  } @else {
+    <button
+      type="button"
+      class="ch-file-input__select-btn"
+      [disabled]="effectiveDisabled()"
+      (click)="triggerFileInput()"
+    >
+      Seleccionar archivo PDF
+    </button>
+    <p class="ch-file-input__placeholder">Máximo 10 MB</p>
+  }
+</div>
+
+@if (hasError()) {
+  <p class="ch-file-input__error" [id]="errorId">{{ displayError() }}</p>
+} @else if (hint()) {
+  <p class="ch-file-input__hint" [id]="hintId">{{ hint() }}</p>
+}

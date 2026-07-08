@@ -1,0 +1,143 @@
+@use '../../../styles/mixins';
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-2);
+}
+
+.ch-file-input__label {
+  font-family: var(--ch-font-body);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--ch-text-primary);
+}
+
+.ch-file-input__native {
+  @include mixins.visually-hidden;
+}
+
+.ch-file-input__drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ch-space-2);
+  padding: var(--ch-space-4);
+  border-radius: var(--ch-radius-md);
+  border: 2px dashed var(--ch-border);
+  background: var(--ch-bg-white);
+  transition: border-color var(--ch-transition);
+  min-height: 80px;
+
+  &:hover:not(&--disabled) {
+    border-color: var(--ch-border-focus);
+  }
+
+  &--error {
+    border-color: var(--ch-danger);
+  }
+
+  &--disabled {
+    background: var(--ch-bg-main);
+    cursor: not-allowed;
+  }
+
+  &--has-file {
+    border-style: solid;
+    border-color: var(--ch-border-focus);
+  }
+}
+
+.ch-file-input__select-btn {
+  padding: var(--ch-space-2) var(--ch-space-4);
+  border-radius: var(--ch-radius-md);
+  border: 2px solid var(--ch-border);
+  background: var(--ch-bg-white);
+  font-family: var(--ch-font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ch-text-primary);
+  cursor: pointer;
+  transition: border-color var(--ch-transition), background-color var(--ch-transition);
+
+  &:hover:not(:disabled) {
+    border-color: var(--ch-border-focus);
+    background: var(--ch-bg-main);
+  }
+
+  &:focus-visible {
+    @include mixins.focus-ring;
+  }
+
+  &:disabled {
+    color: var(--ch-text-muted);
+    cursor: not-allowed;
+  }
+}
+
+.ch-file-input__placeholder {
+  margin: 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.75rem;
+  color: var(--ch-text-muted);
+}
+
+.ch-file-input__file-info {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-3);
+  width: 100%;
+  justify-content: center;
+}
+
+.ch-file-input__file-name {
+  font-family: var(--ch-font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ch-text-primary);
+  @include mixins.truncate;
+  max-width: 250px;
+}
+
+.ch-file-input__remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: var(--ch-danger);
+  color: white;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: opacity var(--ch-transition);
+
+  &:hover:not(:disabled) {
+    opacity: 0.8;
+  }
+
+  &:focus-visible {
+    @include mixins.focus-ring;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.ch-file-input__hint {
+  margin: 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.75rem;
+  color: var(--ch-text-muted);
+}
+
+.ch-file-input__error {
+  margin: 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.75rem;
+  color: var(--ch-danger);
+}
