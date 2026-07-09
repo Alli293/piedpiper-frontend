@@ -28,6 +28,7 @@ import { matchPasswordValidator, futureDateValidator } from '../../shared/valida
 
 const OTRA_VALUE = 'otra';
 const SUBMIT_TIMEOUT_MS = 30000;
+const TOTAL_STEPS = 3;
 
 @Component({
   selector: 'app-registro-auditor-page',
@@ -55,20 +56,27 @@ export class RegistroAuditorPageComponent implements OnInit {
   entidades = signal<EntidadCertificadora[]>([]);
   isSubmitting = signal(false);
   showOtraEntidad = signal(false);
+  currentStep = signal(1);
+
+  readonly totalSteps = TOTAL_STEPS;
 
   form = this.fb.group({
-    nombreCompleto: ['', [Validators.required, nombreCompletoValidator]],
+    // Step 1: Account
+    nombre: ['', [Validators.required, nombreCompletoValidator]],
+    apellidos: ['', [Validators.required, nombreCompletoValidator]],
     email: ['', [Validators.required, emailValidator]],
     contrasena: ['', [Validators.required, passwordValidator]],
     confirmarContrasena: ['', [Validators.required, matchPasswordValidator]],
+    aceptaTerminos: [false, Validators.requiredTrue],
+    // Step 2: Credentials
     numeroCertificacion: ['', [Validators.required, numeroCertificacionValidator]],
     entidadCertificadora: ['', Validators.required],
     entidadCertificadoraOtra: [''],
     fechaVigenciaCert: ['', [Validators.required, futureDateValidator]],
     aniosExperiencia: [null as number | null, [Validators.required, numericRangeValidator]],
+    // Step 3: Documents
     docCertificadoPdf: [null as File | null, [Validators.required, pdfValidator]],
     docIdentificacionPdf: [null as File | null, [Validators.required, pdfValidator]],
-    aceptaTerminos: [false, Validators.requiredTrue],
   });
 
   entidadesOptions = computed<SelectOption[]>(() => {
@@ -80,7 +88,12 @@ export class RegistroAuditorPageComponent implements OnInit {
     return options;
   });
 
-  isSubmitDisabled = computed(() => !this.form.controls.aceptaTerminos.value);
+  /** Fields that belong to each step for validation purposes */
+  private stepFields: Record<number, string[]> = {
+    1: ['nombre', 'apellidos', 'email', 'contrasena', 'confirmarContrasena', 'aceptaTerminos'],
+    2: ['numeroCertificacion', 'entidadCertificadora', 'entidadCertificadoraOtra', 'fechaVigenciaCert', 'aniosExperiencia'],
+    3: ['docCertificadoPdf', 'docIdentificacionPdf'],
+  };
 
   ngOnInit(): void {
     this.catalogService.getEntidadesCertificadoras().subscribe({
@@ -107,23 +120,68 @@ export class RegistroAuditorPageComponent implements OnInit {
     otraControl.updateValueAndValidity();
   }
 
+  /** Navigate to next step if current step fields are valid */
+  nextStep(): void {
+    if (this.validateCurrentStep()) {
+      this.currentStep.update((s) => Math.min(s + 1, TOTAL_STEPS));
+    }
+  }
+
+  /** Navigate to previous step */
+  prevStep(): void {
+    this.currentStep.update((s) => Math.max(s - 1, 1));
+  }
+
+  /** Navigate directly to a step (only if all previous steps are valid) */
+  goToStep(step: number): void {
+    if (step < this.currentStep()) {
+      this.currentStep.set(step);
+      return;
+    }
+    // Can only go forward if all intermediate steps are valid
+    for (let i = this.currentStep(); i < step; i++) {
+      if (!this.isStepValid(i)) return;
+    }
+    this.currentStep.set(step);
+  }
+
+  /** Check if a specific step's fields are all valid */
+  isStepValid(step: number): boolean {
+    const fields = this.stepFields[step] ?? [];
+    return fields.every((field) => {
+      const control = this.form.get(field);
+      if (!control) return true;
+      // Skip entidadCertificadoraOtra if not showing
+      if (field === 'entidadCertificadoraOtra' && !this.showOtraEntidad()) return true;
+      return control.valid;
+    });
+  }
+
+  /** Check if a step has been completed (for stepper indicators) */
+  isStepCompleted(step: number): boolean {
+    return step < this.currentStep() && this.isStepValid(step);
+  }
+
   onSubmit(): void {
-    // Mark all controls as touched to show validation errors
+    // Final validation of all fields
     this.form.markAllAsTouched();
 
-    // If form invalid, scroll to first error field
     if (this.form.invalid) {
-      this.scrollToFirstError();
+      // Find which step has the first error and go there
+      for (let step = 1; step <= TOTAL_STEPS; step++) {
+        if (!this.isStepValid(step)) {
+          this.currentStep.set(step);
+          this.scrollToFirstError();
+          return;
+        }
+      }
       return;
     }
 
-    // Set submitting state
     this.isSubmitting.set(true);
 
-    // Build FormData
     const formData = this.buildFormData();
 
-    // Call backend
     this.authService
       .registrarAuditor(formData)
       .pipe(
@@ -132,15 +190,35 @@ export class RegistroAuditorPageComponent implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.router.navigate(['/confirmacion-registro']);
+          this.router.navigate(['/validacion-pendiente']);
         },
         error: (error) => this.handleSubmitError(error),
       });
   }
 
+  private validateCurrentStep(): boolean {
+    const fields = this.stepFields[this.currentStep()] ?? [];
+    let valid = true;
+
+    for (const field of fields) {
+      const control = this.form.get(field);
+      if (!control) continue;
+      // Skip entidadCertificadoraOtra validation if not showing
+      if (field === 'entidadCertificadoraOtra' && !this.showOtraEntidad()) continue;
+      control.markAsTouched();
+      control.updateValueAndValidity();
+      if (control.invalid) valid = false;
+    }
+
+    if (!valid) {
+      this.scrollToFirstError();
+    }
+
+    return valid;
+  }
+
   private buildFormData(): FormData {
     const formData = new FormData();
-
     const values = this.form.getRawValue();
 
     const entidadId = values.entidadCertificadora === OTRA_VALUE
@@ -152,7 +230,7 @@ export class RegistroAuditorPageComponent implements OnInit {
       : null;
 
     const datos = {
-      nombreCompleto: values.nombreCompleto,
+      nombreCompleto: `${values.nombre} ${values.apellidos}`.trim(),
       email: values.email,
       contrasena: values.contrasena,
       numeroCertificacion: values.numeroCertificacion,
@@ -185,9 +263,10 @@ export class RegistroAuditorPageComponent implements OnInit {
 
     if (error instanceof HttpErrorResponse) {
       if (error.status === 409) {
-        // Email already registered - set inline error on email field
         this.form.controls.email.setErrors({ emailAlreadyExists: true });
         this.form.controls.email.markAsTouched();
+        // Go back to step 1 where the email field is
+        this.currentStep.set(1);
         return;
       }
 
@@ -197,7 +276,6 @@ export class RegistroAuditorPageComponent implements OnInit {
       }
     }
 
-    // Network errors (status 0) or other unknown errors
     this.toastService.show('Error del servidor. Intenta más tarde.', 'error');
   }
 
@@ -217,10 +295,17 @@ export class RegistroAuditorPageComponent implements OnInit {
     const errors = control.errors;
 
     switch (fieldName) {
-      case 'nombreCompleto':
-        if (errors['required']) return 'El nombre completo es obligatorio.';
+      case 'nombre':
+        if (errors['required']) return 'El nombre es obligatorio.';
         if (errors['minLength']) return 'El nombre debe tener al menos 2 caracteres.';
         if (errors['maxLength']) return 'El nombre no puede exceder 100 caracteres.';
+        if (errors['pattern']) return 'Solo se permiten letras, espacios, acentos y guiones.';
+        break;
+
+      case 'apellidos':
+        if (errors['required']) return 'Los apellidos son obligatorios.';
+        if (errors['minLength']) return 'Los apellidos deben tener al menos 2 caracteres.';
+        if (errors['maxLength']) return 'Los apellidos no pueden exceder 100 caracteres.';
         if (errors['pattern']) return 'Solo se permiten letras, espacios, acentos y guiones.';
         break;
 

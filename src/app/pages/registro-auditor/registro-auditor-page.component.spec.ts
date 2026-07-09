@@ -22,7 +22,7 @@ describe('RegistroAuditorPageComponent', () => {
       imports: [RegistroAuditorPageComponent, ReactiveFormsModule],
       providers: [
         provideRouter([
-          { path: 'confirmacion-registro', component: DummyComponent },
+          { path: 'validacion-pendiente', component: DummyComponent },
           { path: 'login', component: DummyComponent },
         ]),
         provideHttpClient(),
@@ -52,9 +52,14 @@ describe('RegistroAuditorPageComponent', () => {
       expect(component).toBeTruthy();
     });
 
+    it('should start on step 1', () => {
+      expect(component.currentStep()).toBe(1);
+    });
+
     it('should have all form controls initialized as empty', () => {
       const form = component.form;
-      expect(form.controls.nombreCompleto.value).toBe('');
+      expect(form.controls.nombre.value).toBe('');
+      expect(form.controls.apellidos.value).toBe('');
       expect(form.controls.email.value).toBe('');
       expect(form.controls.contrasena.value).toBe('');
       expect(form.controls.confirmarContrasena.value).toBe('');
@@ -68,17 +73,9 @@ describe('RegistroAuditorPageComponent', () => {
       expect(form.controls.aceptaTerminos.value).toBe(false);
     });
 
-    it('should have submit button disabled when aceptaTerminos is unchecked', () => {
-      expect(component.form.controls.aceptaTerminos.value).toBe(false);
-      // The submit button is disabled via [disabled]="!form.controls.aceptaTerminos.value || isSubmitting()"
-      const compiled = fixture.nativeElement as HTMLElement;
-      const submitButton = compiled.querySelector('app-button[type="submit"]');
-      expect(submitButton).toBeTruthy();
-    });
-
     it('should not display any error messages initially', () => {
-      // No fields are touched yet, so getFieldError returns empty for all
-      expect(component.getFieldError('nombreCompleto')).toBe('');
+      expect(component.getFieldError('nombre')).toBe('');
+      expect(component.getFieldError('apellidos')).toBe('');
       expect(component.getFieldError('email')).toBe('');
       expect(component.getFieldError('contrasena')).toBe('');
       expect(component.getFieldError('confirmarContrasena')).toBe('');
@@ -91,19 +88,53 @@ describe('RegistroAuditorPageComponent', () => {
     });
   });
 
-  describe('Validación inline en blur', () => {
-    it('should show error for nombreCompleto when too short and touched', () => {
-      const control = component.form.controls.nombreCompleto;
-      control.setValue('A');
-      control.markAsTouched();
-      expect(component.getFieldError('nombreCompleto')).toContain('al menos 2 caracteres');
+  describe('Stepper navigation', () => {
+    it('should not advance to step 2 if step 1 fields are invalid', () => {
+      component.nextStep();
+      expect(component.currentStep()).toBe(1);
     });
 
-    it('should show error for nombreCompleto when pattern is invalid', () => {
-      const control = component.form.controls.nombreCompleto;
+    it('should advance to step 2 when step 1 fields are valid', () => {
+      fillStep1();
+      component.nextStep();
+      expect(component.currentStep()).toBe(2);
+    });
+
+    it('should go back to step 1 from step 2', () => {
+      fillStep1();
+      component.nextStep();
+      expect(component.currentStep()).toBe(2);
+      component.prevStep();
+      expect(component.currentStep()).toBe(1);
+    });
+
+    it('should advance to step 3 when step 2 fields are valid', () => {
+      fillStep1();
+      component.nextStep();
+      fillStep2();
+      component.nextStep();
+      expect(component.currentStep()).toBe(3);
+    });
+
+    it('should not go below step 1', () => {
+      component.prevStep();
+      expect(component.currentStep()).toBe(1);
+    });
+  });
+
+  describe('Validación inline en blur', () => {
+    it('should show error for nombre when too short and touched', () => {
+      const control = component.form.controls.nombre;
+      control.setValue('A');
+      control.markAsTouched();
+      expect(component.getFieldError('nombre')).toContain('al menos 2 caracteres');
+    });
+
+    it('should show error for nombre when pattern is invalid', () => {
+      const control = component.form.controls.nombre;
       control.setValue('John123');
       control.markAsTouched();
-      expect(component.getFieldError('nombreCompleto')).toContain('letras, espacios, acentos y guiones');
+      expect(component.getFieldError('nombre')).toContain('letras, espacios, acentos y guiones');
     });
 
     it('should show error for email when format is invalid', () => {
@@ -175,33 +206,15 @@ describe('RegistroAuditorPageComponent', () => {
   });
 
   describe('Envío exitoso', () => {
-    function fillValidForm(): void {
-      const form = component.form;
-      form.controls.nombreCompleto.setValue('Juan Pérez');
-      form.controls.email.setValue('juan@example.com');
-      form.controls.contrasena.setValue('Password1');
-      form.controls.confirmarContrasena.setValue('Password1');
-      form.controls.numeroCertificacion.setValue('CERT-001');
-      form.controls.entidadCertificadora.setValue('1');
-      form.controls.fechaVigenciaCert.setValue('2030-12-31');
-      form.controls.aniosExperiencia.setValue(5);
-
-      const pdfFile = new File(['pdf'], 'cert.pdf', { type: 'application/pdf' });
-      form.controls.docCertificadoPdf.setValue(pdfFile);
-      form.controls.docIdentificacionPdf.setValue(pdfFile);
-      form.controls.aceptaTerminos.setValue(true);
-    }
-
     it('should set isSubmitting to true when form is submitted', () => {
-      fillValidForm();
+      fillAllSteps();
       component.onSubmit();
-
       expect(component.isSubmitting()).toBe(true);
     });
 
-    it('should navigate to /confirmacion-registro on success', () => {
+    it('should navigate to /validacion-pendiente on success', () => {
       const routerSpy = vi.spyOn((component as any).router, 'navigate');
-      fillValidForm();
+      fillAllSteps();
       component.onSubmit();
 
       const req = httpTesting.expectOne(
@@ -209,11 +222,11 @@ describe('RegistroAuditorPageComponent', () => {
       );
       req.flush({ mensaje: 'Registro exitoso', email: 'juan@example.com' });
 
-      expect(routerSpy).toHaveBeenCalledWith(['/confirmacion-registro']);
+      expect(routerSpy).toHaveBeenCalledWith(['/validacion-pendiente']);
     });
 
     it('should reset isSubmitting after successful response', () => {
-      fillValidForm();
+      fillAllSteps();
       component.onSubmit();
 
       const req = httpTesting.expectOne(
@@ -226,25 +239,8 @@ describe('RegistroAuditorPageComponent', () => {
   });
 
   describe('Envío fallido', () => {
-    function fillValidForm(): void {
-      const form = component.form;
-      form.controls.nombreCompleto.setValue('Juan Pérez');
-      form.controls.email.setValue('juan@example.com');
-      form.controls.contrasena.setValue('Password1');
-      form.controls.confirmarContrasena.setValue('Password1');
-      form.controls.numeroCertificacion.setValue('CERT-001');
-      form.controls.entidadCertificadora.setValue('1');
-      form.controls.fechaVigenciaCert.setValue('2030-12-31');
-      form.controls.aniosExperiencia.setValue(5);
-
-      const pdfFile = new File(['pdf'], 'cert.pdf', { type: 'application/pdf' });
-      form.controls.docCertificadoPdf.setValue(pdfFile);
-      form.controls.docIdentificacionPdf.setValue(pdfFile);
-      form.controls.aceptaTerminos.setValue(true);
-    }
-
     it('should set inline error on email when server returns 409', () => {
-      fillValidForm();
+      fillAllSteps();
       component.onSubmit();
 
       const req = httpTesting.expectOne(
@@ -257,11 +253,13 @@ describe('RegistroAuditorPageComponent', () => {
 
       expect(component.form.controls.email.hasError('emailAlreadyExists')).toBe(true);
       expect(component.getFieldError('email')).toContain('ya está registrado');
+      // Should navigate back to step 1 where email field is
+      expect(component.currentStep()).toBe(1);
     });
 
     it('should show toast on server error (500)', () => {
       const toastSpy = vi.spyOn((component as any).toastService, 'show');
-      fillValidForm();
+      fillAllSteps();
       component.onSubmit();
 
       const req = httpTesting.expectOne(
@@ -273,7 +271,7 @@ describe('RegistroAuditorPageComponent', () => {
     });
 
     it('should reset isSubmitting after error response', () => {
-      fillValidForm();
+      fillAllSteps();
       component.onSubmit();
 
       const req = httpTesting.expectOne(
@@ -285,17 +283,41 @@ describe('RegistroAuditorPageComponent', () => {
     });
 
     it('should not submit when form is invalid', () => {
-      // Form is invalid by default (all fields empty)
       component.onSubmit();
       httpTesting.expectNone((r) => r.url.includes('/auth/registro-auditor'));
       expect(component.isSubmitting()).toBe(false);
     });
-
-    it('should mark all controls as touched when submitting invalid form', () => {
-      component.onSubmit();
-      expect(component.form.controls.nombreCompleto.touched).toBe(true);
-      expect(component.form.controls.email.touched).toBe(true);
-      expect(component.form.controls.contrasena.touched).toBe(true);
-    });
   });
+
+  // Helper functions
+  function fillStep1(): void {
+    const form = component.form;
+    form.controls.nombre.setValue('Juan');
+    form.controls.apellidos.setValue('Pérez');
+    form.controls.email.setValue('juan@example.com');
+    form.controls.contrasena.setValue('Password1');
+    form.controls.confirmarContrasena.setValue('Password1');
+    form.controls.aceptaTerminos.setValue(true);
+  }
+
+  function fillStep2(): void {
+    const form = component.form;
+    form.controls.numeroCertificacion.setValue('CERT-001');
+    form.controls.entidadCertificadora.setValue('1');
+    form.controls.fechaVigenciaCert.setValue('2030-12-31');
+    form.controls.aniosExperiencia.setValue(5);
+  }
+
+  function fillStep3(): void {
+    const form = component.form;
+    const pdfFile = new File(['pdf'], 'cert.pdf', { type: 'application/pdf' });
+    form.controls.docCertificadoPdf.setValue(pdfFile);
+    form.controls.docIdentificacionPdf.setValue(pdfFile);
+  }
+
+  function fillAllSteps(): void {
+    fillStep1();
+    fillStep2();
+    fillStep3();
+  }
 });

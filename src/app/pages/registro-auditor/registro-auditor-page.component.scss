@@ -13,37 +13,120 @@
   &__panel-left {
     width: 580px;
     min-width: 580px;
-    background-color: var(--ch-dark);
+    background-color: #0e2a3b;
+    display: flex;
+    flex-direction: column;
+    padding: 48px 52px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  &__logo-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: var(--ch-space-16);
+    gap: 10px;
   }
 
-  &__branding {
-    text-align: center;
+  &__logo-icon {
+    width: 38px;
+    height: 38px;
   }
 
-  &__logo {
+  &__logo-text {
     font-family: var(--ch-font-heading);
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--ch-text-on-dark);
-    margin: 0 0 var(--ch-space-3) 0;
+    font-size: 1.4375rem;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: -0.01em;
   }
 
-  &__tagline {
-    font-family: var(--ch-font-body);
-    font-size: 1rem;
-    color: var(--ch-text-on-dark-muted);
+  &__logo-accent {
+    color: #7ad3a5;
+  }
+
+  &__hero-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+    padding: 60px 0;
+  }
+
+  &__hero-title {
+    font-family: var(--ch-font-heading);
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: #ffffff;
     margin: 0;
+  }
+
+  &__hero-desc {
+    font-family: var(--ch-font-body);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+    max-width: 330px;
+  }
+
+  &__hero-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  &__stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 15px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+
+  &__stat-val {
+    font-family: var(--ch-font-heading);
+    font-size: 1.3125rem;
+    font-weight: 700;
+    color: #7ad3a5;
+    line-height: 1;
+  }
+
+  &__stat-label {
+    font-family: var(--ch-font-body);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  // === Decorative vectors (left panel) ===
+  &__deco-circles {
+    position: absolute;
+    bottom: -60px;
+    right: -60px;
+    width: 360px;
+    height: 360px;
+    pointer-events: none;
+  }
+
+  &__deco-fingerprint {
+    position: absolute;
+    bottom: -30px;
+    right: -30px;
+    width: 240px;
+    height: 240px;
+    pointer-events: none;
   }
 
   // === Panel derecho (formulario) ===
   &__panel-right {
     width: 860px;
     flex: 1;
-    background-color: var(--ch-bg-white);
+    background-color: #ffffff;
     display: flex;
     align-items: flex-start;
     justify-content: center;
@@ -52,8 +135,8 @@
   }
 
   &__form-container {
-    width: 420px;
-    max-width: 420px;
+    width: 480px;
+    max-width: 480px;
     padding: var(--ch-space-10) 0;
   }
 
@@ -62,7 +145,14 @@
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--ch-text-primary);
-    margin: 0 0 var(--ch-space-8) 0;
+    margin: var(--ch-space-8) 0 var(--ch-space-6) 0;
+  }
+
+  &__step-description {
+    font-family: var(--ch-font-body);
+    font-size: 0.875rem;
+    color: var(--ch-text-secondary);
+    margin: 0 0 var(--ch-space-4) 0;
   }
 
   // === Formulario ===
@@ -72,7 +162,15 @@
     gap: var(--ch-space-5);
   }
 
-  // === Date field (native input, not using TextInputComponent) ===
+  // === Actions row (Atrás / Siguiente) ===
+  &__actions {
+    display: flex;
+    gap: var(--ch-space-4);
+    justify-content: space-between;
+    margin-top: var(--ch-space-2);
+  }
+
+  // === Date field ===
   &__field {
     display: flex;
     flex-direction: column;
@@ -93,7 +191,7 @@
     font-family: var(--ch-font-body);
     font-size: 0.875rem;
     color: var(--ch-text-primary);
-    background-color: var(--ch-bg-white);
+    background-color: #ffffff;
     border: 1px solid var(--ch-border);
     border-radius: var(--ch-radius-md);
     transition: border-color var(--ch-transition), box-shadow var(--ch-transition);
@@ -127,5 +225,89 @@
     color: var(--ch-text-secondary);
     text-align: center;
     margin: var(--ch-space-6) 0 0 0;
+  }
+}
+
+// === Stepper component ===
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: var(--ch-space-2);
+    cursor: pointer;
+    user-select: none;
+
+    &:focus-visible {
+      outline: 2px solid var(--ch-border-focus);
+      outline-offset: 2px;
+      border-radius: var(--ch-radius-sm);
+    }
+
+    &--active {
+      .stepper__circle {
+        background-color: #1f8a5b;
+        color: #ffffff;
+        border-color: #1f8a5b;
+      }
+
+      .stepper__label {
+        color: var(--ch-text-primary);
+        font-weight: 600;
+      }
+    }
+
+    &--completed {
+      .stepper__circle {
+        background-color: #1f8a5b;
+        color: #ffffff;
+        border-color: #1f8a5b;
+      }
+
+      .stepper__label {
+        color: #1f8a5b;
+      }
+    }
+  }
+
+  &__circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--ch-font-body);
+    font-size: 0.875rem;
+    font-weight: 600;
+    background-color: #f3f4f6;
+    color: #6b7280;
+    border: 2px solid #e5e7eb;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    font-family: var(--ch-font-body);
+    font-size: 0.8125rem;
+    color: #6b7280;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+  }
+
+  &__connector {
+    flex: 1;
+    height: 2px;
+    background-color: #e5e7eb;
+    margin: 0 var(--ch-space-3);
+    min-width: 40px;
+    transition: background-color 0.2s ease;
+
+    &--completed {
+      background-color: #1f8a5b;
+    }
   }
 }

@@ -1,149 +1,278 @@
 <div class="registro-auditor">
   <!-- Panel izquierdo -->
   <aside class="registro-auditor__panel-left">
-    <div class="registro-auditor__branding">
-      <h1 class="registro-auditor__logo">CarbonHub</h1>
-      <p class="registro-auditor__tagline">Plataforma de gestión de huella de carbono</p>
+    <!-- Logo top-left -->
+    <div class="registro-auditor__logo-header">
+      <img src="images/registro/carbonhub-logo-icon.svg" alt="" class="registro-auditor__logo-icon" />
+      <span class="registro-auditor__logo-text">Carbon<span class="registro-auditor__logo-accent">Hub</span></span>
     </div>
+
+    <!-- Main content -->
+    <div class="registro-auditor__hero-content">
+      <h2 class="registro-auditor__hero-title">Tu credibilidad, amplificada. Tu red, en crecimiento.</h2>
+      <p class="registro-auditor__hero-desc">Conéctate con empresas que necesitan tu experiencia. Construye una reputación verificable y pública.</p>
+
+      <div class="registro-auditor__hero-stats">
+        <div class="registro-auditor__stat-chip">
+          <span class="registro-auditor__stat-val">200+</span>
+          <span class="registro-auditor__stat-label">auditores activos</span>
+        </div>
+        <div class="registro-auditor__stat-chip">
+          <span class="registro-auditor__stat-val">48h</span>
+          <span class="registro-auditor__stat-label">validación promedio</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decorative elements -->
+    <img
+      src="images/registro/carbonhub-circles.png"
+      alt=""
+      aria-hidden="true"
+      class="registro-auditor__deco-circles"
+    />
+    <img
+      src="images/registro/carbonhub-fingerprint-leaf.png"
+      alt=""
+      aria-hidden="true"
+      class="registro-auditor__deco-fingerprint"
+    />
   </aside>
 
   <!-- Panel derecho -->
   <main class="registro-auditor__panel-right">
     <div class="registro-auditor__form-container">
-      <h2 class="registro-auditor__title">Registro de Auditor Certificado</h2>
+      <!-- Stepper header -->
+      <div class="stepper">
+        @for (step of [1, 2, 3]; track step) {
+          <div
+            class="stepper__item"
+            [class.stepper__item--active]="currentStep() === step"
+            [class.stepper__item--completed]="isStepCompleted(step)"
+            (click)="goToStep(step)"
+            [attr.aria-current]="currentStep() === step ? 'step' : null"
+            role="button"
+            [attr.tabindex]="0"
+            [attr.aria-label]="'Paso ' + step + ' de ' + totalSteps"
+          >
+            <div class="stepper__circle">
+              @if (isStepCompleted(step)) {
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M2 7L5.5 10.5L12 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              } @else {
+                {{ step }}
+              }
+            </div>
+            <span class="stepper__label">
+              @switch (step) {
+                @case (1) { Cuenta }
+                @case (2) { Credenciales }
+                @case (3) { Documentos }
+              }
+            </span>
+          </div>
+          @if (step < 3) {
+            <div
+              class="stepper__connector"
+              [class.stepper__connector--completed]="isStepCompleted(step)"
+            ></div>
+          }
+        }
+      </div>
+
+      <!-- Step title -->
+      <h2 class="registro-auditor__title">
+        @switch (currentStep()) {
+          @case (1) { Registro — Auditor }
+          @case (2) { Paso 2 de 3: Credenciales }
+          @case (3) { Paso 3 de 3: Documentos }
+        }
+      </h2>
 
       <form [formGroup]="form" class="registro-auditor__form" novalidate (ngSubmit)="onSubmit()">
-        <!-- Nombre completo -->
-        <app-text-input
-          label="Nombre completo"
-          formControlName="nombreCompleto"
-          placeholder="Ingresa tu nombre completo"
-          [required]="true"
-          [error]="getFieldError('nombreCompleto')"
-        />
 
-        <!-- Email -->
-        <app-text-input
-          label="Correo electrónico"
-          formControlName="email"
-          type="email"
-          placeholder="correo@ejemplo.com"
-          [required]="true"
-          [error]="getFieldError('email')"
-        />
-
-        <!-- Contraseña -->
-        <app-text-input
-          label="Contraseña"
-          formControlName="contrasena"
-          type="password"
-          placeholder="Mínimo 8 caracteres"
-          hint="Debe contener al menos 1 letra y 1 número"
-          [required]="true"
-          [error]="getFieldError('contrasena')"
-        />
-
-        <!-- Confirmar contraseña -->
-        <app-text-input
-          label="Confirmar contraseña"
-          formControlName="confirmarContrasena"
-          type="password"
-          placeholder="Repite tu contraseña"
-          [required]="true"
-          [error]="getFieldError('confirmarContrasena')"
-        />
-
-        <!-- Número de certificación -->
-        <app-text-input
-          label="Número de certificación"
-          formControlName="numeroCertificacion"
-          placeholder="Ej: ABC-12345"
-          [required]="true"
-          [error]="getFieldError('numeroCertificacion')"
-        />
-
-        <!-- Entidad certificadora -->
-        <app-select-input
-          label="Entidad certificadora"
-          formControlName="entidadCertificadora"
-          [options]="entidadesOptions()"
-          placeholder="Seleccionar entidad..."
-          [error]="getFieldError('entidadCertificadora')"
-        />
-
-        <!-- Entidad certificadora otra (condicional) -->
-        @if (showOtraEntidad()) {
+        <!-- ===== STEP 1: Account ===== -->
+        @if (currentStep() === 1) {
           <app-text-input
-            label="Nombre de la entidad certificadora"
-            formControlName="entidadCertificadoraOtra"
-            placeholder="Ingresa el nombre de la entidad"
+            label="Nombre"
+            formControlName="nombre"
+            placeholder="Ingresa tu nombre"
             [required]="true"
-            [error]="getFieldError('entidadCertificadoraOtra')"
+            [error]="getFieldError('nombre')"
           />
+
+          <app-text-input
+            label="Apellidos"
+            formControlName="apellidos"
+            placeholder="Ingresa tus apellidos"
+            [required]="true"
+            [error]="getFieldError('apellidos')"
+          />
+
+          <app-text-input
+            label="Correo electrónico"
+            formControlName="email"
+            type="email"
+            placeholder="correo&#64;ejemplo.com"
+            [required]="true"
+            [error]="getFieldError('email')"
+          />
+
+          <app-text-input
+            label="Contraseña"
+            formControlName="contrasena"
+            type="password"
+            placeholder="Mínimo 8 caracteres"
+            hint="Debe contener al menos 1 letra y 1 número"
+            [required]="true"
+            [error]="getFieldError('contrasena')"
+          />
+
+          <app-text-input
+            label="Confirmar contraseña"
+            formControlName="confirmarContrasena"
+            type="password"
+            placeholder="Repite tu contraseña"
+            [required]="true"
+            [error]="getFieldError('confirmarContrasena')"
+          />
+
+          <app-checkbox formControlName="aceptaTerminos">
+            Acepto los <a href="/terminos" class="ch-link" target="_blank">términos y condiciones</a>
+          </app-checkbox>
+
+          <!-- Step 1 action -->
+          <app-button
+            type="button"
+            variant="primary"
+            size="lg"
+            [disabled]="!form.controls.aceptaTerminos.value"
+            (click)="nextStep()"
+          >
+            Siguiente
+          </app-button>
         }
 
-        <!-- Fecha vigencia certificación -->
-        <div class="registro-auditor__field">
-          <label class="registro-auditor__label" for="fechaVigenciaCert">
-            Fecha de vigencia de certificación <span aria-hidden="true">*</span>
-          </label>
-          <input
-            id="fechaVigenciaCert"
-            type="date"
-            class="registro-auditor__date-input"
-            [class.registro-auditor__date-input--error]="getFieldError('fechaVigenciaCert')"
-            formControlName="fechaVigenciaCert"
-            [attr.aria-invalid]="getFieldError('fechaVigenciaCert') ? 'true' : null"
+        <!-- ===== STEP 2: Credentials ===== -->
+        @if (currentStep() === 2) {
+          <app-text-input
+            label="Número de certificación"
+            formControlName="numeroCertificacion"
+            placeholder="Ej: ABC-12345"
+            [required]="true"
+            [error]="getFieldError('numeroCertificacion')"
           />
-          @if (getFieldError('fechaVigenciaCert')) {
-            <p class="registro-auditor__error">{{ getFieldError('fechaVigenciaCert') }}</p>
+
+          <app-select-input
+            label="Entidad certificadora"
+            formControlName="entidadCertificadora"
+            [options]="entidadesOptions()"
+            placeholder="Seleccionar entidad..."
+            [error]="getFieldError('entidadCertificadora')"
+          />
+
+          @if (showOtraEntidad()) {
+            <app-text-input
+              label="Nombre de la entidad certificadora"
+              formControlName="entidadCertificadoraOtra"
+              placeholder="Ingresa el nombre de la entidad"
+              [required]="true"
+              [error]="getFieldError('entidadCertificadoraOtra')"
+            />
           }
-        </div>
 
-        <!-- Años de experiencia -->
-        <app-text-input
-          label="Años de experiencia"
-          formControlName="aniosExperiencia"
-          type="number"
-          placeholder="Ej: 5"
-          [required]="true"
-          [error]="getFieldError('aniosExperiencia')"
-        />
+          <div class="registro-auditor__field">
+            <label class="registro-auditor__label" for="fechaVigenciaCert">
+              Fecha de vigencia de certificación <span aria-hidden="true">*</span>
+            </label>
+            <input
+              id="fechaVigenciaCert"
+              type="date"
+              class="registro-auditor__date-input"
+              [class.registro-auditor__date-input--error]="getFieldError('fechaVigenciaCert')"
+              formControlName="fechaVigenciaCert"
+              [attr.aria-invalid]="getFieldError('fechaVigenciaCert') ? 'true' : null"
+            />
+            @if (getFieldError('fechaVigenciaCert')) {
+              <p class="registro-auditor__error">{{ getFieldError('fechaVigenciaCert') }}</p>
+            }
+          </div>
 
-        <!-- Documento certificado PDF -->
-        <app-file-input
-          label="Certificado (PDF)"
-          formControlName="docCertificadoPdf"
-          [required]="true"
-          [error]="getFieldError('docCertificadoPdf')"
-        />
+          <app-text-input
+            label="Años de experiencia"
+            formControlName="aniosExperiencia"
+            type="number"
+            placeholder="Ej: 5"
+            [required]="true"
+            [error]="getFieldError('aniosExperiencia')"
+          />
 
-        <!-- Documento identificación PDF -->
-        <app-file-input
-          label="Identificación oficial (PDF)"
-          formControlName="docIdentificacionPdf"
-          [required]="true"
-          [error]="getFieldError('docIdentificacionPdf')"
-        />
+          <!-- Step 2 actions -->
+          <div class="registro-auditor__actions">
+            <app-button
+              type="button"
+              variant="secondary"
+              size="lg"
+              (click)="prevStep()"
+            >
+              Atrás
+            </app-button>
+            <app-button
+              type="button"
+              variant="primary"
+              size="lg"
+              (click)="nextStep()"
+            >
+              Siguiente
+            </app-button>
+          </div>
+        }
 
-        <!-- Acepta términos -->
-        <app-checkbox formControlName="aceptaTerminos">
-          Acepto los <a href="/terminos" class="ch-link" target="_blank">términos y condiciones</a>
-        </app-checkbox>
+        <!-- ===== STEP 3: Documents ===== -->
+        @if (currentStep() === 3) {
+          <p class="registro-auditor__step-description">
+            Sube los documentos requeridos en formato PDF (máximo 10 MB por archivo).
+          </p>
 
-        <!-- Botón de envío -->
-        <app-button
-          type="submit"
-          variant="primary"
-          size="lg"
-          [disabled]="!form.controls.aceptaTerminos.value || isSubmitting()"
-          [loading]="isSubmitting()"
-        >
-          Registrarme
-        </app-button>
+          <app-file-input
+            label="Certificado profesional (PDF)"
+            formControlName="docCertificadoPdf"
+            [required]="true"
+            [error]="getFieldError('docCertificadoPdf')"
+          />
+
+          <app-file-input
+            label="Identificación oficial (PDF)"
+            formControlName="docIdentificacionPdf"
+            [required]="true"
+            [error]="getFieldError('docIdentificacionPdf')"
+          />
+
+          <!-- Step 3 actions -->
+          <div class="registro-auditor__actions">
+            <app-button
+              type="button"
+              variant="secondary"
+              size="lg"
+              (click)="prevStep()"
+            >
+              Atrás
+            </app-button>
+            <app-button
+              type="submit"
+              variant="primary"
+              size="lg"
+              [disabled]="isSubmitting()"
+              [loading]="isSubmitting()"
+            >
+              Crear cuenta
+            </app-button>
+          </div>
+        }
       </form>
 
-      <!-- Enlace a login -->
+      <!-- Login link -->
       <p class="registro-auditor__login-link">
         ¿Ya tienes cuenta? <a routerLink="/login" class="ch-link">Inicia sesión</a>
       </p>
