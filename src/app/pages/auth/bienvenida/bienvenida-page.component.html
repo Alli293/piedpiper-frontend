@@ -10,52 +10,7 @@
         <li>
           <a class="bienvenida__role" [routerLink]="rol.ruta">
             <span class="bienvenida__role-icon">
-              @switch (rol.id) {
-                @case ('empresa') {
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M3 21h18M5 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16M15 9h3a1 1 0 0 1 1 1v11"
-                    />
-                    <path d="M8 8h1M8 12h1M11 8h1M11 12h1" />
-                  </svg>
-                }
-                @case ('auditor') {
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                    <path d="m9 12 2 2 4-4" />
-                  </svg>
-                }
-                @case ('viajero') {
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <circle cx="12" cy="12" r="9" />
-                    <path d="m15.5 8.5-2 5-5 2 2-5 5-2z" />
-                  </svg>
-                }
-              }
+              <app-icon [name]="rol.id" [size]="22" />
             </span>
             <span class="bienvenida__role-body">
               <span class="bienvenida__role-title">{{ rol.titulo }}</span>

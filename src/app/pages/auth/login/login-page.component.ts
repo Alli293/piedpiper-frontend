@@ -11,13 +11,14 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthLayoutComponent } from '../../../shared/layouts/auth-layout/auth-layout.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { AuthService } from '../../../core/auth/auth.service';
 import { GoogleIdentityService } from '../../../core/auth/google-identity.service';
 import { AuthResponse } from '../../../core/auth/auth.models';
 
 @Component({
   selector: 'app-login-page',
-  imports: [AuthLayoutComponent, ButtonComponent, TextInputComponent, RouterLink],
+  imports: [AuthLayoutComponent, ButtonComponent, TextInputComponent, IconComponent, RouterLink],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',
 })
@@ -77,6 +78,8 @@ export class LoginPageComponent {
   }
 
   private redirigir(respuesta: AuthResponse): void {
-    this.router.navigateByUrl(respuesta.redirect || '/');
+    this.router.navigateByUrl(respuesta.redirect || '/').catch(() => {
+      this.error.set('No pudimos abrir tu panel. Intenta nuevamente.');
+    });
   }
 }

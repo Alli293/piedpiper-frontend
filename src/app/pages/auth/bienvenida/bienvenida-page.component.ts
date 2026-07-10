@@ -2,8 +2,9 @@ import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthLayoutComponent } from '../../../shared/layouts/auth-layout/auth-layout.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { IconComponent, IconName } from '../../../shared/components/icon/icon.component';
 
-type RolIcono = 'empresa' | 'auditor' | 'viajero';
+type RolIcono = Extract<IconName, 'empresa' | 'auditor' | 'viajero'>;
 
 interface OpcionRol {
   id: RolIcono;
@@ -14,7 +15,7 @@ interface OpcionRol {
 
 @Component({
   selector: 'app-bienvenida-page',
-  imports: [AuthLayoutComponent, ButtonComponent, RouterLink],
+  imports: [AuthLayoutComponent, ButtonComponent, IconComponent, RouterLink],
   templateUrl: './bienvenida-page.component.html',
   styleUrl: './bienvenida-page.component.scss',
 })

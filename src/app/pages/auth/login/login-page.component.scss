@@ -87,6 +87,13 @@
   height: 18px;
 }
 
+.login__error {
+  margin: calc(-1 * var(--ch-space-2)) 0 0;
+  color: var(--ch-danger);
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .login__forgot {
   align-self: flex-end;
   margin-top: calc(-1 * var(--ch-space-2));

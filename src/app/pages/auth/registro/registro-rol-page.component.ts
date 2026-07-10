@@ -64,7 +64,9 @@ export class RegistroRolPageComponent {
 
   private readonly googleButton = viewChild.required<ElementRef<HTMLElement>>('googleButton');
 
-  protected readonly config = computed<ConfigRol | null>(() => CONFIG[this.rol() as Rol] ?? null);
+  protected readonly config = computed<ConfigRol | null>(
+    () => (CONFIG as Record<string, ConfigRol>)[this.rol()] ?? null
+  );
   protected readonly cargando = signal(false);
   protected readonly error = signal('');
 
@@ -72,7 +74,7 @@ export class RegistroRolPageComponent {
     afterNextRender(() => {
       const config = this.config();
       if (!config) {
-        this.router.navigateByUrl('/registro');
+        void this.router.navigateByUrl('/registro').catch(() => {});
         return;
       }
       this.googleIdentity
@@ -103,6 +105,8 @@ export class RegistroRolPageComponent {
   }
 
   private redirigir(respuesta: AuthResponse): void {
-    this.router.navigateByUrl(respuesta.redirect || '/');
+    this.router.navigateByUrl(respuesta.redirect || '/').catch(() => {
+      this.error.set('No pudimos abrir tu panel. Intenta nuevamente.');
+    });
   }
 }

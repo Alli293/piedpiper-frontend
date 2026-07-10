@@ -15,6 +15,7 @@
   [placeholder]="placeholder()"
   [disabled]="effectiveDisabled()"
   [required]="required()"
+  [attr.autocomplete]="autocomplete() || null"
   [attr.aria-invalid]="hasError() ? 'true' : null"
   [attr.aria-describedby]="describedBy()"
   (input)="onInput($event)"

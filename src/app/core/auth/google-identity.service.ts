@@ -24,8 +24,14 @@ export class GoogleIdentityService {
       script.async = true;
       script.defer = true;
       script.onload = () => resolve();
-      script.onerror = () => reject(new Error('No se pudo cargar Google Identity Services.'));
+      script.onerror = () => {
+        script.remove();
+        reject(new Error('No se pudo cargar Google Identity Services.'));
+      };
       document.head.appendChild(script);
+    }).catch((error) => {
+      this.cargado = undefined;
+      throw error;
     });
     return this.cargado;
   }

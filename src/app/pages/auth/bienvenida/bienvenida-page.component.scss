@@ -65,7 +65,8 @@
 }
 
 .bienvenida__role:hover .bienvenida__role-icon {
-  background: var(--ch-bg-white);
+  background: var(--ch-green);
+  color: var(--ch-bg-white);
 }
 
 .bienvenida__role-icon svg {
