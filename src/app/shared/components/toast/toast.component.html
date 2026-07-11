@@ -1,0 +1,24 @@
+@for (toast of toastService.toasts(); track toast.id) {
+  <div
+    class="ch-toast"
+    [class.ch-toast--error]="toast.tipo === 'error'"
+    [class.ch-toast--exito]="toast.tipo === 'exito'"
+    role="alert"
+    aria-live="assertive"
+  >
+    <app-icon
+      class="ch-toast__icon"
+      [name]="toast.tipo === 'error' ? 'error' : 'success'"
+      [size]="18"
+    />
+    <span class="ch-toast__mensaje">{{ toast.mensaje }}</span>
+    <button
+      type="button"
+      class="ch-toast__cerrar"
+      aria-label="Cerrar notificación"
+      (click)="toastService.cerrar(toast.id)"
+    >
+      ×
+    </button>
+  </div>
+}

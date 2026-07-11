@@ -7,6 +7,13 @@ export const routes: Routes = [
       import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),
   },
   {
+    path: 'configuracion',
+    loadComponent: () =>
+      import('./pages/configuracion/configuracion-page.component').then(
+        (m) => m.ConfiguracionPageComponent
+      ),
+  },
+  {
     path: '',
     redirectTo: 'ui-kit',
     pathMatch: 'full',
