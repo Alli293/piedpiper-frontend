@@ -230,7 +230,8 @@ export class RegistroAuditorPageComponent implements OnInit {
       : null;
 
     const datos = {
-      nombreCompleto: `${values.nombre} ${values.apellidos}`.trim(),
+      nombre: values.nombre,
+      apellidos: values.apellidos,
       email: values.email,
       contrasena: values.contrasena,
       numeroCertificacion: values.numeroCertificacion,

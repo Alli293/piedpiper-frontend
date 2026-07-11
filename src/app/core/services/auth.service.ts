@@ -15,14 +15,14 @@ export class AuthService {
 
   registrarAuditor(formData: FormData): Observable<RegistroAuditorResponse> {
     return this.http.post<RegistroAuditorResponse>(
-      `${this.baseUrl}/registro-auditor`,
+      `${this.baseUrl}/registro/auditor/correo`,
       formData
     );
   }
 
   verificarEmail(token: string): Observable<VerificacionEmailResponse> {
     return this.http.get<VerificacionEmailResponse>(
-      `${this.baseUrl}/verificar-email`,
+      `${this.baseUrl}/verificar-correo`,
       { params: { token } }
     );
   }
