@@ -63,7 +63,7 @@ describe('PreferenciasService', () => {
       .expectOne(PreferenciasService.URL)
       .flush({ message: 'error' }, { status: 500, statusText: 'Internal Server Error' });
 
-    expect(fallo).toBeTrue();
+    expect(fallo).toBe(true);
     expect(service.preferencias()).toEqual(previas);
     expect(i18n.idioma()).toBe('ESPANOL');
   });

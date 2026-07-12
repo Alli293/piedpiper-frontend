@@ -1,0 +1,12 @@
+/* Configuración de TypeScript para el target `test-karma` (Jasmine + Karma).
+   Es idéntica a tsconfig.spec.json pero con los tipos de Jasmine en lugar de
+   vitest: cada runner compila los mismos specs con su propio tsconfig, por lo
+   que los tipos globales de ambos frameworks no entran en conflicto. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/spec-karma",
+    "types": ["jasmine"]
+  },
+  "include": ["src/**/*.d.ts", "src/**/*.spec.ts"]
+}

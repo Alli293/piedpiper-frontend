@@ -62,13 +62,13 @@ describe('ConfiguracionPageComponent', () => {
     botonGuardar().click();
     fixture.detectChanges();
 
-    expect(botonGuardar().disabled).toBeTrue();
+    expect(botonGuardar().disabled).toBe(true);
     expect(fixture.nativeElement.querySelector('.ch-button__spinner')).not.toBeNull();
 
     httpMock.expectOne(PreferenciasService.URL).flush(GUARDADAS);
     fixture.detectChanges();
 
-    expect(botonGuardar().disabled).toBeFalse();
+    expect(botonGuardar().disabled).toBe(false);
     expect(fixture.nativeElement.querySelector('.ch-button__spinner')).toBeNull();
   });
 
@@ -112,7 +112,7 @@ describe('ConfiguracionPageComponent', () => {
     // La selección vuelve a las preferencias previas y el idioma no cambia.
     expect(selects()[0].value).toBe('ESPANOL');
     expect(i18n.idioma()).toBe('ESPANOL');
-    expect(botonGuardar().disabled).toBeFalse();
+    expect(botonGuardar().disabled).toBe(false);
   });
 
   it('si la lectura inicial falla se mantienen los defaults Español / CRC / métrico', () => {
