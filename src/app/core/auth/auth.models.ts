@@ -19,3 +19,17 @@ export interface ApiError {
   message: string;
   timestamp: string;
 }
+
+export interface RegistroEmpresaCorreoRequest {
+  nombreAdmin: string;
+  apellidosAdmin: string;
+  emailAdmin: string;
+  contrasena: string;
+  confirmarContrasena: string;
+  aceptaTerminos: boolean;
+}
+
+export interface RegistroPendienteResponse {
+  mensaje: string;
+  email: string;
+}

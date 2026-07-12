@@ -51,6 +51,26 @@
   line-height: 1.5;
 }
 
+.registro__divider {
+  position: relative;
+  height: 1px;
+  background: var(--ch-border);
+  margin: var(--ch-space-5) 0;
+}
+
+.registro__divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  transform: translate(-50%, -50%);
+  border-radius: var(--ch-radius-full);
+  border: 1px solid var(--ch-border);
+  background: var(--ch-bg-white);
+}
+
 .registro__google {
   display: flex;
   justify-content: center;

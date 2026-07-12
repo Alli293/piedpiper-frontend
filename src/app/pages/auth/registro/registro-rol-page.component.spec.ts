@@ -6,11 +6,17 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { GoogleIdentityService } from '../../../core/auth/google-identity.service';
 
 describe('RegistroRolPageComponent', () => {
-  let authService: { registrarConGoogle: ReturnType<typeof vi.fn> };
+  let authService: {
+    registrarConGoogle: ReturnType<typeof vi.fn>;
+    registrarEmpresaConCorreo: ReturnType<typeof vi.fn>;
+  };
   let googleIdentity: { renderizarBoton: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    authService = { registrarConGoogle: vi.fn().mockReturnValue(of({})) };
+    authService = {
+      registrarConGoogle: vi.fn().mockReturnValue(of({})),
+      registrarEmpresaConCorreo: vi.fn(),
+    };
     googleIdentity = { renderizarBoton: vi.fn().mockResolvedValue(undefined) };
 
     await TestBed.configureTestingModule({
@@ -49,5 +55,21 @@ describe('RegistroRolPageComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.registro__badge')).toBeNull();
+  });
+
+  it('con rol empresa renderiza el formulario embebido de registro por correo', () => {
+    const fixture = TestBed.createComponent(RegistroRolPageComponent);
+    fixture.componentRef.setInput('rol', 'empresa');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-registro-empresa-form')).not.toBeNull();
+  });
+
+  it('con rol auditor no renderiza el formulario de registro por correo', () => {
+    const fixture = TestBed.createComponent(RegistroRolPageComponent);
+    fixture.componentRef.setInput('rol', 'auditor');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-registro-empresa-form')).toBeNull();
   });
 });

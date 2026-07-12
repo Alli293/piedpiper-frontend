@@ -14,6 +14,7 @@ import { AuthLayoutComponent } from '../../../shared/layouts/auth-layout/auth-la
 import { AuthService } from '../../../core/auth/auth.service';
 import { GoogleIdentityService } from '../../../core/auth/google-identity.service';
 import { AuthResponse } from '../../../core/auth/auth.models';
+import { RegistroEmpresaFormComponent } from './registro-empresa-form.component';
 
 type Rol = 'empresa' | 'auditor' | 'viajero';
 
@@ -50,7 +51,7 @@ const CONFIG: Record<Rol, ConfigRol> = {
 
 @Component({
   selector: 'app-registro-rol-page',
-  imports: [AuthLayoutComponent, RouterLink],
+  imports: [AuthLayoutComponent, RouterLink, RegistroEmpresaFormComponent],
   templateUrl: './registro-rol-page.component.html',
   styleUrl: './registro-rol-page.component.scss',
 })

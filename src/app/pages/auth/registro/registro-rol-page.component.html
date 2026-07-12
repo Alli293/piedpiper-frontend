@@ -9,6 +9,11 @@
         <p class="registro__subtitle">{{ c.subtitulo }}</p>
       </header>
 
+      @if (rol() === 'empresa') {
+        <app-registro-empresa-form />
+        <div class="registro__divider" aria-hidden="true"></div>
+      }
+
       <div class="registro__google" #googleButton></div>
 
       @if (error()) {
