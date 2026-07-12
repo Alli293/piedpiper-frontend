@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import {
+  RegistroAuditorCorreoRequest,
   RegistroAuditorResponse,
   VerificacionEmailResponse,
 } from '../models/registro-auditor.model';
@@ -13,10 +14,10 @@ export class AuthService {
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl + '/auth';
 
-  registrarAuditor(formData: FormData): Observable<RegistroAuditorResponse> {
+  registrarAuditor(body: RegistroAuditorCorreoRequest): Observable<RegistroAuditorResponse> {
     return this.http.post<RegistroAuditorResponse>(
       `${this.baseUrl}/registro/auditor/correo`,
-      formData
+      body
     );
   }
 

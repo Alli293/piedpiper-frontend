@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -14,6 +15,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'registro/auditor',
+    loadComponent: () =>
+      import('./pages/registro-auditor/registro-auditor-page.component').then(
+        (m) => m.RegistroAuditorPageComponent,
+      ),
+  },
+  {
     path: 'registro/:rol',
     loadComponent: () =>
       import('./pages/auth/registro/registro-rol-page.component').then(
@@ -21,11 +29,12 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'registro-auditor',
+    path: 'auditor/configuracion-inicial',
     loadComponent: () =>
-      import('./pages/registro-auditor/registro-auditor-page.component').then(
-        (m) => m.RegistroAuditorPageComponent,
+      import('./pages/configuracion-inicial-auditor/configuracion-inicial-auditor-page.component').then(
+        (m) => m.ConfiguracionInicialAuditorPageComponent,
       ),
+    canActivate: [authGuard],
   },
   {
     path: 'confirmacion-registro',

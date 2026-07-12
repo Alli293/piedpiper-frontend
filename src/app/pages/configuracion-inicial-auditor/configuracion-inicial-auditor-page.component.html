@@ -1,0 +1,190 @@
+<div class="config-auditor">
+  <!-- Navbar -->
+  <header class="config-auditor__navbar">
+    <div class="config-auditor__navbar-brand">
+      <img src="images/registro/carbonhub-logo-icon.svg" alt="" class="config-auditor__navbar-logo" />
+      <span class="config-auditor__navbar-title">CarbonHub</span>
+      <span class="config-auditor__navbar-separator">|</span>
+      <span class="config-auditor__navbar-section">CONFIGURACIÓN INICIAL</span>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="config-auditor__main">
+    <div class="config-auditor__container">
+      <!-- Badge -->
+      <span class="config-auditor__badge">Auditor certificado</span>
+
+      <!-- Stepper -->
+      <div class="stepper">
+        @for (step of [1, 2, 3]; track step) {
+          <div
+            class="stepper__item"
+            [class.stepper__item--active]="currentStep() === step"
+            [class.stepper__item--completed]="isStepCompleted(step)"
+            (click)="goToStep(step)"
+            [attr.aria-current]="currentStep() === step ? 'step' : null"
+            role="button"
+            [attr.tabindex]="step === 1 ? -1 : 0"
+            [attr.aria-label]="'Paso ' + step + ' de ' + totalSteps"
+          >
+            <div class="stepper__circle">
+              @if (isStepCompleted(step)) {
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M2 7L5.5 10.5L12 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              } @else {
+                {{ step }}
+              }
+            </div>
+            <span class="stepper__label">
+              @switch (step) {
+                @case (1) { Datos personales }
+                @case (2) { Perfil profesional }
+                @case (3) { Documentos }
+              }
+            </span>
+          </div>
+          @if (step < 3) {
+            <div
+              class="stepper__connector"
+              [class.stepper__connector--completed]="isStepCompleted(step)"
+            ></div>
+          }
+        }
+      </div>
+
+      <!-- Step title -->
+      <h2 class="config-auditor__title">
+        @switch (currentStep()) {
+          @case (2) { Paso 2 de 3: Perfil profesional }
+          @case (3) { Paso 3 de 3: Documentos }
+        }
+      </h2>
+
+      <form [formGroup]="form" class="config-auditor__form" novalidate (ngSubmit)="onSubmit()">
+
+        <!-- ===== STEP 2: Professional profile ===== -->
+        @if (currentStep() === 2) {
+          <app-text-input
+            label="Número de certificación"
+            formControlName="numeroCertificacion"
+            placeholder="Ej: ABC-12345"
+            [required]="true"
+            [error]="getFieldError('numeroCertificacion')"
+          />
+
+          <app-select-input
+            label="Entidad certificadora"
+            formControlName="entidadCertificadora"
+            [options]="entidadesOptions()"
+            placeholder="Seleccionar entidad..."
+            [error]="getFieldError('entidadCertificadora')"
+          />
+
+          @if (showOtraEntidad()) {
+            <app-text-input
+              label="Nombre de la entidad certificadora"
+              formControlName="entidadCertificadoraOtra"
+              placeholder="Ingresa el nombre de la entidad"
+              [required]="true"
+              [error]="getFieldError('entidadCertificadoraOtra')"
+            />
+          }
+
+          <div class="config-auditor__field">
+            <label class="config-auditor__label" for="fechaVigenciaCert">
+              Fecha de vigencia de certificación <span aria-hidden="true">*</span>
+            </label>
+            <input
+              id="fechaVigenciaCert"
+              type="date"
+              class="config-auditor__date-input"
+              [class.config-auditor__date-input--error]="getFieldError('fechaVigenciaCert')"
+              formControlName="fechaVigenciaCert"
+              [attr.aria-invalid]="getFieldError('fechaVigenciaCert') ? 'true' : null"
+            />
+            @if (getFieldError('fechaVigenciaCert')) {
+              <p class="config-auditor__error">{{ getFieldError('fechaVigenciaCert') }}</p>
+            }
+          </div>
+
+          <app-text-input
+            label="Años de experiencia"
+            formControlName="aniosExperiencia"
+            type="number"
+            placeholder="Ej: 5"
+            [required]="true"
+            [error]="getFieldError('aniosExperiencia')"
+          />
+
+          <!-- Step 2 action -->
+          <div class="config-auditor__actions">
+            <app-button
+              type="button"
+              variant="primary"
+              size="lg"
+              (click)="nextStep()"
+            >
+              Siguiente
+            </app-button>
+          </div>
+        }
+
+        <!-- ===== STEP 3: Documents ===== -->
+        @if (currentStep() === 3) {
+          <p class="config-auditor__step-description">
+            Sube los documentos requeridos en formato PDF (máximo 10 MB por archivo).
+          </p>
+
+          <app-file-input
+            label="Certificado profesional (PDF)"
+            formControlName="docCertificadoPdf"
+            [required]="true"
+            [error]="getFieldError('docCertificadoPdf')"
+          />
+
+          <app-file-input
+            label="Identificación oficial (PDF)"
+            formControlName="docIdentificacionPdf"
+            [required]="true"
+            [error]="getFieldError('docIdentificacionPdf')"
+          />
+
+          <!-- Info notice -->
+          <div class="config-auditor__info-box">
+            <svg class="config-auditor__info-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M10 9V14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="10" cy="6.5" r="1" fill="currentColor"/>
+            </svg>
+            <p class="config-auditor__info-text">
+              Tus credenciales serán verificadas por el equipo de CarbonHub. Este proceso puede tardar entre 2 y 5 días hábiles antes de activar tu cuenta.
+            </p>
+          </div>
+
+          <!-- Step 3 actions -->
+          <div class="config-auditor__actions">
+            <app-button
+              type="button"
+              variant="secondary"
+              size="lg"
+              (click)="prevStep()"
+            >
+              Atrás
+            </app-button>
+            <app-button
+              type="submit"
+              variant="primary"
+              size="lg"
+              [disabled]="isSubmitting()"
+              [loading]="isSubmitting()"
+            >
+              Enviar credenciales
+            </app-button>
+          </div>
+        }
+      </form>
+    </div>
+  </main>
+</div>

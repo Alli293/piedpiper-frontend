@@ -24,6 +24,7 @@ describe('RegistroAuditorPageComponent', () => {
         provideRouter([
           { path: 'validacion-pendiente', component: DummyComponent },
           { path: 'login', component: DummyComponent },
+          { path: 'registro', component: DummyComponent },
         ]),
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -34,26 +35,11 @@ describe('RegistroAuditorPageComponent', () => {
     fixture = TestBed.createComponent(RegistroAuditorPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-
-    // Flush the catalog request that fires on init
-    const catalogReq = httpTesting.match(
-      (req) => req.url.includes('/catalogs/entidades-certificadoras')
-    );
-    catalogReq.forEach((req) => req.flush([
-      { id: 1, nombre: 'Bureau Veritas' },
-      { id: 2, nombre: 'SGS' },
-      { id: 3, nombre: 'TÜV Rheinland' },
-    ]));
-    fixture.detectChanges();
   });
 
   describe('Renderizado inicial', () => {
     it('should create the component', () => {
       expect(component).toBeTruthy();
-    });
-
-    it('should start on step 1', () => {
-      expect(component.currentStep()).toBe(1);
     });
 
     it('should have all form controls initialized as empty', () => {
@@ -63,13 +49,6 @@ describe('RegistroAuditorPageComponent', () => {
       expect(form.controls.email.value).toBe('');
       expect(form.controls.contrasena.value).toBe('');
       expect(form.controls.confirmarContrasena.value).toBe('');
-      expect(form.controls.numeroCertificacion.value).toBe('');
-      expect(form.controls.entidadCertificadora.value).toBe('');
-      expect(form.controls.entidadCertificadoraOtra.value).toBe('');
-      expect(form.controls.fechaVigenciaCert.value).toBe('');
-      expect(form.controls.aniosExperiencia.value).toBeNull();
-      expect(form.controls.docCertificadoPdf.value).toBeNull();
-      expect(form.controls.docIdentificacionPdf.value).toBeNull();
       expect(form.controls.aceptaTerminos.value).toBe(false);
     });
 
@@ -79,46 +58,6 @@ describe('RegistroAuditorPageComponent', () => {
       expect(component.getFieldError('email')).toBe('');
       expect(component.getFieldError('contrasena')).toBe('');
       expect(component.getFieldError('confirmarContrasena')).toBe('');
-      expect(component.getFieldError('numeroCertificacion')).toBe('');
-      expect(component.getFieldError('entidadCertificadora')).toBe('');
-      expect(component.getFieldError('fechaVigenciaCert')).toBe('');
-      expect(component.getFieldError('aniosExperiencia')).toBe('');
-      expect(component.getFieldError('docCertificadoPdf')).toBe('');
-      expect(component.getFieldError('docIdentificacionPdf')).toBe('');
-    });
-  });
-
-  describe('Stepper navigation', () => {
-    it('should not advance to step 2 if step 1 fields are invalid', () => {
-      component.nextStep();
-      expect(component.currentStep()).toBe(1);
-    });
-
-    it('should advance to step 2 when step 1 fields are valid', () => {
-      fillStep1();
-      component.nextStep();
-      expect(component.currentStep()).toBe(2);
-    });
-
-    it('should go back to step 1 from step 2', () => {
-      fillStep1();
-      component.nextStep();
-      expect(component.currentStep()).toBe(2);
-      component.prevStep();
-      expect(component.currentStep()).toBe(1);
-    });
-
-    it('should advance to step 3 when step 2 fields are valid', () => {
-      fillStep1();
-      component.nextStep();
-      fillStep2();
-      component.nextStep();
-      expect(component.currentStep()).toBe(3);
-    });
-
-    it('should not go below step 1', () => {
-      component.prevStep();
-      expect(component.currentStep()).toBe(1);
     });
   });
 
@@ -166,34 +105,6 @@ describe('RegistroAuditorPageComponent', () => {
       expect(component.getFieldError('confirmarContrasena')).toContain('no coinciden');
     });
 
-    it('should show error for numeroCertificacion with invalid characters', () => {
-      const control = component.form.controls.numeroCertificacion;
-      control.setValue('ABC!@#');
-      control.markAsTouched();
-      expect(component.getFieldError('numeroCertificacion')).toContain('alfanuméricos y guiones');
-    });
-
-    it('should show error for fechaVigenciaCert when date is in the past', () => {
-      const control = component.form.controls.fechaVigenciaCert;
-      control.setValue('2020-01-01');
-      control.markAsTouched();
-      expect(component.getFieldError('fechaVigenciaCert')).toContain('presente o futura');
-    });
-
-    it('should show error for aniosExperiencia when value is negative', () => {
-      const control = component.form.controls.aniosExperiencia;
-      control.setValue(-1 as any);
-      control.markAsTouched();
-      expect(component.getFieldError('aniosExperiencia')).toContain('mínimo es 0');
-    });
-
-    it('should show error for aniosExperiencia when value exceeds 60', () => {
-      const control = component.form.controls.aniosExperiencia;
-      control.setValue(61 as any);
-      control.markAsTouched();
-      expect(component.getFieldError('aniosExperiencia')).toContain('máximo es 60');
-    });
-
     it('should clear error when field is corrected', () => {
       const control = component.form.controls.email;
       control.setValue('invalid');
@@ -207,18 +118,37 @@ describe('RegistroAuditorPageComponent', () => {
 
   describe('Envío exitoso', () => {
     it('should set isSubmitting to true when form is submitted', () => {
-      fillAllSteps();
+      fillForm();
       component.onSubmit();
       expect(component.isSubmitting()).toBe(true);
     });
 
-    it('should navigate to /validacion-pendiente on success', () => {
-      const routerSpy = vi.spyOn((component as any).router, 'navigate');
-      fillAllSteps();
+    it('should send JSON body (not FormData) to the correct endpoint', () => {
+      fillForm();
       component.onSubmit();
 
       const req = httpTesting.expectOne(
-        (r) => r.url.includes('/auth/registro-auditor')
+        (r) => r.url.includes('/auth/registro/auditor/correo')
+      );
+
+      expect(req.request.body).toEqual({
+        nombre: 'Juan',
+        apellidos: 'Pérez',
+        email: 'juan@example.com',
+        contrasena: 'Password1',
+        aceptaTerminos: true,
+      });
+
+      req.flush({ mensaje: 'Registro exitoso', email: 'juan@example.com' });
+    });
+
+    it('should navigate to /validacion-pendiente on success', () => {
+      const routerSpy = vi.spyOn((component as any).router, 'navigate');
+      fillForm();
+      component.onSubmit();
+
+      const req = httpTesting.expectOne(
+        (r) => r.url.includes('/auth/registro/auditor/correo')
       );
       req.flush({ mensaje: 'Registro exitoso', email: 'juan@example.com' });
 
@@ -226,11 +156,11 @@ describe('RegistroAuditorPageComponent', () => {
     });
 
     it('should reset isSubmitting after successful response', () => {
-      fillAllSteps();
+      fillForm();
       component.onSubmit();
 
       const req = httpTesting.expectOne(
-        (r) => r.url.includes('/auth/registro-auditor')
+        (r) => r.url.includes('/auth/registro/auditor/correo')
       );
       req.flush({ mensaje: 'Registro exitoso', email: 'juan@example.com' });
 
@@ -240,11 +170,11 @@ describe('RegistroAuditorPageComponent', () => {
 
   describe('Envío fallido', () => {
     it('should set inline error on email when server returns 409', () => {
-      fillAllSteps();
+      fillForm();
       component.onSubmit();
 
       const req = httpTesting.expectOne(
-        (r) => r.url.includes('/auth/registro-auditor')
+        (r) => r.url.includes('/auth/registro/auditor/correo')
       );
       req.flush(
         { error: 'CONFLICT', mensaje: 'El correo ya está registrado.' },
@@ -253,17 +183,15 @@ describe('RegistroAuditorPageComponent', () => {
 
       expect(component.form.controls.email.hasError('emailAlreadyExists')).toBe(true);
       expect(component.getFieldError('email')).toContain('ya está registrado');
-      // Should navigate back to step 1 where email field is
-      expect(component.currentStep()).toBe(1);
     });
 
     it('should show toast on server error (500)', () => {
       const toastSpy = vi.spyOn((component as any).toastService, 'show');
-      fillAllSteps();
+      fillForm();
       component.onSubmit();
 
       const req = httpTesting.expectOne(
-        (r) => r.url.includes('/auth/registro-auditor')
+        (r) => r.url.includes('/auth/registro/auditor/correo')
       );
       req.flush(null, { status: 500, statusText: 'Internal Server Error' });
 
@@ -271,11 +199,11 @@ describe('RegistroAuditorPageComponent', () => {
     });
 
     it('should reset isSubmitting after error response', () => {
-      fillAllSteps();
+      fillForm();
       component.onSubmit();
 
       const req = httpTesting.expectOne(
-        (r) => r.url.includes('/auth/registro-auditor')
+        (r) => r.url.includes('/auth/registro/auditor/correo')
       );
       req.flush(null, { status: 500, statusText: 'Internal Server Error' });
 
@@ -284,13 +212,12 @@ describe('RegistroAuditorPageComponent', () => {
 
     it('should not submit when form is invalid', () => {
       component.onSubmit();
-      httpTesting.expectNone((r) => r.url.includes('/auth/registro-auditor'));
+      httpTesting.expectNone((r) => r.url.includes('/auth/registro/auditor/correo'));
       expect(component.isSubmitting()).toBe(false);
     });
   });
 
-  // Helper functions
-  function fillStep1(): void {
+  function fillForm(): void {
     const form = component.form;
     form.controls.nombre.setValue('Juan');
     form.controls.apellidos.setValue('Pérez');
@@ -298,26 +225,5 @@ describe('RegistroAuditorPageComponent', () => {
     form.controls.contrasena.setValue('Password1');
     form.controls.confirmarContrasena.setValue('Password1');
     form.controls.aceptaTerminos.setValue(true);
-  }
-
-  function fillStep2(): void {
-    const form = component.form;
-    form.controls.numeroCertificacion.setValue('CERT-001');
-    form.controls.entidadCertificadora.setValue('1');
-    form.controls.fechaVigenciaCert.setValue('2030-12-31');
-    form.controls.aniosExperiencia.setValue(5);
-  }
-
-  function fillStep3(): void {
-    const form = component.form;
-    const pdfFile = new File(['pdf'], 'cert.pdf', { type: 'application/pdf' });
-    form.controls.docCertificadoPdf.setValue(pdfFile);
-    form.controls.docIdentificacionPdf.setValue(pdfFile);
-  }
-
-  function fillAllSteps(): void {
-    fillStep1();
-    fillStep2();
-    fillStep3();
   }
 });

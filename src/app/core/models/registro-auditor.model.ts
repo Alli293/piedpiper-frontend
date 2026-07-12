@@ -1,3 +1,11 @@
+export interface RegistroAuditorCorreoRequest {
+  nombre: string | null;
+  apellidos: string | null;
+  email: string | null;
+  contrasena: string | null;
+  aceptaTerminos: boolean | null;
+}
+
 export interface RegistroAuditorRequest {
   nombreCompleto: string;
   email: string;
