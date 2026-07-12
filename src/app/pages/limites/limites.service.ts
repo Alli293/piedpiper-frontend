@@ -44,7 +44,7 @@ export class LimitesService {
   }
 
   actualizarLimite(request: LimiteEmisionesRequest): Observable<LimiteEmisionesResponse> {
-    return this.http.put<LimiteEmisionesResponse>(this.apiUrl, request, {
+    return this.http.post<LimiteEmisionesResponse>(this.apiUrl, request, {
       headers: this.headers(),
     });
   }

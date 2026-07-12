@@ -67,4 +67,25 @@ describe('LimitesService', () => {
     expect(deleteReq.request.method).toBe('DELETE');
     deleteReq.flush(null);
   });
+
+  it('actualiza usando el endpoint de upsert', () => {
+    service.actualizarLimite({ anio: 2026, limiteMt: 40, justificacion: null }).subscribe();
+
+    const req = httpMock.expectOne('/api/limites');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      anio: 2026,
+      limiteMt: 40,
+      justificacion: null,
+    });
+    req.flush({
+      id: 1,
+      empresaId: 7,
+      anio: 2026,
+      limiteMt: 40,
+      justificacion: null,
+      mensaje: '',
+      actualizadoEn: null,
+    });
+  });
 });
