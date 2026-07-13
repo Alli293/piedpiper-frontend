@@ -70,14 +70,6 @@
         },
         "test": {
           "builder": "@angular/build:unit-test"
-        },
-        "test-karma": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "runner": "karma",
-            "tsConfig": "tsconfig.spec.karma.json",
-            "buildTarget": "carbonhub-frontend:build:development"
-          }
         }
       }
     }
