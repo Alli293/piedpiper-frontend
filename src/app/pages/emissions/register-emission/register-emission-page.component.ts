@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import {
   form,
@@ -25,6 +26,7 @@ import {
   SidebarConfig,
 } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
+import { toIsoDateString, toSpanishMonthName } from '../../../shared/utils/date.utils';
 import { EmisionesService } from '../emisiones.service';
 import { ApiErrorResponse, UnidadElectricidad } from '../models/emision.model';
 
@@ -41,13 +43,6 @@ function countDecimals(value: number): number {
   return dotIndex === -1 ? 0 : text.length - dotIndex - 1;
 }
 
-function toIsoDate(date: Date): string {
-  const year = date.getUTCFullYear();
-  const month = `${date.getUTCMonth() + 1}`.padStart(2, '0');
-  const day = `${date.getUTCDate()}`.padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
 function todayUtcMidnight(): Date {
   const now = new Date();
   return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
@@ -62,6 +57,9 @@ const INITIAL_MODEL: RegistrarElectricidadFormModel = {
 
 const GENERIC_CONNECTION_ERROR =
   'No se pudo conectar con el servicio de cálculo de huella. Intente nuevamente más tarde.';
+
+const SESSION_ERROR_MESSAGE =
+  'Tu sesión no es válida o expiró. Inicia sesión nuevamente para registrar esta emisión.';
 
 @Component({
   selector: 'app-register-emission-page',
@@ -81,6 +79,7 @@ const GENERIC_CONNECTION_ERROR =
 })
 export class RegisterEmissionPageComponent {
   private readonly location = inject(Location);
+  private readonly router = inject(Router);
   private readonly emisionesService = inject(EmisionesService);
   private readonly toastService = inject(ToastService);
 
@@ -114,8 +113,6 @@ export class RegisterEmissionPageComponent {
       });
     })
   );
-
-  protected readonly lastResult = signal<{ carbonKg: number } | null>(null);
 
   protected readonly tituloError = computed(() => this.fieldError(this.registerForm.titulo()));
   protected readonly electricityValueError = computed(() =>
@@ -167,7 +164,6 @@ export class RegisterEmissionPageComponent {
   protected onCancel(): void {
     this.model.set({ ...INITIAL_MODEL });
     this.registerForm().reset();
-    this.lastResult.set(null);
   }
 
   protected handleSubmit(event: Event): void {
@@ -179,21 +175,20 @@ export class RegisterEmissionPageComponent {
     await submit(this.registerForm, async (field) => {
       const value = field().value();
       try {
+        const fechaActividad = value.fechaActividad as Date;
         const response = await firstValueFrom(
           this.emisionesService.registrarElectricidad({
             titulo: value.titulo,
             electricityValue: value.electricityValue as number,
             electricityUnit: value.electricityUnit,
-            fechaActividad: toIsoDate(value.fechaActividad as Date),
+            fechaActividad: toIsoDateString(fechaActividad),
           })
         );
-        this.lastResult.set({ carbonKg: response.carbonKg });
         this.toastService.success(
-          'Consumo eléctrico registrado.',
-          `Huella calculada: ${response.carbonKg} kg CO₂e.`
+          'Registro guardado correctamente',
+          `+${response.carbonKg} kg CO₂e añadidos a tu huella de ${toSpanishMonthName(fechaActividad)}.`
         );
-        this.model.set({ ...INITIAL_MODEL });
-        this.registerForm().reset();
+        void this.router.navigateByUrl('/emisiones');
       } catch (error) {
         this.reportSubmissionError(error);
       }
@@ -206,6 +201,10 @@ export class RegisterEmissionPageComponent {
       const apiError = error.error as ApiErrorResponse | null;
       if (apiError?.message) {
         this.toastService.error(apiError.message);
+        return;
+      }
+      if (error.status === 401 || error.status === 403) {
+        this.toastService.error(SESSION_ERROR_MESSAGE);
         return;
       }
     }

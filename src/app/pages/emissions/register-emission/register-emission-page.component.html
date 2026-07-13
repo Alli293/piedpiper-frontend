@@ -99,16 +99,6 @@
         [error]="tituloError()"
       />
 
-      @if (lastResult(); as result) {
-        <div class="register-emission-page__estimate">
-          <span class="register-emission-page__estimate-label">Huella estimada del registro</span>
-          <span class="register-emission-page__estimate-value">
-            {{ result.carbonKg }}
-            <span class="register-emission-page__estimate-unit">kg CO₂e</span>
-          </span>
-        </div>
-      }
-
       <div class="register-emission-page__actions">
         <app-button variant="secondary" type="button" (click)="onCancel()">Cancelar</app-button>
         <app-button

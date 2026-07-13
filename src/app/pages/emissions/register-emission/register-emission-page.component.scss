@@ -126,43 +126,6 @@
   color: var(--ch-danger);
 }
 
-.register-emission-page__estimate {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--ch-space-4);
-  border-radius: var(--ch-radius-md);
-  background: var(--ch-green-soft);
-  border: 1px solid rgba(31, 138, 91, 0.22);
-}
-
-.register-emission-page__estimate-label {
-  font-family: var(--ch-font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--ch-green-dark);
-}
-
-.register-emission-page__estimate-value {
-  display: flex;
-  align-items: baseline;
-  gap: var(--ch-space-2);
-  font-family: var(--ch-font-heading);
-  font-weight: 700;
-  font-size: 1.625rem;
-  color: var(--ch-green);
-}
-
-.register-emission-page__estimate-unit {
-  font-family: var(--ch-font-mono);
-  font-size: 0.625rem;
-  font-weight: 400;
-  letter-spacing: 0.5px;
-  color: var(--ch-green-dark);
-}
-
 .register-emission-page__actions {
   display: flex;
   justify-content: flex-end;

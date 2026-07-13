@@ -9,7 +9,7 @@ export interface ToastMessage {
   readonly description?: string;
 }
 
-const DEFAULT_DURATION_MS = 5000;
+const DEFAULT_DURATION_MS = 8000;
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
@@ -24,12 +24,12 @@ export class ToastService {
     setTimeout(() => this.dismiss(id), durationMs);
   }
 
-  success(title: string, description?: string): void {
-    this.show({ variant: 'success', title, description });
+  success(title: string, description?: string, durationMs?: number): void {
+    this.show({ variant: 'success', title, description }, durationMs);
   }
 
-  error(title: string, description?: string): void {
-    this.show({ variant: 'error', title, description });
+  error(title: string, description?: string, durationMs?: number): void {
+    this.show({ variant: 'error', title, description }, durationMs);
   }
 
   dismiss(id: number): void {

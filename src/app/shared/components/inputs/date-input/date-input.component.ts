@@ -10,15 +10,9 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { IconComponent } from '../../icon/icon.component';
+import { toIsoDateString } from '../../../utils/date.utils';
 
 let nextId = 0;
-
-function toDateAttr(date: Date): string {
-  const year = date.getUTCFullYear();
-  const month = `${date.getUTCMonth() + 1}`.padStart(2, '0');
-  const day = `${date.getUTCDate()}`.padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
 
 @Component({
   selector: 'app-date-input',
@@ -64,15 +58,15 @@ export class DateInputComponent implements ControlValueAccessor {
 
   protected readonly displayValue = computed(() => {
     const current = this.value();
-    return current ? toDateAttr(current) : '';
+    return current ? toIsoDateString(current) : '';
   });
   protected readonly maxAttr = computed(() => {
     const max = this.max();
-    return max ? toDateAttr(max) : null;
+    return max ? toIsoDateString(max) : null;
   });
   protected readonly minAttr = computed(() => {
     const min = this.min();
-    return min ? toDateAttr(min) : null;
+    return min ? toIsoDateString(min) : null;
   });
 
   private onChange: (value: Date | null) => void = () => {};
