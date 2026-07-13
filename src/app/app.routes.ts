@@ -6,7 +6,6 @@ const cargarPlaceholder = () =>
 
 export const rutasPostAutenticacion = [
   'panel',
-  'empresa/configuracion-inicial',
   'empresa/panel',
   'auditor/configuracion-inicial',
   'auditor/panel',
