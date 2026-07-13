@@ -27,6 +27,7 @@ export class TextInputComponent implements ControlValueAccessor {
   type = input<TextInputType>('text');
   error = input('');
   hint = input('');
+  autocomplete = input('');
   disabled = input(false);
   required = input(false);
 
