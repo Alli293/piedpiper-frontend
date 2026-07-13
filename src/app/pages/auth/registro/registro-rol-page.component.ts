@@ -16,6 +16,7 @@ import { GoogleIdentityService } from '../../../core/auth/google-identity.servic
 import { AuthResponse } from '../../../core/auth/auth.models';
 import { RegistroEmpresaFormComponent } from './registro-empresa-form.component';
 import { RegistroUsuarioFormComponent } from './registro-usuario-form.component';
+import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 
 type Rol = 'empresa' | 'auditor' | 'viajero';
 
@@ -31,8 +32,7 @@ const CONFIG: Record<Rol, ConfigRol> = {
     tipo: 'empresa',
     badge: 'EMPRESA · ADMINISTRADOR',
     titulo: 'Crea tu cuenta',
-    subtitulo:
-      'Regístrate con tu cuenta de Google. Después configurarás los datos de tu empresa: nombre, sector, cédula jurídica y más.',
+    subtitulo: 'Primero crea tu perfil personal. Luego configurarás los datos de tu empresa.',
   },
   auditor: {
     tipo: 'auditor',
@@ -45,8 +45,7 @@ const CONFIG: Record<Rol, ConfigRol> = {
     tipo: 'usuario',
     badge: 'VIAJERO SOSTENIBLE',
     titulo: 'Crea tu cuenta',
-    subtitulo:
-      'Regístrate con tu cuenta de Google y empieza a planificar itinerarios de bajo impacto con EcoRuta.',
+    subtitulo: 'Primero crea tu perfil personal. Luego podrás empezar a planificar tus rutas.',
   },
 };
 
@@ -57,6 +56,7 @@ const CONFIG: Record<Rol, ConfigRol> = {
     RouterLink,
     RegistroEmpresaFormComponent,
     RegistroUsuarioFormComponent,
+    BadgeComponent,
   ],
   templateUrl: './registro-rol-page.component.html',
   styleUrl: './registro-rol-page.component.scss',

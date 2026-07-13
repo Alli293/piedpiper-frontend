@@ -38,7 +38,7 @@ describe('RegistroRolPageComponent', () => {
     fixture.componentRef.setInput('rol', 'empresa');
     fixture.detectChanges();
 
-    const badge = fixture.nativeElement.querySelector('.registro__badge');
+    const badge = fixture.nativeElement.querySelector('app-badge');
     expect(badge.textContent.trim()).toBe('EMPRESA · ADMINISTRADOR');
   });
 
@@ -47,7 +47,7 @@ describe('RegistroRolPageComponent', () => {
     fixture.componentRef.setInput('rol', 'auditor');
     fixture.detectChanges();
 
-    const badge = fixture.nativeElement.querySelector('.registro__badge');
+    const badge = fixture.nativeElement.querySelector('app-badge');
     expect(badge.textContent.trim()).toBe('AUDITOR CERTIFICADO');
   });
 
@@ -56,7 +56,7 @@ describe('RegistroRolPageComponent', () => {
     fixture.componentRef.setInput('rol', 'inventado');
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.registro__badge')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-badge')).toBeNull();
   });
 
   it('con rol empresa renderiza el formulario embebido de registro por correo', () => {

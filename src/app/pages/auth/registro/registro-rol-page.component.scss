@@ -20,16 +20,8 @@
   color: var(--ch-text-primary);
 }
 
-.registro__badge {
+.registro app-badge {
   align-self: flex-start;
-  padding: var(--ch-space-1) var(--ch-space-3);
-  border-radius: var(--ch-radius-pill);
-  background: var(--ch-green-soft);
-  color: var(--ch-green-dark);
-  font-family: var(--ch-font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
 }
 
 .registro__header {

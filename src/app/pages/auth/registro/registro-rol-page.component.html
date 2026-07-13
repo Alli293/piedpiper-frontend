@@ -2,7 +2,7 @@
   @if (config(); as c) {
     <div class="registro">
       <a class="registro__back" routerLink="/registro">‹ Cambiar tipo de cuenta</a>
-      <span class="registro__badge">{{ c.badge }}</span>
+      <app-badge variant="success">{{ c.badge }}</app-badge>
 
       <header class="registro__header">
         <h1 class="registro__title">{{ c.titulo }}</h1>
