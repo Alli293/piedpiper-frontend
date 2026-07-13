@@ -33,3 +33,12 @@ export interface RegistroPendienteResponse {
   mensaje: string;
   email: string;
 }
+
+export interface RegistroUsuarioCorreoRequest {
+  nombre: string;
+  apellidos: string;
+  email: string;
+  contrasena: string;
+  confirmarContrasena: string;
+  aceptaTerminos: boolean;
+}

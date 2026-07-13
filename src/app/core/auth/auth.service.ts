@@ -7,6 +7,7 @@ import {
   LoginRequest,
   RegistroEmpresaCorreoRequest,
   RegistroPendienteResponse,
+  RegistroUsuarioCorreoRequest,
 } from './auth.models';
 
 const TOKEN_KEY = 'carbonhub.token';
@@ -53,6 +54,15 @@ export class AuthService {
   ): Observable<RegistroPendienteResponse> {
     return this.http.post<RegistroPendienteResponse>(
       `${this.baseUrl}/registro/empresa/correo`,
+      datos
+    );
+  }
+
+  registrarUsuarioConCorreo(
+    datos: RegistroUsuarioCorreoRequest
+  ): Observable<RegistroPendienteResponse> {
+    return this.http.post<RegistroPendienteResponse>(
+      `${this.baseUrl}/registro/usuario/correo`,
       datos
     );
   }

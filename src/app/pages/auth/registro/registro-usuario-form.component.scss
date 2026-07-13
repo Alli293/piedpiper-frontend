@@ -1,0 +1,63 @@
+:host {
+  display: block;
+}
+
+.registro-usuario-form__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-5);
+}
+
+.registro-usuario-form__password {
+  position: relative;
+}
+
+.registro-usuario-form__password ::ng-deep .ch-text-input__field {
+  padding-right: 44px;
+}
+
+.registro-usuario-form__password-toggle {
+  position: absolute;
+  top: 28px;
+  right: var(--ch-space-2);
+  height: 40px;
+  width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--ch-text-muted);
+  cursor: pointer;
+}
+
+.registro-usuario-form__password-toggle:hover {
+  color: var(--ch-text-primary);
+}
+
+.registro-usuario-form__error {
+  margin: calc(-1 * var(--ch-space-2)) 0 0;
+  color: var(--ch-danger);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.registro-usuario-form__exito {
+  margin: var(--ch-space-5) 0 0;
+}
+
+.registro-usuario-form__exito-title {
+  margin: 0;
+  font-family: var(--ch-font-heading);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ch-text-primary);
+}
+
+.registro-usuario-form__exito-text {
+  margin: var(--ch-space-2) 0 0;
+  color: var(--ch-text-secondary);
+  font-size: 15px;
+  line-height: 1.5;
+}

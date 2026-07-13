@@ -9,6 +9,7 @@ describe('RegistroRolPageComponent', () => {
   let authService: {
     registrarConGoogle: ReturnType<typeof vi.fn>;
     registrarEmpresaConCorreo: ReturnType<typeof vi.fn>;
+    registrarUsuarioConCorreo: ReturnType<typeof vi.fn>;
   };
   let googleIdentity: { renderizarBoton: ReturnType<typeof vi.fn> };
 
@@ -16,6 +17,7 @@ describe('RegistroRolPageComponent', () => {
     authService = {
       registrarConGoogle: vi.fn().mockReturnValue(of({})),
       registrarEmpresaConCorreo: vi.fn(),
+      registrarUsuarioConCorreo: vi.fn(),
     };
     googleIdentity = { renderizarBoton: vi.fn().mockResolvedValue(undefined) };
 
@@ -71,5 +73,21 @@ describe('RegistroRolPageComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('app-registro-empresa-form')).toBeNull();
+  });
+
+  it('con rol viajero renderiza el formulario embebido de registro de usuario', () => {
+    const fixture = TestBed.createComponent(RegistroRolPageComponent);
+    fixture.componentRef.setInput('rol', 'viajero');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-registro-usuario-form')).not.toBeNull();
+  });
+
+  it('con rol empresa no renderiza el formulario de registro de usuario', () => {
+    const fixture = TestBed.createComponent(RegistroRolPageComponent);
+    fixture.componentRef.setInput('rol', 'empresa');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-registro-usuario-form')).toBeNull();
   });
 });
