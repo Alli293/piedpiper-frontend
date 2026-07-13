@@ -31,14 +31,19 @@ describe('RegistroEmpresaFormComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('con campos vacios muestra error y no llama al backend', () => {
+  it('con campos vacios muestra el error de cada campo simultaneamente, no solo el primero', () => {
     const fixture = TestBed.createComponent(RegistroEmpresaFormComponent);
     fixture.detectChanges();
     const comp = fixture.componentInstance as any;
 
     comp.enviar(new Event('submit'));
 
-    expect(comp.error()).toContain('nombre y apellidos');
+    expect(comp.errorNombreAdmin()).toContain('nombre del administrador');
+    expect(comp.errorApellidosAdmin()).toContain('apellidos del administrador');
+    expect(comp.errorEmail()).toContain('correo electrónico');
+    expect(comp.errorContrasena()).toContain('contraseña');
+    expect(comp.errorConfirmacion()).toContain('confirmar tu contraseña');
+    expect(comp.error()).toContain('Términos y Condiciones');
     expect(authService.registrarEmpresaConCorreo).not.toHaveBeenCalled();
   });
 

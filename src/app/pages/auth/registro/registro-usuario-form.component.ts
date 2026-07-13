@@ -27,6 +27,10 @@ export class RegistroUsuarioFormComponent {
 
   protected readonly cargando = signal(false);
   protected readonly error = signal('');
+  protected readonly errorNombre = signal('');
+  protected readonly errorApellidos = signal('');
+  protected readonly errorEmail = signal('');
+  protected readonly errorContrasena = signal('');
   protected readonly errorConfirmacion = signal('');
   protected readonly enviado = signal(false);
   protected readonly correoEnviado = signal('');
@@ -75,28 +79,42 @@ export class RegistroUsuarioFormComponent {
 
   private validar(): boolean {
     this.error.set('');
+    this.errorNombre.set('');
+    this.errorApellidos.set('');
+    this.errorEmail.set('');
+    this.errorContrasena.set('');
     this.errorConfirmacion.set('');
 
-    if (!this.nombre().trim() || !this.apellidos().trim()) {
-      this.error.set('Ingresa tu nombre y apellidos.');
-      return false;
+    let esValido = true;
+
+    if (!this.nombre().trim()) {
+      this.errorNombre.set('Ingresa tu nombre.');
+      esValido = false;
+    }
+    if (!this.apellidos().trim()) {
+      this.errorApellidos.set('Ingresa tus apellidos.');
+      esValido = false;
     }
     if (!this.email().trim()) {
-      this.error.set('Ingresa un correo electrónico válido.');
-      return false;
+      this.errorEmail.set('Ingresa un correo electrónico válido.');
+      esValido = false;
     }
-    if (!this.contrasena() || !this.confirmarContrasena()) {
-      this.error.set('Ingresa y confirma tu contraseña.');
-      return false;
+    if (!this.contrasena()) {
+      this.errorContrasena.set('Ingresa tu contraseña.');
+      esValido = false;
     }
-    if (this.contrasena() !== this.confirmarContrasena()) {
+    if (!this.confirmarContrasena()) {
+      this.errorConfirmacion.set('Debes confirmar tu contraseña.');
+      esValido = false;
+    } else if (this.contrasena() && this.contrasena() !== this.confirmarContrasena()) {
       this.errorConfirmacion.set('Las contraseñas no coinciden.');
-      return false;
+      esValido = false;
     }
     if (!this.aceptaTerminos()) {
       this.error.set('Debes aceptar los Términos y Condiciones y la Política de Privacidad.');
-      return false;
+      esValido = false;
     }
-    return true;
+
+    return esValido;
   }
 }

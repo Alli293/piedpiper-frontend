@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthLayoutComponent } from '../../shared/layouts/auth-layout/auth-layout.component';
+import { ConfiguracionInicialLayoutComponent } from '../../shared/layouts/configuracion-inicial-layout/configuracion-inicial-layout.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { TextInputComponent } from '../../shared/components/inputs/text-input/text-input.component';
 import {
@@ -19,7 +19,7 @@ const CEDULA_JURIDICA_PATTERN = /^\d-\d{3}-\d{6}$/;
 @Component({
   selector: 'app-configuracion-inicial-page',
   imports: [
-    AuthLayoutComponent,
+    ConfiguracionInicialLayoutComponent,
     ButtonComponent,
     TextInputComponent,
     SelectInputComponent,
@@ -98,9 +98,6 @@ export class ConfiguracionInicialPageComponent {
           this.cargando.set(false);
           this.resultado.set(respuesta);
           this.enviado.set(true);
-          // TODO: reemplazar '/login' por la ruta real del panel/dashboard de empresa
-          // cuando exista en app.routes.ts (todavia no esta construida).
-          this.router.navigateByUrl('/login').catch(() => {});
         },
         error: (err) => {
           this.cargando.set(false);
@@ -110,6 +107,14 @@ export class ConfiguracionInicialPageComponent {
           );
         },
       });
+  }
+
+  protected continuar(): void {
+    // TODO: reemplazar '/login' por la ruta real del panel/dashboard de empresa
+    // cuando exista en app.routes.ts (todavia no esta construida).
+    this.router.navigateByUrl('/login').catch((err) => {
+      console.error('Error al navegar tras completar configuración inicial:', err);
+    });
   }
 
   private validar(): boolean {

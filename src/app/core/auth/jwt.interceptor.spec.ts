@@ -56,4 +56,14 @@ describe('jwtInterceptor', () => {
     expect(req.request.headers.has('Authorization')).toBe(false);
     req.flush({});
   });
+
+  it('no agrega el header Authorization a una peticion hacia un origen externo', () => {
+    authService.token.set('jwt-123');
+
+    httpClient.get('https://external-api.example.com/algo').subscribe();
+
+    const req = httpMock.expectOne('https://external-api.example.com/algo');
+    expect(req.request.headers.has('Authorization')).toBe(false);
+    req.flush({});
+  });
 });

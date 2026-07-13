@@ -4,11 +4,19 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
 import { CheckboxComponent } from '../../../shared/components/inputs/checkbox/checkbox.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { SemanticCardComponent } from '../../../shared/components/semantic-card/semantic-card.component';
 import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-registro-empresa-form',
-  imports: [ButtonComponent, TextInputComponent, CheckboxComponent, IconComponent, RouterLink],
+  imports: [
+    ButtonComponent,
+    TextInputComponent,
+    CheckboxComponent,
+    IconComponent,
+    SemanticCardComponent,
+    RouterLink,
+  ],
   templateUrl: './registro-empresa-form.component.html',
   styleUrl: './registro-empresa-form.component.scss',
 })
@@ -27,6 +35,10 @@ export class RegistroEmpresaFormComponent {
 
   protected readonly cargando = signal(false);
   protected readonly error = signal('');
+  protected readonly errorNombreAdmin = signal('');
+  protected readonly errorApellidosAdmin = signal('');
+  protected readonly errorEmail = signal('');
+  protected readonly errorContrasena = signal('');
   protected readonly errorConfirmacion = signal('');
   protected readonly enviado = signal(false);
   protected readonly correoEnviado = signal('');
@@ -75,28 +87,42 @@ export class RegistroEmpresaFormComponent {
 
   private validar(): boolean {
     this.error.set('');
+    this.errorNombreAdmin.set('');
+    this.errorApellidosAdmin.set('');
+    this.errorEmail.set('');
+    this.errorContrasena.set('');
     this.errorConfirmacion.set('');
 
-    if (!this.nombreAdmin().trim() || !this.apellidosAdmin().trim()) {
-      this.error.set('Ingresa el nombre y apellidos del administrador.');
-      return false;
+    let esValido = true;
+
+    if (!this.nombreAdmin().trim()) {
+      this.errorNombreAdmin.set('Ingresa el nombre del administrador.');
+      esValido = false;
+    }
+    if (!this.apellidosAdmin().trim()) {
+      this.errorApellidosAdmin.set('Ingresa los apellidos del administrador.');
+      esValido = false;
     }
     if (!this.email().trim()) {
-      this.error.set('Ingresa un correo electrónico válido.');
-      return false;
+      this.errorEmail.set('Ingresa un correo electrónico válido.');
+      esValido = false;
     }
-    if (!this.contrasena() || !this.confirmarContrasena()) {
-      this.error.set('Ingresa y confirma tu contraseña.');
-      return false;
+    if (!this.contrasena()) {
+      this.errorContrasena.set('Ingresa tu contraseña.');
+      esValido = false;
     }
-    if (this.contrasena() !== this.confirmarContrasena()) {
+    if (!this.confirmarContrasena()) {
+      this.errorConfirmacion.set('Debes confirmar tu contraseña.');
+      esValido = false;
+    } else if (this.contrasena() && this.contrasena() !== this.confirmarContrasena()) {
       this.errorConfirmacion.set('Las contraseñas no coinciden.');
-      return false;
+      esValido = false;
     }
     if (!this.aceptaTerminos()) {
       this.error.set('Debes aceptar los Términos y Condiciones y la Política de Privacidad.');
-      return false;
+      esValido = false;
     }
-    return true;
+
+    return esValido;
   }
 }

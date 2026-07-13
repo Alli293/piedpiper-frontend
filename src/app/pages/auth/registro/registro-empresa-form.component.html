@@ -1,11 +1,9 @@
 @if (!enviado()) {
-  <div class="registro-empresa-form__callout">
-    <app-icon name="info" [size]="18" />
-    <p>
-      <strong>Siguiente paso:</strong> Al crear tu cuenta, te guiaremos para registrar tu empresa:
-      nombre, sector, RUC y más.
-    </p>
-  </div>
+  <app-semantic-card
+    variant="info"
+    title="Siguiente paso:"
+    text="Al crear tu cuenta, te guiaremos para registrar tu empresa: nombre, sector y más."
+  />
 
   <form class="registro-empresa-form__form" (submit)="enviar($event)">
     <app-text-input
@@ -15,6 +13,7 @@
       [value]="nombreAdmin()"
       (valueChange)="nombreAdmin.set($event)"
       [disabled]="cargando()"
+      [error]="errorNombreAdmin()"
     />
 
     <app-text-input
@@ -24,6 +23,7 @@
       [value]="apellidosAdmin()"
       (valueChange)="apellidosAdmin.set($event)"
       [disabled]="cargando()"
+      [error]="errorApellidosAdmin()"
     />
 
     <app-text-input
@@ -34,6 +34,7 @@
       [value]="email()"
       (valueChange)="email.set($event)"
       [disabled]="cargando()"
+      [error]="errorEmail()"
     />
 
     <div class="registro-empresa-form__password">
@@ -45,6 +46,7 @@
         [value]="contrasena()"
         (valueChange)="contrasena.set($event)"
         [disabled]="cargando()"
+        [error]="errorContrasena()"
       />
       <button
         type="button"

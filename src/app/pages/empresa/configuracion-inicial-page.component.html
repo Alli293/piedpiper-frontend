@@ -1,8 +1,6 @@
-<app-auth-layout>
+<app-configuracion-inicial-layout rolLabel="Empresa" rolIcon="empresa">
   @if (!enviado()) {
     <div class="configuracion-empresa">
-      <span class="configuracion-empresa__badge">EMPRESA · CONFIGURACIÓN INICIAL</span>
-
       <header class="configuracion-empresa__header">
         <h1 class="configuracion-empresa__title">Información de tu empresa</h1>
         <p class="configuracion-empresa__subtitle">
@@ -83,9 +81,9 @@
     <div class="configuracion-empresa__exito">
       <h2 class="configuracion-empresa__exito-title">¡Listo!</h2>
       <p class="configuracion-empresa__exito-text">
-        Guardamos la información de <strong>{{ resultado()?.nombreEmpresa }}</strong
-        >. Te estamos redirigiendo...
+        Guardamos la información de <strong>{{ resultado()?.nombreEmpresa }}</strong>.
       </p>
+      <app-button variant="primary" size="lg" (click)="continuar()">Continuar</app-button>
     </div>
   }
-</app-auth-layout>
+</app-configuracion-inicial-layout>

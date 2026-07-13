@@ -85,7 +85,7 @@ describe('ConfiguracionInicialPageComponent', () => {
     expect(empresaService.completarConfiguracionEmpresa).not.toHaveBeenCalled();
   });
 
-  it('con datos validos llama al servicio con el payload correcto y navega', () => {
+  it('con datos validos llama al servicio con el payload correcto y muestra pantalla de exito sin navegar todavia', () => {
     empresaService.completarConfiguracionEmpresa.mockReturnValue(
       of({
         empresaId: 'a1b2c3',
@@ -112,7 +112,36 @@ describe('ConfiguracionInicialPageComponent', () => {
       descripcion: 'Producción y exportación de café.',
     });
     expect(comp.enviado()).toBe(true);
+    expect(router.navigateByUrl).not.toHaveBeenCalled();
+  });
+
+  it('continuar() navega al hacer click explicito en el boton', () => {
+    const fixture = TestBed.createComponent(ConfiguracionInicialPageComponent);
+    fixture.detectChanges();
+    const comp = fixture.componentInstance as any;
+
+    comp.continuar();
+
     expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
+  });
+
+  it('continuar() loguea el error si la navegacion falla', () => {
+    (router.navigateByUrl as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('fallo'));
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const fixture = TestBed.createComponent(ConfiguracionInicialPageComponent);
+    fixture.detectChanges();
+    const comp = fixture.componentInstance as any;
+
+    comp.continuar();
+
+    return Promise.resolve().then(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error al navegar tras completar configuración inicial:',
+        expect.any(Error)
+      );
+      consoleErrorSpy.mockRestore();
+    });
   });
 
   it('con recienCreada false igual muestra exito, no error (usuario ya habia completado este paso)', () => {

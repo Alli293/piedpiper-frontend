@@ -2,31 +2,9 @@
   display: block;
 }
 
-.registro-empresa-form__callout {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--ch-space-2);
+app-semantic-card {
+  display: block;
   margin: var(--ch-space-4) 0 var(--ch-space-6);
-  padding: var(--ch-space-3) var(--ch-space-4);
-  border-radius: var(--ch-radius-md);
-  background: var(--ch-info-bg);
-}
-
-.registro-empresa-form__callout app-icon {
-  flex-shrink: 0;
-  margin-top: 2px;
-  color: var(--ch-info);
-}
-
-.registro-empresa-form__callout p {
-  margin: 0;
-  color: var(--ch-text-primary);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.registro-empresa-form__callout strong {
-  color: var(--ch-info);
 }
 
 .registro-empresa-form__form {

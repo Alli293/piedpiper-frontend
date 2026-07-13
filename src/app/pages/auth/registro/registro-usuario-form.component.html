@@ -7,6 +7,7 @@
       [value]="nombre()"
       (valueChange)="nombre.set($event)"
       [disabled]="cargando()"
+      [error]="errorNombre()"
     />
 
     <app-text-input
@@ -16,6 +17,7 @@
       [value]="apellidos()"
       (valueChange)="apellidos.set($event)"
       [disabled]="cargando()"
+      [error]="errorApellidos()"
     />
 
     <app-text-input
@@ -26,6 +28,7 @@
       [value]="email()"
       (valueChange)="email.set($event)"
       [disabled]="cargando()"
+      [error]="errorEmail()"
     />
 
     <div class="registro-usuario-form__password">
@@ -37,6 +40,7 @@
         [value]="contrasena()"
         (valueChange)="contrasena.set($event)"
         [disabled]="cargando()"
+        [error]="errorContrasena()"
       />
       <button
         type="button"

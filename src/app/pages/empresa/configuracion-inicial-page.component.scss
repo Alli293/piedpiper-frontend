@@ -7,18 +7,6 @@
   flex-direction: column;
 }
 
-.configuracion-empresa__badge {
-  align-self: flex-start;
-  padding: var(--ch-space-1) var(--ch-space-3);
-  border-radius: var(--ch-radius-pill);
-  background: var(--ch-green-soft);
-  color: var(--ch-green-dark);
-  font-family: var(--ch-font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-
 .configuracion-empresa__header {
   margin: var(--ch-space-5) 0 var(--ch-space-6);
 }
@@ -74,7 +62,7 @@
 }
 
 .configuracion-empresa__exito-text {
-  margin: var(--ch-space-2) 0 0;
+  margin: var(--ch-space-2) 0 var(--ch-space-6);
   color: var(--ch-text-secondary);
   font-size: 15px;
   line-height: 1.5;
