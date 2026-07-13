@@ -1,37 +1,34 @@
 import { Component, computed, forwardRef, input, model, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-export type TextInputType = 'text' | 'email' | 'password';
-
 let nextId = 0;
 
 @Component({
-  selector: 'app-text-input',
-  templateUrl: './text-input.component.html',
-  styleUrl: './text-input.component.scss',
+  selector: 'app-number-input',
+  templateUrl: './number-input.component.html',
+  styleUrl: './number-input.component.scss',
   host: {
     class: 'ch-text-input',
   },
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => TextInputComponent),
+      useExisting: forwardRef(() => NumberInputComponent),
       multi: true,
     },
   ],
 })
-export class TextInputComponent implements ControlValueAccessor {
+export class NumberInputComponent implements ControlValueAccessor {
   label = input<string>();
-  value = model('');
+  value = model<number | null>(null);
   placeholder = input('');
-  type = input<TextInputType>('text');
+  step = input('any');
   error = input('');
   hint = input('');
-  autocomplete = input('');
   disabled = input(false);
   required = input(false);
 
-  protected readonly inputId = `ch-text-input-${nextId++}`;
+  protected readonly inputId = `ch-number-input-${nextId++}`;
   protected readonly hintId = `${this.inputId}-hint`;
   protected readonly errorId = `${this.inputId}-error`;
 
@@ -45,14 +42,14 @@ export class TextInputComponent implements ControlValueAccessor {
     return null;
   });
 
-  private onChange: (value: string) => void = () => {};
+  private onChange: (value: number | null) => void = () => {};
   private onTouched: () => void = () => {};
 
-  writeValue(value: string): void {
-    this.value.set(value ?? '');
+  writeValue(value: number | null): void {
+    this.value.set(value ?? null);
   }
 
-  registerOnChange(fn: (value: string) => void): void {
+  registerOnChange(fn: (value: number | null) => void): void {
     this.onChange = fn;
   }
 
@@ -65,7 +62,8 @@ export class TextInputComponent implements ControlValueAccessor {
   }
 
   protected onInput(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
+    const target = event.target as HTMLInputElement;
+    const value = Number.isNaN(target.valueAsNumber) ? null : target.valueAsNumber;
     this.value.set(value);
     this.onChange(value);
   }

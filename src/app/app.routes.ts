@@ -55,6 +55,20 @@ export const routes: Routes = [
   },
   ...rutasPostAutenticacion.map((path) => ({ path, loadComponent: cargarPlaceholder })),
   {
+    path: 'emisiones/registrar',
+    loadComponent: () =>
+      import('./pages/emissions/register-emission/register-emission-page.component').then(
+        (m) => m.RegisterEmissionPageComponent
+      ),
+  },
+  {
+    path: 'emisiones/registrar',
+    loadComponent: () =>
+      import('./pages/emissions/register-emission/register-emission-page.component').then(
+        (m) => m.RegisterEmissionPageComponent
+      ),
+  },
+  {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full' as const,

@@ -1,0 +1,125 @@
+<app-page-layout
+  [sidebarConfig]="sidebarConfig()"
+  [headerConfig]="headerConfig()"
+  (backClicked)="goBack()"
+>
+  <div class="register-emission-page">
+    <form class="register-emission-page__card" novalidate (submit)="handleSubmit($event)">
+      <header class="register-emission-page__header">
+        <span class="register-emission-page__header-icon" aria-hidden="true">
+          <app-icon name="electricidad" [size]="24" />
+        </span>
+        <div>
+          <h2 class="register-emission-page__title">Consumo eléctrico</h2>
+          <p class="register-emission-page__subtitle">
+            Registra el consumo de una sede para calcular su huella de carbono.
+          </p>
+        </div>
+      </header>
+
+      <div
+        class="register-emission-page__categories"
+        role="group"
+        aria-label="Categoría de emisión"
+      >
+        <button
+          type="button"
+          class="register-emission-page__category register-emission-page__category--active"
+          aria-pressed="true"
+        >
+          <app-icon name="electricidad" [size]="16" />
+          Electricidad
+        </button>
+        <button
+          type="button"
+          class="register-emission-page__category"
+          disabled
+          title="Próximamente disponible"
+        >
+          <app-icon name="flota-vehicular" [size]="16" />
+          Flota vehicular
+        </button>
+        <button
+          type="button"
+          class="register-emission-page__category"
+          disabled
+          title="Próximamente disponible"
+        >
+          <app-icon name="vuelos" [size]="16" />
+          Vuelos
+        </button>
+        <button
+          type="button"
+          class="register-emission-page__category"
+          disabled
+          title="Próximamente disponible"
+        >
+          <app-icon name="envios-carga" [size]="16" />
+          Envíos de carga
+        </button>
+      </div>
+
+      <div class="register-emission-page__row">
+        <app-number-input
+          class="register-emission-page__field--grow"
+          label="Consumo del periodo"
+          placeholder="0"
+          step="0.001"
+          [formField]="registerForm.electricityValue"
+          [error]="electricityValueError()"
+        />
+
+        <div class="register-emission-page__field">
+          <span class="register-emission-page__field-label" id="unidad-label">Unidad</span>
+          <div
+            class="register-emission-page__unit-options"
+            appRadioGroup
+            aria-labelledby="unidad-label"
+            [formField]="registerForm.electricityUnit"
+          >
+            <app-radio value="kwh" label="kWh" />
+            <app-radio value="mwh" label="MWh" />
+          </div>
+          @if (electricityUnitError()) {
+            <p class="register-emission-page__field-error">{{ electricityUnitError() }}</p>
+          }
+        </div>
+      </div>
+
+      <app-date-input
+        label="Fecha del registro"
+        [formField]="registerForm.fechaActividad"
+        [error]="fechaActividadError()"
+      />
+
+      <app-textarea
+        label="Detalle"
+        placeholder="Ej. Planta de tueste — Heredia"
+        [formField]="registerForm.titulo"
+        [error]="tituloError()"
+      />
+
+      @if (lastResult(); as result) {
+        <div class="register-emission-page__estimate">
+          <span class="register-emission-page__estimate-label">Huella estimada del registro</span>
+          <span class="register-emission-page__estimate-value">
+            {{ result.carbonKg }}
+            <span class="register-emission-page__estimate-unit">kg CO₂e</span>
+          </span>
+        </div>
+      }
+
+      <div class="register-emission-page__actions">
+        <app-button variant="secondary" type="button" (click)="onCancel()">Cancelar</app-button>
+        <app-button
+          variant="primary"
+          type="submit"
+          [loading]="submitting()"
+          [disabled]="!canSubmit()"
+        >
+          Calcular y guardar
+        </app-button>
+      </div>
+    </form>
+  </div>
+</app-page-layout>

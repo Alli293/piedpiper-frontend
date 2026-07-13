@@ -6,14 +6,19 @@ export type IconName =
   | 'auditores'
   | 'auditorias'
   | 'benchmark'
+  | 'calendario'
+  | 'cerrar'
   | 'certificaciones'
   | 'colaboradores'
   | 'config'
   | 'danger'
   | 'dashboard'
+  | 'electricidad'
   | 'emisiones'
   | 'empresa'
+  | 'envios-carga'
   | 'error'
+  | 'flota-vehicular'
   | 'info'
   | 'insignias'
   | 'logout'
@@ -24,6 +29,8 @@ export type IconName =
   | 'success'
   | 'ver'
   | 'viajero'
+  | 'volver'
+  | 'vuelos'
   | 'warning';
 
 export const ICONS: Record<IconName, string> = {
@@ -36,6 +43,12 @@ export const ICONS: Record<IconName, string> = {
 </svg>`,
   benchmark: `<svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <path d="M1.6875 11.25C1.37812 11.25 1.11328 11.1398 0.892969 10.9195C0.672656 10.6992 0.5625 10.4344 0.5625 10.125C0.5625 9.81563 0.672656 9.55078 0.892969 9.33047C1.11328 9.11016 1.37812 9 1.6875 9H1.83516C1.87734 9 1.92188 9.00937 1.96875 9.02812L4.52812 6.46875C4.50937 6.42188 4.5 6.37734 4.5 6.33516V6.1875C4.5 5.87812 4.61016 5.61328 4.83047 5.39297C5.05078 5.17266 5.31562 5.0625 5.625 5.0625C5.93437 5.0625 6.19922 5.17266 6.41953 5.39297C6.63984 5.61328 6.75 5.87812 6.75 6.1875C6.75 6.20625 6.74062 6.3 6.72187 6.46875L8.15625 7.90312C8.20312 7.88437 8.24766 7.875 8.28984 7.875H8.58516C8.62734 7.875 8.67188 7.88437 8.71875 7.90312L10.7156 5.90625C10.6969 5.85938 10.6875 5.81484 10.6875 5.77266V5.625C10.6875 5.31562 10.7977 5.05078 11.018 4.83047C11.2383 4.61016 11.5031 4.5 11.8125 4.5C12.1219 4.5 12.3867 4.61016 12.607 4.83047C12.8273 5.05078 12.9375 5.31562 12.9375 5.625C12.9375 5.93437 12.8273 6.19922 12.607 6.41953C12.3867 6.63984 12.1219 6.75 11.8125 6.75H11.6648C11.6227 6.75 11.5781 6.74062 11.5312 6.72187L9.53438 8.71875C9.55312 8.76562 9.5625 8.81016 9.5625 8.85234V9C9.5625 9.30937 9.45234 9.57422 9.23203 9.79453C9.01172 10.0148 8.74687 10.125 8.4375 10.125C8.12812 10.125 7.86328 10.0148 7.64297 9.79453C7.42266 9.57422 7.3125 9.30937 7.3125 9V8.85234C7.3125 8.81016 7.32187 8.76562 7.34062 8.71875L5.90625 7.28437C5.85938 7.30312 5.81484 7.3125 5.77266 7.3125H5.625C5.60625 7.3125 5.5125 7.30312 5.34375 7.28437L2.78437 9.84375C2.80312 9.89062 2.8125 9.93516 2.8125 9.97734V10.125C2.8125 10.4344 2.70234 10.6992 2.48203 10.9195C2.26172 11.1398 1.99687 11.25 1.6875 11.25ZM2.25 5.61094L1.89844 4.85156L1.13906 4.5L1.89844 4.14844L2.25 3.38906L2.60156 4.14844L3.36094 4.5L2.60156 4.85156L2.25 5.61094ZM8.4375 5.0625L7.90312 3.90937L6.75 3.375L7.90312 2.84062L8.4375 1.6875L8.97188 2.84062L10.125 3.375L8.97188 3.90937L8.4375 5.0625Z" fill="currentColor"/>
+</svg>`,
+  calendario: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" fill="currentColor"/>
+</svg>`,
+  cerrar: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
 </svg>`,
   certificaciones: `<svg viewBox="0 0 12 15" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <path d="M3.975 8.24995L4.59375 6.2062L2.9625 4.94995H4.9875L5.625 2.92495L6.2625 4.94995H8.2875L6.6375 6.2062L7.25625 8.24995L5.625 6.97495L3.975 8.24995ZM1.5 14.7937V9.4312C1.025 8.9312 0.65625 8.3562 0.39375 7.7062C0.13125 7.0562 0 6.36245 0 5.62495C0 4.04995 0.54375 2.7187 1.63125 1.6312C2.71875 0.5437 4.05 -4.95911e-05 5.625 -4.95911e-05C7.2 -4.95911e-05 8.53125 0.5437 9.61875 1.6312C10.7063 2.7187 11.25 4.04995 11.25 5.62495C11.25 6.36245 11.1188 7.0562 10.8563 7.7062C10.5938 8.3562 10.225 8.9312 9.75 9.4312V14.7937L5.625 13.4812L1.5 14.7937ZM5.625 10.125C5.625 10.125 5.9375 10.125 6.5625 10.125C7.1875 10.125 7.9375 9.68745 8.8125 8.81245C9.6875 7.93745 10.125 6.87495 10.125 5.62495C10.125 4.37495 9.6875 3.31245 8.8125 2.43745C7.9375 1.56245 6.875 1.12495 5.625 1.12495C4.375 1.12495 3.3125 1.56245 2.4375 2.43745C1.5625 3.31245 1.125 4.37495 1.125 5.62495C1.125 6.87495 1.5625 7.93745 2.4375 8.81245C3.3125 9.68745 4.375 10.125 5.625 10.125ZM2.625 13.1437L5.625 12.3375L8.625 13.1437V10.3687C8.2 10.6437 7.73125 10.8593 7.21875 11.0156C6.70625 11.1718 6.175 11.25 5.625 11.25C5.075 11.25 4.54375 11.1718 4.03125 11.0156C3.51875 10.8593 3.05 10.6437 2.625 10.3687V13.1437Z" fill="currentColor"/>
@@ -61,10 +74,16 @@ export const ICONS: Record<IconName, string> = {
   dashboard: `<svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <path d="M7.3125 4.125V-9.53674e-07H12.75V4.125H7.3125ZM0 6.75V-9.53674e-07H5.4375V6.75H0ZM7.3125 12.75V6H12.75V12.75H7.3125ZM0 12.75V8.625H5.4375V12.75H0ZM1.125 5.625H4.3125V1.125H1.125V5.625ZM8.4375 11.625H11.625V7.125H8.4375V11.625ZM8.4375 3H11.625V1.125H8.4375V3ZM1.125 11.625H4.3125V9.75H1.125V11.625Z" fill="currentColor"/>
 </svg>`,
+  electricidad: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<path d="M11 21h-1l1-7H7.5c-.88 0-.33-.75-.31-.78C8.48 10.94 10.42 7.54 13.01 3h1l-1 7h3.51c.4 0 .62.19.4.66C12.97 17.55 11 21 11 21z" fill="currentColor"/>
+</svg>`,
   emisiones: `<svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <path d="M8.625 11.25V6.825H11.25V11.25H8.625ZM4.3125 11.25V0H6.9375V11.25H4.3125ZM0 11.25V3.675H2.625V11.25H0Z" fill="currentColor"/>
 </svg>`,
   empresa: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16M15 9h3a1 1 0 0 1 1 1v11"/><path d="M8 8h1M8 12h1M11 8h1M11 12h1"/></svg>`,
+  'envios-carga': `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.68V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.69c.57-.34 1-.96 1-1.68V4c0-1.1-1-2-2-2zm-9 12.5v-2h2v2h5.5L14 19H9l-4.5-4.5H11zM4 4h16v3H4V4z" fill="currentColor"/>
+</svg>`,
   error: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_17_4632)">
 <path d="M12 2C6.47 2 2 6.47 2 12C2 17.53 6.47 22 12 22C17.53 22 22 17.53 22 12C22 6.47 17.53 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM15.59 7L12 10.59L8.41 7L7 8.41L10.59 12L7 15.59L8.41 17L12 13.41L15.59 17L17 15.59L13.41 12L17 8.41L15.59 7Z" fill="#323232"/>
@@ -74,6 +93,9 @@ export const ICONS: Record<IconName, string> = {
 <rect width="24" height="24" fill="white"/>
 </clipPath>
 </defs>
+</svg>`,
+  'flota-vehicular': `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9 1.96 2.5H17V9.5h2.5zM18 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" fill="currentColor"/>
 </svg>`,
   info: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_6_16068)">
@@ -120,6 +142,12 @@ export const ICONS: Record<IconName, string> = {
 </svg>`,
   ver: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>`,
   viajero: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z"/></svg>`,
+  volver: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" fill="currentColor"/>
+</svg>`,
+  vuelos: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2.5 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="currentColor"/>
+</svg>`,
   warning: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M11 15H13V17H11V15ZM11 7H13V13H11V7ZM11.99 2C6.47 2 2 6.48 2 12C2 17.52 6.47 22 11.99 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 11.99 2ZM12 20C7.58 20 4 16.42 4 12C4 7.58 7.58 4 12 4C16.42 4 20 7.58 20 12C20 16.42 16.42 20 12 20Z" fill="#323232"/>
 </svg>`,
