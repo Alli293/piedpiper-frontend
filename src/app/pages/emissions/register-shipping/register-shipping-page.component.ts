@@ -61,7 +61,7 @@ const INITIAL_MODEL: RegistrarEnvioFormModel = {
   weightValue: null,
   weightUnit: 'KG',
   distanceValue: null,
-  distanceUnit: 'KM',
+  distanceUnit: 'km',
   transportMethod: 'TRUCK',
   fechaActividad: null,
 };

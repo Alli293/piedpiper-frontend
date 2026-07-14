@@ -138,7 +138,14 @@
 }
 
 .register-emission-page__field-error {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-2);
   color: var(--ch-danger);
+}
+
+.register-emission-page__field-error app-button {
+  width: auto;
 }
 
 .register-emission-page__link-button {

@@ -11,20 +11,36 @@
           [class.register-emission-page__header-icon--flight]="activeCategory() === 'vuelo'"
           aria-hidden="true"
         >
-          <app-icon [name]="activeCategory() === 'vuelo' ? 'vuelos' : 'electricidad'" [size]="24" />
+          @if (activeCategory() === 'vuelo') {
+            <app-icon name="vuelos" [size]="24" />
+          } @else if (activeCategory() === 'flota') {
+            <app-icon name="flota-vehicular" [size]="24" />
+          } @else {
+            <app-icon name="electricidad" [size]="24" />
+          }
         </span>
-        <div>
-          <h2 class="register-emission-page__title">
-            {{ activeCategory() === 'vuelo' ? 'Viaje aéreo' : 'Consumo eléctrico' }}
-          </h2>
-          <p class="register-emission-page__subtitle">
-            {{
-              activeCategory() === 'vuelo'
-                ? 'Registra los trayectos del vuelo para calcular su huella de carbono.'
-                : 'Registra el consumo de una sede para calcular su huella de carbono.'
-            }}
-          </p>
-        </div>
+        @if (activeCategory() === 'vuelo') {
+          <div>
+            <h2 class="register-emission-page__title">Viaje aéreo</h2>
+            <p class="register-emission-page__subtitle">
+              Registra los trayectos del vuelo para calcular su huella de carbono.
+            </p>
+          </div>
+        } @else if (activeCategory() === 'flota') {
+          <div>
+            <h2 class="register-emission-page__title">Flota vehicular</h2>
+            <p class="register-emission-page__subtitle">
+              Registra el uso de un vehículo de la flota para calcular su huella de carbono.
+            </p>
+          </div>
+        } @else {
+          <div>
+            <h2 class="register-emission-page__title">Consumo eléctrico</h2>
+            <p class="register-emission-page__subtitle">
+              Registra el consumo de una sede para calcular su huella de carbono.
+            </p>
+          </div>
+        }
       </header>
 
       <div
@@ -45,8 +61,9 @@
         <button
           type="button"
           class="register-emission-page__category"
-          disabled
-          title="Próximamente disponible"
+          [class.register-emission-page__category--active]="activeCategory() === 'flota'"
+          [attr.aria-pressed]="activeCategory() === 'flota'"
+          (click)="selectCategory('flota')"
         >
           <app-icon name="flota-vehicular" [size]="16" />
           Flota vehicular
@@ -86,11 +103,13 @@
           />
 
           <div class="register-emission-page__field">
-            <span class="register-emission-page__field-label" id="unidad-label">Unidad</span>
+            <span class="register-emission-page__field-label" id="unidad-electricidad-label"
+              >Unidad</span
+            >
             <div
               class="register-emission-page__unit-options"
               appRadioGroup
-              aria-labelledby="unidad-label"
+              aria-labelledby="unidad-electricidad-label"
               [formField]="registerForm.electricityUnit"
             >
               <app-radio value="kwh" label="kWh" />
@@ -113,6 +132,75 @@
           placeholder="Ej. Planta de tueste - Heredia"
           [formField]="registerForm.titulo"
           [error]="tituloError()"
+        />
+      } @else if (activeCategory() === 'flota') {
+        <div class="register-emission-page__field">
+          <app-select-input
+            label="Tipo de vehículo"
+            placeholder="Seleccionar..."
+            [options]="tipoVehiculoOptions()"
+            [formField]="flotaForm.tipoVehiculo"
+            [error]="tipoVehiculoError()"
+          />
+          @if (catalogoError()) {
+            <p class="register-emission-page__field-error">
+              No se pudo cargar el catálogo de vehículos.
+              <app-button variant="link" size="sm" type="button" (click)="retryLoadTiposVehiculo()">
+                Reintentar
+              </app-button>
+            </p>
+          }
+        </div>
+
+        <app-select-input
+          label="Combustible"
+          placeholder="Seleccionar..."
+          hint="Promedio: usa el factor de emisión promedio del país cuando no conoces el combustible exacto"
+          [options]="combustibleOptions()"
+          [formField]="flotaForm.combustible"
+          [error]="combustibleError()"
+        />
+
+        <div class="register-emission-page__row">
+          <app-number-input
+            class="register-emission-page__field--grow"
+            label="Distancia recorrida"
+            placeholder="0"
+            step="0.001"
+            [formField]="flotaForm.distanceValue"
+            [error]="distanceValueError()"
+          />
+
+          <div class="register-emission-page__field">
+            <span class="register-emission-page__field-label" id="unidad-distancia-label"
+              >Unidad</span
+            >
+            <div
+              class="register-emission-page__unit-options"
+              appRadioGroup
+              aria-labelledby="unidad-distancia-label"
+              [formField]="flotaForm.distanceUnit"
+            >
+              <app-radio value="km" label="km" />
+              <app-radio value="mi" label="mi" />
+            </div>
+            @if (distanceUnitError()) {
+              <p class="register-emission-page__field-error">{{ distanceUnitError() }}</p>
+            }
+          </div>
+        </div>
+
+        <app-date-input
+          label="Fecha de la actividad"
+          [formField]="flotaForm.fechaActividad"
+          [error]="flotaFechaActividadError()"
+        />
+
+        <app-textarea
+          label="Detalle"
+          placeholder="Ej. Ruta de reparto — San José"
+          [formField]="flotaForm.titulo"
+          [error]="flotaTituloError()"
         />
       } @else {
         <div class="register-emission-page__row">
@@ -231,7 +319,7 @@
         <app-button
           variant="primary"
           type="submit"
-          [loading]="activeCategory() === 'electricidad' ? submitting() : flightSubmitting()"
+          [loading]="activeCategory() === 'vuelo' ? flightSubmitting() : submitting()"
           [disabled]="!canSubmit()"
         >
           Calcular y guardar

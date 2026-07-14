@@ -105,8 +105,8 @@
             aria-labelledby="distance-unit-label"
             [formField]="registerForm.distanceUnit"
           >
-            <app-radio value="KM" label="km" />
-            <app-radio value="MI" label="mi" />
+            <app-radio value="km" label="km" />
+            <app-radio value="mi" label="mi" />
           </div>
           @if (distanceUnitError()) {
             <p class="register-shipping-page__field-error">{{ distanceUnitError() }}</p>

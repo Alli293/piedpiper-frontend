@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { EmisionesService } from './emisiones.service';
 import { environment } from '../../../environments/environment';
+import { RegistrarElectricidadRequest, RegistrarFlotaRequest } from './models/emision.model';
 
 describe('EmisionesService', () => {
   let service: EmisionesService;
@@ -25,7 +26,7 @@ describe('EmisionesService', () => {
       weightValue: 200,
       weightUnit: 'KG' as const,
       distanceValue: 500,
-      distanceUnit: 'KM' as const,
+      distanceUnit: 'km' as const,
       transportMethod: 'TRUCK' as const,
       fechaActividad: '2026-07-01',
     };
@@ -81,6 +82,54 @@ describe('EmisionesService', () => {
       carbonKg: 347,
       carbonMt: 0.347,
       factorEmisionId: 'climatiq-travel-v1-distance',
+      estimatedAt: '2026-07-09T00:00:00Z',
+      createdAt: '2026-07-09T00:00:00Z',
+    });
+  });
+
+  it('gets the vehicle type catalog from /api/emisiones/flota/tipos-vehiculo', () => {
+    service.obtenerTiposVehiculo().subscribe();
+
+    const req = httpMock.expectOne('/api/emisiones/flota/tipos-vehiculo');
+    expect(req.request.method).toBe('GET');
+
+    req.flush([
+      {
+        id: 'AUTOMOVIL',
+        nombre: 'Automóvil / SUV',
+        combustibles: [{ id: 'GASOLINA', nombre: 'Gasolina' }],
+      },
+    ]);
+  });
+
+  it('posts the expected body to /api/emisiones/flota', () => {
+    const payload: RegistrarFlotaRequest = {
+      titulo: 'Ruta de reparto',
+      tipoVehiculo: 'AUTOMOVIL',
+      combustible: 'GASOLINA',
+      distanceValue: 100,
+      distanceUnit: 'km',
+      fechaActividad: '2026-07-09',
+    };
+
+    service.registrarFlota(payload).subscribe();
+
+    const req = httpMock.expectOne('/api/emisiones/flota');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(payload);
+
+    req.flush({
+      id: '2',
+      categoria: 'FLOTA',
+      titulo: payload.titulo,
+      fechaActividad: payload.fechaActividad,
+      tipoVehiculo: payload.tipoVehiculo,
+      combustible: payload.combustible,
+      distanceValue: payload.distanceValue,
+      distanceUnit: payload.distanceUnit,
+      carbonKg: 21,
+      carbonMt: 0.021,
+      factorEmisionId: 'factor-2',
       estimatedAt: '2026-07-09T00:00:00Z',
       createdAt: '2026-07-09T00:00:00Z',
     });
