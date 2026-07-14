@@ -30,6 +30,19 @@ export class AuthService {
       .pipe(tap((response) => this.guardarSesion(response)));
   }
 
+  registrarAuditorCorreo(body: {
+    nombre: string;
+    apellidos: string;
+    email: string;
+    contrasena: string;
+    aceptaTerminos: boolean;
+  }): Observable<{ mensaje: string; email: string }> {
+    return this.http.post<{ mensaje: string; email: string }>(
+      `${this.baseUrl}/registro/auditor/correo`,
+      body
+    );
+  }
+
   private login(request: LoginRequest): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.baseUrl}/login`, request)
