@@ -13,7 +13,6 @@ describe('LimitesPageComponent', () => {
     obtenerLimite: ReturnType<typeof vi.fn>;
     listarLimites: ReturnType<typeof vi.fn>;
     guardarLimite: ReturnType<typeof vi.fn>;
-    actualizarLimite: ReturnType<typeof vi.fn>;
     eliminarLimite: ReturnType<typeof vi.fn>;
   };
 
@@ -22,14 +21,13 @@ describe('LimitesPageComponent', () => {
       obtenerLimite: vi.fn(),
       listarLimites: vi.fn(),
       guardarLimite: vi.fn(),
-      actualizarLimite: vi.fn(),
       eliminarLimite: vi.fn(),
     };
     limitesService.listarLimites.mockReturnValue(of([]));
     limitesService.obtenerLimite.mockReturnValue(
       of({
         id: 1,
-        empresaId: 7,
+        empresaId: '11111111-1111-1111-1111-111111111111',
         anio: new Date().getFullYear(),
         limiteMt: 50,
         justificacion: 'Meta anual',
@@ -40,7 +38,7 @@ describe('LimitesPageComponent', () => {
     limitesService.guardarLimite.mockReturnValue(
       of({
         id: 1,
-        empresaId: 7,
+        empresaId: '11111111-1111-1111-1111-111111111111',
         anio: new Date().getFullYear(),
         limiteMt: 40,
         justificacion: null,
@@ -59,7 +57,7 @@ describe('LimitesPageComponent', () => {
         },
         {
           provide: AuthSessionService,
-          useValue: { isAdministradorEmpresa: () => true, getEmpresaId: () => 7 },
+          useValue: { isAdministradorEmpresa: () => true },
         },
       ],
     }).compileComponents();
@@ -76,6 +74,14 @@ describe('LimitesPageComponent', () => {
 
   it('formulario invalido no llama al servicio de guardado', () => {
     (component as any).limiteMtControl.setValue('0');
+
+    (component as any).guardar();
+
+    expect(limitesService.guardarLimite).not.toHaveBeenCalled();
+  });
+
+  it('formulario rechaza limite con mas de 12 digitos enteros', () => {
+    (component as any).limiteMtControl.setValue('1234567890123.1234');
 
     (component as any).guardar();
 

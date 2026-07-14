@@ -2,11 +2,13 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuthSessionService } from '../../core/auth-session.service';
+import { environment } from '../../../environments/environment';
 import { LimitesService } from './limites.service';
 
 describe('LimitesService', () => {
   let service: LimitesService;
   let httpMock: HttpTestingController;
+  const apiUrl = `${environment.apiBaseUrl}/limites`;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -17,8 +19,6 @@ describe('LimitesService', () => {
         {
           provide: AuthSessionService,
           useValue: {
-            getEmpresaId: () => 7,
-            getRole: () => 'administrador_empresa',
             getToken: () => 'jwt-token',
           },
         },
@@ -36,7 +36,7 @@ describe('LimitesService', () => {
   it('envia el cuerpo con anio y limiteMt', () => {
     service.guardarLimite({ anio: 2026, limiteMt: 50, justificacion: 'Meta anual' }).subscribe();
 
-    const req = httpMock.expectOne('/api/limites');
+    const req = httpMock.expectOne(apiUrl);
     expect(req.request.method).toBe('POST');
     expect(req.request.headers.get('Authorization')).toBe('Bearer jwt-token');
     expect(req.request.body).toEqual({
@@ -59,33 +59,12 @@ describe('LimitesService', () => {
     service.listarLimites().subscribe();
     service.eliminarLimite(2026).subscribe();
 
-    const listReq = httpMock.expectOne('/api/limites');
+    const listReq = httpMock.expectOne(apiUrl);
     expect(listReq.request.method).toBe('GET');
     listReq.flush([]);
 
-    const deleteReq = httpMock.expectOne('/api/limites/2026');
+    const deleteReq = httpMock.expectOne(`${apiUrl}/2026`);
     expect(deleteReq.request.method).toBe('DELETE');
     deleteReq.flush(null);
-  });
-
-  it('actualiza usando el endpoint de upsert', () => {
-    service.actualizarLimite({ anio: 2026, limiteMt: 40, justificacion: null }).subscribe();
-
-    const req = httpMock.expectOne('/api/limites');
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({
-      anio: 2026,
-      limiteMt: 40,
-      justificacion: null,
-    });
-    req.flush({
-      id: 1,
-      empresaId: '11111111-1111-1111-1111-111111111111',
-      anio: 2026,
-      limiteMt: 40,
-      justificacion: null,
-      mensaje: '',
-      actualizadoEn: null,
-    });
   });
 });

@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { AuthSessionService } from '../../core/auth-session.service';
 
 export interface LimiteEmisionesRequest {
@@ -15,7 +16,7 @@ export interface LimiteEmisionesResponse {
   anio: number;
   limiteMt: number;
   justificacion: string | null;
-  mensaje: string;
+  mensaje: string | null;
   actualizadoEn: string | null;
 }
 
@@ -23,7 +24,7 @@ export interface LimiteEmisionesResponse {
 export class LimitesService {
   private readonly http = inject(HttpClient);
   private readonly authSession = inject(AuthSessionService);
-  private readonly apiUrl = '/api/limites';
+  private readonly apiUrl = `${environment.apiBaseUrl}/limites`;
 
   obtenerLimite(anio: number): Observable<LimiteEmisionesResponse> {
     return this.http.get<LimiteEmisionesResponse>(`${this.apiUrl}/${anio}`, {
@@ -38,12 +39,6 @@ export class LimitesService {
   }
 
   guardarLimite(request: LimiteEmisionesRequest): Observable<LimiteEmisionesResponse> {
-    return this.http.post<LimiteEmisionesResponse>(this.apiUrl, request, {
-      headers: this.headers(),
-    });
-  }
-
-  actualizarLimite(request: LimiteEmisionesRequest): Observable<LimiteEmisionesResponse> {
     return this.http.post<LimiteEmisionesResponse>(this.apiUrl, request, {
       headers: this.headers(),
     });

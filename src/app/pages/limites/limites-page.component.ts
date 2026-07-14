@@ -17,7 +17,7 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { distinctUntilChanged, filter, Observable } from 'rxjs';
+import { distinctUntilChanged, filter } from 'rxjs';
 import { AuthSessionService } from '../../core/auth-session.service';
 import { ToastService } from '../../core/toast.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -175,28 +175,27 @@ export class LimitesPageComponent {
       limiteMt: Number(this.limiteMtControl.value),
       justificacion: this.justificacionControl.value.trim() || null,
     };
-    const operation: Observable<LimiteEmisionesResponse> = this.isEditing()
-      ? this.limitesService.actualizarLimite(request)
-      : this.limitesService.guardarLimite(request);
-
     this.saving.set(true);
-    operation.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (response) => {
-        this.limiteVigente.set(response);
-        this.limiteMtControl.setValue(formatDecimal(response.limiteMt), { emitEvent: false });
-        this.justificacionControl.setValue(response.justificacion ?? '', { emitEvent: false });
-        this.toastService.show(
-          `Límite del año ${response.anio} guardado: ${formatDecimal(response.limiteMt)} t CO₂e.`
-        );
-        this.saving.set(false);
-        this.salirModoEdicion(false);
-        this.cargarLimites();
-      },
-      error: (error: HttpErrorResponse) => {
-        this.saving.set(false);
-        this.manejarErrorGuardado(error, request.anio);
-      },
-    });
+    this.limitesService
+      .guardarLimite(request)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.limiteVigente.set(response);
+          this.limiteMtControl.setValue(formatDecimal(response.limiteMt), { emitEvent: false });
+          this.justificacionControl.setValue(response.justificacion ?? '', { emitEvent: false });
+          this.toastService.show(
+            `Límite del año ${response.anio} guardado: ${formatDecimal(response.limiteMt)} t CO₂e.`
+          );
+          this.saving.set(false);
+          this.salirModoEdicion(false);
+          this.cargarLimites();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.saving.set(false);
+          this.manejarErrorGuardado(error, request.anio);
+        },
+      });
   }
 
   protected editar(limite: LimiteEmisionesResponse): void {
@@ -297,6 +296,10 @@ export class LimitesPageComponent {
             this.limiteVigente.set(null);
             this.limiteMtControl.setValue('', { emitEvent: false });
             this.justificacionControl.setValue('', { emitEvent: false });
+            return;
+          }
+          if (error.status !== 403) {
+            this.toastService.show('No se pudo cargar el límite. Intente nuevamente.');
           }
         },
       });
@@ -321,7 +324,7 @@ export class LimitesPageComponent {
     }
 
     if (error.status === 409) {
-      this.toastService.show('Ya existe un límite para ese año; se actualizó el valor.');
+      this.toastService.show('Conflicto al guardar el límite. Intente nuevamente.');
       this.precargarLimite(anio);
       this.cargarLimites();
       return;
@@ -345,7 +348,7 @@ export class LimitesPageComponent {
 
 function limiteMtValidator(control: AbstractControl<string>): ValidationErrors | null {
   const value = control.value.trim();
-  if (!/^\d+(\.\d{1,4})?$/.test(value)) {
+  if (!/^\d{1,12}(\.\d{1,4})?$/.test(value)) {
     return { limiteMt: true };
   }
 
