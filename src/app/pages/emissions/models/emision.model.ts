@@ -1,8 +1,8 @@
 export type UnidadElectricidad = 'kwh' | 'mwh';
 
-export type UnidadPeso = 'g' | 'lb' | 'kg' | 'mt';
-export type UnidadDistancia = 'km' | 'mi';
-export type MetodoTransporte = 'ship' | 'train' | 'truck' | 'plane';
+export type UnidadPeso = 'G' | 'LB' | 'KG' | 'MT';
+export type UnidadDistancia = 'KM' | 'MI';
+export type MetodoTransporte = 'SHIP' | 'TRAIN' | 'TRUCK' | 'PLANE';
 
 export interface RegistrarElectricidadRequest {
   readonly titulo: string;

@@ -157,6 +157,10 @@ export class RegisterEmissionPageComponent {
     showBackButton: true,
   });
 
+  protected navigateToEnvio(): void {
+    void this.router.navigateByUrl('/emisiones/registrar/envio');
+  }
+
   protected goBack(): void {
     this.location.back();
   }

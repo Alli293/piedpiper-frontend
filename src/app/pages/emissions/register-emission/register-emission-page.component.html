@@ -48,12 +48,7 @@
           <app-icon name="vuelos" [size]="16" />
           Vuelos
         </button>
-        <button
-          type="button"
-          class="register-emission-page__category"
-          disabled
-          title="Próximamente disponible"
-        >
+        <button type="button" class="register-emission-page__category" (click)="navigateToEnvio()">
           <app-icon name="envios-carga" [size]="16" />
           Envíos de carga
         </button>

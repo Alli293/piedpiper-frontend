@@ -28,7 +28,12 @@ import {
 import { ToastService } from '../../../shared/services/toast.service';
 import { toIsoDateString, toSpanishMonthName } from '../../../shared/utils/date.utils';
 import { EmisionesService } from '../emisiones.service';
-import { ApiErrorResponse, MetodoTransporte, UnidadDistancia, UnidadPeso } from '../models/emision.model';
+import {
+  ApiErrorResponse,
+  MetodoTransporte,
+  UnidadDistancia,
+  UnidadPeso,
+} from '../models/emision.model';
 
 interface RegistrarEnvioFormModel {
   titulo: string;
@@ -54,10 +59,10 @@ function todayUtcMidnight(): Date {
 const INITIAL_MODEL: RegistrarEnvioFormModel = {
   titulo: '',
   weightValue: null,
-  weightUnit: 'kg',
+  weightUnit: 'KG',
   distanceValue: null,
-  distanceUnit: 'km',
-  transportMethod: 'truck',
+  distanceUnit: 'KM',
+  transportMethod: 'TRUCK',
   fechaActividad: null,
 };
 
@@ -185,6 +190,10 @@ export class RegisterShippingPageComponent {
     userInitials: 'MR',
     showBackButton: true,
   });
+
+  protected navigateToElectricidad(): void {
+    void this.router.navigateByUrl('/emisiones/registrar');
+  }
 
   protected goBack(): void {
     this.location.back();

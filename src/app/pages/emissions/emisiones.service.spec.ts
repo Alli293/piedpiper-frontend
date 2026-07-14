@@ -1,51 +1,56 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { EmisionesService } from './emisiones.service';
-import { RegistrarElectricidadRequest } from './models/emision.model';
+import { environment } from '../../../environments/environment';
 
 describe('EmisionesService', () => {
   let service: EmisionesService;
   let httpMock: HttpTestingController;
+  const base = `${environment.apiBaseUrl}/emisiones`;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [EmisionesService, provideHttpClient(), provideHttpClientTesting()],
     });
     service = TestBed.inject(EmisionesService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => {
-    httpMock.verify();
+  afterEach(() => httpMock.verify());
+
+  it('registrarEnvio hace POST a /emisiones/envio con el body correcto', () => {
+    const payload = {
+      titulo: 'Envío test',
+      weightValue: 200,
+      weightUnit: 'KG' as const,
+      distanceValue: 500,
+      distanceUnit: 'KM' as const,
+      transportMethod: 'TRUCK' as const,
+      fechaActividad: '2026-07-01',
+    };
+
+    service.registrarEnvio(payload).subscribe();
+
+    const req = httpMock.expectOne(`${base}/envio`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(payload);
+    req.flush({ id: '123', carbonKg: 35.5, carbonMt: 0.036 });
   });
 
-  it('posts the expected body to /api/emisiones/electricidad', () => {
-    const payload: RegistrarElectricidadRequest = {
-      titulo: 'Planta de tueste — Heredia',
-      electricityValue: 500,
-      electricityUnit: 'kwh',
-      fechaActividad: '2026-07-09',
+  it('registrarElectricidad hace POST a /emisiones/electricidad', () => {
+    const payload = {
+      titulo: 'Consumo test',
+      electricityValue: 1000,
+      electricityUnit: 'kwh' as const,
+      fechaActividad: '2026-07-01',
     };
 
     service.registrarElectricidad(payload).subscribe();
 
-    const req = httpMock.expectOne('/api/emisiones/electricidad');
+    const req = httpMock.expectOne(`${base}/electricidad`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(payload);
-
-    req.flush({
-      id: '1',
-      categoria: 'ELECTRICIDAD',
-      titulo: payload.titulo,
-      fechaActividad: payload.fechaActividad,
-      electricityValue: payload.electricityValue,
-      electricityUnit: payload.electricityUnit,
-      carbonKg: 347,
-      carbonMt: 0.347,
-      factorEmisionId: 'factor-1',
-      estimatedAt: '2026-07-09T00:00:00Z',
-      createdAt: '2026-07-09T00:00:00Z',
-    });
+    req.flush({ id: '456', carbonKg: 0.5 });
   });
 });
