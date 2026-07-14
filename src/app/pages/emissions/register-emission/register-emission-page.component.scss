@@ -157,12 +157,17 @@
 
 .register-emission-page__leg {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(128px, 0.8fr) 96px;
   align-items: start;
   gap: var(--ch-space-3);
   padding: 12px;
   border: 1px solid var(--ch-border);
   border-radius: var(--ch-radius-md);
+}
+
+.register-emission-page__leg > app-text-input,
+.register-emission-page__leg > app-select-input {
+  min-width: 0;
 }
 
 .register-emission-page__leg-title {
@@ -175,6 +180,7 @@
 
 .register-emission-page__remove-button {
   align-self: end;
+  width: 100%;
   min-height: 42px;
   padding: 0 12px;
   border: 1px solid var(--ch-border);

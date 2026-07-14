@@ -205,6 +205,7 @@ describe('RegisterEmissionPageComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
     clickCategory(root, 'Vuelos');
+    await fixture.whenStable();
     fixture.detectChanges();
 
     clickButton(root, 'Editar');
@@ -221,6 +222,7 @@ describe('RegisterEmissionPageComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
     clickCategory(root, 'Vuelos');
+    await fixture.whenStable();
     fixture.detectChanges();
 
     clickButton(root, 'Editar');
@@ -244,6 +246,7 @@ describe('RegisterEmissionPageComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
     clickCategory(root, 'Vuelos');
+    await fixture.whenStable();
     fixture.detectChanges();
 
     clickRecordButton(root, 'Eliminar');
@@ -263,6 +266,7 @@ describe('RegisterEmissionPageComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
     clickCategory(root, 'Vuelos');
+    await fixture.whenStable();
     fixture.detectChanges();
 
     clickRecordButton(root, 'Eliminar');
@@ -288,6 +292,7 @@ describe('RegisterEmissionPageComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
     clickCategory(root, 'Vuelos');
+    await fixture.whenStable();
     fixture.detectChanges();
 
     expect(root.textContent).toContain('No hay vuelos registrados.');

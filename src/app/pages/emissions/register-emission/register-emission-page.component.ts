@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -123,7 +123,7 @@ const GENERIC_CONNECTION_ERROR =
   templateUrl: './register-emission-page.component.html',
   styleUrl: './register-emission-page.component.scss',
 })
-export class RegisterEmissionPageComponent implements OnInit {
+export class RegisterEmissionPageComponent {
   private readonly location = inject(Location);
   private readonly emisionesService = inject(EmisionesService);
   private readonly toastService = inject(ToastService);
@@ -234,10 +234,6 @@ export class RegisterEmissionPageComponent implements OnInit {
     showBackButton: true,
   });
 
-  ngOnInit(): void {
-    void this.loadEmisiones();
-  }
-
   protected goBack(): void {
     this.location.back();
   }
@@ -267,6 +263,9 @@ export class RegisterEmissionPageComponent implements OnInit {
   protected selectCategory(category: EmissionCategory): void {
     this.activeCategory.set(category);
     this.lastResult.set(null);
+    if (category === 'vuelo') {
+      void this.loadEmisiones();
+    }
   }
 
   protected updateFlightPassengers(passengers: number | null): void {
@@ -337,7 +336,6 @@ export class RegisterEmissionPageComponent implements OnInit {
           })
         );
         this.lastResult.set({ carbonKg: response.carbonKg });
-        await this.loadEmisiones();
         this.toastService.success(
           'Consumo eléctrico registrado.',
           `Huella calculada: ${response.carbonKg} kg CO₂e.`
@@ -444,6 +442,11 @@ export class RegisterEmissionPageComponent implements OnInit {
 
   private reportSubmissionError(error: unknown): void {
     if (error instanceof HttpErrorResponse) {
+      if (error.status === 401 || error.status === 403) {
+        this.toastService.error('Tu sesión no tiene permisos para realizar esta acción.');
+        return;
+      }
+
       const apiError = error.error as ApiErrorResponse | null;
       if (apiError?.message) {
         this.toastService.error(apiError.message);
