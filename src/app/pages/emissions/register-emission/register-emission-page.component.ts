@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import {
   form,
@@ -125,6 +126,7 @@ const GENERIC_CONNECTION_ERROR =
 })
 export class RegisterEmissionPageComponent {
   private readonly location = inject(Location);
+  private readonly router = inject(Router);
   private readonly emisionesService = inject(EmisionesService);
   private readonly toastService = inject(ToastService);
   private readonly authService = inject(AuthService);
@@ -236,6 +238,10 @@ export class RegisterEmissionPageComponent {
 
   protected goBack(): void {
     this.location.back();
+  }
+
+  protected navigateToEnvio(): void {
+    void this.router.navigateByUrl('/emisiones/registrar/envio');
   }
 
   protected onCancel(): void {

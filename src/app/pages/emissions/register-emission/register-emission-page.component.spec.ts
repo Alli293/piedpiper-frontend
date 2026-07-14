@@ -155,7 +155,7 @@ describe('RegisterEmissionPageComponent', () => {
 
     const root = fixture.nativeElement as HTMLElement;
     expect(root.textContent).not.toContain('Vuelos registrados');
-    expect(root.textContent).not.toContain('Viaje aÃ©reo SFO-YYZ');
+    expect(root.textContent).not.toContain('Viaje aéreo SFO-YYZ');
   });
 
   it('does not call the flight service without legs', async () => {

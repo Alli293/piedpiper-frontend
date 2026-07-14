@@ -54,7 +54,7 @@ describe('EmisionesService', () => {
     req.flush({ id: '456', carbonKg: 0.5 });
   });
 
-  it('posts the expected body to /api/emisiones/vuelo', () => {
+  it('posts the expected body to /emisiones/vuelo', () => {
     const payload = {
       passengers: 2,
       distanceUnit: 'km' as const,
@@ -66,7 +66,7 @@ describe('EmisionesService', () => {
 
     service.registrarVuelo(payload).subscribe();
 
-    const req = httpMock.expectOne('/api/emisiones/vuelo');
+    const req = httpMock.expectOne(`${base}/vuelo`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(payload);
     req.flush({
