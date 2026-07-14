@@ -261,41 +261,43 @@
       </div>
     </form>
 
-    <section class="register-emission-page__records">
-      <div class="register-emission-page__records-header">
-        <div>
-          <h3>Registros recientes</h3>
-          <p>Consulta, edita vuelos registrados o elimina registros guardados.</p>
-        </div>
-        @if (loadingEmisiones()) {
-          <span>Cargando...</span>
-        }
-      </div>
-
-      @if (emisiones().length === 0 && !loadingEmisiones()) {
-        <p class="register-emission-page__empty">Aún no hay emisiones registradas.</p>
-      }
-
-      @for (emision of emisiones(); track emision.id) {
-        <article class="register-emission-page__record">
+    @if (activeCategory() === 'vuelo') {
+      <section class="register-emission-page__records">
+        <div class="register-emission-page__records-header">
           <div>
-            <span class="register-emission-page__record-category">{{ emision.categoria }}</span>
-            <h4>{{ emision.titulo }}</h4>
-            <p>
-              {{ emision.fechaActividad }} · {{ emision.carbonKg }} kg CO₂e
+            <h3>Vuelos registrados</h3>
+            <p>Consulta, edita o elimina vuelos guardados.</p>
+          </div>
+          @if (loadingEmisiones()) {
+            <span>Cargando...</span>
+          }
+        </div>
+
+        @if (flightEmisiones().length === 0 && !loadingEmisiones()) {
+          <p class="register-emission-page__empty">No hay vuelos registrados.</p>
+        }
+
+        @for (emision of flightEmisiones(); track emision.id) {
+          <article class="register-emission-page__record">
+            <div>
+              <span class="register-emission-page__record-category">{{ emision.categoria }}</span>
+              <h4>{{ emision.titulo }}</h4>
+              <p>
+                {{ emision.fechaActividad }} · {{ emision.carbonKg }} kg CO₂e
+                @if (emision.categoria === 'VUELO') {
+                  · {{ emision.passengers }} pasajero(s)
+                }
+              </p>
+            </div>
+            <div class="register-emission-page__record-actions">
               @if (emision.categoria === 'VUELO') {
-                · {{ emision.passengers }} pasajero(s)
+                <button type="button" (click)="editFlight(emision)">Editar</button>
               }
-            </p>
-          </div>
-          <div class="register-emission-page__record-actions">
-            @if (emision.categoria === 'VUELO') {
-              <button type="button" (click)="editFlight(emision)">Editar</button>
-            }
-            <button type="button" (click)="deleteEmission(emision)">Eliminar</button>
-          </div>
-        </article>
-      }
-    </section>
+              <button type="button" (click)="deleteEmission(emision)">Eliminar</button>
+            </div>
+          </article>
+        }
+      </section>
+    }
   </div>
 </app-page-layout>

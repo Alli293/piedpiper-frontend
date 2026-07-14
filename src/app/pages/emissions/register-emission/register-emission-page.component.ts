@@ -148,6 +148,9 @@ export class RegisterEmissionPageComponent implements OnInit {
   protected readonly flightSubmitted = signal(false);
   protected readonly flightSubmitting = signal(false);
   protected readonly emisiones = signal<EmisionResponse[]>([]);
+  protected readonly flightEmisiones = computed(() =>
+    this.emisiones().filter((emision) => emision.categoria === 'VUELO')
+  );
   protected readonly loadingEmisiones = signal(false);
   protected readonly editingFlightId = signal<string | null>(null);
   protected readonly hasSession = signal(this.hasActiveSession());

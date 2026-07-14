@@ -109,6 +109,14 @@ describe('RegisterEmissionPageComponent', () => {
     button.click();
   }
 
+  function clickRecordButton(root: HTMLElement, label: string): void {
+    const button = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('.register-emission-page__record-actions button')
+    ).find((item) => item.textContent?.includes(label));
+    if (!button) throw new Error(`Record button not found: ${label}`);
+    button.click();
+  }
+
   it('does not call the service when the amount is 0 (invalid form)', async () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
@@ -137,6 +145,17 @@ describe('RegisterEmissionPageComponent', () => {
       electricityUnit: 'kwh',
       fechaActividad: '2026-07-01',
     });
+  });
+
+  it('does not show flight records while electricity is selected', async () => {
+    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
+    const fixture = createFixture();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.textContent).not.toContain('Vuelos registrados');
+    expect(root.textContent).not.toContain('Viaje aÃ©reo SFO-YYZ');
   });
 
   it('does not call the flight service without legs', async () => {
@@ -185,6 +204,7 @@ describe('RegisterEmissionPageComponent', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
+    clickCategory(root, 'Vuelos');
     fixture.detectChanges();
 
     clickButton(root, 'Editar');
@@ -200,6 +220,7 @@ describe('RegisterEmissionPageComponent', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
+    clickCategory(root, 'Vuelos');
     fixture.detectChanges();
 
     clickButton(root, 'Editar');
@@ -222,9 +243,10 @@ describe('RegisterEmissionPageComponent', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
+    clickCategory(root, 'Vuelos');
     fixture.detectChanges();
 
-    clickButton(root, 'Eliminar');
+    clickRecordButton(root, 'Eliminar');
     await fixture.whenStable();
 
     expect(globalThis.confirm).toHaveBeenCalled();
@@ -240,9 +262,10 @@ describe('RegisterEmissionPageComponent', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
+    clickCategory(root, 'Vuelos');
     fixture.detectChanges();
 
-    clickButton(root, 'Eliminar');
+    clickRecordButton(root, 'Eliminar');
     await fixture.whenStable();
 
     expect(eliminarEmision).not.toHaveBeenCalled();
@@ -264,9 +287,10 @@ describe('RegisterEmissionPageComponent', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
+    clickCategory(root, 'Vuelos');
     fixture.detectChanges();
 
-    expect(root.textContent).toContain('Aún no hay emisiones registradas.');
+    expect(root.textContent).toContain('No hay vuelos registrados.');
   });
 });
 
