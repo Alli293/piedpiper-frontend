@@ -1,0 +1,40 @@
+<app-auth-layout>
+  @if (config(); as c) {
+    <div class="registro">
+      <a class="registro__back" routerLink="/registro">‹ Cambiar tipo de cuenta</a>
+      <app-badge variant="success">{{ c.badge }}</app-badge>
+
+      <header class="registro__header">
+        <h1 class="registro__title">{{ c.titulo }}</h1>
+        <p class="registro__subtitle">{{ c.subtitulo }}</p>
+      </header>
+
+      @if (rol() === 'empresa') {
+        <app-registro-empresa-form />
+        <div class="registro__divider" aria-hidden="true"></div>
+      }
+
+      @if (rol() === 'viajero') {
+        <app-registro-usuario-form />
+        <div class="registro__divider" aria-hidden="true"></div>
+      }
+
+      <div class="registro__google" #googleButton></div>
+
+      @if (error()) {
+        <p class="registro__error">{{ error() }}</p>
+      }
+
+      <p class="registro__terms">
+        Al registrarte aceptas nuestros
+        <a routerLink="/terminos">Términos de uso</a> y la
+        <a routerLink="/privacidad">Política de privacidad</a>.
+      </p>
+
+      <p class="registro__login">
+        ¿Ya tienes cuenta?
+        <a routerLink="/login">Inicia sesión</a>
+      </p>
+    </div>
+  }
+</app-auth-layout>

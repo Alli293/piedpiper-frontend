@@ -78,8 +78,8 @@
 
 :host(.ch-button--secondary) .ch-button__inner {
   background: transparent;
-  border-color: var(--ch-green);
-  color: var(--ch-green);
+  border-color: var(--ch-green-dark);
+  color: var(--ch-green-dark);
 
   &:hover:not(:disabled) {
     background: var(--ch-green-soft);

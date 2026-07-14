@@ -13,11 +13,15 @@
     [pageTitle]="headerConfig().pageTitle"
     [showNotificationDot]="headerConfig().showNotificationDot"
     [userInitials]="headerConfig().userInitials"
+    [showBackButton]="headerConfig().showBackButton ?? false"
     (notificationClicked)="notificationClicked.emit()"
     (profileClicked)="profileClicked.emit()"
+    (backClicked)="backClicked.emit()"
   />
 
   <main class="ch-page-layout__content">
     <ng-content />
   </main>
+
+  <app-toast-host />
 </div>

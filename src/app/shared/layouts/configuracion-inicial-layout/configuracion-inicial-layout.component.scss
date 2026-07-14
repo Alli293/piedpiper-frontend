@@ -1,0 +1,98 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: var(--ch-bg-main);
+}
+
+.ch-config-inicial-layout__topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-4) var(--ch-space-8);
+  background: var(--ch-dark);
+  color: var(--ch-text-on-dark);
+}
+
+.ch-config-inicial-layout__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+}
+
+.ch-config-inicial-layout__logo {
+  width: 24px;
+  height: 24px;
+}
+
+.ch-config-inicial-layout__brand-name {
+  font-family: var(--ch-font-heading);
+  font-size: 18px;
+}
+
+.ch-config-inicial-layout__brand-carbon {
+  color: var(--ch-text-on-dark);
+  font-weight: 600;
+}
+
+.ch-config-inicial-layout__brand-hub {
+  color: var(--ch-green-light);
+  font-weight: 500;
+}
+
+.ch-config-inicial-layout__divider {
+  width: 1px;
+  height: 20px;
+  background: var(--ch-border-on-dark);
+}
+
+.ch-config-inicial-layout__step {
+  font-family: var(--ch-font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ch-text-on-dark-muted);
+}
+
+.ch-config-inicial-layout__body {
+  display: flex;
+  justify-content: center;
+  padding: var(--ch-space-12) var(--ch-space-6);
+}
+
+.ch-config-inicial-layout__card {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  background: var(--ch-bg-white);
+  border-radius: var(--ch-radius-xl);
+  box-shadow: var(--ch-shadow-md);
+  padding: var(--ch-space-8);
+}
+
+.ch-config-inicial-layout__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+  padding: var(--ch-space-2) var(--ch-space-4);
+  border-radius: var(--ch-radius-pill);
+  background: var(--ch-green-soft);
+  color: var(--ch-green-dark);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: var(--ch-shadow-sm);
+}
+
+@media (max-width: 600px) {
+  .ch-config-inicial-layout__topbar {
+    padding: var(--ch-space-4);
+  }
+
+  .ch-config-inicial-layout__body {
+    padding: var(--ch-space-8) var(--ch-space-4);
+  }
+
+  .ch-config-inicial-layout__card {
+    padding: var(--ch-space-6);
+  }
+}

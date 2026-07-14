@@ -1,24 +1,23 @@
-@for (toast of toastService.toasts(); track toast.id) {
-  <div
-    class="ch-toast"
-    [class.ch-toast--error]="toast.tipo === 'error'"
-    [class.ch-toast--exito]="toast.tipo === 'exito'"
-    role="alert"
-    aria-live="assertive"
-  >
-    <app-icon
-      class="ch-toast__icon"
-      [name]="toast.tipo === 'error' ? 'error' : 'success'"
-      [size]="18"
-    />
-    <span class="ch-toast__mensaje">{{ toast.mensaje }}</span>
+@for (toast of toasts(); track toast.id) {
+  <div class="ch-toast" [class.ch-toast--error]="toast.variant === 'error'">
+    <span class="ch-toast__icon">
+      <app-icon [name]="toast.variant === 'success' ? 'success' : 'error'" [size]="18" />
+    </span>
+
+    <div class="ch-toast__text">
+      <p class="ch-toast__title">{{ toast.title }}</p>
+      @if (toast.description) {
+        <p class="ch-toast__description">{{ toast.description }}</p>
+      }
+    </div>
+
     <button
       type="button"
-      class="ch-toast__cerrar"
+      class="ch-toast__close"
       aria-label="Cerrar notificación"
-      (click)="toastService.cerrar(toast.id)"
+      (click)="dismiss(toast.id)"
     >
-      ×
+      <app-icon name="cerrar" [size]="16" />
     </button>
   </div>
 }

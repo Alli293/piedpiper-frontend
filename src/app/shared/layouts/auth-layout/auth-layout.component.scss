@@ -1,0 +1,153 @@
+:host {
+  display: grid;
+  grid-template-columns: 40% 60%;
+  width: 100%;
+  min-height: 100vh;
+  background: var(--ch-bg-white);
+}
+
+.ch-auth-layout__hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-16);
+  padding: var(--ch-space-12);
+  background: var(--ch-dark);
+  color: var(--ch-text-on-dark);
+}
+
+.ch-auth-layout__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-3);
+  z-index: 1;
+}
+
+.ch-auth-layout__logo {
+  width: 34px;
+  height: 34px;
+}
+
+.ch-auth-layout__brand-name {
+  font-family: var(--ch-font-heading);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.ch-auth-layout__brand-accent {
+  color: var(--ch-green-light);
+}
+
+.ch-auth-layout__hero-body {
+  z-index: 1;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.ch-auth-layout__tagline {
+  margin: 0;
+  font-family: var(--ch-font-heading);
+  font-size: 40px;
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.ch-auth-layout__subtitle {
+  margin: var(--ch-space-5) 0 0;
+  max-width: 340px;
+  color: var(--ch-text-on-dark-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.ch-auth-layout__stats {
+  list-style: none;
+  margin: var(--ch-space-10) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-3);
+  max-width: 420px;
+}
+
+.ch-auth-layout__stat {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ch-space-2);
+  padding: var(--ch-space-4) var(--ch-space-5);
+  background: var(--ch-surface-on-dark);
+  border: 1px solid var(--ch-border-on-dark);
+  border-radius: var(--ch-radius-lg);
+}
+
+.ch-auth-layout__stat-value {
+  font-family: var(--ch-font-heading);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ch-green-light);
+}
+
+.ch-auth-layout__stat-unit {
+  font-family: var(--ch-font-mono);
+  font-size: 12px;
+  color: var(--ch-green-light);
+}
+
+.ch-auth-layout__stat-label {
+  font-size: 14px;
+  color: var(--ch-text-on-dark-muted);
+}
+
+.ch-auth-layout__watermark {
+  position: absolute;
+  right: -60px;
+  bottom: -60px;
+  width: 360px;
+  height: 360px;
+  opacity: 0.05;
+  pointer-events: none;
+  display: none;
+}
+
+.ch-auth-layout__fingerprint {
+  position: absolute;
+  right: -30px;
+  bottom: -30px;
+  width: 320px;
+  height: 320px;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.ch-auth-layout__circles {
+  position: absolute;
+  right: -20px;
+  bottom: -20px;
+  width: 360px;
+  height: 360px;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.ch-auth-layout__panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ch-space-12);
+}
+
+.ch-auth-layout__panel-inner {
+  width: 100%;
+  max-width: 400px;
+}
+
+@media (max-width: 900px) {
+  :host {
+    grid-template-columns: 1fr;
+  }
+
+  .ch-auth-layout__hero {
+    display: none;
+  }
+}

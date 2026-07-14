@@ -22,10 +22,12 @@ export class CheckboxComponent implements ControlValueAccessor {
   checked = model(false);
   disabled = input(false);
   label = input('');
+  error = input('');
 
   protected readonly inputId = `ch-checkbox-${nextId++}`;
   protected readonly formDisabled = signal(false);
   protected readonly effectiveDisabled = computed(() => this.disabled() || this.formDisabled());
+  protected readonly hasError = computed(() => this.error().length > 0);
 
   private onChange: (value: boolean) => void = () => {};
   private onTouched: () => void = () => {};

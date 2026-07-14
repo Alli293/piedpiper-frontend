@@ -5,6 +5,7 @@ import {
   SidebarBottomItem,
 } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
+import { ToastHostComponent } from '../../components/toast/toast.component';
 
 export interface SidebarConfig {
   menuItems: SidebarMenuItem[];
@@ -19,11 +20,12 @@ export interface HeaderConfig {
   pageTitle: string;
   showNotificationDot: boolean;
   userInitials: string;
+  showBackButton?: boolean;
 }
 
 @Component({
   selector: 'app-page-layout',
-  imports: [SidebarComponent, HeaderComponent],
+  imports: [SidebarComponent, HeaderComponent, ToastHostComponent],
   templateUrl: './page-layout.component.html',
   styleUrl: './page-layout.component.scss',
   host: {
@@ -37,4 +39,5 @@ export class PageLayoutComponent {
   menuItemClicked = output<string>();
   notificationClicked = output<void>();
   profileClicked = output<void>();
+  backClicked = output<void>();
 }

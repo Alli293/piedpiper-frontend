@@ -1,0 +1,37 @@
+<app-auth-layout>
+  <div class="bienvenida">
+    <header class="bienvenida__header">
+      <h1 class="bienvenida__title">Bienvenido a CarbonHub</h1>
+      <p class="bienvenida__subtitle">Selecciona cómo deseas registrarte para comenzar.</p>
+    </header>
+
+    <ul class="bienvenida__roles">
+      @for (rol of roles; track rol.id) {
+        <li>
+          <a class="bienvenida__role" [routerLink]="rol.ruta">
+            <span class="bienvenida__role-icon">
+              <app-icon [name]="rol.id" [size]="22" />
+            </span>
+            <span class="bienvenida__role-body">
+              <span class="bienvenida__role-title">{{ rol.titulo }}</span>
+              <span class="bienvenida__role-desc">{{ rol.descripcion }}</span>
+            </span>
+            <span class="bienvenida__role-chevron" aria-hidden="true">›</span>
+          </a>
+        </li>
+      }
+    </ul>
+
+    <p class="bienvenida__terms">
+      Al registrarte aceptas nuestros
+      <a routerLink="/terminos">Términos de uso</a> y la
+      <a routerLink="/privacidad">Política de privacidad</a>.
+    </p>
+
+    <div class="bienvenida__divider">
+      <span>¿Ya tienes cuenta?</span>
+    </div>
+
+    <app-button variant="secondary" size="lg" routerLink="/login">Iniciar sesión</app-button>
+  </div>
+</app-auth-layout>

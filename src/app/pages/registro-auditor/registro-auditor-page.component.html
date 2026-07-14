@@ -1,0 +1,122 @@
+<app-auth-layout>
+  <div class="registro-auditor">
+    <a class="registro-auditor__back" routerLink="/registro">‹ Cambiar tipo de cuenta</a>
+    <span class="registro-auditor__badge">AUDITOR CERTIFICADO</span>
+
+    <header class="registro-auditor__header">
+      <h1 class="registro-auditor__title">Crea tu cuenta</h1>
+      <p class="registro-auditor__subtitle">
+        Empieza con tus datos personales. Enviarás tus credenciales una vez actives la cuenta.
+      </p>
+    </header>
+
+    <div class="registro-auditor__info-box">
+      <p class="registro-auditor__info-text">
+        <strong>¿Cómo funciona?</strong>
+      </p>
+      <ol class="registro-auditor__steps">
+        <li>Crea tu cuenta con tus datos personales.</li>
+        <li>Verifica tu correo electrónico.</li>
+        <li>Sube tus credenciales profesionales.</li>
+        <li>El equipo de CarbonHub valida tu perfil.</li>
+      </ol>
+    </div>
+
+    <form class="registro-auditor__form" (submit)="enviar($event)">
+      <app-text-input
+        label="Nombre"
+        type="text"
+        autocomplete="given-name"
+        placeholder="Tu nombre"
+        [value]="nombre()"
+        (valueChange)="nombre.set($event)"
+        [error]="errorNombre()"
+        [disabled]="cargando()"
+        [required]="true"
+      />
+
+      <app-text-input
+        label="Apellidos"
+        type="text"
+        autocomplete="family-name"
+        placeholder="Tus apellidos"
+        [value]="apellidos()"
+        (valueChange)="apellidos.set($event)"
+        [error]="errorApellidos()"
+        [disabled]="cargando()"
+        [required]="true"
+      />
+
+      <app-text-input
+        label="Correo electrónico"
+        type="email"
+        autocomplete="email"
+        placeholder="tucorreo@ejemplo.com"
+        [value]="email()"
+        (valueChange)="email.set($event)"
+        [error]="errorEmail()"
+        [disabled]="cargando()"
+        [required]="true"
+      />
+
+      <app-text-input
+        label="Contraseña"
+        type="password"
+        autocomplete="new-password"
+        placeholder="Mínimo 8 caracteres"
+        [value]="contrasena()"
+        (valueChange)="contrasena.set($event)"
+        [error]="errorContrasena()"
+        [disabled]="cargando()"
+        [required]="true"
+      />
+
+      <app-text-input
+        label="Confirmar contraseña"
+        type="password"
+        autocomplete="new-password"
+        placeholder="Repite tu contraseña"
+        [value]="confirmarContrasena()"
+        (valueChange)="confirmarContrasena.set($event)"
+        [error]="errorConfirmar()"
+        [disabled]="cargando()"
+        [required]="true"
+      />
+
+      <div class="registro-auditor__terminos">
+        <app-checkbox
+          label="Acepto los Términos de uso y la Política de privacidad"
+          [checked]="aceptaTerminos()"
+          (checkedChange)="aceptaTerminos.set($event)"
+          [disabled]="cargando()"
+        />
+        @if (errorTerminos()) {
+          <p class="registro-auditor__error-terminos" role="alert">{{ errorTerminos() }}</p>
+        }
+      </div>
+
+      @if (errorGeneral()) {
+        <p class="registro-auditor__error" role="alert">{{ errorGeneral() }}</p>
+      }
+
+      <app-button variant="primary" size="lg" type="submit" [loading]="cargando()">
+        Crear cuenta →
+      </app-button>
+    </form>
+
+    <div class="registro-auditor__divider">
+      <span>o</span>
+    </div>
+
+    <div
+      class="registro-auditor__google"
+      [class.registro-auditor__google--disabled]="!aceptaTerminos()"
+      #googleButton
+    ></div>
+
+    <p class="registro-auditor__login">
+      ¿Ya tienes cuenta?
+      <a routerLink="/login">Inicia sesión</a>
+    </p>
+  </div>
+</app-auth-layout>
