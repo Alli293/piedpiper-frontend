@@ -1,9 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { provideLocationMocks } from '@angular/common/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter, Router } from '@angular/router';
-import { of } from 'rxjs';
+import { signal } from '@angular/core';
+import { of, throwError } from 'rxjs';
 import { RegisterShippingPageComponent } from './register-shipping-page.component';
 import { EmisionesService } from '../emisiones.service';
+import { ToastService } from '../../../shared/services/toast.service';
 import { EmisionEnvioResponse } from '../models/emision.model';
 
 const VALID_RESPONSE: EmisionEnvioResponse = {
@@ -25,9 +28,13 @@ const VALID_RESPONSE: EmisionEnvioResponse = {
 
 describe('RegisterShippingPageComponent', () => {
   let registrarEnvio: ReturnType<typeof vi.fn>;
+  let toastError: ReturnType<typeof vi.fn>;
+  let toastSuccess: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     registrarEnvio = vi.fn();
+    toastError = vi.fn();
+    toastSuccess = vi.fn();
 
     await TestBed.configureTestingModule({
       imports: [RegisterShippingPageComponent],
@@ -35,6 +42,16 @@ describe('RegisterShippingPageComponent', () => {
         provideLocationMocks(),
         provideRouter([]),
         { provide: EmisionesService, useValue: { registrarEnvio } },
+        {
+          provide: ToastService,
+          useValue: {
+            toasts: signal([]),
+            error: toastError,
+            success: toastSuccess,
+            show: vi.fn(),
+            dismiss: vi.fn(),
+          },
+        },
       ],
     }).compileComponents();
 
@@ -112,5 +129,67 @@ describe('RegisterShippingPageComponent', () => {
       fechaActividad: '2026-07-01',
     });
     expect(TestBed.inject(Router).navigateByUrl).toHaveBeenCalledWith('/emisiones');
+  });
+
+  it('shows session error toast on 401 response', async () => {
+    const httpError = new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' });
+    registrarEnvio.mockReturnValue(throwError(() => httpError));
+
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    fillValidForm(root);
+    await submitForm(fixture);
+
+    expect(toastError).toHaveBeenCalledWith(
+      expect.stringContaining('sesión')
+    );
+    expect(TestBed.inject(Router).navigateByUrl).not.toHaveBeenCalledWith('/emisiones');
+  });
+
+  it('shows session error toast on 403 response', async () => {
+    const httpError = new HttpErrorResponse({ status: 403, statusText: 'Forbidden' });
+    registrarEnvio.mockReturnValue(throwError(() => httpError));
+
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    fillValidForm(root);
+    await submitForm(fixture);
+
+    expect(toastError).toHaveBeenCalledWith(
+      expect.stringContaining('sesión')
+    );
+  });
+
+  it('shows API error message when backend returns error with message', async () => {
+    const httpError = new HttpErrorResponse({
+      status: 422,
+      statusText: 'Unprocessable Entity',
+      error: { status: 422, message: 'El peso excede el limite permitido.' },
+    });
+    registrarEnvio.mockReturnValue(throwError(() => httpError));
+
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    fillValidForm(root);
+    await submitForm(fixture);
+
+    expect(toastError).toHaveBeenCalledWith('El peso excede el limite permitido.');
+  });
+
+  it('shows generic connection error on unknown failure', async () => {
+    registrarEnvio.mockReturnValue(throwError(() => new Error('Network error')));
+
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    fillValidForm(root);
+    await submitForm(fixture);
+
+    expect(toastError).toHaveBeenCalledWith(
+      expect.stringContaining('No se pudo conectar')
+    );
   });
 });
