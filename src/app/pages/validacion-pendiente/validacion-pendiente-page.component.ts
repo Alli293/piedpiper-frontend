@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AuthLayoutComponent } from '../../shared/layouts/auth-layout/auth-layout.component';
 
 @Component({
   selector: 'app-validacion-pendiente-page',
-  imports: [RouterLink],
+  imports: [RouterLink, AuthLayoutComponent],
   template: `
-    <main class="validacion">
-      <div class="validacion__card">
+    <app-auth-layout>
+      <div class="validacion">
         <span class="validacion__badge">Verificación pendiente</span>
         <h1 class="validacion__title">Tu cuenta está pendiente de verificación</h1>
         <p class="validacion__text">
@@ -15,26 +16,11 @@ import { RouterLink } from '@angular/router';
         </p>
         <a class="validacion__link" routerLink="/login">Ir al inicio de sesión</a>
       </div>
-    </main>
+    </app-auth-layout>
   `,
   styles: `
     .validacion {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--ch-space-6);
-      background: var(--ch-green-soft);
-    }
-
-    .validacion__card {
-      max-width: 460px;
-      width: 100%;
       text-align: center;
-      padding: var(--ch-space-8);
-      background: var(--ch-bg-white);
-      border: 1px solid var(--ch-border);
-      border-radius: var(--ch-radius-lg);
     }
 
     .validacion__badge {

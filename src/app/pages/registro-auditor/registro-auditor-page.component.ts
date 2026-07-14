@@ -79,7 +79,7 @@ export class RegistroAuditorPageComponent {
         apellidos: this.apellidos().trim(),
         email: this.email().trim(),
         contrasena: this.contrasena(),
-        aceptaTerminos: true,
+        aceptaTerminos: this.aceptaTerminos(),
       })
       .subscribe({
         next: () => {
