@@ -70,4 +70,41 @@ describe('AuthService', () => {
     expect(localStorage.getItem('carbonhub.token')).toBeNull();
     expect(service.token()).toBeNull();
   });
+
+  it('registrarAuditorCorreo hace POST a /auth/registro/auditor/correo con los datos del formulario', () => {
+    const body = {
+      nombre: 'Carlos',
+      apellidos: 'Lopez',
+      email: 'carlos@example.com',
+      contrasena: 'segura123',
+      aceptaTerminos: true,
+    };
+
+    let recibida: { mensaje: string; email: string } | undefined;
+    service.registrarAuditorCorreo(body).subscribe((r) => (recibida = r));
+
+    const req = httpMock.expectOne(`${base}/registro/auditor/correo`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(body);
+    req.flush({ mensaje: 'Registro exitoso.', email: 'carlos@example.com' });
+
+    expect(recibida!.email).toBe('carlos@example.com');
+  });
+
+  it('registrarAuditorCorreo no guarda token en localStorage', () => {
+    service
+      .registrarAuditorCorreo({
+        nombre: 'Ana',
+        apellidos: 'Mora',
+        email: 'ana@example.com',
+        contrasena: 'clave123',
+        aceptaTerminos: true,
+      })
+      .subscribe();
+
+    const req = httpMock.expectOne(`${base}/registro/auditor/correo`);
+    req.flush({ mensaje: 'OK', email: 'ana@example.com' });
+
+    expect(localStorage.getItem('carbonhub.token')).toBeNull();
+  });
 });
