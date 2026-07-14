@@ -16,6 +16,13 @@ export const rutasPostAutenticacion = [
 
 export const routes: Routes = [
   {
+    path: 'empresa/invitaciones',
+    loadComponent: () =>
+      import('./pages/empresa/invitaciones/invitaciones-page.component').then(
+        (m) => m.InvitacionesPageComponent
+      ),
+  },
+  {
     path: 'login',
     loadComponent: () =>
       import('./pages/auth/login/login-page.component').then((m) => m.LoginPageComponent),
