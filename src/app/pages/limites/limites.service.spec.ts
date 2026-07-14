@@ -19,6 +19,7 @@ describe('LimitesService', () => {
           useValue: {
             getEmpresaId: () => 7,
             getRole: () => 'administrador_empresa',
+            getToken: () => 'jwt-token',
           },
         },
       ],
@@ -37,8 +38,7 @@ describe('LimitesService', () => {
 
     const req = httpMock.expectOne('/api/limites');
     expect(req.request.method).toBe('POST');
-    expect(req.request.headers.get('X-Empresa-Id')).toBe('7');
-    expect(req.request.headers.get('X-Usuario-Rol')).toBe('administrador_empresa');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer jwt-token');
     expect(req.request.body).toEqual({
       anio: 2026,
       limiteMt: 50,
@@ -46,7 +46,7 @@ describe('LimitesService', () => {
     });
     req.flush({
       id: 1,
-      empresaId: 7,
+      empresaId: '11111111-1111-1111-1111-111111111111',
       anio: 2026,
       limiteMt: 50,
       justificacion: 'Meta anual',
@@ -80,7 +80,7 @@ describe('LimitesService', () => {
     });
     req.flush({
       id: 1,
-      empresaId: 7,
+      empresaId: '11111111-1111-1111-1111-111111111111',
       anio: 2026,
       limiteMt: 40,
       justificacion: null,

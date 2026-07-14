@@ -9,6 +9,10 @@ export class AuthSessionService {
     return localStorage.getItem('carbonhub_role') ?? USUARIO_GENERAL_EMPRESA;
   }
 
+  getToken(): string | null {
+    return localStorage.getItem('carbonhub_token');
+  }
+
   getEmpresaId(): number {
     const storedId = Number(localStorage.getItem('carbonhub_empresa_id'));
     return Number.isInteger(storedId) && storedId > 0 ? storedId : 0;

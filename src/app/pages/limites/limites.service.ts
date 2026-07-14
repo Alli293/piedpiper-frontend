@@ -11,7 +11,7 @@ export interface LimiteEmisionesRequest {
 
 export interface LimiteEmisionesResponse {
   id: number;
-  empresaId: number;
+  empresaId: string;
   anio: number;
   limiteMt: number;
   justificacion: string | null;
@@ -56,9 +56,7 @@ export class LimitesService {
   }
 
   private headers(): HttpHeaders {
-    return new HttpHeaders({
-      'X-Empresa-Id': String(this.authSession.getEmpresaId()),
-      'X-Usuario-Rol': this.authSession.getRole(),
-    });
+    const token = this.authSession.getToken();
+    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
   }
 }
