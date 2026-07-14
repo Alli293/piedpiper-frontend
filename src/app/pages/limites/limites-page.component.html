@@ -116,13 +116,19 @@
               <tbody>
                 @for (limite of limites(); track limite.id) {
                   <tr [class.is-editing]="editingYear() === limite.anio">
-                    <td><strong>{{ limite.anio }}</strong></td>
+                    <td>
+                      <strong>{{ limite.anio }}</strong>
+                    </td>
                     <td>{{ formatLimite(limite.limiteMt) }} t CO₂e</td>
                     <td class="limites-list__justification">
                       {{ limite.justificacion || 'Sin justificación' }}
                     </td>
                     <td>
-                      {{ limite.actualizadoEn ? (limite.actualizadoEn | date: 'dd/MM/yyyy, HH:mm') : '—' }}
+                      {{
+                        limite.actualizadoEn
+                          ? (limite.actualizadoEn | date: 'dd/MM/yyyy, HH:mm')
+                          : '—'
+                      }}
                     </td>
                     <td>
                       <div class="limites-list__row-actions">
