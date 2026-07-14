@@ -442,14 +442,14 @@ export class RegisterEmissionPageComponent {
 
   private reportSubmissionError(error: unknown): void {
     if (error instanceof HttpErrorResponse) {
-      if (error.status === 401 || error.status === 403) {
-        this.toastService.error('Tu sesión no tiene permisos para realizar esta acción.');
-        return;
-      }
-
       const apiError = error.error as ApiErrorResponse | null;
       if (apiError?.message) {
         this.toastService.error(apiError.message);
+        return;
+      }
+
+      if (error.status === 401 || error.status === 403) {
+        this.toastService.error('Tu sesión no tiene permisos para realizar esta acción.');
         return;
       }
     }
