@@ -49,6 +49,11 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'limites',
+    loadComponent: () =>
+      import('./pages/limites/limites-page.component').then((m) => m.LimitesPageComponent),
+  },
+  {
     path: 'ui-kit',
     loadComponent: () =>
       import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),

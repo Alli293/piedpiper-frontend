@@ -13,6 +13,8 @@ export type IconName =
   | 'config'
   | 'danger'
   | 'dashboard'
+  | 'delete'
+  | 'edit'
   | 'electricidad'
   | 'emisiones'
   | 'empresa'
@@ -77,6 +79,12 @@ export const ICONS: Record<IconName, string> = {
 </svg>`,
   dashboard: `<svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <path d="M7.3125 4.125V-9.53674e-07H12.75V4.125H7.3125ZM0 6.75V-9.53674e-07H5.4375V6.75H0ZM7.3125 12.75V6H12.75V12.75H7.3125ZM0 12.75V8.625H5.4375V12.75H0ZM1.125 5.625H4.3125V1.125H1.125V5.625ZM8.4375 11.625H11.625V7.125H8.4375V11.625ZM8.4375 3H11.625V1.125H8.4375V3ZM1.125 11.625H4.3125V9.75H1.125V11.625Z" fill="currentColor"/>
+</svg>`,
+  delete: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM8 9H16V19H8V9ZM15.5 4L14.5 3H9.5L8.5 4H5V6H19V4H15.5Z" fill="currentColor"/>
+</svg>`,
+  edit: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M4 16.5V20H7.5L17.82 9.68L14.32 6.18L4 16.5ZM20.53 6.97C20.92 6.58 20.92 5.95 20.53 5.56L18.44 3.47C18.05 3.08 17.42 3.08 17.03 3.47L15.39 5.11L18.89 8.61L20.53 6.97Z" fill="currentColor"/>
 </svg>`,
   electricidad: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <path d="M11 21h-1l1-7H7.5c-.88 0-.33-.75-.31-.78C8.48 10.94 10.42 7.54 13.01 3h1l-1 7h3.51c.4 0 .62.19.4.66C12.97 17.55 11 21 11 21z" fill="currentColor"/>
