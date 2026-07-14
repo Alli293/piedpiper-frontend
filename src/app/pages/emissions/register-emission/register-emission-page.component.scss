@@ -1,7 +1,7 @@
-@use '../../../shared/styles/mixins';
-
 .register-emission-page {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
 }
 
@@ -10,7 +10,7 @@
   flex-direction: column;
   gap: var(--ch-space-4);
   width: 100%;
-  max-width: 720px;
+  max-width: 680px;
   padding: var(--ch-space-6);
   background: var(--ch-bg-white);
   border: 1px solid var(--ch-border);
@@ -18,18 +18,32 @@
   box-shadow: var(--ch-shadow-sm);
 }
 
-.register-emission-page__header {
+.register-emission-page__header,
+.register-emission-page__categories,
+.register-emission-page__row,
+.register-emission-page__legs-header,
+.register-emission-page__actions,
+.register-emission-page__save-flow,
+.register-emission-page__estimate,
+.register-emission-page__info {
   display: flex;
-  align-items: center;
+}
+
+.register-emission-page__header,
+.register-emission-page__row,
+.register-emission-page__actions,
+.register-emission-page__info {
   gap: var(--ch-space-3);
 }
 
-.register-emission-page__header-icon {
-  display: flex;
+.register-emission-page__header {
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 42px;
+}
+
+.register-emission-page__header-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 42px;
   height: 42px;
   border-radius: var(--ch-radius-md);
   background: rgba(224, 161, 0, 0.3);
@@ -39,20 +53,24 @@
 .register-emission-page__title {
   margin: 0;
   font-family: var(--ch-font-heading);
-  font-weight: 700;
   font-size: 1.125rem;
   color: var(--ch-text-primary);
 }
 
-.register-emission-page__subtitle {
-  margin: 2px 0 0;
-  font-family: var(--ch-font-body);
+.register-emission-page__subtitle,
+.register-emission-page__field-error,
+.register-emission-page__info p {
+  margin: 0;
   font-size: 0.8125rem;
+}
+
+.register-emission-page__subtitle,
+.register-emission-page__leg-title,
+.register-emission-page__save-flow {
   color: var(--ch-text-secondary);
 }
 
 .register-emission-page__categories {
-  display: flex;
   flex-wrap: wrap;
   gap: var(--ch-space-2);
 }
@@ -62,19 +80,13 @@
   align-items: center;
   gap: var(--ch-space-2);
   height: 34px;
-  padding: 0 var(--ch-space-4);
-  border-radius: var(--ch-radius-pill);
+  padding: 0 14px;
   border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-pill);
   background: var(--ch-bg-white);
   color: var(--ch-text-secondary);
-  font-family: var(--ch-font-body);
   font-weight: 600;
-  font-size: 0.8125rem;
   cursor: pointer;
-
-  &:focus-visible {
-    @include mixins.focus-ring;
-  }
 
   &:disabled {
     opacity: 0.5;
@@ -85,13 +97,15 @@
     border-color: var(--ch-green);
     background: var(--ch-green-soft);
     color: var(--ch-green-dark);
-    cursor: default;
   }
 }
 
-.register-emission-page__row {
+.register-emission-page__field,
+.register-emission-page__native-field,
+.register-emission-page__legs {
   display: flex;
-  gap: var(--ch-space-4);
+  flex-direction: column;
+  gap: var(--ch-space-2);
 }
 
 .register-emission-page__field--grow {
@@ -99,17 +113,21 @@
   min-width: 0;
 }
 
-.register-emission-page__field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ch-space-2);
-}
-
 .register-emission-page__field-label {
-  font-family: var(--ch-font-body);
   font-weight: 600;
   font-size: 0.875rem;
   color: var(--ch-text-primary);
+}
+
+.register-emission-page__native-field input,
+.register-emission-page__native-field select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 var(--ch-space-3);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-white);
+  font: inherit;
 }
 
 .register-emission-page__unit-options {
@@ -120,19 +138,75 @@
 }
 
 .register-emission-page__field-error {
-  margin: 0;
-  font-family: var(--ch-font-body);
-  font-size: 0.75rem;
   color: var(--ch-danger);
 }
 
-.register-emission-page__actions {
-  display: flex;
-  justify-content: flex-end;
+.register-emission-page__legs-header,
+.register-emission-page__estimate {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.register-emission-page__leg {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  align-items: start;
   gap: var(--ch-space-3);
-  padding-top: var(--ch-space-2);
+  padding: 12px;
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+}
+
+.register-emission-page__estimate-label,
+.register-emission-page__save-flow {
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.register-emission-page__estimate {
+  padding: var(--ch-space-4);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-green-soft);
+}
+
+.register-emission-page__estimate-label {
+  font-size: 0.7rem;
+  color: var(--ch-green-dark);
+}
+
+.register-emission-page__estimate-value {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ch-space-2);
+  font-family: var(--ch-font-heading);
+  font-weight: 700;
+  font-size: 1.625rem;
+  color: var(--ch-green);
+}
+
+.register-emission-page__estimate-unit {
+  font-size: 0.625rem;
+  color: var(--ch-green-dark);
+}
+
+.register-emission-page__actions {
+  justify-content: flex-end;
 }
 
 .register-emission-page__actions app-button {
   width: auto;
+}
+
+@media (max-width: 720px) {
+  .register-emission-page__row {
+    flex-direction: column;
+  }
+
+  .register-emission-page__leg {
+    grid-template-columns: 1fr;
+  }
+
+  .register-emission-page__card {
+    padding: var(--ch-space-5);
+  }
 }

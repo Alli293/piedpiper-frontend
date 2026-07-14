@@ -53,4 +53,36 @@ describe('EmisionesService', () => {
     expect(req.request.body).toEqual(payload);
     req.flush({ id: '456', carbonKg: 0.5 });
   });
+
+  it('posts the expected body to /api/emisiones/vuelo', () => {
+    const payload = {
+      passengers: 2,
+      distanceUnit: 'km' as const,
+      fechaActividad: '2026-07-09',
+      legs: [
+        { departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' as const },
+      ],
+    };
+
+    service.registrarVuelo(payload).subscribe();
+
+    const req = httpMock.expectOne('/api/emisiones/vuelo');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(payload);
+    req.flush({
+      id: '2',
+      categoria: 'VUELO',
+      titulo: 'Viaje aereo SFO-YYZ',
+      fechaActividad: payload.fechaActividad,
+      passengers: 2,
+      legs: payload.legs,
+      distanceUnit: 'km',
+      distanceValue: 7200,
+      carbonKg: 347,
+      carbonMt: 0.347,
+      factorEmisionId: 'climatiq-travel-v1-distance',
+      estimatedAt: '2026-07-09T00:00:00Z',
+      createdAt: '2026-07-09T00:00:00Z',
+    });
+  });
 });

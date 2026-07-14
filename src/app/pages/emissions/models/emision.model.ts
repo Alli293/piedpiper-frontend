@@ -1,4 +1,6 @@
 export type UnidadElectricidad = 'kwh' | 'mwh';
+export type CabinClass = 'economy' | 'premium';
+export type DistanceUnit = 'km' | 'mi';
 
 export type UnidadPeso = 'G' | 'LB' | 'KG' | 'MT';
 export type UnidadDistancia = 'KM' | 'MI';
@@ -11,13 +13,30 @@ export interface RegistrarElectricidadRequest {
   readonly fechaActividad: string;
 }
 
+export interface RegistrarVueloLegRequest {
+  readonly departureAirport: string;
+  readonly destinationAirport: string;
+  readonly cabinClass: CabinClass;
+}
+
+export interface RegistrarVueloRequest {
+  readonly passengers: number;
+  readonly legs: RegistrarVueloLegRequest[];
+  readonly distanceUnit: DistanceUnit;
+  readonly fechaActividad: string;
+}
+
 export interface EmisionResponse {
   readonly id: string;
   readonly categoria: string;
   readonly titulo: string;
   readonly fechaActividad: string;
-  readonly electricityValue: number;
-  readonly electricityUnit: UnidadElectricidad;
+  readonly electricityValue?: number;
+  readonly electricityUnit?: UnidadElectricidad;
+  readonly passengers?: number;
+  readonly legs?: RegistrarVueloLegRequest[];
+  readonly distanceUnit?: DistanceUnit;
+  readonly distanceValue?: number;
   readonly carbonKg: number;
   readonly carbonMt: number;
   readonly factorEmisionId: string;
