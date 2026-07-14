@@ -7,6 +7,7 @@ import {
   EmisionResponse,
   RegistrarElectricidadRequest,
   RegistrarEnvioRequest,
+  RegistrarVueloRequest,
 } from './models/emision.model';
 
 @Injectable({ providedIn: 'root' })
@@ -20,5 +21,21 @@ export class EmisionesService {
 
   registrarEnvio(payload: RegistrarEnvioRequest): Observable<EmisionEnvioResponse> {
     return this.http.post<EmisionEnvioResponse>(`${this.baseUrl}/envio`, payload);
+  }
+
+  registrarVuelo(payload: RegistrarVueloRequest): Observable<EmisionResponse> {
+    return this.http.post<EmisionResponse>(`${this.baseUrl}/vuelo`, payload);
+  }
+
+  listarEmisiones(): Observable<EmisionResponse[]> {
+    return this.http.get<EmisionResponse[]>(this.baseUrl);
+  }
+
+  actualizarVuelo(id: string, payload: RegistrarVueloRequest): Observable<EmisionResponse> {
+    return this.http.put<EmisionResponse>(`${this.baseUrl}/vuelo/${id}`, payload);
+  }
+
+  eliminarEmision(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

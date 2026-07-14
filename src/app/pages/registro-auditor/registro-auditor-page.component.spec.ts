@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { RegistroAuditorPageComponent } from './registro-auditor-page.component';
 import { environment } from '../../../environments/environment';
 
@@ -9,9 +10,13 @@ describe('RegistroAuditorPageComponent', () => {
   let component: RegistroAuditorPageComponent;
   let fixture: ComponentFixture<RegistroAuditorPageComponent>;
   let httpMock: HttpTestingController;
+  let storage: Storage;
   const base = `${environment.apiBaseUrl}/auth`;
 
   beforeEach(async () => {
+    storage = createStorageMock();
+    vi.stubGlobal('localStorage', storage);
+
     await TestBed.configureTestingModule({
       imports: [RegistroAuditorPageComponent],
       providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
@@ -23,7 +28,10 @@ describe('RegistroAuditorPageComponent', () => {
     fixture.detectChanges();
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => {
+    httpMock.verify();
+    vi.unstubAllGlobals();
+  });
 
   it('should create', () => {
     expect(component).toBeTruthy();
@@ -65,3 +73,17 @@ describe('RegistroAuditorPageComponent', () => {
     expect(component['errorEmail']()).toContain('Ya existe');
   });
 });
+
+function createStorageMock(): Storage {
+  const values = new Map<string, string>();
+  return {
+    get length() {
+      return values.size;
+    },
+    clear: () => values.clear(),
+    getItem: (key) => values.get(key) ?? null,
+    key: (index) => Array.from(values.keys())[index] ?? null,
+    removeItem: (key) => values.delete(key),
+    setItem: (key, value) => values.set(key, value),
+  };
+}
