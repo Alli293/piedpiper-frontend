@@ -70,9 +70,6 @@
 }
 
 .ch-config-inicial-layout__badge {
-  position: absolute;
-  top: calc(-1 * var(--ch-space-4));
-  right: var(--ch-space-8);
   display: inline-flex;
   align-items: center;
   gap: var(--ch-space-2);
