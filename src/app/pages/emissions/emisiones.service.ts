@@ -23,10 +23,6 @@ export class EmisionesService {
     return this.http.get<EmisionResponse[]>('/api/emisiones');
   }
 
-  obtenerEmision(id: string): Observable<EmisionResponse> {
-    return this.http.get<EmisionResponse>(`/api/emisiones/${id}`);
-  }
-
   actualizarVuelo(id: string, payload: RegistrarVueloRequest): Observable<EmisionResponse> {
     return this.http.put<EmisionResponse>(`/api/emisiones/vuelo/${id}`, payload);
   }

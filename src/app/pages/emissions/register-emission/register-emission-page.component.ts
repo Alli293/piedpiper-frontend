@@ -18,6 +18,11 @@ import { DateInputComponent } from '../../../shared/components/inputs/date-input
 import { NumberInputComponent } from '../../../shared/components/inputs/number-input/number-input.component';
 import { RadioComponent } from '../../../shared/components/inputs/radio/radio.component';
 import { RadioGroupDirective } from '../../../shared/components/inputs/radio/radio-group.directive';
+import {
+  SelectInputComponent,
+  SelectOption,
+} from '../../../shared/components/inputs/select-input/select-input.component';
+import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
 import { TextareaComponent } from '../../../shared/components/inputs/textarea/textarea.component';
 import {
   HeaderConfig,
@@ -110,6 +115,8 @@ const GENERIC_CONNECTION_ERROR =
     NumberInputComponent,
     RadioComponent,
     RadioGroupDirective,
+    SelectInputComponent,
+    TextInputComponent,
     TextareaComponent,
     PageLayoutComponent,
   ],
@@ -122,7 +129,15 @@ export class RegisterEmissionPageComponent implements OnInit {
   private readonly toastService = inject(ToastService);
   private readonly authService = inject(AuthService);
 
-  private readonly today = todayUtcMidnight();
+  protected readonly today = todayUtcMidnight();
+  protected readonly distanceUnitOptions: SelectOption[] = [
+    { value: 'km', label: 'km' },
+    { value: 'mi', label: 'mi' },
+  ];
+  protected readonly cabinClassOptions: SelectOption[] = [
+    { value: 'economy', label: 'Economy' },
+    { value: 'premium', label: 'Premium' },
+  ];
 
   protected readonly activeCategory = signal<EmissionCategory>('electricidad');
   protected readonly model = signal<RegistrarElectricidadFormModel>({ ...INITIAL_MODEL });
@@ -176,7 +191,6 @@ export class RegisterEmissionPageComponent implements OnInit {
   protected readonly fechaActividadError = computed(() =>
     this.fieldError(this.registerForm.fechaActividad())
   );
-
   protected readonly submitting = computed(() => this.registerForm().submitting());
   protected readonly flightErrors = computed(() =>
     validateFlightModel(this.flightModel(), this.today)
@@ -252,25 +266,19 @@ export class RegisterEmissionPageComponent implements OnInit {
     this.lastResult.set(null);
   }
 
-  protected updateFlightPassengers(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    const passengers = value === '' ? null : Number(value);
+  protected updateFlightPassengers(passengers: number | null): void {
     this.flightModel.update((model) => ({ ...model, passengers }));
   }
 
-  protected updateFlightDate(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    const date = value ? new Date(`${value}T00:00:00Z`) : null;
-    this.flightModel.update((model) => ({ ...model, fechaActividad: date }));
+  protected updateFlightDate(fechaActividad: Date | null): void {
+    this.flightModel.update((model) => ({ ...model, fechaActividad }));
   }
 
-  protected updateFlightDistanceUnit(event: Event): void {
-    const distanceUnit = (event.target as HTMLSelectElement).value as DistanceUnit;
-    this.flightModel.update((model) => ({ ...model, distanceUnit }));
+  protected updateFlightDistanceUnit(distanceUnit: string): void {
+    this.flightModel.update((model) => ({ ...model, distanceUnit: distanceUnit as DistanceUnit }));
   }
 
-  protected updateLeg(index: number, field: keyof RegistrarVueloLegFormModel, event: Event): void {
-    const value = (event.target as HTMLInputElement | HTMLSelectElement).value;
+  protected updateLeg(index: number, field: keyof RegistrarVueloLegFormModel, value: string): void {
     this.flightModel.update((model) => ({
       ...model,
       legs: model.legs.map((leg, currentIndex) =>
@@ -361,8 +369,8 @@ export class RegisterEmissionPageComponent implements OnInit {
       this.lastResult.set({ carbonKg: response.carbonKg });
       await this.loadEmisiones();
       this.toastService.success(
-        editingId ? 'Viaje aereo actualizado.' : 'Viaje aereo registrado.',
-        `Huella calculada: ${response.carbonKg} kg CO2e.`
+        editingId ? 'Viaje aéreo actualizado.' : 'Viaje aéreo registrado.',
+        `Huella calculada: ${response.carbonKg} kg CO₂e.`
       );
       this.flightModel.set(cloneFlightModel(INITIAL_FLIGHT_MODEL));
       this.flightTouched.set(new Set());
@@ -396,6 +404,11 @@ export class RegisterEmissionPageComponent implements OnInit {
 
   protected async deleteEmission(emision: EmisionResponse): Promise<void> {
     if (!this.ensureSession()) return;
+
+    const confirmed = globalThis.confirm(
+      `¿Eliminar el registro "${emision.titulo}"? Esta acción no se puede deshacer.`
+    );
+    if (!confirmed) return;
 
     try {
       await firstValueFrom(this.emisionesService.eliminarEmision(emision.id));
@@ -440,7 +453,7 @@ export class RegisterEmissionPageComponent implements OnInit {
   private ensureSession(): boolean {
     this.hasSession.set(this.hasActiveSession());
     if (this.hasSession()) return true;
-    this.toastService.error('Debe iniciar sesion para registrar emisiones.');
+    this.toastService.error('Debe iniciar sesión para registrar emisiones.');
     return false;
   }
 
@@ -498,10 +511,10 @@ function validateFlightModel(
     const destinationKey = `legs.${index}.destinationAirport` as const;
     const cabinKey = `legs.${index}.cabinClass` as const;
     if (!/^[A-Za-z]{3}$/.test(leg.departureAirport)) {
-      errors[departureKey] = 'Ingrese un codigo IATA de 3 letras.';
+      errors[departureKey] = 'Ingrese un código IATA de 3 letras.';
     }
     if (!/^[A-Za-z]{3}$/.test(leg.destinationAirport)) {
-      errors[destinationKey] = 'Ingrese un codigo IATA de 3 letras.';
+      errors[destinationKey] = 'Ingrese un código IATA de 3 letras.';
     }
     if (
       /^[A-Za-z]{3}$/.test(leg.departureAirport) &&
@@ -510,7 +523,7 @@ function validateFlightModel(
       errors[destinationKey] = 'El origen y el destino no pueden ser iguales.';
     }
     if (!['economy', 'premium'].includes(leg.cabinClass)) {
-      errors[cabinKey] = 'Seleccione una clase valida.';
+      errors[cabinKey] = 'Seleccione una clase válida.';
     }
   });
   return errors;

@@ -46,7 +46,7 @@
           type="button"
           class="register-emission-page__category"
           disabled
-          title="Proximamente disponible"
+          title="Próximamente disponible"
         >
           <app-icon name="flota-vehicular" [size]="16" />
           Flota vehicular
@@ -65,7 +65,7 @@
           type="button"
           class="register-emission-page__category"
           disabled
-          title="Proximamente disponible"
+          title="Próximamente disponible"
         >
           <app-icon name="envios-carga" [size]="16" />
           Envíos de carga
@@ -121,44 +121,32 @@
         />
       } @else {
         <div class="register-emission-page__row">
-          <label class="register-emission-page__native-field register-emission-page__field--grow">
-            <span class="register-emission-page__field-label">Pasajeros</span>
-            <input
-              type="number"
-              min="1"
-              step="1"
-              [value]="flightModel().passengers ?? ''"
-              (input)="updateFlightPassengers($event)"
-              (blur)="markFlightTouched('passengers')"
-            />
-            @if (flightError('passengers')) {
-              <p class="register-emission-page__field-error">{{ flightError('passengers') }}</p>
-            }
-          </label>
+          <app-number-input
+            class="register-emission-page__field--grow"
+            label="Pasajeros"
+            step="1"
+            [required]="true"
+            [value]="flightModel().passengers"
+            [error]="flightError('passengers')"
+            (valueChange)="updateFlightPassengers($event); markFlightTouched('passengers')"
+          />
 
-          <label class="register-emission-page__native-field">
-            <span class="register-emission-page__field-label">Unidad distancia</span>
-            <select
-              [value]="flightModel().distanceUnit"
-              (change)="updateFlightDistanceUnit($event)"
-            >
-              <option value="km">km</option>
-              <option value="mi">mi</option>
-            </select>
-          </label>
+          <app-select-input
+            label="Unidad distancia"
+            [options]="distanceUnitOptions"
+            [value]="flightModel().distanceUnit"
+            (valueChange)="updateFlightDistanceUnit($event)"
+          />
         </div>
 
-        <label class="register-emission-page__native-field">
-          <span class="register-emission-page__field-label">Fecha del viaje</span>
-          <input
-            type="date"
-            (input)="updateFlightDate($event)"
-            (blur)="markFlightTouched('fechaActividad')"
-          />
-          @if (flightError('fechaActividad')) {
-            <p class="register-emission-page__field-error">{{ flightError('fechaActividad') }}</p>
-          }
-        </label>
+        <app-date-input
+          label="Fecha del viaje"
+          [required]="true"
+          [value]="flightModel().fechaActividad"
+          [max]="today"
+          [error]="flightError('fechaActividad')"
+          (valueChange)="updateFlightDate($event); markFlightTouched('fechaActividad')"
+        />
 
         <div class="register-emission-page__legs">
           <div class="register-emission-page__legs-header">
@@ -174,54 +162,38 @@
           @for (leg of flightModel().legs; track $index) {
             <div class="register-emission-page__leg">
               <div class="register-emission-page__leg-title">Trayecto {{ $index + 1 }}</div>
-              <label class="register-emission-page__native-field">
-                <span class="register-emission-page__field-label">Origen</span>
-                <input
-                  type="text"
-                  maxlength="3"
-                  [value]="leg.departureAirport"
-                  (input)="updateLeg($index, 'departureAirport', $event)"
-                  (blur)="markFlightTouched('legs.' + $index + '.departureAirport')"
-                />
-                @if (flightError('legs.' + $index + '.departureAirport')) {
-                  <p class="register-emission-page__field-error">
-                    {{ flightError('legs.' + $index + '.departureAirport') }}
-                  </p>
-                }
-              </label>
+              <app-text-input
+                label="Origen"
+                placeholder="SJO"
+                [value]="leg.departureAirport"
+                [error]="flightError('legs.' + $index + '.departureAirport')"
+                (valueChange)="
+                  updateLeg($index, 'departureAirport', $event);
+                  markFlightTouched('legs.' + $index + '.departureAirport')
+                "
+              />
 
-              <label class="register-emission-page__native-field">
-                <span class="register-emission-page__field-label">Destino</span>
-                <input
-                  type="text"
-                  maxlength="3"
-                  [value]="leg.destinationAirport"
-                  (input)="updateLeg($index, 'destinationAirport', $event)"
-                  (blur)="markFlightTouched('legs.' + $index + '.destinationAirport')"
-                />
-                @if (flightError('legs.' + $index + '.destinationAirport')) {
-                  <p class="register-emission-page__field-error">
-                    {{ flightError('legs.' + $index + '.destinationAirport') }}
-                  </p>
-                }
-              </label>
+              <app-text-input
+                label="Destino"
+                placeholder="YYZ"
+                [value]="leg.destinationAirport"
+                [error]="flightError('legs.' + $index + '.destinationAirport')"
+                (valueChange)="
+                  updateLeg($index, 'destinationAirport', $event);
+                  markFlightTouched('legs.' + $index + '.destinationAirport')
+                "
+              />
 
-              <label class="register-emission-page__native-field">
-                <span class="register-emission-page__field-label">Cabina</span>
-                <select
-                  [value]="leg.cabinClass"
-                  (change)="updateLeg($index, 'cabinClass', $event)"
-                  (blur)="markFlightTouched('legs.' + $index + '.cabinClass')"
-                >
-                  <option value="economy">Economy</option>
-                  <option value="premium">Premium</option>
-                </select>
-                @if (flightError('legs.' + $index + '.cabinClass')) {
-                  <p class="register-emission-page__field-error">
-                    {{ flightError('legs.' + $index + '.cabinClass') }}
-                  </p>
-                }
-              </label>
+              <app-select-input
+                label="Cabina"
+                [options]="cabinClassOptions"
+                [value]="leg.cabinClass"
+                [error]="flightError('legs.' + $index + '.cabinClass')"
+                (valueChange)="
+                  updateLeg($index, 'cabinClass', $event);
+                  markFlightTouched('legs.' + $index + '.cabinClass')
+                "
+              />
 
               <button
                 class="register-emission-page__remove-button"
@@ -240,8 +212,8 @@
         <app-icon name="info" [size]="16" />
         <p>
           @if (activeCategory() === 'vuelo') {
-            El cálculo usa Climatiq Travel Distance para estimar cada trayecto por aeropuerto IATA.
-            Un viaje de ida y vuelta se registra con dos trayectos.
+            El cálculo usa un catálogo local de aeropuertos frecuentes para estimar cada trayecto
+            por código IATA. Un viaje de ida y vuelta se registra con dos trayectos.
           } @else {
             El cálculo de electricidad usa factores de red como aproximación cuando no existe
             proveedor local configurado.

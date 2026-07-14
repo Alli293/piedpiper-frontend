@@ -72,7 +72,7 @@ describe('EmisionesService', () => {
     req.flush({
       id: '2',
       categoria: 'VUELO',
-      titulo: 'Viaje aereo SFO-YYZ',
+      titulo: 'Viaje aéreo SFO-YYZ',
       fechaActividad: payload.fechaActividad,
       passengers: 2,
       legs: payload.legs,

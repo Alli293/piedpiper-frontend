@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideLocationMocks } from '@angular/common/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { RegisterEmissionPageComponent } from './register-emission-page.component';
 import { EmisionesService } from '../emisiones.service';
 import { EmisionResponse } from '../models/emision.model';
@@ -17,6 +17,17 @@ const VALID_RESPONSE: EmisionResponse = {
   factorEmisionId: 'factor-1',
   estimatedAt: '2026-07-01T00:00:00Z',
   createdAt: '2026-07-01T00:00:00Z',
+};
+
+const FLIGHT_RESPONSE: EmisionResponse = {
+  ...VALID_RESPONSE,
+  id: 'flight-1',
+  categoria: 'VUELO',
+  titulo: 'Viaje aéreo SFO-YYZ',
+  passengers: 2,
+  legs: [{ departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' }],
+  distanceUnit: 'km',
+  distanceValue: 7200,
 };
 
 describe('RegisterEmissionPageComponent', () => {
@@ -36,7 +47,7 @@ describe('RegisterEmissionPageComponent', () => {
     registrarVuelo = vi.fn();
     listarEmisiones = vi.fn().mockReturnValue(of([]));
     actualizarVuelo = vi.fn();
-    eliminarEmision = vi.fn();
+    eliminarEmision = vi.fn().mockReturnValue(of(void 0));
 
     await TestBed.configureTestingModule({
       imports: [RegisterEmissionPageComponent],
@@ -87,10 +98,14 @@ describe('RegisterEmissionPageComponent', () => {
   }
 
   function clickCategory(root: HTMLElement, label: string): void {
+    clickButton(root, label, 'Category');
+  }
+
+  function clickButton(root: HTMLElement, label: string, errorLabel = 'Button'): void {
     const button = Array.from(root.querySelectorAll('button')).find((item) =>
       item.textContent?.includes(label)
     );
-    if (!button) throw new Error(`Category not found: ${label}`);
+    if (!button) throw new Error(`${errorLabel} not found: ${label}`);
     button.click();
   }
 
@@ -163,6 +178,95 @@ describe('RegisterEmissionPageComponent', () => {
       fechaActividad: '2026-07-01',
       legs: [{ departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' }],
     });
+  });
+
+  it('loads the date when editing a flight', async () => {
+    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    clickButton(root, 'Editar');
+    fixture.detectChanges();
+
+    const dateInput = root.querySelector<HTMLInputElement>('input[type="date"]');
+    expect(dateInput?.value).toBe('2026-07-01');
+  });
+
+  it('keeps the edit flow stable when updating a flight fails', async () => {
+    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
+    actualizarVuelo.mockReturnValue(throwError(() => new Error('Network error')));
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    clickButton(root, 'Editar');
+    await submitForm(fixture);
+
+    expect(actualizarVuelo).toHaveBeenCalledWith('flight-1', {
+      passengers: 2,
+      distanceUnit: 'km',
+      fechaActividad: '2026-07-01',
+      legs: [{ departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' }],
+    });
+  });
+
+  it('asks for confirmation before deleting an emission', async () => {
+    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
+    vi.stubGlobal(
+      'confirm',
+      vi.fn(() => true)
+    );
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    clickButton(root, 'Eliminar');
+    await fixture.whenStable();
+
+    expect(globalThis.confirm).toHaveBeenCalled();
+    expect(eliminarEmision).toHaveBeenCalledWith('flight-1');
+  });
+
+  it('does not delete when confirmation is cancelled', async () => {
+    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
+    vi.stubGlobal(
+      'confirm',
+      vi.fn(() => false)
+    );
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    clickButton(root, 'Eliminar');
+    await fixture.whenStable();
+
+    expect(eliminarEmision).not.toHaveBeenCalled();
+  });
+
+  it('does not submit without an active session', async () => {
+    storage.removeItem('carbonhub.token');
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    fillValidForm(root);
+    await submitForm(fixture);
+
+    expect(registrarElectricidad).not.toHaveBeenCalled();
+  });
+
+  it('shows the empty state when loading emissions fails', async () => {
+    listarEmisiones.mockReturnValue(throwError(() => new Error('Network error')));
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(root.textContent).toContain('Aún no hay emisiones registradas.');
   });
 });
 
