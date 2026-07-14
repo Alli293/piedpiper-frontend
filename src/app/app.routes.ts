@@ -28,10 +28,24 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'registro/auditor',
+    loadComponent: () =>
+      import('./pages/registro-auditor/registro-auditor-page.component').then(
+        (m) => m.RegistroAuditorPageComponent
+      ),
+  },
+  {
     path: 'registro/:rol',
     loadComponent: () =>
       import('./pages/auth/registro/registro-rol-page.component').then(
         (m) => m.RegistroRolPageComponent
+      ),
+  },
+  {
+    path: 'validacion-pendiente',
+    loadComponent: () =>
+      import('./pages/validacion-pendiente/validacion-pendiente-page.component').then(
+        (m) => m.ValidacionPendientePageComponent
       ),
   },
   {
