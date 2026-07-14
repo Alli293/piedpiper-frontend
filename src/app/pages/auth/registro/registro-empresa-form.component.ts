@@ -1,7 +1,15 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { form, FormField, pattern, required, schema, submit, validate } from '@angular/forms/signals';
+import {
+  form,
+  FormField,
+  pattern,
+  required,
+  schema,
+  submit,
+  validate,
+} from '@angular/forms/signals';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
 import { CheckboxComponent } from '../../../shared/components/inputs/checkbox/checkbox.component';

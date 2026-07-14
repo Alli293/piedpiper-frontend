@@ -1,12 +1,10 @@
 @if (!enviado()) {
-  <form class="registro-usuario-form__form" (submit)="enviar($event)">
+  <form class="registro-usuario-form__form" novalidate (submit)="handleSubmit($event)">
     <app-text-input
       label="Nombre"
       autocomplete="given-name"
       placeholder="Tu nombre"
-      [value]="nombre()"
-      (valueChange)="nombre.set($event)"
-      [disabled]="cargando()"
+      [formField]="registroForm.nombre"
       [error]="errorNombre()"
     />
 
@@ -14,9 +12,7 @@
       label="Apellidos"
       autocomplete="family-name"
       placeholder="Tus apellidos"
-      [value]="apellidos()"
-      (valueChange)="apellidos.set($event)"
-      [disabled]="cargando()"
+      [formField]="registroForm.apellidos"
       [error]="errorApellidos()"
     />
 
@@ -25,9 +21,7 @@
       type="email"
       autocomplete="email"
       placeholder="tucorreo@ejemplo.com"
-      [value]="email()"
-      (valueChange)="email.set($event)"
-      [disabled]="cargando()"
+      [formField]="registroForm.email"
       [error]="errorEmail()"
     />
 
@@ -37,9 +31,7 @@
         [type]="mostrarContrasena() ? 'text' : 'password'"
         autocomplete="new-password"
         placeholder="Tu contraseña"
-        [value]="contrasena()"
-        (valueChange)="contrasena.set($event)"
-        [disabled]="cargando()"
+        [formField]="registroForm.contrasena"
         [error]="errorContrasena()"
       />
       <button
@@ -58,9 +50,7 @@
         [type]="mostrarConfirmar() ? 'text' : 'password'"
         autocomplete="new-password"
         placeholder="Repite tu contraseña"
-        [value]="confirmarContrasena()"
-        (valueChange)="confirmarContrasena.set($event)"
-        [disabled]="cargando()"
+        [formField]="registroForm.confirmarContrasena"
         [error]="errorConfirmacion()"
       />
       <button
@@ -73,11 +63,7 @@
       </button>
     </div>
 
-    <app-checkbox
-      [checked]="aceptaTerminos()"
-      (checkedChange)="aceptaTerminos.set($event)"
-      [disabled]="cargando()"
-    >
+    <app-checkbox [formField]="registroForm.aceptaTerminos" [error]="errorTerminos()">
       Acepto los <a routerLink="/terminos">Términos de servicio</a> y la
       <a routerLink="/privacidad">Política de privacidad</a> de CarbonHub
     </app-checkbox>
@@ -86,7 +72,13 @@
       <p class="registro-usuario-form__error" role="alert">{{ error() }}</p>
     }
 
-    <app-button variant="primary" size="lg" type="submit" [loading]="cargando()">
+    <app-button
+      variant="primary"
+      size="lg"
+      type="submit"
+      [loading]="submitting()"
+      [disabled]="submitting()"
+    >
       Crear cuenta →
     </app-button>
   </form>

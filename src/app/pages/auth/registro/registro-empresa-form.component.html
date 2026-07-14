@@ -69,10 +69,7 @@
       </button>
     </div>
 
-    <app-checkbox
-      [formField]="registroForm.aceptaTerminos"
-      [error]="errorTerminos()"
-    >
+    <app-checkbox [formField]="registroForm.aceptaTerminos" [error]="errorTerminos()">
       Acepto los <a routerLink="/terminos">Términos de servicio</a> y la
       <a routerLink="/privacidad">Política de privacidad</a> de CarbonHub
     </app-checkbox>
