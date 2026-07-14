@@ -30,6 +30,16 @@ export class AuthService {
       .pipe(tap((response) => this.guardarSesion(response)));
   }
 
+  registrarConInvitacion(tokenInvitacion: string, idToken: string): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.baseUrl}/registro/invitacion`, {
+        tokenInvitacion,
+        idToken,
+        aceptaTerminos: true,
+      })
+      .pipe(tap((response) => this.guardarSesion(response)));
+  }
+
   private login(request: LoginRequest): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.baseUrl}/login`, request)

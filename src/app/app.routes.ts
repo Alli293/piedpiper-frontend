@@ -35,6 +35,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'registro/invitacion',
+    loadComponent: () =>
+      import('./pages/auth/registro-invitacion/registro-invitacion-page.component').then(
+        (m) => m.RegistroInvitacionPageComponent
+      ),
+  },
+  {
     path: 'registro/:rol',
     loadComponent: () =>
       import('./pages/auth/registro/registro-rol-page.component').then(
