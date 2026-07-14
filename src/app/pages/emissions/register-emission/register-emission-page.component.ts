@@ -126,7 +126,9 @@ export class RegisterEmissionPageComponent implements OnInit {
 
   protected readonly activeCategory = signal<EmissionCategory>('electricidad');
   protected readonly model = signal<RegistrarElectricidadFormModel>({ ...INITIAL_MODEL });
-  protected readonly flightModel = signal<RegistrarVueloFormModel>(cloneFlightModel(INITIAL_FLIGHT_MODEL));
+  protected readonly flightModel = signal<RegistrarVueloFormModel>(
+    cloneFlightModel(INITIAL_FLIGHT_MODEL)
+  );
   protected readonly flightTouched = signal<Set<FlightErrorKey>>(new Set());
   protected readonly flightSubmitted = signal(false);
   protected readonly flightSubmitting = signal(false);
@@ -176,7 +178,9 @@ export class RegisterEmissionPageComponent implements OnInit {
   );
 
   protected readonly submitting = computed(() => this.registerForm().submitting());
-  protected readonly flightErrors = computed(() => validateFlightModel(this.flightModel(), this.today));
+  protected readonly flightErrors = computed(() =>
+    validateFlightModel(this.flightModel(), this.today)
+  );
   protected readonly canSubmit = computed(() => {
     if (this.activeCategory() === 'electricidad') {
       return this.registerForm().valid() && !this.submitting();
@@ -265,11 +269,7 @@ export class RegisterEmissionPageComponent implements OnInit {
     this.flightModel.update((model) => ({ ...model, distanceUnit }));
   }
 
-  protected updateLeg(
-    index: number,
-    field: keyof RegistrarVueloLegFormModel,
-    event: Event
-  ): void {
+  protected updateLeg(index: number, field: keyof RegistrarVueloLegFormModel, event: Event): void {
     const value = (event.target as HTMLInputElement | HTMLSelectElement).value;
     this.flightModel.update((model) => ({
       ...model,
@@ -287,7 +287,10 @@ export class RegisterEmissionPageComponent implements OnInit {
   protected addLeg(): void {
     this.flightModel.update((model) => ({
       ...model,
-      legs: [...model.legs, { departureAirport: '', destinationAirport: '', cabinClass: 'economy' }],
+      legs: [
+        ...model.legs,
+        { departureAirport: '', destinationAirport: '', cabinClass: 'economy' },
+      ],
     }));
   }
 
