@@ -1,3 +1,4 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideLocationMocks } from '@angular/common/testing';
 import { provideRouter, Router } from '@angular/router';
@@ -5,6 +6,9 @@ import { of } from 'rxjs';
 import { RegisterEmissionPageComponent } from './register-emission-page.component';
 import { EmisionesService } from '../emisiones.service';
 import { EmisionResponse } from '../models/emision.model';
+
+@Component({ template: '' })
+class EmisionesStubComponent {}
 
 const VALID_RESPONSE: EmisionResponse = {
   id: '1',
@@ -30,12 +34,10 @@ describe('RegisterEmissionPageComponent', () => {
       imports: [RegisterEmissionPageComponent],
       providers: [
         provideLocationMocks(),
-        provideRouter([]),
+        provideRouter([{ path: 'emisiones', component: EmisionesStubComponent }]),
         { provide: EmisionesService, useValue: { registrarElectricidad } },
       ],
     }).compileComponents();
-
-    vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
   });
 
   function createFixture() {
@@ -76,7 +78,7 @@ describe('RegisterEmissionPageComponent', () => {
     expect(registrarElectricidad).not.toHaveBeenCalled();
   });
 
-  it('calls the service exactly once when the form is valid', async () => {
+  it('calls the service exactly once when the form is valid and navigates to an existing route', async () => {
     registrarElectricidad.mockReturnValue(of(VALID_RESPONSE));
 
     const fixture = createFixture();
@@ -84,6 +86,7 @@ describe('RegisterEmissionPageComponent', () => {
 
     fillValidForm(root);
     await submitForm(fixture);
+    await fixture.whenStable();
 
     expect(registrarElectricidad).toHaveBeenCalledTimes(1);
     expect(registrarElectricidad).toHaveBeenCalledWith({
@@ -92,6 +95,6 @@ describe('RegisterEmissionPageComponent', () => {
       electricityUnit: 'kwh',
       fechaActividad: '2026-07-01',
     });
-    expect(TestBed.inject(Router).navigateByUrl).toHaveBeenCalledWith('/emisiones');
+    expect(TestBed.inject(Router).url).toBe('/emisiones');
   });
 });
