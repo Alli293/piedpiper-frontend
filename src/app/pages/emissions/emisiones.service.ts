@@ -2,7 +2,12 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { EmisionResponse, RegistrarElectricidadRequest } from './models/emision.model';
+import {
+  EmisionEnvioResponse,
+  EmisionResponse,
+  RegistrarElectricidadRequest,
+  RegistrarEnvioRequest,
+} from './models/emision.model';
 
 @Injectable({ providedIn: 'root' })
 export class EmisionesService {
@@ -11,5 +16,9 @@ export class EmisionesService {
 
   registrarElectricidad(payload: RegistrarElectricidadRequest): Observable<EmisionResponse> {
     return this.http.post<EmisionResponse>(`${this.baseUrl}/electricidad`, payload);
+  }
+
+  registrarEnvio(payload: RegistrarEnvioRequest): Observable<EmisionEnvioResponse> {
+    return this.http.post<EmisionEnvioResponse>(`${this.baseUrl}/envio`, payload);
   }
 }

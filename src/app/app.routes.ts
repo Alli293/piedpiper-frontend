@@ -62,10 +62,10 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'emisiones/registrar',
+    path: 'emisiones/registrar/envio',
     loadComponent: () =>
-      import('./pages/emissions/register-emission/register-emission-page.component').then(
-        (m) => m.RegisterEmissionPageComponent
+      import('./pages/emissions/register-shipping/register-shipping-page.component').then(
+        (m) => m.RegisterShippingPageComponent
       ),
   },
   {

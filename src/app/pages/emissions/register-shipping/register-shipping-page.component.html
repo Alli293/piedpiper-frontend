@@ -1,0 +1,162 @@
+<app-page-layout
+  [sidebarConfig]="sidebarConfig()"
+  [headerConfig]="headerConfig()"
+  (backClicked)="goBack()"
+>
+  <div class="register-shipping-page">
+    <form class="register-shipping-page__card" novalidate (submit)="handleSubmit($event)">
+      <header class="register-shipping-page__header">
+        <span class="register-shipping-page__header-icon" aria-hidden="true">
+          <app-icon name="envios-carga" [size]="24" />
+        </span>
+        <div>
+          <h2 class="register-shipping-page__title">Envíos de carga</h2>
+          <p class="register-shipping-page__subtitle">
+            Registra un envío para calcular su huella de carbono.
+          </p>
+        </div>
+      </header>
+
+      <div
+        class="register-shipping-page__categories"
+        role="group"
+        aria-label="Categoría de emisión"
+      >
+        <button
+          type="button"
+          class="register-shipping-page__category"
+          disabled
+          title="Próximamente disponible"
+        >
+          <app-icon name="electricidad" [size]="16" />
+          Electricidad
+        </button>
+        <button
+          type="button"
+          class="register-shipping-page__category"
+          disabled
+          title="Próximamente disponible"
+        >
+          <app-icon name="flota-vehicular" [size]="16" />
+          Flota vehicular
+        </button>
+        <button
+          type="button"
+          class="register-shipping-page__category"
+          disabled
+          title="Próximamente disponible"
+        >
+          <app-icon name="vuelos" [size]="16" />
+          Vuelos
+        </button>
+        <button
+          type="button"
+          class="register-shipping-page__category register-shipping-page__category--active"
+          aria-pressed="true"
+        >
+          <app-icon name="envios-carga" [size]="16" />
+          Envíos de carga
+        </button>
+      </div>
+
+      <div class="register-shipping-page__row">
+        <app-number-input
+          class="register-shipping-page__field--grow"
+          label="Peso del envío"
+          placeholder="0"
+          step="0.001"
+          [formField]="registerForm.weightValue"
+          [error]="weightValueError()"
+        />
+
+        <div class="register-shipping-page__field">
+          <span class="register-shipping-page__field-label" id="weight-unit-label">Unidad</span>
+          <div
+            class="register-shipping-page__unit-options"
+            appRadioGroup
+            aria-labelledby="weight-unit-label"
+            [formField]="registerForm.weightUnit"
+          >
+            <app-radio value="g" label="g" />
+            <app-radio value="lb" label="lb" />
+            <app-radio value="kg" label="kg" />
+            <app-radio value="mt" label="mt" />
+          </div>
+          @if (weightUnitError()) {
+            <p class="register-shipping-page__field-error">{{ weightUnitError() }}</p>
+          }
+        </div>
+      </div>
+
+      <div class="register-shipping-page__row">
+        <app-number-input
+          class="register-shipping-page__field--grow"
+          label="Distancia recorrida"
+          placeholder="0"
+          step="0.001"
+          [formField]="registerForm.distanceValue"
+          [error]="distanceValueError()"
+        />
+
+        <div class="register-shipping-page__field">
+          <span class="register-shipping-page__field-label" id="distance-unit-label">Unidad</span>
+          <div
+            class="register-shipping-page__unit-options"
+            appRadioGroup
+            aria-labelledby="distance-unit-label"
+            [formField]="registerForm.distanceUnit"
+          >
+            <app-radio value="km" label="km" />
+            <app-radio value="mi" label="mi" />
+          </div>
+          @if (distanceUnitError()) {
+            <p class="register-shipping-page__field-error">{{ distanceUnitError() }}</p>
+          }
+        </div>
+      </div>
+
+      <div class="register-shipping-page__field">
+        <span class="register-shipping-page__field-label" id="transport-method-label">Método de transporte</span>
+        <div
+          class="register-shipping-page__unit-options"
+          appRadioGroup
+          aria-labelledby="transport-method-label"
+          [formField]="registerForm.transportMethod"
+        >
+          <app-radio value="ship" label="Barco" />
+          <app-radio value="train" label="Tren" />
+          <app-radio value="truck" label="Camión" />
+          <app-radio value="plane" label="Avión" />
+        </div>
+        @if (transportMethodError()) {
+          <p class="register-shipping-page__field-error">{{ transportMethodError() }}</p>
+        }
+      </div>
+
+      <app-date-input
+        label="Fecha del registro"
+        [formField]="registerForm.fechaActividad"
+        [error]="fechaActividadError()"
+      />
+
+      <app-textarea
+        label="Detalle"
+        placeholder="Ej. Envío de café a puerto — Limón"
+        [formField]="registerForm.titulo"
+        [error]="tituloError()"
+      />
+
+      <div class="register-shipping-page__actions">
+        <app-button variant="secondary" type="button" (click)="onCancel()">Cancelar</app-button>
+        <app-button
+          variant="primary"
+          type="submit"
+          [loading]="submitting()"
+          [disabled]="!canSubmit()"
+        >
+          Calcular y guardar
+        </app-button>
+      </div>
+    </form>
+  </div>
+</app-page-layout>
