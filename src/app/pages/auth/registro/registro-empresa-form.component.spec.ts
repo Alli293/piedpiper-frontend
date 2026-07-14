@@ -16,103 +16,129 @@ describe('RegistroEmpresaFormComponent', () => {
     }).compileComponents();
   });
 
-  function llenarFormularioValido(comp: any): void {
-    comp.nombreAdmin.set('Ana');
-    comp.apellidosAdmin.set('Perez Solano');
-    comp.email.set('ana@empresa.com');
-    comp.contrasena.set('clave1234');
-    comp.confirmarContrasena.set('clave1234');
-    comp.aceptaTerminos.set(true);
+  function createFixture() {
+    const fixture = TestBed.createComponent(RegistroEmpresaFormComponent);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  function setInputValue(root: HTMLElement, selector: string, value: string): void {
+    const element = root.querySelector<HTMLInputElement>(selector);
+    if (!element) throw new Error(`Element not found: ${selector}`);
+    element.value = value;
+    element.dispatchEvent(new Event('input'));
+  }
+
+  function setChecked(root: HTMLElement, checked: boolean): void {
+    const element = root.querySelector<HTMLInputElement>('input[type="checkbox"]');
+    if (!element) throw new Error('Checkbox not found');
+    element.checked = checked;
+    element.dispatchEvent(new Event('change'));
+  }
+
+  function fillValidForm(root: HTMLElement): void {
+    setInputValue(root, 'input[autocomplete="given-name"]', 'Ana');
+    setInputValue(root, 'input[autocomplete="family-name"]', 'Perez Solano');
+    setInputValue(root, 'input[autocomplete="email"]', 'ana@empresa.com');
+    setInputValue(root, 'input[placeholder="Tu contraseña"]', 'clave1234');
+    setInputValue(root, 'input[placeholder="Repite tu contraseña"]', 'clave1234');
+    setChecked(root, true);
+  }
+
+  async function submitForm(fixture: ReturnType<typeof createFixture>): Promise<void> {
+    fixture.detectChanges();
+    const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
+    form.dispatchEvent(new Event('submit', { cancelable: true }));
+    await fixture.whenStable();
   }
 
   it('se crea', () => {
-    const fixture = TestBed.createComponent(RegistroEmpresaFormComponent);
-    fixture.detectChanges();
+    const fixture = createFixture();
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('con campos vacios muestra el error de cada campo simultaneamente, no solo el primero', () => {
-    const fixture = TestBed.createComponent(RegistroEmpresaFormComponent);
-    fixture.detectChanges();
+  it('con campos vacios muestra el error de cada campo simultaneamente, no solo el primero', async () => {
+    const fixture = createFixture();
+
+    await submitForm(fixture);
+
     const comp = fixture.componentInstance as any;
-
-    comp.enviar(new Event('submit'));
-
     expect(comp.errorNombreAdmin()).toContain('nombre del administrador');
     expect(comp.errorApellidosAdmin()).toContain('apellidos del administrador');
     expect(comp.errorEmail()).toContain('correo electrónico');
     expect(comp.errorContrasena()).toContain('contraseña');
     expect(comp.errorConfirmacion()).toContain('confirmar tu contraseña');
-    expect(comp.error()).toContain('Términos y Condiciones');
+    expect(comp.errorTerminos()).toContain('Términos y Condiciones');
     expect(authService.registrarEmpresaConCorreo).not.toHaveBeenCalled();
   });
 
-  it('con correo sin formato valido muestra error y no llama al backend', () => {
-    const fixture = TestBed.createComponent(RegistroEmpresaFormComponent);
-    fixture.detectChanges();
+  it('con correo sin formato valido muestra error y no llama al backend', async () => {
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    fillValidForm(root);
+    setInputValue(root, 'input[autocomplete="email"]', 'abc');
+
+    await submitForm(fixture);
+
     const comp = fixture.componentInstance as any;
-    llenarFormularioValido(comp);
-    comp.email.set('abc');
-
-    comp.enviar(new Event('submit'));
-
     expect(comp.errorEmail()).toContain('correo electrónico');
     expect(authService.registrarEmpresaConCorreo).not.toHaveBeenCalled();
   });
 
-  it('con contrasena que no cumple el patron (sin numero) muestra error y no llama al backend', () => {
-    const fixture = TestBed.createComponent(RegistroEmpresaFormComponent);
-    fixture.detectChanges();
+  it('con contrasena que no cumple el patron (sin numero) muestra error y no llama al backend', async () => {
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    fillValidForm(root);
+    setInputValue(root, 'input[placeholder="Tu contraseña"]', 'soloLetras');
+    setInputValue(root, 'input[placeholder="Repite tu contraseña"]', 'soloLetras');
+
+    await submitForm(fixture);
+
     const comp = fixture.componentInstance as any;
-    llenarFormularioValido(comp);
-    comp.contrasena.set('soloLetras');
-    comp.confirmarContrasena.set('soloLetras');
-
-    comp.enviar(new Event('submit'));
-
     expect(comp.errorContrasena()).toContain('al menos 8 caracteres');
     expect(authService.registrarEmpresaConCorreo).not.toHaveBeenCalled();
   });
 
-  it('con contrasenas que no coinciden muestra el error en el campo de confirmacion', () => {
-    const fixture = TestBed.createComponent(RegistroEmpresaFormComponent);
-    fixture.detectChanges();
+  it('con contrasenas que no coinciden muestra el error en el campo de confirmacion', async () => {
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    fillValidForm(root);
+    setInputValue(root, 'input[placeholder="Repite tu contraseña"]', 'otra-clave');
+
+    await submitForm(fixture);
+
     const comp = fixture.componentInstance as any;
-    llenarFormularioValido(comp);
-    comp.confirmarContrasena.set('otra-clave');
-
-    comp.enviar(new Event('submit'));
-
     expect(comp.errorConfirmacion()).toContain('no coinciden');
     expect(comp.error()).toBe('');
     expect(authService.registrarEmpresaConCorreo).not.toHaveBeenCalled();
   });
 
-  it('sin aceptar terminos muestra error y no llama al backend', () => {
-    const fixture = TestBed.createComponent(RegistroEmpresaFormComponent);
-    fixture.detectChanges();
+  it('sin aceptar terminos muestra error junto al checkbox y no llama al backend', async () => {
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    fillValidForm(root);
+    setChecked(root, false);
+
+    await submitForm(fixture);
+
     const comp = fixture.componentInstance as any;
-    llenarFormularioValido(comp);
-    comp.aceptaTerminos.set(false);
-
-    comp.enviar(new Event('submit'));
-
-    expect(comp.error()).toContain('Términos y Condiciones');
+    expect(comp.errorTerminos()).toContain('Términos y Condiciones');
+    expect(comp.error()).toBe('');
     expect(authService.registrarEmpresaConCorreo).not.toHaveBeenCalled();
   });
 
-  it('con datos validos llama a registrarEmpresaConCorreo y muestra pantalla de exito', () => {
+  it('con datos validos llama a registrarEmpresaConCorreo y muestra pantalla de exito', async () => {
     authService.registrarEmpresaConCorreo.mockReturnValue(
       of({ mensaje: 'Revisa tu correo', email: 'ana@empresa.com' })
     );
 
-    const fixture = TestBed.createComponent(RegistroEmpresaFormComponent);
-    fixture.detectChanges();
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    fillValidForm(root);
+
+    await submitForm(fixture);
+
     const comp = fixture.componentInstance as any;
-    llenarFormularioValido(comp);
-
-    comp.enviar(new Event('submit'));
-
     expect(authService.registrarEmpresaConCorreo).toHaveBeenCalledWith({
       nombreAdmin: 'Ana',
       apellidosAdmin: 'Perez Solano',
@@ -125,25 +151,24 @@ describe('RegistroEmpresaFormComponent', () => {
     expect(comp.correoEnviado()).toBe('ana@empresa.com');
   });
 
-  it('si el backend responde error, lo muestra y no marca como enviado', () => {
+  it('si el backend responde error, lo muestra y no marca como enviado', async () => {
     authService.registrarEmpresaConCorreo.mockReturnValue(
       throwError(() => ({ error: { message: 'Ya existe una cuenta con este correo.' } }))
     );
 
-    const fixture = TestBed.createComponent(RegistroEmpresaFormComponent);
-    fixture.detectChanges();
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    fillValidForm(root);
+
+    await submitForm(fixture);
+
     const comp = fixture.componentInstance as any;
-    llenarFormularioValido(comp);
-
-    comp.enviar(new Event('submit'));
-
     expect(comp.error()).toBe('Ya existe una cuenta con este correo.');
     expect(comp.enviado()).toBe(false);
   });
 
   it('alternarContrasena y alternarConfirmar cambian la visibilidad de cada campo por separado', () => {
-    const fixture = TestBed.createComponent(RegistroEmpresaFormComponent);
-    fixture.detectChanges();
+    const fixture = createFixture();
     const comp = fixture.componentInstance as any;
 
     comp.alternarContrasena();

@@ -5,14 +5,12 @@
     text="Al crear tu cuenta, te guiaremos para registrar tu empresa: nombre, sector y más."
   />
 
-  <form class="registro-empresa-form__form" (submit)="enviar($event)">
+  <form class="registro-empresa-form__form" novalidate (submit)="handleSubmit($event)">
     <app-text-input
       label="Nombre"
       autocomplete="given-name"
       placeholder="Tu nombre"
-      [value]="nombreAdmin()"
-      (valueChange)="nombreAdmin.set($event)"
-      [disabled]="cargando()"
+      [formField]="registroForm.nombreAdmin"
       [error]="errorNombreAdmin()"
     />
 
@@ -20,9 +18,7 @@
       label="Apellidos"
       autocomplete="family-name"
       placeholder="Tus apellidos"
-      [value]="apellidosAdmin()"
-      (valueChange)="apellidosAdmin.set($event)"
-      [disabled]="cargando()"
+      [formField]="registroForm.apellidosAdmin"
       [error]="errorApellidosAdmin()"
     />
 
@@ -31,9 +27,7 @@
       type="email"
       autocomplete="email"
       placeholder="tucorreo@empresa.com"
-      [value]="email()"
-      (valueChange)="email.set($event)"
-      [disabled]="cargando()"
+      [formField]="registroForm.email"
       [error]="errorEmail()"
     />
 
@@ -43,9 +37,7 @@
         [type]="mostrarContrasena() ? 'text' : 'password'"
         autocomplete="new-password"
         placeholder="Tu contraseña"
-        [value]="contrasena()"
-        (valueChange)="contrasena.set($event)"
-        [disabled]="cargando()"
+        [formField]="registroForm.contrasena"
         [error]="errorContrasena()"
       />
       <button
@@ -64,9 +56,7 @@
         [type]="mostrarConfirmar() ? 'text' : 'password'"
         autocomplete="new-password"
         placeholder="Repite tu contraseña"
-        [value]="confirmarContrasena()"
-        (valueChange)="confirmarContrasena.set($event)"
-        [disabled]="cargando()"
+        [formField]="registroForm.confirmarContrasena"
         [error]="errorConfirmacion()"
       />
       <button
@@ -80,9 +70,8 @@
     </div>
 
     <app-checkbox
-      [checked]="aceptaTerminos()"
-      (checkedChange)="aceptaTerminos.set($event)"
-      [disabled]="cargando()"
+      [formField]="registroForm.aceptaTerminos"
+      [error]="errorTerminos()"
     >
       Acepto los <a routerLink="/terminos">Términos de servicio</a> y la
       <a routerLink="/privacidad">Política de privacidad</a> de CarbonHub
@@ -92,7 +81,13 @@
       <p class="registro-empresa-form__error" role="alert">{{ error() }}</p>
     }
 
-    <app-button variant="primary" size="lg" type="submit" [loading]="cargando()">
+    <app-button
+      variant="primary"
+      size="lg"
+      type="submit"
+      [loading]="submitting()"
+      [disabled]="submitting()"
+    >
       Crear cuenta →
     </app-button>
   </form>
