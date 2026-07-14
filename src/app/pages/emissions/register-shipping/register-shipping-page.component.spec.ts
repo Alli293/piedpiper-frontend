@@ -141,9 +141,7 @@ describe('RegisterShippingPageComponent', () => {
     fillValidForm(root);
     await submitForm(fixture);
 
-    expect(toastError).toHaveBeenCalledWith(
-      expect.stringContaining('sesión')
-    );
+    expect(toastError).toHaveBeenCalledWith(expect.stringContaining('sesión'));
     expect(TestBed.inject(Router).navigateByUrl).not.toHaveBeenCalledWith('/emisiones');
   });
 
@@ -157,9 +155,7 @@ describe('RegisterShippingPageComponent', () => {
     fillValidForm(root);
     await submitForm(fixture);
 
-    expect(toastError).toHaveBeenCalledWith(
-      expect.stringContaining('sesión')
-    );
+    expect(toastError).toHaveBeenCalledWith(expect.stringContaining('sesión'));
   });
 
   it('shows API error message when backend returns error with message', async () => {
@@ -188,8 +184,6 @@ describe('RegisterShippingPageComponent', () => {
     fillValidForm(root);
     await submitForm(fixture);
 
-    expect(toastError).toHaveBeenCalledWith(
-      expect.stringContaining('No se pudo conectar')
-    );
+    expect(toastError).toHaveBeenCalledWith(expect.stringContaining('No se pudo conectar'));
   });
 });
