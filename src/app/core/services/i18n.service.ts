@@ -37,23 +37,16 @@ const TRADUCCIONES_EN: Record<ClaveTraduccion, string> = {
   'config.cargando': 'Loading preferences…',
 };
 
-/**
- * Servicio de internacionalización ligero (PP-31).
- * El idioma activo es un signal, por lo que cualquier template que llame a
- * `t()` se re-renderiza de inmediato al cambiar el idioma.
- */
 @Injectable({ providedIn: 'root' })
 export class I18nService {
   private readonly idiomaActual = signal<Idioma>('ESPANOL');
 
-  /** Idioma activo de la interfaz (solo lectura). */
   readonly idioma = this.idiomaActual.asReadonly();
 
   usarIdioma(idioma: Idioma): void {
     this.idiomaActual.set(idioma);
   }
 
-  /** Traduce una clave según el idioma activo. */
   t(clave: ClaveTraduccion): string {
     const diccionario = this.idiomaActual() === 'INGLES' ? TRADUCCIONES_EN : TRADUCCIONES_ES;
     return diccionario[clave] ?? clave;

@@ -13,8 +13,8 @@
       } @else {
         <div class="ch-configuracion__campos">
           <div class="ch-configuracion__campo">
-            <span class="ch-configuracion__etiqueta">{{ i18n.t('config.idioma') }}</span>
             <app-select-input
+              [label]="i18n.t('config.idioma')"
               [options]="opcionesIdioma"
               [value]="idioma()"
               [disabled]="guardando()"
@@ -23,8 +23,8 @@
           </div>
 
           <div class="ch-configuracion__campo">
-            <span class="ch-configuracion__etiqueta">{{ i18n.t('config.moneda') }}</span>
             <app-select-input
+              [label]="i18n.t('config.moneda')"
               [options]="opcionesMoneda"
               [value]="moneda()"
               [disabled]="guardando()"
@@ -33,8 +33,8 @@
           </div>
 
           <div class="ch-configuracion__campo">
-            <span class="ch-configuracion__etiqueta">{{ i18n.t('config.unidades') }}</span>
             <app-select-input
+              [label]="i18n.t('config.unidades')"
               [options]="opcionesUnidades"
               [value]="unidades()"
               [disabled]="guardando()"

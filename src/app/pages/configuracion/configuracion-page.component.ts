@@ -21,11 +21,6 @@ import {
   Preferencias,
 } from '../../core/models/preferencias.model';
 
-/**
- * Pantalla de Configuración — preferencias de interfaz (PP-31).
- * Permite elegir idioma, moneda y unidades; se guardan en el perfil del
- * usuario y se aplican de inmediato a la interfaz.
- */
 @Component({
   selector: 'app-configuracion-page',
   imports: [
@@ -50,7 +45,6 @@ export class ConfiguracionPageComponent implements OnInit {
   protected readonly cargando = signal(true);
   protected readonly guardando = signal(false);
 
-  // Selección en edición (aún no persistida).
   protected readonly idioma = signal<Idioma>('ESPANOL');
   protected readonly moneda = signal<Moneda>('CRC');
   protected readonly unidades = signal<Unidades>('METRICO');
@@ -86,7 +80,6 @@ export class ConfiguracionPageComponent implements OnInit {
         this.aplicarSeleccion(preferencias);
         this.cargando.set(false);
       },
-      // Si la lectura falla se mantienen los defaults (Español / CRC / métrico).
       error: () => this.cargando.set(false),
     });
   }
@@ -110,7 +103,6 @@ export class ConfiguracionPageComponent implements OnInit {
           this.toastService.exito(this.i18n.t('config.guardarExito'));
         },
         error: () => {
-          // La interfaz mantiene las preferencias previas.
           this.aplicarSeleccion(this.preferenciasService.preferencias());
           this.guardando.set(false);
           this.toastService.error(this.i18n.t('config.errorGuardar'));

@@ -43,7 +43,7 @@ describe('ConfiguracionPageComponent', () => {
   }
 
   function botonGuardar(): HTMLButtonElement {
-    return fixture.nativeElement.querySelector('.ch-button__inner');
+    return fixture.nativeElement.querySelector('button');
   }
 
   it('lee las preferencias del perfil y las aplica al render', () => {

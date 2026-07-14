@@ -12,7 +12,6 @@ const DURACION_MS = 5000;
 
 let siguienteId = 0;
 
-/** Servicio de notificaciones tipo toast (auto-descartables). */
 @Injectable({ providedIn: 'root' })
 export class ToastService {
   private readonly toastsActivos = signal<Toast[]>([]);
