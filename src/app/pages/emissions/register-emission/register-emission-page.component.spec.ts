@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideLocationMocks } from '@angular/common/testing';
+import { provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { RegisterEmissionPageComponent } from './register-emission-page.component';
 import { EmisionesService } from '../emisiones.service';
@@ -29,9 +30,12 @@ describe('RegisterEmissionPageComponent', () => {
       imports: [RegisterEmissionPageComponent],
       providers: [
         provideLocationMocks(),
+        provideRouter([]),
         { provide: EmisionesService, useValue: { registrarElectricidad } },
       ],
     }).compileComponents();
+
+    vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
   });
 
   function createFixture() {
@@ -88,5 +92,6 @@ describe('RegisterEmissionPageComponent', () => {
       electricityUnit: 'kwh',
       fechaActividad: '2026-07-01',
     });
+    expect(TestBed.inject(Router).navigateByUrl).toHaveBeenCalledWith('/emisiones');
   });
 });
