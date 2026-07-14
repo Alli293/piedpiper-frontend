@@ -102,6 +102,10 @@ export class RegistroAuditorPageComponent {
   }
 
   private registrarConGoogle(idToken: string): void {
+    if (!this.aceptaTerminos()) {
+      this.errorTerminos.set('Debes aceptar los términos y condiciones.');
+      return;
+    }
     this.cargando.set(true);
     this.limpiarErrores();
     this.authService.registrarConGoogle('auditor', idToken).subscribe({

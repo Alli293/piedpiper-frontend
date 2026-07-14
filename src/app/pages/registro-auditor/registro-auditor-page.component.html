@@ -108,7 +108,11 @@
       <span>o</span>
     </div>
 
-    <div class="registro-auditor__google" #googleButton></div>
+    <div
+      class="registro-auditor__google"
+      [class.registro-auditor__google--disabled]="!aceptaTerminos()"
+      #googleButton
+    ></div>
 
     <p class="registro-auditor__login">
       ¿Ya tienes cuenta?

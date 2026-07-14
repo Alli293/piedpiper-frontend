@@ -16,8 +16,8 @@ interface AuthStat {
 })
 export class AuthLayoutComponent {
   protected readonly stats: AuthStat[] = [
-    { value: '200+', label: 'auditores activos' },
-    { value: '48h', label: 'validación promedio' },
+    { value: '150+', label: 'empresas certificadas' },
+    { value: '48', label: 'auditores certificados activos' },
     { value: '26,282', unit: 'tCO₂e', label: 'verificadas este año' },
   ];
 }
