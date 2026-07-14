@@ -1,5 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { form, FormField, required, schema, submit, validate } from '@angular/forms/signals';
 import { ConfiguracionInicialLayoutComponent } from '../../shared/layouts/configuracion-inicial-layout/configuracion-inicial-layout.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { TextInputComponent } from '../../shared/components/inputs/text-input/text-input.component';
@@ -16,9 +18,28 @@ import {
 
 const CEDULA_JURIDICA_PATTERN = /^\d-\d{3}-\d{6}$/;
 
+interface ConfiguracionInicialFormModel {
+  nombreEmpresa: string;
+  cedulaJuridica: string;
+  sectorIndustrial: string;
+  pais: string;
+  cantidadEmpleados: string;
+  descripcion: string;
+}
+
+const INITIAL_MODEL: ConfiguracionInicialFormModel = {
+  nombreEmpresa: '',
+  cedulaJuridica: '',
+  sectorIndustrial: '',
+  pais: 'CR',
+  cantidadEmpleados: '',
+  descripcion: '',
+};
+
 @Component({
   selector: 'app-configuracion-inicial-page',
   imports: [
+    FormField,
     ConfiguracionInicialLayoutComponent,
     ButtonComponent,
     TextInputComponent,
@@ -53,60 +74,77 @@ export class ConfiguracionInicialPageComponent {
     { value: 'CO', label: 'Colombia' },
   ];
 
-  protected readonly nombreEmpresa = signal('');
-  protected readonly cedulaJuridica = signal('');
-  protected readonly sectorIndustrial = signal('');
-  protected readonly pais = signal('CR');
-  protected readonly cantidadEmpleados = signal('');
-  protected readonly descripcion = signal('');
+  protected readonly model = signal<ConfiguracionInicialFormModel>({ ...INITIAL_MODEL });
 
-  protected readonly errorNombreEmpresa = signal('');
-  protected readonly errorCedulaJuridica = signal('');
-  protected readonly errorSectorIndustrial = signal('');
-  protected readonly errorPais = signal('');
-  protected readonly errorCantidadEmpleados = signal('');
-  protected readonly errorDescripcion = signal('');
+  protected readonly configuracionForm = form(
+    this.model,
+    schema<ConfiguracionInicialFormModel>((path) => {
+      required(path.nombreEmpresa, { message: 'Ingresa el nombre legal de la empresa.' });
 
-  protected readonly cargando = signal(false);
+      validate(path.cedulaJuridica, ({ value }) => {
+        if (!CEDULA_JURIDICA_PATTERN.test(value().trim())) {
+          return {
+            kind: 'cedulaJuridicaInvalida',
+            message: 'Formato de cédula jurídica inválido (ej. 3-101-123456).',
+          };
+        }
+        return undefined;
+      });
+
+      required(path.sectorIndustrial, { message: 'Selecciona una opción válida.' });
+      required(path.pais, { message: 'Selecciona una opción válida.' });
+
+      validate(path.cantidadEmpleados, ({ value }) => {
+        const raw = value();
+        const cantidad = Number(raw);
+        if (!raw.trim() || !Number.isInteger(cantidad) || cantidad <= 0) {
+          return {
+            kind: 'cantidadEmpleadosInvalida',
+            message: 'Ingresa un número de empleados mayor que 0.',
+          };
+        }
+        return undefined;
+      });
+
+      validate(path.descripcion, ({ value }) => {
+        if (value().length > 300) {
+          return {
+            kind: 'descripcionMuyLarga',
+            message: 'La descripción no puede superar los 300 caracteres.',
+          };
+        }
+        return undefined;
+      });
+    })
+  );
+
   protected readonly error = signal('');
   protected readonly enviado = signal(false);
   protected readonly resultado = signal<ConfiguracionInicialEmpresaResponse | null>(null);
 
-  protected readonly descripcionContador = computed(() => `${this.descripcion().length}/300`);
+  protected readonly errorNombreEmpresa = computed(() =>
+    this.fieldError(this.configuracionForm.nombreEmpresa())
+  );
+  protected readonly errorCedulaJuridica = computed(() =>
+    this.fieldError(this.configuracionForm.cedulaJuridica())
+  );
+  protected readonly errorSectorIndustrial = computed(() =>
+    this.fieldError(this.configuracionForm.sectorIndustrial())
+  );
+  protected readonly errorPais = computed(() => this.fieldError(this.configuracionForm.pais()));
+  protected readonly errorCantidadEmpleados = computed(() =>
+    this.fieldError(this.configuracionForm.cantidadEmpleados())
+  );
+  protected readonly errorDescripcion = computed(() =>
+    this.fieldError(this.configuracionForm.descripcion())
+  );
 
-  protected enviar(event?: Event): void {
-    event?.preventDefault();
-    if (this.cargando()) {
-      return;
-    }
-    if (!this.validar()) {
-      return;
-    }
+  protected readonly submitting = computed(() => this.configuracionForm().submitting());
+  protected readonly descripcionContador = computed(() => `${this.model().descripcion.length}/300`);
 
-    this.cargando.set(true);
-    this.empresaService
-      .completarConfiguracionEmpresa({
-        nombreEmpresa: this.nombreEmpresa().trim(),
-        cedulaJuridica: this.cedulaJuridica().trim(),
-        sectorIndustrial: this.sectorIndustrial() as SectorIndustrial,
-        pais: this.pais(),
-        cantidadEmpleados: Number(this.cantidadEmpleados()),
-        descripcion: this.descripcion().trim() || undefined,
-      })
-      .subscribe({
-        next: (respuesta) => {
-          this.cargando.set(false);
-          this.resultado.set(respuesta);
-          this.enviado.set(true);
-        },
-        error: (err) => {
-          this.cargando.set(false);
-          this.error.set(
-            err?.error?.message ??
-              'No pudimos guardar la información de tu empresa. Intenta nuevamente.'
-          );
-        },
-      });
+  protected handleSubmit(event: Event): void {
+    event.preventDefault();
+    void this.onSubmit();
   }
 
   protected continuar(): void {
@@ -117,40 +155,38 @@ export class ConfiguracionInicialPageComponent {
     });
   }
 
-  private validar(): boolean {
-    this.error.set('');
-    this.errorNombreEmpresa.set('');
-    this.errorCedulaJuridica.set('');
-    this.errorSectorIndustrial.set('');
-    this.errorPais.set('');
-    this.errorCantidadEmpleados.set('');
-    this.errorDescripcion.set('');
+  private async onSubmit(): Promise<void> {
+    await submit(this.configuracionForm, async (field) => {
+      const value = field().value();
+      try {
+        const respuesta = await firstValueFrom(
+          this.empresaService.completarConfiguracionEmpresa({
+            nombreEmpresa: value.nombreEmpresa.trim(),
+            cedulaJuridica: value.cedulaJuridica.trim(),
+            sectorIndustrial: value.sectorIndustrial as SectorIndustrial,
+            pais: value.pais,
+            cantidadEmpleados: Number(value.cantidadEmpleados),
+            descripcion: value.descripcion.trim() || undefined,
+          })
+        );
+        this.error.set('');
+        this.resultado.set(respuesta);
+        this.enviado.set(true);
+      } catch (err: unknown) {
+        this.error.set(
+          (err as { error?: { message?: string } })?.error?.message ??
+            'No pudimos guardar la información de tu empresa. Intenta nuevamente.'
+        );
+      }
+      return undefined;
+    });
+  }
 
-    if (!this.nombreEmpresa().trim()) {
-      this.errorNombreEmpresa.set('Ingresa el nombre legal de la empresa.');
-      return false;
-    }
-    if (!CEDULA_JURIDICA_PATTERN.test(this.cedulaJuridica().trim())) {
-      this.errorCedulaJuridica.set('Formato de cédula jurídica inválido (ej. 3-101-123456).');
-      return false;
-    }
-    if (!this.sectorIndustrial()) {
-      this.errorSectorIndustrial.set('Selecciona una opción válida.');
-      return false;
-    }
-    if (!this.pais()) {
-      this.errorPais.set('Selecciona una opción válida.');
-      return false;
-    }
-    const cantidad = Number(this.cantidadEmpleados());
-    if (!this.cantidadEmpleados().trim() || !Number.isInteger(cantidad) || cantidad <= 0) {
-      this.errorCantidadEmpleados.set('Ingresa un número de empleados mayor que 0.');
-      return false;
-    }
-    if (this.descripcion().length > 300) {
-      this.errorDescripcion.set('La descripción no puede superar los 300 caracteres.');
-      return false;
-    }
-    return true;
+  private fieldError(field: {
+    touched(): boolean;
+    errors(): readonly { message?: string }[];
+  }): string {
+    if (!field.touched()) return '';
+    return field.errors()[0]?.message ?? '';
   }
 }

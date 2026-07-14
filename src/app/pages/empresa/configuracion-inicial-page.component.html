@@ -8,13 +8,11 @@
         </p>
       </header>
 
-      <form class="configuracion-empresa__form" (submit)="enviar($event)">
+      <form class="configuracion-empresa__form" novalidate (submit)="handleSubmit($event)">
         <app-text-input
           label="Nombre legal de la empresa"
           placeholder="Café del Valle S.A."
-          [value]="nombreEmpresa()"
-          (valueChange)="nombreEmpresa.set($event)"
-          [disabled]="cargando()"
+          [formField]="configuracionForm.nombreEmpresa"
           [error]="errorNombreEmpresa()"
         />
 
@@ -22,17 +20,13 @@
           <app-select-input
             label="Sector industrial"
             [options]="sectoresIndustriales"
-            [value]="sectorIndustrial()"
-            (valueChange)="sectorIndustrial.set($event)"
-            [disabled]="cargando()"
+            [formField]="configuracionForm.sectorIndustrial"
             [error]="errorSectorIndustrial()"
           />
           <app-select-input
             label="País"
             [options]="paises"
-            [value]="pais()"
-            (valueChange)="pais.set($event)"
-            [disabled]="cargando()"
+            [formField]="configuracionForm.pais"
             [error]="errorPais()"
           />
         </div>
@@ -42,17 +36,13 @@
             label="Cantidad de empleados"
             type="number"
             placeholder="25"
-            [value]="cantidadEmpleados()"
-            (valueChange)="cantidadEmpleados.set($event)"
-            [disabled]="cargando()"
+            [formField]="configuracionForm.cantidadEmpleados"
             [error]="errorCantidadEmpleados()"
           />
           <app-text-input
             label="Cédula jurídica"
             placeholder="3-101-123456"
-            [value]="cedulaJuridica()"
-            (valueChange)="cedulaJuridica.set($event)"
-            [disabled]="cargando()"
+            [formField]="configuracionForm.cedulaJuridica"
             [error]="errorCedulaJuridica()"
           />
         </div>
@@ -61,9 +51,7 @@
           label="Descripción (opcional)"
           placeholder="Cuéntanos brevemente a qué se dedica tu empresa..."
           [rows]="4"
-          [value]="descripcion()"
-          (valueChange)="descripcion.set($event)"
-          [disabled]="cargando()"
+          [formField]="configuracionForm.descripcion"
           [error]="errorDescripcion()"
           [hint]="descripcionContador()"
         />
@@ -72,7 +60,13 @@
           <p class="configuracion-empresa__error" role="alert">{{ error() }}</p>
         }
 
-        <app-button variant="primary" size="lg" type="submit" [loading]="cargando()">
+        <app-button
+          variant="primary"
+          size="lg"
+          type="submit"
+          [loading]="submitting()"
+          [disabled]="submitting()"
+        >
           Finalizar
         </app-button>
       </form>

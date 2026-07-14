@@ -20,72 +20,109 @@ describe('ConfiguracionInicialPageComponent', () => {
     vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
   });
 
-  function llenarFormularioValido(comp: any): void {
-    comp.nombreEmpresa.set('Café del Valle S.A.');
-    comp.cedulaJuridica.set('3-101-123456');
-    comp.sectorIndustrial.set('AGROINDUSTRIA');
-    comp.pais.set('CR');
-    comp.cantidadEmpleados.set('12');
-    comp.descripcion.set('Producción y exportación de café.');
+  function createFixture() {
+    const fixture = TestBed.createComponent(ConfiguracionInicialPageComponent);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  function setInputValue(root: HTMLElement, selector: string, value: string): void {
+    const element = root.querySelector<HTMLInputElement | HTMLTextAreaElement>(selector);
+    if (!element) throw new Error(`Element not found: ${selector}`);
+    element.value = value;
+    element.dispatchEvent(new Event('input'));
+  }
+
+  function setSelectValue(root: HTMLElement, index: number, value: string): void {
+    const selects = root.querySelectorAll<HTMLSelectElement>('select');
+    const element = selects[index];
+    if (!element) throw new Error(`Select not found at index ${index}`);
+    element.value = value;
+    element.dispatchEvent(new Event('change'));
+  }
+
+  function fillValidForm(root: HTMLElement): void {
+    setInputValue(root, 'input[placeholder="Café del Valle S.A."]', 'Café del Valle S.A.');
+    setSelectValue(root, 0, 'AGROINDUSTRIA');
+    setSelectValue(root, 1, 'CR');
+    setInputValue(root, 'input[placeholder="25"]', '12');
+    setInputValue(root, 'input[placeholder="3-101-123456"]', '3-101-123456');
+    setInputValue(
+      root,
+      'textarea[placeholder="Cuéntanos brevemente a qué se dedica tu empresa..."]',
+      'Producción y exportación de café.'
+    );
+  }
+
+  async function submitForm(fixture: ReturnType<typeof createFixture>): Promise<void> {
+    fixture.detectChanges();
+    const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
+    form.dispatchEvent(new Event('submit', { cancelable: true }));
+    await fixture.whenStable();
   }
 
   it('se crea', () => {
-    const fixture = TestBed.createComponent(ConfiguracionInicialPageComponent);
-    fixture.detectChanges();
+    const fixture = createFixture();
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('con nombreEmpresa vacio muestra error y no llama al backend', () => {
-    const fixture = TestBed.createComponent(ConfiguracionInicialPageComponent);
-    fixture.detectChanges();
+  it('con campos vacios muestra el error de cada campo simultaneamente, no solo el primero', async () => {
+    const fixture = createFixture();
+
+    await submitForm(fixture);
+
     const comp = fixture.componentInstance as any;
-
-    comp.enviar(new Event('submit'));
-
     expect(comp.errorNombreEmpresa()).toContain('nombre legal');
-    expect(empresaService.completarConfiguracionEmpresa).not.toHaveBeenCalled();
-  });
-
-  it('con cedula juridica en formato invalido muestra error y no llama al backend', () => {
-    const fixture = TestBed.createComponent(ConfiguracionInicialPageComponent);
-    fixture.detectChanges();
-    const comp = fixture.componentInstance as any;
-    llenarFormularioValido(comp);
-    comp.cedulaJuridica.set('3101123456');
-
-    comp.enviar(new Event('submit'));
-
     expect(comp.errorCedulaJuridica()).toContain('Formato de cédula jurídica inválido');
-    expect(empresaService.completarConfiguracionEmpresa).not.toHaveBeenCalled();
-  });
-
-  it('con cantidad de empleados en 0 muestra error y no llama al backend', () => {
-    const fixture = TestBed.createComponent(ConfiguracionInicialPageComponent);
-    fixture.detectChanges();
-    const comp = fixture.componentInstance as any;
-    llenarFormularioValido(comp);
-    comp.cantidadEmpleados.set('0');
-
-    comp.enviar(new Event('submit'));
-
+    expect(comp.errorSectorIndustrial()).toContain('Selecciona una opción válida');
     expect(comp.errorCantidadEmpleados()).toContain('mayor que 0');
     expect(empresaService.completarConfiguracionEmpresa).not.toHaveBeenCalled();
   });
 
-  it('con descripcion mayor a 300 caracteres muestra error y no llama al backend', () => {
-    const fixture = TestBed.createComponent(ConfiguracionInicialPageComponent);
-    fixture.detectChanges();
+  it('con cedula juridica en formato invalido muestra error y no llama al backend', async () => {
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    fillValidForm(root);
+    setInputValue(root, 'input[placeholder="3-101-123456"]', '3101123456');
+
+    await submitForm(fixture);
+
     const comp = fixture.componentInstance as any;
-    llenarFormularioValido(comp);
-    comp.descripcion.set('a'.repeat(301));
+    expect(comp.errorCedulaJuridica()).toContain('Formato de cédula jurídica inválido');
+    expect(empresaService.completarConfiguracionEmpresa).not.toHaveBeenCalled();
+  });
 
-    comp.enviar(new Event('submit'));
+  it('con cantidad de empleados en 0 muestra error y no llama al backend', async () => {
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    fillValidForm(root);
+    setInputValue(root, 'input[placeholder="25"]', '0');
 
+    await submitForm(fixture);
+
+    const comp = fixture.componentInstance as any;
+    expect(comp.errorCantidadEmpleados()).toContain('mayor que 0');
+    expect(empresaService.completarConfiguracionEmpresa).not.toHaveBeenCalled();
+  });
+
+  it('con descripcion mayor a 300 caracteres muestra error y no llama al backend', async () => {
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    fillValidForm(root);
+    setInputValue(
+      root,
+      'textarea[placeholder="Cuéntanos brevemente a qué se dedica tu empresa..."]',
+      'a'.repeat(301)
+    );
+
+    await submitForm(fixture);
+
+    const comp = fixture.componentInstance as any;
     expect(comp.errorDescripcion()).toContain('300 caracteres');
     expect(empresaService.completarConfiguracionEmpresa).not.toHaveBeenCalled();
   });
 
-  it('con datos validos llama al servicio con el payload correcto y muestra pantalla de exito sin navegar todavia', () => {
+  it('con datos validos llama al servicio con el payload correcto y muestra pantalla de exito sin navegar todavia', async () => {
     empresaService.completarConfiguracionEmpresa.mockReturnValue(
       of({
         empresaId: 'a1b2c3',
@@ -96,13 +133,13 @@ describe('ConfiguracionInicialPageComponent', () => {
       })
     );
 
-    const fixture = TestBed.createComponent(ConfiguracionInicialPageComponent);
-    fixture.detectChanges();
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    fillValidForm(root);
+
+    await submitForm(fixture);
+
     const comp = fixture.componentInstance as any;
-    llenarFormularioValido(comp);
-
-    comp.enviar(new Event('submit'));
-
     expect(empresaService.completarConfiguracionEmpresa).toHaveBeenCalledWith({
       nombreEmpresa: 'Café del Valle S.A.',
       cedulaJuridica: '3-101-123456',
@@ -116,8 +153,7 @@ describe('ConfiguracionInicialPageComponent', () => {
   });
 
   it('continuar() navega al hacer click explicito en el boton', () => {
-    const fixture = TestBed.createComponent(ConfiguracionInicialPageComponent);
-    fixture.detectChanges();
+    const fixture = createFixture();
     const comp = fixture.componentInstance as any;
 
     comp.continuar();
@@ -129,8 +165,7 @@ describe('ConfiguracionInicialPageComponent', () => {
     (router.navigateByUrl as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('fallo'));
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    const fixture = TestBed.createComponent(ConfiguracionInicialPageComponent);
-    fixture.detectChanges();
+    const fixture = createFixture();
     const comp = fixture.componentInstance as any;
 
     comp.continuar();
@@ -144,7 +179,7 @@ describe('ConfiguracionInicialPageComponent', () => {
     });
   });
 
-  it('con recienCreada false igual muestra exito, no error (usuario ya habia completado este paso)', () => {
+  it('con recienCreada false igual muestra exito, no error (usuario ya habia completado este paso)', async () => {
     empresaService.completarConfiguracionEmpresa.mockReturnValue(
       of({
         empresaId: 'a1b2c3',
@@ -155,29 +190,29 @@ describe('ConfiguracionInicialPageComponent', () => {
       })
     );
 
-    const fixture = TestBed.createComponent(ConfiguracionInicialPageComponent);
-    fixture.detectChanges();
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    fillValidForm(root);
+
+    await submitForm(fixture);
+
     const comp = fixture.componentInstance as any;
-    llenarFormularioValido(comp);
-
-    comp.enviar(new Event('submit'));
-
     expect(comp.enviado()).toBe(true);
     expect(comp.error()).toBe('');
   });
 
-  it('si el backend responde error, lo muestra y no marca como enviado', () => {
+  it('si el backend responde error, lo muestra y no marca como enviado', async () => {
     empresaService.completarConfiguracionEmpresa.mockReturnValue(
       throwError(() => ({ error: { message: 'Ya existe una empresa con esta cédula jurídica.' } }))
     );
 
-    const fixture = TestBed.createComponent(ConfiguracionInicialPageComponent);
-    fixture.detectChanges();
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    fillValidForm(root);
+
+    await submitForm(fixture);
+
     const comp = fixture.componentInstance as any;
-    llenarFormularioValido(comp);
-
-    comp.enviar(new Event('submit'));
-
     expect(comp.error()).toBe('Ya existe una empresa con esta cédula jurídica.');
     expect(comp.enviado()).toBe(false);
   });
