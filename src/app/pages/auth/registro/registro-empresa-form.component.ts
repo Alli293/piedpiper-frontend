@@ -7,6 +7,9 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { SemanticCardComponent } from '../../../shared/components/semantic-card/semantic-card.component';
 import { AuthService } from '../../../core/auth/auth.service';
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const CONTRASENA_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+
 @Component({
   selector: 'app-registro-empresa-form',
   imports: [
@@ -106,9 +109,17 @@ export class RegistroEmpresaFormComponent {
     if (!this.email().trim()) {
       this.errorEmail.set('Ingresa un correo electrónico válido.');
       esValido = false;
+    } else if (!EMAIL_PATTERN.test(this.email().trim())) {
+      this.errorEmail.set('Ingresa un correo electrónico válido.');
+      esValido = false;
     }
     if (!this.contrasena()) {
       this.errorContrasena.set('Ingresa tu contraseña.');
+      esValido = false;
+    } else if (!CONTRASENA_PATTERN.test(this.contrasena())) {
+      this.errorContrasena.set(
+        'La contraseña debe tener al menos 8 caracteres, con una letra y un número.'
+      );
       esValido = false;
     }
     if (!this.confirmarContrasena()) {

@@ -47,6 +47,33 @@ describe('RegistroUsuarioFormComponent', () => {
     expect(authService.registrarUsuarioConCorreo).not.toHaveBeenCalled();
   });
 
+  it('con correo sin formato valido muestra error y no llama al backend', () => {
+    const fixture = TestBed.createComponent(RegistroUsuarioFormComponent);
+    fixture.detectChanges();
+    const comp = fixture.componentInstance as any;
+    llenarFormularioValido(comp);
+    comp.email.set('abc');
+
+    comp.enviar(new Event('submit'));
+
+    expect(comp.errorEmail()).toContain('correo electrónico');
+    expect(authService.registrarUsuarioConCorreo).not.toHaveBeenCalled();
+  });
+
+  it('con contrasena que no cumple el patron (sin numero) muestra error y no llama al backend', () => {
+    const fixture = TestBed.createComponent(RegistroUsuarioFormComponent);
+    fixture.detectChanges();
+    const comp = fixture.componentInstance as any;
+    llenarFormularioValido(comp);
+    comp.contrasena.set('soloLetras');
+    comp.confirmarContrasena.set('soloLetras');
+
+    comp.enviar(new Event('submit'));
+
+    expect(comp.errorContrasena()).toContain('al menos 8 caracteres');
+    expect(authService.registrarUsuarioConCorreo).not.toHaveBeenCalled();
+  });
+
   it('con contrasenas que no coinciden muestra el error en el campo de confirmacion', () => {
     const fixture = TestBed.createComponent(RegistroUsuarioFormComponent);
     fixture.detectChanges();

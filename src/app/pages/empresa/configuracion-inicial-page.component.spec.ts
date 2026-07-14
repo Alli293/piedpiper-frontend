@@ -122,7 +122,7 @@ describe('ConfiguracionInicialPageComponent', () => {
 
     comp.continuar();
 
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/empresa/panel');
   });
 
   it('continuar() loguea el error si la navegacion falla', () => {
