@@ -1,0 +1,84 @@
+<app-configuracion-inicial-layout rolLabel="Empresa" rolIcon="empresa">
+  @if (!enviado()) {
+    <div class="configuracion-empresa">
+      <header class="configuracion-empresa__header">
+        <h1 class="configuracion-empresa__title">Información de tu empresa</h1>
+        <p class="configuracion-empresa__subtitle">
+          Completa estos datos para terminar de configurar tu cuenta.
+        </p>
+      </header>
+
+      <form class="configuracion-empresa__form" novalidate (submit)="handleSubmit($event)">
+        <app-text-input
+          label="Nombre legal de la empresa"
+          placeholder="Café del Valle S.A."
+          [formField]="configuracionForm.nombreEmpresa"
+          [error]="errorNombreEmpresa()"
+        />
+
+        <div class="configuracion-empresa__row">
+          <app-select-input
+            label="Sector industrial"
+            [options]="sectoresIndustriales"
+            [formField]="configuracionForm.sectorIndustrial"
+            [error]="errorSectorIndustrial()"
+          />
+          <app-select-input
+            label="País"
+            [options]="paises"
+            [formField]="configuracionForm.pais"
+            [error]="errorPais()"
+          />
+        </div>
+
+        <div class="configuracion-empresa__row">
+          <app-text-input
+            label="Cantidad de empleados"
+            type="number"
+            placeholder="25"
+            [formField]="configuracionForm.cantidadEmpleados"
+            [error]="errorCantidadEmpleados()"
+          />
+          <app-text-input
+            label="Cédula jurídica"
+            placeholder="3-101-123456"
+            [formField]="configuracionForm.cedulaJuridica"
+            [error]="errorCedulaJuridica()"
+          />
+        </div>
+
+        <app-textarea
+          label="Descripción (opcional)"
+          placeholder="Cuéntanos brevemente a qué se dedica tu empresa..."
+          [rows]="4"
+          [formField]="configuracionForm.descripcion"
+          [error]="errorDescripcion()"
+          [hint]="descripcionContador()"
+        />
+
+        @if (error()) {
+          <p class="configuracion-empresa__error" role="alert">{{ error() }}</p>
+        }
+
+        <app-button
+          variant="primary"
+          size="lg"
+          type="submit"
+          [loading]="submitting()"
+          [disabled]="submitting()"
+        >
+          Finalizar
+        </app-button>
+      </form>
+    </div>
+  } @else {
+    <div class="configuracion-empresa__exito">
+      <h2 class="configuracion-empresa__exito-title">¡Listo!</h2>
+      <p class="configuracion-empresa__exito-text">
+        Guardamos la información de <strong>{{ resultado()?.nombreEmpresa }}</strong
+        >.
+      </p>
+      <app-button variant="primary" size="lg" (click)="continuar()">Continuar</app-button>
+    </div>
+  }
+</app-configuracion-inicial-layout>

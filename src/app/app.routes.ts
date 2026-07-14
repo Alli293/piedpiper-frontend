@@ -1,11 +1,11 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/auth/auth.guard';
 
 const cargarPlaceholder = () =>
   import('./pages/placeholder/placeholder-page.component').then((m) => m.PlaceholderPageComponent);
 
 export const rutasPostAutenticacion = [
   'panel',
-  'empresa/configuracion-inicial',
   'empresa/panel',
   'auditor/configuracion-inicial',
   'auditor/panel',
@@ -52,6 +52,14 @@ export const routes: Routes = [
     path: 'limites',
     loadComponent: () =>
       import('./pages/limites/limites-page.component').then((m) => m.LimitesPageComponent),
+  },
+  {
+    path: 'empresa/configuracion-inicial',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/empresa/configuracion-inicial-page.component').then(
+        (m) => m.ConfiguracionInicialPageComponent
+      ),
   },
   {
     path: 'ui-kit',

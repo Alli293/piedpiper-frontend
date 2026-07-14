@@ -1,7 +1,7 @@
 import { Component, computed, forwardRef, input, model, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-export type TextInputType = 'text' | 'email' | 'password';
+export type TextInputType = 'text' | 'email' | 'password' | 'number';
 
 let nextId = 0;
 
