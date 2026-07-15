@@ -7,8 +7,7 @@ import {
 import { CardComponent } from '../../shared/components/card/card.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { SelectInputComponent } from '../../shared/components/inputs/select-input/select-input.component';
-import { ToastComponent } from '../../shared/components/toast/toast.component';
-import { ToastService } from '../../shared/components/toast/toast.service';
+import { ToastService } from '../../shared/services/toast.service';
 import { I18nService } from '../../core/services/i18n.service';
 import { PreferenciasService } from '../../core/services/preferencias.service';
 import {
@@ -28,7 +27,6 @@ import {
     CardComponent,
     ButtonComponent,
     SelectInputComponent,
-    ToastComponent,
   ],
   templateUrl: './configuracion-page.component.html',
   styleUrl: './configuracion-page.component.scss',
@@ -100,7 +98,7 @@ export class ConfiguracionPageComponent implements OnInit {
         next: (guardadas) => {
           this.aplicarSeleccion(guardadas);
           this.guardando.set(false);
-          this.toastService.exito(this.i18n.t('config.guardarExito'));
+          this.toastService.success(this.i18n.t('config.guardarExito'));
         },
         error: () => {
           this.aplicarSeleccion(this.preferenciasService.preferencias());

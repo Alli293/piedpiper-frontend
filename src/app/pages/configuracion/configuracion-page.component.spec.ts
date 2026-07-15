@@ -4,7 +4,7 @@ import { provideHttpClientTesting, HttpTestingController } from '@angular/common
 import { ConfiguracionPageComponent } from './configuracion-page.component';
 import { PreferenciasService } from '../../core/services/preferencias.service';
 import { I18nService } from '../../core/services/i18n.service';
-import { ToastService } from '../../shared/components/toast/toast.service';
+import { ToastService } from '../../shared/services/toast.service';
 import { Preferencias } from '../../core/models/preferencias.model';
 
 describe('ConfiguracionPageComponent', () => {
@@ -43,7 +43,7 @@ describe('ConfiguracionPageComponent', () => {
   }
 
   function botonGuardar(): HTMLButtonElement {
-    return fixture.nativeElement.querySelector('button');
+    return fixture.nativeElement.querySelector('[data-testid="guardar-preferencias"] button');
   }
 
   it('lee las preferencias del perfil y las aplica al render', () => {
@@ -106,7 +106,7 @@ describe('ConfiguracionPageComponent', () => {
       .flush({ message: 'error' }, { status: 500, statusText: 'Internal Server Error' });
     fixture.detectChanges();
 
-    const mensajes = toastService.toasts().map((t) => t.mensaje);
+    const mensajes = toastService.toasts().map((t) => t.title);
     expect(mensajes).toContain('No se pudieron guardar tus preferencias. Intenta nuevamente.');
 
     // La selección vuelve a las preferencias previas y el idioma no cambia.

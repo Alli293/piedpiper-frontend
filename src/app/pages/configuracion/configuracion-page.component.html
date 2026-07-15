@@ -46,6 +46,7 @@
 
         <div class="ch-configuracion__acciones">
           <app-button
+            data-testid="guardar-preferencias"
             variant="primary"
             [loading]="guardando()"
             [disabled]="guardando()"
@@ -58,5 +59,3 @@
     </app-card>
   </div>
 </app-page-layout>
-
-<app-toast />
