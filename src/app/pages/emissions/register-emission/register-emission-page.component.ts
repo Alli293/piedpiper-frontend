@@ -599,6 +599,8 @@ export class RegisterEmissionPageComponent {
   }
 
   private async onSubmitFlota(): Promise<void> {
+    if (!this.ensureSession()) return;
+
     await submit(this.flotaForm, async (field) => {
       const value = field().value();
       try {

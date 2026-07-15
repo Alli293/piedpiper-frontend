@@ -450,6 +450,30 @@ describe('RegisterEmissionPageComponent', () => {
       expect(registrarFlota).not.toHaveBeenCalled();
     });
 
+    it('does not call registrarFlota without an active session', async () => {
+      storage.removeItem('carbonhub.token');
+
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      const [tipoSelect, combustibleSelect] = Array.from(
+        root.querySelectorAll<HTMLSelectElement>('app-select-input select')
+      );
+      tipoSelect.value = 'AUTOMOVIL';
+      tipoSelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      combustibleSelect.value = 'GASOLINA';
+      combustibleSelect.dispatchEvent(new Event('change'));
+
+      setInputValue(root, 'app-number-input input', '100');
+      setInputValue(root, 'app-date-input input', '2026-07-01');
+      setInputValue(root, 'textarea', 'Ruta de reparto');
+
+      await submitForm(fixture);
+
+      expect(registrarFlota).not.toHaveBeenCalled();
+    });
+
     it('calls registrarFlota with the expected payload and navigates on success', async () => {
       registrarFlota.mockReturnValue(of(VALID_FLOTA_RESPONSE));
 
