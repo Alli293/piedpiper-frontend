@@ -102,6 +102,17 @@
   color: var(--ch-green);
   font-weight: 700;
   cursor: pointer;
+
+  &:disabled {
+    color: var(--ch-text-muted);
+    cursor: not-allowed;
+  }
+}
+
+.register-emission-page__legs-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ch-space-3);
 }
 
 .register-emission-page__legs-header {

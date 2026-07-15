@@ -62,6 +62,7 @@ describe('EmisionesService', () => {
       fechaActividad: '2026-07-09',
       legs: [
         { departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' as const },
+        { departureAirport: 'YYZ', destinationAirport: 'SFO', cabinClass: 'economy' as const },
       ],
     };
 
