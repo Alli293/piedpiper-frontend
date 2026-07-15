@@ -95,6 +95,10 @@ function toIsoDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+function isAuthError(error: unknown): boolean {
+  return error instanceof HttpErrorResponse && (error.status === 401 || error.status === 403);
+}
+
 function todayUtcMidnight(): Date {
   const now = new Date();
   return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
@@ -126,7 +130,9 @@ const INITIAL_FLOTA_MODEL: RegistrarFlotaFormModel = {
 const GENERIC_CONNECTION_ERROR =
   'No se pudo conectar con el servicio de cálculo de huella. Intente nuevamente más tarde.';
 
-const CATALOGO_ERROR_MESSAGE = 'No se pudo cargar el catálogo de vehículos. Intente nuevamente.';
+const SESSION_ERROR_MESSAGE = 'Tu sesión no tiene permisos para realizar esta acción.';
+
+const CATALOGO_ERROR_MESSAGE = 'No se pudo cargar el catálogo de vehículos.';
 
 @Component({
   selector: 'app-register-emission-page',
@@ -247,7 +253,10 @@ export class RegisterEmissionPageComponent {
 
   protected readonly tiposVehiculo = signal<TipoVehiculoOption[]>([]);
   protected readonly catalogoLoading = signal(false);
-  protected readonly catalogoError = signal(false);
+  protected readonly catalogoError = signal('');
+  protected readonly catalogoLoaded = signal(false);
+
+  private readonly flotaCombustible = computed(() => this.flotaModel().combustible);
 
   protected readonly tipoVehiculoOptions = computed<SelectOption[]>(() =>
     this.tiposVehiculo().map((tipo) => ({ value: tipo.id, label: tipo.nombre }))
@@ -336,11 +345,9 @@ export class RegisterEmissionPageComponent {
   });
 
   constructor() {
-    this.loadTiposVehiculo();
-
     effect(() => {
       const validCombustibles = this.combustibleOptions();
-      const current = this.flotaModel().combustible;
+      const current = this.flotaCombustible();
       if (current && !validCombustibles.some((option) => option.value === current)) {
         this.flotaModel.update((model) => ({ ...model, combustible: '' }));
       }
@@ -393,6 +400,9 @@ export class RegisterEmissionPageComponent {
     this.lastResult.set(null);
     if (category === 'vuelo') {
       void this.loadEmisiones();
+    }
+    if (category === 'flota' && !this.catalogoLoaded() && !this.catalogoLoading()) {
+      this.loadTiposVehiculo();
     }
   }
 
@@ -454,17 +464,17 @@ export class RegisterEmissionPageComponent {
 
   private loadTiposVehiculo(): void {
     this.catalogoLoading.set(true);
-    this.catalogoError.set(false);
+    this.catalogoError.set('');
     this.emisionesService.obtenerTiposVehiculo().subscribe({
       next: (tipos) => {
         this.tiposVehiculo.set(tipos);
+        this.catalogoLoaded.set(true);
         this.catalogoLoading.set(false);
       },
-      error: () => {
+      error: (error: unknown) => {
         this.tiposVehiculo.set([]);
-        this.catalogoError.set(true);
+        this.catalogoError.set(isAuthError(error) ? SESSION_ERROR_MESSAGE : CATALOGO_ERROR_MESSAGE);
         this.catalogoLoading.set(false);
-        this.toastService.error(CATALOGO_ERROR_MESSAGE);
       },
     });
   }
@@ -622,11 +632,10 @@ export class RegisterEmissionPageComponent {
         this.toastService.error(apiError.message);
         return;
       }
-
-      if (error.status === 401 || error.status === 403) {
-        this.toastService.error('Tu sesión no tiene permisos para realizar esta acción.');
-        return;
-      }
+    }
+    if (isAuthError(error)) {
+      this.toastService.error(SESSION_ERROR_MESSAGE);
+      return;
     }
     this.toastService.error(GENERIC_CONNECTION_ERROR);
   }

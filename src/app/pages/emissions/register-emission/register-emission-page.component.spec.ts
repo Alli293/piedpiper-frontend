@@ -1,9 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { provideLocationMocks } from '@angular/common/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { RegisterEmissionPageComponent } from './register-emission-page.component';
 import { EmisionesService } from '../emisiones.service';
+import { ToastService } from '../../../shared/services/toast.service';
 import { EmisionFlotaResponse, EmisionResponse, TipoVehiculoOption } from '../models/emision.model';
 
 const VALID_RESPONSE: EmisionResponse = {
@@ -76,6 +78,7 @@ describe('RegisterEmissionPageComponent', () => {
   let obtenerTiposVehiculo: ReturnType<typeof vi.fn>;
   let registrarFlota: ReturnType<typeof vi.fn>;
   let storage: Storage;
+  let toastError: ReturnType<typeof vi.spyOn>;
 
   beforeEach(async () => {
     storage = createStorageMock();
@@ -111,6 +114,7 @@ describe('RegisterEmissionPageComponent', () => {
     }).compileComponents();
 
     vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    toastError = vi.spyOn(TestBed.inject(ToastService), 'error');
   });
 
   afterEach(() => {
@@ -165,11 +169,27 @@ describe('RegisterEmissionPageComponent', () => {
     button.click();
   }
 
-  function selectFlotaTab(fixture: ReturnType<typeof createFixture>): HTMLElement {
+  function selectTab(fixture: ReturnType<typeof createFixture>, label: string): HTMLElement {
     const root = fixture.nativeElement as HTMLElement;
-    clickCategory(root, 'Flota vehicular');
+    clickCategory(root, label);
     fixture.detectChanges();
     return root;
+  }
+
+  function selectFlotaTab(fixture: ReturnType<typeof createFixture>): HTMLElement {
+    return selectTab(fixture, 'Flota vehicular');
+  }
+
+  function clickRetry(root: HTMLElement): void {
+    const retryButton = Array.from(root.querySelectorAll('app-button')).find((el) =>
+      el.textContent?.includes('Reintentar')
+    );
+    if (!retryButton) throw new Error('Retry button not found');
+    retryButton.querySelector('button')?.click();
+  }
+
+  function selectElectricidadTab(fixture: ReturnType<typeof createFixture>): HTMLElement {
+    return selectTab(fixture, 'Electricidad');
   }
 
   it('does not call the service when the amount is 0 (invalid form)', async () => {
@@ -354,6 +374,12 @@ describe('RegisterEmissionPageComponent', () => {
   });
 
   describe('flota vehicular', () => {
+    it('does not fetch the vehicle catalog while the electricidad tab is active', () => {
+      createFixture();
+
+      expect(obtenerTiposVehiculo).not.toHaveBeenCalled();
+    });
+
     it('fetches the vehicle catalog and renders the flota fields when the tab is selected', () => {
       const fixture = createFixture();
       const root = selectFlotaTab(fixture);
@@ -361,6 +387,15 @@ describe('RegisterEmissionPageComponent', () => {
       expect(obtenerTiposVehiculo).toHaveBeenCalledTimes(1);
       const selects = root.querySelectorAll('app-select-input select');
       expect(selects.length).toBe(2);
+    });
+
+    it('does not refetch the vehicle catalog when the flota tab is selected again', () => {
+      const fixture = createFixture();
+      selectFlotaTab(fixture);
+      selectElectricidadTab(fixture);
+      selectFlotaTab(fixture);
+
+      expect(obtenerTiposVehiculo).toHaveBeenCalledTimes(1);
     });
 
     it('updates the combustible options when the vehicle type changes and clears an invalid selection', () => {
@@ -448,16 +483,48 @@ describe('RegisterEmissionPageComponent', () => {
       expect(TestBed.inject(Router).navigateByUrl).toHaveBeenCalledWith('/emisiones');
     });
 
-    it('shows a retry action when the vehicle catalog fails to load', () => {
+    it('refetches the vehicle catalog when the retry action is clicked after a failure', () => {
       obtenerTiposVehiculo.mockReturnValue(throwError(() => new Error('network error')));
 
       const fixture = createFixture();
       const root = selectFlotaTab(fixture);
 
-      const retryButton = Array.from(root.querySelectorAll('app-button')).find((el) =>
-        el.textContent?.includes('Reintentar')
+      expect(root.textContent).toContain('No se pudo cargar el catálogo de vehículos');
+      expect(obtenerTiposVehiculo).toHaveBeenCalledTimes(1);
+
+      obtenerTiposVehiculo.mockReturnValue(of(TIPOS_VEHICULO));
+      clickRetry(root);
+      fixture.detectChanges();
+
+      expect(obtenerTiposVehiculo).toHaveBeenCalledTimes(2);
+      expect(root.textContent).not.toContain('No se pudo cargar el catálogo de vehículos');
+      const [tipoSelect] = Array.from(
+        root.querySelectorAll<HTMLSelectElement>('app-select-input select')
       );
-      expect(retryButton).toBeTruthy();
+      expect(Array.from(tipoSelect.options).map((o) => o.value)).toEqual(
+        expect.arrayContaining(['AUTOMOVIL', 'MOTOCICLETA'])
+      );
+    });
+
+    it('shows the session message instead of the generic catalog error on a 401', () => {
+      obtenerTiposVehiculo.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }))
+      );
+
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      expect(root.textContent).toContain('Tu sesión no tiene permisos');
+      expect(root.textContent).not.toContain('No se pudo cargar el catálogo de vehículos');
+    });
+
+    it('does not raise an error toast when the vehicle catalog fails to load', () => {
+      obtenerTiposVehiculo.mockReturnValue(throwError(() => new Error('network error')));
+
+      const fixture = createFixture();
+      selectFlotaTab(fixture);
+
+      expect(toastError).not.toHaveBeenCalled();
     });
   });
 });
