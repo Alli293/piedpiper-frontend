@@ -54,6 +54,14 @@ export const routes: Routes = [
       import('./pages/limites/limites-page.component').then((m) => m.LimitesPageComponent),
   },
   {
+    path: 'admin/solicitudes-auditor',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/admin/solicitudes-auditor/solicitudes-auditor-page.component').then(
+        (m) => m.SolicitudesAuditorPageComponent
+      ),
+  },
+  {
     path: 'empresa/configuracion-inicial',
     canActivate: [authGuard],
     loadComponent: () =>

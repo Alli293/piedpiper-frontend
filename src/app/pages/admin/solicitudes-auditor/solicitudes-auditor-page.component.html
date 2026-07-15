@@ -1,0 +1,141 @@
+<main class="solicitudes">
+  <header class="solicitudes__header">
+    <h1 class="solicitudes__title">Solicitudes de auditores</h1>
+    <p class="solicitudes__subtitle">
+      Revisa las solicitudes pendientes y aprueba o rechaza el ingreso de auditores certificados.
+    </p>
+  </header>
+
+  @if (cargando()) {
+    <p class="solicitudes__vacio">Cargando solicitudes...</p>
+  } @else if (!pagina() || pagina()!.contenido.length === 0) {
+    <p class="solicitudes__vacio">No hay solicitudes pendientes en este momento.</p>
+  } @else {
+    <div class="solicitudes__tabla-wrap">
+      <table class="solicitudes__tabla">
+        <thead>
+          <tr>
+            <th>Auditor</th>
+            <th>Correo</th>
+            <th>Fecha de solicitud</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (solicitud of pagina()!.contenido; track solicitud.id) {
+            <tr>
+              <td>{{ solicitud.nombreAuditor }}</td>
+              <td>{{ solicitud.email }}</td>
+              <td>{{ solicitud.fechaSolicitud | date: 'dd/MM/yyyy' }}</td>
+              <td class="solicitudes__acciones">
+                <app-button variant="tertiary" size="sm" (click)="abrirRevision(solicitud)">
+                  Revisar
+                </app-button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (pagina()!.totalPaginas > 1) {
+      <div class="solicitudes__paginacion">
+        <app-button
+          variant="secondary"
+          size="sm"
+          [disabled]="pagina()!.pagina === 0"
+          (click)="cargar(pagina()!.pagina - 1)"
+        >
+          Anterior
+        </app-button>
+        <span class="solicitudes__paginacion-info">
+          Página {{ pagina()!.pagina + 1 }} de {{ pagina()!.totalPaginas }}
+        </span>
+        <app-button
+          variant="secondary"
+          size="sm"
+          [disabled]="pagina()!.pagina + 1 >= pagina()!.totalPaginas"
+          (click)="cargar(pagina()!.pagina + 1)"
+        >
+          Siguiente
+        </app-button>
+      </div>
+    }
+  }
+
+  @if (solicitudEnRevision(); as solicitud) {
+    <div class="solicitudes__overlay" (click)="cerrarRevision()">
+      <div
+        class="solicitudes__modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="revision-titulo"
+        (click)="$event.stopPropagation()"
+      >
+        <h2 class="solicitudes__modal-title" id="revision-titulo">Revisar solicitud</h2>
+
+        <dl class="solicitudes__datos">
+          <div class="solicitudes__dato">
+            <dt>Auditor</dt>
+            <dd>{{ solicitud.nombreAuditor }}</dd>
+          </div>
+          <div class="solicitudes__dato">
+            <dt>Correo</dt>
+            <dd>{{ solicitud.email }}</dd>
+          </div>
+          <div class="solicitudes__dato">
+            <dt>Fecha de solicitud</dt>
+            <dd>{{ solicitud.fechaSolicitud | date: 'dd/MM/yyyy HH:mm' }}</dd>
+          </div>
+        </dl>
+
+        <div class="solicitudes__decision" role="radiogroup" aria-label="Decisión">
+          <button
+            type="button"
+            class="solicitudes__opcion solicitudes__opcion--aprobar"
+            [class.solicitudes__opcion--activa]="decision() === 'aprobado'"
+            [disabled]="enviando()"
+            (click)="decision.set('aprobado')"
+          >
+            Aprobar
+          </button>
+          <button
+            type="button"
+            class="solicitudes__opcion solicitudes__opcion--rechazar"
+            [class.solicitudes__opcion--activa]="decision() === 'rechazado'"
+            [disabled]="enviando()"
+            (click)="decision.set('rechazado')"
+          >
+            Rechazar
+          </button>
+        </div>
+
+        @if (decision() === 'rechazado') {
+          <app-textarea
+            label="Motivo del rechazo"
+            placeholder="Explica por qué se rechaza esta solicitud (mínimo 10 caracteres)"
+            [rows]="3"
+            [value]="motivo()"
+            (valueChange)="motivo.set($event)"
+            [error]="motivo().length > 0 ? errorMotivo() : ''"
+            [disabled]="enviando()"
+          />
+        }
+
+        <div class="solicitudes__modal-actions">
+          <app-button variant="secondary" [disabled]="enviando()" (click)="cerrarRevision()">
+            Cancelar
+          </app-button>
+          <app-button
+            variant="primary"
+            [disabled]="!puedeConfirmar()"
+            [loading]="enviando()"
+            (click)="confirmarDecision()"
+          >
+            Confirmar decisión
+          </app-button>
+        </div>
+      </div>
+    </div>
+  }
+</main>
