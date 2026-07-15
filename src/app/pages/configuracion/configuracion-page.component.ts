@@ -22,12 +22,7 @@ import {
 
 @Component({
   selector: 'app-configuracion-page',
-  imports: [
-    PageLayoutComponent,
-    CardComponent,
-    ButtonComponent,
-    SelectInputComponent,
-  ],
+  imports: [PageLayoutComponent, CardComponent, ButtonComponent, SelectInputComponent],
   templateUrl: './configuracion-page.component.html',
   styleUrl: './configuracion-page.component.scss',
 })
