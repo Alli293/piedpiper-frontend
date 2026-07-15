@@ -1,4 +1,5 @@
 import { routes, rutasPostAutenticacion } from './app.routes';
+import { authGuard } from './core/auth/auth.guard';
 
 describe('app.routes', () => {
   const redirectsBackend = [
@@ -23,6 +24,18 @@ describe('app.routes', () => {
     for (const path of rutasPostAutenticacion) {
       const ruta = routes.find((r) => r.path === path);
       expect(ruta?.loadComponent).toBeTypeOf('function');
+    }
+  });
+
+  it('las páginas privadas están protegidas con authGuard', () => {
+    const rutasPrivadas = [
+      'configuracion',
+      'empresa/configuracion-inicial',
+      'perfil/configuracion-inicial',
+    ];
+    for (const path of rutasPrivadas) {
+      const ruta = routes.find((r) => r.path === path);
+      expect(ruta?.canActivate).toContain(authGuard);
     }
   });
 });

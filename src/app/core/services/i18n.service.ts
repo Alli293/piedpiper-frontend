@@ -30,6 +30,11 @@ const TRADUCCIONES_ES = {
   'perfil.guardar': 'Guardar y continuar',
   'perfil.errorGuardar': 'No se pudo guardar tu perfil. Intenta nuevamente.',
   'perfil.cargando': 'Cargando tu perfil…',
+  'perfil.errorCargar': 'No se pudo cargar tu perfil. Verifica tu conexión e intenta de nuevo.',
+  'perfil.reintentar': 'Reintentar',
+  'perfil.sectorError': 'Selecciona un sector industrial.',
+  'perfil.paisError': 'Ingresa un país de hasta 100 caracteres.',
+  'perfil.empleadosError': 'Ingresa un número de empleados mayor que 0.',
 } as const;
 
 export type ClaveTraduccion = keyof typeof TRADUCCIONES_ES;
@@ -63,6 +68,11 @@ const TRADUCCIONES_EN: Record<ClaveTraduccion, string> = {
   'perfil.guardar': 'Save and continue',
   'perfil.errorGuardar': 'Your profile could not be saved. Please try again.',
   'perfil.cargando': 'Loading your profile…',
+  'perfil.errorCargar': 'Your profile could not be loaded. Check your connection and try again.',
+  'perfil.reintentar': 'Retry',
+  'perfil.sectorError': 'Select an industry sector.',
+  'perfil.paisError': 'Enter a country of up to 100 characters.',
+  'perfil.empleadosError': 'Enter a number of employees greater than 0.',
 };
 
 @Injectable({ providedIn: 'root' })

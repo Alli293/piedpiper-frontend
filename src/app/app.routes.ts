@@ -90,6 +90,7 @@ export const routes: Routes = [
   },
   {
     path: 'configuracion',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/configuracion/configuracion-page.component').then(
         (m) => m.ConfiguracionPageComponent

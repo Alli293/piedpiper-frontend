@@ -49,6 +49,7 @@ export class ConfiguracionInicialPerfilPageComponent implements OnInit {
   protected readonly opcionesSector = OPCIONES_SECTOR;
 
   protected readonly cargando = signal(true);
+  protected readonly errorCarga = signal(false);
   protected readonly guardando = signal(false);
   protected readonly intentoGuardar = signal(false);
 
@@ -73,12 +74,57 @@ export class ConfiguracionInicialPerfilPageComponent implements OnInit {
     this.intentoGuardar() && this.nombreInvalido() ? this.i18n.t('perfil.nombreError') : ''
   );
 
+  // Espejan los mínimos del backend (DatosEmpresaPerfilDTO):
+  // sector @NotBlank, país @NotBlank @Size(max=100), empleados @NotNull @Positive.
+  protected readonly editaEmpresa = computed(
+    () => this.esAdminEmpresa() && this.empresa() !== null
+  );
+  protected readonly sectorInvalido = computed(
+    () => this.editaEmpresa() && this.sectorIndustrial().trim().length === 0
+  );
+  protected readonly paisInvalido = computed(() => {
+    if (!this.editaEmpresa()) {
+      return false;
+    }
+    const pais = this.pais().trim();
+    return pais.length === 0 || pais.length > 100;
+  });
+  protected readonly empleadosInvalidos = computed(() => {
+    if (!this.editaEmpresa()) {
+      return false;
+    }
+    const cantidad = this.cantidadEmpleados();
+    return cantidad === null || cantidad <= 0;
+  });
+  protected readonly errorSector = computed(() =>
+    this.intentoGuardar() && this.sectorInvalido() ? this.i18n.t('perfil.sectorError') : ''
+  );
+  protected readonly errorPais = computed(() =>
+    this.intentoGuardar() && this.paisInvalido() ? this.i18n.t('perfil.paisError') : ''
+  );
+  protected readonly errorEmpleados = computed(() =>
+    this.intentoGuardar() && this.empleadosInvalidos() ? this.i18n.t('perfil.empleadosError') : ''
+  );
+  protected readonly formularioInvalido = computed(
+    () =>
+      this.nombreInvalido() ||
+      this.sectorInvalido() ||
+      this.paisInvalido() ||
+      this.empleadosInvalidos()
+  );
+
   protected readonly sectorLabel = computed(() => {
     const valor = this.empresa()?.sectorIndustrial;
     return OPCIONES_SECTOR.find((opcion) => opcion.value === valor)?.label ?? (valor || '—');
   });
 
   ngOnInit(): void {
+    this.cargarPerfil();
+  }
+
+  protected cargarPerfil(): void {
+    this.cargando.set(true);
+    this.errorCarga.set(false);
     this.perfilService.obtener().subscribe({
       next: (perfil) => {
         this.rol.set(perfil.rol);
@@ -94,7 +140,10 @@ export class ConfiguracionInicialPerfilPageComponent implements OnInit {
         }
         this.cargando.set(false);
       },
-      error: () => this.cargando.set(false),
+      error: () => {
+        this.cargando.set(false);
+        this.errorCarga.set(true);
+      },
     });
   }
 
@@ -103,7 +152,7 @@ export class ConfiguracionInicialPerfilPageComponent implements OnInit {
       return;
     }
     this.intentoGuardar.set(true);
-    if (this.nombreInvalido()) {
+    if (this.formularioInvalido()) {
       return;
     }
 

@@ -65,6 +65,15 @@ describe('ConfiguracionInicialPerfilPageComponent', () => {
     expect(fixture.nativeElement.querySelector('[data-testid="sector-industrial"]')).toBeNull();
   });
 
+  it('el administrador de plataforma renderiza como perfil básico, sin sección de empresa', () => {
+    flushCarga({ ...perfilIndividual, rol: 'ADMINISTRADOR_PLATAFORMA' });
+
+    expect(inputNombre().value).toBe('Ana');
+    expect(fixture.nativeElement.querySelectorAll('app-select-input').length).toBe(3);
+    expect(fixture.nativeElement.querySelector('[data-testid="sector-industrial"]')).toBeNull();
+    expect(botonGuardar()).not.toBeNull();
+  });
+
   it('el usuario general ve los datos de empresa en solo lectura', () => {
     flushCarga({ ...perfilIndividual, rol: 'USUARIO_GENERAL', empresa });
 
@@ -148,6 +157,56 @@ describe('ConfiguracionInicialPerfilPageComponent', () => {
       cantidadEmpleados: 10,
     });
     req.flush({ ...perfilIndividual, configuracionCompleta: true, redirect: '/empresa/panel' });
+  });
+
+  it('si la carga del perfil falla muestra el error con reintento y no renderiza el formulario', () => {
+    fixture.detectChanges();
+    httpMock
+      .expectOne(PerfilInicialService.URL)
+      .flush({ message: 'error' }, { status: 500, statusText: 'Internal Server Error' });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="error-carga"]')).not.toBeNull();
+    expect(inputNombre()).toBeNull();
+    expect(botonGuardar()).toBeNull();
+  });
+
+  it('el botón de reintento vuelve a pedir el perfil y muestra el formulario al recuperarse', () => {
+    fixture.detectChanges();
+    httpMock
+      .expectOne(PerfilInicialService.URL)
+      .flush({ message: 'error' }, { status: 500, statusText: 'Internal Server Error' });
+    fixture.detectChanges();
+
+    const reintentar: HTMLButtonElement = fixture.nativeElement.querySelector(
+      '[data-testid="reintentar-perfil"] button'
+    );
+    reintentar.click();
+    fixture.detectChanges();
+
+    httpMock.expectOne(PerfilInicialService.URL).flush(perfilIndividual);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="error-carga"]')).toBeNull();
+    expect(inputNombre().value).toBe('Ana');
+  });
+
+  it('el administrador no envía el PUT si limpia país, sector o empleados y ve errores inline', () => {
+    flushCarga({
+      ...perfilIndividual,
+      rol: 'ADMINISTRADOR_EMPRESA',
+      empresa: { ...empresa, sectorIndustrial: null, pais: '', cantidadEmpleados: 0 },
+    });
+
+    botonGuardar().click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Selecciona un sector industrial.');
+    expect(fixture.nativeElement.textContent).toContain('Ingresa un país de hasta 100 caracteres.');
+    expect(fixture.nativeElement.textContent).toContain(
+      'Ingresa un número de empleados mayor que 0.'
+    );
+    httpMock.expectNone(PerfilInicialService.URL);
   });
 
   it('si la persistencia falla muestra el toast de error y permanece en la pantalla', () => {

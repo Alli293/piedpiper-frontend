@@ -1,6 +1,13 @@
 <app-configuracion-inicial-layout rolLabel="Perfil" rolIcon="perfil-publico">
   @if (cargando()) {
     <p class="perfil-inicial__cargando">{{ i18n.t('perfil.cargando') }}</p>
+  } @else if (errorCarga()) {
+    <div class="perfil-inicial__error" data-testid="error-carga">
+      <p class="perfil-inicial__error-mensaje">{{ i18n.t('perfil.errorCargar') }}</p>
+      <app-button data-testid="reintentar-perfil" variant="secondary" (click)="cargarPerfil()">
+        {{ i18n.t('perfil.reintentar') }}
+      </app-button>
+    </div>
   } @else {
     <div class="perfil-inicial">
       <header class="perfil-inicial__header">
@@ -55,6 +62,7 @@
                 [label]="i18n.t('perfil.sector')"
                 [options]="opcionesSector"
                 [value]="sectorIndustrial()"
+                [error]="errorSector()"
                 [disabled]="guardando()"
                 (valueChange)="onSectorChange($event)"
               />
@@ -62,6 +70,7 @@
                 data-testid="pais"
                 [label]="i18n.t('perfil.pais')"
                 [value]="pais()"
+                [error]="errorPais()"
                 [disabled]="guardando()"
                 (valueChange)="onPaisChange($event)"
               />
@@ -69,6 +78,7 @@
                 data-testid="cantidad-empleados"
                 [label]="i18n.t('perfil.empleados')"
                 [value]="cantidadEmpleados()"
+                [error]="errorEmpleados()"
                 [disabled]="guardando()"
                 (valueChange)="onCantidadEmpleadosChange($event)"
               />

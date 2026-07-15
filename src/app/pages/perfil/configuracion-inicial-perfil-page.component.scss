@@ -60,4 +60,17 @@
     font-family: var(--ch-font-body);
     color: var(--ch-text-muted);
   }
+
+  &__error {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ch-space-4);
+  }
+
+  &__error-mensaje {
+    margin: 0;
+    font-family: var(--ch-font-body);
+    color: var(--ch-text-muted);
+  }
 }
