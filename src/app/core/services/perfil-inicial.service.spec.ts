@@ -41,7 +41,11 @@ describe('PerfilInicialService', () => {
   it('completa el perfil con PUT al endpoint y el cuerpo esperado', () => {
     const request = {
       nombreVisible: 'Ana G.',
-      preferencias: { idioma: 'INGLES' as const, moneda: 'USD' as const, unidades: 'METRICO' as const },
+      preferencias: {
+        idioma: 'INGLES' as const,
+        moneda: 'USD' as const,
+        unidades: 'METRICO' as const,
+      },
     };
     let recibido: PerfilInicial | undefined;
     service.completar(request).subscribe((p) => (recibido = p));
@@ -49,7 +53,12 @@ describe('PerfilInicialService', () => {
     const req = httpMock.expectOne(PerfilInicialService.URL);
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual(request);
-    req.flush({ ...perfil, nombreVisible: 'Ana G.', configuracionCompleta: true, redirect: '/panel' });
+    req.flush({
+      ...perfil,
+      nombreVisible: 'Ana G.',
+      configuracionCompleta: true,
+      redirect: '/panel',
+    });
 
     expect(recibido?.configuracionCompleta).toBe(true);
     expect(recibido?.redirect).toBe('/panel');

@@ -2,10 +2,7 @@ import { SelectOption } from '../../shared/components/inputs/select-input/select
 import { Preferencias } from './preferencias.model';
 
 export type RolUsuario =
-  | 'USUARIO_INDIVIDUAL'
-  | 'USUARIO_GENERAL'
-  | 'ADMINISTRADOR_EMPRESA'
-  | 'AUDITOR_CERTIFICADO';
+  'USUARIO_INDIVIDUAL' | 'USUARIO_GENERAL' | 'ADMINISTRADOR_EMPRESA' | 'AUDITOR_CERTIFICADO';
 
 export interface EmpresaPerfil {
   nombreEmpresa: string;
