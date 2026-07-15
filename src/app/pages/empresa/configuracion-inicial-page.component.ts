@@ -148,7 +148,9 @@ export class ConfiguracionInicialPageComponent {
   }
 
   protected continuar(): void {
-    this.router.navigateByUrl('/perfil/configuracion-inicial').catch((err) => {
+    // TODO: reemplazar '/empresa/panel' por el dashboard real de empresa
+    // cuando exista (hoy es una ruta placeholder protegida por el guard).
+    this.router.navigateByUrl('/empresa/panel').catch((err) => {
       console.error('Error al navegar tras completar configuración inicial:', err);
     });
   }
