@@ -82,6 +82,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'configuracion',
+    loadComponent: () =>
+      import('./pages/configuracion/configuracion-page.component').then(
+        (m) => m.ConfiguracionPageComponent
+      ),
+  },
+  {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full' as const,
