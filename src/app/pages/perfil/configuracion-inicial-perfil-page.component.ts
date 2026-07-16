@@ -66,13 +66,25 @@ export class ConfiguracionInicialPerfilPageComponent implements OnInit {
   protected readonly cantidadEmpleados = signal<number | null>(null);
 
   protected readonly esAdminEmpresa = computed(() => this.rol() === 'ADMINISTRADOR_EMPRESA');
-  protected readonly esUsuarioGeneral = computed(() => this.rol() === 'USUARIO_GENERAL');
   protected readonly esAuditor = computed(() => this.rol() === 'AUDITOR_CERTIFICADO');
 
-  protected readonly nombreInvalido = computed(() => this.nombreVisible().trim().length < 2);
-  protected readonly errorNombre = computed(() =>
-    this.intentoGuardar() && this.nombreInvalido() ? this.i18n.t('perfil.nombreError') : ''
-  );
+  protected readonly nombreInvalido = computed(() => {
+    const largo = this.nombreVisible().trim().length;
+    return largo < 2 || largo > 100;
+  });
+  protected readonly errorNombre = computed(() => {
+    if (!this.intentoGuardar()) {
+      return '';
+    }
+    const largo = this.nombreVisible().trim().length;
+    if (largo < 2) {
+      return this.i18n.t('perfil.nombreError');
+    }
+    if (largo > 100) {
+      return this.i18n.t('perfil.nombreErrorMax');
+    }
+    return '';
+  });
 
   // Espejan los mínimos del backend (DatosEmpresaPerfilDTO):
   // sector @NotBlank, país @NotBlank @Size(max=100), empleados @NotNull @Positive.
@@ -177,7 +189,9 @@ export class ConfiguracionInicialPerfilPageComponent implements OnInit {
       next: (perfil) => {
         this.i18n.usarIdioma(perfil.preferencias.idioma);
         this.guardando.set(false);
-        this.router.navigateByUrl(perfil.redirect || '/').catch(() => undefined);
+        this.router.navigateByUrl(perfil.redirect || '/').catch((err) => {
+          console.error('Error al navegar tras completar el perfil inicial:', err);
+        });
       },
       error: () => {
         this.guardando.set(false);

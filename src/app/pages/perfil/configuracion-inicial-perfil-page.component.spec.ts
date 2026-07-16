@@ -62,7 +62,7 @@ describe('ConfiguracionInicialPerfilPageComponent', () => {
 
     expect(inputNombre().value).toBe('Ana');
     expect(fixture.nativeElement.querySelectorAll('app-select-input').length).toBe(3);
-    expect(fixture.nativeElement.querySelector('[data-testid="sector-industrial"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-testid^="sector-industrial"]')).toBeNull();
   });
 
   it('el administrador de plataforma renderiza como perfil básico, sin sección de empresa', () => {
@@ -70,7 +70,7 @@ describe('ConfiguracionInicialPerfilPageComponent', () => {
 
     expect(inputNombre().value).toBe('Ana');
     expect(fixture.nativeElement.querySelectorAll('app-select-input').length).toBe(3);
-    expect(fixture.nativeElement.querySelector('[data-testid="sector-industrial"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-testid^="sector-industrial"]')).toBeNull();
     expect(botonGuardar()).not.toBeNull();
   });
 
@@ -81,7 +81,7 @@ describe('ConfiguracionInicialPerfilPageComponent', () => {
       '[data-testid="empresa-nombre"] input'
     );
     const pais: HTMLInputElement = fixture.nativeElement.querySelector(
-      '[data-testid="pais"] input'
+      '[data-testid="pais-lectura"] input'
     );
     expect(nombreEmpresa.value).toBe('Café del Valle S.A.');
     expect(nombreEmpresa.disabled).toBe(true);
@@ -91,9 +91,11 @@ describe('ConfiguracionInicialPerfilPageComponent', () => {
   it('el administrador de empresa puede editar sector, país y empleados', () => {
     flushCarga({ ...perfilIndividual, rol: 'ADMINISTRADOR_EMPRESA', empresa });
 
-    const sector = fixture.nativeElement.querySelector('[data-testid="sector-industrial"] select');
+    const sector = fixture.nativeElement.querySelector(
+      '[data-testid="sector-industrial-editable"] select'
+    );
     const pais: HTMLInputElement = fixture.nativeElement.querySelector(
-      '[data-testid="pais"] input'
+      '[data-testid="pais-editable"] input'
     );
     expect(sector).not.toBeNull();
     expect(sector.disabled).toBe(false);
@@ -120,6 +122,22 @@ describe('ConfiguracionInicialPerfilPageComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain(
       'El nombre debe tener al menos 2 caracteres.'
+    );
+    httpMock.expectNone(PerfilInicialService.URL);
+  });
+
+  it('valida el maximo de 100 caracteres del nombre y no envia el PUT', () => {
+    flushCarga(perfilIndividual);
+
+    inputNombre().value = 'A'.repeat(101);
+    inputNombre().dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    botonGuardar().click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain(
+      'El nombre no puede superar los 100 caracteres.'
     );
     httpMock.expectNone(PerfilInicialService.URL);
   });

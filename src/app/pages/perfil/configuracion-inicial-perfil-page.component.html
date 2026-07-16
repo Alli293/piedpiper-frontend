@@ -58,7 +58,7 @@
           @if (esAdminEmpresa()) {
             <div class="perfil-inicial__campos">
               <app-select-input
-                data-testid="sector-industrial"
+                data-testid="sector-industrial-editable"
                 [label]="i18n.t('perfil.sector')"
                 [options]="opcionesSector"
                 [value]="sectorIndustrial()"
@@ -67,7 +67,7 @@
                 (valueChange)="onSectorChange($event)"
               />
               <app-text-input
-                data-testid="pais"
+                data-testid="pais-editable"
                 [label]="i18n.t('perfil.pais')"
                 [value]="pais()"
                 [error]="errorPais()"
@@ -75,7 +75,7 @@
                 (valueChange)="onPaisChange($event)"
               />
               <app-number-input
-                data-testid="cantidad-empleados"
+                data-testid="cantidad-empleados-editable"
                 [label]="i18n.t('perfil.empleados')"
                 [value]="cantidadEmpleados()"
                 [error]="errorEmpleados()"
@@ -93,19 +93,19 @@
                 [disabled]="true"
               />
               <app-text-input
-                data-testid="sector-industrial"
+                data-testid="sector-industrial-lectura"
                 [label]="i18n.t('perfil.sector')"
                 [value]="sectorLabel()"
                 [disabled]="true"
               />
               <app-text-input
-                data-testid="pais"
+                data-testid="pais-lectura"
                 [label]="i18n.t('perfil.pais')"
                 [value]="datosEmpresa.pais"
                 [disabled]="true"
               />
               <app-text-input
-                data-testid="cantidad-empleados"
+                data-testid="cantidad-empleados-lectura"
                 [label]="i18n.t('perfil.empleados')"
                 [value]="'' + datosEmpresa.cantidadEmpleados"
                 [disabled]="true"
