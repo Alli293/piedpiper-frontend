@@ -92,6 +92,13 @@ export const routes: Routes = [
   },
   ...rutasPostAutenticacion.map((path) => ({ path, loadComponent: cargarPlaceholder })),
   {
+    path: 'emisiones',
+    loadComponent: () =>
+      import('./pages/emissions/emissions-list/emissions-list-page.component').then(
+        (m) => m.EmissionsListPageComponent
+      ),
+  },
+  {
     path: 'emisiones/registrar',
     canActivate: [authGuard],
     loadComponent: () =>

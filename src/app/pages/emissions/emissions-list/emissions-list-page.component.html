@@ -1,0 +1,137 @@
+<app-page-layout [sidebarConfig]="sidebarConfig()" [headerConfig]="headerConfig()">
+  <div class="emissions-list-page">
+    <section class="emissions-list-page__toolbar" aria-label="Filtros de emisiones">
+      <div class="emissions-list-page__filter">
+        <label for="categoria">Categoria</label>
+        <select
+          id="categoria"
+          [value]="filtroCategoria()"
+          (change)="cambiarCategoria($any($event.target).value)"
+        >
+          @for (option of categoryOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="emissions-list-page__filter">
+        <label for="anio">Anio</label>
+        <select id="anio" [value]="filtroAnio() ?? ''" (change)="cambiarAnio($any($event.target).value)">
+          <option value="">Todos</option>
+          @for (year of yearOptions(); track year) {
+            <option [value]="year">{{ year }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="emissions-list-page__filter">
+        <label for="mes">Mes</label>
+        <select id="mes" [value]="filtroMes() ?? ''" (change)="cambiarMes($any($event.target).value)">
+          @for (option of monthOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="emissions-list-page__toolbar-actions">
+        <app-button type="button" variant="secondary" [loading]="loading()" (click)="cargarRegistros()">
+          Recargar
+        </app-button>
+        <app-button type="button" (click)="registrarEmision()">Registrar emision</app-button>
+      </div>
+    </section>
+
+    <section class="emissions-list-page__table-section" aria-labelledby="emissions-table-title">
+      <div class="emissions-list-page__table-header">
+        <div>
+          <h2 id="emissions-table-title">Listado de registros</h2>
+          <p>{{ registros().length }} registro(s)</p>
+        </div>
+      </div>
+
+      @if (loading()) {
+        <div class="emissions-list-page__empty">Cargando registros...</div>
+      } @else if (registros().length === 0) {
+        <div class="emissions-list-page__empty">
+          No hay registros para los filtros seleccionados.
+        </div>
+      } @else {
+        <div class="emissions-list-page__table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Categoria</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Detalle</th>
+                <th scope="col">Huella (kg CO2e)</th>
+                <th scope="col" class="emissions-list-page__actions-heading">Accion</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (registro of registros(); track registro.id) {
+                <tr>
+                  <td>
+                    <span class="emissions-list-page__category">
+                      {{ categoriaLabel(registro) }}
+                    </span>
+                  </td>
+                  <td>{{ formatFecha(registro.fechaActividad) }}</td>
+                  <td class="emissions-list-page__detail">{{ detalle(registro) }}</td>
+                  <td class="emissions-list-page__carbon">
+                    {{ formatCarbonKg(registro.carbonKg) }}
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="emissions-list-page__delete"
+                      [disabled]="deletingId() === registro.id"
+                      (click)="solicitarEliminar(registro)"
+                      title="Eliminar registro"
+                      aria-label="Eliminar registro"
+                    >
+                      <app-icon name="delete" [size]="16" />
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </div>
+
+  @if (confirmTarget(); as registro) {
+    <div class="emissions-list-page__modal-backdrop" role="presentation">
+      <section
+        class="emissions-list-page__modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-title"
+      >
+        <div class="emissions-list-page__modal-icon" aria-hidden="true">
+          <app-icon name="danger" [size]="22" />
+        </div>
+        <div>
+          <h2 id="delete-title">Eliminar registro</h2>
+          <p>
+            Se eliminara el registro {{ categoriaLabel(registro) }} del
+            {{ formatFecha(registro.fechaActividad) }}.
+          </p>
+        </div>
+        <div class="emissions-list-page__modal-actions">
+          <app-button type="button" variant="secondary" (click)="cancelarEliminar()">
+            Cancelar
+          </app-button>
+          <app-button
+            type="button"
+            [loading]="deletingId() === registro.id"
+            (click)="confirmarEliminar()"
+          >
+            Eliminar
+          </app-button>
+        </div>
+      </section>
+    </div>
+  }
+</app-page-layout>
