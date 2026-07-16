@@ -70,6 +70,17 @@ describe('SolicitudesAuditorPageComponent', () => {
     );
   });
 
+  it('si falla la carga inicial muestra el error con reintentar y no el vacio', () => {
+    validacionService.listarPendientes.mockReturnValue(throwError(() => ({ status: 500 })));
+    const fixture = crear();
+    const comp = fixture.componentInstance as any;
+    const html = fixture.nativeElement as HTMLElement;
+
+    expect(comp.errorCarga()).toBe(true);
+    expect(html.textContent).toContain('No pudimos cargar las solicitudes. Intenta nuevamente.');
+    expect(html.textContent).not.toContain('No hay solicitudes pendientes en este momento.');
+  });
+
   it('el campo de motivo aparece solo al rechazar', () => {
     const fixture = crear();
     const comp = fixture.componentInstance as any;

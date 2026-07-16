@@ -8,6 +8,13 @@
 
   @if (cargando()) {
     <p class="solicitudes__vacio">Cargando solicitudes...</p>
+  } @else if (errorCarga()) {
+    <div class="solicitudes__vacio" role="alert">
+      <p>No pudimos cargar las solicitudes. Intenta nuevamente.</p>
+      <app-button variant="secondary" size="sm" (click)="cargar(pagina()?.pagina ?? 0)">
+        Reintentar
+      </app-button>
+    </div>
   } @else if (!pagina() || pagina()!.contenido.length === 0) {
     <p class="solicitudes__vacio">No hay solicitudes pendientes en este momento.</p>
   } @else {

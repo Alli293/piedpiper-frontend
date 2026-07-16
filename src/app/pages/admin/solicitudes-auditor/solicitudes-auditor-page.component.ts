@@ -23,6 +23,7 @@ export class SolicitudesAuditorPageComponent {
   private readonly toastService = inject(ToastService);
 
   protected readonly cargando = signal(true);
+  protected readonly errorCarga = signal(false);
   protected readonly pagina = signal<PaginaSolicitudes | null>(null);
   protected readonly solicitudEnRevision = signal<SolicitudPendiente | null>(null);
   protected readonly decision = signal<'aprobado' | 'rechazado' | null>(null);
@@ -56,6 +57,7 @@ export class SolicitudesAuditorPageComponent {
 
   protected cargar(numeroPagina: number): void {
     this.cargando.set(true);
+    this.errorCarga.set(false);
     this.validacionService.listarPendientes(numeroPagina).subscribe({
       next: (pagina) => {
         this.pagina.set(pagina);
@@ -63,6 +65,7 @@ export class SolicitudesAuditorPageComponent {
       },
       error: (err) => {
         this.cargando.set(false);
+        this.errorCarga.set(true);
         this.toastService.error(
           'No pudimos cargar las solicitudes',
           err?.error?.message ?? 'Intenta nuevamente.'
