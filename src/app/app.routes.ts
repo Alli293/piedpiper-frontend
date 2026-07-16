@@ -10,7 +10,6 @@ export const rutasPostAutenticacion = [
   'auditor/configuracion-inicial',
   'auditor/panel',
   'auditor/validacion-pendiente',
-  'perfil/configuracion-inicial',
   'admin/panel',
 ];
 
@@ -62,6 +61,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'perfil/configuracion-inicial',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/perfil/configuracion-inicial-perfil-page.component').then(
+        (m) => m.ConfiguracionInicialPerfilPageComponent
+      ),
+  },
+  {
     path: 'ui-kit',
     loadComponent: () =>
       import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),
@@ -83,6 +90,7 @@ export const routes: Routes = [
   },
   {
     path: 'configuracion',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/configuracion/configuracion-page.component').then(
         (m) => m.ConfiguracionPageComponent
