@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/auth/auth.guard';
+import { authGuard, rolGuard } from './core/auth/auth.guard';
 
 const cargarPlaceholder = () =>
   import('./pages/placeholder/placeholder-page.component').then((m) => m.PlaceholderPageComponent);
@@ -55,7 +55,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin/solicitudes-auditor',
-    canActivate: [authGuard],
+    canActivate: [rolGuard('ADMINISTRADOR_PLATAFORMA')],
     loadComponent: () =>
       import('./pages/admin/solicitudes-auditor/solicitudes-auditor-page.component').then(
         (m) => m.SolicitudesAuditorPageComponent

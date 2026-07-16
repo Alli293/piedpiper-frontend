@@ -134,6 +134,29 @@ describe('SolicitudesAuditorPageComponent', () => {
     expect(comp.solicitudEnRevision()).toBeNull();
   });
 
+  it('al resolver la ultima solicitud de una pagina > 0 recarga la pagina anterior', () => {
+    validacionService.listarPendientes.mockReturnValue(
+      of({ contenido: [solicitud], pagina: 1, totalPaginas: 2, totalElementos: 4 })
+    );
+    validacionService.resolver.mockReturnValue(
+      of({
+        id: 'sol-1',
+        estado: 'APROBADO',
+        estadoAuditor: 'ACTIVO',
+        fechaResolucion: '2026-07-15T00:00:00Z',
+        motivoRechazo: null,
+      })
+    );
+    const fixture = crear();
+    const comp = fixture.componentInstance as any;
+    comp.abrirRevision(solicitud);
+    comp.decision.set('aprobado');
+
+    comp.confirmarDecision();
+
+    expect(validacionService.listarPendientes).toHaveBeenLastCalledWith(0);
+  });
+
   it('un 409 muestra el toast y recarga el listado', () => {
     validacionService.resolver.mockReturnValue(
       throwError(() => ({

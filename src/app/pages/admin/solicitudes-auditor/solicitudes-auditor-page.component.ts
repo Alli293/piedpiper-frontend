@@ -100,7 +100,7 @@ export class SolicitudesAuditorPageComponent {
             resuelta.estado === 'APROBADO' ? 'Solicitud aprobada' : 'Solicitud rechazada',
             `El auditor ${solicitud.nombreAuditor} fue notificado por correo.`
           );
-          this.cargar(this.pagina()?.pagina ?? 0);
+          this.cargar(this.paginaTrasResolver());
         },
         error: (err) => {
           this.enviando.set(false);
@@ -110,9 +110,16 @@ export class SolicitudesAuditorPageComponent {
             err?.error?.message ?? 'Intenta nuevamente.'
           );
           if (err?.status === 409) {
-            this.cargar(this.pagina()?.pagina ?? 0);
+            this.cargar(this.paginaTrasResolver());
           }
         },
       });
+  }
+
+  private paginaTrasResolver(): number {
+    const actual = this.pagina();
+    const paginaActual = actual?.pagina ?? 0;
+    const esUltimaDeLaPagina = (actual?.contenido.length ?? 0) <= 1;
+    return esUltimaDeLaPagina && paginaActual > 0 ? paginaActual - 1 : paginaActual;
   }
 }
