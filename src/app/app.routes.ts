@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/auth/auth.guard';
 
 const cargarPlaceholder = () =>
   import('./pages/placeholder/placeholder-page.component').then((m) => m.PlaceholderPageComponent);
@@ -17,6 +18,7 @@ export const rutasPostAutenticacion = [
 export const routes: Routes = [
   {
     path: 'empresa/invitaciones',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/empresa/invitaciones/invitaciones-page.component').then(
         (m) => m.InvitacionesPageComponent

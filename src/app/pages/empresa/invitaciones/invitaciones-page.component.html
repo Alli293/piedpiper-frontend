@@ -40,6 +40,13 @@
 
     @if (cargando()) {
       <p class="invitaciones__vacio">Cargando invitaciones...</p>
+    } @else if (errorCarga()) {
+      <div class="invitaciones__vacio" role="alert">
+        <p>No pudimos cargar las invitaciones. Intenta nuevamente.</p>
+        <app-button variant="secondary" size="sm" (click)="reintentarCarga()">
+          Reintentar
+        </app-button>
+      </div>
     } @else if (invitaciones().length === 0) {
       <p class="invitaciones__vacio">Aún no has enviado invitaciones.</p>
     } @else {
@@ -62,7 +69,7 @@
                     {{ etiqueta(invitacion.estado) }}
                   </app-badge>
                 </td>
-                <td>{{ invitacion.fechaExpiracion | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ invitacion.fechaExpiracion | date: 'dd/MM/yyyy' : 'UTC' }}</td>
                 <td class="invitaciones__acciones">
                   @if (invitacion.estado === 'ENVIADA') {
                     <app-button variant="tertiary" size="sm" (click)="abrirRevocacion(invitacion)">
@@ -81,11 +88,14 @@
   @if (invitacionARevocar(); as invitacion) {
     <div class="invitaciones__overlay" (click)="cerrarRevocacion()">
       <div
+        #modalRevocar
         class="invitaciones__modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="revocar-titulo"
+        tabindex="-1"
         (click)="$event.stopPropagation()"
+        (keydown)="alPresionarTeclaModal($event)"
       >
         <h3 class="invitaciones__modal-title" id="revocar-titulo">Revocar invitación</h3>
         <p class="invitaciones__modal-text">

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ElementRef, effect, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
@@ -35,11 +35,17 @@ export class InvitacionesPageComponent {
 
   protected readonly invitaciones = signal<Invitacion[]>([]);
   protected readonly cargando = signal(true);
+  protected readonly errorCarga = signal(false);
   protected readonly invitacionARevocar = signal<Invitacion | null>(null);
   protected readonly revocando = signal(false);
 
+  private readonly modal = viewChild<ElementRef<HTMLElement>>('modalRevocar');
+
   constructor() {
     this.cargarInvitaciones();
+    effect(() => {
+      this.modal()?.nativeElement.focus();
+    });
   }
 
   protected etiqueta(estado: EstadoInvitacion): string {
@@ -90,6 +96,43 @@ export class InvitacionesPageComponent {
     }
   }
 
+  protected alPresionarTeclaModal(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.cerrarRevocacion();
+      return;
+    }
+    if (event.key === 'Tab') {
+      this.atraparFoco(event);
+    }
+  }
+
+  private atraparFoco(event: KeyboardEvent): void {
+    const modal = this.modal()?.nativeElement;
+    if (!modal) {
+      return;
+    }
+    const focusables = modal.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusables.length === 0) {
+      return;
+    }
+    const primero = focusables[0];
+    const ultimo = focusables[focusables.length - 1];
+    if (event.shiftKey && document.activeElement === primero) {
+      event.preventDefault();
+      ultimo.focus();
+    } else if (!event.shiftKey && document.activeElement === ultimo) {
+      event.preventDefault();
+      primero.focus();
+    }
+  }
+
+  protected reintentarCarga(): void {
+    this.cargarInvitaciones();
+  }
+
   protected confirmarRevocacion(): void {
     const invitacion = this.invitacionARevocar();
     if (!invitacion || this.revocando()) {
@@ -118,16 +161,16 @@ export class InvitacionesPageComponent {
   }
 
   private cargarInvitaciones(): void {
+    this.cargando.set(true);
+    this.errorCarga.set(false);
     this.invitacionesService.listar().subscribe({
       next: (lista) => {
         this.invitaciones.set(lista);
         this.cargando.set(false);
       },
-      error: (err) => {
+      error: () => {
         this.cargando.set(false);
-        this.mensajeError.set(
-          err?.error?.message ?? 'No pudimos cargar las invitaciones. Intenta nuevamente.'
-        );
+        this.errorCarga.set(true);
       },
     });
   }

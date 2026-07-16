@@ -86,6 +86,30 @@ describe('InvitacionesPageComponent', () => {
     expect(comp.mensajeError()).toBe('Ya existe una invitación pendiente para este correo.');
   });
 
+  it('si falla la carga inicial muestra el error y no el estado vacio', () => {
+    invitacionesService.listar.mockReturnValue(throwError(() => ({ status: 500 })));
+    const fixture = crear();
+    const comp = fixture.componentInstance as any;
+    const html = fixture.nativeElement as HTMLElement;
+
+    expect(comp.errorCarga()).toBe(true);
+    expect(html.textContent).toContain('No pudimos cargar las invitaciones. Intenta nuevamente.');
+    expect(html.textContent).not.toContain('Aún no has enviado invitaciones.');
+  });
+
+  it('reintentar vuelve a pedir las invitaciones tras un fallo de carga', () => {
+    invitacionesService.listar.mockReturnValueOnce(throwError(() => ({ status: 500 })));
+    const fixture = crear();
+    const comp = fixture.componentInstance as any;
+
+    invitacionesService.listar.mockReturnValue(of([invitacion]));
+    comp.reintentarCarga();
+    fixture.detectChanges();
+
+    expect(comp.errorCarga()).toBe(false);
+    expect(comp.invitaciones()).toHaveLength(1);
+  });
+
   it('muestra el modal de revocacion y revoca al confirmar', () => {
     invitacionesService.revocar.mockReturnValue(of({ ...invitacion, estado: 'REVOCADA' }));
     const fixture = crear();
