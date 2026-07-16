@@ -72,7 +72,9 @@ export class RegistroInvitacionPageComponent implements OnInit {
     this.error.set('');
     this.cuentaExistente.set(false);
     this.registrando.set(true);
-    this.authService.registrarConInvitacion(this.token(), idToken).subscribe({
+    this.authService
+      .registrarConInvitacion(this.token(), idToken, this.aceptaTerminos())
+      .subscribe({
       next: (respuesta) => {
         this.registrando.set(false);
         this.router.navigateByUrl(respuesta.redirect || '/').catch(() => {

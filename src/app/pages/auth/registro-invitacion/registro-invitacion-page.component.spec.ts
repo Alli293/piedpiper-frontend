@@ -91,7 +91,7 @@ describe('RegistroInvitacionPageComponent', () => {
 
     comp.registrar('id-token');
 
-    expect(authService.registrarConInvitacion).toHaveBeenCalledWith('tok-123', 'id-token');
+    expect(authService.registrarConInvitacion).toHaveBeenCalledWith('tok-123', 'id-token', true);
     expect(navegar).toHaveBeenCalledWith('/perfil/configuracion-inicial');
   });
 
