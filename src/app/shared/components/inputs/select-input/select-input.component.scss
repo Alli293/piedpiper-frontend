@@ -46,3 +46,10 @@
   font-size: 0.75rem;
   color: var(--ch-danger);
 }
+
+.ch-select-input__hint {
+  margin: 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.75rem;
+  color: var(--ch-text-muted);
+}

@@ -1,9 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { provideLocationMocks } from '@angular/common/testing';
+import { HttpErrorResponse } from '@angular/common/http';
+import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { RegisterEmissionPageComponent } from './register-emission-page.component';
 import { EmisionesService } from '../emisiones.service';
-import { EmisionResponse } from '../models/emision.model';
+import { ToastService } from '../../../shared/services/toast.service';
+import { EmisionFlotaResponse, EmisionResponse, TipoVehiculoOption } from '../models/emision.model';
 
 const VALID_RESPONSE: EmisionResponse = {
   id: '1',
@@ -30,13 +33,52 @@ const FLIGHT_RESPONSE: EmisionResponse = {
   distanceValue: 7200,
 };
 
+const TIPOS_VEHICULO: TipoVehiculoOption[] = [
+  {
+    id: 'AUTOMOVIL',
+    nombre: 'Automóvil / SUV',
+    combustibles: [
+      { id: 'PROMEDIO', nombre: 'Promedio' },
+      { id: 'GASOLINA', nombre: 'Gasolina' },
+      { id: 'BEV', nombre: 'Eléctrico (BEV)' },
+    ],
+  },
+  {
+    id: 'MOTOCICLETA',
+    nombre: 'Motocicleta',
+    combustibles: [
+      { id: 'PROMEDIO', nombre: 'Promedio' },
+      { id: 'GASOLINA', nombre: 'Gasolina' },
+    ],
+  },
+];
+
+const VALID_FLOTA_RESPONSE: EmisionFlotaResponse = {
+  id: '2',
+  categoria: 'FLOTA',
+  titulo: 'Ruta de reparto',
+  fechaActividad: '2026-07-01',
+  tipoVehiculo: 'AUTOMOVIL',
+  combustible: 'GASOLINA',
+  distanceValue: 100,
+  distanceUnit: 'km',
+  carbonKg: 21,
+  carbonMt: 0.021,
+  factorEmisionId: 'factor-2',
+  estimatedAt: '2026-07-01T00:00:00Z',
+  createdAt: '2026-07-01T00:00:00Z',
+};
+
 describe('RegisterEmissionPageComponent', () => {
   let registrarElectricidad: ReturnType<typeof vi.fn>;
   let registrarVuelo: ReturnType<typeof vi.fn>;
   let listarEmisiones: ReturnType<typeof vi.fn>;
   let actualizarVuelo: ReturnType<typeof vi.fn>;
   let eliminarEmision: ReturnType<typeof vi.fn>;
+  let obtenerTiposVehiculo: ReturnType<typeof vi.fn>;
+  let registrarFlota: ReturnType<typeof vi.fn>;
   let storage: Storage;
+  let toastError: ReturnType<typeof vi.spyOn>;
 
   beforeEach(async () => {
     storage = createStorageMock();
@@ -48,11 +90,14 @@ describe('RegisterEmissionPageComponent', () => {
     listarEmisiones = vi.fn().mockReturnValue(of([]));
     actualizarVuelo = vi.fn();
     eliminarEmision = vi.fn().mockReturnValue(of(void 0));
+    obtenerTiposVehiculo = vi.fn().mockReturnValue(of(TIPOS_VEHICULO));
+    registrarFlota = vi.fn();
 
     await TestBed.configureTestingModule({
       imports: [RegisterEmissionPageComponent],
       providers: [
         provideLocationMocks(),
+        provideRouter([]),
         {
           provide: EmisionesService,
           useValue: {
@@ -61,10 +106,15 @@ describe('RegisterEmissionPageComponent', () => {
             listarEmisiones,
             actualizarVuelo,
             eliminarEmision,
+            obtenerTiposVehiculo,
+            registrarFlota,
           },
         },
       ],
     }).compileComponents();
+
+    vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    toastError = vi.spyOn(TestBed.inject(ToastService), 'error');
   });
 
   afterEach(() => {
@@ -78,10 +128,12 @@ describe('RegisterEmissionPageComponent', () => {
   }
 
   function setInputValue(root: HTMLElement, selector: string, value: string): void {
-    const element = root.querySelector<HTMLInputElement | HTMLTextAreaElement>(selector);
+    const element = root.querySelector<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
+      selector
+    );
     if (!element) throw new Error(`Element not found: ${selector}`);
     element.value = value;
-    element.dispatchEvent(new Event('input'));
+    element.dispatchEvent(new Event(element.tagName === 'SELECT' ? 'change' : 'input'));
   }
 
   function fillValidForm(root: HTMLElement): void {
@@ -115,6 +167,29 @@ describe('RegisterEmissionPageComponent', () => {
     ).find((item) => item.textContent?.includes(label));
     if (!button) throw new Error(`Record button not found: ${label}`);
     button.click();
+  }
+
+  function selectTab(fixture: ReturnType<typeof createFixture>, label: string): HTMLElement {
+    const root = fixture.nativeElement as HTMLElement;
+    clickCategory(root, label);
+    fixture.detectChanges();
+    return root;
+  }
+
+  function selectFlotaTab(fixture: ReturnType<typeof createFixture>): HTMLElement {
+    return selectTab(fixture, 'Flota vehicular');
+  }
+
+  function clickRetry(root: HTMLElement): void {
+    const retryButton = Array.from(root.querySelectorAll('app-button')).find((el) =>
+      el.textContent?.includes('Reintentar')
+    );
+    if (!retryButton) throw new Error('Retry button not found');
+    retryButton.querySelector('button')?.click();
+  }
+
+  function selectElectricidadTab(fixture: ReturnType<typeof createFixture>): HTMLElement {
+    return selectTab(fixture, 'Electricidad');
   }
 
   it('does not call the service when the amount is 0 (invalid form)', async () => {
@@ -296,6 +371,185 @@ describe('RegisterEmissionPageComponent', () => {
     fixture.detectChanges();
 
     expect(root.textContent).toContain('No hay vuelos registrados.');
+  });
+
+  describe('flota vehicular', () => {
+    it('does not fetch the vehicle catalog while the electricidad tab is active', () => {
+      createFixture();
+
+      expect(obtenerTiposVehiculo).not.toHaveBeenCalled();
+    });
+
+    it('fetches the vehicle catalog and renders the flota fields when the tab is selected', () => {
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      expect(obtenerTiposVehiculo).toHaveBeenCalledTimes(1);
+      const selects = root.querySelectorAll('app-select-input select');
+      expect(selects.length).toBe(2);
+    });
+
+    it('does not refetch the vehicle catalog when the flota tab is selected again', () => {
+      const fixture = createFixture();
+      selectFlotaTab(fixture);
+      selectElectricidadTab(fixture);
+      selectFlotaTab(fixture);
+
+      expect(obtenerTiposVehiculo).toHaveBeenCalledTimes(1);
+    });
+
+    it('updates the combustible options when the vehicle type changes and clears an invalid selection', () => {
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      const [tipoSelect, combustibleSelect] = Array.from(
+        root.querySelectorAll<HTMLSelectElement>('app-select-input select')
+      );
+
+      tipoSelect.value = 'AUTOMOVIL';
+      tipoSelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+
+      let combustibleOptionValues = Array.from(combustibleSelect.options).map((o) => o.value);
+      expect(combustibleOptionValues).toEqual(
+        expect.arrayContaining(['PROMEDIO', 'GASOLINA', 'BEV'])
+      );
+
+      combustibleSelect.value = 'BEV';
+      combustibleSelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+
+      tipoSelect.value = 'MOTOCICLETA';
+      tipoSelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+
+      combustibleOptionValues = Array.from(combustibleSelect.options).map((o) => o.value);
+      expect(combustibleOptionValues).not.toContain('BEV');
+      expect(combustibleSelect.value).not.toBe('BEV');
+    });
+
+    it('does not call registrarFlota when the distance is 0 (invalid form)', async () => {
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      const [tipoSelect, combustibleSelect] = Array.from(
+        root.querySelectorAll<HTMLSelectElement>('app-select-input select')
+      );
+      tipoSelect.value = 'AUTOMOVIL';
+      tipoSelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      combustibleSelect.value = 'GASOLINA';
+      combustibleSelect.dispatchEvent(new Event('change'));
+
+      setInputValue(root, 'app-number-input input', '0');
+      setInputValue(root, 'app-date-input input', '2026-07-01');
+      setInputValue(root, 'textarea', 'Ruta de reparto');
+
+      await submitForm(fixture);
+
+      expect(registrarFlota).not.toHaveBeenCalled();
+    });
+
+    it('does not call registrarFlota without an active session', async () => {
+      storage.removeItem('carbonhub.token');
+
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      const [tipoSelect, combustibleSelect] = Array.from(
+        root.querySelectorAll<HTMLSelectElement>('app-select-input select')
+      );
+      tipoSelect.value = 'AUTOMOVIL';
+      tipoSelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      combustibleSelect.value = 'GASOLINA';
+      combustibleSelect.dispatchEvent(new Event('change'));
+
+      setInputValue(root, 'app-number-input input', '100');
+      setInputValue(root, 'app-date-input input', '2026-07-01');
+      setInputValue(root, 'textarea', 'Ruta de reparto');
+
+      await submitForm(fixture);
+
+      expect(registrarFlota).not.toHaveBeenCalled();
+    });
+
+    it('calls registrarFlota with the expected payload and navigates on success', async () => {
+      registrarFlota.mockReturnValue(of(VALID_FLOTA_RESPONSE));
+
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      const [tipoSelect, combustibleSelect] = Array.from(
+        root.querySelectorAll<HTMLSelectElement>('app-select-input select')
+      );
+      tipoSelect.value = 'AUTOMOVIL';
+      tipoSelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      combustibleSelect.value = 'GASOLINA';
+      combustibleSelect.dispatchEvent(new Event('change'));
+
+      setInputValue(root, 'app-number-input input', '100');
+      setInputValue(root, 'app-date-input input', '2026-07-01');
+      setInputValue(root, 'textarea', 'Ruta de reparto');
+
+      await submitForm(fixture);
+
+      expect(registrarFlota).toHaveBeenCalledTimes(1);
+      expect(registrarFlota).toHaveBeenCalledWith({
+        titulo: 'Ruta de reparto',
+        tipoVehiculo: 'AUTOMOVIL',
+        combustible: 'GASOLINA',
+        distanceValue: 100,
+        distanceUnit: 'km',
+        fechaActividad: '2026-07-01',
+      });
+      expect(TestBed.inject(Router).navigateByUrl).toHaveBeenCalledWith('/emisiones');
+    });
+
+    it('refetches the vehicle catalog when the retry action is clicked after a failure', () => {
+      obtenerTiposVehiculo.mockReturnValue(throwError(() => new Error('network error')));
+
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      expect(root.textContent).toContain('No se pudo cargar el catálogo de vehículos');
+      expect(obtenerTiposVehiculo).toHaveBeenCalledTimes(1);
+
+      obtenerTiposVehiculo.mockReturnValue(of(TIPOS_VEHICULO));
+      clickRetry(root);
+      fixture.detectChanges();
+
+      expect(obtenerTiposVehiculo).toHaveBeenCalledTimes(2);
+      expect(root.textContent).not.toContain('No se pudo cargar el catálogo de vehículos');
+      const [tipoSelect] = Array.from(
+        root.querySelectorAll<HTMLSelectElement>('app-select-input select')
+      );
+      expect(Array.from(tipoSelect.options).map((o) => o.value)).toEqual(
+        expect.arrayContaining(['AUTOMOVIL', 'MOTOCICLETA'])
+      );
+    });
+
+    it('shows the session message instead of the generic catalog error on a 401', () => {
+      obtenerTiposVehiculo.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }))
+      );
+
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      expect(root.textContent).toContain('Tu sesión no tiene permisos');
+      expect(root.textContent).not.toContain('No se pudo cargar el catálogo de vehículos');
+    });
+
+    it('does not raise an error toast when the vehicle catalog fails to load', () => {
+      obtenerTiposVehiculo.mockReturnValue(throwError(() => new Error('network error')));
+
+      const fixture = createFixture();
+      selectFlotaTab(fixture);
+
+      expect(toastError).not.toHaveBeenCalled();
+    });
   });
 });
 

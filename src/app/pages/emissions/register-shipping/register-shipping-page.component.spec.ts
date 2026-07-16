@@ -17,7 +17,7 @@ const VALID_RESPONSE: EmisionEnvioResponse = {
   weightValue: 200,
   weightUnit: 'KG',
   distanceValue: 500,
-  distanceUnit: 'KM',
+  distanceUnit: 'km',
   transportMethod: 'TRUCK',
   carbonKg: 35.5,
   carbonMt: 0.036,
@@ -124,7 +124,7 @@ describe('RegisterShippingPageComponent', () => {
       weightValue: 200,
       weightUnit: 'KG',
       distanceValue: 500,
-      distanceUnit: 'KM',
+      distanceUnit: 'km',
       transportMethod: 'TRUCK',
       fechaActividad: '2026-07-01',
     });
