@@ -37,11 +37,7 @@
           </select>
         </label>
 
-        <button
-          type="button"
-          class="emissions-list-page__register"
-          (click)="registrarEmision()"
-        >
+        <button type="button" class="emissions-list-page__register" (click)="registrarEmision()">
           <span class="emissions-list-page__register-plus" aria-hidden="true">+</span>
           <span>Registrar emision</span>
         </button>
@@ -79,7 +75,9 @@
                   <td>
                     <span
                       class="emissions-list-page__category"
-                      [class.emissions-list-page__category--electricidad]="registro.categoria === 'ELECTRICIDAD'"
+                      [class.emissions-list-page__category--electricidad]="
+                        registro.categoria === 'ELECTRICIDAD'
+                      "
                       [class.emissions-list-page__category--flota]="registro.categoria === 'FLOTA'"
                       [class.emissions-list-page__category--vuelo]="registro.categoria === 'VUELO'"
                       [class.emissions-list-page__category--envio]="registro.categoria === 'ENVIO'"
@@ -88,7 +86,9 @@
                       <span>{{ categoriaLabel(registro) }}</span>
                     </span>
                   </td>
-                  <td class="emissions-list-page__date">{{ formatFecha(registro.fechaActividad) }}</td>
+                  <td class="emissions-list-page__date">
+                    {{ formatFecha(registro.fechaActividad) }}
+                  </td>
                   <td>
                     <div class="emissions-list-page__detail">
                       <strong>{{ detallePrincipal(registro) }}</strong>
@@ -139,7 +139,9 @@
         <article class="emissions-list-page__modal-record">
           <span
             class="emissions-list-page__modal-record-icon"
-            [class.emissions-list-page__modal-record-icon--electricidad]="registro.categoria === 'ELECTRICIDAD'"
+            [class.emissions-list-page__modal-record-icon--electricidad]="
+              registro.categoria === 'ELECTRICIDAD'
+            "
             [class.emissions-list-page__modal-record-icon--flota]="registro.categoria === 'FLOTA'"
             [class.emissions-list-page__modal-record-icon--vuelo]="registro.categoria === 'VUELO'"
             [class.emissions-list-page__modal-record-icon--envio]="registro.categoria === 'ENVIO'"
@@ -149,7 +151,10 @@
           </span>
           <div class="emissions-list-page__modal-record-copy">
             <strong>{{ detallePrincipal(registro) }}</strong>
-            <span>{{ categoriaLabel(registro) }} · {{ formatFecha(registro.fechaActividad) }} · {{ detalleSecundario(registro) }}</span>
+            <span
+              >{{ categoriaLabel(registro) }} · {{ formatFecha(registro.fechaActividad) }} ·
+              {{ detalleSecundario(registro) }}</span
+            >
           </div>
           <div class="emissions-list-page__modal-record-carbon">
             <strong>{{ formatCarbonKg(registro.carbonKg) }}</strong>

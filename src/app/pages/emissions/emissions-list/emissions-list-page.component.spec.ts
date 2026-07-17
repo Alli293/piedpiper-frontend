@@ -119,9 +119,9 @@ describe('EmissionsListPageComponent', () => {
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    const vuelosChip = Array.from(root.querySelectorAll<HTMLButtonElement>('.emissions-list-page__chip')).find(
-      (button) => button.textContent?.includes('Vuelos')
-    );
+    const vuelosChip = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('.emissions-list-page__chip')
+    ).find((button) => button.textContent?.includes('Vuelos'));
     vuelosChip?.click();
     fixture.detectChanges();
     await fixture.whenStable();

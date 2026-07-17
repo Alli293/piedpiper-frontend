@@ -166,7 +166,9 @@ export class EmissionsListPageComponent {
     try {
       await firstValueFrom(this.emisionesService.eliminarEmision(registro.id));
       this.registros.update((registros) => registros.filter((item) => item.id !== registro.id));
-      this.registrosConteo.update((registros) => registros.filter((item) => item.id !== registro.id));
+      this.registrosConteo.update((registros) =>
+        registros.filter((item) => item.id !== registro.id)
+      );
       this.toastService.success('Registro eliminado.');
       this.confirmTarget.set(null);
     } catch (error) {
@@ -181,7 +183,10 @@ export class EmissionsListPageComponent {
   }
 
   protected categoriaLabel(registro: EmisionResponse): string {
-    return CATEGORY_OPTIONS.find((option) => option.value === registro.categoria)?.label ?? registro.categoria;
+    return (
+      CATEGORY_OPTIONS.find((option) => option.value === registro.categoria)?.label ??
+      registro.categoria
+    );
   }
 
   protected categoriaIcon(registro: EmisionResponse): CategoriaOption['icon'] {
@@ -221,8 +226,11 @@ export class EmissionsListPageComponent {
   }
 
   protected formatFecha(fecha: string): string {
-    return new Intl.DateTimeFormat('es-CR', { day: '2-digit', month: 'short', year: 'numeric' })
-      .format(new Date(`${fecha}T00:00:00`));
+    return new Intl.DateTimeFormat('es-CR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(new Date(`${fecha}T00:00:00`));
   }
 
   protected formatCarbonKg(value: number): string {
