@@ -49,6 +49,7 @@ export const routes: Routes = [
   },
   {
     path: 'limites',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/limites/limites-page.component').then((m) => m.LimitesPageComponent),
   },
@@ -76,6 +77,7 @@ export const routes: Routes = [
   ...rutasPostAutenticacion.map((path) => ({ path, loadComponent: cargarPlaceholder })),
   {
     path: 'emisiones/registrar',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/emissions/register-emission/register-emission-page.component').then(
         (m) => m.RegisterEmissionPageComponent
@@ -83,6 +85,7 @@ export const routes: Routes = [
   },
   {
     path: 'emisiones/registrar/envio',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/emissions/register-shipping/register-shipping-page.component').then(
         (m) => m.RegisterShippingPageComponent
