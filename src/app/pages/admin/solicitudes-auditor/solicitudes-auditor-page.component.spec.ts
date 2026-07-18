@@ -81,6 +81,21 @@ describe('SolicitudesAuditorPageComponent', () => {
     expect(html.textContent).not.toContain('No hay solicitudes pendientes en este momento.');
   });
 
+  it('el modal se cierra con Escape', () => {
+    const fixture = crear();
+    const comp = fixture.componentInstance as any;
+    comp.abrirRevision(solicitud);
+    fixture.detectChanges();
+    const modal = (fixture.nativeElement as HTMLElement).querySelector(
+      '[role="dialog"]'
+    ) as HTMLElement;
+
+    modal.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+
+    expect(comp.solicitudEnRevision()).toBeNull();
+  });
+
   it('el campo de motivo aparece solo al rechazar', () => {
     const fixture = crear();
     const comp = fixture.componentInstance as any;

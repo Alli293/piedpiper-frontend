@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { TextareaComponent } from '../../../shared/components/inputs/textarea/textarea.component';
@@ -51,8 +51,13 @@ export class SolicitudesAuditorPageComponent {
     return this.decision() === 'rechazado' && this.errorMotivo() === '';
   });
 
+  private readonly modal = viewChild<ElementRef<HTMLElement>>('modalRevision');
+
   constructor() {
     this.cargar(0);
+    effect(() => {
+      this.modal()?.nativeElement.focus();
+    });
   }
 
   protected cargar(numeroPagina: number): void {
@@ -83,6 +88,39 @@ export class SolicitudesAuditorPageComponent {
   protected cerrarRevision(): void {
     if (!this.enviando()) {
       this.solicitudEnRevision.set(null);
+    }
+  }
+
+  protected alPresionarTeclaModal(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.cerrarRevision();
+      return;
+    }
+    if (event.key === 'Tab') {
+      this.atraparFoco(event);
+    }
+  }
+
+  private atraparFoco(event: KeyboardEvent): void {
+    const modal = this.modal()?.nativeElement;
+    if (!modal) {
+      return;
+    }
+    const focusables = modal.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusables.length === 0) {
+      return;
+    }
+    const primero = focusables[0];
+    const ultimo = focusables[focusables.length - 1];
+    if (event.shiftKey && document.activeElement === primero) {
+      event.preventDefault();
+      ultimo.focus();
+    } else if (!event.shiftKey && document.activeElement === ultimo) {
+      event.preventDefault();
+      primero.focus();
     }
   }
 

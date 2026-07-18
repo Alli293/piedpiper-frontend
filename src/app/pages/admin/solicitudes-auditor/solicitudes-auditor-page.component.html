@@ -73,11 +73,14 @@
   @if (solicitudEnRevision(); as solicitud) {
     <div class="solicitudes__overlay" (click)="cerrarRevision()">
       <div
+        #modalRevision
         class="solicitudes__modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="revision-titulo"
+        tabindex="-1"
         (click)="$event.stopPropagation()"
+        (keydown)="alPresionarTeclaModal($event)"
       >
         <h2 class="solicitudes__modal-title" id="revision-titulo">Revisar solicitud</h2>
 
