@@ -1,0 +1,167 @@
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import {
+  HeaderConfig,
+  PageLayoutComponent,
+  SidebarConfig,
+} from '../../shared/layouts/page-layout/page-layout.component';
+import {
+  SelectInputComponent,
+  SelectOption,
+} from '../../shared/components/inputs/select-input/select-input.component';
+import { ToastService } from '../../shared/services/toast.service';
+import {
+  ComparacionEmisionesResponse,
+  DashboardService,
+  EstadoComparacion,
+} from './dashboard.service';
+
+interface EstadoVisual {
+  label: string;
+  className: string;
+}
+
+@Component({
+  selector: 'app-dashboard-page',
+  imports: [PageLayoutComponent, RouterLink, SelectInputComponent],
+  templateUrl: './dashboard-page.component.html',
+  styleUrl: './dashboard-page.component.scss',
+})
+export class DashboardPageComponent implements OnInit {
+  private readonly dashboardService = inject(DashboardService);
+  private readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
+
+  protected readonly anioActual = new Date().getFullYear();
+  protected readonly anioSeleccionado = signal(this.anioActual);
+  protected readonly comparacion = signal<ComparacionEmisionesResponse | null>(null);
+  protected readonly cargando = signal(false);
+
+  protected readonly anios = computed<SelectOption[]>(() => {
+    const actual = this.anioActual;
+    return Array.from({ length: 6 }, (_, index) => {
+      const anio = actual - index;
+      return { value: String(anio), label: `Año ${anio}` };
+    });
+  });
+
+  protected readonly anioSeleccionadoValue = computed(() => String(this.anioSeleccionado()));
+
+  protected readonly sidebarConfig = computed<SidebarConfig>(() => ({
+    menuItems: [
+      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', active: true },
+      { id: 'emissions', label: 'Mis Emisiones', icon: 'emisiones', active: false },
+      { id: 'auditores', label: 'Auditores', icon: 'auditores', active: false },
+      { id: 'auditorias', label: 'Auditorías', icon: 'auditorias', active: false },
+      { id: 'certificaciones', label: 'Certificaciones', icon: 'certificaciones', active: false },
+      { id: 'insignias', label: 'Insignias', icon: 'insignias', active: false },
+    ],
+    bottomItems: [
+      { id: 'configuracion', label: 'Configuración', icon: 'config' },
+      { id: 'logout', label: 'Cerrar sesión', icon: 'logout' },
+    ],
+    companyName: 'Café del Valle S.A.',
+    companyRole: 'Empresa · Admin',
+    companyInitials: 'CV',
+  }));
+
+  protected readonly headerConfig = computed<HeaderConfig>(() => ({
+    sectionLabel: 'PANEL EMPRESARIAL',
+    pageTitle: 'Dashboard',
+    showNotificationDot: true,
+    userInitials: 'MR',
+  }));
+
+  protected readonly consumoBarra = computed(() => {
+    const porcentaje = this.comparacion()?.porcentajeConsumido ?? 0;
+    return Math.min(Math.max(porcentaje, 0), 100);
+  });
+
+  ngOnInit(): void {
+    this.cargarComparacion(this.anioSeleccionado());
+  }
+
+  protected onAnioChange(valor: string): void {
+    const anio = Number(valor);
+    if (!Number.isInteger(anio)) {
+      return;
+    }
+    this.anioSeleccionado.set(anio);
+    this.cargarComparacion(anio);
+  }
+
+  protected estadoVisual(estado: EstadoComparacion): EstadoVisual {
+    const estados: Record<EstadoComparacion, EstadoVisual> = {
+      dentro: { label: 'En meta', className: 'is-dentro' },
+      cerca: { label: 'Cerca del límite', className: 'is-cerca' },
+      superado: { label: 'Límite superado', className: 'is-superado' },
+      sin_limite: { label: 'Sin límite', className: 'is-sin-limite' },
+    };
+    return estados[estado];
+  }
+
+  protected tieneEstado(estado: EstadoComparacion): boolean {
+    const comparacion = this.comparacion();
+    return comparacion ? this.estadoPresentacion(comparacion) === estado : false;
+  }
+
+  protected estadoPresentacion(comparacion: ComparacionEmisionesResponse): EstadoComparacion {
+    const porcentaje = comparacion.porcentajeConsumido;
+    if (comparacion.limiteT === null || porcentaje === null) {
+      return 'sin_limite';
+    }
+    if (porcentaje > 100) {
+      return 'superado';
+    }
+    if (porcentaje >= 80) {
+      return 'cerca';
+    }
+    return 'dentro';
+  }
+
+  protected formatToneladas(valor: number | null): string {
+    if (valor === null) {
+      return '--';
+    }
+    return new Intl.NumberFormat('es-CR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 3,
+    }).format(valor);
+  }
+
+  protected formatPorcentaje(valor: number | null): string {
+    if (valor === null) {
+      return '--';
+    }
+    return new Intl.NumberFormat('es-CR', {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    }).format(valor);
+  }
+
+  protected onMenuItem(id: string): void {
+    const rutas: Record<string, string> = {
+      dashboard: '/panel',
+      emissions: '/emisiones',
+      emisiones: '/emisiones',
+      configuracion: '/configuracion',
+      settings: '/configuracion',
+      logout: '/login',
+    };
+    void this.router.navigateByUrl(rutas[id] ?? '/panel');
+  }
+
+  private cargarComparacion(anio: number): void {
+    this.cargando.set(true);
+    this.dashboardService.obtenerComparacion(anio).subscribe({
+      next: (comparacion) => {
+        this.comparacion.set(comparacion);
+        this.cargando.set(false);
+      },
+      error: () => {
+        this.cargando.set(false);
+        this.toastService.error('No se pudo cargar la comparación. Intente nuevamente.', undefined, 5000);
+      },
+    });
+  }
+}
