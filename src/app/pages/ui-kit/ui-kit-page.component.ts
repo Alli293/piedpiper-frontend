@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
+import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { SemanticCardComponent } from '../../shared/components/semantic-card/semantic-card.component';
 import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
@@ -28,6 +29,7 @@ import {
     ButtonComponent,
     AvatarComponent,
     BadgeComponent,
+    HeadingComponent,
     CardComponent,
     SemanticCardComponent,
     CardStatComponent,
