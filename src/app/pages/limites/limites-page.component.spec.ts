@@ -1,5 +1,6 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthSessionService } from '../../core/auth-session.service';
 import { ToastService } from '../../core/toast.service';
@@ -9,6 +10,7 @@ import { LimitesService } from './limites.service';
 describe('LimitesPageComponent', () => {
   let fixture: ComponentFixture<LimitesPageComponent>;
   let component: LimitesPageComponent;
+  let toastService: ToastService;
   let limitesService: {
     obtenerLimite: ReturnType<typeof vi.fn>;
     listarLimites: ReturnType<typeof vi.fn>;
@@ -64,6 +66,7 @@ describe('LimitesPageComponent', () => {
 
     fixture = TestBed.createComponent(LimitesPageComponent);
     component = fixture.componentInstance;
+    toastService = TestBed.inject(ToastService);
     fixture.detectChanges();
   });
 
@@ -86,5 +89,77 @@ describe('LimitesPageComponent', () => {
     (component as any).guardar();
 
     expect(limitesService.guardarLimite).not.toHaveBeenCalled();
+  });
+
+  it('guardar muestra el mensaje de la API en un 403', () => {
+    limitesService.guardarLimite.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 403,
+            error: { message: 'Solo un administrador puede editar el límite.' },
+          })
+      )
+    );
+
+    (component as any).guardar();
+
+    expect(toastService.message()).toBe('Solo un administrador puede editar el límite.');
+  });
+
+  it('guardar usa el mensaje por defecto en un 403 sin mensaje de la API', () => {
+    limitesService.guardarLimite.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 403 })));
+
+    (component as any).guardar();
+
+    expect(toastService.message()).toBe('No tiene permiso para modificar el límite de la empresa.');
+  });
+
+  it('guardar muestra el mensaje de la API en un conflicto 409', () => {
+    limitesService.guardarLimite.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { message: 'Ya existe un límite registrado para ese año.' },
+          })
+      )
+    );
+
+    (component as any).guardar();
+
+    expect(toastService.message()).toBe('Ya existe un límite registrado para ese año.');
+  });
+
+  it('guardar usa el mensaje por defecto en un 409 sin mensaje de la API', () => {
+    limitesService.guardarLimite.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409 })));
+
+    (component as any).guardar();
+
+    expect(toastService.message()).toBe('Conflicto al guardar el límite. Intente nuevamente.');
+  });
+
+  it('eliminar muestra el mensaje de la API en un 403', () => {
+    limitesService.eliminarLimite.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 403,
+            error: { message: 'No tiene permisos para realizar esta acción.' },
+          })
+      )
+    );
+
+    (component as any).eliminar(new Date().getFullYear());
+
+    expect(toastService.message()).toBe('No tiene permisos para realizar esta acción.');
+  });
+
+  it('eliminar usa el mensaje por defecto en un 403 sin mensaje de la API', () => {
+    limitesService.eliminarLimite.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 403 })));
+
+    (component as any).eliminar(new Date().getFullYear());
+
+    expect(toastService.message()).toBe('No tiene permiso para modificar el límite de la empresa.');
   });
 });

@@ -242,7 +242,9 @@ export class LimitesPageComponent {
         error: (error: HttpErrorResponse) => {
           this.deletingYear.set(null);
           if (error.status === 403) {
-            this.toastService.show('No tiene permiso para modificar el límite de la empresa.');
+            this.toastService.show(
+              this.mensajeApi(error) ?? 'No tiene permiso para modificar el límite de la empresa.'
+            );
             return;
           }
           this.toastService.show('No se pudo eliminar el límite. Intente nuevamente.');
@@ -319,18 +321,25 @@ export class LimitesPageComponent {
 
   private manejarErrorGuardado(error: HttpErrorResponse, anio: number): void {
     if (error.status === 403) {
-      this.toastService.show('No tiene permiso para modificar el límite de la empresa.');
+      this.toastService.show(
+        this.mensajeApi(error) ?? 'No tiene permiso para modificar el límite de la empresa.'
+      );
       return;
     }
 
     if (error.status === 409) {
-      this.toastService.show('Conflicto al guardar el límite. Intente nuevamente.');
+      this.toastService.show(this.mensajeApi(error) ?? 'Conflicto al guardar el límite. Intente nuevamente.');
       this.precargarLimite(anio);
       this.cargarLimites();
       return;
     }
 
     this.toastService.show('No se pudo guardar el límite. Intente nuevamente.');
+  }
+
+  private mensajeApi(error: HttpErrorResponse): string | undefined {
+    const apiError = error.error as { message?: string } | null;
+    return apiError?.message ?? undefined;
   }
 
   private debeMostrarError(control: AbstractControl): boolean {
