@@ -19,7 +19,7 @@
 
       <div class="emissions-list-page__select-filters">
         <label class="emissions-list-page__select">
-          <span>Anio</span>
+          <span>Año</span>
           <select [value]="filtroAnio() ?? ''" (change)="cambiarAnio($any($event.target).value)">
             <option value="">Todos</option>
             @for (year of yearOptions(); track year) {

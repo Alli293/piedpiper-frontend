@@ -54,6 +54,7 @@ export class EmissionsListPageComponent {
   private readonly emisionesService = inject(EmisionesService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
+  private cargaRegistrosRequestId = 0;
 
   protected readonly registros = signal<EmisionResponse[]>([]);
   protected readonly registrosConteo = signal<EmisionResponse[]>([]);
@@ -107,31 +108,45 @@ export class EmissionsListPageComponent {
   }
 
   protected async cargarRegistros(): Promise<void> {
+    const requestId = ++this.cargaRegistrosRequestId;
     this.loading.set(true);
     try {
       const filtrosPeriodo = {
         anio: this.filtroAnio(),
         mes: this.filtroMes(),
       };
+      const categoria = this.filtroCategoria();
       const registrosPromise = firstValueFrom(
         this.emisionesService.listarEmisiones({
           ...filtrosPeriodo,
-          categoria: this.filtroCategoria(),
+          categoria,
         })
       );
       const conteoPromise =
-        this.filtroCategoria() === 'TODAS'
+        categoria === 'TODAS'
           ? registrosPromise
           : firstValueFrom(this.emisionesService.listarEmisiones(filtrosPeriodo));
       const [registros, registrosConteo] = await Promise.all([registrosPromise, conteoPromise]);
-      this.registros.set(registros);
-      this.registrosConteo.set(registrosConteo);
+      if (requestId !== this.cargaRegistrosRequestId) return;
+      this.registros.set(
+        registros.filter((registro) =>
+          cumpleFiltros(registro, categoria, filtrosPeriodo.anio, filtrosPeriodo.mes)
+        )
+      );
+      this.registrosConteo.set(
+        registrosConteo.filter((registro) =>
+          cumpleFiltros(registro, 'TODAS', filtrosPeriodo.anio, filtrosPeriodo.mes)
+        )
+      );
     } catch {
+      if (requestId !== this.cargaRegistrosRequestId) return;
       this.toastService.error('No se pudo completar la operacion. Intente nuevamente.');
       this.registros.set([]);
       this.registrosConteo.set([]);
     } finally {
-      this.loading.set(false);
+      if (requestId === this.cargaRegistrosRequestId) {
+        this.loading.set(false);
+      }
     }
   }
 
@@ -270,6 +285,19 @@ function formatNumber(value: number | undefined): string {
     minimumFractionDigits: 0,
     maximumFractionDigits: 3,
   }).format(value);
+}
+
+function cumpleFiltros(
+  registro: EmisionResponse,
+  categoria: CategoriaFiltroEmision,
+  anio: number | null,
+  mes: number | null
+): boolean {
+  if (categoria !== 'TODAS' && registro.categoria !== categoria) return false;
+  const fecha = new Date(`${registro.fechaActividad}T00:00:00`);
+  if (anio !== null && fecha.getFullYear() !== anio) return false;
+  if (mes !== null && fecha.getMonth() + 1 !== mes) return false;
+  return true;
 }
 
 function formatText(value: string | undefined): string {

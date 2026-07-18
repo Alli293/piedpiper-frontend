@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { EmisionesService } from '../emisiones.service';
 import { EmisionResponse } from '../models/emision.model';
 import { EmissionsListPageComponent } from './emissions-list-page.component';
@@ -42,6 +42,13 @@ const REGISTRO_ELECTRICIDAD: EmisionResponse = {
   electricityValue: 0.02,
   electricityUnit: 'kwh',
   carbonKg: 0.266,
+};
+
+const REGISTRO_FLOTA_OTRO_MES: EmisionResponse = {
+  ...REGISTRO_FLOTA,
+  id: 'registro-4',
+  titulo: 'Ruta fuera de mes',
+  fechaActividad: '2026-08-01',
 };
 
 describe('EmissionsListPageComponent', () => {
@@ -134,5 +141,81 @@ describe('EmissionsListPageComponent', () => {
     expect(root.textContent).toContain('Vuelos1');
     expect(root.textContent).toContain('Viaje aereo SJO-FRA-SJO');
     expect(root.textContent).not.toContain('Ruta de reparto');
+  });
+
+  it('ignora respuestas viejas para no pisar el filtro de flota', async () => {
+    const registros = [REGISTRO_ELECTRICIDAD, REGISTRO_FLOTA, REGISTRO_VUELO];
+    const cargaInicial = new Subject<EmisionResponse[]>();
+    let llamadas = 0;
+    listarEmisiones.mockImplementation((filtros) => {
+      llamadas += 1;
+      if (llamadas === 1) return cargaInicial.asObservable();
+      return of(filtros?.categoria === 'FLOTA' ? [REGISTRO_FLOTA] : registros);
+    });
+
+    const fixture = TestBed.createComponent(EmissionsListPageComponent);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const flotaChip = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('.emissions-list-page__chip')
+    ).find((button) => button.textContent?.includes('Flota'));
+
+    flotaChip?.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    cargaInicial.next(registros);
+    cargaInicial.complete();
+    await fixture.whenStable();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    const tableText = root.querySelector('tbody')?.textContent ?? '';
+    expect(tableText).toContain('Ruta de reparto');
+    expect(tableText).not.toContain('Pruebas');
+    expect(tableText).not.toContain('Viaje aereo SJO-FRA-SJO');
+  });
+
+  it('filtra en pantalla por categoria aunque el servicio devuelva todos los registros', async () => {
+    const registros = [REGISTRO_ELECTRICIDAD, REGISTRO_FLOTA, REGISTRO_VUELO];
+    listarEmisiones.mockReturnValue(of(registros));
+    const fixture = await createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    const flotaChip = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('.emissions-list-page__chip')
+    ).find((button) => button.textContent?.includes('Flota'));
+    flotaChip?.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    const tableText = root.querySelector('tbody')?.textContent ?? '';
+    expect(tableText).toContain('Ruta de reparto');
+    expect(tableText).not.toContain('Pruebas');
+    expect(tableText).not.toContain('Viaje aereo SJO-FRA-SJO');
+  });
+
+  it('filtra en pantalla por año y mes aunque el servicio devuelva mas registros', async () => {
+    listarEmisiones.mockReturnValue(of([REGISTRO_FLOTA, REGISTRO_FLOTA_OTRO_MES]));
+    const fixture = await createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    const selects = root.querySelectorAll<HTMLSelectElement>('.emissions-list-page__select select');
+
+    selects[0].value = '2026';
+    selects[0].dispatchEvent(new Event('change'));
+    selects[1].value = '7';
+    selects[1].dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    const tableText = root.querySelector('tbody')?.textContent ?? '';
+    expect(tableText).toContain('Ruta de reparto');
+    expect(tableText).not.toContain('Ruta fuera de mes');
   });
 });
