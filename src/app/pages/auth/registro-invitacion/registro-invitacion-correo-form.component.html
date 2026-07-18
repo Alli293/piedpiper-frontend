@@ -1,7 +1,14 @@
 <form class="registro-invitacion-correo-form__form" novalidate (submit)="handleSubmit($event)">
-  <app-text-input label="Correo electrónico" type="email" [value]="email()" [disabled]="true" />
+  <app-text-input
+    id="txtCorreo"
+    label="Correo electrónico"
+    type="email"
+    [value]="email()"
+    [disabled]="true"
+  />
 
   <app-text-input
+    id="txtNombre"
     label="Nombre"
     autocomplete="given-name"
     placeholder="Tu nombre"
@@ -10,6 +17,7 @@
   />
 
   <app-text-input
+    id="txtApellidos"
     label="Apellidos"
     autocomplete="family-name"
     placeholder="Tus apellidos"
@@ -19,6 +27,7 @@
 
   <div class="registro-invitacion-correo-form__password">
     <app-text-input
+      id="txtContrasena"
       label="Contraseña"
       [type]="mostrarContrasena() ? 'text' : 'password'"
       autocomplete="new-password"
@@ -27,6 +36,7 @@
       [error]="errorContrasena()"
     />
     <button
+      id="btnMostrarContrasena"
       type="button"
       class="registro-invitacion-correo-form__password-toggle"
       [attr.aria-label]="mostrarContrasena() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
@@ -38,6 +48,7 @@
 
   <div class="registro-invitacion-correo-form__password">
     <app-text-input
+      id="txtConfirmarContrasena"
       label="Confirmar contraseña"
       [type]="mostrarConfirmar() ? 'text' : 'password'"
       autocomplete="new-password"
@@ -46,6 +57,7 @@
       [error]="errorConfirmacion()"
     />
     <button
+      id="btnMostrarConfirmarContrasena"
       type="button"
       class="registro-invitacion-correo-form__password-toggle"
       [attr.aria-label]="mostrarConfirmar() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
@@ -55,7 +67,11 @@
     </button>
   </div>
 
-  <app-checkbox [formField]="registroForm.aceptaTerminos" [error]="errorTerminos()">
+  <app-checkbox
+    id="chkAceptaTerminos"
+    [formField]="registroForm.aceptaTerminos"
+    [error]="errorTerminos()"
+  >
     Acepto los <a routerLink="/terminos">Términos de servicio</a> y la
     <a routerLink="/privacidad">Política de privacidad</a> de CarbonHub
   </app-checkbox>
@@ -65,6 +81,7 @@
   }
 
   <app-button
+    id="btnCrearCuenta"
     variant="primary"
     size="lg"
     type="submit"
