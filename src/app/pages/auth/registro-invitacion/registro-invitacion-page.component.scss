@@ -14,19 +14,6 @@
   font-size: 14px;
 }
 
-.invitacion__badge {
-  display: inline-block;
-  margin-bottom: var(--ch-space-4);
-  padding: 4px 12px;
-  border-radius: var(--ch-radius-full);
-  background: var(--ch-green-soft);
-  color: var(--ch-green-dark);
-  font-family: var(--ch-font-mono);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-}
-
 .invitacion__title {
   margin: 0;
   font-family: var(--ch-font-heading);
@@ -42,33 +29,20 @@
   line-height: 1.5;
 }
 
-.invitacion__datos {
+.invitacion__divisor {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: var(--ch-space-3);
-  margin: 0;
-  padding: var(--ch-space-4);
-  border: 1px solid var(--ch-border);
-  border-radius: var(--ch-radius-lg);
-  background: var(--ch-green-soft);
-}
-
-.invitacion__dato {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--ch-space-4);
-}
-
-.invitacion__dato dt {
-  color: var(--ch-text-secondary);
+  color: var(--ch-text-muted);
   font-size: 13px;
 }
 
-.invitacion__dato dd {
-  margin: 0;
-  color: var(--ch-text-primary);
-  font-size: 14px;
-  font-weight: 600;
+.invitacion__divisor::before,
+.invitacion__divisor::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--ch-border);
 }
 
 .invitacion__google {

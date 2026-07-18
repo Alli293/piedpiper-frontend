@@ -12,16 +12,24 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { AuthLayoutComponent } from '../../../shared/layouts/auth-layout/auth-layout.component';
 import { CheckboxComponent } from '../../../shared/components/inputs/checkbox/checkbox.component';
+import { SemanticCardComponent } from '../../../shared/components/semantic-card/semantic-card.component';
 import { AuthService } from '../../../core/auth/auth.service';
 import { GoogleIdentityService } from '../../../core/auth/google-identity.service';
 import {
   InvitacionPublica,
   InvitacionesService,
 } from '../../../core/invitaciones/invitaciones.service';
+import { RegistroInvitacionCorreoFormComponent } from './registro-invitacion-correo-form.component';
 
 @Component({
   selector: 'app-registro-invitacion-page',
-  imports: [AuthLayoutComponent, CheckboxComponent, RouterLink],
+  imports: [
+    AuthLayoutComponent,
+    CheckboxComponent,
+    RouterLink,
+    SemanticCardComponent,
+    RegistroInvitacionCorreoFormComponent,
+  ],
   templateUrl: './registro-invitacion-page.component.html',
   styleUrl: './registro-invitacion-page.component.scss',
 })
@@ -75,23 +83,23 @@ export class RegistroInvitacionPageComponent implements OnInit {
     this.authService
       .registrarConInvitacion(this.token(), idToken, this.aceptaTerminos())
       .subscribe({
-      next: (respuesta) => {
-        this.registrando.set(false);
-        this.router.navigateByUrl(respuesta.redirect || '/').catch(() => {
-          this.error.set('No pudimos abrir tu panel. Intenta nuevamente.');
-        });
-      },
-      error: (err) => {
-        this.registrando.set(false);
-        if (err?.status === 409) {
-          this.cuentaExistente.set(true);
-        }
-        this.error.set(
-          err?.error?.message ??
-            'Ocurrió un error al registrar tu cuenta. Por favor, intenta nuevamente.'
-        );
-      },
-    });
+        next: (respuesta) => {
+          this.registrando.set(false);
+          this.router.navigateByUrl(respuesta.redirect || '/').catch(() => {
+            this.error.set('No pudimos abrir tu panel. Intenta nuevamente.');
+          });
+        },
+        error: (err) => {
+          this.registrando.set(false);
+          if (err?.status === 409) {
+            this.cuentaExistente.set(true);
+          }
+          this.error.set(
+            err?.error?.message ??
+              'Ocurrió un error al registrar tu cuenta. Por favor, intenta nuevamente.'
+          );
+        },
+      });
   }
 
   private validarToken(): void {

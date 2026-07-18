@@ -9,25 +9,20 @@
         <a class="invitacion__enlace" routerLink="/login">Ir al inicio de sesión</a>
       </div>
     } @else if (invitacion(); as datos) {
+      <app-semantic-card variant="success" title="Invitación válida">
+        Enviada por <strong>{{ datos.nombreEmpresa }}</strong> · Rol: colaborador de empresa
+      </app-semantic-card>
+
       <header class="invitacion__header">
-        <span class="invitacion__badge">INVITACIÓN DE EMPRESA</span>
-        <h1 class="invitacion__title">Únete a {{ datos.nombreEmpresa }}</h1>
+        <h1 class="invitacion__title">Completa tu registro</h1>
         <p class="invitacion__texto">
-          Fuiste invitado a unirte como usuario general. Regístrate con tu cuenta de Google para
-          continuar.
+          Tu correo ya está registrado. Solo necesitas ingresar tu nombre y elegir una contraseña.
         </p>
       </header>
 
-      <dl class="invitacion__datos">
-        <div class="invitacion__dato">
-          <dt>Empresa</dt>
-          <dd>{{ datos.nombreEmpresa }}</dd>
-        </div>
-        <div class="invitacion__dato">
-          <dt>Correo invitado</dt>
-          <dd>{{ datos.email }}</dd>
-        </div>
-      </dl>
+      <app-registro-invitacion-correo-form [email]="datos.email" [token]="token()" />
+
+      <div class="invitacion__divisor"><span>o</span></div>
 
       <app-checkbox
         label="He leído y acepto los Términos y Condiciones y la Política de Privacidad"

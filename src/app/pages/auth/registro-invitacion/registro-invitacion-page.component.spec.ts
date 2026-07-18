@@ -1,7 +1,9 @@
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { RegistroInvitacionPageComponent } from './registro-invitacion-page.component';
+import { RegistroInvitacionCorreoFormComponent } from './registro-invitacion-correo-form.component';
 import { AuthService } from '../../../core/auth/auth.service';
 import { GoogleIdentityService } from '../../../core/auth/google-identity.service';
 import { InvitacionesService } from '../../../core/invitaciones/invitaciones.service';
@@ -38,13 +40,27 @@ describe('RegistroInvitacionPageComponent', () => {
     return fixture;
   }
 
-  it('con token valido muestra la empresa y el correo invitado', () => {
+  it('con token valido muestra la empresa en el callout y el correo invitado en el form embebido', () => {
     const fixture = crear();
-    const html = (fixture.nativeElement as HTMLElement).textContent;
+    const root = fixture.nativeElement as HTMLElement;
 
     expect(invitacionesService.resolver).toHaveBeenCalledWith('tok-123');
-    expect(html).toContain('Acme S.A.');
-    expect(html).toContain('colab@correo.com');
+    expect(root.textContent).toContain('Acme S.A.');
+
+    const correoInput = root.querySelector<HTMLInputElement>('input[type="email"]');
+    expect(correoInput?.value).toBe('colab@correo.com');
+    expect(correoInput?.disabled).toBe(true);
+  });
+
+  it('pasa el email y el token correctos al formulario de registro por correo embebido', () => {
+    const fixture = crear('tok-456');
+    const formulario = fixture.debugElement.query(
+      By.directive(RegistroInvitacionCorreoFormComponent)
+    );
+
+    expect(formulario).not.toBeNull();
+    expect(formulario.componentInstance.email()).toBe('colab@correo.com');
+    expect(formulario.componentInstance.token()).toBe('tok-456');
   });
 
   it('con token inexistente muestra el mensaje de enlace invalido sin formulario', () => {

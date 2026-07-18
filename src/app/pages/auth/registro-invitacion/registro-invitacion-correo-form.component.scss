@@ -1,0 +1,44 @@
+:host {
+  display: block;
+}
+
+.registro-invitacion-correo-form__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-5);
+}
+
+.registro-invitacion-correo-form__password {
+  position: relative;
+}
+
+.registro-invitacion-correo-form__password ::ng-deep .ch-text-input__field {
+  padding-right: 44px;
+}
+
+.registro-invitacion-correo-form__password-toggle {
+  position: absolute;
+  top: 28px;
+  right: var(--ch-space-2);
+  height: 40px;
+  width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--ch-text-muted);
+  cursor: pointer;
+}
+
+.registro-invitacion-correo-form__password-toggle:hover {
+  color: var(--ch-text-primary);
+}
+
+.registro-invitacion-correo-form__error {
+  margin: calc(-1 * var(--ch-space-2)) 0 0;
+  color: var(--ch-danger);
+  font-size: 14px;
+  font-weight: 600;
+}

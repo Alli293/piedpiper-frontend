@@ -69,6 +69,35 @@ describe('AuthService', () => {
     expect(localStorage.getItem('carbonhub.token')).toBe('jwt-app');
   });
 
+  it('registrarInvitacionConCorreo hace POST con tokenInvitacion junto a los datos y guarda el token', () => {
+    let recibida;
+    service
+      .registrarInvitacionConCorreo('token-inv', {
+        nombre: 'Ana',
+        apellidos: 'Torres',
+        contrasena: 'clave1234',
+        confirmarContrasena: 'clave1234',
+        aceptaTerminos: true,
+      })
+      .subscribe((r) => (recibida = r));
+
+    const req = httpMock.expectOne(`${base}/registro/invitacion/correo`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      tokenInvitacion: 'token-inv',
+      nombre: 'Ana',
+      apellidos: 'Torres',
+      contrasena: 'clave1234',
+      confirmarContrasena: 'clave1234',
+      aceptaTerminos: true,
+    });
+    req.flush({ ...respuesta, rol: 'USUARIO_GENERAL', redirect: '/perfil/configuracion-inicial' });
+
+    expect(recibida!.redirect).toBe('/perfil/configuracion-inicial');
+    expect(localStorage.getItem('carbonhub.token')).toBe('jwt-app');
+    expect(service.token()).toBe('jwt-app');
+  });
+
   it('cerrarSesion limpia el token', () => {
     localStorage.setItem('carbonhub.token', 'x');
     service.cerrarSesion();

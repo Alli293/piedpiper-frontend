@@ -42,3 +42,11 @@ export interface RegistroUsuarioCorreoRequest {
   confirmarContrasena: string;
   aceptaTerminos: boolean;
 }
+
+export interface RegistroInvitacionCorreoRequest {
+  nombre: string;
+  apellidos: string;
+  contrasena: string;
+  confirmarContrasena: string;
+  aceptaTerminos: boolean;
+}
