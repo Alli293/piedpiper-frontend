@@ -35,6 +35,7 @@ describe('LimitesPageComponent', () => {
         justificacion: 'Meta anual',
         mensaje: '',
         actualizadoEn: null,
+        recienCreada: false,
       })
     );
     limitesService.guardarLimite.mockReturnValue(
@@ -46,6 +47,7 @@ describe('LimitesPageComponent', () => {
         justificacion: null,
         mensaje: '',
         actualizadoEn: null,
+        recienCreada: false,
       })
     );
 
@@ -89,6 +91,50 @@ describe('LimitesPageComponent', () => {
     (component as any).guardar();
 
     expect(limitesService.guardarLimite).not.toHaveBeenCalled();
+  });
+
+  it('guardar muestra "creado" cuando la API indica recienCreada', () => {
+    const anioNuevo = new Date().getFullYear() + 1;
+    limitesService.guardarLimite.mockReturnValue(
+      of({
+        id: 2,
+        empresaId: '11111111-1111-1111-1111-111111111111',
+        anio: anioNuevo,
+        limiteMt: 15,
+        justificacion: null,
+        mensaje: '',
+        actualizadoEn: null,
+        recienCreada: true,
+      })
+    );
+    (component as any).anioControl.setValue(String(anioNuevo));
+    (component as any).limiteMtControl.setValue('15');
+
+    (component as any).guardar();
+
+    expect(toastService.message()).toBe(`Límite del año ${anioNuevo} creado: 15 t CO₂e.`);
+  });
+
+  it('guardar muestra "actualizado" cuando la API indica que no es recienCreada', () => {
+    limitesService.guardarLimite.mockReturnValue(
+      of({
+        id: 1,
+        empresaId: '11111111-1111-1111-1111-111111111111',
+        anio: new Date().getFullYear(),
+        limiteMt: 60,
+        justificacion: null,
+        mensaje: '',
+        actualizadoEn: null,
+        recienCreada: false,
+      })
+    );
+    (component as any).limiteMtControl.setValue('60');
+
+    (component as any).guardar();
+
+    expect(toastService.message()).toBe(
+      `Límite del año ${new Date().getFullYear()} actualizado: 60 t CO₂e.`
+    );
   });
 
   it('guardar muestra el mensaje de la API en un 403', () => {

@@ -184,8 +184,9 @@ export class LimitesPageComponent {
           this.limiteVigente.set(response);
           this.limiteMtControl.setValue(formatDecimal(response.limiteMt), { emitEvent: false });
           this.justificacionControl.setValue(response.justificacion ?? '', { emitEvent: false });
+          const accion = response.recienCreada ? 'creado' : 'actualizado';
           this.toastService.show(
-            `Límite del año ${response.anio} guardado: ${formatDecimal(response.limiteMt)} t CO₂e.`
+            `Límite del año ${response.anio} ${accion}: ${formatDecimal(response.limiteMt)} t CO₂e.`
           );
           this.saving.set(false);
           this.salirModoEdicion(false);
