@@ -110,6 +110,21 @@ describe('InvitacionesPageComponent', () => {
     expect(comp.invitaciones()).toHaveLength(1);
   });
 
+  it('el modal de revocacion se cierra con Escape', () => {
+    const fixture = crear();
+    const comp = fixture.componentInstance as any;
+    comp.abrirRevocacion(invitacion);
+    fixture.detectChanges();
+    const modal = (fixture.nativeElement as HTMLElement).querySelector(
+      '[role="dialog"]'
+    ) as HTMLElement;
+
+    modal.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+
+    expect(comp.invitacionARevocar()).toBeNull();
+  });
+
   it('muestra el modal de revocacion y revoca al confirmar', () => {
     invitacionesService.revocar.mockReturnValue(of({ ...invitacion, estado: 'REVOCADA' }));
     const fixture = crear();
