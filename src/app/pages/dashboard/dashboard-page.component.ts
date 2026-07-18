@@ -1,14 +1,11 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { SelectInputComponent, SelectOption } from '../../shared/components/inputs/select-input/select-input.component';
 import {
   HeaderConfig,
   PageLayoutComponent,
   SidebarConfig,
 } from '../../shared/layouts/page-layout/page-layout.component';
-import {
-  SelectInputComponent,
-  SelectOption,
-} from '../../shared/components/inputs/select-input/select-input.component';
 import { ToastService } from '../../shared/services/toast.service';
 import {
   ComparacionEmisionesResponse,
@@ -18,7 +15,6 @@ import {
 
 interface EstadoVisual {
   label: string;
-  className: string;
 }
 
 @Component({
@@ -37,13 +33,12 @@ export class DashboardPageComponent implements OnInit {
   protected readonly comparacion = signal<ComparacionEmisionesResponse | null>(null);
   protected readonly cargando = signal(false);
 
-  protected readonly anios = computed<SelectOption[]>(() => {
-    const actual = this.anioActual;
-    return Array.from({ length: 6 }, (_, index) => {
-      const anio = actual - index;
+  protected readonly anios = computed<SelectOption[]>(() =>
+    Array.from({ length: 6 }, (_, index) => {
+      const anio = this.anioActual - index;
       return { value: String(anio), label: `Año ${anio}` };
-    });
-  });
+    })
+  );
 
   protected readonly anioSeleccionadoValue = computed(() => String(this.anioSeleccionado()));
 
@@ -83,19 +78,18 @@ export class DashboardPageComponent implements OnInit {
 
   protected onAnioChange(valor: string): void {
     const anio = Number(valor);
-    if (!Number.isInteger(anio)) {
-      return;
-    }
+    if (!Number.isInteger(anio)) return;
+
     this.anioSeleccionado.set(anio);
     this.cargarComparacion(anio);
   }
 
   protected estadoVisual(estado: EstadoComparacion): EstadoVisual {
     const estados: Record<EstadoComparacion, EstadoVisual> = {
-      dentro: { label: 'En meta', className: 'is-dentro' },
-      cerca: { label: 'Cerca del límite', className: 'is-cerca' },
-      superado: { label: 'Límite superado', className: 'is-superado' },
-      sin_limite: { label: 'Sin límite', className: 'is-sin-limite' },
+      dentro: { label: 'En meta' },
+      cerca: { label: 'Cerca del límite' },
+      superado: { label: 'Límite superado' },
+      sin_limite: { label: 'Sin límite' },
     };
     return estados[estado];
   }
@@ -107,22 +101,15 @@ export class DashboardPageComponent implements OnInit {
 
   protected estadoPresentacion(comparacion: ComparacionEmisionesResponse): EstadoComparacion {
     const porcentaje = comparacion.porcentajeConsumido;
-    if (comparacion.limiteT === null || porcentaje === null) {
-      return 'sin_limite';
-    }
-    if (porcentaje > 100) {
-      return 'superado';
-    }
-    if (porcentaje >= 80) {
-      return 'cerca';
-    }
+    if (comparacion.limiteT === null || porcentaje === null) return 'sin_limite';
+    if (porcentaje > 100) return 'superado';
+    if (porcentaje >= 80) return 'cerca';
     return 'dentro';
   }
 
   protected formatToneladas(valor: number | null): string {
-    if (valor === null) {
-      return '--';
-    }
+    if (valor === null) return '--';
+
     return new Intl.NumberFormat('es-CR', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 3,
@@ -130,9 +117,8 @@ export class DashboardPageComponent implements OnInit {
   }
 
   protected formatPorcentaje(valor: number | null): string {
-    if (valor === null) {
-      return '--';
-    }
+    if (valor === null) return '--';
+
     return new Intl.NumberFormat('es-CR', {
       minimumFractionDigits: 1,
       maximumFractionDigits: 1,
@@ -142,13 +128,13 @@ export class DashboardPageComponent implements OnInit {
   protected onMenuItem(id: string): void {
     const rutas: Record<string, string> = {
       dashboard: '/panel',
-      emissions: '/emisiones',
-      emisiones: '/emisiones',
+      emissions: '/emisiones/registrar',
       configuracion: '/configuracion',
       settings: '/configuracion',
       logout: '/login',
     };
-    void this.router.navigateByUrl(rutas[id] ?? '/panel');
+    const ruta = rutas[id];
+    if (ruta) void this.router.navigateByUrl(ruta);
   }
 
   private cargarComparacion(anio: number): void {
@@ -160,7 +146,11 @@ export class DashboardPageComponent implements OnInit {
       },
       error: () => {
         this.cargando.set(false);
-        this.toastService.error('No se pudo cargar la comparación. Intente nuevamente.', undefined, 5000);
+        this.toastService.error(
+          'No se pudo cargar la comparación. Intente nuevamente.',
+          undefined,
+          5000
+        );
       },
     });
   }
