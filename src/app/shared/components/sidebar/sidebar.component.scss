@@ -28,32 +28,6 @@
   }
 }
 
-.ch-sidebar__logo-icon {
-  width: 22px;
-  height: 22px;
-  flex-shrink: 0;
-}
-
-.ch-sidebar__logo-text {
-  display: none;
-  font-family: var(--ch-font-heading);
-  font-size: 1.25rem;
-
-  @include mixins.desktop-up {
-    display: inline;
-  }
-}
-
-.ch-sidebar__logo-carbon {
-  color: var(--ch-text-on-dark);
-  font-weight: 600;
-}
-
-.ch-sidebar__logo-hub {
-  color: var(--ch-green-light);
-  font-weight: 500;
-}
-
 .ch-sidebar__company {
   padding: var(--ch-space-4);
   border-bottom: 1px solid var(--ch-border-on-dark);

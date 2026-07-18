@@ -243,6 +243,60 @@
     </section>
 
     <section class="ui-kit-page__section">
+      <h2 class="ch-h3">Logo</h2>
+      <p class="ch-body">
+        <code>app-logo</code> renderiza el isotipo de CarbonHub, opcionalmente junto al wordmark
+        ("Carbon" en 600, "Hub" en 500, fuente Sora). <code>variant</code> controla la paleta según
+        la superficie (<code>on-dark</code>/<code>on-light</code>) y <code>type</code> permite
+        mostrar solo el isotipo, sin texto.
+      </p>
+      <div class="ui-kit-page__row ui-kit-page__row--dark">
+        <app-logo variant="on-dark" />
+        <app-logo variant="on-dark" type="isotype" />
+      </div>
+      <div class="ui-kit-page__row">
+        <app-logo variant="on-light" />
+        <app-logo variant="on-light" type="isotype" />
+      </div>
+      <table class="ui-kit-page__props">
+        <thead>
+          <tr>
+            <th>Propiedad</th>
+            <th>Tipo</th>
+            <th>Valor por defecto</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>variant</code></td>
+            <td><code>'on-dark' | 'on-light'</code></td>
+            <td><code>'on-dark'</code></td>
+            <td>Paleta de color e isotipo según la superficie donde se coloca.</td>
+          </tr>
+          <tr>
+            <td><code>type</code></td>
+            <td><code>'full' | 'isotype'</code></td>
+            <td><code>'full'</code></td>
+            <td>Muestra el isotipo con wordmark, o solo el isotipo.</td>
+          </tr>
+          <tr>
+            <td><code>iconSize</code></td>
+            <td><code>number</code></td>
+            <td><code>24</code></td>
+            <td>Tamaño del isotipo en píxeles.</td>
+          </tr>
+          <tr>
+            <td><code>textSize</code></td>
+            <td><code>string</code></td>
+            <td><code>'18px'</code></td>
+            <td>Tamaño de fuente del wordmark (acepta cualquier unidad CSS).</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="ui-kit-page__section">
       <h2 class="ch-h3">Tarjetas</h2>
       <p class="ch-body">
         <code>app-card</code> es un contenedor de contenido con tres slots proyectados: un elemento

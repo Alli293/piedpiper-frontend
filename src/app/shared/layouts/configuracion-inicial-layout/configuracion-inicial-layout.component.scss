@@ -13,32 +13,6 @@
   color: var(--ch-text-on-dark);
 }
 
-.ch-config-inicial-layout__brand {
-  display: flex;
-  align-items: center;
-  gap: var(--ch-space-2);
-}
-
-.ch-config-inicial-layout__logo {
-  width: 24px;
-  height: 24px;
-}
-
-.ch-config-inicial-layout__brand-name {
-  font-family: var(--ch-font-heading);
-  font-size: 18px;
-}
-
-.ch-config-inicial-layout__brand-carbon {
-  color: var(--ch-text-on-dark);
-  font-weight: 600;
-}
-
-.ch-config-inicial-layout__brand-hub {
-  color: var(--ch-green-light);
-  font-weight: 500;
-}
-
 .ch-config-inicial-layout__divider {
   width: 1px;
   height: 20px;

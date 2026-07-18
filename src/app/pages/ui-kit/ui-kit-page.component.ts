@@ -7,6 +7,7 @@ import { CardComponent } from '../../shared/components/card/card.component';
 import { SemanticCardComponent } from '../../shared/components/semantic-card/semantic-card.component';
 import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
 import { PublicStatComponent } from '../../shared/components/public-stat/public-stat.component';
+import { LogoComponent } from '../../shared/components/logo/logo.component';
 import { LinkDirective } from '../../shared/components/link/link.directive';
 import { TextInputComponent } from '../../shared/components/inputs/text-input/text-input.component';
 import {
@@ -34,6 +35,7 @@ import {
     SemanticCardComponent,
     CardStatComponent,
     PublicStatComponent,
+    LogoComponent,
     LinkDirective,
     TextInputComponent,
     SelectInputComponent,

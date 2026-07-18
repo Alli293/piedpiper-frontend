@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { LogoComponent } from '../../components/logo/logo.component';
 
 interface AuthStat {
   value: string;
@@ -8,6 +9,7 @@ interface AuthStat {
 
 @Component({
   selector: 'app-auth-layout',
+  imports: [LogoComponent],
   templateUrl: './auth-layout.component.html',
   styleUrl: './auth-layout.component.scss',
   host: {

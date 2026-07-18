@@ -1,0 +1,18 @@
+<img
+  class="ch-logo__icon"
+  [src]="iconSrc()"
+  [alt]="iconAlt()"
+  [attr.aria-hidden]="iconAlt() ? null : 'true'"
+  [style.width.px]="iconSize()"
+  [style.height.px]="iconSize()"
+/>
+@if (type() === 'full') {
+  <span
+    class="ch-logo__text"
+    [class.ch-logo__text--hide-mobile]="hideTextBelowDesktop()"
+    [style.font-size]="textSize()"
+  >
+    <span class="ch-logo__carbon" [style.color]="carbonColor()">Carbon</span
+    ><span class="ch-logo__hub" [style.color]="hubColor()">Hub</span>
+  </span>
+}
