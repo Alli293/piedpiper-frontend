@@ -10,6 +10,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { AuthLayoutComponent } from '../../../shared/layouts/auth-layout/auth-layout.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -18,7 +19,14 @@ import { AuthResponse } from '../../../core/auth/auth.models';
 
 @Component({
   selector: 'app-login-page',
-  imports: [AuthLayoutComponent, ButtonComponent, TextInputComponent, IconComponent, RouterLink],
+  imports: [
+    AuthLayoutComponent,
+    ButtonComponent,
+    HeadingComponent,
+    TextInputComponent,
+    IconComponent,
+    RouterLink,
+  ],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',
 })

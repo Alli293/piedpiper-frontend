@@ -6,6 +6,7 @@ import {
 } from '../../shared/layouts/page-layout/page-layout.component';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { SelectInputComponent } from '../../shared/components/inputs/select-input/select-input.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { I18nService } from '../../core/services/i18n.service';
@@ -22,7 +23,13 @@ import {
 
 @Component({
   selector: 'app-configuracion-page',
-  imports: [PageLayoutComponent, CardComponent, ButtonComponent, SelectInputComponent],
+  imports: [
+    PageLayoutComponent,
+    CardComponent,
+    ButtonComponent,
+    HeadingComponent,
+    SelectInputComponent,
+  ],
   templateUrl: './configuracion-page.component.html',
   styleUrl: './configuracion-page.component.scss',
 })

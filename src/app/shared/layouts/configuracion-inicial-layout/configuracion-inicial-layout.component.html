@@ -17,10 +17,7 @@
 
 <div class="ch-config-inicial-layout__body">
   <div class="ch-config-inicial-layout__card">
-    <span class="ch-config-inicial-layout__badge">
-      <app-icon [name]="rolIcon()" [size]="16" />
-      {{ rolLabel() }}
-    </span>
+    <app-badge variant="success" [icon]="rolIcon()">{{ rolLabel() }}</app-badge>
     <ng-content />
   </div>
 </div>

@@ -11,7 +11,7 @@
   } @else {
     <div class="perfil-inicial">
       <header class="perfil-inicial__header">
-        <h1 class="perfil-inicial__titulo">{{ i18n.t('perfil.titulo') }}</h1>
+        <app-heading level="h1" [text]="i18n.t('perfil.titulo')" />
         <p class="perfil-inicial__subtitulo">{{ i18n.t('perfil.subtitulo') }}</p>
       </header>
 
@@ -53,7 +53,7 @@
 
       @if (empresa(); as datosEmpresa) {
         <section class="perfil-inicial__empresa">
-          <h2 class="perfil-inicial__empresa-titulo">{{ i18n.t('perfil.empresa.titulo') }}</h2>
+          <app-heading level="h2" [text]="i18n.t('perfil.empresa.titulo')" />
 
           @if (esAdminEmpresa()) {
             <div class="perfil-inicial__campos">

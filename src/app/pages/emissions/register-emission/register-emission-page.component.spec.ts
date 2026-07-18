@@ -22,17 +22,6 @@ const VALID_RESPONSE: EmisionResponse = {
   createdAt: '2026-07-01T00:00:00Z',
 };
 
-const FLIGHT_RESPONSE: EmisionResponse = {
-  ...VALID_RESPONSE,
-  id: 'flight-1',
-  categoria: 'VUELO',
-  titulo: 'Viaje aéreo SFO-YYZ',
-  passengers: 2,
-  legs: [{ departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' }],
-  distanceUnit: 'km',
-  distanceValue: 7200,
-};
-
 const TIPOS_VEHICULO: TipoVehiculoOption[] = [
   {
     id: 'AUTOMOVIL',
@@ -72,9 +61,6 @@ const VALID_FLOTA_RESPONSE: EmisionFlotaResponse = {
 describe('RegisterEmissionPageComponent', () => {
   let registrarElectricidad: ReturnType<typeof vi.fn>;
   let registrarVuelo: ReturnType<typeof vi.fn>;
-  let listarEmisiones: ReturnType<typeof vi.fn>;
-  let actualizarVuelo: ReturnType<typeof vi.fn>;
-  let eliminarEmision: ReturnType<typeof vi.fn>;
   let obtenerTiposVehiculo: ReturnType<typeof vi.fn>;
   let registrarFlota: ReturnType<typeof vi.fn>;
   let storage: Storage;
@@ -87,9 +73,6 @@ describe('RegisterEmissionPageComponent', () => {
     storage.setItem('carbonhub.token', 'test-token');
     registrarElectricidad = vi.fn();
     registrarVuelo = vi.fn();
-    listarEmisiones = vi.fn().mockReturnValue(of([]));
-    actualizarVuelo = vi.fn();
-    eliminarEmision = vi.fn().mockReturnValue(of(void 0));
     obtenerTiposVehiculo = vi.fn().mockReturnValue(of(TIPOS_VEHICULO));
     registrarFlota = vi.fn();
 
@@ -103,9 +86,6 @@ describe('RegisterEmissionPageComponent', () => {
           useValue: {
             registrarElectricidad,
             registrarVuelo,
-            listarEmisiones,
-            actualizarVuelo,
-            eliminarEmision,
             obtenerTiposVehiculo,
             registrarFlota,
           },
@@ -158,14 +138,6 @@ describe('RegisterEmissionPageComponent', () => {
       item.textContent?.includes(label)
     );
     if (!button) throw new Error(`${errorLabel} not found: ${label}`);
-    button.click();
-  }
-
-  function clickRecordButton(root: HTMLElement, label: string): void {
-    const button = Array.from(
-      root.querySelectorAll<HTMLButtonElement>('.register-emission-page__record-actions button')
-    ).find((item) => item.textContent?.includes(label));
-    if (!button) throw new Error(`Record button not found: ${label}`);
     button.click();
   }
 
@@ -222,17 +194,6 @@ describe('RegisterEmissionPageComponent', () => {
     });
   });
 
-  it('does not show flight records while electricity is selected', async () => {
-    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
-    const fixture = createFixture();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const root = fixture.nativeElement as HTMLElement;
-    expect(root.textContent).not.toContain('Vuelos registrados');
-    expect(root.textContent).not.toContain('Viaje aéreo SFO-YYZ');
-  });
-
   it('does not call the flight service without legs', async () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
@@ -274,82 +235,6 @@ describe('RegisterEmissionPageComponent', () => {
     });
   });
 
-  it('loads the date when editing a flight', async () => {
-    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
-    const fixture = createFixture();
-    const root = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
-    clickCategory(root, 'Vuelos');
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    clickButton(root, 'Editar');
-    fixture.detectChanges();
-
-    const dateInput = root.querySelector<HTMLInputElement>('input[type="date"]');
-    expect(dateInput?.value).toBe('2026-07-01');
-  });
-
-  it('keeps the edit flow stable when updating a flight fails', async () => {
-    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
-    actualizarVuelo.mockReturnValue(throwError(() => new Error('Network error')));
-    const fixture = createFixture();
-    const root = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
-    clickCategory(root, 'Vuelos');
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    clickButton(root, 'Editar');
-    await submitForm(fixture);
-
-    expect(actualizarVuelo).toHaveBeenCalledWith('flight-1', {
-      passengers: 2,
-      distanceUnit: 'km',
-      fechaActividad: '2026-07-01',
-      legs: [{ departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' }],
-    });
-  });
-
-  it('asks for confirmation before deleting an emission', async () => {
-    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
-    vi.stubGlobal(
-      'confirm',
-      vi.fn(() => true)
-    );
-    const fixture = createFixture();
-    const root = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
-    clickCategory(root, 'Vuelos');
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    clickRecordButton(root, 'Eliminar');
-    await fixture.whenStable();
-
-    expect(globalThis.confirm).toHaveBeenCalled();
-    expect(eliminarEmision).toHaveBeenCalledWith('flight-1');
-  });
-
-  it('does not delete when confirmation is cancelled', async () => {
-    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
-    vi.stubGlobal(
-      'confirm',
-      vi.fn(() => false)
-    );
-    const fixture = createFixture();
-    const root = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
-    clickCategory(root, 'Vuelos');
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    clickRecordButton(root, 'Eliminar');
-    await fixture.whenStable();
-
-    expect(eliminarEmision).not.toHaveBeenCalled();
-  });
-
   it('does not submit without an active session', async () => {
     storage.removeItem('carbonhub.token');
     const fixture = createFixture();
@@ -359,18 +244,6 @@ describe('RegisterEmissionPageComponent', () => {
     await submitForm(fixture);
 
     expect(registrarElectricidad).not.toHaveBeenCalled();
-  });
-
-  it('shows the empty state when loading emissions fails', async () => {
-    listarEmisiones.mockReturnValue(throwError(() => new Error('Network error')));
-    const fixture = createFixture();
-    const root = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
-    clickCategory(root, 'Vuelos');
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    expect(root.textContent).toContain('No hay vuelos registrados.');
   });
 
   describe('flota vehicular', () => {

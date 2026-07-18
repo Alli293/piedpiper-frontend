@@ -88,7 +88,7 @@ describe('ConfiguracionPageComponent', () => {
     fixture.detectChanges();
 
     expect(i18n.idioma()).toBe('INGLES');
-    const titulo: HTMLElement = fixture.nativeElement.querySelector('.ch-configuracion__titulo');
+    const titulo: HTMLElement = fixture.nativeElement.querySelector('app-heading');
     expect(titulo.textContent).toContain('Interface preferences');
   });
 

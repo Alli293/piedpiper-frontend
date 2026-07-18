@@ -1,10 +1,10 @@
 import { Component, input } from '@angular/core';
-import { IconComponent } from '../../components/icon/icon.component';
+import { BadgeComponent } from '../../components/badge/badge.component';
 import { IconName } from '../../components/icon/icon-registry';
 
 @Component({
   selector: 'app-configuracion-inicial-layout',
-  imports: [IconComponent],
+  imports: [BadgeComponent],
   templateUrl: './configuracion-inicial-layout.component.html',
   styleUrl: './configuracion-inicial-layout.component.scss',
 })

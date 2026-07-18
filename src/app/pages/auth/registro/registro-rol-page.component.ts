@@ -17,6 +17,7 @@ import { AuthResponse } from '../../../core/auth/auth.models';
 import { RegistroEmpresaFormComponent } from './registro-empresa-form.component';
 import { RegistroUsuarioFormComponent } from './registro-usuario-form.component';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
+import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 
 type Rol = 'empresa' | 'auditor' | 'viajero';
 
@@ -57,6 +58,7 @@ const CONFIG: Record<Rol, ConfigRol> = {
     RegistroEmpresaFormComponent,
     RegistroUsuarioFormComponent,
     BadgeComponent,
+    HeadingComponent,
   ],
   templateUrl: './registro-rol-page.component.html',
   styleUrl: './registro-rol-page.component.scss',

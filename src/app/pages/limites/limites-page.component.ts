@@ -26,6 +26,7 @@ import {
 } from '../../shared/components/inputs/select-input/select-input.component';
 import { TextInputComponent } from '../../shared/components/inputs/text-input/text-input.component';
 import { TextareaComponent } from '../../shared/components/inputs/textarea/textarea.component';
+import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import {
   HeaderConfig,
@@ -44,6 +45,7 @@ import { LimiteEmisionesRequest, LimiteEmisionesResponse, LimitesService } from 
     SelectInputComponent,
     TextInputComponent,
     TextareaComponent,
+    HeadingComponent,
     IconComponent,
     ButtonComponent,
   ],
@@ -328,7 +330,9 @@ export class LimitesPageComponent {
     }
 
     if (error.status === 409) {
-      this.toastService.error(this.mensajeApi(error) ?? 'Conflicto al guardar el límite. Intente nuevamente.');
+      this.toastService.error(
+        this.mensajeApi(error) ?? 'Conflicto al guardar el límite. Intente nuevamente.'
+      );
       this.precargarLimite(anio);
       this.cargarLimites();
       return;

@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthLayoutComponent } from '../../shared/layouts/auth-layout/auth-layout.component';
+import { HeadingComponent } from '../../shared/components/heading/heading.component';
 
 @Component({
   selector: 'app-validacion-pendiente-page',
-  imports: [RouterLink, AuthLayoutComponent],
+  imports: [RouterLink, AuthLayoutComponent, HeadingComponent],
   template: `
     <app-auth-layout>
       <div class="validacion">
         <span class="validacion__badge">Verificación pendiente</span>
-        <h1 class="validacion__title">Tu cuenta está pendiente de verificación</h1>
+        <app-heading level="h1" text="Tu cuenta está pendiente de verificación" />
         <p class="validacion__text">
           Te enviamos un correo electrónico para verificar tu cuenta. Revisa tu bandeja de entrada y
           haz clic en el enlace de confirmación.
@@ -36,16 +37,8 @@ import { AuthLayoutComponent } from '../../shared/layouts/auth-layout/auth-layou
       text-transform: uppercase;
     }
 
-    .validacion__title {
-      margin: 0 0 var(--ch-space-3);
-      font-family: var(--ch-font-heading);
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--ch-text-primary);
-    }
-
     .validacion__text {
-      margin: 0 0 var(--ch-space-6);
+      margin: var(--ch-space-3) 0 var(--ch-space-6);
       color: var(--ch-text-secondary);
       font-size: 15px;
       line-height: 1.5;

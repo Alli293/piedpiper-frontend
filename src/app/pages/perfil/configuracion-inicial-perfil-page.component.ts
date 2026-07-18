@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ConfiguracionInicialLayoutComponent } from '../../shared/layouts/configuracion-inicial-layout/configuracion-inicial-layout.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { TextInputComponent } from '../../shared/components/inputs/text-input/text-input.component';
 import { NumberInputComponent } from '../../shared/components/inputs/number-input/number-input.component';
 import { SelectInputComponent } from '../../shared/components/inputs/select-input/select-input.component';
@@ -29,6 +30,7 @@ import {
   imports: [
     ConfiguracionInicialLayoutComponent,
     ButtonComponent,
+    HeadingComponent,
     TextInputComponent,
     NumberInputComponent,
     SelectInputComponent,

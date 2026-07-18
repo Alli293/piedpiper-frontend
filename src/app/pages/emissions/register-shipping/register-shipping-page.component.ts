@@ -14,6 +14,7 @@ import {
   validate,
 } from '@angular/forms/signals';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { DateInputComponent } from '../../../shared/components/inputs/date-input/date-input.component';
 import { NumberInputComponent } from '../../../shared/components/inputs/number-input/number-input.component';
@@ -77,6 +78,7 @@ const SESSION_ERROR_MESSAGE =
   imports: [
     FormField,
     ButtonComponent,
+    HeadingComponent,
     IconComponent,
     DateInputComponent,
     NumberInputComponent,

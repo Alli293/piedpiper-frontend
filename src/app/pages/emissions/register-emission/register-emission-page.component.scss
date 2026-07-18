@@ -62,13 +62,6 @@
   color: #1f6f9f;
 }
 
-.register-emission-page__title {
-  margin: 0;
-  font-family: var(--ch-font-heading);
-  font-size: 1.125rem;
-  color: var(--ch-text-primary);
-}
-
 .register-emission-page__subtitle,
 .register-emission-page__field-error,
 .register-emission-page__info p {
@@ -282,79 +275,6 @@
 .register-emission-page__save-pill--done {
   background: var(--ch-green-soft);
   color: var(--ch-green-dark);
-}
-
-.register-emission-page__records {
-  width: 100%;
-  max-width: 680px;
-  margin-top: var(--ch-space-5);
-  padding: var(--ch-space-5);
-  border: 1px solid var(--ch-border);
-  border-radius: var(--ch-radius-lg);
-  background: var(--ch-bg-white);
-  box-shadow: var(--ch-shadow-sm);
-}
-
-.register-emission-page__records-header,
-.register-emission-page__record,
-.register-emission-page__record-actions {
-  display: flex;
-}
-
-.register-emission-page__records-header,
-.register-emission-page__record {
-  justify-content: space-between;
-  gap: var(--ch-space-4);
-}
-
-.register-emission-page__records-header {
-  align-items: flex-start;
-  margin-bottom: var(--ch-space-3);
-}
-
-.register-emission-page__records h3,
-.register-emission-page__record h4,
-.register-emission-page__records p {
-  margin: 0;
-}
-
-.register-emission-page__records p {
-  color: var(--ch-text-secondary);
-  font-size: 0.8125rem;
-}
-
-.register-emission-page__record {
-  align-items: center;
-  padding: var(--ch-space-3) 0;
-  border-top: 1px solid var(--ch-border);
-}
-
-.register-emission-page__record-category {
-  display: inline-block;
-  margin-bottom: 4px;
-  color: var(--ch-green);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.7px;
-}
-
-.register-emission-page__record-actions {
-  gap: var(--ch-space-2);
-}
-
-.register-emission-page__record-actions button {
-  min-height: 34px;
-  padding: 0 12px;
-  border: 1px solid var(--ch-border);
-  border-radius: var(--ch-radius-md);
-  background: var(--ch-bg-white);
-  color: var(--ch-text-primary);
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.register-emission-page__empty {
-  padding-top: var(--ch-space-3);
 }
 
 @media (max-width: 720px) {

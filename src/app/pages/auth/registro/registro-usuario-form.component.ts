@@ -11,6 +11,7 @@ import {
   validate,
 } from '@angular/forms/signals';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
 import { CheckboxComponent } from '../../../shared/components/inputs/checkbox/checkbox.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
@@ -42,6 +43,7 @@ const INITIAL_MODEL: RegistroUsuarioFormModel = {
   imports: [
     FormField,
     ButtonComponent,
+    HeadingComponent,
     TextInputComponent,
     CheckboxComponent,
     IconComponent,

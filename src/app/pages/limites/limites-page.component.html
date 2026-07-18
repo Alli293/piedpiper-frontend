@@ -5,9 +5,11 @@
         <div class="limites-editor__header">
           <div class="limites-editor__mark" aria-hidden="true">!</div>
           <div>
-            <h2 id="editor-title">
-              {{ isEditing() ? 'Editar límite anual' : 'Configurar límite anual' }}
-            </h2>
+            <app-heading
+              level="h2"
+              id="editor-title"
+              [text]="isEditing() ? 'Editar límite anual' : 'Configurar límite anual'"
+            />
             <p>
               {{
                 isEditing()
@@ -76,10 +78,10 @@
       <section class="limites-list" aria-labelledby="list-title">
         <div class="limites-list__header">
           <div>
-            <h2 id="list-title">
-              Límites registrados
-              <span>{{ limites().length }}</span>
-            </h2>
+            <div id="list-title" class="limites-list__title-row">
+              <app-heading level="h3" text="Límites registrados" />
+              <span class="limites-list__count">{{ limites().length }}</span>
+            </div>
             <p>Historial de objetivos anuales de la empresa.</p>
           </div>
           <app-button

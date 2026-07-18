@@ -9,7 +9,9 @@ import {
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthLayoutComponent } from '../../shared/layouts/auth-layout/auth-layout.component';
+import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { TextInputComponent } from '../../shared/components/inputs/text-input/text-input.component';
 import { CheckboxComponent } from '../../shared/components/inputs/checkbox/checkbox.component';
 import { AuthService } from '../../core/auth/auth.service';
@@ -20,7 +22,9 @@ import { AuthResponse } from '../../core/auth/auth.models';
   selector: 'app-registro-auditor-page',
   imports: [
     AuthLayoutComponent,
+    BadgeComponent,
     ButtonComponent,
+    HeadingComponent,
     TextInputComponent,
     CheckboxComponent,
     RouterLink,

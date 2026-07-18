@@ -166,7 +166,9 @@ describe('LimitesPageComponent', () => {
   });
 
   it('guardar usa el mensaje por defecto en un 403 sin mensaje de la API', () => {
-    limitesService.guardarLimite.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 403 })));
+    limitesService.guardarLimite.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 403 }))
+    );
 
     (component as any).guardar();
 
@@ -196,7 +198,9 @@ describe('LimitesPageComponent', () => {
   });
 
   it('guardar usa el mensaje por defecto en un 409 sin mensaje de la API', () => {
-    limitesService.guardarLimite.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409 })));
+    limitesService.guardarLimite.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 409 }))
+    );
 
     (component as any).guardar();
 
@@ -226,7 +230,9 @@ describe('LimitesPageComponent', () => {
   });
 
   it('eliminar usa el mensaje por defecto en un 403 sin mensaje de la API', () => {
-    limitesService.eliminarLimite.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 403 })));
+    limitesService.eliminarLimite.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 403 }))
+    );
 
     (component as any).eliminar(new Date().getFullYear());
 

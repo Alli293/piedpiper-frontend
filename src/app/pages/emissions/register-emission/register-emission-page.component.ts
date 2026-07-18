@@ -15,6 +15,7 @@ import {
   validate,
 } from '@angular/forms/signals';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { DateInputComponent } from '../../../shared/components/inputs/date-input/date-input.component';
 import { NumberInputComponent } from '../../../shared/components/inputs/number-input/number-input.component';
@@ -37,7 +38,6 @@ import { EmisionesService } from '../emisiones.service';
 import {
   ApiErrorResponse,
   CabinClass,
-  EmisionResponse,
   RegistrarVueloRequest,
   TipoVehiculoOption,
   UnidadDistancia,
@@ -139,6 +139,7 @@ const CATALOGO_ERROR_MESSAGE = 'No se pudo cargar el catálogo de vehículos.';
   imports: [
     FormField,
     ButtonComponent,
+    HeadingComponent,
     IconComponent,
     DateInputComponent,
     NumberInputComponent,
@@ -177,12 +178,6 @@ export class RegisterEmissionPageComponent {
   protected readonly flightTouched = signal<Set<FlightErrorKey>>(new Set());
   protected readonly flightSubmitted = signal(false);
   protected readonly flightSubmitting = signal(false);
-  protected readonly emisiones = signal<EmisionResponse[]>([]);
-  protected readonly flightEmisiones = computed(() =>
-    this.emisiones().filter((emision) => emision.categoria === 'VUELO')
-  );
-  protected readonly loadingEmisiones = signal(false);
-  protected readonly editingFlightId = signal<string | null>(null);
   protected readonly hasSession = signal(this.hasActiveSession());
 
   protected readonly registerForm = form(
@@ -377,7 +372,6 @@ export class RegisterEmissionPageComponent {
       this.flightModel.set(cloneFlightModel(INITIAL_FLIGHT_MODEL));
       this.flightTouched.set(new Set());
       this.flightSubmitted.set(false);
-      this.editingFlightId.set(null);
     }
     this.lastResult.set(null);
   }
@@ -398,9 +392,6 @@ export class RegisterEmissionPageComponent {
   protected selectCategory(category: EmissionCategory): void {
     this.activeCategory.set(category);
     this.lastResult.set(null);
-    if (category === 'vuelo') {
-      void this.loadEmisiones();
-    }
     if (category === 'flota' && !this.catalogoLoaded() && !this.catalogoLoading()) {
       this.loadTiposVehiculo();
     }
@@ -519,82 +510,19 @@ export class RegisterEmissionPageComponent {
     this.flightSubmitting.set(true);
     try {
       const payload = buildFlightPayload(value);
-      const editingId = this.editingFlightId();
-      const response = await firstValueFrom(
-        editingId
-          ? this.emisionesService.actualizarVuelo(editingId, payload)
-          : this.emisionesService.registrarVuelo(payload)
-      );
+      const response = await firstValueFrom(this.emisionesService.registrarVuelo(payload));
       this.lastResult.set({ carbonKg: response.carbonKg });
-      await this.loadEmisiones();
       this.toastService.success(
-        editingId ? 'Viaje aéreo actualizado.' : 'Viaje aéreo registrado.',
+        'Viaje aéreo registrado.',
         `Huella calculada: ${response.carbonKg} kg CO₂e.`
       );
       this.flightModel.set(cloneFlightModel(INITIAL_FLIGHT_MODEL));
       this.flightTouched.set(new Set());
       this.flightSubmitted.set(false);
-      this.editingFlightId.set(null);
     } catch (error) {
       this.reportSubmissionError(error);
     } finally {
       this.flightSubmitting.set(false);
-    }
-  }
-
-  protected editFlight(emision: EmisionResponse): void {
-    if (emision.categoria !== 'VUELO') return;
-    this.activeCategory.set('vuelo');
-    this.editingFlightId.set(emision.id);
-    this.lastResult.set(null);
-    this.flightTouched.set(new Set());
-    this.flightSubmitted.set(false);
-    this.flightModel.set({
-      passengers: emision.passengers ?? 1,
-      distanceUnit: emision.distanceUnit ?? 'km',
-      fechaActividad: new Date(`${emision.fechaActividad}T00:00:00Z`),
-      legs: (emision.legs ?? []).map((leg) => ({
-        departureAirport: leg.departureAirport,
-        destinationAirport: leg.destinationAirport,
-        cabinClass: leg.cabinClass,
-      })),
-    });
-  }
-
-  protected async deleteEmission(emision: EmisionResponse): Promise<void> {
-    if (!this.ensureSession()) return;
-
-    const confirmed = globalThis.confirm(
-      `¿Eliminar el registro "${emision.titulo}"? Esta acción no se puede deshacer.`
-    );
-    if (!confirmed) return;
-
-    try {
-      await firstValueFrom(this.emisionesService.eliminarEmision(emision.id));
-      await this.loadEmisiones();
-      if (this.editingFlightId() === emision.id) {
-        this.onCancel();
-      }
-      this.toastService.success('Registro eliminado.');
-    } catch (error) {
-      this.reportSubmissionError(error);
-    }
-  }
-
-  private async loadEmisiones(): Promise<void> {
-    this.hasSession.set(this.hasActiveSession());
-    if (!this.hasSession()) {
-      this.emisiones.set([]);
-      return;
-    }
-
-    this.loadingEmisiones.set(true);
-    try {
-      this.emisiones.set(await firstValueFrom(this.emisionesService.listarEmisiones()));
-    } catch {
-      this.emisiones.set([]);
-    } finally {
-      this.loadingEmisiones.set(false);
     }
   }
 
