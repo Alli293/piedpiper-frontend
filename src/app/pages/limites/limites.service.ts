@@ -18,6 +18,7 @@ export interface LimiteEmisionesResponse {
   justificacion: string | null;
   mensaje: string | null;
   actualizadoEn: string | null;
+  recienCreada: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
