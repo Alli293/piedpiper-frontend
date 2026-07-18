@@ -303,21 +303,6 @@ td strong {
   }
 }
 
-.limites-page__toast {
-  position: fixed;
-  right: var(--ch-space-6);
-  bottom: var(--ch-space-6);
-  z-index: 20;
-  max-width: min(420px, calc(100vw - 48px));
-  padding: var(--ch-space-4) var(--ch-space-5);
-  border-radius: var(--ch-radius-md);
-  background: var(--ch-dark);
-  box-shadow: var(--ch-shadow-lg);
-  color: var(--ch-text-on-dark);
-  font-family: var(--ch-font-body);
-  font-size: 0.8125rem;
-}
-
 @media (max-width: 720px) {
   .limites-editor {
     padding: var(--ch-space-4);

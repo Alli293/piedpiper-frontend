@@ -19,7 +19,6 @@ import {
 } from '@angular/forms';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { AuthSessionService } from '../../core/auth-session.service';
-import { ToastService } from '../../core/toast.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import {
   SelectInputComponent,
@@ -33,6 +32,7 @@ import {
   PageLayoutComponent,
   SidebarConfig,
 } from '../../shared/layouts/page-layout/page-layout.component';
+import { ToastService } from '../../shared/services/toast.service';
 import { LimiteEmisionesRequest, LimiteEmisionesResponse, LimitesService } from './limites.service';
 
 @Component({
@@ -67,7 +67,6 @@ export class LimitesPageComponent {
   protected readonly submitted = signal(false);
   protected readonly limiteVigente = signal<LimiteEmisionesResponse | null>(null);
   protected readonly limites = signal<LimiteEmisionesResponse[]>([]);
-  protected readonly toastMessage = this.toastService.message;
   protected readonly isAdmin = computed(() => this.authSession.isAdministradorEmpresa());
   protected readonly isEditing = computed(() => this.editingYear() !== null);
 
@@ -162,7 +161,7 @@ export class LimitesPageComponent {
     this.form.markAllAsTouched();
 
     if (!this.isAdmin()) {
-      this.toastService.show('No tiene permiso para modificar el límite de la empresa.');
+      this.toastService.error('No tiene permiso para modificar el límite de la empresa.');
       return;
     }
 
@@ -185,7 +184,7 @@ export class LimitesPageComponent {
           this.limiteMtControl.setValue(formatDecimal(response.limiteMt), { emitEvent: false });
           this.justificacionControl.setValue(response.justificacion ?? '', { emitEvent: false });
           const accion = response.recienCreada ? 'creado' : 'actualizado';
-          this.toastService.show(
+          this.toastService.success(
             `Límite del año ${response.anio} ${accion}: ${formatDecimal(response.limiteMt)} t CO₂e.`
           );
           this.saving.set(false);
@@ -233,7 +232,7 @@ export class LimitesPageComponent {
         next: () => {
           this.deletingYear.set(null);
           this.confirmDeleteYear.set(null);
-          this.toastService.show(`Límite del año ${anio} eliminado.`);
+          this.toastService.success(`Límite del año ${anio} eliminado.`);
 
           if (this.editingYear() === anio || Number(this.anioControl.value) === anio) {
             this.salirModoEdicion(true);
@@ -243,12 +242,12 @@ export class LimitesPageComponent {
         error: (error: HttpErrorResponse) => {
           this.deletingYear.set(null);
           if (error.status === 403) {
-            this.toastService.show(
+            this.toastService.error(
               this.mensajeApi(error) ?? 'No tiene permiso para modificar el límite de la empresa.'
             );
             return;
           }
-          this.toastService.show('No se pudo eliminar el límite. Intente nuevamente.');
+          this.toastService.error('No se pudo eliminar el límite. Intente nuevamente.');
         },
       });
   }
@@ -273,7 +272,7 @@ export class LimitesPageComponent {
         error: (error: HttpErrorResponse) => {
           this.loadingList.set(false);
           if (error.status !== 403) {
-            this.toastService.show('No se pudieron cargar los límites.');
+            this.toastService.error('No se pudieron cargar los límites.');
           }
         },
       });
@@ -302,7 +301,7 @@ export class LimitesPageComponent {
             return;
           }
           if (error.status !== 403) {
-            this.toastService.show('No se pudo cargar el límite. Intente nuevamente.');
+            this.toastService.error('No se pudo cargar el límite. Intente nuevamente.');
           }
         },
       });
@@ -322,20 +321,20 @@ export class LimitesPageComponent {
 
   private manejarErrorGuardado(error: HttpErrorResponse, anio: number): void {
     if (error.status === 403) {
-      this.toastService.show(
+      this.toastService.error(
         this.mensajeApi(error) ?? 'No tiene permiso para modificar el límite de la empresa.'
       );
       return;
     }
 
     if (error.status === 409) {
-      this.toastService.show(this.mensajeApi(error) ?? 'Conflicto al guardar el límite. Intente nuevamente.');
+      this.toastService.error(this.mensajeApi(error) ?? 'Conflicto al guardar el límite. Intente nuevamente.');
       this.precargarLimite(anio);
       this.cargarLimites();
       return;
     }
 
-    this.toastService.show('No se pudo guardar el límite. Intente nuevamente.');
+    this.toastService.error('No se pudo guardar el límite. Intente nuevamente.');
   }
 
   private mensajeApi(error: HttpErrorResponse): string | undefined {

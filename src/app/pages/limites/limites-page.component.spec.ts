@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthSessionService } from '../../core/auth-session.service';
-import { ToastService } from '../../core/toast.service';
+import { ToastService } from '../../shared/services/toast.service';
 import { LimitesPageComponent } from './limites-page.component';
 import { LimitesService } from './limites.service';
 
@@ -72,6 +72,11 @@ describe('LimitesPageComponent', () => {
     fixture.detectChanges();
   });
 
+  function ultimoToast() {
+    const toasts = toastService.toasts();
+    return toasts[toasts.length - 1];
+  }
+
   it('precarga el valor existente', () => {
     expect(limitesService.obtenerLimite).toHaveBeenCalledWith(new Date().getFullYear());
     expect((component as any).limiteMtControl.value).toBe('50');
@@ -112,7 +117,10 @@ describe('LimitesPageComponent', () => {
 
     (component as any).guardar();
 
-    expect(toastService.message()).toBe(`Límite del año ${anioNuevo} creado: 15 t CO₂e.`);
+    expect(ultimoToast()).toMatchObject({
+      variant: 'success',
+      title: `Límite del año ${anioNuevo} creado: 15 t CO₂e.`,
+    });
   });
 
   it('guardar muestra "actualizado" cuando la API indica que no es recienCreada', () => {
@@ -132,9 +140,10 @@ describe('LimitesPageComponent', () => {
 
     (component as any).guardar();
 
-    expect(toastService.message()).toBe(
-      `Límite del año ${new Date().getFullYear()} actualizado: 60 t CO₂e.`
-    );
+    expect(ultimoToast()).toMatchObject({
+      variant: 'success',
+      title: `Límite del año ${new Date().getFullYear()} actualizado: 60 t CO₂e.`,
+    });
   });
 
   it('guardar muestra el mensaje de la API en un 403', () => {
@@ -150,7 +159,10 @@ describe('LimitesPageComponent', () => {
 
     (component as any).guardar();
 
-    expect(toastService.message()).toBe('Solo un administrador puede editar el límite.');
+    expect(ultimoToast()).toMatchObject({
+      variant: 'error',
+      title: 'Solo un administrador puede editar el límite.',
+    });
   });
 
   it('guardar usa el mensaje por defecto en un 403 sin mensaje de la API', () => {
@@ -158,7 +170,10 @@ describe('LimitesPageComponent', () => {
 
     (component as any).guardar();
 
-    expect(toastService.message()).toBe('No tiene permiso para modificar el límite de la empresa.');
+    expect(ultimoToast()).toMatchObject({
+      variant: 'error',
+      title: 'No tiene permiso para modificar el límite de la empresa.',
+    });
   });
 
   it('guardar muestra el mensaje de la API en un conflicto 409', () => {
@@ -174,7 +189,10 @@ describe('LimitesPageComponent', () => {
 
     (component as any).guardar();
 
-    expect(toastService.message()).toBe('Ya existe un límite registrado para ese año.');
+    expect(ultimoToast()).toMatchObject({
+      variant: 'error',
+      title: 'Ya existe un límite registrado para ese año.',
+    });
   });
 
   it('guardar usa el mensaje por defecto en un 409 sin mensaje de la API', () => {
@@ -182,7 +200,10 @@ describe('LimitesPageComponent', () => {
 
     (component as any).guardar();
 
-    expect(toastService.message()).toBe('Conflicto al guardar el límite. Intente nuevamente.');
+    expect(ultimoToast()).toMatchObject({
+      variant: 'error',
+      title: 'Conflicto al guardar el límite. Intente nuevamente.',
+    });
   });
 
   it('eliminar muestra el mensaje de la API en un 403', () => {
@@ -198,7 +219,10 @@ describe('LimitesPageComponent', () => {
 
     (component as any).eliminar(new Date().getFullYear());
 
-    expect(toastService.message()).toBe('No tiene permisos para realizar esta acción.');
+    expect(ultimoToast()).toMatchObject({
+      variant: 'error',
+      title: 'No tiene permisos para realizar esta acción.',
+    });
   });
 
   it('eliminar usa el mensaje por defecto en un 403 sin mensaje de la API', () => {
@@ -206,6 +230,9 @@ describe('LimitesPageComponent', () => {
 
     (component as any).eliminar(new Date().getFullYear());
 
-    expect(toastService.message()).toBe('No tiene permiso para modificar el límite de la empresa.');
+    expect(ultimoToast()).toMatchObject({
+      variant: 'error',
+      title: 'No tiene permiso para modificar el límite de la empresa.',
+    });
   });
 });
