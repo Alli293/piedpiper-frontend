@@ -1,6 +1,19 @@
-<div class="ch-header__left">
-  <span class="ch-header__eyebrow">{{ sectionLabel() }}</span>
-  <h1 class="ch-header__title">{{ pageTitle() }}</h1>
+<div class="ch-header__leading">
+  @if (showBackButton()) {
+    <button
+      type="button"
+      class="ch-header__back-button"
+      aria-label="Volver"
+      (click)="backClicked.emit()"
+    >
+      <app-icon name="volver" [size]="16" />
+    </button>
+  }
+
+  <div class="ch-header__left">
+    <span class="ch-header__eyebrow">{{ sectionLabel() }}</span>
+    <h1 class="ch-header__title">{{ pageTitle() }}</h1>
+  </div>
 </div>
 
 <div class="ch-header__right">

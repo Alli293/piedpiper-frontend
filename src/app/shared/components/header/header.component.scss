@@ -11,11 +11,39 @@
   padding: 0 var(--ch-space-8);
 }
 
+.ch-header__leading {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-4);
+}
+
 .ch-header__left {
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 0;
+}
+
+.ch-header__back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-white);
+  color: var(--ch-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--ch-transition);
+
+  &:hover {
+    background: var(--ch-bg-main);
+  }
+
+  &:focus-visible {
+    @include mixins.focus-ring;
+  }
 }
 
 .ch-header__eyebrow {
@@ -25,7 +53,7 @@
   line-height: 1;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--ch-text-muted);
+  color: var(--ch-text-secondary);
 }
 
 .ch-header__title {

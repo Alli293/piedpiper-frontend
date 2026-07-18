@@ -6,11 +6,19 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { GoogleIdentityService } from '../../../core/auth/google-identity.service';
 
 describe('RegistroRolPageComponent', () => {
-  let authService: { registrarConGoogle: ReturnType<typeof vi.fn> };
+  let authService: {
+    registrarConGoogle: ReturnType<typeof vi.fn>;
+    registrarEmpresaConCorreo: ReturnType<typeof vi.fn>;
+    registrarUsuarioConCorreo: ReturnType<typeof vi.fn>;
+  };
   let googleIdentity: { renderizarBoton: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    authService = { registrarConGoogle: vi.fn().mockReturnValue(of({})) };
+    authService = {
+      registrarConGoogle: vi.fn().mockReturnValue(of({})),
+      registrarEmpresaConCorreo: vi.fn(),
+      registrarUsuarioConCorreo: vi.fn(),
+    };
     googleIdentity = { renderizarBoton: vi.fn().mockResolvedValue(undefined) };
 
     await TestBed.configureTestingModule({
@@ -30,7 +38,7 @@ describe('RegistroRolPageComponent', () => {
     fixture.componentRef.setInput('rol', 'empresa');
     fixture.detectChanges();
 
-    const badge = fixture.nativeElement.querySelector('.registro__badge');
+    const badge = fixture.nativeElement.querySelector('app-badge');
     expect(badge.textContent.trim()).toBe('EMPRESA · ADMINISTRADOR');
   });
 
@@ -39,7 +47,7 @@ describe('RegistroRolPageComponent', () => {
     fixture.componentRef.setInput('rol', 'auditor');
     fixture.detectChanges();
 
-    const badge = fixture.nativeElement.querySelector('.registro__badge');
+    const badge = fixture.nativeElement.querySelector('app-badge');
     expect(badge.textContent.trim()).toBe('AUDITOR CERTIFICADO');
   });
 
@@ -48,6 +56,38 @@ describe('RegistroRolPageComponent', () => {
     fixture.componentRef.setInput('rol', 'inventado');
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.registro__badge')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-badge')).toBeNull();
+  });
+
+  it('con rol empresa renderiza el formulario embebido de registro por correo', () => {
+    const fixture = TestBed.createComponent(RegistroRolPageComponent);
+    fixture.componentRef.setInput('rol', 'empresa');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-registro-empresa-form')).not.toBeNull();
+  });
+
+  it('con rol auditor no renderiza el formulario de registro por correo', () => {
+    const fixture = TestBed.createComponent(RegistroRolPageComponent);
+    fixture.componentRef.setInput('rol', 'auditor');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-registro-empresa-form')).toBeNull();
+  });
+
+  it('con rol viajero renderiza el formulario embebido de registro de usuario', () => {
+    const fixture = TestBed.createComponent(RegistroRolPageComponent);
+    fixture.componentRef.setInput('rol', 'viajero');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-registro-usuario-form')).not.toBeNull();
+  });
+
+  it('con rol empresa no renderiza el formulario de registro de usuario', () => {
+    const fixture = TestBed.createComponent(RegistroRolPageComponent);
+    fixture.componentRef.setInput('rol', 'empresa');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-registro-usuario-form')).toBeNull();
   });
 });

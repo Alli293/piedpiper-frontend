@@ -9,6 +9,7 @@ import { IconComponent } from '../icon/icon.component';
   styleUrl: './header.component.scss',
   host: {
     class: 'ch-header',
+    role: 'banner',
   },
 })
 export class HeaderComponent {
@@ -16,7 +17,9 @@ export class HeaderComponent {
   pageTitle = input('');
   showNotificationDot = input(false);
   userInitials = input('');
+  showBackButton = input(false);
 
   notificationClicked = output<void>();
   profileClicked = output<void>();
+  backClicked = output<void>();
 }

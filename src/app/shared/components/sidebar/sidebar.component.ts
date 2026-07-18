@@ -22,6 +22,8 @@ export interface SidebarBottomItem {
   styleUrl: './sidebar.component.scss',
   host: {
     class: 'ch-sidebar',
+    role: 'complementary',
+    'aria-label': 'Barra lateral',
   },
 })
 export class SidebarComponent {

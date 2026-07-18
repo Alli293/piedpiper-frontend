@@ -1,0 +1,76 @@
+.perfil-inicial {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-6);
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ch-space-2);
+  }
+
+  &__titulo {
+    margin: 0;
+    font-family: var(--ch-font-heading);
+    font-size: 1.5rem;
+    color: var(--ch-text-primary);
+  }
+
+  &__subtitulo {
+    margin: 0;
+    font-family: var(--ch-font-body);
+    font-size: 0.9375rem;
+    color: var(--ch-text-muted);
+  }
+
+  &__campos {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ch-space-4);
+  }
+
+  &__empresa {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ch-space-3);
+  }
+
+  &__empresa-titulo {
+    margin: 0;
+    font-family: var(--ch-font-heading);
+    font-size: 1.125rem;
+    color: var(--ch-text-primary);
+  }
+
+  &__empresa-nota,
+  &__auditor-nota {
+    margin: 0;
+    font-family: var(--ch-font-body);
+    font-size: 0.875rem;
+    color: var(--ch-text-muted);
+  }
+
+  &__acciones {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  &__cargando {
+    margin: 0;
+    font-family: var(--ch-font-body);
+    color: var(--ch-text-muted);
+  }
+
+  &__error {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ch-space-4);
+  }
+
+  &__error-mensaje {
+    margin: 0;
+    font-family: var(--ch-font-body);
+    color: var(--ch-text-muted);
+  }
+}

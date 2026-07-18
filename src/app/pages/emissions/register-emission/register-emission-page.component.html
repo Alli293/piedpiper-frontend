@@ -1,0 +1,386 @@
+<app-page-layout
+  [sidebarConfig]="sidebarConfig()"
+  [headerConfig]="headerConfig()"
+  (backClicked)="goBack()"
+>
+  <div class="register-emission-page">
+    <form class="register-emission-page__card" novalidate (submit)="handleSubmit($event)">
+      <header class="register-emission-page__header">
+        <span
+          class="register-emission-page__header-icon"
+          [class.register-emission-page__header-icon--flight]="activeCategory() === 'vuelo'"
+          aria-hidden="true"
+        >
+          @if (activeCategory() === 'vuelo') {
+            <app-icon name="vuelos" [size]="24" />
+          } @else if (activeCategory() === 'flota') {
+            <app-icon name="flota-vehicular" [size]="24" />
+          } @else {
+            <app-icon name="electricidad" [size]="24" />
+          }
+        </span>
+        @if (activeCategory() === 'vuelo') {
+          <div>
+            <h2 class="register-emission-page__title">Viaje aéreo</h2>
+            <p class="register-emission-page__subtitle">
+              Registra los trayectos del vuelo para calcular su huella de carbono.
+            </p>
+          </div>
+        } @else if (activeCategory() === 'flota') {
+          <div>
+            <h2 class="register-emission-page__title">Flota vehicular</h2>
+            <p class="register-emission-page__subtitle">
+              Registra el uso de un vehículo de la flota para calcular su huella de carbono.
+            </p>
+          </div>
+        } @else {
+          <div>
+            <h2 class="register-emission-page__title">Consumo eléctrico</h2>
+            <p class="register-emission-page__subtitle">
+              Registra el consumo de una sede para calcular su huella de carbono.
+            </p>
+          </div>
+        }
+      </header>
+
+      <div
+        class="register-emission-page__categories"
+        role="group"
+        aria-label="Categoría de emisión"
+      >
+        <button
+          type="button"
+          class="register-emission-page__category"
+          [class.register-emission-page__category--active]="activeCategory() === 'electricidad'"
+          [attr.aria-pressed]="activeCategory() === 'electricidad'"
+          (click)="selectCategory('electricidad')"
+        >
+          <app-icon name="electricidad" [size]="16" />
+          Electricidad
+        </button>
+        <button
+          type="button"
+          class="register-emission-page__category"
+          [class.register-emission-page__category--active]="activeCategory() === 'flota'"
+          [attr.aria-pressed]="activeCategory() === 'flota'"
+          (click)="selectCategory('flota')"
+        >
+          <app-icon name="flota-vehicular" [size]="16" />
+          Flota vehicular
+        </button>
+        <button
+          type="button"
+          class="register-emission-page__category"
+          [class.register-emission-page__category--active]="activeCategory() === 'vuelo'"
+          [attr.aria-pressed]="activeCategory() === 'vuelo'"
+          (click)="selectCategory('vuelo')"
+        >
+          <app-icon name="vuelos" [size]="16" />
+          Vuelos
+        </button>
+        <button type="button" class="register-emission-page__category" (click)="navigateToEnvio()">
+          <app-icon name="envios-carga" [size]="16" />
+          Envíos de carga
+        </button>
+      </div>
+
+      @if (!hasSession()) {
+        <div class="register-emission-page__auth-warning">
+          <app-icon name="warning" [size]="16" />
+          <span>Inicie sesión para consultar, registrar o editar emisiones.</span>
+        </div>
+      }
+
+      @if (activeCategory() === 'electricidad') {
+        <div class="register-emission-page__row">
+          <app-number-input
+            class="register-emission-page__field--grow"
+            label="Consumo del periodo"
+            placeholder="0"
+            step="0.001"
+            [formField]="registerForm.electricityValue"
+            [error]="electricityValueError()"
+          />
+
+          <div class="register-emission-page__field">
+            <span class="register-emission-page__field-label" id="unidad-electricidad-label"
+              >Unidad</span
+            >
+            <div
+              class="register-emission-page__unit-options"
+              appRadioGroup
+              aria-labelledby="unidad-electricidad-label"
+              [formField]="registerForm.electricityUnit"
+            >
+              <app-radio value="kwh" label="kWh" />
+              <app-radio value="mwh" label="MWh" />
+            </div>
+            @if (electricityUnitError()) {
+              <p class="register-emission-page__field-error">{{ electricityUnitError() }}</p>
+            }
+          </div>
+        </div>
+
+        <app-date-input
+          label="Fecha del registro"
+          [formField]="registerForm.fechaActividad"
+          [error]="fechaActividadError()"
+        />
+
+        <app-textarea
+          label="Detalle"
+          placeholder="Ej. Planta de tueste - Heredia"
+          [formField]="registerForm.titulo"
+          [error]="tituloError()"
+        />
+      } @else if (activeCategory() === 'flota') {
+        <div class="register-emission-page__field">
+          <app-select-input
+            label="Tipo de vehículo"
+            placeholder="Seleccionar..."
+            [options]="tipoVehiculoOptions()"
+            [formField]="flotaForm.tipoVehiculo"
+            [error]="tipoVehiculoError()"
+          />
+          @if (catalogoError()) {
+            <p class="register-emission-page__field-error">
+              {{ catalogoError() }}
+              <app-button variant="link" size="sm" type="button" (click)="retryLoadTiposVehiculo()">
+                Reintentar
+              </app-button>
+            </p>
+          }
+        </div>
+
+        <app-select-input
+          label="Combustible"
+          placeholder="Seleccionar..."
+          hint="Promedio: usa el factor de emisión promedio del país cuando no conoces el combustible exacto"
+          [options]="combustibleOptions()"
+          [formField]="flotaForm.combustible"
+          [error]="combustibleError()"
+        />
+
+        <div class="register-emission-page__row">
+          <app-number-input
+            class="register-emission-page__field--grow"
+            label="Distancia recorrida"
+            placeholder="0"
+            step="0.001"
+            [formField]="flotaForm.distanceValue"
+            [error]="distanceValueError()"
+          />
+
+          <div class="register-emission-page__field">
+            <span class="register-emission-page__field-label" id="unidad-distancia-label"
+              >Unidad</span
+            >
+            <div
+              class="register-emission-page__unit-options"
+              appRadioGroup
+              aria-labelledby="unidad-distancia-label"
+              [formField]="flotaForm.distanceUnit"
+            >
+              <app-radio value="km" label="km" />
+              <app-radio value="mi" label="mi" />
+            </div>
+            @if (distanceUnitError()) {
+              <p class="register-emission-page__field-error">{{ distanceUnitError() }}</p>
+            }
+          </div>
+        </div>
+
+        <app-date-input
+          label="Fecha de la actividad"
+          [formField]="flotaForm.fechaActividad"
+          [error]="flotaFechaActividadError()"
+        />
+
+        <app-textarea
+          label="Detalle"
+          placeholder="Ej. Ruta de reparto — San José"
+          [formField]="flotaForm.titulo"
+          [error]="flotaTituloError()"
+        />
+      } @else {
+        <div class="register-emission-page__row">
+          <app-number-input
+            class="register-emission-page__field--grow"
+            label="Pasajeros"
+            step="1"
+            [required]="true"
+            [value]="flightModel().passengers"
+            [error]="flightError('passengers')"
+            (valueChange)="updateFlightPassengers($event); markFlightTouched('passengers')"
+          />
+
+          <app-select-input
+            label="Unidad distancia"
+            [options]="distanceUnitOptions"
+            [value]="flightModel().distanceUnit"
+            (valueChange)="updateFlightDistanceUnit($event)"
+          />
+        </div>
+
+        <app-date-input
+          label="Fecha del viaje"
+          [required]="true"
+          [value]="flightModel().fechaActividad"
+          [max]="today"
+          [error]="flightError('fechaActividad')"
+          (valueChange)="updateFlightDate($event); markFlightTouched('fechaActividad')"
+        />
+
+        <div class="register-emission-page__legs">
+          <div class="register-emission-page__legs-header">
+            <span class="register-emission-page__field-label">Trayectos</span>
+            <button class="register-emission-page__link-button" type="button" (click)="addLeg()">
+              + Agregar trayecto
+            </button>
+          </div>
+          @if (flightError('legs')) {
+            <p class="register-emission-page__field-error">{{ flightError('legs') }}</p>
+          }
+
+          @for (leg of flightModel().legs; track $index) {
+            <div class="register-emission-page__leg">
+              <div class="register-emission-page__leg-title">Trayecto {{ $index + 1 }}</div>
+              <app-text-input
+                label="Origen"
+                placeholder="SJO"
+                [value]="leg.departureAirport"
+                [error]="flightError('legs.' + $index + '.departureAirport')"
+                (valueChange)="
+                  updateLeg($index, 'departureAirport', $event);
+                  markFlightTouched('legs.' + $index + '.departureAirport')
+                "
+              />
+
+              <app-text-input
+                label="Destino"
+                placeholder="YYZ"
+                [value]="leg.destinationAirport"
+                [error]="flightError('legs.' + $index + '.destinationAirport')"
+                (valueChange)="
+                  updateLeg($index, 'destinationAirport', $event);
+                  markFlightTouched('legs.' + $index + '.destinationAirport')
+                "
+              />
+
+              <app-select-input
+                label="Cabina"
+                [options]="cabinClassOptions"
+                [value]="leg.cabinClass"
+                [error]="flightError('legs.' + $index + '.cabinClass')"
+                (valueChange)="
+                  updateLeg($index, 'cabinClass', $event);
+                  markFlightTouched('legs.' + $index + '.cabinClass')
+                "
+              />
+
+              <button
+                class="register-emission-page__remove-button"
+                type="button"
+                (click)="removeLeg($index)"
+                title="Eliminar trayecto"
+              >
+                Eliminar
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="register-emission-page__info">
+        <app-icon name="info" [size]="16" />
+        <p>
+          @if (activeCategory() === 'vuelo') {
+            El cálculo usa un catálogo local de aeropuertos frecuentes para estimar cada trayecto
+            por código IATA. Un viaje de ida y vuelta se registra con dos trayectos.
+          } @else {
+            El cálculo de electricidad usa factores de red como aproximación cuando no existe
+            proveedor local configurado.
+          }
+        </p>
+      </div>
+
+      @if (lastResult(); as result) {
+        <div class="register-emission-page__estimate">
+          <span class="register-emission-page__estimate-label">Huella estimada del registro</span>
+          <span class="register-emission-page__estimate-value">
+            {{ result.carbonKg }}
+            <span class="register-emission-page__estimate-unit">kg CO₂e</span>
+          </span>
+        </div>
+      }
+
+      <div class="register-emission-page__actions">
+        <app-button variant="secondary" type="button" (click)="onCancel()">Cancelar</app-button>
+        <app-button
+          variant="primary"
+          type="submit"
+          [loading]="activeCategory() === 'vuelo' ? flightSubmitting() : submitting()"
+          [disabled]="!canSubmit()"
+        >
+          Calcular y guardar
+        </app-button>
+      </div>
+
+      <div class="register-emission-page__save-flow" aria-live="polite">
+        <span class="register-emission-page__save-label">Al guardar:</span>
+        <span
+          class="register-emission-page__save-pill"
+          [class.register-emission-page__save-pill--active]="submitting() || flightSubmitting()"
+        >
+          Calculando...
+        </span>
+        <span class="register-emission-page__save-arrow">></span>
+        <span
+          class="register-emission-page__save-pill"
+          [class.register-emission-page__save-pill--done]="lastResult()"
+        >
+          Guardado
+        </span>
+      </div>
+    </form>
+
+    @if (activeCategory() === 'vuelo') {
+      <section class="register-emission-page__records">
+        <div class="register-emission-page__records-header">
+          <div>
+            <h3>Vuelos registrados</h3>
+            <p>Consulta, edita o elimina vuelos guardados.</p>
+          </div>
+          @if (loadingEmisiones()) {
+            <span>Cargando...</span>
+          }
+        </div>
+
+        @if (flightEmisiones().length === 0 && !loadingEmisiones()) {
+          <p class="register-emission-page__empty">No hay vuelos registrados.</p>
+        }
+
+        @for (emision of flightEmisiones(); track emision.id) {
+          <article class="register-emission-page__record">
+            <div>
+              <span class="register-emission-page__record-category">{{ emision.categoria }}</span>
+              <h4>{{ emision.titulo }}</h4>
+              <p>
+                {{ emision.fechaActividad }} · {{ emision.carbonKg }} kg CO₂e
+                @if (emision.categoria === 'VUELO') {
+                  · {{ emision.passengers }} pasajero(s)
+                }
+              </p>
+            </div>
+            <div class="register-emission-page__record-actions">
+              @if (emision.categoria === 'VUELO') {
+                <button type="button" (click)="editFlight(emision)">Editar</button>
+              }
+              <button type="button" (click)="deleteEmission(emision)">Eliminar</button>
+            </div>
+          </article>
+        }
+      </section>
+    }
+  </div>
+</app-page-layout>

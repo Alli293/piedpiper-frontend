@@ -30,6 +30,10 @@
     background-color var(--ch-transition),
     border-color var(--ch-transition);
 
+  &--error {
+    border-color: var(--ch-danger);
+  }
+
   &:checked {
     background: var(--ch-green);
     border-color: var(--ch-green);
@@ -61,4 +65,11 @@
   font-family: var(--ch-font-body);
   font-size: 0.875rem;
   color: var(--ch-text-primary);
+}
+
+.ch-checkbox__error {
+  margin: var(--ch-space-2) 0 0 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.875rem;
+  color: var(--ch-danger);
 }

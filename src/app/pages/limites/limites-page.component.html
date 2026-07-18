@@ -1,0 +1,182 @@
+<app-page-layout [sidebarConfig]="sidebarConfig()" [headerConfig]="headerConfig">
+  <div class="limites-page">
+    @if (isAdmin()) {
+      <section class="limites-editor" aria-labelledby="editor-title">
+        <div class="limites-editor__header">
+          <div class="limites-editor__mark" aria-hidden="true">!</div>
+          <div>
+            <h2 id="editor-title">
+              {{ isEditing() ? 'Editar límite anual' : 'Configurar límite anual' }}
+            </h2>
+            <p>
+              {{
+                isEditing()
+                  ? 'Actualice el objetivo máximo de emisiones del año seleccionado.'
+                  : 'Declare el objetivo máximo de emisiones para un año fiscal.'
+              }}
+            </p>
+          </div>
+        </div>
+
+        <div class="limites-editor__summary" aria-live="polite">
+          <span>{{ isEditing() ? 'Límite seleccionado' : 'Límite vigente' }}</span>
+          <strong>
+            @if (loading()) {
+              Cargando...
+            } @else if (limiteVigente()) {
+              {{ formatLimite(limiteVigente()!.limiteMt) }} t CO₂e
+            } @else {
+              Sin límite registrado
+            }
+          </strong>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+          <div class="limites-editor__fields">
+            <app-select-input
+              label="Año fiscal"
+              formControlName="anio"
+              [options]="yearOptions"
+              [error]="anioError"
+            />
+            <app-text-input
+              label="Nuevo límite (tCO₂e)"
+              placeholder="50"
+              formControlName="limiteMt"
+              [error]="limiteMtError"
+              hint="Hasta 4 decimales"
+              [required]="true"
+            />
+          </div>
+
+          <div class="limites-editor__justification">
+            <app-textarea
+              label="Justificación (opcional)"
+              formControlName="justificacion"
+              placeholder="Describa el motivo o compromiso asociado a este objetivo anual."
+              [rows]="3"
+              [error]="justificacionError"
+              hint="Máximo 500 caracteres"
+            />
+          </div>
+
+          <div class="limites-editor__actions">
+            @if (isEditing()) {
+              <app-button type="button" variant="secondary" (click)="cancelarEdicion()">
+                Cancelar
+              </app-button>
+            }
+            <app-button type="submit" [disabled]="form.invalid || saving()" [loading]="saving()">
+              {{ isEditing() ? 'Guardar cambios' : 'Guardar límite' }}
+            </app-button>
+          </div>
+        </form>
+      </section>
+
+      <section class="limites-list" aria-labelledby="list-title">
+        <div class="limites-list__header">
+          <div>
+            <h2 id="list-title">
+              Límites registrados
+              <span>{{ limites().length }}</span>
+            </h2>
+            <p>Historial de objetivos anuales de la empresa.</p>
+          </div>
+          <app-button
+            type="button"
+            size="sm"
+            [loading]="loadingList()"
+            [disabled]="loadingList()"
+            (click)="cargarLimites()"
+          >
+            Recargar límites
+          </app-button>
+        </div>
+
+        @if (loadingList()) {
+          <div class="limites-list__empty">Cargando límites...</div>
+        } @else if (limites().length === 0) {
+          <div class="limites-list__empty">
+            <strong>No hay límites registrados.</strong>
+            <span>Complete el formulario para crear el primero.</span>
+          </div>
+        } @else {
+          <div class="limites-list__table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Año fiscal</th>
+                  <th scope="col">Límite anual</th>
+                  <th scope="col">Justificación</th>
+                  <th scope="col">Última actualización</th>
+                  <th scope="col" class="limites-list__actions-heading">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (limite of limites(); track limite.id) {
+                  <tr [class.is-editing]="editingYear() === limite.anio">
+                    <td>
+                      <strong>{{ limite.anio }}</strong>
+                    </td>
+                    <td>{{ formatLimite(limite.limiteMt) }} t CO₂e</td>
+                    <td class="limites-list__justification">
+                      {{ limite.justificacion || 'Sin justificación' }}
+                    </td>
+                    <td>
+                      {{
+                        limite.actualizadoEn
+                          ? (limite.actualizadoEn | date: 'dd/MM/yyyy, HH:mm')
+                          : '—'
+                      }}
+                    </td>
+                    <td>
+                      <div class="limites-list__row-actions">
+                        @if (confirmDeleteYear() === limite.anio) {
+                          <span>¿Eliminar?</span>
+                          <button
+                            type="button"
+                            class="table-action table-action--danger"
+                            [disabled]="deletingYear() === limite.anio"
+                            (click)="eliminar(limite.anio)"
+                          >
+                            Confirmar
+                          </button>
+                          <button type="button" class="table-action" (click)="cancelarEliminar()">
+                            Cancelar
+                          </button>
+                        } @else {
+                          <button
+                            type="button"
+                            class="icon-action icon-action--edit"
+                            title="Editar límite"
+                            aria-label="Editar límite"
+                            (click)="editar(limite)"
+                          >
+                            <app-icon name="edit" [size]="16" />
+                          </button>
+                          <button
+                            type="button"
+                            class="icon-action icon-action--delete"
+                            title="Eliminar límite"
+                            aria-label="Eliminar límite"
+                            (click)="solicitarEliminar(limite.anio)"
+                          >
+                            <app-icon name="delete" [size]="16" />
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    }
+  </div>
+
+  @if (toastMessage()) {
+    <div class="limites-page__toast" role="status">{{ toastMessage() }}</div>
+  }
+</app-page-layout>
