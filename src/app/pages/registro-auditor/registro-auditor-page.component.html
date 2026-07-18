@@ -54,9 +54,10 @@
         label="Contraseña"
         type="password"
         autocomplete="new-password"
-        placeholder="Mínimo 8 caracteres"
+        placeholder="Tu contraseña"
         [formField]="registroForm.contrasena"
         [error]="errorContrasena()"
+        [hint]="contrasenaHint"
       />
 
       <app-text-input

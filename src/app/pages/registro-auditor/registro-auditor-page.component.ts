@@ -9,7 +9,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { disabled, form, FormField, minLength, pattern, required, schema, submit, validate } from '@angular/forms/signals';
+import { disabled, form, FormField, pattern, required, schema, submit, validate } from '@angular/forms/signals';
 import { AuthLayoutComponent } from '../../shared/layouts/auth-layout/auth-layout.component';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -19,8 +19,12 @@ import { CheckboxComponent } from '../../shared/components/inputs/checkbox/check
 import { AuthService } from '../../core/auth/auth.service';
 import { GoogleIdentityService } from '../../core/auth/google-identity.service';
 import { AuthResponse } from '../../core/auth/auth.models';
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import {
+  CONTRASENA_HINT,
+  CONTRASENA_MENSAJE,
+  CONTRASENA_PATTERN,
+} from '../../shared/utils/password.utils';
+import { EMAIL_MENSAJE, EMAIL_PATTERN } from '../../shared/utils/email.utils';
 
 interface RegistroAuditorFormModel {
   nombre: string;
@@ -55,6 +59,7 @@ export class RegistroAuditorPageComponent {
   private readonly googleButton = viewChild.required<ElementRef<HTMLElement>>('googleButton');
 
   protected readonly cargando = signal(false);
+  protected readonly contrasenaHint = CONTRASENA_HINT;
 
   protected readonly model = signal<RegistroAuditorFormModel>({
     nombre: '',
@@ -72,12 +77,10 @@ export class RegistroAuditorPageComponent {
       required(path.apellidos, { message: 'Los apellidos son obligatorios.' });
 
       required(path.email, { message: 'El correo electrónico es obligatorio.' });
-      pattern(path.email, EMAIL_PATTERN, { message: 'Ingresa un correo electrónico válido.' });
+      pattern(path.email, EMAIL_PATTERN, { message: EMAIL_MENSAJE });
 
       required(path.contrasena, { message: 'La contraseña es obligatoria.' });
-      minLength(path.contrasena, 8, {
-        message: 'La contraseña debe tener al menos 8 caracteres.',
-      });
+      pattern(path.contrasena, CONTRASENA_PATTERN, { message: CONTRASENA_MENSAJE });
 
       required(path.confirmarContrasena, { message: 'Confirma tu contraseña.' });
       validate(path.confirmarContrasena, ({ value, valueOf }) => {

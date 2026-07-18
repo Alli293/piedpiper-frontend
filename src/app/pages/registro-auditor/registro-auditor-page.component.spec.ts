@@ -56,8 +56,8 @@ describe('RegistroAuditorPageComponent', () => {
       nombre: 'Carlos',
       apellidos: 'Lopez',
       email: 'carlos@example.com',
-      contrasena: 'segura123',
-      confirmarContrasena: 'segura123',
+      contrasena: 'Segura123.',
+      confirmarContrasena: 'Segura123.',
       aceptaTerminos: true,
     }));
     fixture.detectChanges();

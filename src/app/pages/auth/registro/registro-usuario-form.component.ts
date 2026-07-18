@@ -16,9 +16,12 @@ import { TextInputComponent } from '../../../shared/components/inputs/text-input
 import { CheckboxComponent } from '../../../shared/components/inputs/checkbox/checkbox.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { AuthService } from '../../../core/auth/auth.service';
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const CONTRASENA_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+import {
+  CONTRASENA_HINT,
+  CONTRASENA_MENSAJE,
+  CONTRASENA_PATTERN,
+} from '../../../shared/utils/password.utils';
+import { EMAIL_MENSAJE, EMAIL_PATTERN } from '../../../shared/utils/email.utils';
 
 interface RegistroUsuarioFormModel {
   nombre: string;
@@ -55,6 +58,8 @@ const INITIAL_MODEL: RegistroUsuarioFormModel = {
 export class RegistroUsuarioFormComponent {
   private readonly authService = inject(AuthService);
 
+  protected readonly contrasenaHint = CONTRASENA_HINT;
+
   protected readonly model = signal<RegistroUsuarioFormModel>({ ...INITIAL_MODEL });
 
   protected readonly registroForm = form(
@@ -63,13 +68,11 @@ export class RegistroUsuarioFormComponent {
       required(path.nombre, { message: 'Ingresa tu nombre.' });
       required(path.apellidos, { message: 'Ingresa tus apellidos.' });
 
-      required(path.email, { message: 'Ingresa un correo electrónico válido.' });
-      pattern(path.email, EMAIL_PATTERN, { message: 'Ingresa un correo electrónico válido.' });
+      required(path.email, { message: EMAIL_MENSAJE });
+      pattern(path.email, EMAIL_PATTERN, { message: EMAIL_MENSAJE });
 
       required(path.contrasena, { message: 'Ingresa tu contraseña.' });
-      pattern(path.contrasena, CONTRASENA_PATTERN, {
-        message: 'La contraseña debe tener al menos 8 caracteres, con una letra y un número.',
-      });
+      pattern(path.contrasena, CONTRASENA_PATTERN, { message: CONTRASENA_MENSAJE });
 
       required(path.confirmarContrasena, { message: 'Debes confirmar tu contraseña.' });
       validate(path.confirmarContrasena, ({ value, valueOf }) => {

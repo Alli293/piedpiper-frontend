@@ -9,7 +9,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { disabled, form, FormField, required, schema, submit } from '@angular/forms/signals';
+import { disabled, form, FormField, pattern, required, schema, submit } from '@angular/forms/signals';
 import { AuthLayoutComponent } from '../../../shared/layouts/auth-layout/auth-layout.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
@@ -18,6 +18,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { AuthService } from '../../../core/auth/auth.service';
 import { GoogleIdentityService } from '../../../core/auth/google-identity.service';
 import { AuthResponse } from '../../../core/auth/auth.models';
+import { EMAIL_MENSAJE, EMAIL_PATTERN } from '../../../shared/utils/email.utils';
 
 interface LoginFormModel {
   email: string;
@@ -54,6 +55,7 @@ export class LoginPageComponent {
     this.model,
     schema<LoginFormModel>((path) => {
       required(path.email, { message: REQUIRED_MESSAGE });
+      pattern(path.email, EMAIL_PATTERN, { message: EMAIL_MENSAJE });
       required(path.contrasena, { message: REQUIRED_MESSAGE });
       disabled(path.email, { when: () => this.cargando() });
       disabled(path.contrasena, { when: () => this.cargando() });
@@ -67,8 +69,11 @@ export class LoginPageComponent {
   protected readonly error = computed(() => {
     if (this.serverError()) return this.serverError();
     const email = this.loginForm.email();
+    if (email.touched() && email.invalid()) {
+      return email.errors()[0]?.message ?? REQUIRED_MESSAGE;
+    }
     const contrasena = this.loginForm.contrasena();
-    if ((email.touched() && email.invalid()) || (contrasena.touched() && contrasena.invalid())) {
+    if (contrasena.touched() && contrasena.invalid()) {
       return REQUIRED_MESSAGE;
     }
     return '';

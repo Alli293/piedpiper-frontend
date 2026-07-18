@@ -40,8 +40,8 @@ describe('RegistroEmpresaFormComponent', () => {
     setInputValue(root, 'input[autocomplete="given-name"]', 'Ana');
     setInputValue(root, 'input[autocomplete="family-name"]', 'Perez Solano');
     setInputValue(root, 'input[autocomplete="email"]', 'ana@empresa.com');
-    setInputValue(root, 'input[placeholder="Tu contraseña"]', 'clave1234');
-    setInputValue(root, 'input[placeholder="Repite tu contraseña"]', 'clave1234');
+    setInputValue(root, 'input[placeholder="Tu contraseña"]', 'Clave1234.');
+    setInputValue(root, 'input[placeholder="Repite tu contraseña"]', 'Clave1234.');
     setChecked(root, true);
   }
 
@@ -143,8 +143,8 @@ describe('RegistroEmpresaFormComponent', () => {
       nombreAdmin: 'Ana',
       apellidosAdmin: 'Perez Solano',
       emailAdmin: 'ana@empresa.com',
-      contrasena: 'clave1234',
-      confirmarContrasena: 'clave1234',
+      contrasena: 'Clave1234.',
+      confirmarContrasena: 'Clave1234.',
       aceptaTerminos: true,
     });
     expect(comp.enviado()).toBe(true);
