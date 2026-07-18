@@ -1,23 +1,9 @@
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  AbstractControl,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators,
-} from '@angular/forms';
-import { distinctUntilChanged, filter } from 'rxjs';
+import { disabled, form, FormField, maxLength, schema, submit, validate } from '@angular/forms/signals';
+import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from '../../core/auth-session.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import {
@@ -36,11 +22,17 @@ import {
 import { ToastService } from '../../shared/services/toast.service';
 import { LimiteEmisionesRequest, LimiteEmisionesResponse, LimitesService } from './limites.service';
 
+interface LimitesFormModel {
+  anio: string;
+  limiteMt: string;
+  justificacion: string;
+}
+
 @Component({
   selector: 'app-limites-page',
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
+    DatePipe,
+    FormField,
     PageLayoutComponent,
     SelectInputComponent,
     TextInputComponent,
@@ -51,7 +43,6 @@ import { LimiteEmisionesRequest, LimiteEmisionesResponse, LimitesService } from 
   ],
   templateUrl: './limites-page.component.html',
   styleUrl: './limites-page.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LimitesPageComponent {
   private readonly limitesService = inject(LimitesService);
@@ -60,38 +51,56 @@ export class LimitesPageComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly currentYear = new Date().getFullYear();
-  protected readonly saving = signal(false);
   protected readonly loading = signal(false);
   protected readonly loadingList = signal(false);
   protected readonly deletingYear = signal<number | null>(null);
   protected readonly confirmDeleteYear = signal<number | null>(null);
   protected readonly editingYear = signal<number | null>(null);
-  protected readonly submitted = signal(false);
   protected readonly limiteVigente = signal<LimiteEmisionesResponse | null>(null);
   protected readonly limites = signal<LimiteEmisionesResponse[]>([]);
   protected readonly isAdmin = computed(() => this.authSession.isAdministradorEmpresa());
   protected readonly isEditing = computed(() => this.editingYear() !== null);
 
-  protected readonly anioControl = new FormControl(String(this.currentYear), {
-    nonNullable: true,
-    validators: [Validators.required, this.anioValidoValidator.bind(this)],
+  protected readonly model = signal<LimitesFormModel>({
+    anio: String(this.currentYear),
+    limiteMt: '',
+    justificacion: '',
   });
 
-  protected readonly limiteMtControl = new FormControl('', {
-    nonNullable: true,
-    validators: [Validators.required, limiteMtValidator],
-  });
+  protected readonly limitesForm = form(
+    this.model,
+    schema<LimitesFormModel>((path) => {
+      validate(path.anio, ({ value }) => {
+        const anio = Number(value());
+        if (!Number.isInteger(anio) || anio < 2000 || anio > this.currentYear + 1) {
+          return { kind: 'anioValido', message: 'Seleccione un año válido.' };
+        }
+        return undefined;
+      });
+      disabled(path.anio, { when: () => this.isEditing() });
 
-  protected readonly justificacionControl = new FormControl('', {
-    nonNullable: true,
-    validators: [Validators.maxLength(500)],
-  });
+      validate(path.limiteMt, ({ value }) => {
+        const limiteMt = value().trim();
+        if (!/^\d{1,12}(\.\d{1,4})?$/.test(limiteMt) || Number(limiteMt) <= 0) {
+          return { kind: 'limiteMt', message: 'Ingrese un límite mayor que 0.' };
+        }
+        return undefined;
+      });
 
-  protected readonly form = new FormGroup({
-    anio: this.anioControl,
-    limiteMt: this.limiteMtControl,
-    justificacion: this.justificacionControl,
-  });
+      maxLength(path.justificacion, 500, {
+        message: 'La justificación no puede superar 500 caracteres.',
+      });
+    })
+  );
+
+  protected readonly anioError = computed(() => this.fieldError(this.limitesForm.anio()));
+  protected readonly limiteMtError = computed(() => this.fieldError(this.limitesForm.limiteMt()));
+  protected readonly justificacionError = computed(() =>
+    this.fieldError(this.limitesForm.justificacion())
+  );
+
+  protected readonly submitting = computed(() => this.limitesForm().submitting());
+  protected readonly canSubmit = computed(() => this.limitesForm().valid() && !this.submitting());
 
   protected readonly yearOptions: SelectOption[] = Array.from(
     { length: this.currentYear + 2 - 2000 },
@@ -131,83 +140,31 @@ export class LimitesPageComponent {
   constructor() {
     if (this.isAdmin()) {
       this.cargarLimites();
-      this.precargarLimite(Number(this.anioControl.value));
     }
 
-    this.anioControl.valueChanges
-      .pipe(
-        distinctUntilChanged(),
-        filter(() => this.anioControl.valid && !this.isEditing()),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe((value) => this.precargarLimite(Number(value)));
+    effect(() => {
+      const anioField = this.limitesForm.anio();
+      const anio = anioField.value();
+      if (anioField.valid() && !this.isEditing()) {
+        this.precargarLimite(Number(anio));
+      }
+    });
   }
 
-  protected get anioError(): string {
-    if (!this.debeMostrarError(this.anioControl)) return '';
-    return 'Seleccione un año válido.';
-  }
-
-  protected get limiteMtError(): string {
-    if (!this.debeMostrarError(this.limiteMtControl)) return '';
-    return 'Ingrese un límite mayor que 0.';
-  }
-
-  protected get justificacionError(): string {
-    if (!this.debeMostrarError(this.justificacionControl)) return '';
-    return 'La justificación no puede superar 500 caracteres.';
-  }
-
-  protected guardar(): void {
-    this.submitted.set(true);
-    this.form.markAllAsTouched();
-
-    if (!this.isAdmin()) {
-      this.toastService.error('No tiene permiso para modificar el límite de la empresa.');
-      return;
-    }
-
-    if (this.form.invalid || this.saving()) {
-      return;
-    }
-
-    const request: LimiteEmisionesRequest = {
-      anio: Number(this.anioControl.value),
-      limiteMt: Number(this.limiteMtControl.value),
-      justificacion: this.justificacionControl.value.trim() || null,
-    };
-    this.saving.set(true);
-    this.limitesService
-      .guardarLimite(request)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.limiteVigente.set(response);
-          this.limiteMtControl.setValue(formatDecimal(response.limiteMt), { emitEvent: false });
-          this.justificacionControl.setValue(response.justificacion ?? '', { emitEvent: false });
-          const accion = response.recienCreada ? 'creado' : 'actualizado';
-          this.toastService.success(
-            `Límite del año ${response.anio} ${accion}: ${formatDecimal(response.limiteMt)} t CO₂e.`
-          );
-          this.saving.set(false);
-          this.salirModoEdicion(false);
-          this.cargarLimites();
-        },
-        error: (error: HttpErrorResponse) => {
-          this.saving.set(false);
-          this.manejarErrorGuardado(error, request.anio);
-        },
-      });
+  protected handleSubmit(event: Event): void {
+    event.preventDefault();
+    void this.guardar();
   }
 
   protected editar(limite: LimiteEmisionesResponse): void {
     this.editingYear.set(limite.anio);
-    this.submitted.set(false);
     this.confirmDeleteYear.set(null);
-    this.anioControl.setValue(String(limite.anio), { emitEvent: false });
-    this.anioControl.disable({ emitEvent: false });
-    this.limiteMtControl.setValue(formatDecimal(limite.limiteMt), { emitEvent: false });
-    this.justificacionControl.setValue(limite.justificacion ?? '', { emitEvent: false });
+    this.model.update((m) => ({
+      ...m,
+      anio: String(limite.anio),
+      limiteMt: formatDecimal(limite.limiteMt),
+      justificacion: limite.justificacion ?? '',
+    }));
     this.limiteVigente.set(limite);
   }
 
@@ -236,7 +193,7 @@ export class LimitesPageComponent {
           this.confirmDeleteYear.set(null);
           this.toastService.success(`Límite del año ${anio} eliminado.`);
 
-          if (this.editingYear() === anio || Number(this.anioControl.value) === anio) {
+          if (this.editingYear() === anio || Number(this.model().anio) === anio) {
             this.salirModoEdicion(true);
           }
           this.cargarLimites();
@@ -280,6 +237,44 @@ export class LimitesPageComponent {
       });
   }
 
+  private async guardar(): Promise<void> {
+    if (!this.isAdmin()) {
+      this.toastService.error('No tiene permiso para modificar el límite de la empresa.');
+      return;
+    }
+
+    await submit(this.limitesForm, {
+      action: async (field) => {
+        const value = field().value();
+        const request: LimiteEmisionesRequest = {
+          anio: Number(value.anio),
+          limiteMt: Number(value.limiteMt),
+          justificacion: value.justificacion.trim() || null,
+        };
+
+        try {
+          const response = await firstValueFrom(this.limitesService.guardarLimite(request));
+          this.limiteVigente.set(response);
+          this.model.update((m) => ({
+            ...m,
+            limiteMt: formatDecimal(response.limiteMt),
+            justificacion: response.justificacion ?? '',
+          }));
+          const accion = response.recienCreada ? 'creado' : 'actualizado';
+          this.toastService.success(
+            `Límite del año ${response.anio} ${accion}: ${formatDecimal(response.limiteMt)} t CO₂e.`
+          );
+          this.salirModoEdicion(false);
+          this.cargarLimites();
+        } catch (error) {
+          this.manejarErrorGuardado(error, request.anio);
+        }
+        return undefined;
+      },
+      onInvalid: (field) => field().markAsTouched(),
+    });
+  }
+
   private precargarLimite(anio: number): void {
     if (!this.isAdmin()) return;
 
@@ -290,16 +285,18 @@ export class LimitesPageComponent {
       .subscribe({
         next: (response) => {
           this.limiteVigente.set(response);
-          this.limiteMtControl.setValue(formatDecimal(response.limiteMt), { emitEvent: false });
-          this.justificacionControl.setValue(response.justificacion ?? '', { emitEvent: false });
+          this.model.update((m) => ({
+            ...m,
+            limiteMt: formatDecimal(response.limiteMt),
+            justificacion: response.justificacion ?? '',
+          }));
           this.loading.set(false);
         },
         error: (error: HttpErrorResponse) => {
           this.loading.set(false);
           if (error.status === 404) {
             this.limiteVigente.set(null);
-            this.limiteMtControl.setValue('', { emitEvent: false });
-            this.justificacionControl.setValue('', { emitEvent: false });
+            this.model.update((m) => ({ ...m, limiteMt: '', justificacion: '' }));
             return;
           }
           if (error.status !== 403) {
@@ -311,31 +308,29 @@ export class LimitesPageComponent {
 
   private salirModoEdicion(recargarSeleccion: boolean): void {
     this.editingYear.set(null);
-    this.submitted.set(false);
-    this.anioControl.enable({ emitEvent: false });
 
     if (recargarSeleccion) {
-      this.anioControl.setValue(String(this.currentYear), { emitEvent: false });
-      this.justificacionControl.setValue('', { emitEvent: false });
-      this.precargarLimite(this.currentYear);
+      this.model.update((m) => ({ ...m, anio: String(this.currentYear), justificacion: '' }));
     }
   }
 
-  private manejarErrorGuardado(error: HttpErrorResponse, anio: number): void {
-    if (error.status === 403) {
-      this.toastService.error(
-        this.mensajeApi(error) ?? 'No tiene permiso para modificar el límite de la empresa.'
-      );
-      return;
-    }
+  private manejarErrorGuardado(error: unknown, anio: number): void {
+    if (error instanceof HttpErrorResponse) {
+      if (error.status === 403) {
+        this.toastService.error(
+          this.mensajeApi(error) ?? 'No tiene permiso para modificar el límite de la empresa.'
+        );
+        return;
+      }
 
-    if (error.status === 409) {
-      this.toastService.error(
-        this.mensajeApi(error) ?? 'Conflicto al guardar el límite. Intente nuevamente.'
-      );
-      this.precargarLimite(anio);
-      this.cargarLimites();
-      return;
+      if (error.status === 409) {
+        this.toastService.error(
+          this.mensajeApi(error) ?? 'Conflicto al guardar el límite. Intente nuevamente.'
+        );
+        this.precargarLimite(anio);
+        this.cargarLimites();
+        return;
+      }
     }
 
     this.toastService.error('No se pudo guardar el límite. Intente nuevamente.');
@@ -346,26 +341,13 @@ export class LimitesPageComponent {
     return apiError?.message ?? undefined;
   }
 
-  private debeMostrarError(control: AbstractControl): boolean {
-    return control.invalid && (control.touched || this.submitted());
+  private fieldError(field: {
+    touched(): boolean;
+    errors(): readonly { message?: string }[];
+  }): string {
+    if (!field.touched()) return '';
+    return field.errors()[0]?.message ?? '';
   }
-
-  private anioValidoValidator(control: AbstractControl<string>): ValidationErrors | null {
-    const value = Number(control.value);
-    if (!Number.isInteger(value) || value < 2000 || value > this.currentYear + 1) {
-      return { anioValido: true };
-    }
-    return null;
-  }
-}
-
-function limiteMtValidator(control: AbstractControl<string>): ValidationErrors | null {
-  const value = control.value.trim();
-  if (!/^\d{1,12}(\.\d{1,4})?$/.test(value)) {
-    return { limiteMt: true };
-  }
-
-  return Number(value) > 0 ? null : { limiteMt: true };
 }
 
 function formatDecimal(value: number): string {

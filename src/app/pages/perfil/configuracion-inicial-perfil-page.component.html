@@ -19,35 +19,26 @@
         <app-text-input
           data-testid="nombre-visible"
           [label]="i18n.t('perfil.nombre')"
-          [value]="nombreVisible()"
+          [formField]="perfilForm.nombreVisible"
           [error]="errorNombre()"
-          [disabled]="guardando()"
-          [required]="true"
-          (valueChange)="onNombreChange($event)"
         />
 
         <app-select-input
           [label]="i18n.t('config.idioma')"
           [options]="opcionesIdioma"
-          [value]="idioma()"
-          [disabled]="guardando()"
-          (valueChange)="onIdiomaChange($event)"
+          [formField]="perfilForm.idioma"
         />
 
         <app-select-input
           [label]="i18n.t('config.moneda')"
           [options]="opcionesMoneda"
-          [value]="moneda()"
-          [disabled]="guardando()"
-          (valueChange)="onMonedaChange($event)"
+          [formField]="perfilForm.moneda"
         />
 
         <app-select-input
           [label]="i18n.t('config.unidades')"
           [options]="opcionesUnidades"
-          [value]="unidades()"
-          [disabled]="guardando()"
-          (valueChange)="onUnidadesChange($event)"
+          [formField]="perfilForm.unidades"
         />
       </div>
 
@@ -61,26 +52,20 @@
                 data-testid="sector-industrial-editable"
                 [label]="i18n.t('perfil.sector')"
                 [options]="opcionesSector"
-                [value]="sectorIndustrial()"
+                [formField]="perfilForm.sectorIndustrial"
                 [error]="errorSector()"
-                [disabled]="guardando()"
-                (valueChange)="onSectorChange($event)"
               />
               <app-text-input
                 data-testid="pais-editable"
                 [label]="i18n.t('perfil.pais')"
-                [value]="pais()"
+                [formField]="perfilForm.pais"
                 [error]="errorPais()"
-                [disabled]="guardando()"
-                (valueChange)="onPaisChange($event)"
               />
               <app-number-input
                 data-testid="cantidad-empleados-editable"
                 [label]="i18n.t('perfil.empleados')"
-                [value]="cantidadEmpleados()"
+                [formField]="perfilForm.cantidadEmpleados"
                 [error]="errorEmpleados()"
-                [disabled]="guardando()"
-                (valueChange)="onCantidadEmpleadosChange($event)"
               />
             </div>
           } @else {

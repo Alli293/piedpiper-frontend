@@ -37,10 +37,11 @@ describe('RegistroAuditorPageComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should show error when submitting with empty fields', () => {
+  it('should show error when submitting with empty fields', async () => {
     // Trigger submit
     const form = fixture.nativeElement.querySelector('form');
     form.dispatchEvent(new Event('submit'));
+    await fixture.whenStable();
     fixture.detectChanges();
 
     // Check that error messages appear
@@ -48,18 +49,22 @@ describe('RegistroAuditorPageComponent', () => {
     expect(errors.length).toBeGreaterThan(0);
   });
 
-  it('should show email error on 409 response', () => {
+  it('should show email error on 409 response', async () => {
     // Set valid form values
-    component['nombre'].set('Carlos');
-    component['apellidos'].set('Lopez');
-    component['email'].set('carlos@example.com');
-    component['contrasena'].set('segura123');
-    component['confirmarContrasena'].set('segura123');
-    component['aceptaTerminos'].set(true);
+    component['model'].update((m: any) => ({
+      ...m,
+      nombre: 'Carlos',
+      apellidos: 'Lopez',
+      email: 'carlos@example.com',
+      contrasena: 'segura123',
+      confirmarContrasena: 'segura123',
+      aceptaTerminos: true,
+    }));
     fixture.detectChanges();
 
     // Submit
     component['enviar']();
+    await fixture.whenStable();
     fixture.detectChanges();
 
     // Mock 409 response

@@ -3,11 +3,13 @@ import {
   ElementRef,
   NgZone,
   afterNextRender,
+  computed,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { disabled, form, FormField, minLength, pattern, required, schema, submit, validate } from '@angular/forms/signals';
 import { AuthLayoutComponent } from '../../shared/layouts/auth-layout/auth-layout.component';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -18,9 +20,21 @@ import { AuthService } from '../../core/auth/auth.service';
 import { GoogleIdentityService } from '../../core/auth/google-identity.service';
 import { AuthResponse } from '../../core/auth/auth.models';
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+interface RegistroAuditorFormModel {
+  nombre: string;
+  apellidos: string;
+  email: string;
+  contrasena: string;
+  confirmarContrasena: string;
+  aceptaTerminos: boolean;
+}
+
 @Component({
   selector: 'app-registro-auditor-page',
   imports: [
+    FormField,
     AuthLayoutComponent,
     BadgeComponent,
     ButtonComponent,
@@ -40,21 +54,70 @@ export class RegistroAuditorPageComponent {
 
   private readonly googleButton = viewChild.required<ElementRef<HTMLElement>>('googleButton');
 
-  protected readonly nombre = signal('');
-  protected readonly apellidos = signal('');
-  protected readonly email = signal('');
-  protected readonly contrasena = signal('');
-  protected readonly confirmarContrasena = signal('');
-  protected readonly aceptaTerminos = signal(false);
-
   protected readonly cargando = signal(false);
+
+  protected readonly model = signal<RegistroAuditorFormModel>({
+    nombre: '',
+    apellidos: '',
+    email: '',
+    contrasena: '',
+    confirmarContrasena: '',
+    aceptaTerminos: false,
+  });
+
+  protected readonly registroForm = form(
+    this.model,
+    schema<RegistroAuditorFormModel>((path) => {
+      required(path.nombre, { message: 'El nombre es obligatorio.' });
+      required(path.apellidos, { message: 'Los apellidos son obligatorios.' });
+
+      required(path.email, { message: 'El correo electrónico es obligatorio.' });
+      pattern(path.email, EMAIL_PATTERN, { message: 'Ingresa un correo electrónico válido.' });
+
+      required(path.contrasena, { message: 'La contraseña es obligatoria.' });
+      minLength(path.contrasena, 8, {
+        message: 'La contraseña debe tener al menos 8 caracteres.',
+      });
+
+      required(path.confirmarContrasena, { message: 'Confirma tu contraseña.' });
+      validate(path.confirmarContrasena, ({ value, valueOf }) => {
+        if (!value()) return undefined;
+        if (value() !== valueOf(path.contrasena)) {
+          return { kind: 'confirmMismatch', message: 'Las contraseñas no coinciden.' };
+        }
+        return undefined;
+      });
+
+      required(path.aceptaTerminos, { message: 'Debes aceptar los términos y condiciones.' });
+
+      disabled(path.nombre, { when: () => this.cargando() });
+      disabled(path.apellidos, { when: () => this.cargando() });
+      disabled(path.email, { when: () => this.cargando() });
+      disabled(path.contrasena, { when: () => this.cargando() });
+      disabled(path.confirmarContrasena, { when: () => this.cargando() });
+      disabled(path.aceptaTerminos, { when: () => this.cargando() });
+    })
+  );
+
   protected readonly errorGeneral = signal('');
-  protected readonly errorEmail = signal('');
-  protected readonly errorNombre = signal('');
-  protected readonly errorApellidos = signal('');
-  protected readonly errorContrasena = signal('');
-  protected readonly errorConfirmar = signal('');
-  protected readonly errorTerminos = signal('');
+  protected readonly serverErrorEmail = signal('');
+
+  protected readonly errorNombre = computed(() => this.fieldError(this.registroForm.nombre()));
+  protected readonly errorApellidos = computed(() =>
+    this.fieldError(this.registroForm.apellidos())
+  );
+  protected readonly errorEmail = computed(
+    () => this.serverErrorEmail() || this.fieldError(this.registroForm.email())
+  );
+  protected readonly errorContrasena = computed(() =>
+    this.fieldError(this.registroForm.contrasena())
+  );
+  protected readonly errorConfirmar = computed(() =>
+    this.fieldError(this.registroForm.confirmarContrasena())
+  );
+  protected readonly errorTerminos = computed(() =>
+    this.fieldError(this.registroForm.aceptaTerminos())
+  );
 
   constructor() {
     afterNextRender(() => {
@@ -72,46 +135,53 @@ export class RegistroAuditorPageComponent {
     event?.preventDefault();
     if (this.cargando()) return;
 
-    this.limpiarErrores();
+    this.errorGeneral.set('');
+    this.serverErrorEmail.set('');
 
-    if (!this.validar()) return;
-
-    this.cargando.set(true);
-    this.authService
-      .registrarAuditorCorreo({
-        nombre: this.nombre().trim(),
-        apellidos: this.apellidos().trim(),
-        email: this.email().trim(),
-        contrasena: this.contrasena(),
-        aceptaTerminos: this.aceptaTerminos(),
-      })
-      .subscribe({
-        next: () => {
-          this.cargando.set(false);
-          void this.router.navigateByUrl('/validacion-pendiente');
-        },
-        error: (err) => {
-          this.cargando.set(false);
-          if (err?.status === 409) {
-            this.errorEmail.set(
-              err?.error?.message ?? 'Ya existe una cuenta con este correo electrónico.'
-            );
-          } else {
-            this.errorGeneral.set(
-              err?.error?.message ?? 'No pudimos completar tu registro. Intenta nuevamente.'
-            );
-          }
-        },
-      });
+    void submit(this.registroForm, {
+      action: async (field) => {
+        const value = field().value();
+        this.cargando.set(true);
+        this.authService
+          .registrarAuditorCorreo({
+            nombre: value.nombre.trim(),
+            apellidos: value.apellidos.trim(),
+            email: value.email.trim(),
+            contrasena: value.contrasena,
+            aceptaTerminos: value.aceptaTerminos,
+          })
+          .subscribe({
+            next: () => {
+              this.cargando.set(false);
+              void this.router.navigateByUrl('/validacion-pendiente');
+            },
+            error: (err) => {
+              this.cargando.set(false);
+              if (err?.status === 409) {
+                this.serverErrorEmail.set(
+                  err?.error?.message ?? 'Ya existe una cuenta con este correo electrónico.'
+                );
+              } else {
+                this.errorGeneral.set(
+                  err?.error?.message ?? 'No pudimos completar tu registro. Intenta nuevamente.'
+                );
+              }
+            },
+          });
+        return undefined;
+      },
+      onInvalid: (field) => field().markAsTouched(),
+    });
   }
 
   private registrarConGoogle(idToken: string): void {
-    if (!this.aceptaTerminos()) {
-      this.errorTerminos.set('Debes aceptar los términos y condiciones.');
+    if (!this.model().aceptaTerminos) {
+      this.registroForm.aceptaTerminos().markAsTouched();
       return;
     }
     this.cargando.set(true);
-    this.limpiarErrores();
+    this.errorGeneral.set('');
+    this.serverErrorEmail.set('');
     this.authService.registrarConGoogle('auditor', idToken).subscribe({
       next: (respuesta: AuthResponse) => {
         this.cargando.set(false);
@@ -128,62 +198,11 @@ export class RegistroAuditorPageComponent {
     });
   }
 
-  private validar(): boolean {
-    let valido = true;
-
-    if (!this.nombre().trim()) {
-      this.errorNombre.set('El nombre es obligatorio.');
-      valido = false;
-    }
-
-    if (!this.apellidos().trim()) {
-      this.errorApellidos.set('Los apellidos son obligatorios.');
-      valido = false;
-    }
-
-    if (!this.email().trim()) {
-      this.errorEmail.set('El correo electrónico es obligatorio.');
-      valido = false;
-    } else if (!this.esEmailValido(this.email().trim())) {
-      this.errorEmail.set('Ingresa un correo electrónico válido.');
-      valido = false;
-    }
-
-    if (!this.contrasena()) {
-      this.errorContrasena.set('La contraseña es obligatoria.');
-      valido = false;
-    } else if (this.contrasena().length < 8) {
-      this.errorContrasena.set('La contraseña debe tener al menos 8 caracteres.');
-      valido = false;
-    }
-
-    if (!this.confirmarContrasena()) {
-      this.errorConfirmar.set('Confirma tu contraseña.');
-      valido = false;
-    } else if (this.contrasena() !== this.confirmarContrasena()) {
-      this.errorConfirmar.set('Las contraseñas no coinciden.');
-      valido = false;
-    }
-
-    if (!this.aceptaTerminos()) {
-      this.errorTerminos.set('Debes aceptar los términos y condiciones.');
-      valido = false;
-    }
-
-    return valido;
-  }
-
-  private esEmailValido(email: string): boolean {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-
-  private limpiarErrores(): void {
-    this.errorGeneral.set('');
-    this.errorEmail.set('');
-    this.errorNombre.set('');
-    this.errorApellidos.set('');
-    this.errorContrasena.set('');
-    this.errorConfirmar.set('');
-    this.errorTerminos.set('');
+  private fieldError(field: {
+    touched(): boolean;
+    errors(): readonly { message?: string }[];
+  }): string {
+    if (!field.touched()) return '';
+    return field.errors()[0]?.message ?? '';
   }
 }

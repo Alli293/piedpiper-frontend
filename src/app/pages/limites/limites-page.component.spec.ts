@@ -79,26 +79,26 @@ describe('LimitesPageComponent', () => {
 
   it('precarga el valor existente', () => {
     expect(limitesService.obtenerLimite).toHaveBeenCalledWith(new Date().getFullYear());
-    expect((component as any).limiteMtControl.value).toBe('50');
+    expect((component as any).model().limiteMt).toBe('50');
   });
 
-  it('formulario invalido no llama al servicio de guardado', () => {
-    (component as any).limiteMtControl.setValue('0');
+  it('formulario invalido no llama al servicio de guardado', async () => {
+    (component as any).model.update((m: any) => ({ ...m, limiteMt: '0' }));
 
-    (component as any).guardar();
+    await (component as any).guardar();
 
     expect(limitesService.guardarLimite).not.toHaveBeenCalled();
   });
 
-  it('formulario rechaza limite con mas de 12 digitos enteros', () => {
-    (component as any).limiteMtControl.setValue('1234567890123.1234');
+  it('formulario rechaza limite con mas de 12 digitos enteros', async () => {
+    (component as any).model.update((m: any) => ({ ...m, limiteMt: '1234567890123.1234' }));
 
-    (component as any).guardar();
+    await (component as any).guardar();
 
     expect(limitesService.guardarLimite).not.toHaveBeenCalled();
   });
 
-  it('guardar muestra "creado" cuando la API indica recienCreada', () => {
+  it('guardar muestra "creado" cuando la API indica recienCreada', async () => {
     const anioNuevo = new Date().getFullYear() + 1;
     limitesService.guardarLimite.mockReturnValue(
       of({
@@ -112,10 +112,13 @@ describe('LimitesPageComponent', () => {
         recienCreada: true,
       })
     );
-    (component as any).anioControl.setValue(String(anioNuevo));
-    (component as any).limiteMtControl.setValue('15');
+    (component as any).model.update((m: any) => ({
+      ...m,
+      anio: String(anioNuevo),
+      limiteMt: '15',
+    }));
 
-    (component as any).guardar();
+    await (component as any).guardar();
 
     expect(ultimoToast()).toMatchObject({
       variant: 'success',
@@ -123,7 +126,7 @@ describe('LimitesPageComponent', () => {
     });
   });
 
-  it('guardar muestra "actualizado" cuando la API indica que no es recienCreada', () => {
+  it('guardar muestra "actualizado" cuando la API indica que no es recienCreada', async () => {
     limitesService.guardarLimite.mockReturnValue(
       of({
         id: 1,
@@ -136,9 +139,9 @@ describe('LimitesPageComponent', () => {
         recienCreada: false,
       })
     );
-    (component as any).limiteMtControl.setValue('60');
+    (component as any).model.update((m: any) => ({ ...m, limiteMt: '60' }));
 
-    (component as any).guardar();
+    await (component as any).guardar();
 
     expect(ultimoToast()).toMatchObject({
       variant: 'success',
@@ -146,7 +149,7 @@ describe('LimitesPageComponent', () => {
     });
   });
 
-  it('guardar muestra el mensaje de la API en un 403', () => {
+  it('guardar muestra el mensaje de la API en un 403', async () => {
     limitesService.guardarLimite.mockReturnValue(
       throwError(
         () =>
@@ -157,7 +160,7 @@ describe('LimitesPageComponent', () => {
       )
     );
 
-    (component as any).guardar();
+    await (component as any).guardar();
 
     expect(ultimoToast()).toMatchObject({
       variant: 'error',
@@ -165,12 +168,12 @@ describe('LimitesPageComponent', () => {
     });
   });
 
-  it('guardar usa el mensaje por defecto en un 403 sin mensaje de la API', () => {
+  it('guardar usa el mensaje por defecto en un 403 sin mensaje de la API', async () => {
     limitesService.guardarLimite.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 403 }))
     );
 
-    (component as any).guardar();
+    await (component as any).guardar();
 
     expect(ultimoToast()).toMatchObject({
       variant: 'error',
@@ -178,7 +181,7 @@ describe('LimitesPageComponent', () => {
     });
   });
 
-  it('guardar muestra el mensaje de la API en un conflicto 409', () => {
+  it('guardar muestra el mensaje de la API en un conflicto 409', async () => {
     limitesService.guardarLimite.mockReturnValue(
       throwError(
         () =>
@@ -189,7 +192,7 @@ describe('LimitesPageComponent', () => {
       )
     );
 
-    (component as any).guardar();
+    await (component as any).guardar();
 
     expect(ultimoToast()).toMatchObject({
       variant: 'error',
@@ -197,12 +200,12 @@ describe('LimitesPageComponent', () => {
     });
   });
 
-  it('guardar usa el mensaje por defecto en un 409 sin mensaje de la API', () => {
+  it('guardar usa el mensaje por defecto en un 409 sin mensaje de la API', async () => {
     limitesService.guardarLimite.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 409 }))
     );
 
-    (component as any).guardar();
+    await (component as any).guardar();
 
     expect(ultimoToast()).toMatchObject({
       variant: 'error',

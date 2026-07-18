@@ -11,15 +11,13 @@
       <span>o continúa con correo electrónico</span>
     </div>
 
-    <form class="login__form" (submit)="enviar($event)">
+    <form class="login__form" novalidate (submit)="enviar($event)">
       <app-text-input
         label="Correo electrónico"
         type="email"
         autocomplete="email"
         placeholder="tucorreo@empresa.com"
-        [value]="email()"
-        (valueChange)="email.set($event)"
-        [disabled]="cargando()"
+        [formField]="loginForm.email"
       />
 
       <div class="login__password">
@@ -28,9 +26,7 @@
           [type]="mostrarContrasena() ? 'text' : 'password'"
           autocomplete="current-password"
           placeholder="Tu contraseña"
-          [value]="contrasena()"
-          (valueChange)="contrasena.set($event)"
-          [disabled]="cargando()"
+          [formField]="loginForm.contrasena"
         />
         <button
           type="button"
