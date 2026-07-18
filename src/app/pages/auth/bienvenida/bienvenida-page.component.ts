@@ -4,6 +4,7 @@ import { AuthLayoutComponent } from '../../../shared/layouts/auth-layout/auth-la
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { IconComponent, IconName } from '../../../shared/components/icon/icon.component';
+import { LinkDirective } from '../../../shared/components/link/link.directive';
 
 type RolIcono = Extract<IconName, 'empresa' | 'auditor' | 'viajero'>;
 
@@ -16,7 +17,14 @@ interface OpcionRol {
 
 @Component({
   selector: 'app-bienvenida-page',
-  imports: [AuthLayoutComponent, ButtonComponent, HeadingComponent, IconComponent, RouterLink],
+  imports: [
+    AuthLayoutComponent,
+    ButtonComponent,
+    HeadingComponent,
+    IconComponent,
+    RouterLink,
+    LinkDirective,
+  ],
   templateUrl: './bienvenida-page.component.html',
   styleUrl: './bienvenida-page.component.scss',
 })

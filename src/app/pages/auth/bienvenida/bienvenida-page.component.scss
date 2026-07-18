@@ -61,11 +61,6 @@
   color: var(--ch-bg-white);
 }
 
-.bienvenida__role-icon svg {
-  width: 22px;
-  height: 22px;
-}
-
 .bienvenida__role-body {
   display: flex;
   flex-direction: column;
@@ -96,16 +91,6 @@
   font-size: 13px;
   line-height: 1.5;
   color: var(--ch-text-secondary);
-}
-
-.bienvenida__terms a {
-  color: var(--ch-blue-mid);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.bienvenida__terms a:hover {
-  text-decoration: underline;
 }
 
 .bienvenida__divider {

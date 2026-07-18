@@ -17,7 +17,14 @@ import {
   PerfilInicialRequest,
   RolUsuario,
 } from '../../core/models/perfil-inicial.model';
-import { Idioma, Moneda, OPCIONES_IDIOMA, OPCIONES_MONEDA, OPCIONES_UNIDADES, Unidades } from '../../core/models/preferencias.model';
+import {
+  Idioma,
+  Moneda,
+  OPCIONES_IDIOMA,
+  OPCIONES_MONEDA,
+  OPCIONES_UNIDADES,
+  Unidades,
+} from '../../core/models/preferencias.model';
 
 interface PerfilInicialFormModel {
   nombreVisible: string;

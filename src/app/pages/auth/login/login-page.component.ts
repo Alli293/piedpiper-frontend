@@ -9,7 +9,15 @@ import {
   viewChild,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { disabled, form, FormField, pattern, required, schema, submit } from '@angular/forms/signals';
+import {
+  disabled,
+  form,
+  FormField,
+  pattern,
+  required,
+  schema,
+  submit,
+} from '@angular/forms/signals';
 import { AuthLayoutComponent } from '../../../shared/layouts/auth-layout/auth-layout.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
