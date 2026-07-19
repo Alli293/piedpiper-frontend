@@ -112,3 +112,19 @@ export interface ApiErrorResponse {
   readonly message: string;
   readonly timestamp: string;
 }
+
+export type CategoriaResumen = 'ELECTRICIDAD' | 'FLOTA' | 'VUELO' | 'ENVIO';
+
+export interface ResumenCategoriaResponse {
+  readonly categoria: CategoriaResumen;
+  readonly totalKg: number;
+  readonly porcentaje: number;
+}
+
+export interface ResumenEmisionesResponse {
+  readonly anio: number;
+  readonly mes: number | null;
+  readonly totalKg: number;
+  readonly totalT: number;
+  readonly categorias: ResumenCategoriaResponse[];
+}

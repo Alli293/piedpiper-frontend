@@ -134,4 +134,26 @@ describe('EmisionesService', () => {
       createdAt: '2026-07-09T00:00:00Z',
     });
   });
+
+  it('obtenerResumen hace GET a /emisiones/resumen con el query param anio', () => {
+    service.obtenerResumen(2026).subscribe();
+
+    const req = httpMock.expectOne(
+      (request) => request.url === `${base}/resumen` && request.method === 'GET'
+    );
+    expect(req.request.params.get('anio')).toBe('2026');
+    expect(req.request.params.has('mes')).toBe(false);
+    req.flush({ anio: 2026, mes: null, totalKg: 0, totalT: 0, categorias: [] });
+  });
+
+  it('obtenerResumen incluye el query param mes cuando se indica', () => {
+    service.obtenerResumen(2026, 3).subscribe();
+
+    const req = httpMock.expectOne(
+      (request) => request.url === `${base}/resumen` && request.method === 'GET'
+    );
+    expect(req.request.params.get('anio')).toBe('2026');
+    expect(req.request.params.get('mes')).toBe('3');
+    req.flush({ anio: 2026, mes: 3, totalKg: 0, totalT: 0, categorias: [] });
+  });
 });

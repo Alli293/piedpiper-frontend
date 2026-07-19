@@ -1,0 +1,97 @@
+<app-page-layout [sidebarConfig]="sidebarConfig()" [headerConfig]="headerConfig()">
+  <div class="dashboard-page">
+    <form class="dashboard-page__filters" novalidate aria-label="Período a consultar">
+      <app-select-input
+        class="dashboard-page__filter"
+        label="Año"
+        [options]="anioOptions"
+        [formField]="periodoForm.anio"
+      />
+      <app-select-input
+        class="dashboard-page__filter"
+        label="Mes"
+        placeholder="Todo el año"
+        [options]="mesOptions"
+        [formField]="periodoForm.mes"
+      />
+    </form>
+
+    <div class="dashboard-page__grid">
+      <section class="dashboard-page__card" aria-label="Desglose por categoría">
+        <h2 class="dashboard-page__card-title">Desglose por categoría</h2>
+
+        @if (cargando()) {
+          <p class="dashboard-page__estado">Cargando el desglose…</p>
+        } @else if (errorCarga()) {
+          <p class="dashboard-page__estado">
+            No se pudo cargar la información del período seleccionado.
+          </p>
+        } @else if (resumen()) {
+          <div class="dashboard-page__dona-wrapper">
+            <svg
+              class="dashboard-page__dona"
+              viewBox="0 0 160 160"
+              role="img"
+              aria-label="Composición de la huella por categoría"
+            >
+              <circle
+                class="dashboard-page__dona-fondo"
+                cx="80"
+                cy="80"
+                r="60"
+                fill="none"
+                stroke-width="22"
+              />
+              @if (!sinDatos()) {
+                @for (item of desglose(); track item.categoria) {
+                  @if (item.porcentaje > 0) {
+                    <circle
+                      class="dashboard-page__segmento"
+                      [class]="'dashboard-page__segmento--' + item.categoria.toLowerCase()"
+                      cx="80"
+                      cy="80"
+                      r="60"
+                      fill="none"
+                      stroke-width="22"
+                      [attr.stroke-dasharray]="item.largo + ' ' + circunferencia"
+                      [attr.stroke-dashoffset]="item.offset"
+                      transform="rotate(-90 80 80)"
+                    ></circle>
+                  }
+                }
+              }
+            </svg>
+            <div class="dashboard-page__dona-centro">
+              <span class="dashboard-page__dona-eyebrow">Total</span>
+              <span class="dashboard-page__dona-total">{{ totalT() | number: '1.0-3' }}</span>
+              <span class="dashboard-page__dona-unidad">tCO₂e</span>
+            </div>
+          </div>
+
+          @if (sinDatos()) {
+            <p class="dashboard-page__vacio">{{ sinEmisionesMensaje }}</p>
+          }
+
+          <ul class="dashboard-page__leyenda">
+            @for (item of desglose(); track item.categoria) {
+              <li
+                class="dashboard-page__fila"
+                [title]="(item.totalKg | number: '1.0-3') + ' kg CO₂e'"
+              >
+                <span
+                  class="dashboard-page__punto"
+                  [class]="'dashboard-page__punto--' + item.categoria.toLowerCase()"
+                  aria-hidden="true"
+                ></span>
+                <span class="dashboard-page__fila-etiqueta">{{ item.etiqueta }}</span>
+                <span class="dashboard-page__fila-porcentaje">
+                  {{ item.porcentaje | number: '1.0-1' }} %
+                </span>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
+  </div>
+</app-page-layout>

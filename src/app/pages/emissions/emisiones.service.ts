@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -10,6 +10,7 @@ import {
   RegistrarEnvioRequest,
   RegistrarFlotaRequest,
   RegistrarVueloRequest,
+  ResumenEmisionesResponse,
   TipoVehiculoOption,
 } from './models/emision.model';
 
@@ -48,5 +49,13 @@ export class EmisionesService {
 
   registrarFlota(payload: RegistrarFlotaRequest): Observable<EmisionFlotaResponse> {
     return this.http.post<EmisionFlotaResponse>(`${this.baseUrl}/flota`, payload);
+  }
+
+  obtenerResumen(anio: number, mes?: number): Observable<ResumenEmisionesResponse> {
+    let params = new HttpParams().set('anio', anio);
+    if (mes !== undefined) {
+      params = params.set('mes', mes);
+    }
+    return this.http.get<ResumenEmisionesResponse>(`${this.baseUrl}/resumen`, { params });
   }
 }

@@ -73,7 +73,15 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),
   },
-  ...rutasPostAutenticacion.map((path) => ({ path, loadComponent: cargarPlaceholder })),
+  {
+    path: 'panel',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent),
+  },
+  ...rutasPostAutenticacion
+    .filter((path) => path !== 'panel')
+    .map((path) => ({ path, loadComponent: cargarPlaceholder })),
   {
     path: 'emisiones/registrar',
     loadComponent: () =>
