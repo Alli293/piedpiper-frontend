@@ -1,6 +1,9 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
 
+const cargarDashboard = () =>
+  import('./pages/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent);
+
 const cargarPlaceholder = () =>
   import('./pages/placeholder/placeholder-page.component').then((m) => m.PlaceholderPageComponent);
 
@@ -73,14 +76,19 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),
   },
+  // Dashboard de empresa: el backend redirige a /empresa/panel (admin) o /panel (usuario general).
   {
     path: 'panel',
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./pages/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent),
+    loadComponent: cargarDashboard,
+  },
+  {
+    path: 'empresa/panel',
+    canActivate: [authGuard],
+    loadComponent: cargarDashboard,
   },
   ...rutasPostAutenticacion
-    .filter((path) => path !== 'panel')
+    .filter((path) => path !== 'panel' && path !== 'empresa/panel')
     .map((path) => ({ path, loadComponent: cargarPlaceholder })),
   {
     path: 'emisiones/registrar',
