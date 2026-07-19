@@ -89,6 +89,7 @@ export class RegistroInvitacionCorreoFormComponent {
   protected readonly mostrarConfirmar = signal(false);
 
   protected readonly error = signal('');
+  protected readonly cuentaExistente = signal(false);
 
   protected readonly errorNombre = computed(() => this.fieldError(this.registroForm.nombre()));
   protected readonly errorApellidos = computed(() =>
@@ -122,6 +123,8 @@ export class RegistroInvitacionCorreoFormComponent {
   private async onSubmit(): Promise<void> {
     await submit(this.registroForm, async (field) => {
       const value = field().value();
+      this.error.set('');
+      this.cuentaExistente.set(false);
       try {
         const respuesta = await firstValueFrom(
           this.authService.registrarInvitacionConCorreo(this.token(), {
@@ -132,14 +135,14 @@ export class RegistroInvitacionCorreoFormComponent {
             aceptaTerminos: value.aceptaTerminos,
           })
         );
-        this.error.set('');
         this.router.navigateByUrl(respuesta.redirect || '/').catch(() => {
           this.error.set('No pudimos abrir tu panel. Intenta nuevamente.');
         });
       } catch (err: unknown) {
+        const error = err as { status?: number; error?: { message?: string } };
+        this.cuentaExistente.set(error?.status === 409);
         this.error.set(
-          (err as { error?: { message?: string } })?.error?.message ??
-            'No pudimos completar tu registro. Intenta nuevamente.'
+          error?.error?.message ?? 'No pudimos completar tu registro. Intenta nuevamente.'
         );
       }
       return undefined;

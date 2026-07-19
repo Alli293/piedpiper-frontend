@@ -168,6 +168,29 @@ describe('RegistroInvitacionCorreoFormComponent', () => {
     expect(navigateSpy).not.toHaveBeenCalled();
   });
 
+  it('un 409 muestra el mensaje y el enlace a iniciar sesion', async () => {
+    authService.registrarInvitacionConCorreo.mockReturnValue(
+      throwError(() => ({
+        status: 409,
+        error: { message: 'Este correo ya tiene una cuenta en CarbonHub. ¿Deseas iniciar sesión?' },
+      }))
+    );
+
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    fillValidForm(root);
+
+    await submitForm(fixture);
+    fixture.detectChanges();
+
+    const comp = fixture.componentInstance as any;
+    expect(comp.error()).toBe(
+      'Este correo ya tiene una cuenta en CarbonHub. ¿Deseas iniciar sesión?'
+    );
+    expect(comp.cuentaExistente()).toBe(true);
+    expect(root.querySelector('a[href="/login"]')).not.toBeNull();
+  });
+
   it('alternarContrasena y alternarConfirmar cambian la visibilidad de cada campo por separado', () => {
     const fixture = createFixture();
     const comp = fixture.componentInstance as any;

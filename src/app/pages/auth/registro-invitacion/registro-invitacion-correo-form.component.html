@@ -79,6 +79,9 @@
   @if (error()) {
     <p class="registro-invitacion-correo-form__error" role="alert">{{ error() }}</p>
   }
+  @if (cuentaExistente()) {
+    <a class="registro-invitacion-correo-form__enlace" routerLink="/login">Iniciar sesión</a>
+  }
 
   <app-button
     id="btnCrearCuenta"

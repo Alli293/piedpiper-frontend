@@ -42,3 +42,14 @@
   font-size: 14px;
   font-weight: 600;
 }
+
+.registro-invitacion-correo-form__enlace {
+  color: var(--ch-blue-mid);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.registro-invitacion-correo-form__enlace:hover {
+  text-decoration: underline;
+}
