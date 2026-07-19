@@ -1,4 +1,5 @@
 import { DecimalPipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { form, FormField, required, schema } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
@@ -188,7 +189,11 @@ export class DashboardPageComponent {
       if (solicitud !== this.solicitudActual) return;
       this.resumen.set(null);
       this.errorCarga.set(true);
-      this.toastService.error(ERROR_CARGA_MENSAJE, undefined, TOAST_DURACION_MS);
+      const mensajeApi =
+        err instanceof HttpErrorResponse && typeof err.error?.message === 'string'
+          ? err.error.message
+          : undefined;
+      this.toastService.error(mensajeApi ?? ERROR_CARGA_MENSAJE, undefined, TOAST_DURACION_MS);
     } finally {
       if (solicitud === this.solicitudActual) {
         this.cargando.set(false);

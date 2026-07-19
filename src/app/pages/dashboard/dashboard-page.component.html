@@ -24,7 +24,7 @@
         @if (cargando()) {
           <p class="dashboard-page__estado">Cargando el desglose…</p>
         } @else if (errorCarga()) {
-          <p class="dashboard-page__estado">
+          <p class="dashboard-page__estado" role="alert">
             No se pudo cargar la información del período seleccionado.
           </p>
         } @else if (resumen()) {

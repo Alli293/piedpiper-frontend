@@ -162,6 +162,21 @@ describe('DashboardPageComponent', () => {
     expect(root.querySelector('.dashboard-page__leyenda')).toBeNull();
   });
 
+  it('expone el mensaje del API en el toast cuando la respuesta de error lo incluye', async () => {
+    obtenerResumen.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: { message: 'El mes debe estar entre 1 y 12.' },
+          })
+      )
+    );
+    await createFixture();
+
+    expect(toastError).toHaveBeenCalledWith('El mes debe estar entre 1 y 12.', undefined, 5000);
+  });
+
   it('muestra las etiquetas de categoría del diseño', async () => {
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
