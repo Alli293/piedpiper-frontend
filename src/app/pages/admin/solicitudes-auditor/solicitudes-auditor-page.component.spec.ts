@@ -13,7 +13,11 @@ describe('SolicitudesAuditorPageComponent', () => {
     listarPendientes: ReturnType<typeof vi.fn>;
     resolver: ReturnType<typeof vi.fn>;
   };
-  let toastService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
+  let toastService: {
+    success: ReturnType<typeof vi.fn>;
+    error: ReturnType<typeof vi.fn>;
+    toasts: () => [];
+  };
 
   const solicitud: SolicitudPendiente = {
     id: 'sol-1',
@@ -34,7 +38,7 @@ describe('SolicitudesAuditorPageComponent', () => {
       listarPendientes: vi.fn().mockReturnValue(of(pagina)),
       resolver: vi.fn(),
     };
-    toastService = { success: vi.fn(), error: vi.fn() };
+    toastService = { success: vi.fn(), error: vi.fn(), toasts: () => [] };
 
     await TestBed.configureTestingModule({
       imports: [SolicitudesAuditorPageComponent],
@@ -57,6 +61,12 @@ describe('SolicitudesAuditorPageComponent', () => {
 
     expect(texto).toContain('Ana Mora');
     expect(texto).toContain('ana@correo.com');
+  });
+
+  it('renderiza el host de toasts para mostrar las notificaciones', () => {
+    const fixture = crear();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('app-toast-host')).toBeTruthy();
   });
 
   it('sin solicitudes muestra el mensaje de vacio', () => {

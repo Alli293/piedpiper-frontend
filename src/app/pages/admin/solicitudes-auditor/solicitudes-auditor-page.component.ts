@@ -2,6 +2,7 @@ import { Component, ElementRef, computed, effect, inject, signal, viewChild } fr
 import { DatePipe } from '@angular/common';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { TextareaComponent } from '../../../shared/components/inputs/textarea/textarea.component';
+import { ToastHostComponent } from '../../../shared/components/toast/toast.component';
 import { ToastService } from '../../../shared/services/toast.service';
 import {
   PaginaSolicitudes,
@@ -14,7 +15,7 @@ const MOTIVO_MAX = 500;
 
 @Component({
   selector: 'app-solicitudes-auditor-page',
-  imports: [ButtonComponent, TextareaComponent, DatePipe],
+  imports: [ButtonComponent, TextareaComponent, DatePipe, ToastHostComponent],
   templateUrl: './solicitudes-auditor-page.component.html',
   styleUrl: './solicitudes-auditor-page.component.scss',
 })
