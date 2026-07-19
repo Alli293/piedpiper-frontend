@@ -32,6 +32,7 @@
 
 .emissions-list-page__chip,
 .emissions-list-page__select,
+.emissions-list-page__limits,
 .emissions-list-page__register,
 .emissions-list-page__delete {
   border: 1px solid var(--ch-border);
@@ -102,6 +103,7 @@
   outline: 0;
 }
 
+.emissions-list-page__limits,
 .emissions-list-page__register {
   display: inline-flex;
   align-items: center;
@@ -109,13 +111,26 @@
   gap: 8px;
   min-height: 40px;
   padding: 0 18px;
-  border-color: var(--ch-green);
   border-radius: var(--ch-radius-md);
-  background: var(--ch-green);
-  color: #ffffff;
   font-weight: 800;
   cursor: pointer;
   white-space: nowrap;
+}
+
+.emissions-list-page__limits {
+  border-color: rgba(16, 122, 83, 0.32);
+  background: var(--ch-bg-white);
+  color: var(--ch-green-dark);
+}
+
+.emissions-list-page__limits app-icon {
+  color: var(--ch-green-dark);
+}
+
+.emissions-list-page__register {
+  border-color: var(--ch-green);
+  background: var(--ch-green);
+  color: #ffffff;
 }
 
 .emissions-list-page__register-plus {

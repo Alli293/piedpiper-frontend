@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { EmisionesService } from '../emisiones.service';
 import { EmisionResponse } from '../models/emision.model';
@@ -54,6 +54,7 @@ const REGISTRO_FLOTA_OTRO_MES: EmisionResponse = {
 describe('EmissionsListPageComponent', () => {
   let listarEmisiones: ReturnType<typeof vi.fn>;
   let eliminarEmision: ReturnType<typeof vi.fn>;
+  let navigateByUrl: ReturnType<typeof vi.spyOn>;
 
   beforeEach(async () => {
     listarEmisiones = vi.fn().mockReturnValue(of([REGISTRO_FLOTA]));
@@ -72,6 +73,8 @@ describe('EmissionsListPageComponent', () => {
         },
       ],
     }).compileComponents();
+
+    navigateByUrl = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
   });
 
   async function createFixture() {
@@ -116,6 +119,18 @@ describe('EmissionsListPageComponent', () => {
     await fixture.whenStable();
 
     expect(eliminarEmision).not.toHaveBeenCalled();
+  });
+
+  it('navega a limites anuales desde el boton del toolbar', async () => {
+    const fixture = await createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    const limitsButton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
+      (button) => button.textContent?.includes('Límites anuales')
+    );
+
+    limitsButton?.click();
+
+    expect(navigateByUrl).toHaveBeenCalledWith('/limites');
   });
 
   it('mantiene los contadores del periodo aunque se filtre por categoria', async () => {

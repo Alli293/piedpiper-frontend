@@ -197,6 +197,10 @@ export class EmissionsListPageComponent {
     void this.router.navigateByUrl('/emisiones/registrar');
   }
 
+  protected verLimitesAnuales(): void {
+    void this.router.navigateByUrl('/limites');
+  }
+
   protected categoriaLabel(registro: EmisionResponse): string {
     return (
       CATEGORY_OPTIONS.find((option) => option.value === registro.categoria)?.label ??

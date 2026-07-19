@@ -37,6 +37,11 @@
           </select>
         </label>
 
+        <button type="button" class="emissions-list-page__limits" (click)="verLimitesAnuales()">
+          <app-icon name="benchmark" [size]="16" />
+          <span>Límites anuales</span>
+        </button>
+
         <button type="button" class="emissions-list-page__register" (click)="registrarEmision()">
           <span class="emissions-list-page__register-plus" aria-hidden="true">+</span>
           <span>Registrar emision</span>
