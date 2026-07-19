@@ -6,7 +6,12 @@ import { of, throwError } from 'rxjs';
 import { RegisterEmissionPageComponent } from './register-emission-page.component';
 import { EmisionesService } from '../emisiones.service';
 import { ToastService } from '../../../shared/services/toast.service';
-import { EmisionFlotaResponse, EmisionResponse, TipoVehiculoOption } from '../models/emision.model';
+import {
+  EmisionEnvioResponse,
+  EmisionFlotaResponse,
+  EmisionResponse,
+  TipoVehiculoOption,
+} from '../models/emision.model';
 
 const VALID_RESPONSE: EmisionResponse = {
   id: '1',
@@ -58,11 +63,29 @@ const VALID_FLOTA_RESPONSE: EmisionFlotaResponse = {
   createdAt: '2026-07-01T00:00:00Z',
 };
 
+const VALID_ENVIO_RESPONSE: EmisionEnvioResponse = {
+  id: '3',
+  categoria: 'ENVIO',
+  titulo: 'Envío de café a puerto',
+  fechaActividad: '2026-07-01',
+  weightValue: 200,
+  weightUnit: 'KG',
+  distanceValue: 500,
+  distanceUnit: 'km',
+  transportMethod: 'TRUCK',
+  carbonKg: 35.5,
+  carbonMt: 0.036,
+  factorEmisionId: 'factor-envio-1',
+  estimatedAt: '2026-07-01T00:00:00Z',
+  createdAt: '2026-07-01T00:00:00Z',
+};
+
 describe('RegisterEmissionPageComponent', () => {
   let registrarElectricidad: ReturnType<typeof vi.fn>;
   let registrarVuelo: ReturnType<typeof vi.fn>;
   let obtenerTiposVehiculo: ReturnType<typeof vi.fn>;
   let registrarFlota: ReturnType<typeof vi.fn>;
+  let registrarEnvio: ReturnType<typeof vi.fn>;
   let storage: Storage;
   let toastError: ReturnType<typeof vi.spyOn>;
 
@@ -75,6 +98,7 @@ describe('RegisterEmissionPageComponent', () => {
     registrarVuelo = vi.fn();
     obtenerTiposVehiculo = vi.fn().mockReturnValue(of(TIPOS_VEHICULO));
     registrarFlota = vi.fn();
+    registrarEnvio = vi.fn();
 
     await TestBed.configureTestingModule({
       imports: [RegisterEmissionPageComponent],
@@ -88,6 +112,7 @@ describe('RegisterEmissionPageComponent', () => {
             registrarVuelo,
             obtenerTiposVehiculo,
             registrarFlota,
+            registrarEnvio,
           },
         },
       ],
@@ -150,6 +175,10 @@ describe('RegisterEmissionPageComponent', () => {
 
   function selectFlotaTab(fixture: ReturnType<typeof createFixture>): HTMLElement {
     return selectTab(fixture, 'Flota vehicular');
+  }
+
+  function selectEnvioTab(fixture: ReturnType<typeof createFixture>): HTMLElement {
+    return selectTab(fixture, 'Envíos de carga');
   }
 
   function clickRetry(root: HTMLElement): void {
@@ -347,7 +376,7 @@ describe('RegisterEmissionPageComponent', () => {
       expect(registrarFlota).not.toHaveBeenCalled();
     });
 
-    it('calls registrarFlota with the expected payload and navigates on success', async () => {
+    it('calls registrarFlota with the expected payload and resets the form on success', async () => {
       registrarFlota.mockReturnValue(of(VALID_FLOTA_RESPONSE));
 
       const fixture = createFixture();
@@ -377,7 +406,9 @@ describe('RegisterEmissionPageComponent', () => {
         distanceUnit: 'km',
         fechaActividad: '2026-07-01',
       });
-      expect(TestBed.inject(Router).navigateByUrl).toHaveBeenCalledWith('/emisiones');
+      expect(TestBed.inject(Router).navigateByUrl).not.toHaveBeenCalledWith('/emisiones');
+      fixture.detectChanges();
+      expect(root.querySelector<HTMLTextAreaElement>('textarea')?.value).toBe('');
     });
 
     it('refetches the vehicle catalog when the retry action is clicked after a failure', () => {
@@ -422,6 +453,115 @@ describe('RegisterEmissionPageComponent', () => {
       selectFlotaTab(fixture);
 
       expect(toastError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('envío de carga', () => {
+    function fillValidEnvioForm(root: HTMLElement): void {
+      setInputValue(root, 'textarea', 'Envío de café a puerto');
+      const numberInputs = root.querySelectorAll<HTMLInputElement>('app-number-input input');
+      numberInputs[0].value = '200';
+      numberInputs[0].dispatchEvent(new Event('input'));
+      numberInputs[1].value = '500';
+      numberInputs[1].dispatchEvent(new Event('input'));
+      setInputValue(root, 'app-date-input input', '2026-07-01');
+    }
+
+    it('does not call the service when weight is 0 (invalid form)', async () => {
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      const numberInputs = root.querySelectorAll<HTMLInputElement>('app-number-input input');
+      numberInputs[0].value = '0';
+      numberInputs[0].dispatchEvent(new Event('input'));
+
+      await submitForm(fixture);
+
+      expect(registrarEnvio).not.toHaveBeenCalled();
+    });
+
+    it('calls registrarEnvio with the expected payload and resets the form on success', async () => {
+      registrarEnvio.mockReturnValue(of(VALID_ENVIO_RESPONSE));
+
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      await submitForm(fixture);
+
+      expect(registrarEnvio).toHaveBeenCalledTimes(1);
+      expect(registrarEnvio).toHaveBeenCalledWith({
+        titulo: 'Envío de café a puerto',
+        weightValue: 200,
+        weightUnit: 'KG',
+        distanceValue: 500,
+        distanceUnit: 'km',
+        transportMethod: 'TRUCK',
+        fechaActividad: '2026-07-01',
+      });
+      expect(TestBed.inject(Router).navigateByUrl).not.toHaveBeenCalledWith('/emisiones');
+      fixture.detectChanges();
+      expect(root.querySelector<HTMLTextAreaElement>('textarea')?.value).toBe('');
+    });
+
+    it('does not call registrarEnvio without an active session', async () => {
+      storage.removeItem('carbonhub.token');
+
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      await submitForm(fixture);
+
+      expect(registrarEnvio).not.toHaveBeenCalled();
+    });
+
+    it('shows session error toast on 401 response', async () => {
+      registrarEnvio.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }))
+      );
+
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      await submitForm(fixture);
+
+      expect(toastError).toHaveBeenCalledWith(expect.stringContaining('sesión'));
+    });
+
+    it('shows the API error message when the backend returns one', async () => {
+      registrarEnvio.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 422,
+              statusText: 'Unprocessable Entity',
+              error: { status: 422, message: 'El peso excede el límite permitido.' },
+            })
+        )
+      );
+
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      await submitForm(fixture);
+
+      expect(toastError).toHaveBeenCalledWith('El peso excede el límite permitido.');
+    });
+
+    it('shows the generic connection error on an unknown failure', async () => {
+      registrarEnvio.mockReturnValue(throwError(() => new Error('Network error')));
+
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      await submitForm(fixture);
+
+      expect(toastError).toHaveBeenCalledWith(expect.stringContaining('No se pudo conectar'));
     });
   });
 });

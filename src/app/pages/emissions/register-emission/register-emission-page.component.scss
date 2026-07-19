@@ -8,8 +8,7 @@
 
 .register-emission-page h2,
 .register-emission-page h3,
-.register-emission-page h4,
-.register-emission-page__estimate-value {
+.register-emission-page h4 {
   font-family: var(--ch-font-heading);
 }
 
@@ -27,20 +26,15 @@
 }
 
 .register-emission-page__header,
-.register-emission-page__categories,
 .register-emission-page__row,
 .register-emission-page__legs-header,
-.register-emission-page__actions,
-.register-emission-page__save-flow,
-.register-emission-page__estimate,
-.register-emission-page__info {
+.register-emission-page__actions {
   display: flex;
 }
 
 .register-emission-page__header,
 .register-emission-page__row,
-.register-emission-page__actions,
-.register-emission-page__info {
+.register-emission-page__actions {
   gap: var(--ch-space-3);
 }
 
@@ -63,46 +57,14 @@
 }
 
 .register-emission-page__subtitle,
-.register-emission-page__field-error,
-.register-emission-page__info p {
+.register-emission-page__field-error {
   margin: 0;
   font-size: 0.8125rem;
 }
 
 .register-emission-page__subtitle,
-.register-emission-page__leg-title,
-.register-emission-page__save-flow {
+.register-emission-page__leg-title {
   color: var(--ch-text-secondary);
-}
-
-.register-emission-page__categories {
-  flex-wrap: wrap;
-  gap: var(--ch-space-2);
-}
-
-.register-emission-page__category {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--ch-space-2);
-  height: 34px;
-  padding: 0 14px;
-  border: 1px solid var(--ch-border);
-  border-radius: var(--ch-radius-pill);
-  background: var(--ch-bg-white);
-  color: var(--ch-text-secondary);
-  font-weight: 600;
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  &--active {
-    border-color: var(--ch-green);
-    background: var(--ch-green-soft);
-    color: var(--ch-green-dark);
-  }
 }
 
 .register-emission-page__field,
@@ -121,13 +83,6 @@
   font-weight: 600;
   font-size: 0.875rem;
   color: var(--ch-text-primary);
-}
-
-.register-emission-page__unit-options {
-  display: flex;
-  align-items: center;
-  gap: var(--ch-space-4);
-  height: 40px;
 }
 
 .register-emission-page__field-error {
@@ -149,8 +104,7 @@
   cursor: pointer;
 }
 
-.register-emission-page__legs-header,
-.register-emission-page__estimate {
+.register-emission-page__legs-header {
   align-items: center;
   justify-content: space-between;
 }
@@ -191,47 +145,6 @@
   cursor: pointer;
 }
 
-.register-emission-page__estimate-label,
-.register-emission-page__save-flow {
-  letter-spacing: 0.7px;
-  text-transform: uppercase;
-}
-
-.register-emission-page__estimate {
-  padding: var(--ch-space-4);
-  border-radius: var(--ch-radius-md);
-  background: var(--ch-green-soft);
-}
-
-.register-emission-page__estimate-label {
-  font-size: 0.7rem;
-  color: var(--ch-green-dark);
-}
-
-.register-emission-page__estimate-value {
-  display: flex;
-  align-items: baseline;
-  gap: var(--ch-space-2);
-  font-family: var(--ch-font-heading);
-  font-weight: 700;
-  font-size: 1.625rem;
-  color: var(--ch-green);
-}
-
-.register-emission-page__estimate-unit {
-  font-size: 0.625rem;
-  color: var(--ch-green-dark);
-}
-
-.register-emission-page__info {
-  padding: 14px 16px;
-  border-left: 4px solid #0ea5e9;
-  border-radius: var(--ch-radius-md);
-  background: #e8f6fc;
-  color: #146c94;
-  line-height: 1.45;
-}
-
 .register-emission-page__auth-warning {
   display: flex;
   align-items: center;
@@ -249,32 +162,6 @@
 
 .register-emission-page__actions app-button {
   width: auto;
-}
-
-.register-emission-page__save-flow {
-  align-items: center;
-  gap: var(--ch-space-2);
-  padding-top: var(--ch-space-4);
-  border-top: 1px dashed var(--ch-border);
-  font-size: 0.68rem;
-}
-
-.register-emission-page__save-pill {
-  padding: 5px 12px;
-  border-radius: var(--ch-radius-pill);
-  background: var(--ch-bg-white);
-  font-weight: 600;
-  text-transform: none;
-}
-
-.register-emission-page__save-pill--active {
-  background: var(--ch-green);
-  color: var(--ch-bg-white);
-}
-
-.register-emission-page__save-pill--done {
-  background: var(--ch-green-soft);
-  color: var(--ch-green-dark);
 }
 
 @media (max-width: 720px) {

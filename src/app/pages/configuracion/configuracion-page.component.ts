@@ -1,9 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import {
-  PageLayoutComponent,
-  HeaderConfig,
-  SidebarConfig,
-} from '../../shared/layouts/page-layout/page-layout.component';
+import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
+import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { HeadingComponent } from '../../shared/components/heading/heading.component';
@@ -24,7 +21,7 @@ import {
 @Component({
   selector: 'app-configuracion-page',
   imports: [
-    PageLayoutComponent,
+    ShellLayoutComponent,
     CardComponent,
     ButtonComponent,
     HeadingComponent,
@@ -48,24 +45,6 @@ export class ConfiguracionPageComponent implements OnInit {
   protected readonly idioma = signal<Idioma>('ESPANOL');
   protected readonly moneda = signal<Moneda>('CRC');
   protected readonly unidades = signal<Unidades>('METRICO');
-
-  protected readonly sidebarConfig = computed<SidebarConfig>(() => ({
-    menuItems: [
-      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', active: false },
-      { id: 'emisiones', label: 'Mis Emisiones', icon: 'emisiones', active: false },
-      { id: 'auditores', label: 'Auditores', icon: 'auditores', active: false },
-      { id: 'auditorias', label: 'Auditorías', icon: 'auditorias', active: false },
-      { id: 'certificaciones', label: 'Certificaciones', icon: 'certificaciones', active: false },
-      { id: 'insignias', label: 'Insignias', icon: 'insignias', active: false },
-    ],
-    bottomItems: [
-      { id: 'configuracion', label: this.i18n.t('config.seccion'), icon: 'config' },
-      { id: 'logout', label: 'Cerrar sesión', icon: 'logout' },
-    ],
-    companyName: 'Café del Valle S.A.',
-    companyRole: 'Empresa · Admin',
-    companyInitials: 'CV',
-  }));
 
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: this.i18n.t('config.seccion').toUpperCase(),

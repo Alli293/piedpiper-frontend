@@ -22,12 +22,11 @@ import { TextInputComponent } from '../../shared/components/inputs/text-input/te
 import { TextareaComponent } from '../../shared/components/inputs/textarea/textarea.component';
 import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { IconComponent } from '../../shared/components/icon/icon.component';
-import {
-  HeaderConfig,
-  PageLayoutComponent,
-  SidebarConfig,
-} from '../../shared/layouts/page-layout/page-layout.component';
+import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
+import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../shared/services/toast.service';
+import { fieldError } from '../../shared/utils/form-field.utils';
+import { apiErrorMessage } from '../../shared/utils/http-error.utils';
 import { LimiteEmisionesRequest, LimiteEmisionesResponse, LimitesService } from './limites.service';
 
 interface LimitesFormModel {
@@ -41,7 +40,7 @@ interface LimitesFormModel {
   imports: [
     DatePipe,
     FormField,
-    PageLayoutComponent,
+    ShellLayoutComponent,
     SelectInputComponent,
     TextInputComponent,
     TextareaComponent,
@@ -101,10 +100,10 @@ export class LimitesPageComponent {
     })
   );
 
-  protected readonly anioError = computed(() => this.fieldError(this.limitesForm.anio()));
-  protected readonly limiteMtError = computed(() => this.fieldError(this.limitesForm.limiteMt()));
+  protected readonly anioError = computed(() => fieldError(this.limitesForm.anio()));
+  protected readonly limiteMtError = computed(() => fieldError(this.limitesForm.limiteMt()));
   protected readonly justificacionError = computed(() =>
-    this.fieldError(this.limitesForm.justificacion())
+    fieldError(this.limitesForm.justificacion())
   );
 
   protected readonly submitting = computed(() => this.limitesForm().submitting());
@@ -118,25 +117,9 @@ export class LimitesPageComponent {
     }
   ).reverse();
 
-  protected readonly sidebarConfig = computed<SidebarConfig>(() => {
-    const menuItems = [
-      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' as const, active: false },
-      { id: 'emissions', label: 'Mis emisiones', icon: 'emisiones' as const, active: false },
-      { id: 'limits', label: 'Límite anual', icon: 'benchmark' as const, active: true },
-      { id: 'team-members', label: 'Colaboradores', icon: 'colaboradores' as const, active: false },
-    ].filter((item) => item.id !== 'limits' || this.isAdmin());
-
-    return {
-      menuItems,
-      bottomItems: [
-        { id: 'settings', label: 'Configuración', icon: 'config' },
-        { id: 'logout', label: 'Cerrar sesión', icon: 'logout' },
-      ],
-      companyName: 'Café del Valle S.A.',
-      companyRole: this.isAdmin() ? 'Administrador' : 'Usuario general',
-      companyInitials: 'CV',
-    };
-  });
+  protected readonly companyRole = computed(() =>
+    this.isAdmin() ? 'Administrador' : 'Usuario general'
+  );
 
   protected readonly headerConfig: HeaderConfig = {
     sectionLabel: 'PANEL EMPRESARIAL',
@@ -170,7 +153,7 @@ export class LimitesPageComponent {
     this.model.update((m) => ({
       ...m,
       anio: String(limite.anio),
-      limiteMt: formatDecimal(limite.limiteMt),
+      limiteMt: String(limite.limiteMt),
       justificacion: limite.justificacion ?? '',
     }));
     this.limiteVigente.set(limite);
@@ -210,7 +193,7 @@ export class LimitesPageComponent {
           this.deletingYear.set(null);
           if (error.status === 403) {
             this.toastService.error(
-              this.mensajeApi(error) ?? 'No tiene permiso para modificar el límite de la empresa.'
+              apiErrorMessage(error) ?? 'No tiene permiso para modificar el límite de la empresa.'
             );
             return;
           }
@@ -265,12 +248,12 @@ export class LimitesPageComponent {
           this.limiteVigente.set(response);
           this.model.update((m) => ({
             ...m,
-            limiteMt: formatDecimal(response.limiteMt),
+            limiteMt: String(response.limiteMt),
             justificacion: response.justificacion ?? '',
           }));
           const accion = response.recienCreada ? 'creado' : 'actualizado';
           this.toastService.success(
-            `Límite del año ${response.anio} ${accion}: ${formatDecimal(response.limiteMt)} t CO₂e.`
+            `Límite del año ${response.anio} ${accion}: ${response.limiteMt} t CO₂e.`
           );
           this.salirModoEdicion(false);
           this.cargarLimites();
@@ -295,7 +278,7 @@ export class LimitesPageComponent {
           this.limiteVigente.set(response);
           this.model.update((m) => ({
             ...m,
-            limiteMt: formatDecimal(response.limiteMt),
+            limiteMt: String(response.limiteMt),
             justificacion: response.justificacion ?? '',
           }));
           this.loading.set(false);
@@ -326,14 +309,14 @@ export class LimitesPageComponent {
     if (error instanceof HttpErrorResponse) {
       if (error.status === 403) {
         this.toastService.error(
-          this.mensajeApi(error) ?? 'No tiene permiso para modificar el límite de la empresa.'
+          apiErrorMessage(error) ?? 'No tiene permiso para modificar el límite de la empresa.'
         );
         return;
       }
 
       if (error.status === 409) {
         this.toastService.error(
-          this.mensajeApi(error) ?? 'Conflicto al guardar el límite. Intente nuevamente.'
+          apiErrorMessage(error) ?? 'Conflicto al guardar el límite. Intente nuevamente.'
         );
         this.precargarLimite(anio);
         this.cargarLimites();
@@ -343,21 +326,4 @@ export class LimitesPageComponent {
 
     this.toastService.error('No se pudo guardar el límite. Intente nuevamente.');
   }
-
-  private mensajeApi(error: HttpErrorResponse): string | undefined {
-    const apiError = error.error as { message?: string } | null;
-    return apiError?.message ?? undefined;
-  }
-
-  private fieldError(field: {
-    touched(): boolean;
-    errors(): readonly { message?: string }[];
-  }): string {
-    if (!field.touched()) return '';
-    return field.errors()[0]?.message ?? '';
-  }
-}
-
-function formatDecimal(value: number): string {
-  return Number(value).toString();
 }

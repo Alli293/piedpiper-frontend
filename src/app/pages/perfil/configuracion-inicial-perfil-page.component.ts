@@ -9,6 +9,7 @@ import { NumberInputComponent } from '../../shared/components/inputs/number-inpu
 import { SelectInputComponent } from '../../shared/components/inputs/select-input/select-input.component';
 import { ToastHostComponent } from '../../shared/components/toast/toast.component';
 import { ToastService } from '../../shared/services/toast.service';
+import { fieldError } from '../../shared/utils/form-field.utils';
 import { I18nService } from '../../core/services/i18n.service';
 import { PerfilInicialService } from '../../core/services/perfil-inicial.service';
 import {
@@ -137,13 +138,11 @@ export class ConfiguracionInicialPerfilPageComponent implements OnInit {
     })
   );
 
-  protected readonly errorNombre = computed(() => this.fieldError(this.perfilForm.nombreVisible()));
-  protected readonly errorSector = computed(() =>
-    this.fieldError(this.perfilForm.sectorIndustrial())
-  );
-  protected readonly errorPais = computed(() => this.fieldError(this.perfilForm.pais()));
+  protected readonly errorNombre = computed(() => fieldError(this.perfilForm.nombreVisible()));
+  protected readonly errorSector = computed(() => fieldError(this.perfilForm.sectorIndustrial()));
+  protected readonly errorPais = computed(() => fieldError(this.perfilForm.pais()));
   protected readonly errorEmpleados = computed(() =>
-    this.fieldError(this.perfilForm.cantidadEmpleados())
+    fieldError(this.perfilForm.cantidadEmpleados())
   );
 
   protected readonly sectorLabel = computed(() => {
@@ -223,13 +222,5 @@ export class ConfiguracionInicialPerfilPageComponent implements OnInit {
       },
       onInvalid: (field) => field().markAsTouched(),
     });
-  }
-
-  private fieldError(field: {
-    touched(): boolean;
-    errors(): readonly { message?: string }[];
-  }): string {
-    if (!field.touched()) return '';
-    return field.errors()[0]?.message ?? '';
   }
 }

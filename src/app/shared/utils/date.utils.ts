@@ -8,3 +8,8 @@ export function toIsoDateString(date: Date): string {
 export function toSpanishMonthName(date: Date): string {
   return new Intl.DateTimeFormat('es', { month: 'long', timeZone: 'UTC' }).format(date);
 }
+
+export function todayUtcMidnight(): Date {
+  const now = new Date();
+  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+}

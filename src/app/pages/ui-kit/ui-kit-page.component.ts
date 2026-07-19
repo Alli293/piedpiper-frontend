@@ -23,6 +23,7 @@ import {
   SidebarConfig,
   HeaderConfig,
 } from '../../shared/layouts/page-layout/page-layout.component';
+import { buildSidebarConfig } from '../../shared/layouts/page-layout/sidebar-nav';
 
 @Component({
   selector: 'app-ui-kit-page',
@@ -58,26 +59,14 @@ export class UiKitPageComponent {
   protected readonly termsAccepted = signal(false);
   protected readonly selectedPlan = signal<string | null>('basic');
 
-  protected readonly sidebarConfig = signal<SidebarConfig>({
-    menuItems: [
-      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', active: false },
-      { id: 'emissions', label: 'Mis Emisiones', icon: 'emisiones', active: true },
-      { id: 'auditors', label: 'Auditores', icon: 'auditores', active: false },
-      { id: 'audits', label: 'Auditorías', icon: 'auditorias', active: false },
-      { id: 'certifications', label: 'Certificaciones', icon: 'certificaciones', active: false },
-      { id: 'benchmark', label: 'Madurez Ambiental', icon: 'benchmark', active: false },
-      { id: 'badges', label: 'Insignias', icon: 'insignias', active: false },
-      { id: 'public-profile', label: 'Perfil Público', icon: 'perfil-publico', active: false },
-      { id: 'team-members', label: 'Colaboradores', icon: 'colaboradores', active: false },
-    ],
-    bottomItems: [
-      { id: 'settings', label: 'Configuración', icon: 'config' },
-      { id: 'logout', label: 'Cerrar sesión', icon: 'logout' },
-    ],
-    companyName: 'Café del Valle S.A.',
-    companyRole: 'Administrador',
-    companyInitials: 'CV',
-  });
+  protected readonly sidebarConfig = signal<SidebarConfig>(
+    buildSidebarConfig({
+      activeId: 'emissions',
+      companyName: 'Café del Valle S.A.',
+      companyRole: 'Administrador',
+      companyInitials: 'CV',
+    })
+  );
 
   protected readonly headerConfig = signal<HeaderConfig>({
     sectionLabel: 'PANEL EMPRESARIAL',

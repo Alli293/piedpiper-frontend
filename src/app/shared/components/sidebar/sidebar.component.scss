@@ -81,6 +81,25 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ch-border-on-dark) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--ch-border-on-dark);
+    border-radius: var(--ch-radius-pill);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--ch-text-on-dark-muted);
+  }
 }
 
 .ch-sidebar__bottom {

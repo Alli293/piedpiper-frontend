@@ -1,0 +1,14 @@
+@for (tab of tabs(); track tab.id) {
+  <button
+    type="button"
+    class="ch-emission-category-tabs__item"
+    [class.ch-emission-category-tabs__item--active]="tab.id === activeId()"
+    [attr.aria-pressed]="tab.id === activeId()"
+    [disabled]="tab.disabled ?? false"
+    [attr.title]="tab.disabled ? tab.disabledTitle : null"
+    (click)="selectTab(tab)"
+  >
+    <app-icon [name]="tab.icon" [size]="16" />
+    {{ tab.label }}
+  </button>
+}

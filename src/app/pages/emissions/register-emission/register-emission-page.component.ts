@@ -1,7 +1,4 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
-import { Location } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
-import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import {
   disabled,
@@ -19,29 +16,34 @@ import { HeadingComponent } from '../../../shared/components/heading/heading.com
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { DateInputComponent } from '../../../shared/components/inputs/date-input/date-input.component';
 import { NumberInputComponent } from '../../../shared/components/inputs/number-input/number-input.component';
-import { RadioComponent } from '../../../shared/components/inputs/radio/radio.component';
-import { RadioGroupDirective } from '../../../shared/components/inputs/radio/radio-group.directive';
+import { RadioGroupFieldComponent } from '../../../shared/components/inputs/radio-group-field/radio-group-field.component';
 import {
   SelectInputComponent,
   SelectOption,
 } from '../../../shared/components/inputs/select-input/select-input.component';
 import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
 import { TextareaComponent } from '../../../shared/components/inputs/textarea/textarea.component';
-import {
-  HeaderConfig,
-  PageLayoutComponent,
-  SidebarConfig,
-} from '../../../shared/layouts/page-layout/page-layout.component';
+import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
+import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
+import { todayUtcMidnight, toIsoDateString } from '../../../shared/utils/date.utils';
+import { fieldError } from '../../../shared/utils/form-field.utils';
+import { apiErrorMessage, isAuthError } from '../../../shared/utils/http-error.utils';
+import { countDecimals } from '../../../shared/utils/number.utils';
+import {
+  EmissionCategoryTab,
+  EmissionCategoryTabsComponent,
+} from '../category-tabs/category-tabs.component';
 import { AuthService } from '../../../core/auth/auth.service';
 import { EmisionesService } from '../emisiones.service';
 import {
-  ApiErrorResponse,
   CabinClass,
+  MetodoTransporte,
   RegistrarVueloRequest,
   TipoVehiculoOption,
   UnidadDistancia,
   UnidadElectricidad,
+  UnidadPeso,
 } from '../models/emision.model';
 
 interface RegistrarElectricidadFormModel {
@@ -73,7 +75,17 @@ interface RegistrarFlotaFormModel {
   fechaActividad: Date | null;
 }
 
-type EmissionCategory = 'electricidad' | 'vuelo' | 'flota';
+interface RegistrarEnvioFormModel {
+  titulo: string;
+  weightValue: number | null;
+  weightUnit: UnidadPeso;
+  distanceValue: number | null;
+  distanceUnit: UnidadDistancia;
+  transportMethod: MetodoTransporte;
+  fechaActividad: Date | null;
+}
+
+type EmissionCategory = 'electricidad' | 'vuelo' | 'flota' | 'envio';
 type FlightErrorKey =
   | 'passengers'
   | 'fechaActividad'
@@ -81,28 +93,6 @@ type FlightErrorKey =
   | `legs.${number}.departureAirport`
   | `legs.${number}.destinationAirport`
   | `legs.${number}.cabinClass`;
-
-function countDecimals(value: number): number {
-  const text = value.toString();
-  const dotIndex = text.indexOf('.');
-  return dotIndex === -1 ? 0 : text.length - dotIndex - 1;
-}
-
-function toIsoDate(date: Date): string {
-  const year = date.getUTCFullYear();
-  const month = `${date.getUTCMonth() + 1}`.padStart(2, '0');
-  const day = `${date.getUTCDate()}`.padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function isAuthError(error: unknown): boolean {
-  return error instanceof HttpErrorResponse && (error.status === 401 || error.status === 403);
-}
-
-function todayUtcMidnight(): Date {
-  const now = new Date();
-  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-}
 
 const INITIAL_MODEL: RegistrarElectricidadFormModel = {
   titulo: '',
@@ -127,12 +117,29 @@ const INITIAL_FLOTA_MODEL: RegistrarFlotaFormModel = {
   fechaActividad: null,
 };
 
+const INITIAL_ENVIO_MODEL: RegistrarEnvioFormModel = {
+  titulo: '',
+  weightValue: null,
+  weightUnit: 'KG',
+  distanceValue: null,
+  distanceUnit: 'km',
+  transportMethod: 'TRUCK',
+  fechaActividad: null,
+};
+
 const GENERIC_CONNECTION_ERROR =
   'No se pudo conectar con el servicio de cálculo de huella. Intente nuevamente más tarde.';
 
 const SESSION_ERROR_MESSAGE = 'Tu sesión no tiene permisos para realizar esta acción.';
 
 const CATALOGO_ERROR_MESSAGE = 'No se pudo cargar el catálogo de vehículos.';
+
+const CATEGORY_TABS: EmissionCategoryTab[] = [
+  { id: 'electricidad', label: 'Electricidad', icon: 'electricidad' },
+  { id: 'flota', label: 'Flota vehicular', icon: 'flota-vehicular' },
+  { id: 'vuelo', label: 'Vuelos', icon: 'vuelos' },
+  { id: 'envio', label: 'Envíos de carga', icon: 'envios-carga' },
+];
 
 @Component({
   selector: 'app-register-emission-page',
@@ -143,24 +150,27 @@ const CATALOGO_ERROR_MESSAGE = 'No se pudo cargar el catálogo de vehículos.';
     IconComponent,
     DateInputComponent,
     NumberInputComponent,
-    RadioComponent,
-    RadioGroupDirective,
+    RadioGroupFieldComponent,
     SelectInputComponent,
     TextInputComponent,
     TextareaComponent,
-    PageLayoutComponent,
+    ShellLayoutComponent,
+    EmissionCategoryTabsComponent,
   ],
   templateUrl: './register-emission-page.component.html',
   styleUrl: './register-emission-page.component.scss',
 })
 export class RegisterEmissionPageComponent {
-  private readonly location = inject(Location);
-  private readonly router = inject(Router);
   private readonly emisionesService = inject(EmisionesService);
   private readonly toastService = inject(ToastService);
   private readonly authService = inject(AuthService);
 
   protected readonly today = todayUtcMidnight();
+  protected readonly categoryTabs = CATEGORY_TABS;
+  protected readonly electricityUnitOptions: SelectOption[] = [
+    { value: 'kwh', label: 'kWh' },
+    { value: 'mwh', label: 'MWh' },
+  ];
   protected readonly distanceUnitOptions: SelectOption[] = [
     { value: 'km', label: 'km' },
     { value: 'mi', label: 'mi' },
@@ -168,6 +178,18 @@ export class RegisterEmissionPageComponent {
   protected readonly cabinClassOptions: SelectOption[] = [
     { value: 'economy', label: 'Economy' },
     { value: 'premium', label: 'Premium' },
+  ];
+  protected readonly weightUnitOptions: SelectOption[] = [
+    { value: 'G', label: 'g' },
+    { value: 'LB', label: 'lb' },
+    { value: 'KG', label: 'kg' },
+    { value: 'MT', label: 'mt' },
+  ];
+  protected readonly transportMethodOptions: SelectOption[] = [
+    { value: 'SHIP', label: 'Barco' },
+    { value: 'TRAIN', label: 'Tren' },
+    { value: 'TRUCK', label: 'Camión' },
+    { value: 'PLANE', label: 'Avión' },
   ];
 
   protected readonly activeCategory = signal<EmissionCategory>('electricidad');
@@ -207,8 +229,6 @@ export class RegisterEmissionPageComponent {
     })
   );
 
-  protected readonly lastResult = signal<{ carbonKg: number } | null>(null);
-
   protected readonly flotaModel = signal<RegistrarFlotaFormModel>({ ...INITIAL_FLOTA_MODEL });
 
   protected readonly flotaForm = form(
@@ -246,6 +266,49 @@ export class RegisterEmissionPageComponent {
     })
   );
 
+  protected readonly envioModel = signal<RegistrarEnvioFormModel>({ ...INITIAL_ENVIO_MODEL });
+
+  protected readonly envioForm = form(
+    this.envioModel,
+    schema<RegistrarEnvioFormModel>((path) => {
+      required(path.titulo, { message: 'Ingrese un título para este registro.' });
+      maxLength(path.titulo, 150, {
+        message: 'El título no puede contener más de 150 caracteres.',
+      });
+
+      required(path.weightValue, { message: 'Ingrese una cantidad mayor que 0.' });
+      validate(path.weightValue, ({ value }) => {
+        const amount = value();
+        if (amount === null) return undefined;
+        if (amount <= 0 || countDecimals(amount) > 3) {
+          return { kind: 'positiveAmount', message: 'Ingrese una cantidad mayor que 0.' };
+        }
+        return undefined;
+      });
+
+      required(path.weightUnit, { message: 'Seleccione una unidad válida.' });
+
+      required(path.distanceValue, { message: 'Ingrese una cantidad mayor que 0.' });
+      validate(path.distanceValue, ({ value }) => {
+        const amount = value();
+        if (amount === null) return undefined;
+        if (amount <= 0 || countDecimals(amount) > 3) {
+          return { kind: 'positiveAmount', message: 'Ingrese una cantidad mayor que 0.' };
+        }
+        return undefined;
+      });
+
+      required(path.distanceUnit, { message: 'Seleccione una unidad válida.' });
+
+      required(path.transportMethod, { message: 'Seleccione un método de transporte.' });
+
+      required(path.fechaActividad, { message: 'Ingrese una fecha para este registro.' });
+      maxDate(path.fechaActividad, this.today, {
+        message: 'La fecha no puede ser posterior a hoy.',
+      });
+    })
+  );
+
   protected readonly tiposVehiculo = signal<TipoVehiculoOption[]>([]);
   protected readonly catalogoLoading = signal(false);
   protected readonly catalogoError = signal('');
@@ -264,71 +327,65 @@ export class RegisterEmissionPageComponent {
     return tipo ? tipo.combustibles.map((c) => ({ value: c.id, label: c.nombre })) : [];
   });
 
-  protected readonly tituloError = computed(() => this.fieldError(this.registerForm.titulo()));
+  protected readonly tituloError = computed(() => fieldError(this.registerForm.titulo()));
   protected readonly electricityValueError = computed(() =>
-    this.fieldError(this.registerForm.electricityValue())
+    fieldError(this.registerForm.electricityValue())
   );
   protected readonly electricityUnitError = computed(() =>
-    this.fieldError(this.registerForm.electricityUnit())
+    fieldError(this.registerForm.electricityUnit())
   );
   protected readonly fechaActividadError = computed(() =>
-    this.fieldError(this.registerForm.fechaActividad())
+    fieldError(this.registerForm.fechaActividad())
   );
   protected readonly flightErrors = computed(() =>
     validateFlightModel(this.flightModel(), this.today)
   );
 
-  protected readonly flotaTituloError = computed(() => this.fieldError(this.flotaForm.titulo()));
-  protected readonly tipoVehiculoError = computed(() =>
-    this.fieldError(this.flotaForm.tipoVehiculo())
-  );
-  protected readonly combustibleError = computed(() =>
-    this.fieldError(this.flotaForm.combustible())
-  );
+  protected readonly flotaTituloError = computed(() => fieldError(this.flotaForm.titulo()));
+  protected readonly tipoVehiculoError = computed(() => fieldError(this.flotaForm.tipoVehiculo()));
+  protected readonly combustibleError = computed(() => fieldError(this.flotaForm.combustible()));
   protected readonly distanceValueError = computed(() =>
-    this.fieldError(this.flotaForm.distanceValue())
+    fieldError(this.flotaForm.distanceValue())
   );
-  protected readonly distanceUnitError = computed(() =>
-    this.fieldError(this.flotaForm.distanceUnit())
-  );
+  protected readonly distanceUnitError = computed(() => fieldError(this.flotaForm.distanceUnit()));
   protected readonly flotaFechaActividadError = computed(() =>
-    this.fieldError(this.flotaForm.fechaActividad())
+    fieldError(this.flotaForm.fechaActividad())
   );
 
-  protected readonly submitting = computed(() =>
-    this.activeCategory() === 'flota'
-      ? this.flotaForm().submitting()
-      : this.registerForm().submitting()
+  protected readonly envioTituloError = computed(() => fieldError(this.envioForm.titulo()));
+  protected readonly envioWeightValueError = computed(() =>
+    fieldError(this.envioForm.weightValue())
   );
+  protected readonly envioWeightUnitError = computed(() => fieldError(this.envioForm.weightUnit()));
+  protected readonly envioDistanceValueError = computed(() =>
+    fieldError(this.envioForm.distanceValue())
+  );
+  protected readonly envioDistanceUnitError = computed(() =>
+    fieldError(this.envioForm.distanceUnit())
+  );
+  protected readonly envioTransportMethodError = computed(() =>
+    fieldError(this.envioForm.transportMethod())
+  );
+  protected readonly envioFechaActividadError = computed(() =>
+    fieldError(this.envioForm.fechaActividad())
+  );
+
+  protected readonly submitting = computed(() => {
+    if (this.activeCategory() === 'flota') return this.flotaForm().submitting();
+    if (this.activeCategory() === 'envio') return this.envioForm().submitting();
+    return this.registerForm().submitting();
+  });
   protected readonly canSubmit = computed(() => {
     if (this.activeCategory() === 'flota') {
       return this.flotaForm().valid() && !this.submitting();
+    }
+    if (this.activeCategory() === 'envio') {
+      return this.envioForm().valid() && !this.submitting();
     }
     if (this.activeCategory() === 'electricidad') {
       return this.registerForm().valid() && !this.submitting();
     }
     return Object.keys(this.flightErrors()).length === 0 && !this.flightSubmitting();
-  });
-
-  protected readonly sidebarConfig = signal<SidebarConfig>({
-    menuItems: [
-      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', active: false },
-      { id: 'emissions', label: 'Mis Emisiones', icon: 'emisiones', active: true },
-      { id: 'auditors', label: 'Auditores', icon: 'auditores', active: false },
-      { id: 'audits', label: 'Auditorías', icon: 'auditorias', active: false },
-      { id: 'certifications', label: 'Certificaciones', icon: 'certificaciones', active: false },
-      { id: 'benchmark', label: 'Madurez ambiental', icon: 'benchmark', active: false },
-      { id: 'badges', label: 'Insignias', icon: 'insignias', active: false },
-      { id: 'public-profile', label: 'Perfil Público', icon: 'perfil-publico', active: false },
-      { id: 'team-members', label: 'Colaboradores', icon: 'colaboradores', active: false },
-    ],
-    bottomItems: [
-      { id: 'settings', label: 'Configuración', icon: 'config' },
-      { id: 'logout', label: 'Cerrar sesión', icon: 'logout' },
-    ],
-    companyName: 'Café del Valle S.A.',
-    companyRole: 'Empresa · Admin',
-    companyInitials: 'CV',
   });
 
   protected readonly headerConfig = signal<HeaderConfig>({
@@ -349,12 +406,8 @@ export class RegisterEmissionPageComponent {
     });
   }
 
-  protected goBack(): void {
-    this.location.back();
-  }
-
-  protected navigateToEnvio(): void {
-    void this.router.navigateByUrl('/emisiones/registrar/envio');
+  protected onCategorySelected(category: string): void {
+    this.selectCategory(category as EmissionCategory);
   }
 
   protected retryLoadTiposVehiculo(): void {
@@ -362,36 +415,47 @@ export class RegisterEmissionPageComponent {
   }
 
   protected onCancel(): void {
-    if (this.activeCategory() === 'electricidad') {
-      this.model.set({ ...INITIAL_MODEL });
-      this.registerForm().reset();
-    } else if (this.activeCategory() === 'flota') {
-      this.flotaModel.set({ ...INITIAL_FLOTA_MODEL });
-      this.flotaForm().reset();
-    } else {
-      this.flightModel.set(cloneFlightModel(INITIAL_FLIGHT_MODEL));
-      this.flightTouched.set(new Set());
-      this.flightSubmitted.set(false);
+    switch (this.activeCategory()) {
+      case 'electricidad':
+        this.model.set({ ...INITIAL_MODEL });
+        this.registerForm().reset();
+        break;
+      case 'flota':
+        this.flotaModel.set({ ...INITIAL_FLOTA_MODEL });
+        this.flotaForm().reset();
+        break;
+      case 'envio':
+        this.envioModel.set({ ...INITIAL_ENVIO_MODEL });
+        this.envioForm().reset();
+        break;
+      case 'vuelo':
+        this.flightModel.set(cloneFlightModel(INITIAL_FLIGHT_MODEL));
+        this.flightTouched.set(new Set());
+        this.flightSubmitted.set(false);
+        break;
     }
-    this.lastResult.set(null);
   }
 
   protected handleSubmit(event: Event): void {
     event.preventDefault();
-    if (this.activeCategory() === 'electricidad') {
-      void this.onSubmit();
-      return;
+    switch (this.activeCategory()) {
+      case 'electricidad':
+        void this.onSubmit();
+        break;
+      case 'flota':
+        void this.onSubmitFlota();
+        break;
+      case 'envio':
+        void this.onSubmitEnvio();
+        break;
+      case 'vuelo':
+        void this.onFlightSubmit();
+        break;
     }
-    if (this.activeCategory() === 'flota') {
-      void this.onSubmitFlota();
-      return;
-    }
-    void this.onFlightSubmit();
   }
 
   protected selectCategory(category: EmissionCategory): void {
     this.activeCategory.set(category);
-    this.lastResult.set(null);
     if (category === 'flota' && !this.catalogoLoaded() && !this.catalogoLoading()) {
       this.loadTiposVehiculo();
     }
@@ -481,10 +545,9 @@ export class RegisterEmissionPageComponent {
             titulo: value.titulo,
             electricityValue: value.electricityValue as number,
             electricityUnit: value.electricityUnit,
-            fechaActividad: toIsoDate(value.fechaActividad as Date),
+            fechaActividad: toIsoDateString(value.fechaActividad as Date),
           })
         );
-        this.lastResult.set({ carbonKg: response.carbonKg });
         this.toastService.success(
           'Consumo eléctrico registrado.',
           `Huella calculada: ${response.carbonKg} kg CO₂e.`
@@ -511,7 +574,6 @@ export class RegisterEmissionPageComponent {
     try {
       const payload = buildFlightPayload(value);
       const response = await firstValueFrom(this.emisionesService.registrarVuelo(payload));
-      this.lastResult.set({ carbonKg: response.carbonKg });
       this.toastService.success(
         'Viaje aéreo registrado.',
         `Huella calculada: ${response.carbonKg} kg CO₂e.`
@@ -540,14 +602,46 @@ export class RegisterEmissionPageComponent {
             combustible: value.combustible,
             distanceValue: value.distanceValue as number,
             distanceUnit: value.distanceUnit,
-            fechaActividad: toIsoDate(fechaActividad),
+            fechaActividad: toIsoDateString(fechaActividad),
           })
         );
         this.toastService.success(
           'Emisión de flota registrada.',
           `Huella calculada: ${response.carbonKg} kg CO₂e.`
         );
-        void this.router.navigateByUrl('/emisiones');
+        this.flotaModel.set({ ...INITIAL_FLOTA_MODEL });
+        this.flotaForm().reset();
+      } catch (error) {
+        this.reportSubmissionError(error);
+      }
+      return undefined;
+    });
+  }
+
+  private async onSubmitEnvio(): Promise<void> {
+    if (!this.ensureSession()) return;
+
+    await submit(this.envioForm, async (field) => {
+      const value = field().value();
+      try {
+        const fechaActividad = value.fechaActividad as Date;
+        const response = await firstValueFrom(
+          this.emisionesService.registrarEnvio({
+            titulo: value.titulo,
+            weightValue: value.weightValue as number,
+            weightUnit: value.weightUnit,
+            distanceValue: value.distanceValue as number,
+            distanceUnit: value.distanceUnit,
+            transportMethod: value.transportMethod,
+            fechaActividad: toIsoDateString(fechaActividad),
+          })
+        );
+        this.toastService.success(
+          'Envío registrado.',
+          `Huella calculada: ${response.carbonKg} kg CO₂e.`
+        );
+        this.envioModel.set({ ...INITIAL_ENVIO_MODEL });
+        this.envioForm().reset();
       } catch (error) {
         this.reportSubmissionError(error);
       }
@@ -556,12 +650,10 @@ export class RegisterEmissionPageComponent {
   }
 
   private reportSubmissionError(error: unknown): void {
-    if (error instanceof HttpErrorResponse) {
-      const apiError = error.error as ApiErrorResponse | null;
-      if (apiError?.message) {
-        this.toastService.error(apiError.message);
-        return;
-      }
+    const apiMessage = apiErrorMessage(error);
+    if (apiMessage) {
+      this.toastService.error(apiMessage);
+      return;
     }
     if (isAuthError(error)) {
       this.toastService.error(SESSION_ERROR_MESSAGE);
@@ -580,14 +672,6 @@ export class RegisterEmissionPageComponent {
   private hasActiveSession(): boolean {
     return Boolean(this.authService.token());
   }
-
-  private fieldError(field: {
-    touched(): boolean;
-    errors(): readonly { message?: string }[];
-  }): string {
-    if (!field.touched()) return '';
-    return field.errors()[0]?.message ?? '';
-  }
 }
 
 function cloneFlightModel(model: RegistrarVueloFormModel): RegistrarVueloFormModel {
@@ -601,7 +685,7 @@ function buildFlightPayload(model: RegistrarVueloFormModel): RegistrarVueloReque
   return {
     passengers: model.passengers as number,
     distanceUnit: model.distanceUnit,
-    fechaActividad: toIsoDate(model.fechaActividad as Date),
+    fechaActividad: toIsoDateString(model.fechaActividad as Date),
     legs: model.legs.map((leg) => ({
       departureAirport: leg.departureAirport.toUpperCase(),
       destinationAirport: leg.destinationAirport.toUpperCase(),

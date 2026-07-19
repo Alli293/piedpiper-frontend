@@ -1,4 +1,4 @@
-<app-page-layout [sidebarConfig]="sidebarConfig()" [headerConfig]="headerConfig">
+<app-shell-layout activeId="emissions" [companyRole]="companyRole()" [headerConfig]="headerConfig">
   <div class="limites-page">
     @if (isAdmin()) {
       <section class="limites-editor" aria-labelledby="editor-title">
@@ -176,4 +176,4 @@
       </section>
     }
   </div>
-</app-page-layout>
+</app-shell-layout>

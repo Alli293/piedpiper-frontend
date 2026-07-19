@@ -77,14 +77,6 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'emisiones/registrar/envio',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./pages/emissions/register-shipping/register-shipping-page.component').then(
-        (m) => m.RegisterShippingPageComponent
-      ),
-  },
-  {
     path: 'configuracion',
     canActivate: [authGuard],
     loadComponent: () =>

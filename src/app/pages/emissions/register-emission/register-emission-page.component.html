@@ -1,8 +1,4 @@
-<app-page-layout
-  [sidebarConfig]="sidebarConfig()"
-  [headerConfig]="headerConfig()"
-  (backClicked)="goBack()"
->
+<app-shell-layout activeId="emissions" [headerConfig]="headerConfig()" backRoute="/emisiones">
   <div class="register-emission-page">
     <form class="register-emission-page__card" novalidate (submit)="handleSubmit($event)">
       <header class="register-emission-page__header">
@@ -15,6 +11,8 @@
             <app-icon name="vuelos" [size]="24" />
           } @else if (activeCategory() === 'flota') {
             <app-icon name="flota-vehicular" [size]="24" />
+          } @else if (activeCategory() === 'envio') {
+            <app-icon name="envios-carga" [size]="24" />
           } @else {
             <app-icon name="electricidad" [size]="24" />
           }
@@ -33,6 +31,13 @@
               Registra el uso de un vehículo de la flota para calcular su huella de carbono.
             </p>
           </div>
+        } @else if (activeCategory() === 'envio') {
+          <div>
+            <app-heading level="h2" text="Envíos de carga" />
+            <p class="register-emission-page__subtitle">
+              Registra un envío para calcular su huella de carbono.
+            </p>
+          </div>
         } @else {
           <div>
             <app-heading level="h2" text="Consumo eléctrico" />
@@ -43,46 +48,11 @@
         }
       </header>
 
-      <div
-        class="register-emission-page__categories"
-        role="group"
-        aria-label="Categoría de emisión"
-      >
-        <button
-          type="button"
-          class="register-emission-page__category"
-          [class.register-emission-page__category--active]="activeCategory() === 'electricidad'"
-          [attr.aria-pressed]="activeCategory() === 'electricidad'"
-          (click)="selectCategory('electricidad')"
-        >
-          <app-icon name="electricidad" [size]="16" />
-          Electricidad
-        </button>
-        <button
-          type="button"
-          class="register-emission-page__category"
-          [class.register-emission-page__category--active]="activeCategory() === 'flota'"
-          [attr.aria-pressed]="activeCategory() === 'flota'"
-          (click)="selectCategory('flota')"
-        >
-          <app-icon name="flota-vehicular" [size]="16" />
-          Flota vehicular
-        </button>
-        <button
-          type="button"
-          class="register-emission-page__category"
-          [class.register-emission-page__category--active]="activeCategory() === 'vuelo'"
-          [attr.aria-pressed]="activeCategory() === 'vuelo'"
-          (click)="selectCategory('vuelo')"
-        >
-          <app-icon name="vuelos" [size]="16" />
-          Vuelos
-        </button>
-        <button type="button" class="register-emission-page__category" (click)="navigateToEnvio()">
-          <app-icon name="envios-carga" [size]="16" />
-          Envíos de carga
-        </button>
-      </div>
+      <app-emission-category-tabs
+        [tabs]="categoryTabs"
+        [activeId]="activeCategory()"
+        (categorySelected)="onCategorySelected($event)"
+      />
 
       @if (!hasSession()) {
         <div class="register-emission-page__auth-warning">
@@ -102,23 +72,12 @@
             [error]="electricityValueError()"
           />
 
-          <div class="register-emission-page__field">
-            <span class="register-emission-page__field-label" id="unidad-electricidad-label"
-              >Unidad</span
-            >
-            <div
-              class="register-emission-page__unit-options"
-              appRadioGroup
-              aria-labelledby="unidad-electricidad-label"
-              [formField]="registerForm.electricityUnit"
-            >
-              <app-radio value="kwh" label="kWh" />
-              <app-radio value="mwh" label="MWh" />
-            </div>
-            @if (electricityUnitError()) {
-              <p class="register-emission-page__field-error">{{ electricityUnitError() }}</p>
-            }
-          </div>
+          <app-radio-group-field
+            label="Unidad"
+            [options]="electricityUnitOptions"
+            [formField]="registerForm.electricityUnit"
+            [error]="electricityUnitError()"
+          />
         </div>
 
         <app-date-input
@@ -171,23 +130,12 @@
             [error]="distanceValueError()"
           />
 
-          <div class="register-emission-page__field">
-            <span class="register-emission-page__field-label" id="unidad-distancia-label"
-              >Unidad</span
-            >
-            <div
-              class="register-emission-page__unit-options"
-              appRadioGroup
-              aria-labelledby="unidad-distancia-label"
-              [formField]="flotaForm.distanceUnit"
-            >
-              <app-radio value="km" label="km" />
-              <app-radio value="mi" label="mi" />
-            </div>
-            @if (distanceUnitError()) {
-              <p class="register-emission-page__field-error">{{ distanceUnitError() }}</p>
-            }
-          </div>
+          <app-radio-group-field
+            label="Unidad"
+            [options]="distanceUnitOptions"
+            [formField]="flotaForm.distanceUnit"
+            [error]="distanceUnitError()"
+          />
         </div>
 
         <app-date-input
@@ -202,7 +150,7 @@
           [formField]="flotaForm.titulo"
           [error]="flotaTituloError()"
         />
-      } @else {
+      } @else if (activeCategory() === 'vuelo') {
         <div class="register-emission-page__row">
           <app-number-input
             class="register-emission-page__field--grow"
@@ -289,29 +237,62 @@
             </div>
           }
         </div>
-      }
+      } @else if (activeCategory() === 'envio') {
+        <div class="register-emission-page__row">
+          <app-number-input
+            class="register-emission-page__field--grow"
+            label="Peso del envío"
+            placeholder="0"
+            step="0.001"
+            [formField]="envioForm.weightValue"
+            [error]="envioWeightValueError()"
+          />
 
-      <div class="register-emission-page__info">
-        <app-icon name="info" [size]="16" />
-        <p>
-          @if (activeCategory() === 'vuelo') {
-            El cálculo usa un catálogo local de aeropuertos frecuentes para estimar cada trayecto
-            por código IATA. Un viaje de ida y vuelta se registra con dos trayectos.
-          } @else {
-            El cálculo de electricidad usa factores de red como aproximación cuando no existe
-            proveedor local configurado.
-          }
-        </p>
-      </div>
-
-      @if (lastResult(); as result) {
-        <div class="register-emission-page__estimate">
-          <span class="register-emission-page__estimate-label">Huella estimada del registro</span>
-          <span class="register-emission-page__estimate-value">
-            {{ result.carbonKg }}
-            <span class="register-emission-page__estimate-unit">kg CO₂e</span>
-          </span>
+          <app-radio-group-field
+            label="Unidad"
+            [options]="weightUnitOptions"
+            [formField]="envioForm.weightUnit"
+            [error]="envioWeightUnitError()"
+          />
         </div>
+
+        <div class="register-emission-page__row">
+          <app-number-input
+            class="register-emission-page__field--grow"
+            label="Distancia recorrida"
+            placeholder="0"
+            step="0.001"
+            [formField]="envioForm.distanceValue"
+            [error]="envioDistanceValueError()"
+          />
+
+          <app-radio-group-field
+            label="Unidad"
+            [options]="distanceUnitOptions"
+            [formField]="envioForm.distanceUnit"
+            [error]="envioDistanceUnitError()"
+          />
+        </div>
+
+        <app-radio-group-field
+          label="Método de transporte"
+          [options]="transportMethodOptions"
+          [formField]="envioForm.transportMethod"
+          [error]="envioTransportMethodError()"
+        />
+
+        <app-date-input
+          label="Fecha del registro"
+          [formField]="envioForm.fechaActividad"
+          [error]="envioFechaActividadError()"
+        />
+
+        <app-textarea
+          label="Detalle"
+          placeholder="Ej. Envío de café a puerto — Limón"
+          [formField]="envioForm.titulo"
+          [error]="envioTituloError()"
+        />
       }
 
       <div class="register-emission-page__actions">
@@ -325,23 +306,6 @@
           Calcular y guardar
         </app-button>
       </div>
-
-      <div class="register-emission-page__save-flow" aria-live="polite">
-        <span class="register-emission-page__save-label">Al guardar:</span>
-        <span
-          class="register-emission-page__save-pill"
-          [class.register-emission-page__save-pill--active]="submitting() || flightSubmitting()"
-        >
-          Calculando...
-        </span>
-        <span class="register-emission-page__save-arrow">></span>
-        <span
-          class="register-emission-page__save-pill"
-          [class.register-emission-page__save-pill--done]="lastResult()"
-        >
-          Guardado
-        </span>
-      </div>
     </form>
   </div>
-</app-page-layout>
+</app-shell-layout>
