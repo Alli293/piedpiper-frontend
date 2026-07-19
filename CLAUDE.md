@@ -20,11 +20,11 @@ These already exist. Use them; do not hand-roll or duplicate them.
 - Headings → `app-heading` (`shared/components/heading`). Never style raw `<h1>`/`<h2>`.
 - Wordmark/logo → `app-logo` (`shared/components/logo`).
 - Badges → `app-badge` (`shared/components/badge`), supports an optional `icon`.
-- Password fields → `app-password-input` (`shared/components/inputs/password-input`).
+- Password fields → `app-password-input` (`shared/components/inputs/password-input`) — en construcción en la rama `fix/PP-166-auditoria-sprint1`.
 - Other inputs → `shared/components/inputs/*` (text, textarea, checkbox, radio, date, number, select).
 - Toasts / user feedback → the single `ToastService` in `shared/services/toast.service.ts` (`success()` / `error()`). Do not create another toast service.
-- Validation regex + messages → `shared/utils/email.utils.ts`, `shared/utils/password.utils.ts`.
-- Field error text → `fieldError()` in `shared/utils/form-field.utils.ts`. Do not re-declare it inline.
+- Validation regex + messages → `shared/utils/email.utils.ts`, `shared/utils/password.utils.ts` — en construcción en la rama `fix/PP-166-auditoria-sprint1`.
+- Field error text → `fieldError()` in `shared/utils/form-field.utils.ts` — en construcción en la rama `fix/PP-166-auditoria-sprint1`. Do not re-declare it inline.
 - Inline anchors → the `appLink` directive (`a[appLink]`).
 
 ## Always

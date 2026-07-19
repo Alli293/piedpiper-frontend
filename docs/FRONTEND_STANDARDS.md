@@ -60,8 +60,8 @@ Other rules:
 
 - The `<form>` element carries **`novalidate`** so consistent component-level errors show instead of inconsistent native browser tooltips.
 - Disable fields **declaratively** with `disabled(path.x, { when: () => this.cargando() })` — not per-input `[disabled]`. Keeps disable logic co-located with the schema.
-- Centralize validation regex/messages in `shared/utils` — `email.utils.ts` (`EMAIL_PATTERN`, `EMAIL_MENSAJE`), `password.utils.ts` (`CONTRASENA_PATTERN`, `CONTRASENA_MENSAJE`, `CONTRASENA_HINT`). DRY: one definition keeps validation identical across every form.
-- Field error text comes from `fieldError(field)` in `shared/utils/form-field.utils.ts`. **Do not** paste a private copy into a component (`limites` and `configuracion-inicial-perfil` currently carry inline copies — prefer the shared util).
+- Centralize validation regex/messages in `shared/utils` — `email.utils.ts` (`EMAIL_PATTERN`, `EMAIL_MENSAJE`), `password.utils.ts` (`CONTRASENA_PATTERN`, `CONTRASENA_MENSAJE`, `CONTRASENA_HINT`). DRY: one definition keeps validation identical across every form. En construcción en la rama `fix/PP-166-auditoria-sprint1`.
+- Field error text comes from `fieldError(field)` in `shared/utils/form-field.utils.ts` — en construcción en la rama `fix/PP-166-auditoria-sprint1`. **Do not** paste a private copy into a component (`limites` and `configuracion-inicial-perfil` currently carry inline copies — prefer the shared util).
 
 ## 2. Components & dependency injection
 
@@ -72,7 +72,7 @@ Other rules:
   - headings → `app-heading` (`shared/components/heading`)
   - wordmark → `app-logo` (`shared/components/logo`)
   - badges → `app-badge` with optional `icon` (`shared/components/badge`)
-  - password fields → `app-password-input` (`shared/components/inputs/password-input`)
+  - password fields → `app-password-input` (`shared/components/inputs/password-input`) — en construcción en la rama `fix/PP-166-auditoria-sprint1`
 - **One component/service per concept.** Duplicates (e.g. two toast services, near-identical stat cards, per-role copies of the same form) drift apart over time — search `shared/` before adding anything, and consolidate rather than fork.
 - No inline `template:` / `styles:` for non-trivial components — use external `.html` / `.scss`. Keeps files focused and diffs readable.
 
