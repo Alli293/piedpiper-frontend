@@ -15,10 +15,13 @@ import { FormField, form, schema, submit, validate } from '@angular/forms/signal
 import { firstValueFrom } from 'rxjs';
 import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
 import { ToastHostComponent } from '../../../shared/components/toast/toast.component';
+import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
+import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
-import { EMAIL_MENSAJE, EMAIL_PATTERN } from '../../../shared/utils/email.utils';
+import { EMAIL_MAX_LENGTH, EMAIL_MENSAJE, EMAIL_PATTERN } from '../../../shared/utils/email.utils';
 import { fieldError } from '../../../shared/utils/form-field.utils';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import {
@@ -43,6 +46,8 @@ const ESTADOS: Record<EstadoInvitacion, { etiqueta: string; variante: BadgeVaria
   imports: [
     BadgeComponent,
     ButtonComponent,
+    HeadingComponent,
+    ShellLayoutComponent,
     TextInputComponent,
     ToastHostComponent,
     DatePipe,
@@ -55,6 +60,13 @@ export class InvitacionesPageComponent {
   private readonly invitacionesService = inject(InvitacionesService);
   private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+
+  protected readonly headerConfig: HeaderConfig = {
+    sectionLabel: 'PANEL EMPRESARIAL',
+    pageTitle: 'Invitaciones de empresa',
+    showNotificationDot: true,
+    userInitials: 'CA',
+  };
 
   protected readonly invitaciones = signal<Invitacion[]>([]);
   protected readonly cargando = signal(true);
@@ -69,7 +81,7 @@ export class InvitacionesPageComponent {
     schema<InvitacionFormModel>((path) => {
       validate(path.email, ({ value }) => {
         const email = value().trim();
-        if (!email || email.length > 254 || !EMAIL_PATTERN.test(email)) {
+        if (!email || email.length > EMAIL_MAX_LENGTH || !EMAIL_PATTERN.test(email)) {
           return { kind: 'email', message: EMAIL_MENSAJE };
         }
         return undefined;

@@ -15,14 +15,6 @@ export const rutasPostAutenticacion = [
 
 export const routes: Routes = [
   {
-    path: 'empresa/invitaciones',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./pages/empresa/invitaciones/invitaciones-page.component').then(
-        (m) => m.InvitacionesPageComponent
-      ),
-  },
-  {
     path: 'login',
     loadComponent: () =>
       import('./pages/auth/login/login-page.component').then((m) => m.LoginPageComponent),
@@ -60,6 +52,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/empresa/configuracion-inicial-page.component').then(
         (m) => m.ConfiguracionInicialPageComponent
+      ),
+  },
+  {
+    path: 'empresa/invitaciones',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/empresa/invitaciones/invitaciones-page.component').then(
+        (m) => m.InvitacionesPageComponent
       ),
   },
   {
