@@ -11,9 +11,11 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormField, form, schema, submit, validate } from '@angular/forms/signals';
+import { FormField, form, required, schema, submit, validate } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { RadioGroupFieldComponent } from '../../../shared/components/inputs/radio-group-field/radio-group-field.component';
+import { SelectOption } from '../../../shared/components/inputs/select-input/select-input.component';
 import { TextareaComponent } from '../../../shared/components/inputs/textarea/textarea.component';
 import { ToastHostComponent } from '../../../shared/components/toast/toast.component';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -25,7 +27,10 @@ import {
   ValidacionService,
 } from '../../../core/validacion/validacion.service';
 
+type DecisionValor = 'aprobado' | 'rechazado' | '';
+
 interface DecisionFormModel {
+  decision: DecisionValor;
   motivo: string;
 }
 
@@ -34,7 +39,14 @@ const MOTIVO_MAX = 500;
 
 @Component({
   selector: 'app-solicitudes-auditor-page',
-  imports: [ButtonComponent, TextareaComponent, DatePipe, ToastHostComponent, FormField],
+  imports: [
+    ButtonComponent,
+    RadioGroupFieldComponent,
+    TextareaComponent,
+    DatePipe,
+    ToastHostComponent,
+    FormField,
+  ],
   templateUrl: './solicitudes-auditor-page.component.html',
   styleUrl: './solicitudes-auditor-page.component.scss',
 })
@@ -47,15 +59,15 @@ export class SolicitudesAuditorPageComponent {
   protected readonly errorCarga = signal(false);
   protected readonly pagina = signal<PaginaSolicitudes | null>(null);
   protected readonly solicitudEnRevision = signal<SolicitudPendiente | null>(null);
-  protected readonly decision = signal<'aprobado' | 'rechazado' | null>(null);
 
-  protected readonly model = signal<DecisionFormModel>({ motivo: '' });
+  protected readonly model = signal<DecisionFormModel>({ decision: '', motivo: '' });
 
   protected readonly decisionForm = form(
     this.model,
     schema<DecisionFormModel>((path) => {
+      required(path.decision, { message: 'Selecciona una decisión.' });
       validate(path.motivo, ({ value }) => {
-        if (this.decision() !== 'rechazado') {
+        if (this.model().decision !== 'rechazado') {
           return undefined;
         }
         const largo = value().trim().length;
@@ -73,10 +85,16 @@ export class SolicitudesAuditorPageComponent {
     })
   );
 
+  protected readonly decisionOptions: SelectOption[] = [
+    { value: 'aprobado', label: 'Aprobar' },
+    { value: 'rechazado', label: 'Rechazar' },
+  ];
+
+  protected readonly esRechazo = computed(() => this.model().decision === 'rechazado');
   protected readonly errorMotivo = computed(() => fieldError(this.decisionForm.motivo()));
   protected readonly enviando = computed(() => this.decisionForm().submitting());
   protected readonly puedeConfirmar = computed(
-    () => this.decision() !== null && this.decisionForm().valid() && !this.enviando()
+    () => this.decisionForm().valid() && !this.enviando()
   );
 
   private readonly modal = viewChild<ElementRef<HTMLElement>>('modalRevision');
@@ -112,8 +130,7 @@ export class SolicitudesAuditorPageComponent {
 
   protected abrirRevision(solicitud: SolicitudPendiente): void {
     this.solicitudEnRevision.set(solicitud);
-    this.decision.set(null);
-    this.model.set({ motivo: '' });
+    this.model.set({ decision: '', motivo: '' });
     this.decisionForm().reset();
   }
 
@@ -141,19 +158,21 @@ export class SolicitudesAuditorPageComponent {
 
   protected async confirmarDecision(): Promise<void> {
     const solicitud = this.solicitudEnRevision();
-    const decision = this.decision();
-    if (!solicitud || !decision || this.enviando()) {
+    if (!solicitud || this.enviando()) {
       return;
     }
     await submit(this.decisionForm, {
       action: async (field) => {
-        const motivo = field().value().motivo.trim();
+        const { decision, motivo } = field().value();
+        if (!decision) {
+          return undefined;
+        }
         try {
           const resuelta = await firstValueFrom(
             this.validacionService.resolver(
               solicitud.id,
               decision,
-              decision === 'rechazado' ? motivo : undefined
+              decision === 'rechazado' ? motivo.trim() : undefined
             )
           );
           this.solicitudEnRevision.set(null);

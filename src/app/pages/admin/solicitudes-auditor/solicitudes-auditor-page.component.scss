@@ -137,34 +137,10 @@
   font-weight: 600;
 }
 
-.solicitudes__decision {
+.solicitudes__modal form {
   display: flex;
-  gap: var(--ch-space-3);
-}
-
-.solicitudes__opcion {
-  flex: 1;
-  padding: var(--ch-space-3);
-  border: 1px solid var(--ch-border);
-  border-radius: var(--ch-radius-md);
-  background: var(--ch-bg-white);
-  font-family: var(--ch-font-heading);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ch-text-primary);
-  cursor: pointer;
-}
-
-.solicitudes__opcion--aprobar.solicitudes__opcion--activa {
-  border-color: var(--ch-green);
-  background: var(--ch-green-soft);
-  color: var(--ch-green-dark);
-}
-
-.solicitudes__opcion--rechazar.solicitudes__opcion--activa {
-  border-color: var(--ch-danger);
-  background: #fdecec;
-  color: var(--ch-danger);
+  flex-direction: column;
+  gap: var(--ch-space-5);
 }
 
 .solicitudes__modal-actions {

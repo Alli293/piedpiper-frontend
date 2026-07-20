@@ -111,28 +111,38 @@ describe('SolicitudesAuditorPageComponent', () => {
     const fixture = crear();
     const comp = fixture.componentInstance as any;
     comp.abrirRevision(solicitud);
-    comp.decision.set('aprobado');
+    comp.model.set({ decision: 'aprobado', motivo: '' });
     fixture.detectChanges();
     expect((fixture.nativeElement as HTMLElement).querySelector('app-textarea')).toBeNull();
 
-    comp.decision.set('rechazado');
+    comp.model.set({ decision: 'rechazado', motivo: '' });
     fixture.detectChanges();
     expect((fixture.nativeElement as HTMLElement).querySelector('app-textarea')).toBeTruthy();
+  });
+
+  it('sin decision seleccionada el boton confirmar queda deshabilitado', () => {
+    const fixture = crear();
+    const comp = fixture.componentInstance as any;
+    comp.abrirRevision(solicitud);
+
+    expect(comp.puedeConfirmar()).toBe(false);
+
+    comp.model.set({ decision: 'aprobado', motivo: '' });
+    expect(comp.puedeConfirmar()).toBe(true);
   });
 
   it('el boton confirmar se habilita segun la longitud del motivo', () => {
     const fixture = crear();
     const comp = fixture.componentInstance as any;
     comp.abrirRevision(solicitud);
-    comp.decision.set('rechazado');
 
-    comp.model.set({ motivo: 'corto' });
+    comp.model.set({ decision: 'rechazado', motivo: 'corto' });
     expect(comp.puedeConfirmar()).toBe(false);
 
-    comp.model.set({ motivo: 'Motivo de rechazo con largo suficiente.' });
+    comp.model.set({ decision: 'rechazado', motivo: 'Motivo de rechazo con largo suficiente.' });
     expect(comp.puedeConfirmar()).toBe(true);
 
-    comp.model.set({ motivo: 'x'.repeat(501) });
+    comp.model.set({ decision: 'rechazado', motivo: 'x'.repeat(501) });
     expect(comp.puedeConfirmar()).toBe(false);
   });
 
@@ -140,8 +150,7 @@ describe('SolicitudesAuditorPageComponent', () => {
     const fixture = crear();
     const comp = fixture.componentInstance as any;
     comp.abrirRevision(solicitud);
-    comp.decision.set('rechazado');
-    comp.model.set({ motivo: 'corto' });
+    comp.model.set({ decision: 'rechazado', motivo: 'corto' });
 
     await comp.confirmarDecision();
     fixture.detectChanges();
@@ -163,7 +172,7 @@ describe('SolicitudesAuditorPageComponent', () => {
     const fixture = crear();
     const comp = fixture.componentInstance as any;
     comp.abrirRevision(solicitud);
-    comp.decision.set('aprobado');
+    comp.model.set({ decision: 'aprobado', motivo: '' });
 
     await comp.confirmarDecision();
 
@@ -189,7 +198,7 @@ describe('SolicitudesAuditorPageComponent', () => {
     const fixture = crear();
     const comp = fixture.componentInstance as any;
     comp.abrirRevision(solicitud);
-    comp.decision.set('aprobado');
+    comp.model.set({ decision: 'aprobado', motivo: '' });
 
     await comp.confirmarDecision();
 
@@ -209,7 +218,7 @@ describe('SolicitudesAuditorPageComponent', () => {
     const fixture = crear();
     const comp = fixture.componentInstance as any;
     comp.abrirRevision(solicitud);
-    comp.decision.set('aprobado');
+    comp.model.set({ decision: 'aprobado', motivo: '' });
 
     await comp.confirmarDecision();
 

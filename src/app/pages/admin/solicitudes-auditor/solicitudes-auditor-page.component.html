@@ -100,28 +100,14 @@
         </dl>
 
         <form novalidate (submit)="handleSubmit($event)">
-          <div class="solicitudes__decision" role="radiogroup" aria-label="Decisión">
-            <button
-              type="button"
-              class="solicitudes__opcion solicitudes__opcion--aprobar"
-              [class.solicitudes__opcion--activa]="decision() === 'aprobado'"
-              [disabled]="enviando()"
-              (click)="decision.set('aprobado')"
-            >
-              Aprobar
-            </button>
-            <button
-              type="button"
-              class="solicitudes__opcion solicitudes__opcion--rechazar"
-              [class.solicitudes__opcion--activa]="decision() === 'rechazado'"
-              [disabled]="enviando()"
-              (click)="decision.set('rechazado')"
-            >
-              Rechazar
-            </button>
-          </div>
+          <app-radio-group-field
+            label="Decisión"
+            [options]="decisionOptions"
+            [formField]="decisionForm.decision"
+            [disabled]="enviando()"
+          />
 
-          @if (decision() === 'rechazado') {
+          @if (esRechazo()) {
             <app-textarea
               label="Motivo del rechazo"
               placeholder="Explica por qué se rechaza esta solicitud (mínimo 10 caracteres)"
