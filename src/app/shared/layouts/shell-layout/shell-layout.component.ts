@@ -45,4 +45,15 @@ export class ShellLayoutComponent {
     }
     this.backClicked.emit();
   }
+
+  protected onMenuItem(id: string): void {
+    const rutas: Record<string, string> = {
+      dashboard: '/panel',
+      emissions: '/emisiones/registrar',
+      settings: '/configuracion',
+      logout: '/login',
+    };
+    const ruta = rutas[id];
+    if (ruta) void this.router.navigateByUrl(ruta);
+  }
 }

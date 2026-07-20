@@ -1,8 +1,4 @@
-<app-page-layout
-  [sidebarConfig]="sidebarConfig()"
-  [headerConfig]="headerConfig()"
-  (menuItemClicked)="onMenuItem($event)"
->
+<app-shell-layout activeId="dashboard" [headerConfig]="headerConfig()">
   <section class="dashboard-shell" aria-label="Límite anual de emisiones">
     <div class="dashboard-shell__toolbar">
       <app-select-input
@@ -103,4 +99,4 @@
       }
     </article>
   </section>
-</app-page-layout>
+</app-shell-layout>
