@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { form, FormField, required, schema, submit, validate } from '@angular/forms/signals';
 import { ConfiguracionInicialLayoutComponent } from '../../shared/layouts/configuracion-inicial-layout/configuracion-inicial-layout.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { TextInputComponent } from '../../shared/components/inputs/text-input/text-input.component';
 import {
   SelectInputComponent,
@@ -42,6 +43,7 @@ const INITIAL_MODEL: ConfiguracionInicialFormModel = {
     FormField,
     ConfiguracionInicialLayoutComponent,
     ButtonComponent,
+    HeadingComponent,
     TextInputComponent,
     SelectInputComponent,
     TextareaComponent,
@@ -148,9 +150,7 @@ export class ConfiguracionInicialPageComponent {
   }
 
   protected continuar(): void {
-    // TODO: reemplazar '/empresa/panel' por el dashboard real de empresa
-    // cuando exista (hoy es una ruta placeholder protegida por el guard).
-    this.router.navigateByUrl('/empresa/panel').catch((err) => {
+    this.router.navigateByUrl('/perfil/configuracion-inicial').catch((err) => {
       console.error('Error al navegar tras completar configuración inicial:', err);
     });
   }

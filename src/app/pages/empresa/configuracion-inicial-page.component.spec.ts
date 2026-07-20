@@ -158,7 +158,7 @@ describe('ConfiguracionInicialPageComponent', () => {
 
     comp.continuar();
 
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/empresa/panel');
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/perfil/configuracion-inicial');
   });
 
   it('continuar() loguea el error si la navegacion falla', () => {

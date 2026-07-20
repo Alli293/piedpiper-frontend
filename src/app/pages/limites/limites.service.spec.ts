@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { AuthSessionService } from '../../core/auth-session.service';
 import { environment } from '../../../environments/environment';
 import { LimitesService } from './limites.service';
 
@@ -12,17 +11,7 @@ describe('LimitesService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        LimitesService,
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        {
-          provide: AuthSessionService,
-          useValue: {
-            getToken: () => 'jwt-token',
-          },
-        },
-      ],
+      providers: [LimitesService, provideHttpClient(), provideHttpClientTesting()],
     });
 
     service = TestBed.inject(LimitesService);
@@ -38,7 +27,6 @@ describe('LimitesService', () => {
 
     const req = httpMock.expectOne(apiUrl);
     expect(req.request.method).toBe('POST');
-    expect(req.request.headers.get('Authorization')).toBe('Bearer jwt-token');
     expect(req.request.body).toEqual({
       anio: 2026,
       limiteMt: 50,

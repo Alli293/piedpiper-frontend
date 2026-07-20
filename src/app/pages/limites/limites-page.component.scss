@@ -30,19 +30,8 @@
   align-items: center;
   gap: var(--ch-space-3);
 
-  h2,
   p {
-    margin: 0;
-  }
-
-  h2 {
-    color: var(--ch-text-primary);
-    font-family: var(--ch-font-heading);
-    font-size: 1rem;
-  }
-
-  p {
-    margin-top: 2px;
+    margin: 2px 0 0;
     color: var(--ch-text-secondary);
     font-size: 0.75rem;
   }
@@ -115,37 +104,29 @@
   border-bottom: 1px solid var(--ch-border);
   gap: var(--ch-space-4);
 
-  h2,
   p {
-    margin: 0;
-  }
-
-  h2 {
-    display: flex;
-    align-items: center;
-    color: var(--ch-text-primary);
-    font-family: var(--ch-font-heading);
-    font-size: 0.875rem;
-    gap: var(--ch-space-2);
-
-    span {
-      display: inline-grid;
-      min-width: 24px;
-      height: 20px;
-      place-items: center;
-      border-radius: var(--ch-radius-pill);
-      background: var(--ch-green-soft);
-      color: var(--ch-green-dark);
-      font-family: var(--ch-font-mono);
-      font-size: 0.625rem;
-    }
-  }
-
-  p {
-    margin-top: 2px;
+    margin: 2px 0 0;
     color: var(--ch-text-secondary);
     font-size: 0.6875rem;
   }
+}
+
+.limites-list__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+}
+
+.limites-list__count {
+  display: inline-grid;
+  min-width: 24px;
+  height: 20px;
+  place-items: center;
+  border-radius: var(--ch-radius-pill);
+  background: var(--ch-green-soft);
+  color: var(--ch-green-dark);
+  font-family: var(--ch-font-mono);
+  font-size: 0.625rem;
 }
 
 .limites-list__table-wrap {
@@ -184,7 +165,7 @@ tbody tr {
   transition: background var(--ch-transition);
 
   &:hover {
-    background: #f8fafc;
+    background: var(--ch-bg-main);
   }
 
   &:last-child td {
@@ -255,7 +236,7 @@ td strong {
 }
 
 .icon-action--delete {
-  border-color: #fecaca;
+  border-color: var(--ch-danger-bg);
   color: var(--ch-danger);
 
   &:hover {
@@ -301,21 +282,6 @@ td strong {
     color: var(--ch-text-primary);
     font-family: var(--ch-font-heading);
   }
-}
-
-.limites-page__toast {
-  position: fixed;
-  right: var(--ch-space-6);
-  bottom: var(--ch-space-6);
-  z-index: 20;
-  max-width: min(420px, calc(100vw - 48px));
-  padding: var(--ch-space-4) var(--ch-space-5);
-  border-radius: var(--ch-radius-md);
-  background: var(--ch-dark);
-  box-shadow: var(--ch-shadow-lg);
-  color: var(--ch-text-on-dark);
-  font-family: var(--ch-font-body);
-  font-size: 0.8125rem;
 }
 
 @media (max-width: 720px) {

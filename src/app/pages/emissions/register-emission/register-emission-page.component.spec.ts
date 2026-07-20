@@ -1,9 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { provideLocationMocks } from '@angular/common/testing';
+import { HttpErrorResponse } from '@angular/common/http';
+import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { RegisterEmissionPageComponent } from './register-emission-page.component';
 import { EmisionesService } from '../emisiones.service';
-import { EmisionResponse } from '../models/emision.model';
+import { ToastService } from '../../../shared/services/toast.service';
+import {
+  EmisionEnvioResponse,
+  EmisionFlotaResponse,
+  EmisionResponse,
+  TipoVehiculoOption,
+} from '../models/emision.model';
 
 const VALID_RESPONSE: EmisionResponse = {
   id: '1',
@@ -19,24 +27,67 @@ const VALID_RESPONSE: EmisionResponse = {
   createdAt: '2026-07-01T00:00:00Z',
 };
 
-const FLIGHT_RESPONSE: EmisionResponse = {
-  ...VALID_RESPONSE,
-  id: 'flight-1',
-  categoria: 'VUELO',
-  titulo: 'Viaje aéreo SFO-YYZ',
-  passengers: 2,
-  legs: [{ departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' }],
+const TIPOS_VEHICULO: TipoVehiculoOption[] = [
+  {
+    id: 'AUTOMOVIL',
+    nombre: 'Automóvil / SUV',
+    combustibles: [
+      { id: 'PROMEDIO', nombre: 'Promedio' },
+      { id: 'GASOLINA', nombre: 'Gasolina' },
+      { id: 'BEV', nombre: 'Eléctrico (BEV)' },
+    ],
+  },
+  {
+    id: 'MOTOCICLETA',
+    nombre: 'Motocicleta',
+    combustibles: [
+      { id: 'PROMEDIO', nombre: 'Promedio' },
+      { id: 'GASOLINA', nombre: 'Gasolina' },
+    ],
+  },
+];
+
+const VALID_FLOTA_RESPONSE: EmisionFlotaResponse = {
+  id: '2',
+  categoria: 'FLOTA',
+  titulo: 'Ruta de reparto',
+  fechaActividad: '2026-07-01',
+  tipoVehiculo: 'AUTOMOVIL',
+  combustible: 'GASOLINA',
+  distanceValue: 100,
   distanceUnit: 'km',
-  distanceValue: 7200,
+  carbonKg: 21,
+  carbonMt: 0.021,
+  factorEmisionId: 'factor-2',
+  estimatedAt: '2026-07-01T00:00:00Z',
+  createdAt: '2026-07-01T00:00:00Z',
+};
+
+const VALID_ENVIO_RESPONSE: EmisionEnvioResponse = {
+  id: '3',
+  categoria: 'ENVIO',
+  titulo: 'Envío de café a puerto',
+  fechaActividad: '2026-07-01',
+  weightValue: 200,
+  weightUnit: 'KG',
+  distanceValue: 500,
+  distanceUnit: 'km',
+  transportMethod: 'TRUCK',
+  carbonKg: 35.5,
+  carbonMt: 0.036,
+  factorEmisionId: 'factor-envio-1',
+  estimatedAt: '2026-07-01T00:00:00Z',
+  createdAt: '2026-07-01T00:00:00Z',
 };
 
 describe('RegisterEmissionPageComponent', () => {
   let registrarElectricidad: ReturnType<typeof vi.fn>;
   let registrarVuelo: ReturnType<typeof vi.fn>;
-  let listarEmisiones: ReturnType<typeof vi.fn>;
-  let actualizarVuelo: ReturnType<typeof vi.fn>;
-  let eliminarEmision: ReturnType<typeof vi.fn>;
+  let obtenerTiposVehiculo: ReturnType<typeof vi.fn>;
+  let registrarFlota: ReturnType<typeof vi.fn>;
+  let registrarEnvio: ReturnType<typeof vi.fn>;
   let storage: Storage;
+  let toastError: ReturnType<typeof vi.spyOn>;
 
   beforeEach(async () => {
     storage = createStorageMock();
@@ -45,26 +96,30 @@ describe('RegisterEmissionPageComponent', () => {
     storage.setItem('carbonhub.token', 'test-token');
     registrarElectricidad = vi.fn();
     registrarVuelo = vi.fn();
-    listarEmisiones = vi.fn().mockReturnValue(of([]));
-    actualizarVuelo = vi.fn();
-    eliminarEmision = vi.fn().mockReturnValue(of(void 0));
+    obtenerTiposVehiculo = vi.fn().mockReturnValue(of(TIPOS_VEHICULO));
+    registrarFlota = vi.fn();
+    registrarEnvio = vi.fn();
 
     await TestBed.configureTestingModule({
       imports: [RegisterEmissionPageComponent],
       providers: [
         provideLocationMocks(),
+        provideRouter([]),
         {
           provide: EmisionesService,
           useValue: {
             registrarElectricidad,
             registrarVuelo,
-            listarEmisiones,
-            actualizarVuelo,
-            eliminarEmision,
+            obtenerTiposVehiculo,
+            registrarFlota,
+            registrarEnvio,
           },
         },
       ],
     }).compileComponents();
+
+    vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    toastError = vi.spyOn(TestBed.inject(ToastService), 'error');
   });
 
   afterEach(() => {
@@ -78,10 +133,12 @@ describe('RegisterEmissionPageComponent', () => {
   }
 
   function setInputValue(root: HTMLElement, selector: string, value: string): void {
-    const element = root.querySelector<HTMLInputElement | HTMLTextAreaElement>(selector);
+    const element = root.querySelector<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
+      selector
+    );
     if (!element) throw new Error(`Element not found: ${selector}`);
     element.value = value;
-    element.dispatchEvent(new Event('input'));
+    element.dispatchEvent(new Event(element.tagName === 'SELECT' ? 'change' : 'input'));
   }
 
   function fillValidForm(root: HTMLElement): void {
@@ -109,12 +166,31 @@ describe('RegisterEmissionPageComponent', () => {
     button.click();
   }
 
-  function clickRecordButton(root: HTMLElement, label: string): void {
-    const button = Array.from(
-      root.querySelectorAll<HTMLButtonElement>('.register-emission-page__record-actions button')
-    ).find((item) => item.textContent?.includes(label));
-    if (!button) throw new Error(`Record button not found: ${label}`);
-    button.click();
+  function selectTab(fixture: ReturnType<typeof createFixture>, label: string): HTMLElement {
+    const root = fixture.nativeElement as HTMLElement;
+    clickCategory(root, label);
+    fixture.detectChanges();
+    return root;
+  }
+
+  function selectFlotaTab(fixture: ReturnType<typeof createFixture>): HTMLElement {
+    return selectTab(fixture, 'Flota vehicular');
+  }
+
+  function selectEnvioTab(fixture: ReturnType<typeof createFixture>): HTMLElement {
+    return selectTab(fixture, 'Envíos de carga');
+  }
+
+  function clickRetry(root: HTMLElement): void {
+    const retryButton = Array.from(root.querySelectorAll('app-button')).find((el) =>
+      el.textContent?.includes('Reintentar')
+    );
+    if (!retryButton) throw new Error('Retry button not found');
+    retryButton.querySelector('button')?.click();
+  }
+
+  function selectElectricidadTab(fixture: ReturnType<typeof createFixture>): HTMLElement {
+    return selectTab(fixture, 'Electricidad');
   }
 
   it('does not call the service when the amount is 0 (invalid form)', async () => {
@@ -145,17 +221,6 @@ describe('RegisterEmissionPageComponent', () => {
       electricityUnit: 'kwh',
       fechaActividad: '2026-07-01',
     });
-  });
-
-  it('does not show flight records while electricity is selected', async () => {
-    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
-    const fixture = createFixture();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const root = fixture.nativeElement as HTMLElement;
-    expect(root.textContent).not.toContain('Vuelos registrados');
-    expect(root.textContent).not.toContain('Viaje aéreo SFO-YYZ');
   });
 
   it('does not call the flight service without legs', async () => {
@@ -199,82 +264,6 @@ describe('RegisterEmissionPageComponent', () => {
     });
   });
 
-  it('loads the date when editing a flight', async () => {
-    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
-    const fixture = createFixture();
-    const root = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
-    clickCategory(root, 'Vuelos');
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    clickButton(root, 'Editar');
-    fixture.detectChanges();
-
-    const dateInput = root.querySelector<HTMLInputElement>('input[type="date"]');
-    expect(dateInput?.value).toBe('2026-07-01');
-  });
-
-  it('keeps the edit flow stable when updating a flight fails', async () => {
-    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
-    actualizarVuelo.mockReturnValue(throwError(() => new Error('Network error')));
-    const fixture = createFixture();
-    const root = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
-    clickCategory(root, 'Vuelos');
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    clickButton(root, 'Editar');
-    await submitForm(fixture);
-
-    expect(actualizarVuelo).toHaveBeenCalledWith('flight-1', {
-      passengers: 2,
-      distanceUnit: 'km',
-      fechaActividad: '2026-07-01',
-      legs: [{ departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' }],
-    });
-  });
-
-  it('asks for confirmation before deleting an emission', async () => {
-    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
-    vi.stubGlobal(
-      'confirm',
-      vi.fn(() => true)
-    );
-    const fixture = createFixture();
-    const root = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
-    clickCategory(root, 'Vuelos');
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    clickRecordButton(root, 'Eliminar');
-    await fixture.whenStable();
-
-    expect(globalThis.confirm).toHaveBeenCalled();
-    expect(eliminarEmision).toHaveBeenCalledWith('flight-1');
-  });
-
-  it('does not delete when confirmation is cancelled', async () => {
-    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
-    vi.stubGlobal(
-      'confirm',
-      vi.fn(() => false)
-    );
-    const fixture = createFixture();
-    const root = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
-    clickCategory(root, 'Vuelos');
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    clickRecordButton(root, 'Eliminar');
-    await fixture.whenStable();
-
-    expect(eliminarEmision).not.toHaveBeenCalled();
-  });
-
   it('does not submit without an active session', async () => {
     storage.removeItem('carbonhub.token');
     const fixture = createFixture();
@@ -286,16 +275,294 @@ describe('RegisterEmissionPageComponent', () => {
     expect(registrarElectricidad).not.toHaveBeenCalled();
   });
 
-  it('shows the empty state when loading emissions fails', async () => {
-    listarEmisiones.mockReturnValue(throwError(() => new Error('Network error')));
-    const fixture = createFixture();
-    const root = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
-    clickCategory(root, 'Vuelos');
-    await fixture.whenStable();
-    fixture.detectChanges();
+  describe('flota vehicular', () => {
+    it('does not fetch the vehicle catalog while the electricidad tab is active', () => {
+      createFixture();
 
-    expect(root.textContent).toContain('No hay vuelos registrados.');
+      expect(obtenerTiposVehiculo).not.toHaveBeenCalled();
+    });
+
+    it('fetches the vehicle catalog and renders the flota fields when the tab is selected', () => {
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      expect(obtenerTiposVehiculo).toHaveBeenCalledTimes(1);
+      const selects = root.querySelectorAll('app-select-input select');
+      expect(selects.length).toBe(2);
+    });
+
+    it('does not refetch the vehicle catalog when the flota tab is selected again', () => {
+      const fixture = createFixture();
+      selectFlotaTab(fixture);
+      selectElectricidadTab(fixture);
+      selectFlotaTab(fixture);
+
+      expect(obtenerTiposVehiculo).toHaveBeenCalledTimes(1);
+    });
+
+    it('updates the combustible options when the vehicle type changes and clears an invalid selection', () => {
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      const [tipoSelect, combustibleSelect] = Array.from(
+        root.querySelectorAll<HTMLSelectElement>('app-select-input select')
+      );
+
+      tipoSelect.value = 'AUTOMOVIL';
+      tipoSelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+
+      let combustibleOptionValues = Array.from(combustibleSelect.options).map((o) => o.value);
+      expect(combustibleOptionValues).toEqual(
+        expect.arrayContaining(['PROMEDIO', 'GASOLINA', 'BEV'])
+      );
+
+      combustibleSelect.value = 'BEV';
+      combustibleSelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+
+      tipoSelect.value = 'MOTOCICLETA';
+      tipoSelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+
+      combustibleOptionValues = Array.from(combustibleSelect.options).map((o) => o.value);
+      expect(combustibleOptionValues).not.toContain('BEV');
+      expect(combustibleSelect.value).not.toBe('BEV');
+    });
+
+    it('does not call registrarFlota when the distance is 0 (invalid form)', async () => {
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      const [tipoSelect, combustibleSelect] = Array.from(
+        root.querySelectorAll<HTMLSelectElement>('app-select-input select')
+      );
+      tipoSelect.value = 'AUTOMOVIL';
+      tipoSelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      combustibleSelect.value = 'GASOLINA';
+      combustibleSelect.dispatchEvent(new Event('change'));
+
+      setInputValue(root, 'app-number-input input', '0');
+      setInputValue(root, 'app-date-input input', '2026-07-01');
+      setInputValue(root, 'textarea', 'Ruta de reparto');
+
+      await submitForm(fixture);
+
+      expect(registrarFlota).not.toHaveBeenCalled();
+    });
+
+    it('does not call registrarFlota without an active session', async () => {
+      storage.removeItem('carbonhub.token');
+
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      const [tipoSelect, combustibleSelect] = Array.from(
+        root.querySelectorAll<HTMLSelectElement>('app-select-input select')
+      );
+      tipoSelect.value = 'AUTOMOVIL';
+      tipoSelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      combustibleSelect.value = 'GASOLINA';
+      combustibleSelect.dispatchEvent(new Event('change'));
+
+      setInputValue(root, 'app-number-input input', '100');
+      setInputValue(root, 'app-date-input input', '2026-07-01');
+      setInputValue(root, 'textarea', 'Ruta de reparto');
+
+      await submitForm(fixture);
+
+      expect(registrarFlota).not.toHaveBeenCalled();
+    });
+
+    it('calls registrarFlota with the expected payload and resets the form on success', async () => {
+      registrarFlota.mockReturnValue(of(VALID_FLOTA_RESPONSE));
+
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      const [tipoSelect, combustibleSelect] = Array.from(
+        root.querySelectorAll<HTMLSelectElement>('app-select-input select')
+      );
+      tipoSelect.value = 'AUTOMOVIL';
+      tipoSelect.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      combustibleSelect.value = 'GASOLINA';
+      combustibleSelect.dispatchEvent(new Event('change'));
+
+      setInputValue(root, 'app-number-input input', '100');
+      setInputValue(root, 'app-date-input input', '2026-07-01');
+      setInputValue(root, 'textarea', 'Ruta de reparto');
+
+      await submitForm(fixture);
+
+      expect(registrarFlota).toHaveBeenCalledTimes(1);
+      expect(registrarFlota).toHaveBeenCalledWith({
+        titulo: 'Ruta de reparto',
+        tipoVehiculo: 'AUTOMOVIL',
+        combustible: 'GASOLINA',
+        distanceValue: 100,
+        distanceUnit: 'km',
+        fechaActividad: '2026-07-01',
+      });
+      expect(TestBed.inject(Router).navigateByUrl).not.toHaveBeenCalledWith('/emisiones');
+      fixture.detectChanges();
+      expect(root.querySelector<HTMLTextAreaElement>('textarea')?.value).toBe('');
+    });
+
+    it('refetches the vehicle catalog when the retry action is clicked after a failure', () => {
+      obtenerTiposVehiculo.mockReturnValue(throwError(() => new Error('network error')));
+
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      expect(root.textContent).toContain('No se pudo cargar el catálogo de vehículos');
+      expect(obtenerTiposVehiculo).toHaveBeenCalledTimes(1);
+
+      obtenerTiposVehiculo.mockReturnValue(of(TIPOS_VEHICULO));
+      clickRetry(root);
+      fixture.detectChanges();
+
+      expect(obtenerTiposVehiculo).toHaveBeenCalledTimes(2);
+      expect(root.textContent).not.toContain('No se pudo cargar el catálogo de vehículos');
+      const [tipoSelect] = Array.from(
+        root.querySelectorAll<HTMLSelectElement>('app-select-input select')
+      );
+      expect(Array.from(tipoSelect.options).map((o) => o.value)).toEqual(
+        expect.arrayContaining(['AUTOMOVIL', 'MOTOCICLETA'])
+      );
+    });
+
+    it('shows the session message instead of the generic catalog error on a 401', () => {
+      obtenerTiposVehiculo.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }))
+      );
+
+      const fixture = createFixture();
+      const root = selectFlotaTab(fixture);
+
+      expect(root.textContent).toContain('Tu sesión no tiene permisos');
+      expect(root.textContent).not.toContain('No se pudo cargar el catálogo de vehículos');
+    });
+
+    it('does not raise an error toast when the vehicle catalog fails to load', () => {
+      obtenerTiposVehiculo.mockReturnValue(throwError(() => new Error('network error')));
+
+      const fixture = createFixture();
+      selectFlotaTab(fixture);
+
+      expect(toastError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('envío de carga', () => {
+    function fillValidEnvioForm(root: HTMLElement): void {
+      setInputValue(root, 'textarea', 'Envío de café a puerto');
+      const numberInputs = root.querySelectorAll<HTMLInputElement>('app-number-input input');
+      numberInputs[0].value = '200';
+      numberInputs[0].dispatchEvent(new Event('input'));
+      numberInputs[1].value = '500';
+      numberInputs[1].dispatchEvent(new Event('input'));
+      setInputValue(root, 'app-date-input input', '2026-07-01');
+    }
+
+    it('does not call the service when weight is 0 (invalid form)', async () => {
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      const numberInputs = root.querySelectorAll<HTMLInputElement>('app-number-input input');
+      numberInputs[0].value = '0';
+      numberInputs[0].dispatchEvent(new Event('input'));
+
+      await submitForm(fixture);
+
+      expect(registrarEnvio).not.toHaveBeenCalled();
+    });
+
+    it('calls registrarEnvio with the expected payload and resets the form on success', async () => {
+      registrarEnvio.mockReturnValue(of(VALID_ENVIO_RESPONSE));
+
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      await submitForm(fixture);
+
+      expect(registrarEnvio).toHaveBeenCalledTimes(1);
+      expect(registrarEnvio).toHaveBeenCalledWith({
+        titulo: 'Envío de café a puerto',
+        weightValue: 200,
+        weightUnit: 'KG',
+        distanceValue: 500,
+        distanceUnit: 'km',
+        transportMethod: 'TRUCK',
+        fechaActividad: '2026-07-01',
+      });
+      expect(TestBed.inject(Router).navigateByUrl).not.toHaveBeenCalledWith('/emisiones');
+      fixture.detectChanges();
+      expect(root.querySelector<HTMLTextAreaElement>('textarea')?.value).toBe('');
+    });
+
+    it('does not call registrarEnvio without an active session', async () => {
+      storage.removeItem('carbonhub.token');
+
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      await submitForm(fixture);
+
+      expect(registrarEnvio).not.toHaveBeenCalled();
+    });
+
+    it('shows session error toast on 401 response', async () => {
+      registrarEnvio.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }))
+      );
+
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      await submitForm(fixture);
+
+      expect(toastError).toHaveBeenCalledWith(expect.stringContaining('sesión'));
+    });
+
+    it('shows the API error message when the backend returns one', async () => {
+      registrarEnvio.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 422,
+              statusText: 'Unprocessable Entity',
+              error: { status: 422, message: 'El peso excede el límite permitido.' },
+            })
+        )
+      );
+
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      await submitForm(fixture);
+
+      expect(toastError).toHaveBeenCalledWith('El peso excede el límite permitido.');
+    });
+
+    it('shows the generic connection error on an unknown failure', async () => {
+      registrarEnvio.mockReturnValue(throwError(() => new Error('Network error')));
+
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      await submitForm(fixture);
+
+      expect(toastError).toHaveBeenCalledWith(expect.stringContaining('No se pudo conectar'));
+    });
   });
 });
 

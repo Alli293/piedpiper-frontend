@@ -1,0 +1,39 @@
+@use '../../../shared/styles/mixins';
+
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ch-space-2);
+}
+
+.ch-emission-category-tabs__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+  height: 34px;
+  padding: 0 var(--ch-space-4);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-pill);
+  background: var(--ch-bg-white);
+  color: var(--ch-text-secondary);
+  font-family: var(--ch-font-body);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  cursor: pointer;
+
+  &:focus-visible {
+    @include mixins.focus-ring;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--active {
+    border-color: var(--ch-green);
+    background: var(--ch-green-soft);
+    color: var(--ch-green-dark);
+    cursor: default;
+  }
+}

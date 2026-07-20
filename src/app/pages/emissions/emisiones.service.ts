@@ -4,10 +4,13 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   EmisionEnvioResponse,
+  EmisionFlotaResponse,
   EmisionResponse,
   RegistrarElectricidadRequest,
   RegistrarEnvioRequest,
+  RegistrarFlotaRequest,
   RegistrarVueloRequest,
+  TipoVehiculoOption,
 } from './models/emision.model';
 
 @Injectable({ providedIn: 'root' })
@@ -37,5 +40,13 @@ export class EmisionesService {
 
   eliminarEmision(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  obtenerTiposVehiculo(): Observable<TipoVehiculoOption[]> {
+    return this.http.get<TipoVehiculoOption[]>(`${this.baseUrl}/flota/tipos-vehiculo`);
+  }
+
+  registrarFlota(payload: RegistrarFlotaRequest): Observable<EmisionFlotaResponse> {
+    return this.http.post<EmisionFlotaResponse>(`${this.baseUrl}/flota`, payload);
   }
 }

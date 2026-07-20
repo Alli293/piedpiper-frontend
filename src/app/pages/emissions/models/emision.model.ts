@@ -1,9 +1,9 @@
 export type UnidadElectricidad = 'kwh' | 'mwh';
 export type CabinClass = 'economy' | 'premium';
-export type DistanceUnit = 'km' | 'mi';
 
 export type UnidadPeso = 'G' | 'LB' | 'KG' | 'MT';
-export type UnidadDistancia = 'KM' | 'MI';
+// El backend serializa UnidadDistancia en minúscula (@JsonValue) para vuelo, envío y flota.
+export type UnidadDistancia = 'km' | 'mi';
 export type MetodoTransporte = 'SHIP' | 'TRAIN' | 'TRUCK' | 'PLANE';
 
 export interface RegistrarElectricidadRequest {
@@ -22,7 +22,7 @@ export interface RegistrarVueloLegRequest {
 export interface RegistrarVueloRequest {
   readonly passengers: number;
   readonly legs: RegistrarVueloLegRequest[];
-  readonly distanceUnit: DistanceUnit;
+  readonly distanceUnit: UnidadDistancia;
   readonly fechaActividad: string;
 }
 
@@ -35,7 +35,7 @@ export interface EmisionResponse {
   readonly electricityUnit?: UnidadElectricidad;
   readonly passengers?: number;
   readonly legs?: RegistrarVueloLegRequest[];
-  readonly distanceUnit?: DistanceUnit;
+  readonly distanceUnit?: UnidadDistancia;
   readonly distanceValue?: number;
   readonly carbonKg: number;
   readonly carbonMt: number;
@@ -64,6 +64,42 @@ export interface EmisionEnvioResponse {
   readonly distanceValue: number;
   readonly distanceUnit: UnidadDistancia;
   readonly transportMethod: MetodoTransporte;
+  readonly carbonKg: number;
+  readonly carbonMt: number;
+  readonly factorEmisionId: string;
+  readonly estimatedAt: string;
+  readonly createdAt: string;
+}
+
+export interface CombustibleOption {
+  readonly id: string;
+  readonly nombre: string;
+}
+
+export interface TipoVehiculoOption {
+  readonly id: string;
+  readonly nombre: string;
+  readonly combustibles: CombustibleOption[];
+}
+
+export interface RegistrarFlotaRequest {
+  readonly titulo: string;
+  readonly tipoVehiculo: string;
+  readonly combustible: string;
+  readonly distanceValue: number;
+  readonly distanceUnit: UnidadDistancia;
+  readonly fechaActividad: string;
+}
+
+export interface EmisionFlotaResponse {
+  readonly id: string;
+  readonly categoria: string;
+  readonly titulo: string;
+  readonly fechaActividad: string;
+  readonly tipoVehiculo: string;
+  readonly combustible: string;
+  readonly distanceValue: number;
+  readonly distanceUnit: UnidadDistancia;
   readonly carbonKg: number;
   readonly carbonMt: number;
   readonly factorEmisionId: string;
