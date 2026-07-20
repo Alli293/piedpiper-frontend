@@ -126,21 +126,18 @@ export class LoginPageComponent {
     }
   }
 
-  private autenticarConGoogle(idToken: string): void {
+  private async autenticarConGoogle(idToken: string): Promise<void> {
     this.cargando.set(true);
     this.serverError.set('');
-    this.authService.loginConGoogle(idToken).subscribe({
-      next: (respuesta) => {
-        this.cargando.set(false);
-        this.redirigir(respuesta);
-      },
-      error: (err) => {
-        this.cargando.set(false);
-        this.serverError.set(
-          err?.error?.message ?? 'No pudimos iniciar sesión. Intenta nuevamente.'
-        );
-      },
-    });
+    try {
+      const respuesta = await firstValueFrom(this.authService.loginConGoogle(idToken));
+      this.cargando.set(false);
+      this.redirigir(respuesta);
+    } catch (err: unknown) {
+      this.cargando.set(false);
+      const message = (err as { error?: { message?: string } })?.error?.message;
+      this.serverError.set(message ?? 'No pudimos iniciar sesión. Intenta nuevamente.');
+    }
   }
 
   private redirigir(respuesta: AuthResponse): void {
