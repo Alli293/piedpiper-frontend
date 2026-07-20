@@ -43,6 +43,8 @@ describe('DashboardPageComponent', () => {
     fixture = TestBed.createComponent(DashboardPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('carga la comparacion con el anio actual por defecto', () => {
@@ -79,10 +81,10 @@ describe('DashboardPageComponent', () => {
     ).toBe('superado');
   });
 
-  it('muestra toast de 5 segundos si falla la carga', () => {
+  it('muestra toast de 5 segundos si falla la carga', async () => {
     emisionesService.obtenerComparacion.mockReturnValueOnce(throwError(() => new Error('network')));
 
-    (component as any).cargarComparacion(2026);
+    await (component as any).cargarComparacion(2026);
 
     expect(toastService.error).toHaveBeenCalledWith(
       'No se pudo cargar la comparación. Intente nuevamente.',

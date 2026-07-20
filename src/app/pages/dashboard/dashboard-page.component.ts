@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
 import {
   SelectInputComponent,
@@ -52,7 +53,7 @@ export class DashboardPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.cargarComparacion(this.anioSeleccionado());
+    void this.cargarComparacion(this.anioSeleccionado());
   }
 
   protected onAnioChange(valor: string): void {
@@ -60,7 +61,7 @@ export class DashboardPageComponent implements OnInit {
     if (!Number.isInteger(anio)) return;
 
     this.anioSeleccionado.set(anio);
-    this.cargarComparacion(anio);
+    void this.cargarComparacion(anio);
   }
 
   protected estadoVisual(estado: EstadoComparacion): EstadoVisual {
@@ -120,21 +121,19 @@ export class DashboardPageComponent implements OnInit {
     )} tCO2e`;
   }
 
-  private cargarComparacion(anio: number): void {
+  private async cargarComparacion(anio: number): Promise<void> {
     this.cargando.set(true);
-    this.emisionesService.obtenerComparacion(anio).subscribe({
-      next: (comparacion) => {
-        this.comparacion.set(comparacion);
-        this.cargando.set(false);
-      },
-      error: () => {
-        this.cargando.set(false);
-        this.toastService.error(
-          'No se pudo cargar la comparación. Intente nuevamente.',
-          undefined,
-          5000
-        );
-      },
-    });
+    try {
+      const comparacion = await firstValueFrom(this.emisionesService.obtenerComparacion(anio));
+      this.comparacion.set(comparacion);
+    } catch {
+      this.toastService.error(
+        'No se pudo cargar la comparación. Intente nuevamente.',
+        undefined,
+        5000
+      );
+    } finally {
+      this.cargando.set(false);
+    }
   }
 }
