@@ -6,7 +6,7 @@
       <div class="invitacion__bloqueo" role="alert">
         <h1 class="invitacion__title">Invitación no disponible</h1>
         <p class="invitacion__texto">{{ mensajePantalla() }}</p>
-        <a class="invitacion__enlace" routerLink="/login">Ir al inicio de sesión</a>
+        <a class="invitacion__enlace" routerLink="/login" appLink>Ir al inicio de sesión</a>
       </div>
     } @else if (invitacion(); as datos) {
       <header class="invitacion__header">
@@ -46,7 +46,7 @@
         <p class="invitacion__error" role="alert">{{ error() }}</p>
       }
       @if (cuentaExistente()) {
-        <a class="invitacion__enlace" routerLink="/login">Iniciar sesión</a>
+        <a class="invitacion__enlace" routerLink="/login" appLink>Iniciar sesión</a>
       }
     }
   </div>
