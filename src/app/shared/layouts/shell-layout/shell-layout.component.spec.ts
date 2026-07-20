@@ -1,49 +1,79 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../core/auth/auth.service';
 import { ShellLayoutComponent } from './shell-layout.component';
+import { AuthService } from '../../../core/auth/auth.service';
+import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
 
 describe('ShellLayoutComponent', () => {
-  let fixture: ComponentFixture<ShellLayoutComponent>;
-  let router: { navigateByUrl: ReturnType<typeof vi.fn> };
-  let authService: { cerrarSesion: ReturnType<typeof vi.fn> };
+  let authServiceStub: { cerrarSesion: ReturnType<typeof vi.fn> };
+  let sesionInactividadStub: { detener: ReturnType<typeof vi.fn> };
+  let routerStub: { navigateByUrl: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    router = {
-      navigateByUrl: vi.fn(),
-    };
-    authService = {
-      cerrarSesion: vi.fn(),
-    };
+    authServiceStub = { cerrarSesion: vi.fn() };
+    sesionInactividadStub = { detener: vi.fn() };
+    routerStub = { navigateByUrl: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [ShellLayoutComponent],
       providers: [
-        { provide: Router, useValue: router },
-        { provide: AuthService, useValue: authService },
+        { provide: AuthService, useValue: authServiceStub },
+        { provide: SesionInactividadService, useValue: sesionInactividadStub },
+        { provide: Router, useValue: routerStub },
       ],
     }).compileComponents();
+  });
 
-    fixture = TestBed.createComponent(ShellLayoutComponent);
+  function createComponent() {
+    const fixture = TestBed.createComponent(ShellLayoutComponent);
     fixture.componentRef.setInput('headerConfig', {
       sectionLabel: 'Panel',
-      pageTitle: 'Dashboard',
+      pageTitle: 'Inicio',
       showNotificationDot: false,
-      userInitials: 'AJ',
+      userInitials: 'CV',
     });
     fixture.detectChanges();
+    return fixture;
+  }
+
+  function boton(
+    fixture: ReturnType<typeof createComponent>,
+    ariaLabel: string
+  ): HTMLButtonElement {
+    const element = fixture.nativeElement as HTMLElement;
+    const encontrado = Array.from(element.querySelectorAll('button')).find(
+      (b) => b.getAttribute('aria-label') === ariaLabel
+    );
+    if (!encontrado) {
+      throw new Error(`No se encontró el botón con aria-label "${ariaLabel}"`);
+    }
+    return encontrado;
+  }
+
+  it('al hacer clic en Cerrar sesión, limpia la sesión, detiene la inactividad y redirige a /login', () => {
+    const fixture = createComponent();
+
+    boton(fixture, 'Cerrar sesión').click();
+
+    expect(authServiceStub.cerrarSesion).toHaveBeenCalled();
+    expect(sesionInactividadStub.detener).toHaveBeenCalled();
+    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/login');
   });
 
-  it('cierra sesion antes de navegar al login', () => {
-    (fixture.componentInstance as any).onMenuItem('logout');
+  it('al hacer clic en Configuración, navega a /configuracion sin cerrar sesión', () => {
+    const fixture = createComponent();
 
-    expect(authService.cerrarSesion).toHaveBeenCalled();
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
+    boton(fixture, 'Configuración').click();
+
+    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/configuracion');
+    expect(authServiceStub.cerrarSesion).not.toHaveBeenCalled();
   });
 
-  it('navega al placeholder de benchmark', () => {
-    (fixture.componentInstance as any).onMenuItem('benchmark');
+  it('al hacer clic en Madurez ambiental, navega al placeholder de benchmark', () => {
+    const fixture = createComponent();
 
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/benchmark');
+    boton(fixture, 'Madurez ambiental').click();
+
+    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/benchmark');
   });
 });

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { HeaderConfig, PageLayoutComponent } from '../page-layout/page-layout.component';
 import { buildSidebarConfig, SidebarNavId } from '../page-layout/sidebar-nav';
+import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
 
 const COMPANY_NAME = 'Café del Valle S.A.';
 const COMPANY_INITIALS = 'CV';
@@ -19,6 +20,7 @@ const COMPANY_INITIALS = 'CV';
 export class ShellLayoutComponent {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly sesionInactividadService = inject(SesionInactividadService);
 
   activeId = input<SidebarNavId>();
   companyRole = input('Empresa · Admin');
@@ -51,6 +53,7 @@ export class ShellLayoutComponent {
   protected onMenuItem(id: string): void {
     if (id === 'logout') {
       this.authService.cerrarSesion();
+      this.sesionInactividadService.detener();
       void this.router.navigateByUrl('/login');
       return;
     }

@@ -17,7 +17,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/auth`;
 
-  readonly token = signal<string | null>(localStorage.getItem(TOKEN_KEY));
+  readonly token = signal<string | null>(sessionStorage.getItem(TOKEN_KEY));
 
   readonly rol = computed(() => this.leerRolDeToken(this.token()));
 
@@ -90,12 +90,17 @@ export class AuthService {
   }
 
   private guardarSesion(response: AuthResponse): void {
-    localStorage.setItem(TOKEN_KEY, response.token);
+    sessionStorage.setItem(TOKEN_KEY, response.token);
     this.token.set(response.token);
   }
 
+  renovarToken(token: string): void {
+    sessionStorage.setItem(TOKEN_KEY, token);
+    this.token.set(token);
+  }
+
   cerrarSesion(): void {
-    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
     this.token.set(null);
   }
 

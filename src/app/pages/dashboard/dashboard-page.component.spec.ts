@@ -15,7 +15,10 @@ describe('DashboardPageComponent', () => {
   let component: DashboardPageComponent;
   let emisionesService: { obtenerComparacion: ReturnType<typeof vi.fn> };
   let authSession: { getUserInitials: ReturnType<typeof vi.fn> };
-  let authService: { cerrarSesion: ReturnType<typeof vi.fn> };
+  let authService: {
+    cerrarSesion: ReturnType<typeof vi.fn>;
+    token: ReturnType<typeof signal<string | null>>;
+  };
   let toastService: { error: ReturnType<typeof vi.fn> };
 
   const comparacionBase: ComparacionEmisionesResponse = {
@@ -36,6 +39,7 @@ describe('DashboardPageComponent', () => {
     };
     authService = {
       cerrarSesion: vi.fn(),
+      token: signal<string | null>(null),
     };
     toastService = {
       toasts: signal([]),
