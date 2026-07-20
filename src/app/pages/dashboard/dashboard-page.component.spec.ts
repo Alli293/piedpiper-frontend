@@ -50,6 +50,14 @@ describe('DashboardPageComponent', () => {
     expect((component as any).comparacion()).toEqual(comparacionBase);
   });
 
+  it('muestra los KPIs superiores de comparacion anual', () => {
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+    expect(texto).toContain('Huella total 2026');
+    expect(texto).toContain('Del limite anual');
+    expect(texto).toContain('30 / 50 tCO2e');
+  });
+
   it('asigna el estado visual segun los umbrales de porcentaje', () => {
     expect(
       (component as any).estadoPresentacion({ ...comparacionBase, porcentajeConsumido: 79.9 })

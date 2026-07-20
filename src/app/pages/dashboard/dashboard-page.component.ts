@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
 import {
   SelectInputComponent,
   SelectOption,
@@ -19,7 +20,7 @@ interface EstadoVisual {
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [PageLayoutComponent, RouterLink, SelectInputComponent],
+  imports: [CardStatComponent, PageLayoutComponent, RouterLink, SelectInputComponent],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
 })
@@ -123,6 +124,22 @@ export class DashboardPageComponent implements OnInit {
       minimumFractionDigits: 1,
       maximumFractionDigits: 1,
     }).format(valor);
+  }
+
+  protected porcentajeResumen(valor: number | null): string {
+    if (valor === null) return '--';
+
+    return `${this.formatPorcentaje(valor)} %`;
+  }
+
+  protected detalleLimiteResumen(comparacion: ComparacionEmisionesResponse): string {
+    if (comparacion.limiteT === null || comparacion.porcentajeConsumido === null) {
+      return 'Sin limite declarado';
+    }
+
+    return `${this.formatToneladas(comparacion.huellaAcumuladaT)} / ${this.formatToneladas(
+      comparacion.limiteT
+    )} tCO2e`;
   }
 
   protected onMenuItem(id: string): void {

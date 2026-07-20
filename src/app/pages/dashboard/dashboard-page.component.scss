@@ -17,6 +17,12 @@
   width: 144px;
 }
 
+.dashboard-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--ch-space-4);
+}
+
 .annual-limit-panel {
   background: var(--ch-bg-white);
   border: 1px solid var(--ch-border);
@@ -82,10 +88,8 @@
 
 .annual-limit-panel__fill {
   display: block;
-  min-width: 0;
   height: 100%;
   border-radius: inherit;
-  transition: width var(--ch-transition);
 }
 
 .annual-limit-panel__scale {
@@ -114,7 +118,6 @@
   margin: var(--ch-space-5) 0 0;
 
   div {
-    min-width: 0;
     padding-top: var(--ch-space-2);
     border-top: 4px solid var(--ch-border);
   }
