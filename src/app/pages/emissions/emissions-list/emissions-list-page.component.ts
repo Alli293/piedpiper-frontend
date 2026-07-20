@@ -17,14 +17,15 @@ import { CategoriaFiltroEmision, EmisionResponse } from '../models/emision.model
 interface CategoriaOption {
   readonly value: CategoriaFiltroEmision;
   readonly label: string;
+  readonly icon: 'emisiones' | 'electricidad' | 'flota-vehicular' | 'vuelos' | 'envios-carga';
 }
 
 const CATEGORY_OPTIONS: CategoriaOption[] = [
-  { value: 'TODAS', label: 'Todas' },
-  { value: 'ELECTRICIDAD', label: 'Electricidad' },
-  { value: 'FLOTA', label: 'Flota' },
-  { value: 'VUELO', label: 'Vuelo' },
-  { value: 'ENVIO', label: 'Envio' },
+  { value: 'TODAS', label: 'Todas', icon: 'emisiones' },
+  { value: 'ELECTRICIDAD', label: 'Electricidad', icon: 'electricidad' },
+  { value: 'FLOTA', label: 'Flota', icon: 'flota-vehicular' },
+  { value: 'VUELO', label: 'Vuelos', icon: 'vuelos' },
+  { value: 'ENVIO', label: 'Envios', icon: 'envios-carga' },
 ];
 
 const MONTH_OPTIONS = [
@@ -55,6 +56,7 @@ export class EmissionsListPageComponent {
   private readonly router = inject(Router);
 
   protected readonly registros = signal<EmisionResponse[]>([]);
+  protected readonly registrosConteo = signal<EmisionResponse[]>([]);
   protected readonly loading = signal(false);
   protected readonly deletingId = signal<string | null>(null);
   protected readonly confirmTarget = signal<EmisionResponse | null>(null);
@@ -64,6 +66,9 @@ export class EmissionsListPageComponent {
 
   protected readonly categoryOptions = CATEGORY_OPTIONS;
   protected readonly monthOptions = MONTH_OPTIONS;
+  protected readonly totalCarbonKg = computed(() =>
+    this.registros().reduce((total, registro) => total + (registro.carbonKg ?? 0), 0)
+  );
   protected readonly yearOptions = computed(() => {
     const currentYear = new Date().getFullYear();
     return Array.from({ length: currentYear - 1999 }, (_, index) => currentYear - index);
@@ -92,7 +97,7 @@ export class EmissionsListPageComponent {
 
   protected readonly headerConfig = signal<HeaderConfig>({
     sectionLabel: 'PANEL EMPRESARIAL',
-    pageTitle: 'Registros de emisiones',
+    pageTitle: 'Mis Emisiones',
     showNotificationDot: true,
     userInitials: 'MR',
   });
@@ -104,17 +109,27 @@ export class EmissionsListPageComponent {
   protected async cargarRegistros(): Promise<void> {
     this.loading.set(true);
     try {
-      const registros = await firstValueFrom(
+      const filtrosPeriodo = {
+        anio: this.filtroAnio(),
+        mes: this.filtroMes(),
+      };
+      const registrosPromise = firstValueFrom(
         this.emisionesService.listarEmisiones({
+          ...filtrosPeriodo,
           categoria: this.filtroCategoria(),
-          anio: this.filtroAnio(),
-          mes: this.filtroMes(),
         })
       );
+      const conteoPromise =
+        this.filtroCategoria() === 'TODAS'
+          ? registrosPromise
+          : firstValueFrom(this.emisionesService.listarEmisiones(filtrosPeriodo));
+      const [registros, registrosConteo] = await Promise.all([registrosPromise, conteoPromise]);
       this.registros.set(registros);
+      this.registrosConteo.set(registrosConteo);
     } catch {
       this.toastService.error('No se pudo completar la operacion. Intente nuevamente.');
       this.registros.set([]);
+      this.registrosConteo.set([]);
     } finally {
       this.loading.set(false);
     }
@@ -151,6 +166,7 @@ export class EmissionsListPageComponent {
     try {
       await firstValueFrom(this.emisionesService.eliminarEmision(registro.id));
       this.registros.update((registros) => registros.filter((item) => item.id !== registro.id));
+      this.registrosConteo.update((registros) => registros.filter((item) => item.id !== registro.id));
       this.toastService.success('Registro eliminado.');
       this.confirmTarget.set(null);
     } catch (error) {
@@ -168,27 +184,44 @@ export class EmissionsListPageComponent {
     return CATEGORY_OPTIONS.find((option) => option.value === registro.categoria)?.label ?? registro.categoria;
   }
 
-  protected detalle(registro: EmisionResponse): string {
+  protected categoriaIcon(registro: EmisionResponse): CategoriaOption['icon'] {
+    return (
+      CATEGORY_OPTIONS.find((option) => option.value === registro.categoria)?.icon ?? 'emisiones'
+    );
+  }
+
+  protected registrosPorCategoria(categoria: CategoriaFiltroEmision): number {
+    if (categoria === 'TODAS') return this.registrosConteo().length;
+    return this.registrosConteo().filter((registro) => registro.categoria === categoria).length;
+  }
+
+  protected detallePrincipal(registro: EmisionResponse): string {
+    if (registro.titulo?.trim()) return registro.titulo;
+    if (registro.categoria === 'ELECTRICIDAD') return 'Consumo electrico';
+    if (registro.categoria === 'FLOTA') return formatText(registro.tipoVehiculo);
+    if (registro.categoria === 'VUELO') return this.rutaVuelo(registro);
+    if (registro.categoria === 'ENVIO') return 'Envio de carga';
+    return 'Registro de emision';
+  }
+
+  protected detalleSecundario(registro: EmisionResponse): string {
     if (registro.categoria === 'ELECTRICIDAD') {
       return `${formatNumber(registro.electricityValue)} ${registro.electricityUnit ?? 'kwh'}`;
     }
     if (registro.categoria === 'FLOTA') {
-      return `${formatText(registro.tipoVehiculo)} - ${formatNumber(registro.distanceValue)} ${registro.distanceUnit ?? 'km'}`;
+      return `${formatText(registro.combustible)} - ${formatNumber(registro.distanceValue)} ${registro.distanceUnit ?? 'km'}`;
     }
     if (registro.categoria === 'VUELO') {
-      const ruta = registro.legs?.length
-        ? registro.legs.map((leg) => `${leg.departureAirport}->${leg.destinationAirport}`).join(', ')
-        : registro.titulo;
-      return `${ruta} x${registro.passengers ?? 1} pas.`;
+      return `${this.rutaVuelo(registro)} x${registro.passengers ?? 1} pas.`;
     }
     if (registro.categoria === 'ENVIO') {
       return `${formatText(registro.transportMethod)} ${formatNumber(registro.weightValue)} ${registro.weightUnit ?? 'KG'} - ${formatNumber(registro.distanceValue)} ${registro.distanceUnit ?? 'km'}`;
     }
-    return registro.titulo;
+    return '';
   }
 
   protected formatFecha(fecha: string): string {
-    return new Intl.DateTimeFormat('es-CR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    return new Intl.DateTimeFormat('es-CR', { day: '2-digit', month: 'short', year: 'numeric' })
       .format(new Date(`${fecha}T00:00:00`));
   }
 
@@ -213,6 +246,13 @@ export class EmissionsListPageComponent {
       }
     }
     this.toastService.error('No se pudo completar la operacion. Intente nuevamente.');
+  }
+
+  private rutaVuelo(registro: EmisionResponse): string {
+    if (!registro.legs?.length) return registro.titulo || 'Vuelo';
+    return registro.legs
+      .map((leg) => `${leg.departureAirport}->${leg.destinationAirport}`)
+      .join(', ');
   }
 }
 

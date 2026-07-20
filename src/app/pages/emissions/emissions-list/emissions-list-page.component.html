@@ -1,53 +1,59 @@
 <app-page-layout [sidebarConfig]="sidebarConfig()" [headerConfig]="headerConfig()">
   <div class="emissions-list-page">
-    <section class="emissions-list-page__toolbar" aria-label="Filtros de emisiones">
-      <div class="emissions-list-page__filter">
-        <label for="categoria">Categoria</label>
-        <select
-          id="categoria"
-          [value]="filtroCategoria()"
-          (change)="cambiarCategoria($any($event.target).value)"
+    <section class="emissions-list-page__controls" aria-label="Filtros de emisiones">
+      <div class="emissions-list-page__category-filters" role="group" aria-label="Categoria">
+        @for (option of categoryOptions; track option.value) {
+          <button
+            type="button"
+            class="emissions-list-page__chip"
+            [class.emissions-list-page__chip--active]="filtroCategoria() === option.value"
+            [attr.aria-pressed]="filtroCategoria() === option.value"
+            (click)="cambiarCategoria(option.value)"
+          >
+            <app-icon [name]="option.icon" [size]="15" />
+            <span>{{ option.label }}</span>
+            <strong>{{ registrosPorCategoria(option.value) }}</strong>
+          </button>
+        }
+      </div>
+
+      <div class="emissions-list-page__select-filters">
+        <label class="emissions-list-page__select">
+          <span>Anio</span>
+          <select [value]="filtroAnio() ?? ''" (change)="cambiarAnio($any($event.target).value)">
+            <option value="">Todos</option>
+            @for (year of yearOptions(); track year) {
+              <option [value]="year">{{ year }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="emissions-list-page__select">
+          <span>Mes</span>
+          <select [value]="filtroMes() ?? ''" (change)="cambiarMes($any($event.target).value)">
+            @for (option of monthOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+
+        <button
+          type="button"
+          class="emissions-list-page__register"
+          (click)="registrarEmision()"
         >
-          @for (option of categoryOptions; track option.value) {
-            <option [value]="option.value">{{ option.label }}</option>
-          }
-        </select>
-      </div>
-
-      <div class="emissions-list-page__filter">
-        <label for="anio">Anio</label>
-        <select id="anio" [value]="filtroAnio() ?? ''" (change)="cambiarAnio($any($event.target).value)">
-          <option value="">Todos</option>
-          @for (year of yearOptions(); track year) {
-            <option [value]="year">{{ year }}</option>
-          }
-        </select>
-      </div>
-
-      <div class="emissions-list-page__filter">
-        <label for="mes">Mes</label>
-        <select id="mes" [value]="filtroMes() ?? ''" (change)="cambiarMes($any($event.target).value)">
-          @for (option of monthOptions; track option.value) {
-            <option [value]="option.value">{{ option.label }}</option>
-          }
-        </select>
-      </div>
-
-      <div class="emissions-list-page__toolbar-actions">
-        <app-button type="button" variant="secondary" [loading]="loading()" (click)="cargarRegistros()">
-          Recargar
-        </app-button>
-        <app-button type="button" (click)="registrarEmision()">Registrar emision</app-button>
+          <span class="emissions-list-page__register-plus" aria-hidden="true">+</span>
+          <span>Registrar emision</span>
+        </button>
       </div>
     </section>
 
-    <section class="emissions-list-page__table-section" aria-labelledby="emissions-table-title">
-      <div class="emissions-list-page__table-header">
-        <div>
-          <h2 id="emissions-table-title">Listado de registros</h2>
-          <p>{{ registros().length }} registro(s)</p>
-        </div>
-      </div>
+    <section class="emissions-list-page__table-panel" aria-labelledby="emissions-table-title">
+      <header class="emissions-list-page__table-header">
+        <h2 id="emissions-table-title">Registros</h2>
+        <span>{{ registros().length }} en lista</span>
+        <span>{{ formatCarbonKg(totalCarbonKg()) }} kg CO2e</span>
+      </header>
 
       @if (loading()) {
         <div class="emissions-list-page__empty">Cargando registros...</div>
@@ -63,22 +69,34 @@
                 <th scope="col">Categoria</th>
                 <th scope="col">Fecha</th>
                 <th scope="col">Detalle</th>
-                <th scope="col">Huella (kg CO2e)</th>
-                <th scope="col" class="emissions-list-page__actions-heading">Accion</th>
+                <th scope="col">Huella kg CO2e</th>
+                <th scope="col">Acciones</th>
               </tr>
             </thead>
             <tbody>
               @for (registro of registros(); track registro.id) {
                 <tr>
                   <td>
-                    <span class="emissions-list-page__category">
-                      {{ categoriaLabel(registro) }}
+                    <span
+                      class="emissions-list-page__category"
+                      [class.emissions-list-page__category--electricidad]="registro.categoria === 'ELECTRICIDAD'"
+                      [class.emissions-list-page__category--flota]="registro.categoria === 'FLOTA'"
+                      [class.emissions-list-page__category--vuelo]="registro.categoria === 'VUELO'"
+                      [class.emissions-list-page__category--envio]="registro.categoria === 'ENVIO'"
+                    >
+                      <app-icon [name]="categoriaIcon(registro)" [size]="15" />
+                      <span>{{ categoriaLabel(registro) }}</span>
                     </span>
                   </td>
-                  <td>{{ formatFecha(registro.fechaActividad) }}</td>
-                  <td class="emissions-list-page__detail">{{ detalle(registro) }}</td>
+                  <td class="emissions-list-page__date">{{ formatFecha(registro.fechaActividad) }}</td>
+                  <td>
+                    <div class="emissions-list-page__detail">
+                      <strong>{{ detallePrincipal(registro) }}</strong>
+                      <span>{{ detalleSecundario(registro) }}</span>
+                    </div>
+                  </td>
                   <td class="emissions-list-page__carbon">
-                    {{ formatCarbonKg(registro.carbonKg) }}
+                    {{ formatCarbonKg(registro.carbonKg) }} <span>kg</span>
                   </td>
                   <td>
                     <button
@@ -110,21 +128,41 @@
         aria-labelledby="delete-title"
       >
         <div class="emissions-list-page__modal-icon" aria-hidden="true">
-          <app-icon name="danger" [size]="22" />
+          <app-icon name="delete" [size]="18" />
         </div>
-        <div>
-          <h2 id="delete-title">Eliminar registro</h2>
+        <div class="emissions-list-page__modal-copy">
+          <h2 id="delete-title">¿Eliminar este registro?</h2>
           <p>
-            Se eliminara el registro {{ categoriaLabel(registro) }} del
-            {{ formatFecha(registro.fechaActividad) }}.
+            Esta accion no se puede deshacer. El registro se descontara de tu huella de carbono.
           </p>
         </div>
+        <article class="emissions-list-page__modal-record">
+          <span
+            class="emissions-list-page__modal-record-icon"
+            [class.emissions-list-page__modal-record-icon--electricidad]="registro.categoria === 'ELECTRICIDAD'"
+            [class.emissions-list-page__modal-record-icon--flota]="registro.categoria === 'FLOTA'"
+            [class.emissions-list-page__modal-record-icon--vuelo]="registro.categoria === 'VUELO'"
+            [class.emissions-list-page__modal-record-icon--envio]="registro.categoria === 'ENVIO'"
+            aria-hidden="true"
+          >
+            <app-icon [name]="categoriaIcon(registro)" [size]="15" />
+          </span>
+          <div class="emissions-list-page__modal-record-copy">
+            <strong>{{ detallePrincipal(registro) }}</strong>
+            <span>{{ categoriaLabel(registro) }} · {{ formatFecha(registro.fechaActividad) }} · {{ detalleSecundario(registro) }}</span>
+          </div>
+          <div class="emissions-list-page__modal-record-carbon">
+            <strong>{{ formatCarbonKg(registro.carbonKg) }}</strong>
+            <span>kg CO2e</span>
+          </div>
+        </article>
         <div class="emissions-list-page__modal-actions">
           <app-button type="button" variant="secondary" (click)="cancelarEliminar()">
             Cancelar
           </app-button>
           <app-button
             type="button"
+            variant="danger"
             [loading]="deletingId() === registro.id"
             (click)="confirmarEliminar()"
           >

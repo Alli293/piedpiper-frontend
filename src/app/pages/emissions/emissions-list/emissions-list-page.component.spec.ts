@@ -21,6 +21,29 @@ const REGISTRO_FLOTA: EmisionResponse = {
   createdAt: '2026-07-01T00:00:00Z',
 };
 
+const REGISTRO_VUELO: EmisionResponse = {
+  ...REGISTRO_FLOTA,
+  id: 'registro-2',
+  categoria: 'VUELO',
+  titulo: 'Viaje aereo SJO-FRA-SJO',
+  passengers: 2,
+  legs: [
+    { departureAirport: 'SJO', destinationAirport: 'FRA', cabinClass: 'economy' },
+    { departureAirport: 'FRA', destinationAirport: 'SJO', cabinClass: 'economy' },
+  ],
+  carbonKg: 4689.988,
+};
+
+const REGISTRO_ELECTRICIDAD: EmisionResponse = {
+  ...REGISTRO_FLOTA,
+  id: 'registro-3',
+  categoria: 'ELECTRICIDAD',
+  titulo: 'Pruebas',
+  electricityValue: 0.02,
+  electricityUnit: 'kwh',
+  carbonKg: 0.266,
+};
+
 describe('EmissionsListPageComponent', () => {
   let listarEmisiones: ReturnType<typeof vi.fn>;
   let eliminarEmision: ReturnType<typeof vi.fn>;
@@ -48,6 +71,8 @@ describe('EmissionsListPageComponent', () => {
     const fixture = TestBed.createComponent(EmissionsListPageComponent);
     fixture.detectChanges();
     await fixture.whenStable();
+    await Promise.resolve();
+    await Promise.resolve();
     fixture.detectChanges();
     return fixture;
   }
@@ -84,5 +109,30 @@ describe('EmissionsListPageComponent', () => {
     await fixture.whenStable();
 
     expect(eliminarEmision).not.toHaveBeenCalled();
+  });
+
+  it('mantiene los contadores del periodo aunque se filtre por categoria', async () => {
+    const registros = [REGISTRO_ELECTRICIDAD, REGISTRO_FLOTA, REGISTRO_VUELO];
+    listarEmisiones.mockImplementation((filtros) =>
+      of(filtros?.categoria === 'VUELO' ? [REGISTRO_VUELO] : registros)
+    );
+    const fixture = await createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    const vuelosChip = Array.from(root.querySelectorAll<HTMLButtonElement>('.emissions-list-page__chip')).find(
+      (button) => button.textContent?.includes('Vuelos')
+    );
+    vuelosChip?.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await Promise.resolve();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    expect(root.textContent).toContain('Todas3');
+    expect(root.textContent).toContain('Flota1');
+    expect(root.textContent).toContain('Vuelos1');
+    expect(root.textContent).toContain('Viaje aereo SJO-FRA-SJO');
+    expect(root.textContent).not.toContain('Ruta de reparto');
   });
 });
