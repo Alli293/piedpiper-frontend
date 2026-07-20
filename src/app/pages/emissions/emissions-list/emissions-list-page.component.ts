@@ -1,9 +1,9 @@
-import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import {
   HeaderConfig,
@@ -25,7 +25,7 @@ const CATEGORY_OPTIONS: CategoriaOption[] = [
   { value: 'ELECTRICIDAD', label: 'Electricidad', icon: 'electricidad' },
   { value: 'FLOTA', label: 'Flota', icon: 'flota-vehicular' },
   { value: 'VUELO', label: 'Vuelos', icon: 'vuelos' },
-  { value: 'ENVIO', label: 'Envios', icon: 'envios-carga' },
+  { value: 'ENVIO', label: 'Envíos', icon: 'envios-carga' },
 ];
 
 const MONTH_OPTIONS = [
@@ -46,7 +46,7 @@ const MONTH_OPTIONS = [
 
 @Component({
   selector: 'app-emissions-list-page',
-  imports: [CommonModule, ButtonComponent, IconComponent, PageLayoutComponent],
+  imports: [ButtonComponent, HeadingComponent, IconComponent, PageLayoutComponent],
   templateUrl: './emissions-list-page.component.html',
   styleUrl: './emissions-list-page.component.scss',
 })
@@ -80,18 +80,18 @@ export class EmissionsListPageComponent {
       { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', active: false },
       { id: 'emissions', label: 'Mis Emisiones', icon: 'emisiones', active: true },
       { id: 'auditors', label: 'Auditores', icon: 'auditores', active: false },
-      { id: 'audits', label: 'Auditorias', icon: 'auditorias', active: false },
+      { id: 'audits', label: 'Auditorías', icon: 'auditorias', active: false },
       { id: 'certifications', label: 'Certificaciones', icon: 'certificaciones', active: false },
       { id: 'benchmark', label: 'Madurez ambiental', icon: 'benchmark', active: false },
       { id: 'badges', label: 'Insignias', icon: 'insignias', active: false },
-      { id: 'public-profile', label: 'Perfil Publico', icon: 'perfil-publico', active: false },
+      { id: 'public-profile', label: 'Perfil Público', icon: 'perfil-publico', active: false },
       { id: 'team-members', label: 'Colaboradores', icon: 'colaboradores', active: false },
     ],
     bottomItems: [
-      { id: 'settings', label: 'Configuracion', icon: 'config' },
-      { id: 'logout', label: 'Cerrar sesion', icon: 'logout' },
+      { id: 'settings', label: 'Configuración', icon: 'config' },
+      { id: 'logout', label: 'Cerrar sesión', icon: 'logout' },
     ],
-    companyName: 'Cafe del Valle S.A.',
+    companyName: 'Café del Valle S.A.',
     companyRole: 'Empresa',
     companyInitials: 'CV',
   });
@@ -140,7 +140,7 @@ export class EmissionsListPageComponent {
       );
     } catch {
       if (requestId !== this.cargaRegistrosRequestId) return;
-      this.toastService.error('No se pudo completar la operacion. Intente nuevamente.');
+      this.toastService.error('No se pudo completar la operación. Intente nuevamente.');
       this.registros.set([]);
       this.registrosConteo.set([]);
     } finally {
@@ -221,11 +221,11 @@ export class EmissionsListPageComponent {
 
   protected detallePrincipal(registro: EmisionResponse): string {
     if (registro.titulo?.trim()) return registro.titulo;
-    if (registro.categoria === 'ELECTRICIDAD') return 'Consumo electrico';
+    if (registro.categoria === 'ELECTRICIDAD') return 'Consumo eléctrico';
     if (registro.categoria === 'FLOTA') return formatText(registro.tipoVehiculo);
     if (registro.categoria === 'VUELO') return this.rutaVuelo(registro);
-    if (registro.categoria === 'ENVIO') return 'Envio de carga';
-    return 'Registro de emision';
+    if (registro.categoria === 'ENVIO') return 'Envío de carga';
+    return 'Registro de emisión';
   }
 
   protected detalleSecundario(registro: EmisionResponse): string {
@@ -272,7 +272,7 @@ export class EmissionsListPageComponent {
         return;
       }
     }
-    this.toastService.error('No se pudo completar la operacion. Intente nuevamente.');
+    this.toastService.error('No se pudo completar la operación. Intente nuevamente.');
   }
 
   private rutaVuelo(registro: EmisionResponse): string {

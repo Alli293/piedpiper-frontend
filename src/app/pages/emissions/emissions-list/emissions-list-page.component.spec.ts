@@ -99,7 +99,7 @@ describe('EmissionsListPageComponent', () => {
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    root.querySelector<HTMLButtonElement>('.emissions-list-page__delete')?.click();
+    root.querySelector<HTMLButtonElement>('.ch-emissions-list-page__delete')?.click();
     fixture.detectChanges();
 
     clickModalButton(root, 'Eliminar');
@@ -112,7 +112,7 @@ describe('EmissionsListPageComponent', () => {
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    root.querySelector<HTMLButtonElement>('.emissions-list-page__delete')?.click();
+    root.querySelector<HTMLButtonElement>('.ch-emissions-list-page__delete')?.click();
     fixture.detectChanges();
 
     clickModalButton(root, 'Cancelar');
@@ -142,7 +142,7 @@ describe('EmissionsListPageComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     const vuelosChip = Array.from(
-      root.querySelectorAll<HTMLButtonElement>('.emissions-list-page__chip')
+      root.querySelectorAll<HTMLButtonElement>('.ch-emissions-list-page__chip')
     ).find((button) => button.textContent?.includes('Vuelos'));
     vuelosChip?.click();
     fixture.detectChanges();
@@ -172,7 +172,7 @@ describe('EmissionsListPageComponent', () => {
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
     const flotaChip = Array.from(
-      root.querySelectorAll<HTMLButtonElement>('.emissions-list-page__chip')
+      root.querySelectorAll<HTMLButtonElement>('.ch-emissions-list-page__chip')
     ).find((button) => button.textContent?.includes('Flota'));
 
     flotaChip?.click();
@@ -200,7 +200,7 @@ describe('EmissionsListPageComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     const flotaChip = Array.from(
-      root.querySelectorAll<HTMLButtonElement>('.emissions-list-page__chip')
+      root.querySelectorAll<HTMLButtonElement>('.ch-emissions-list-page__chip')
     ).find((button) => button.textContent?.includes('Flota'));
     flotaChip?.click();
     fixture.detectChanges();
@@ -218,7 +218,9 @@ describe('EmissionsListPageComponent', () => {
     listarEmisiones.mockReturnValue(of([REGISTRO_FLOTA, REGISTRO_FLOTA_OTRO_MES]));
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
-    const selects = root.querySelectorAll<HTMLSelectElement>('.emissions-list-page__select select');
+    const selects = root.querySelectorAll<HTMLSelectElement>(
+      '.ch-emissions-list-page__select select'
+    );
 
     selects[0].value = '2026';
     selects[0].dispatchEvent(new Event('change'));

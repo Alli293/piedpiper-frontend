@@ -1,12 +1,12 @@
 <app-page-layout [sidebarConfig]="sidebarConfig()" [headerConfig]="headerConfig()">
-  <div class="emissions-list-page">
-    <section class="emissions-list-page__controls" aria-label="Filtros de emisiones">
-      <div class="emissions-list-page__category-filters" role="group" aria-label="Categoria">
+  <div class="ch-emissions-list-page">
+    <section class="ch-emissions-list-page__controls" aria-label="Filtros de emisiones">
+      <div class="ch-emissions-list-page__category-filters" role="group" aria-label="Categoría">
         @for (option of categoryOptions; track option.value) {
           <button
             type="button"
-            class="emissions-list-page__chip"
-            [class.emissions-list-page__chip--active]="filtroCategoria() === option.value"
+            class="ch-emissions-list-page__chip"
+            [class.ch-emissions-list-page__chip--active]="filtroCategoria() === option.value"
             [attr.aria-pressed]="filtroCategoria() === option.value"
             (click)="cambiarCategoria(option.value)"
           >
@@ -17,8 +17,8 @@
         }
       </div>
 
-      <div class="emissions-list-page__select-filters">
-        <label class="emissions-list-page__select">
+      <div class="ch-emissions-list-page__select-filters">
+        <label class="ch-emissions-list-page__select">
           <span>Año</span>
           <select [value]="filtroAnio() ?? ''" (change)="cambiarAnio($any($event.target).value)">
             <option value="">Todos</option>
@@ -28,7 +28,7 @@
           </select>
         </label>
 
-        <label class="emissions-list-page__select">
+        <label class="ch-emissions-list-page__select">
           <span>Mes</span>
           <select [value]="filtroMes() ?? ''" (change)="cambiarMes($any($event.target).value)">
             @for (option of monthOptions; track option.value) {
@@ -37,37 +37,37 @@
           </select>
         </label>
 
-        <button type="button" class="emissions-list-page__limits" (click)="verLimitesAnuales()">
+        <button type="button" class="ch-emissions-list-page__limits" (click)="verLimitesAnuales()">
           <app-icon name="benchmark" [size]="16" />
           <span>Límites anuales</span>
         </button>
 
-        <button type="button" class="emissions-list-page__register" (click)="registrarEmision()">
-          <span class="emissions-list-page__register-plus" aria-hidden="true">+</span>
+        <button type="button" class="ch-emissions-list-page__register" (click)="registrarEmision()">
+          <span class="ch-emissions-list-page__register-plus" aria-hidden="true">+</span>
           <span>Registrar emisión</span>
         </button>
       </div>
     </section>
 
-    <section class="emissions-list-page__table-panel" aria-labelledby="emissions-table-title">
-      <header class="emissions-list-page__table-header">
-        <h2 id="emissions-table-title">Registros</h2>
+    <section class="ch-emissions-list-page__table-panel" aria-labelledby="emissions-table-title">
+      <header class="ch-emissions-list-page__table-header">
+        <app-heading id="emissions-table-title" level="h2" appearance="h4" text="Registros" />
         <span>{{ registros().length }} en lista</span>
         <span>{{ formatCarbonKg(totalCarbonKg()) }} kg CO2e</span>
       </header>
 
       @if (loading()) {
-        <div class="emissions-list-page__empty">Cargando registros...</div>
+        <div class="ch-emissions-list-page__empty">Cargando registros...</div>
       } @else if (registros().length === 0) {
-        <div class="emissions-list-page__empty">
+        <div class="ch-emissions-list-page__empty">
           No hay registros para los filtros seleccionados.
         </div>
       } @else {
-        <div class="emissions-list-page__table-wrap">
+        <div class="ch-emissions-list-page__table-wrap">
           <table>
             <thead>
               <tr>
-                <th scope="col">Categoria</th>
+                <th scope="col">Categoría</th>
                 <th scope="col">Fecha</th>
                 <th scope="col">Detalle</th>
                 <th scope="col">Huella kg CO2e</th>
@@ -79,34 +79,40 @@
                 <tr>
                   <td>
                     <span
-                      class="emissions-list-page__category"
-                      [class.emissions-list-page__category--electricidad]="
+                      class="ch-emissions-list-page__category"
+                      [class.ch-emissions-list-page__category--electricidad]="
                         registro.categoria === 'ELECTRICIDAD'
                       "
-                      [class.emissions-list-page__category--flota]="registro.categoria === 'FLOTA'"
-                      [class.emissions-list-page__category--vuelo]="registro.categoria === 'VUELO'"
-                      [class.emissions-list-page__category--envio]="registro.categoria === 'ENVIO'"
+                      [class.ch-emissions-list-page__category--flota]="
+                        registro.categoria === 'FLOTA'
+                      "
+                      [class.ch-emissions-list-page__category--vuelo]="
+                        registro.categoria === 'VUELO'
+                      "
+                      [class.ch-emissions-list-page__category--envio]="
+                        registro.categoria === 'ENVIO'
+                      "
                     >
                       <app-icon [name]="categoriaIcon(registro)" [size]="15" />
                       <span>{{ categoriaLabel(registro) }}</span>
                     </span>
                   </td>
-                  <td class="emissions-list-page__date">
+                  <td class="ch-emissions-list-page__date">
                     {{ formatFecha(registro.fechaActividad) }}
                   </td>
                   <td>
-                    <div class="emissions-list-page__detail">
+                    <div class="ch-emissions-list-page__detail">
                       <strong>{{ detallePrincipal(registro) }}</strong>
                       <span>{{ detalleSecundario(registro) }}</span>
                     </div>
                   </td>
-                  <td class="emissions-list-page__carbon">
+                  <td class="ch-emissions-list-page__carbon">
                     {{ formatCarbonKg(registro.carbonKg) }} <span>kg</span>
                   </td>
                   <td>
                     <button
                       type="button"
-                      class="emissions-list-page__delete"
+                      class="ch-emissions-list-page__delete"
                       [disabled]="deletingId() === registro.id"
                       (click)="solicitarEliminar(registro)"
                       title="Eliminar registro"
@@ -125,48 +131,59 @@
   </div>
 
   @if (confirmTarget(); as registro) {
-    <div class="emissions-list-page__modal-backdrop" role="presentation">
+    <div class="ch-emissions-list-page__modal-backdrop" role="presentation">
       <section
-        class="emissions-list-page__modal"
+        class="ch-emissions-list-page__modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="delete-title"
       >
-        <div class="emissions-list-page__modal-icon" aria-hidden="true">
+        <div class="ch-emissions-list-page__modal-icon" aria-hidden="true">
           <app-icon name="delete" [size]="18" />
         </div>
-        <div class="emissions-list-page__modal-copy">
-          <h2 id="delete-title">¿Eliminar este registro?</h2>
+        <div class="ch-emissions-list-page__modal-copy">
+          <app-heading
+            id="delete-title"
+            level="h2"
+            appearance="h4"
+            text="¿Eliminar este registro?"
+          />
           <p>
-            Esta accion no se puede deshacer. El registro se descontara de tu huella de carbono.
+            Esta acción no se puede deshacer. El registro se descontará de tu huella de carbono.
           </p>
         </div>
-        <article class="emissions-list-page__modal-record">
+        <article class="ch-emissions-list-page__modal-record">
           <span
-            class="emissions-list-page__modal-record-icon"
-            [class.emissions-list-page__modal-record-icon--electricidad]="
+            class="ch-emissions-list-page__modal-record-icon"
+            [class.ch-emissions-list-page__modal-record-icon--electricidad]="
               registro.categoria === 'ELECTRICIDAD'
             "
-            [class.emissions-list-page__modal-record-icon--flota]="registro.categoria === 'FLOTA'"
-            [class.emissions-list-page__modal-record-icon--vuelo]="registro.categoria === 'VUELO'"
-            [class.emissions-list-page__modal-record-icon--envio]="registro.categoria === 'ENVIO'"
+            [class.ch-emissions-list-page__modal-record-icon--flota]="
+              registro.categoria === 'FLOTA'
+            "
+            [class.ch-emissions-list-page__modal-record-icon--vuelo]="
+              registro.categoria === 'VUELO'
+            "
+            [class.ch-emissions-list-page__modal-record-icon--envio]="
+              registro.categoria === 'ENVIO'
+            "
             aria-hidden="true"
           >
             <app-icon [name]="categoriaIcon(registro)" [size]="15" />
           </span>
-          <div class="emissions-list-page__modal-record-copy">
+          <div class="ch-emissions-list-page__modal-record-copy">
             <strong>{{ detallePrincipal(registro) }}</strong>
             <span
               >{{ categoriaLabel(registro) }} · {{ formatFecha(registro.fechaActividad) }} ·
               {{ detalleSecundario(registro) }}</span
             >
           </div>
-          <div class="emissions-list-page__modal-record-carbon">
+          <div class="ch-emissions-list-page__modal-record-carbon">
             <strong>{{ formatCarbonKg(registro.carbonKg) }}</strong>
             <span>kg CO2e</span>
           </div>
         </article>
-        <div class="emissions-list-page__modal-actions">
+        <div class="ch-emissions-list-page__modal-actions">
           <app-button type="button" variant="secondary" (click)="cancelarEliminar()">
             Cancelar
           </app-button>
