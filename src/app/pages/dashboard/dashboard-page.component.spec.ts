@@ -58,6 +58,12 @@ describe('DashboardPageComponent', () => {
     expect(texto).toContain('30 / 50 tCO2e');
   });
 
+  it('mantiene el acceso del shell compartido a mis emisiones', () => {
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+    expect(texto).toContain('Mis Emisiones');
+  });
+
   it('asigna el estado visual segun los umbrales de porcentaje', () => {
     expect(
       (component as any).estadoPresentacion({ ...comparacionBase, porcentajeConsumido: 79.9 })

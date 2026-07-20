@@ -1,6 +1,7 @@
 <app-page-layout
   [sidebarConfig]="sidebarConfig()"
   [headerConfig]="headerConfig()"
+  (menuItemClicked)="onMenuItem($event)"
   (backClicked)="onBackClicked()"
 >
   <ng-content />

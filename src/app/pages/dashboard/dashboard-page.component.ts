@@ -1,15 +1,12 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
 import {
   SelectInputComponent,
   SelectOption,
 } from '../../shared/components/inputs/select-input/select-input.component';
-import {
-  HeaderConfig,
-  PageLayoutComponent,
-  SidebarConfig,
-} from '../../shared/layouts/page-layout/page-layout.component';
+import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
+import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { ComparacionEmisionesResponse, EstadoComparacion } from '../emissions/models/emision.model';
 import { EmisionesService } from '../emissions/emisiones.service';
@@ -20,14 +17,13 @@ interface EstadoVisual {
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [CardStatComponent, PageLayoutComponent, RouterLink, SelectInputComponent],
+  imports: [CardStatComponent, RouterLink, SelectInputComponent, ShellLayoutComponent],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
 })
 export class DashboardPageComponent implements OnInit {
   private readonly emisionesService = inject(EmisionesService);
   private readonly toastService = inject(ToastService);
-  private readonly router = inject(Router);
 
   protected readonly anioActual = new Date().getFullYear();
   protected readonly anioSeleccionado = signal(this.anioActual);
@@ -42,24 +38,6 @@ export class DashboardPageComponent implements OnInit {
   );
 
   protected readonly anioSeleccionadoValue = computed(() => String(this.anioSeleccionado()));
-
-  protected readonly sidebarConfig = computed<SidebarConfig>(() => ({
-    menuItems: [
-      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', active: true },
-      { id: 'emissions', label: 'Mis Emisiones', icon: 'emisiones', active: false },
-      { id: 'auditores', label: 'Auditores', icon: 'auditores', active: false },
-      { id: 'auditorias', label: 'Auditorías', icon: 'auditorias', active: false },
-      { id: 'certificaciones', label: 'Certificaciones', icon: 'certificaciones', active: false },
-      { id: 'insignias', label: 'Insignias', icon: 'insignias', active: false },
-    ],
-    bottomItems: [
-      { id: 'configuracion', label: 'Configuración', icon: 'config' },
-      { id: 'logout', label: 'Cerrar sesión', icon: 'logout' },
-    ],
-    companyName: 'Café del Valle S.A.',
-    companyRole: 'Empresa · Admin',
-    companyInitials: 'CV',
-  }));
 
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'PANEL EMPRESARIAL',
@@ -140,18 +118,6 @@ export class DashboardPageComponent implements OnInit {
     return `${this.formatToneladas(comparacion.huellaAcumuladaT)} / ${this.formatToneladas(
       comparacion.limiteT
     )} tCO2e`;
-  }
-
-  protected onMenuItem(id: string): void {
-    const rutas: Record<string, string> = {
-      dashboard: '/panel',
-      emissions: '/emisiones/registrar',
-      configuracion: '/configuracion',
-      settings: '/configuracion',
-      logout: '/login',
-    };
-    const ruta = rutas[id];
-    if (ruta) void this.router.navigateByUrl(ruta);
   }
 
   private cargarComparacion(anio: number): void {
