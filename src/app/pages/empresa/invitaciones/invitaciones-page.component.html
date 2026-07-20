@@ -6,34 +6,21 @@
     </p>
   </header>
 
-  <form class="invitaciones__form" (submit)="enviar($event)">
+  <form class="invitaciones__form" novalidate (submit)="handleSubmit($event)">
     <div class="invitaciones__form-field">
       <app-text-input
         label="Correo del colaborador"
         type="email"
         autocomplete="email"
         placeholder="colaborador@correo.com"
-        [value]="email()"
-        (valueChange)="email.set($event)"
-        [error]="errorEmail()"
-        [disabled]="enviando()"
+        [formField]="invitacionForm.email"
+        [error]="emailError()"
       />
     </div>
     <app-button variant="primary" type="submit" [loading]="enviando()">
       Enviar invitación
     </app-button>
   </form>
-
-  @if (mensajeExito()) {
-    <p class="invitaciones__mensaje invitaciones__mensaje--exito" role="status">
-      {{ mensajeExito() }}
-    </p>
-  }
-  @if (mensajeError()) {
-    <p class="invitaciones__mensaje invitaciones__mensaje--error" role="alert">
-      {{ mensajeError() }}
-    </p>
-  }
 
   <section class="invitaciones__lista">
     <h2 class="invitaciones__lista-title">Invitaciones enviadas</h2>
@@ -72,7 +59,12 @@
                 <td>{{ invitacion.fechaExpiracion | date: 'dd/MM/yyyy' : 'UTC' }}</td>
                 <td class="invitaciones__acciones">
                   @if (invitacion.estado === 'ENVIADA') {
-                    <app-button variant="tertiary" size="sm" (click)="abrirRevocacion(invitacion)">
+                    <app-button
+                      variant="tertiary"
+                      size="sm"
+                      [attr.aria-label]="'Revocar invitación a ' + invitacion.email"
+                      (click)="abrirRevocacion(invitacion)"
+                    >
                       Revocar
                     </app-button>
                   }
@@ -114,3 +106,5 @@
     </div>
   }
 </main>
+
+<app-toast-host />

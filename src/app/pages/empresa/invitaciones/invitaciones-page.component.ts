@@ -1,15 +1,35 @@
-import { Component, ElementRef, effect, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormField, form, schema, submit, validate } from '@angular/forms/signals';
+import { firstValueFrom } from 'rxjs';
 import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
+import { ToastHostComponent } from '../../../shared/components/toast/toast.component';
+import { ToastService } from '../../../shared/services/toast.service';
+import { EMAIL_MENSAJE, EMAIL_PATTERN } from '../../../shared/utils/email.utils';
+import { fieldError } from '../../../shared/utils/form-field.utils';
+import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import {
   EstadoInvitacion,
   Invitacion,
   InvitacionesService,
 } from '../../../core/invitaciones/invitaciones.service';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+interface InvitacionFormModel {
+  email: string;
+}
 
 const ESTADOS: Record<EstadoInvitacion, { etiqueta: string; variante: BadgeVariant }> = {
   ENVIADA: { etiqueta: 'Enviada', variante: 'info' },
@@ -20,24 +40,45 @@ const ESTADOS: Record<EstadoInvitacion, { etiqueta: string; variante: BadgeVaria
 
 @Component({
   selector: 'app-invitaciones-page',
-  imports: [BadgeComponent, ButtonComponent, TextInputComponent, DatePipe],
+  imports: [
+    BadgeComponent,
+    ButtonComponent,
+    TextInputComponent,
+    ToastHostComponent,
+    DatePipe,
+    FormField,
+  ],
   templateUrl: './invitaciones-page.component.html',
   styleUrl: './invitaciones-page.component.scss',
 })
 export class InvitacionesPageComponent {
   private readonly invitacionesService = inject(InvitacionesService);
-
-  protected readonly email = signal('');
-  protected readonly errorEmail = signal('');
-  protected readonly enviando = signal(false);
-  protected readonly mensajeExito = signal('');
-  protected readonly mensajeError = signal('');
+  private readonly toastService = inject(ToastService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly invitaciones = signal<Invitacion[]>([]);
   protected readonly cargando = signal(true);
   protected readonly errorCarga = signal(false);
   protected readonly invitacionARevocar = signal<Invitacion | null>(null);
   protected readonly revocando = signal(false);
+
+  protected readonly model = signal<InvitacionFormModel>({ email: '' });
+
+  protected readonly invitacionForm = form(
+    this.model,
+    schema<InvitacionFormModel>((path) => {
+      validate(path.email, ({ value }) => {
+        const email = value().trim();
+        if (!email || email.length > 254 || !EMAIL_PATTERN.test(email)) {
+          return { kind: 'email', message: EMAIL_MENSAJE };
+        }
+        return undefined;
+      });
+    })
+  );
+
+  protected readonly emailError = computed(() => fieldError(this.invitacionForm.email()));
+  protected readonly enviando = computed(() => this.invitacionForm().submitting());
 
   private readonly modal = viewChild<ElementRef<HTMLElement>>('modalRevocar');
 
@@ -56,34 +97,9 @@ export class InvitacionesPageComponent {
     return ESTADOS[estado]?.variante ?? 'neutral';
   }
 
-  protected enviar(event?: Event): void {
-    event?.preventDefault();
-    if (this.enviando()) {
-      return;
-    }
-    this.mensajeExito.set('');
-    this.mensajeError.set('');
-    const email = this.email().trim();
-    if (!email || email.length > 254 || !EMAIL_PATTERN.test(email)) {
-      this.errorEmail.set('Ingresa un correo electrónico válido');
-      return;
-    }
-    this.errorEmail.set('');
-    this.enviando.set(true);
-    this.invitacionesService.emitir(email).subscribe({
-      next: (invitacion) => {
-        this.enviando.set(false);
-        this.email.set('');
-        this.mensajeExito.set(`Invitación enviada a ${invitacion.email}.`);
-        this.invitaciones.update((lista) => [invitacion, ...lista]);
-      },
-      error: (err) => {
-        this.enviando.set(false);
-        this.mensajeError.set(
-          err?.error?.message ?? 'No pudimos enviar la invitación. Intenta nuevamente.'
-        );
-      },
-    });
+  protected handleSubmit(event: Event): void {
+    event.preventDefault();
+    void this.enviar();
   }
 
   protected abrirRevocacion(invitacion: Invitacion): void {
@@ -105,6 +121,59 @@ export class InvitacionesPageComponent {
     if (event.key === 'Tab') {
       this.atraparFoco(event);
     }
+  }
+
+  protected reintentarCarga(): void {
+    this.cargarInvitaciones();
+  }
+
+  protected confirmarRevocacion(): void {
+    const invitacion = this.invitacionARevocar();
+    if (!invitacion || this.revocando()) {
+      return;
+    }
+    this.revocando.set(true);
+    this.invitacionesService
+      .revocar(invitacion.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (revocada) => {
+          this.revocando.set(false);
+          this.invitacionARevocar.set(null);
+          this.invitaciones.update((lista) =>
+            lista.map((i) => (i.id === revocada.id ? revocada : i))
+          );
+          this.toastService.success(`Invitación a ${revocada.email} revocada.`);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.revocando.set(false);
+          this.invitacionARevocar.set(null);
+          this.toastService.error(
+            apiErrorMessage(err) ?? 'No pudimos revocar la invitación. Intenta nuevamente.'
+          );
+        },
+      });
+  }
+
+  private async enviar(): Promise<void> {
+    await submit(this.invitacionForm, {
+      action: async (field) => {
+        const email = field().value().email.trim();
+        try {
+          const invitacion = await firstValueFrom(this.invitacionesService.emitir(email));
+          this.model.set({ email: '' });
+          this.invitacionForm().reset();
+          this.invitaciones.update((lista) => [invitacion, ...lista]);
+          this.toastService.success(`Invitación enviada a ${invitacion.email}.`);
+        } catch (err: unknown) {
+          this.toastService.error(
+            apiErrorMessage(err) ?? 'No pudimos enviar la invitación. Intenta nuevamente.'
+          );
+        }
+        return undefined;
+      },
+      onInvalid: (field) => field().markAsTouched(),
+    });
   }
 
   private atraparFoco(event: KeyboardEvent): void {
@@ -129,49 +198,21 @@ export class InvitacionesPageComponent {
     }
   }
 
-  protected reintentarCarga(): void {
-    this.cargarInvitaciones();
-  }
-
-  protected confirmarRevocacion(): void {
-    const invitacion = this.invitacionARevocar();
-    if (!invitacion || this.revocando()) {
-      return;
-    }
-    this.mensajeExito.set('');
-    this.mensajeError.set('');
-    this.revocando.set(true);
-    this.invitacionesService.revocar(invitacion.id).subscribe({
-      next: (revocada) => {
-        this.revocando.set(false);
-        this.invitacionARevocar.set(null);
-        this.invitaciones.update((lista) =>
-          lista.map((i) => (i.id === revocada.id ? revocada : i))
-        );
-        this.mensajeExito.set(`Invitación a ${revocada.email} revocada.`);
-      },
-      error: (err) => {
-        this.revocando.set(false);
-        this.invitacionARevocar.set(null);
-        this.mensajeError.set(
-          err?.error?.message ?? 'No pudimos revocar la invitación. Intenta nuevamente.'
-        );
-      },
-    });
-  }
-
   private cargarInvitaciones(): void {
     this.cargando.set(true);
     this.errorCarga.set(false);
-    this.invitacionesService.listar().subscribe({
-      next: (lista) => {
-        this.invitaciones.set(lista);
-        this.cargando.set(false);
-      },
-      error: () => {
-        this.cargando.set(false);
-        this.errorCarga.set(true);
-      },
-    });
+    this.invitacionesService
+      .listar()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (lista) => {
+          this.invitaciones.set(lista);
+          this.cargando.set(false);
+        },
+        error: () => {
+          this.cargando.set(false);
+          this.errorCarga.set(true);
+        },
+      });
   }
 }
