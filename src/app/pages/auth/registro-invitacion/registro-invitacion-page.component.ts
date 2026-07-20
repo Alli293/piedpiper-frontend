@@ -14,7 +14,9 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { AuthLayoutComponent } from '../../../shared/layouts/auth-layout/auth-layout.component';
+import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { CheckboxComponent } from '../../../shared/components/inputs/checkbox/checkbox.component';
+import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { LinkDirective } from '../../../shared/components/link/link.directive';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -26,7 +28,14 @@ import {
 
 @Component({
   selector: 'app-registro-invitacion-page',
-  imports: [AuthLayoutComponent, CheckboxComponent, RouterLink, LinkDirective],
+  imports: [
+    AuthLayoutComponent,
+    BadgeComponent,
+    CheckboxComponent,
+    HeadingComponent,
+    RouterLink,
+    LinkDirective,
+  ],
   templateUrl: './registro-invitacion-page.component.html',
   styleUrl: './registro-invitacion-page.component.scss',
 })
