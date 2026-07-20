@@ -15,6 +15,26 @@
       />
     </div>
 
+    @if (!cargando() && comparacion(); as data) {
+      <section class="dashboard-summary" aria-label="Resumen de comparacion anual">
+        <article class="annual-limit-panel dashboard-summary__card">
+          <app-card-stat
+            [label]="'Huella total ' + data.anio"
+            [value]="formatToneladas(data.huellaAcumuladaT)"
+            delta="tCO2e acumuladas"
+          />
+        </article>
+
+        <article class="annual-limit-panel dashboard-summary__card">
+          <app-card-stat
+            label="Del limite anual"
+            [value]="porcentajeResumen(data.porcentajeConsumido)"
+            [delta]="detalleLimiteResumen(data)"
+          />
+        </article>
+      </section>
+    }
+
     <article
       class="annual-limit-panel"
       [class.is-dentro]="tieneEstado('dentro')"
