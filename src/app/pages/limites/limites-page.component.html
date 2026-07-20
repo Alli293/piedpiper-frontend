@@ -1,13 +1,15 @@
-<app-page-layout [sidebarConfig]="sidebarConfig()" [headerConfig]="headerConfig">
+<app-shell-layout activeId="emissions" [companyRole]="companyRole()" [headerConfig]="headerConfig">
   <div class="limites-page">
     @if (isAdmin()) {
       <section class="limites-editor" aria-labelledby="editor-title">
         <div class="limites-editor__header">
           <div class="limites-editor__mark" aria-hidden="true">!</div>
           <div>
-            <h2 id="editor-title">
-              {{ isEditing() ? 'Editar límite anual' : 'Configurar límite anual' }}
-            </h2>
+            <app-heading
+              level="h2"
+              id="editor-title"
+              [text]="isEditing() ? 'Editar límite anual' : 'Configurar límite anual'"
+            />
             <p>
               {{
                 isEditing()
@@ -31,31 +33,30 @@
           </strong>
         </div>
 
-        <form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+        <form novalidate (submit)="handleSubmit($event)">
           <div class="limites-editor__fields">
             <app-select-input
               label="Año fiscal"
-              formControlName="anio"
+              [formField]="limitesForm.anio"
               [options]="yearOptions"
-              [error]="anioError"
+              [error]="anioError()"
             />
             <app-text-input
               label="Nuevo límite (tCO₂e)"
               placeholder="50"
-              formControlName="limiteMt"
-              [error]="limiteMtError"
+              [formField]="limitesForm.limiteMt"
+              [error]="limiteMtError()"
               hint="Hasta 4 decimales"
-              [required]="true"
             />
           </div>
 
           <div class="limites-editor__justification">
             <app-textarea
               label="Justificación (opcional)"
-              formControlName="justificacion"
+              [formField]="limitesForm.justificacion"
               placeholder="Describa el motivo o compromiso asociado a este objetivo anual."
               [rows]="3"
-              [error]="justificacionError"
+              [error]="justificacionError()"
               hint="Máximo 500 caracteres"
             />
           </div>
@@ -66,7 +67,7 @@
                 Cancelar
               </app-button>
             }
-            <app-button type="submit" [disabled]="form.invalid || saving()" [loading]="saving()">
+            <app-button type="submit" [disabled]="!canSubmit()" [loading]="submitting()">
               {{ isEditing() ? 'Guardar cambios' : 'Guardar límite' }}
             </app-button>
           </div>
@@ -76,10 +77,10 @@
       <section class="limites-list" aria-labelledby="list-title">
         <div class="limites-list__header">
           <div>
-            <h2 id="list-title">
-              Límites registrados
-              <span>{{ limites().length }}</span>
-            </h2>
+            <div id="list-title" class="limites-list__title-row">
+              <app-heading level="h3" text="Límites registrados" />
+              <span class="limites-list__count">{{ limites().length }}</span>
+            </div>
             <p>Historial de objetivos anuales de la empresa.</p>
           </div>
           <app-button
@@ -175,8 +176,4 @@
       </section>
     }
   </div>
-
-  @if (toastMessage()) {
-    <div class="limites-page__toast" role="status">{{ toastMessage() }}</div>
-  }
-</app-page-layout>
+</app-shell-layout>

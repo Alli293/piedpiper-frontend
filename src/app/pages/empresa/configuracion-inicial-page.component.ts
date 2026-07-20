@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { form, FormField, required, schema, submit, validate } from '@angular/forms/signals';
 import { ConfiguracionInicialLayoutComponent } from '../../shared/layouts/configuracion-inicial-layout/configuracion-inicial-layout.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { TextInputComponent } from '../../shared/components/inputs/text-input/text-input.component';
 import {
   SelectInputComponent,
@@ -42,6 +43,7 @@ const INITIAL_MODEL: ConfiguracionInicialFormModel = {
     FormField,
     ConfiguracionInicialLayoutComponent,
     ButtonComponent,
+    HeadingComponent,
     TextInputComponent,
     SelectInputComponent,
     TextareaComponent,

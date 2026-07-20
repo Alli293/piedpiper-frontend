@@ -5,19 +5,11 @@
     margin-bottom: var(--ch-space-6);
   }
 
-  &__titulo {
-    font-family: var(--ch-font-heading);
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--ch-text-primary);
-    margin: 0 0 var(--ch-space-2);
-  }
-
   &__descripcion {
     font-family: var(--ch-font-body);
     font-size: 14px;
     color: var(--ch-text-secondary);
-    margin: 0;
+    margin: var(--ch-space-2) 0 0;
   }
 
   &__cargando {

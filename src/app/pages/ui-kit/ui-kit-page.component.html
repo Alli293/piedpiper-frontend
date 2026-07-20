@@ -152,7 +152,8 @@
       <h2 class="ch-h3">Insignias</h2>
       <p class="ch-body">
         <code>app-badge</code> es una etiqueta de estado pequeña. Su contenido se proyecta, por lo
-        que acepta cualquier texto mediante <code>&lt;ng-content&gt;</code>.
+        que acepta cualquier texto mediante <code>&lt;ng-content&gt;</code>. El punto por defecto se
+        puede reemplazar por un ícono con <code>icon</code>.
       </p>
       <div class="ui-kit-page__row">
         <app-badge variant="success">Aprobado</app-badge>
@@ -161,6 +162,10 @@
         <app-badge variant="info">Info</app-badge>
         <app-badge variant="new">Nuevo</app-badge>
         <app-badge variant="neutral">Neutral</app-badge>
+      </div>
+      <div class="ui-kit-page__row">
+        <app-badge variant="success" icon="success">Verificado</app-badge>
+        <app-badge variant="info" icon="emisiones">Emisiones</app-badge>
       </div>
       <table class="ui-kit-page__props">
         <thead>
@@ -177,6 +182,115 @@
             <td><code>'success' | 'warning' | 'danger' | 'info' | 'new' | 'neutral'</code></td>
             <td><code>'neutral'</code></td>
             <td>Color semántico de la insignia.</td>
+          </tr>
+          <tr>
+            <td><code>icon</code></td>
+            <td><code>IconName | null</code></td>
+            <td><code>null</code></td>
+            <td>
+              Reemplaza el punto por defecto con un ícono (ver <code>icon-registry.ts</code>).
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="ui-kit-page__section">
+      <h2 class="ch-h3">Encabezados</h2>
+      <p class="ch-body">
+        <code>app-heading</code> renderiza un <code>h1</code>–<code>h4</code> semántico definido por
+        <code>level</code>, con un estilo visual propio por nivel. <code>appearance</code> permite
+        desacoplar el estilo del nivel semántico (p. ej. un <code>h2</code> con apariencia de
+        <code>h1</code>) para mantener una jerarquía de documento correcta sin sacrificar el diseño.
+      </p>
+      <div class="ui-kit-page__row ui-kit-page__row--column">
+        <app-heading level="h1" text="Título de página (h1)" />
+        <app-heading level="h2" text="Título de sección (h2)" />
+        <app-heading level="h3" text="Subtítulo / alta jerarquía (h3)" />
+        <app-heading level="h4" text="Encabezado menor (h4)" />
+        <app-heading level="h2" appearance="h1" text="h2 con apariencia de h1" />
+      </div>
+      <table class="ui-kit-page__props">
+        <thead>
+          <tr>
+            <th>Propiedad</th>
+            <th>Tipo</th>
+            <th>Valor por defecto</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>level</code></td>
+            <td><code>'h1' | 'h2' | 'h3' | 'h4'</code></td>
+            <td><em>requerido</em></td>
+            <td>Tag HTML semántico a renderizar.</td>
+          </tr>
+          <tr>
+            <td><code>text</code></td>
+            <td><code>string</code></td>
+            <td><em>requerido</em></td>
+            <td>Texto del encabezado.</td>
+          </tr>
+          <tr>
+            <td><code>appearance</code></td>
+            <td><code>'h1' | 'h2' | 'h3' | 'h4'</code></td>
+            <td>igual a <code>level</code></td>
+            <td>Estilo visual a aplicar, independiente del tag semántico.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="ui-kit-page__section">
+      <h2 class="ch-h3">Logo</h2>
+      <p class="ch-body">
+        <code>app-logo</code> renderiza el isotipo de CarbonHub, opcionalmente junto al wordmark
+        ("Carbon" en 600, "Hub" en 500, fuente Sora). <code>variant</code> controla la paleta según
+        la superficie (<code>on-dark</code>/<code>on-light</code>) y <code>type</code> permite
+        mostrar solo el isotipo, sin texto.
+      </p>
+      <div class="ui-kit-page__row ui-kit-page__row--dark">
+        <app-logo variant="on-dark" />
+        <app-logo variant="on-dark" type="isotype" />
+      </div>
+      <div class="ui-kit-page__row">
+        <app-logo variant="on-light" />
+        <app-logo variant="on-light" type="isotype" />
+      </div>
+      <table class="ui-kit-page__props">
+        <thead>
+          <tr>
+            <th>Propiedad</th>
+            <th>Tipo</th>
+            <th>Valor por defecto</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>variant</code></td>
+            <td><code>'on-dark' | 'on-light'</code></td>
+            <td><code>'on-dark'</code></td>
+            <td>Paleta de color e isotipo según la superficie donde se coloca.</td>
+          </tr>
+          <tr>
+            <td><code>type</code></td>
+            <td><code>'full' | 'isotype'</code></td>
+            <td><code>'full'</code></td>
+            <td>Muestra el isotipo con wordmark, o solo el isotipo.</td>
+          </tr>
+          <tr>
+            <td><code>iconSize</code></td>
+            <td><code>number</code></td>
+            <td><code>24</code></td>
+            <td>Tamaño del isotipo en píxeles.</td>
+          </tr>
+          <tr>
+            <td><code>textSize</code></td>
+            <td><code>string</code></td>
+            <td><code>'18px'</code></td>
+            <td>Tamaño de fuente del wordmark (acepta cualquier unidad CSS).</td>
           </tr>
         </tbody>
       </table>
@@ -359,13 +473,14 @@
     <section class="ui-kit-page__section">
       <h2 class="ch-h3">Tarjetas de estadísticas</h2>
       <p class="ch-body">
-        <code>app-stat-card</code> es un par valor/etiqueta mínimo para franjas destacadas de estilo
-        dashboard, normalmente colocado sobre una superficie oscura.
+        <code>app-public-stat</code> es un par valor/etiqueta mínimo para franjas destacadas de
+        estilo dashboard, pensado para páginas públicas, normalmente colocado sobre una superficie
+        oscura.
       </p>
       <div class="ui-kit-page__row ui-kit-page__row--dark">
-        <app-stat-card value="999+" label="Empresas registradas" />
-        <app-stat-card value="99" label="Reportes generados" />
-        <app-stat-card value="99,999" label="Toneladas de CO2" />
+        <app-public-stat value="999+" label="Empresas registradas" />
+        <app-public-stat value="99" label="Reportes generados" />
+        <app-public-stat value="99,999" label="Toneladas de CO2" />
       </div>
       <table class="ui-kit-page__props">
         <thead>

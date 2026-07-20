@@ -9,7 +9,7 @@
   border-radius: var(--ch-radius-lg);
 }
 
-.ch-stat-card__value {
+.ch-public-stat__value {
   font-family: var(--ch-font-heading);
   font-weight: 700;
   font-size: 2rem;
@@ -17,7 +17,7 @@
   color: var(--ch-green-light);
 }
 
-.ch-stat-card__label {
+.ch-public-stat__label {
   font-family: var(--ch-font-body);
   font-weight: 400;
   font-size: 1rem;

@@ -27,13 +27,6 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'registro/auditor',
-    loadComponent: () =>
-      import('./pages/registro-auditor/registro-auditor-page.component').then(
-        (m) => m.RegistroAuditorPageComponent
-      ),
-  },
-  {
     path: 'registro/:rol',
     loadComponent: () =>
       import('./pages/auth/registro/registro-rol-page.component').then(
@@ -49,6 +42,7 @@ export const routes: Routes = [
   },
   {
     path: 'limites',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/limites/limites-page.component').then((m) => m.LimitesPageComponent),
   },
@@ -76,16 +70,10 @@ export const routes: Routes = [
   ...rutasPostAutenticacion.map((path) => ({ path, loadComponent: cargarPlaceholder })),
   {
     path: 'emisiones/registrar',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/emissions/register-emission/register-emission-page.component').then(
         (m) => m.RegisterEmissionPageComponent
-      ),
-  },
-  {
-    path: 'emisiones/registrar/envio',
-    loadComponent: () =>
-      import('./pages/emissions/register-shipping/register-shipping-page.component').then(
-        (m) => m.RegisterShippingPageComponent
       ),
   },
   {
