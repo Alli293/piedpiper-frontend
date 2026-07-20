@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { SolicitudesAuditorPageComponent } from './solicitudes-auditor-page.component';
@@ -125,29 +126,31 @@ describe('SolicitudesAuditorPageComponent', () => {
     comp.abrirRevision(solicitud);
     comp.decision.set('rechazado');
 
-    comp.motivo.set('corto');
+    comp.model.set({ motivo: 'corto' });
     expect(comp.puedeConfirmar()).toBe(false);
 
-    comp.motivo.set('Motivo de rechazo con largo suficiente.');
+    comp.model.set({ motivo: 'Motivo de rechazo con largo suficiente.' });
     expect(comp.puedeConfirmar()).toBe(true);
 
-    comp.motivo.set('x'.repeat(501));
+    comp.model.set({ motivo: 'x'.repeat(501) });
     expect(comp.puedeConfirmar()).toBe(false);
   });
 
-  it('confirmar sin decision valida no llama al backend', () => {
+  it('confirmar con motivo invalido no llama al backend y marca el error', async () => {
     const fixture = crear();
     const comp = fixture.componentInstance as any;
     comp.abrirRevision(solicitud);
     comp.decision.set('rechazado');
-    comp.motivo.set('corto');
+    comp.model.set({ motivo: 'corto' });
 
-    comp.confirmarDecision();
+    await comp.confirmarDecision();
+    fixture.detectChanges();
 
     expect(validacionService.resolver).not.toHaveBeenCalled();
+    expect(comp.errorMotivo()).toBe('El motivo debe tener entre 10 y 500 caracteres.');
   });
 
-  it('aprobar resuelve, notifica y recarga la lista', () => {
+  it('aprobar resuelve, notifica y recarga la lista', async () => {
     validacionService.resolver.mockReturnValue(
       of({
         id: 'sol-1',
@@ -162,7 +165,7 @@ describe('SolicitudesAuditorPageComponent', () => {
     comp.abrirRevision(solicitud);
     comp.decision.set('aprobado');
 
-    comp.confirmarDecision();
+    await comp.confirmarDecision();
 
     expect(validacionService.resolver).toHaveBeenCalledWith('sol-1', 'aprobado', undefined);
     expect(toastService.success).toHaveBeenCalled();
@@ -170,7 +173,7 @@ describe('SolicitudesAuditorPageComponent', () => {
     expect(comp.solicitudEnRevision()).toBeNull();
   });
 
-  it('al resolver la ultima solicitud de una pagina > 0 recarga la pagina anterior', () => {
+  it('al resolver la ultima solicitud de una pagina > 0 recarga la pagina anterior', async () => {
     validacionService.listarPendientes.mockReturnValue(
       of({ contenido: [solicitud], pagina: 1, totalPaginas: 2, totalElementos: 4 })
     );
@@ -188,24 +191,27 @@ describe('SolicitudesAuditorPageComponent', () => {
     comp.abrirRevision(solicitud);
     comp.decision.set('aprobado');
 
-    comp.confirmarDecision();
+    await comp.confirmarDecision();
 
     expect(validacionService.listarPendientes).toHaveBeenLastCalledWith(0);
   });
 
-  it('un 409 muestra el toast y recarga el listado', () => {
+  it('un 409 muestra el toast y recarga el listado', async () => {
     validacionService.resolver.mockReturnValue(
-      throwError(() => ({
-        status: 409,
-        error: { message: 'Esta solicitud ya fue procesada por otro administrador.' },
-      }))
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { message: 'Esta solicitud ya fue procesada por otro administrador.' },
+          })
+      )
     );
     const fixture = crear();
     const comp = fixture.componentInstance as any;
     comp.abrirRevision(solicitud);
     comp.decision.set('aprobado');
 
-    comp.confirmarDecision();
+    await comp.confirmarDecision();
 
     expect(toastService.error).toHaveBeenCalledWith(
       'No se pudo aplicar la decisión',

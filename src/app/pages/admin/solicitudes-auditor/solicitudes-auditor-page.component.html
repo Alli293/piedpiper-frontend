@@ -99,56 +99,60 @@
           </div>
         </dl>
 
-        <div class="solicitudes__decision" role="radiogroup" aria-label="Decisión">
-          <button
-            type="button"
-            class="solicitudes__opcion solicitudes__opcion--aprobar"
-            [class.solicitudes__opcion--activa]="decision() === 'aprobado'"
-            [disabled]="enviando()"
-            (click)="decision.set('aprobado')"
-          >
-            Aprobar
-          </button>
-          <button
-            type="button"
-            class="solicitudes__opcion solicitudes__opcion--rechazar"
-            [class.solicitudes__opcion--activa]="decision() === 'rechazado'"
-            [disabled]="enviando()"
-            (click)="decision.set('rechazado')"
-          >
-            Rechazar
-          </button>
-        </div>
+        <form novalidate (submit)="handleSubmit($event)">
+          <div class="solicitudes__decision" role="radiogroup" aria-label="Decisión">
+            <button
+              type="button"
+              class="solicitudes__opcion solicitudes__opcion--aprobar"
+              [class.solicitudes__opcion--activa]="decision() === 'aprobado'"
+              [disabled]="enviando()"
+              (click)="decision.set('aprobado')"
+            >
+              Aprobar
+            </button>
+            <button
+              type="button"
+              class="solicitudes__opcion solicitudes__opcion--rechazar"
+              [class.solicitudes__opcion--activa]="decision() === 'rechazado'"
+              [disabled]="enviando()"
+              (click)="decision.set('rechazado')"
+            >
+              Rechazar
+            </button>
+          </div>
 
-        @if (decision() === 'rechazado') {
-          <app-textarea
-            label="Motivo del rechazo"
-            placeholder="Explica por qué se rechaza esta solicitud (mínimo 10 caracteres)"
-            [rows]="3"
-            [value]="motivo()"
-            (valueChange)="motivo.set($event)"
-            [error]="motivo().length > 0 ? errorMotivo() : ''"
-            [disabled]="enviando()"
-          />
-        }
+          @if (decision() === 'rechazado') {
+            <app-textarea
+              label="Motivo del rechazo"
+              placeholder="Explica por qué se rechaza esta solicitud (mínimo 10 caracteres)"
+              [rows]="3"
+              [formField]="decisionForm.motivo"
+              [error]="errorMotivo()"
+            />
+          }
 
-        <div class="solicitudes__modal-actions">
-          <app-button variant="secondary" [disabled]="enviando()" (click)="cerrarRevision()">
-            Cancelar
-          </app-button>
-          <app-button
-            variant="primary"
-            [disabled]="!puedeConfirmar()"
-            [loading]="enviando()"
-            (click)="confirmarDecision()"
-          >
-            Confirmar decisión
-          </app-button>
-        </div>
+          <div class="solicitudes__modal-actions">
+            <app-button
+              variant="secondary"
+              type="button"
+              [disabled]="enviando()"
+              (click)="cerrarRevision()"
+            >
+              Cancelar
+            </app-button>
+            <app-button
+              variant="primary"
+              type="submit"
+              [disabled]="!puedeConfirmar()"
+              [loading]="enviando()"
+            >
+              Confirmar decisión
+            </app-button>
+          </div>
+        </form>
       </div>
     </div>
   }
 </main>
 
 <app-toast-host />
-
