@@ -53,9 +53,9 @@ describe('DashboardPageComponent', () => {
     expect(
       (component as any).estadoPresentacion({ ...comparacionBase, porcentajeConsumido: 79.9 })
     ).toBe('dentro');
-    expect((component as any).estadoPresentacion({ ...comparacionBase, porcentajeConsumido: 80 })).toBe(
-      'cerca'
-    );
+    expect(
+      (component as any).estadoPresentacion({ ...comparacionBase, porcentajeConsumido: 80 })
+    ).toBe('cerca');
     expect(
       (component as any).estadoPresentacion({ ...comparacionBase, porcentajeConsumido: 100 })
     ).toBe('cerca');
