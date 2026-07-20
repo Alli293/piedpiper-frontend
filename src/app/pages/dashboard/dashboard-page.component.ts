@@ -1,6 +1,9 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { SelectInputComponent, SelectOption } from '../../shared/components/inputs/select-input/select-input.component';
+import {
+  SelectInputComponent,
+  SelectOption,
+} from '../../shared/components/inputs/select-input/select-input.component';
 import {
   HeaderConfig,
   PageLayoutComponent,
