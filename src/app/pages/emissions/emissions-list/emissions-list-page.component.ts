@@ -138,7 +138,7 @@ export class EmissionsListPageComponent {
           cumpleFiltros(registro, 'TODAS', filtrosPeriodo.anio, filtrosPeriodo.mes)
         )
       );
-    } catch {
+    } catch (error: unknown) {
       if (requestId !== this.cargaRegistrosRequestId) return;
       this.toastService.error('No se pudo completar la operación. Intente nuevamente.');
       this.registros.set([]);
