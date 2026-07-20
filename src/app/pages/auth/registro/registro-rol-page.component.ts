@@ -291,21 +291,18 @@ export class RegistroRolPageComponent {
     });
   }
 
-  private registrarConGoogle(tipo: ConfigRol['tipo'], idToken: string): void {
+  private async registrarConGoogle(tipo: ConfigRol['tipo'], idToken: string): Promise<void> {
     this.cargando.set(true);
     this.error.set('');
-    this.authService.registrarConGoogle(tipo, idToken).subscribe({
-      next: (respuesta) => {
-        this.cargando.set(false);
-        this.redirigir(respuesta);
-      },
-      error: (err) => {
-        this.cargando.set(false);
-        this.error.set(
-          err?.error?.message ?? 'No pudimos completar tu registro. Intenta nuevamente.'
-        );
-      },
-    });
+    try {
+      const respuesta = await firstValueFrom(this.authService.registrarConGoogle(tipo, idToken));
+      this.cargando.set(false);
+      this.redirigir(respuesta);
+    } catch (err: unknown) {
+      this.cargando.set(false);
+      const message = (err as { error?: { message?: string } })?.error?.message;
+      this.error.set(message ?? 'No pudimos completar tu registro. Intenta nuevamente.');
+    }
   }
 
   private redirigir(respuesta: AuthResponse): void {

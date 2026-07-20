@@ -1,11 +1,13 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import {
+  applyEach,
   disabled,
   form,
   FormField,
   maxDate,
   maxLength,
+  pattern,
   required,
   schema,
   submit,
@@ -86,13 +88,6 @@ interface RegistrarEnvioFormModel {
 }
 
 type EmissionCategory = 'electricidad' | 'vuelo' | 'flota' | 'envio';
-type FlightErrorKey =
-  | 'passengers'
-  | 'fechaActividad'
-  | 'legs'
-  | `legs.${number}.departureAirport`
-  | `legs.${number}.destinationAirport`
-  | `legs.${number}.cabinClass`;
 
 const INITIAL_MODEL: RegistrarElectricidadFormModel = {
   titulo: '',
@@ -161,6 +156,8 @@ const CATEGORY_TABS: EmissionCategoryTab[] = [
   styleUrl: './register-emission-page.component.scss',
 })
 export class RegisterEmissionPageComponent {
+  protected readonly fieldError = fieldError;
+
   private readonly emisionesService = inject(EmisionesService);
   private readonly toastService = inject(ToastService);
   private readonly authService = inject(AuthService);
@@ -197,9 +194,6 @@ export class RegisterEmissionPageComponent {
   protected readonly flightModel = signal<RegistrarVueloFormModel>(
     cloneFlightModel(INITIAL_FLIGHT_MODEL)
   );
-  protected readonly flightTouched = signal<Set<FlightErrorKey>>(new Set());
-  protected readonly flightSubmitted = signal(false);
-  protected readonly flightSubmitting = signal(false);
   protected readonly hasSession = signal(this.hasActiveSession());
 
   protected readonly registerForm = form(
@@ -262,6 +256,62 @@ export class RegisterEmissionPageComponent {
       required(path.fechaActividad, { message: 'Ingrese una fecha para este registro.' });
       maxDate(path.fechaActividad, this.today, {
         message: 'La fecha no puede ser posterior a hoy.',
+      });
+    })
+  );
+
+  protected readonly flightForm = form(
+    this.flightModel,
+    schema<RegistrarVueloFormModel>((path) => {
+      required(path.passengers, { message: 'Ingrese al menos 1 pasajero.' });
+      validate(path.passengers, ({ value }) => {
+        const passengers = value();
+        if (passengers === null) return undefined;
+        if (!Number.isInteger(passengers) || passengers < 1) {
+          return { kind: 'minPassengers', message: 'Ingrese al menos 1 pasajero.' };
+        }
+        return undefined;
+      });
+
+      required(path.fechaActividad, { message: 'Ingrese una fecha para este registro.' });
+      maxDate(path.fechaActividad, this.today, {
+        message: 'La fecha no puede ser posterior a hoy.',
+      });
+
+      validate(path.legs, ({ value }) => {
+        if (value().length === 0) {
+          return { kind: 'minLegs', message: 'Agregue al menos un trayecto.' };
+        }
+        return undefined;
+      });
+
+      applyEach(path.legs, (leg) => {
+        required(leg.departureAirport, { message: 'Ingrese un código IATA de 3 letras.' });
+        pattern(leg.departureAirport, /^[A-Za-z]{3}$/, {
+          message: 'Ingrese un código IATA de 3 letras.',
+        });
+
+        required(leg.destinationAirport, { message: 'Ingrese un código IATA de 3 letras.' });
+        pattern(leg.destinationAirport, /^[A-Za-z]{3}$/, {
+          message: 'Ingrese un código IATA de 3 letras.',
+        });
+        validate(leg.destinationAirport, (ctx) => {
+          const destination = ctx.value();
+          const departure = ctx.valueOf(leg.departureAirport);
+          if (
+            /^[A-Za-z]{3}$/.test(departure) &&
+            /^[A-Za-z]{3}$/.test(destination) &&
+            departure.toUpperCase() === destination.toUpperCase()
+          ) {
+            return {
+              kind: 'sameAirport',
+              message: 'El origen y el destino no pueden ser iguales.',
+            };
+          }
+          return undefined;
+        });
+
+        required(leg.cabinClass, { message: 'Seleccione una clase válida.' });
       });
     })
   );
@@ -337,9 +387,13 @@ export class RegisterEmissionPageComponent {
   protected readonly fechaActividadError = computed(() =>
     fieldError(this.registerForm.fechaActividad())
   );
-  protected readonly flightErrors = computed(() =>
-    validateFlightModel(this.flightModel(), this.today)
+  protected readonly flightPassengersError = computed(() =>
+    fieldError(this.flightForm.passengers())
   );
+  protected readonly flightFechaActividadError = computed(() =>
+    fieldError(this.flightForm.fechaActividad())
+  );
+  protected readonly flightLegsError = computed(() => fieldError(this.flightForm.legs()));
 
   protected readonly flotaTituloError = computed(() => fieldError(this.flotaForm.titulo()));
   protected readonly tipoVehiculoError = computed(() => fieldError(this.flotaForm.tipoVehiculo()));
@@ -373,6 +427,7 @@ export class RegisterEmissionPageComponent {
   protected readonly submitting = computed(() => {
     if (this.activeCategory() === 'flota') return this.flotaForm().submitting();
     if (this.activeCategory() === 'envio') return this.envioForm().submitting();
+    if (this.activeCategory() === 'vuelo') return this.flightForm().submitting();
     return this.registerForm().submitting();
   });
   protected readonly canSubmit = computed(() => {
@@ -382,10 +437,10 @@ export class RegisterEmissionPageComponent {
     if (this.activeCategory() === 'envio') {
       return this.envioForm().valid() && !this.submitting();
     }
-    if (this.activeCategory() === 'electricidad') {
-      return this.registerForm().valid() && !this.submitting();
+    if (this.activeCategory() === 'vuelo') {
+      return this.flightForm().valid() && !this.submitting();
     }
-    return Object.keys(this.flightErrors()).length === 0 && !this.flightSubmitting();
+    return this.registerForm().valid() && !this.submitting();
   });
 
   protected readonly headerConfig = signal<HeaderConfig>({
@@ -430,8 +485,7 @@ export class RegisterEmissionPageComponent {
         break;
       case 'vuelo':
         this.flightModel.set(cloneFlightModel(INITIAL_FLIGHT_MODEL));
-        this.flightTouched.set(new Set());
-        this.flightSubmitted.set(false);
+        this.flightForm().reset();
         break;
     }
   }
@@ -461,35 +515,6 @@ export class RegisterEmissionPageComponent {
     }
   }
 
-  protected updateFlightPassengers(passengers: number | null): void {
-    this.flightModel.update((model) => ({ ...model, passengers }));
-  }
-
-  protected updateFlightDate(fechaActividad: Date | null): void {
-    this.flightModel.update((model) => ({ ...model, fechaActividad }));
-  }
-
-  protected updateFlightDistanceUnit(distanceUnit: string): void {
-    this.flightModel.update((model) => ({
-      ...model,
-      distanceUnit: distanceUnit as UnidadDistancia,
-    }));
-  }
-
-  protected updateLeg(index: number, field: keyof RegistrarVueloLegFormModel, value: string): void {
-    this.flightModel.update((model) => ({
-      ...model,
-      legs: model.legs.map((leg, currentIndex) =>
-        currentIndex === index
-          ? {
-              ...leg,
-              [field]: field === 'cabinClass' ? (value as CabinClass) : value.toUpperCase(),
-            }
-          : leg
-      ),
-    }));
-  }
-
   protected addLeg(): void {
     this.flightModel.update((model) => ({
       ...model,
@@ -505,16 +530,6 @@ export class RegisterEmissionPageComponent {
       ...model,
       legs: model.legs.filter((_, currentIndex) => currentIndex !== index),
     }));
-  }
-
-  protected markFlightTouched(key: string): void {
-    this.flightTouched.update((current) => new Set(current).add(key as FlightErrorKey));
-  }
-
-  protected flightError(key: string): string {
-    const typedKey = key as FlightErrorKey;
-    if (!this.flightSubmitted() && !this.flightTouched().has(typedKey)) return '';
-    return this.flightErrors()[typedKey] ?? '';
   }
 
   private loadTiposVehiculo(): void {
@@ -564,28 +579,22 @@ export class RegisterEmissionPageComponent {
   private async onFlightSubmit(): Promise<void> {
     if (!this.ensureSession()) return;
 
-    this.flightSubmitted.set(true);
-    if (Object.keys(this.flightErrors()).length > 0) {
-      return;
-    }
-
-    const value = this.flightModel();
-    this.flightSubmitting.set(true);
-    try {
-      const payload = buildFlightPayload(value);
-      const response = await firstValueFrom(this.emisionesService.registrarVuelo(payload));
-      this.toastService.success(
-        'Viaje aéreo registrado.',
-        `Huella calculada: ${response.carbonKg} kg CO₂e.`
-      );
-      this.flightModel.set(cloneFlightModel(INITIAL_FLIGHT_MODEL));
-      this.flightTouched.set(new Set());
-      this.flightSubmitted.set(false);
-    } catch (error: unknown) {
-      this.reportSubmissionError(error);
-    } finally {
-      this.flightSubmitting.set(false);
-    }
+    await submit(this.flightForm, async (field) => {
+      const value = field().value();
+      try {
+        const payload = buildFlightPayload(value);
+        const response = await firstValueFrom(this.emisionesService.registrarVuelo(payload));
+        this.toastService.success(
+          'Viaje aéreo registrado.',
+          `Huella calculada: ${response.carbonKg} kg CO₂e.`
+        );
+        this.flightModel.set(cloneFlightModel(INITIAL_FLIGHT_MODEL));
+        this.flightForm().reset();
+      } catch (error: unknown) {
+        this.reportSubmissionError(error);
+      }
+      return undefined;
+    });
   }
 
   private async onSubmitFlota(): Promise<void> {
@@ -692,43 +701,4 @@ function buildFlightPayload(model: RegistrarVueloFormModel): RegistrarVueloReque
       cabinClass: leg.cabinClass,
     })),
   };
-}
-
-function validateFlightModel(
-  model: RegistrarVueloFormModel,
-  today: Date
-): Partial<Record<FlightErrorKey, string>> {
-  const errors: Partial<Record<FlightErrorKey, string>> = {};
-  if (!Number.isInteger(model.passengers) || (model.passengers ?? 0) < 1) {
-    errors.passengers = 'Ingrese al menos 1 pasajero.';
-  }
-  if (model.legs.length === 0) {
-    errors.legs = 'Agregue al menos un trayecto.';
-  }
-  if (!model.fechaActividad) {
-    errors.fechaActividad = 'Ingrese una fecha para este registro.';
-  } else if (model.fechaActividad.getTime() > today.getTime()) {
-    errors.fechaActividad = 'La fecha no puede ser posterior a hoy.';
-  }
-  model.legs.forEach((leg, index) => {
-    const departureKey = `legs.${index}.departureAirport` as const;
-    const destinationKey = `legs.${index}.destinationAirport` as const;
-    const cabinKey = `legs.${index}.cabinClass` as const;
-    if (!/^[A-Za-z]{3}$/.test(leg.departureAirport)) {
-      errors[departureKey] = 'Ingrese un código IATA de 3 letras.';
-    }
-    if (!/^[A-Za-z]{3}$/.test(leg.destinationAirport)) {
-      errors[destinationKey] = 'Ingrese un código IATA de 3 letras.';
-    }
-    if (
-      /^[A-Za-z]{3}$/.test(leg.departureAirport) &&
-      leg.departureAirport.toUpperCase() === leg.destinationAirport.toUpperCase()
-    ) {
-      errors[destinationKey] = 'El origen y el destino no pueden ser iguales.';
-    }
-    if (!['economy', 'premium'].includes(leg.cabinClass)) {
-      errors[cabinKey] = 'Seleccione una clase válida.';
-    }
-  });
-  return errors;
 }

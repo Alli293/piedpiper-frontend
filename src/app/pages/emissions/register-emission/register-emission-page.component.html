@@ -102,7 +102,7 @@
             [error]="tipoVehiculoError()"
           />
           @if (catalogoError()) {
-            <p class="register-emission-page__field-error">
+            <p class="register-emission-page__field-error" role="alert">
               {{ catalogoError() }}
               <app-button variant="link" size="sm" type="button" (click)="retryLoadTiposVehiculo()">
                 Reintentar
@@ -156,27 +156,21 @@
             class="register-emission-page__field--grow"
             label="Pasajeros"
             step="1"
-            [required]="true"
-            [value]="flightModel().passengers"
-            [error]="flightError('passengers')"
-            (valueChange)="updateFlightPassengers($event); markFlightTouched('passengers')"
+            [formField]="flightForm.passengers"
+            [error]="flightPassengersError()"
           />
 
           <app-select-input
             label="Unidad distancia"
             [options]="distanceUnitOptions"
-            [value]="flightModel().distanceUnit"
-            (valueChange)="updateFlightDistanceUnit($event)"
+            [formField]="flightForm.distanceUnit"
           />
         </div>
 
         <app-date-input
           label="Fecha del viaje"
-          [required]="true"
-          [value]="flightModel().fechaActividad"
-          [max]="today"
-          [error]="flightError('fechaActividad')"
-          (valueChange)="updateFlightDate($event); markFlightTouched('fechaActividad')"
+          [formField]="flightForm.fechaActividad"
+          [error]="flightFechaActividadError()"
         />
 
         <div class="register-emission-page__legs">
@@ -186,44 +180,32 @@
               + Agregar trayecto
             </button>
           </div>
-          @if (flightError('legs')) {
-            <p class="register-emission-page__field-error">{{ flightError('legs') }}</p>
+          @if (flightLegsError()) {
+            <p class="register-emission-page__field-error" role="alert">{{ flightLegsError() }}</p>
           }
 
-          @for (leg of flightModel().legs; track $index) {
+          @for (leg of flightForm.legs; track $index) {
             <div class="register-emission-page__leg">
               <div class="register-emission-page__leg-title">Trayecto {{ $index + 1 }}</div>
               <app-text-input
                 label="Origen"
                 placeholder="SJO"
-                [value]="leg.departureAirport"
-                [error]="flightError('legs.' + $index + '.departureAirport')"
-                (valueChange)="
-                  updateLeg($index, 'departureAirport', $event);
-                  markFlightTouched('legs.' + $index + '.departureAirport')
-                "
+                [formField]="leg.departureAirport"
+                [error]="fieldError(leg.departureAirport())"
               />
 
               <app-text-input
                 label="Destino"
                 placeholder="YYZ"
-                [value]="leg.destinationAirport"
-                [error]="flightError('legs.' + $index + '.destinationAirport')"
-                (valueChange)="
-                  updateLeg($index, 'destinationAirport', $event);
-                  markFlightTouched('legs.' + $index + '.destinationAirport')
-                "
+                [formField]="leg.destinationAirport"
+                [error]="fieldError(leg.destinationAirport())"
               />
 
               <app-select-input
                 label="Cabina"
                 [options]="cabinClassOptions"
-                [value]="leg.cabinClass"
-                [error]="flightError('legs.' + $index + '.cabinClass')"
-                (valueChange)="
-                  updateLeg($index, 'cabinClass', $event);
-                  markFlightTouched('legs.' + $index + '.cabinClass')
-                "
+                [formField]="leg.cabinClass"
+                [error]="fieldError(leg.cabinClass())"
               />
 
               <button
@@ -300,7 +282,7 @@
         <app-button
           variant="primary"
           type="submit"
-          [loading]="activeCategory() === 'vuelo' ? flightSubmitting() : submitting()"
+          [loading]="submitting()"
           [disabled]="!canSubmit()"
         >
           Calcular y guardar

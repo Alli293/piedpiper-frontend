@@ -104,7 +104,7 @@ Other rules:
 ## 6. Routing & auth
 
 - Routes are lazy: `loadComponent: () => import(...)`. Best practice — keeps the initial bundle small.
-- Authenticated feature routes declare `canActivate: [authGuard]` (`core/auth/auth.guard.ts`). Any route behind login must be guarded — e.g. `/limites`, `/emisiones/registrar`, `/emisiones/registrar/envio`.
+- Authenticated feature routes declare `canActivate: [authGuard]` (`core/auth/auth.guard.ts`). Any route behind login must be guarded — e.g. `/limites`, `/emisiones/registrar`.
 
 ## 7. Accessibility
 

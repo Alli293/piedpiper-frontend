@@ -48,7 +48,7 @@
   flex: 0 0 42px;
   height: 42px;
   border-radius: var(--ch-radius-md);
-  background: rgba(224, 161, 0, 0.3);
+  background: var(--ch-warning-bg);
   color: var(--ch-warning-dark);
 }
 
@@ -151,7 +151,7 @@
   gap: var(--ch-space-2);
   padding: 12px 14px;
   border-radius: var(--ch-radius-md);
-  background: rgba(224, 161, 0, 0.14);
+  background: var(--ch-warning-bg);
   color: var(--ch-warning-dark);
   font-weight: 600;
 }
