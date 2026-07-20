@@ -5,6 +5,7 @@ export type UnidadPeso = 'G' | 'LB' | 'KG' | 'MT';
 // El backend serializa UnidadDistancia en minúscula (@JsonValue) para vuelo, envío y flota.
 export type UnidadDistancia = 'km' | 'mi';
 export type MetodoTransporte = 'SHIP' | 'TRAIN' | 'TRUCK' | 'PLANE';
+export type EstadoComparacion = 'dentro' | 'cerca' | 'superado' | 'sin_limite';
 
 export interface RegistrarElectricidadRequest {
   readonly titulo: string;
@@ -105,6 +106,15 @@ export interface EmisionFlotaResponse {
   readonly factorEmisionId: string;
   readonly estimatedAt: string;
   readonly createdAt: string;
+}
+
+export interface ComparacionEmisionesResponse {
+  readonly anio: number;
+  readonly huellaAcumuladaT: number;
+  readonly limiteT: number | null;
+  readonly porcentajeConsumido: number | null;
+  readonly estado: EstadoComparacion;
+  readonly mensaje: string | null;
 }
 
 export interface ApiErrorResponse {

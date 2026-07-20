@@ -3,13 +3,14 @@ import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ToastService } from '../../shared/services/toast.service';
+import { ComparacionEmisionesResponse } from '../emissions/models/emision.model';
+import { EmisionesService } from '../emissions/emisiones.service';
 import { DashboardPageComponent } from './dashboard-page.component';
-import { ComparacionEmisionesResponse, DashboardService } from './dashboard.service';
 
 describe('DashboardPageComponent', () => {
   let fixture: ComponentFixture<DashboardPageComponent>;
   let component: DashboardPageComponent;
-  let dashboardService: { obtenerComparacion: ReturnType<typeof vi.fn> };
+  let emisionesService: { obtenerComparacion: ReturnType<typeof vi.fn> };
   let toastService: { error: ReturnType<typeof vi.fn> };
 
   const comparacionBase: ComparacionEmisionesResponse = {
@@ -22,7 +23,7 @@ describe('DashboardPageComponent', () => {
   };
 
   beforeEach(async () => {
-    dashboardService = {
+    emisionesService = {
       obtenerComparacion: vi.fn().mockReturnValue(of(comparacionBase)),
     };
     toastService = {
@@ -34,7 +35,7 @@ describe('DashboardPageComponent', () => {
       imports: [DashboardPageComponent],
       providers: [
         provideRouter([]),
-        { provide: DashboardService, useValue: dashboardService },
+        { provide: EmisionesService, useValue: emisionesService },
         { provide: ToastService, useValue: toastService },
       ],
     }).compileComponents();
@@ -45,7 +46,7 @@ describe('DashboardPageComponent', () => {
   });
 
   it('carga la comparacion con el anio actual por defecto', () => {
-    expect(dashboardService.obtenerComparacion).toHaveBeenCalledWith(new Date().getFullYear());
+    expect(emisionesService.obtenerComparacion).toHaveBeenCalledWith(new Date().getFullYear());
     expect((component as any).comparacion()).toEqual(comparacionBase);
   });
 
@@ -65,7 +66,7 @@ describe('DashboardPageComponent', () => {
   });
 
   it('muestra toast de 5 segundos si falla la carga', () => {
-    dashboardService.obtenerComparacion.mockReturnValueOnce(throwError(() => new Error('network')));
+    emisionesService.obtenerComparacion.mockReturnValueOnce(throwError(() => new Error('network')));
 
     (component as any).cargarComparacion(2026);
 

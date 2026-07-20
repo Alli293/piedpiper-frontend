@@ -10,11 +10,8 @@ import {
   SidebarConfig,
 } from '../../shared/layouts/page-layout/page-layout.component';
 import { ToastService } from '../../shared/services/toast.service';
-import {
-  ComparacionEmisionesResponse,
-  DashboardService,
-  EstadoComparacion,
-} from './dashboard.service';
+import { ComparacionEmisionesResponse, EstadoComparacion } from '../emissions/models/emision.model';
+import { EmisionesService } from '../emissions/emisiones.service';
 
 interface EstadoVisual {
   label: string;
@@ -27,7 +24,7 @@ interface EstadoVisual {
   styleUrl: './dashboard-page.component.scss',
 })
 export class DashboardPageComponent implements OnInit {
-  private readonly dashboardService = inject(DashboardService);
+  private readonly emisionesService = inject(EmisionesService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
@@ -142,7 +139,7 @@ export class DashboardPageComponent implements OnInit {
 
   private cargarComparacion(anio: number): void {
     this.cargando.set(true);
-    this.dashboardService.obtenerComparacion(anio).subscribe({
+    this.emisionesService.obtenerComparacion(anio).subscribe({
       next: (comparacion) => {
         this.comparacion.set(comparacion);
         this.cargando.set(false);

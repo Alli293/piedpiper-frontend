@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
+  ComparacionEmisionesResponse,
   EmisionEnvioResponse,
   EmisionFlotaResponse,
   EmisionResponse,
@@ -32,6 +33,11 @@ export class EmisionesService {
 
   listarEmisiones(): Observable<EmisionResponse[]> {
     return this.http.get<EmisionResponse[]>(this.baseUrl);
+  }
+
+  obtenerComparacion(anio: number): Observable<ComparacionEmisionesResponse> {
+    const params = new HttpParams().set('anio', anio);
+    return this.http.get<ComparacionEmisionesResponse>(`${this.baseUrl}/comparacion`, { params });
   }
 
   actualizarVuelo(id: string, payload: RegistrarVueloRequest): Observable<EmisionResponse> {
