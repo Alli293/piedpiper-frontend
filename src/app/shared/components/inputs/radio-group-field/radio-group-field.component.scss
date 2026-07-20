@@ -1,0 +1,26 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-2);
+}
+
+.ch-radio-group-field__label {
+  font-family: var(--ch-font-body);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--ch-text-primary);
+}
+
+.ch-radio-group-field__options {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-4);
+  height: 40px;
+}
+
+.ch-radio-group-field__error {
+  margin: 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.75rem;
+  color: var(--ch-danger);
+}

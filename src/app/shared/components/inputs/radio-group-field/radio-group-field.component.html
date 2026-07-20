@@ -1,0 +1,17 @@
+@if (label()) {
+  <span class="ch-radio-group-field__label" [id]="labelId">{{ label() }}</span>
+}
+<div
+  class="ch-radio-group-field__options"
+  appRadioGroup
+  [attr.aria-labelledby]="label() ? labelId : null"
+  [value]="value()"
+  (valueChange)="onGroupChange($event)"
+>
+  @for (option of options(); track option.value) {
+    <app-radio [value]="option.value" [label]="option.label" [disabled]="effectiveDisabled()" />
+  }
+</div>
+@if (hasError()) {
+  <p class="ch-radio-group-field__error" [id]="errorId" role="alert">{{ error() }}</p>
+}

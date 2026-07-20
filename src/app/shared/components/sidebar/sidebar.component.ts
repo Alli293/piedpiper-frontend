@@ -1,6 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { IconComponent, IconName } from '../icon/icon.component';
+import { LogoComponent } from '../logo/logo.component';
 
 export interface SidebarMenuItem {
   label: string;
@@ -17,11 +18,13 @@ export interface SidebarBottomItem {
 
 @Component({
   selector: 'app-sidebar',
-  imports: [AvatarComponent, IconComponent],
+  imports: [AvatarComponent, IconComponent, LogoComponent],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
   host: {
     class: 'ch-sidebar',
+    role: 'complementary',
+    'aria-label': 'Barra lateral',
   },
 })
 export class SidebarComponent {

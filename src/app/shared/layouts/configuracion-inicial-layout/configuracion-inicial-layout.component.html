@@ -1,0 +1,12 @@
+<div class="ch-config-inicial-layout__topbar">
+  <app-logo variant="on-dark" [iconSize]="24" textSize="18px" />
+  <span class="ch-config-inicial-layout__divider" aria-hidden="true"></span>
+  <span class="ch-config-inicial-layout__step">Configuración inicial</span>
+</div>
+
+<div class="ch-config-inicial-layout__body">
+  <div class="ch-config-inicial-layout__card">
+    <app-badge variant="success" [icon]="rolIcon()">{{ rolLabel() }}</app-badge>
+    <ng-content />
+  </div>
+</div>

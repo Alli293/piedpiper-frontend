@@ -1,16 +1,15 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/auth/auth.guard';
 
 const cargarPlaceholder = () =>
   import('./pages/placeholder/placeholder-page.component').then((m) => m.PlaceholderPageComponent);
 
 export const rutasPostAutenticacion = [
   'panel',
-  'empresa/configuracion-inicial',
   'empresa/panel',
   'auditor/configuracion-inicial',
   'auditor/panel',
   'auditor/validacion-pendiente',
-  'perfil/configuracion-inicial',
   'admin/panel',
 ];
 
@@ -49,14 +48,66 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'validacion-pendiente',
+    loadComponent: () =>
+      import('./pages/validacion-pendiente/validacion-pendiente-page.component').then(
+        (m) => m.ValidacionPendientePageComponent
+      ),
+  },
+  {
+    path: 'limites',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/limites/limites-page.component').then((m) => m.LimitesPageComponent),
+  },
+  {
+    path: 'empresa/configuracion-inicial',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/empresa/configuracion-inicial-page.component').then(
+        (m) => m.ConfiguracionInicialPageComponent
+      ),
+  },
+  {
+    path: 'perfil/configuracion-inicial',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/perfil/configuracion-inicial-perfil-page.component').then(
+        (m) => m.ConfiguracionInicialPerfilPageComponent
+      ),
+  },
+  {
     path: 'ui-kit',
     loadComponent: () =>
       import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),
   },
   ...rutasPostAutenticacion.map((path) => ({ path, loadComponent: cargarPlaceholder })),
   {
+    path: 'emisiones/registrar',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/emissions/register-emission/register-emission-page.component').then(
+        (m) => m.RegisterEmissionPageComponent
+      ),
+  },
+  {
+    path: 'configuracion',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/configuracion/configuracion-page.component').then(
+        (m) => m.ConfiguracionPageComponent
+      ),
+  },
+  {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full' as const,
+  },
+  {
+    path: '**',
+    loadComponent: () =>
+      import('./pages/errors/not-found/not-found-page.component').then(
+        (m) => m.NotFoundPageComponent
+      ),
   },
 ];

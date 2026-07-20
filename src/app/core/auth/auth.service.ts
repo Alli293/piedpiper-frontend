@@ -2,7 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, LoginRequest } from './auth.models';
+import {
+  AuthResponse,
+  LoginRequest,
+  RegistroEmpresaCorreoRequest,
+  RegistroPendienteResponse,
+  RegistroUsuarioCorreoRequest,
+} from './auth.models';
 
 const TOKEN_KEY = 'carbonhub.token';
 
@@ -42,6 +48,37 @@ export class AuthService {
         aceptaTerminos,
       })
       .pipe(tap((response) => this.guardarSesion(response)));
+  }
+
+  registrarAuditorCorreo(body: {
+    nombre: string;
+    apellidos: string;
+    email: string;
+    contrasena: string;
+    aceptaTerminos: boolean;
+  }): Observable<{ mensaje: string; email: string }> {
+    return this.http.post<{ mensaje: string; email: string }>(
+      `${this.baseUrl}/registro/auditor/correo`,
+      body
+    );
+  }
+
+  registrarEmpresaConCorreo(
+    datos: RegistroEmpresaCorreoRequest
+  ): Observable<RegistroPendienteResponse> {
+    return this.http.post<RegistroPendienteResponse>(
+      `${this.baseUrl}/registro/empresa/correo`,
+      datos
+    );
+  }
+
+  registrarUsuarioConCorreo(
+    datos: RegistroUsuarioCorreoRequest
+  ): Observable<RegistroPendienteResponse> {
+    return this.http.post<RegistroPendienteResponse>(
+      `${this.baseUrl}/registro/usuario/correo`,
+      datos
+    );
   }
 
   private login(request: LoginRequest): Observable<AuthResponse> {
