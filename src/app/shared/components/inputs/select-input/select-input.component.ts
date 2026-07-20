@@ -29,15 +29,22 @@ export class SelectInputComponent implements ControlValueAccessor {
   options = input.required<SelectOption[]>();
   placeholder = input('Seleccionar...');
   error = input('');
+  hint = input('');
   disabled = input(false);
 
   protected readonly inputId = `ch-select-input-${nextId++}`;
   protected readonly errorId = `${this.inputId}-error`;
+  protected readonly hintId = `${this.inputId}-hint`;
 
   protected readonly formDisabled = signal(false);
   protected readonly effectiveDisabled = computed(() => this.disabled() || this.formDisabled());
 
   protected readonly hasError = computed(() => this.error().length > 0);
+  protected readonly describedBy = computed(() => {
+    if (this.hasError()) return this.errorId;
+    if (this.hint()) return this.hintId;
+    return null;
+  });
 
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};

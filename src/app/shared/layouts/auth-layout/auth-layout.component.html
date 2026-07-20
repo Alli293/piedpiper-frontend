@@ -1,13 +1,11 @@
 <aside class="ch-auth-layout__hero">
-  <div class="ch-auth-layout__brand">
-    <img
-      class="ch-auth-layout__logo"
-      src="images/logos/isotipo-mono-white.svg"
-      alt=""
-      aria-hidden="true"
-    />
-    <span class="ch-auth-layout__brand-name">CarbonHub</span>
-  </div>
+  <app-logo
+    class="ch-auth-layout__brand"
+    variant="on-dark"
+    [iconSize]="34"
+    textSize="22px"
+    gap="var(--ch-space-3)"
+  />
 
   <div class="ch-auth-layout__hero-body">
     <h2 class="ch-auth-layout__tagline">Gestiona tu huella.<br />Certifica tu impacto.</h2>
@@ -32,6 +30,18 @@
   <img
     class="ch-auth-layout__watermark"
     src="images/logos/isotipo-mono-white.svg"
+    alt=""
+    aria-hidden="true"
+  />
+  <img
+    class="ch-auth-layout__fingerprint"
+    src="images/logos/carbonhub-fingerprint-leaf.svg"
+    alt=""
+    aria-hidden="true"
+  />
+  <img
+    class="ch-auth-layout__circles"
+    src="images/logos/carbonhub-circles.svg"
     alt=""
     aria-hidden="true"
   />

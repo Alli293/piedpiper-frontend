@@ -1,0 +1,30 @@
+@use '../../styles/mixins';
+
+:host {
+  display: flex;
+  align-items: center;
+}
+
+.ch-logo__icon {
+  flex-shrink: 0;
+}
+
+.ch-logo__text {
+  font-family: var(--ch-font-heading);
+}
+
+.ch-logo__carbon {
+  font-weight: 600;
+}
+
+.ch-logo__hub {
+  font-weight: 500;
+}
+
+.ch-logo__text--hide-mobile {
+  display: none;
+
+  @include mixins.desktop-up {
+    display: inline;
+  }
+}

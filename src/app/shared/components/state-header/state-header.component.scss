@@ -1,0 +1,33 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  box-sizing: border-box;
+  padding: 0 var(--ch-space-6);
+  background: var(--ch-bg-white);
+  border-bottom: 1px solid var(--ch-border);
+}
+
+.ch-state-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-5);
+}
+
+.ch-state-header__help {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-1);
+  font-family: var(--ch-font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ch-text-secondary);
+}
+
+.ch-state-header__login {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-1);
+  font-size: 0.8125rem;
+}

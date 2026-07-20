@@ -18,21 +18,7 @@
 }
 
 .ch-auth-layout__brand {
-  display: flex;
-  align-items: center;
-  gap: var(--ch-space-3);
   z-index: 1;
-}
-
-.ch-auth-layout__logo {
-  width: 34px;
-  height: 34px;
-}
-
-.ch-auth-layout__brand-name {
-  font-family: var(--ch-font-heading);
-  font-size: 22px;
-  font-weight: 700;
 }
 
 .ch-auth-layout__hero-body {
@@ -102,6 +88,27 @@
   width: 360px;
   height: 360px;
   opacity: 0.05;
+  pointer-events: none;
+  display: none;
+}
+
+.ch-auth-layout__fingerprint {
+  position: absolute;
+  right: -30px;
+  bottom: -30px;
+  width: 320px;
+  height: 320px;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.ch-auth-layout__circles {
+  position: absolute;
+  right: -20px;
+  bottom: -20px;
+  width: 360px;
+  height: 360px;
+  opacity: 0.4;
   pointer-events: none;
 }
 

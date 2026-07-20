@@ -10,38 +10,15 @@
 .registro__back {
   align-self: flex-start;
   margin-bottom: var(--ch-space-5);
-  color: var(--ch-text-secondary);
   font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.registro__back:hover {
-  color: var(--ch-text-primary);
 }
 
 .registro__badge {
   align-self: flex-start;
-  padding: var(--ch-space-1) var(--ch-space-3);
-  border-radius: var(--ch-radius-pill);
-  background: var(--ch-green-soft);
-  color: var(--ch-green-dark);
-  font-family: var(--ch-font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
 }
 
 .registro__header {
-  margin: var(--ch-space-5) 0 var(--ch-space-6);
-}
-
-.registro__title {
-  margin: 0;
-  font-family: var(--ch-font-heading);
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--ch-text-primary);
+  margin: var(--ch-space-5) 0 var(--ch-space-4);
 }
 
 .registro__subtitle {
@@ -51,6 +28,41 @@
   line-height: 1.5;
 }
 
+app-semantic-card {
+  margin: 0 0 var(--ch-space-5);
+}
+
+.registro__card-steps {
+  list-style: decimal;
+  margin: var(--ch-space-2) 0 0;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.registro__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-2);
+}
+
+.registro__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-4);
+  margin: var(--ch-space-5) 0;
+  color: var(--ch-text-muted);
+  font-size: 13px;
+}
+
+.registro__divider::before,
+.registro__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--ch-border);
+}
+
 .registro__google {
   display: flex;
   justify-content: center;
@@ -58,9 +70,10 @@
 }
 
 .registro__error {
-  margin: var(--ch-space-3) 0 0;
+  margin: var(--ch-space-4) 0 0;
   color: var(--ch-danger);
   font-size: 14px;
+  font-weight: 600;
 }
 
 .registro__terms {
@@ -68,18 +81,6 @@
   font-size: 13px;
   line-height: 1.5;
   color: var(--ch-text-secondary);
-}
-
-.registro__terms a,
-.registro__login a {
-  color: var(--ch-blue-mid);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.registro__terms a:hover,
-.registro__login a:hover {
-  text-decoration: underline;
 }
 
 .registro__login {

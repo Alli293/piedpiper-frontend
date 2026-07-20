@@ -1,0 +1,35 @@
+<app-state-layout>
+  <div class="not-found-page">
+    <div class="not-found-page__art" aria-hidden="true">
+      <app-icon name="page-not-found" [size]="48" />
+    </div>
+
+    <div class="not-found-page__code">
+      <span class="not-found-page__code-line"></span>
+      <span>Error 404</span>
+      <span class="not-found-page__code-line"></span>
+    </div>
+
+    <app-heading level="h1" text="Página no encontrada" />
+
+    <p class="not-found-page__message">
+      La página que buscas no existe o fue movida. Revisa la dirección o vuelve al inicio para
+      seguir navegando.
+    </p>
+
+    <div class="not-found-page__actions">
+      <app-button variant="primary" size="lg" routerLink="/">
+        <span class="not-found-page__button-content">
+          <app-icon name="home" [size]="16" />
+          Volver al inicio
+        </span>
+      </app-button>
+      <app-button variant="link" (click)="goBack()">
+        <span class="not-found-page__button-content">
+          <app-icon name="volver" [size]="14" />
+          Regresar a la página anterior
+        </span>
+      </app-button>
+    </div>
+  </div>
+</app-state-layout>
