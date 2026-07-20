@@ -56,7 +56,7 @@ describe('ConfiguracionPageComponent', () => {
     expect(i18n.idioma()).toBe('INGLES');
   });
 
-  it('muestra el spinner y deshabilita el botón durante el guardado', () => {
+  it('muestra el spinner y deshabilita el botón durante el guardado', async () => {
     flushCargaInicial();
 
     botonGuardar().click();
@@ -66,6 +66,7 @@ describe('ConfiguracionPageComponent', () => {
     expect(fixture.nativeElement.querySelector('.ch-button__spinner')).not.toBeNull();
 
     httpMock.expectOne(PreferenciasService.URL).flush(GUARDADAS);
+    await fixture.whenStable();
     fixture.detectChanges();
 
     expect(botonGuardar().disabled).toBe(false);
@@ -92,7 +93,7 @@ describe('ConfiguracionPageComponent', () => {
     expect(titulo.textContent).toContain('Interface preferences');
   });
 
-  it('si la persistencia falla muestra el toast de error y mantiene las preferencias previas', () => {
+  it('si la persistencia falla muestra el toast de error y mantiene las preferencias previas', async () => {
     flushCargaInicial();
 
     const idiomaSelect = selects()[0];
@@ -104,6 +105,7 @@ describe('ConfiguracionPageComponent', () => {
     httpMock
       .expectOne(PreferenciasService.URL)
       .flush({ message: 'error' }, { status: 500, statusText: 'Internal Server Error' });
+    await fixture.whenStable();
     fixture.detectChanges();
 
     const mensajes = toastService.toasts().map((t) => t.title);

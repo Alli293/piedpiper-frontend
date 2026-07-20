@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { disabled, form, FormField, schema, submit, validate } from '@angular/forms/signals';
 import { ConfiguracionInicialLayoutComponent } from '../../shared/layouts/configuracion-inicial-layout/configuracion-inicial-layout.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -180,12 +181,17 @@ export class ConfiguracionInicialPerfilPageComponent implements OnInit {
     });
   }
 
-  protected guardar(): void {
+  protected handleSubmit(event: Event): void {
+    event.preventDefault();
+    void this.onSubmit();
+  }
+
+  private async onSubmit(): Promise<void> {
     if (this.guardando()) {
       return;
     }
 
-    void submit(this.perfilForm, {
+    await submit(this.perfilForm, {
       action: async (field) => {
         const value = field().value();
         const request: PerfilInicialRequest = {
@@ -205,19 +211,19 @@ export class ConfiguracionInicialPerfilPageComponent implements OnInit {
         }
 
         this.guardando.set(true);
-        this.perfilService.completar(request).subscribe({
-          next: (perfil) => {
-            this.i18n.usarIdioma(perfil.preferencias.idioma);
-            this.guardando.set(false);
-            this.router.navigateByUrl(perfil.redirect || '/').catch((err) => {
-              console.error('Error al navegar tras completar el perfil inicial:', err);
-            });
-          },
-          error: () => {
-            this.guardando.set(false);
-            this.toastService.error(this.i18n.t('perfil.errorGuardar'));
-          },
-        });
+        try {
+          const perfil = await firstValueFrom(this.perfilService.completar(request));
+          this.i18n.usarIdioma(perfil.preferencias.idioma);
+          this.guardando.set(false);
+          try {
+            await this.router.navigateByUrl(perfil.redirect || '/');
+          } catch (err: unknown) {
+            console.error('Error al navegar tras completar el perfil inicial:', err);
+          }
+        } catch (err: unknown) {
+          this.guardando.set(false);
+          this.toastService.error(this.i18n.t('perfil.errorGuardar'));
+        }
         return undefined;
       },
       onInvalid: (field) => field().markAsTouched(),

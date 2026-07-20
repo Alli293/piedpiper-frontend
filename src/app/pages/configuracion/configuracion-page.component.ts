@@ -1,4 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import { disabled, form, FormField, schema, submit } from '@angular/forms/signals';
 import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { CardComponent } from '../../shared/components/card/card.component';
@@ -16,11 +18,19 @@ import {
   OPCIONES_MONEDA,
   OPCIONES_UNIDADES,
   Preferencias,
+  PREFERENCIAS_POR_DEFECTO,
 } from '../../core/models/preferencias.model';
+
+interface PreferenciasFormModel {
+  idioma: Idioma;
+  moneda: Moneda;
+  unidades: Unidades;
+}
 
 @Component({
   selector: 'app-configuracion-page',
   imports: [
+    FormField,
     ShellLayoutComponent,
     CardComponent,
     ButtonComponent,
@@ -42,9 +52,16 @@ export class ConfiguracionPageComponent implements OnInit {
   protected readonly cargando = signal(true);
   protected readonly guardando = signal(false);
 
-  protected readonly idioma = signal<Idioma>('ESPANOL');
-  protected readonly moneda = signal<Moneda>('CRC');
-  protected readonly unidades = signal<Unidades>('METRICO');
+  protected readonly model = signal<PreferenciasFormModel>({ ...PREFERENCIAS_POR_DEFECTO });
+
+  protected readonly preferenciasForm = form(
+    this.model,
+    schema<PreferenciasFormModel>((path) => {
+      disabled(path.idioma, { when: () => this.guardando() });
+      disabled(path.moneda, { when: () => this.guardando() });
+      disabled(path.unidades, { when: () => this.guardando() });
+    })
+  );
 
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: this.i18n.t('config.seccion').toUpperCase(),
@@ -63,47 +80,40 @@ export class ConfiguracionPageComponent implements OnInit {
     });
   }
 
-  protected guardar(): void {
+  protected handleSubmit(event: Event): void {
+    event.preventDefault();
+    void this.onSubmit();
+  }
+
+  private async onSubmit(): Promise<void> {
     if (this.guardando()) {
       return;
     }
-    this.guardando.set(true);
 
-    this.preferenciasService
-      .actualizar({
-        idioma: this.idioma(),
-        moneda: this.moneda(),
-        unidades: this.unidades(),
-      })
-      .subscribe({
-        next: (guardadas) => {
+    await submit(this.preferenciasForm, {
+      action: async (field) => {
+        const value = field().value();
+        this.guardando.set(true);
+        try {
+          const guardadas = await firstValueFrom(this.preferenciasService.actualizar(value));
           this.aplicarSeleccion(guardadas);
           this.guardando.set(false);
           this.toastService.success(this.i18n.t('config.guardarExito'));
-        },
-        error: () => {
+        } catch (err: unknown) {
           this.aplicarSeleccion(this.preferenciasService.preferencias());
           this.guardando.set(false);
           this.toastService.error(this.i18n.t('config.errorGuardar'));
-        },
-      });
-  }
-
-  protected onIdiomaChange(valor: string): void {
-    this.idioma.set(valor as Idioma);
-  }
-
-  protected onMonedaChange(valor: string): void {
-    this.moneda.set(valor as Moneda);
-  }
-
-  protected onUnidadesChange(valor: string): void {
-    this.unidades.set(valor as Unidades);
+        }
+        return undefined;
+      },
+    });
   }
 
   private aplicarSeleccion(preferencias: Preferencias): void {
-    this.idioma.set(preferencias.idioma);
-    this.moneda.set(preferencias.moneda);
-    this.unidades.set(preferencias.unidades);
+    this.model.set({
+      idioma: preferencias.idioma,
+      moneda: preferencias.moneda,
+      unidades: preferencias.unidades,
+    });
   }
 }

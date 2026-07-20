@@ -20,23 +20,12 @@
         [formField]="loginForm.email"
       />
 
-      <div class="login__password">
-        <app-text-input
-          label="Contraseña"
-          [type]="mostrarContrasena() ? 'text' : 'password'"
-          autocomplete="current-password"
-          placeholder="Tu contraseña"
-          [formField]="loginForm.contrasena"
-        />
-        <button
-          type="button"
-          class="login__password-toggle"
-          [attr.aria-label]="mostrarContrasena() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-          (click)="alternarContrasena()"
-        >
-          <app-icon [name]="mostrarContrasena() ? 'ocultar' : 'ver'" [size]="18" />
-        </button>
-      </div>
+      <app-password-input
+        label="Contraseña"
+        autocomplete="current-password"
+        placeholder="Tu contraseña"
+        [formField]="loginForm.contrasena"
+      />
 
       @if (error()) {
         <p class="login__error" role="alert">{{ error() }}</p>

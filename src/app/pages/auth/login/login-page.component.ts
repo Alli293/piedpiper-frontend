@@ -18,11 +18,12 @@ import {
   schema,
   submit,
 } from '@angular/forms/signals';
+import { firstValueFrom } from 'rxjs';
 import { AuthLayoutComponent } from '../../../shared/layouts/auth-layout/auth-layout.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
-import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { PasswordInputComponent } from '../../../shared/components/inputs/password-input/password-input.component';
 import { AuthService } from '../../../core/auth/auth.service';
 import { GoogleIdentityService } from '../../../core/auth/google-identity.service';
 import { AuthResponse } from '../../../core/auth/auth.models';
@@ -43,7 +44,7 @@ const REQUIRED_MESSAGE = 'Ingresa tu correo y contraseña.';
     ButtonComponent,
     HeadingComponent,
     TextInputComponent,
-    IconComponent,
+    PasswordInputComponent,
     RouterLink,
   ],
   templateUrl: './login-page.component.html',
@@ -70,7 +71,6 @@ export class LoginPageComponent {
     })
   );
 
-  protected readonly mostrarContrasena = signal(false);
   protected readonly cargando = signal(false);
   protected readonly serverError = signal('');
 
@@ -91,14 +91,10 @@ export class LoginPageComponent {
     afterNextRender(() => {
       this.googleIdentity
         .renderizarBoton(this.googleButton().nativeElement, (idToken) =>
-          this.zone.run(() => this.autenticar(this.authService.loginConGoogle(idToken)))
+          this.zone.run(() => this.autenticarConGoogle(idToken))
         )
         .catch(() => this.serverError.set('No se pudo cargar el inicio de sesión con Google.'));
     });
-  }
-
-  protected alternarContrasena(): void {
-    this.mostrarContrasena.update((v) => !v);
   }
 
   protected enviar(event?: Event): void {
@@ -109,17 +105,31 @@ export class LoginPageComponent {
     void submit(this.loginForm, {
       action: async (field) => {
         const value = field().value();
-        this.autenticar(this.authService.loginConCorreo(value.email.trim(), value.contrasena));
+        await this.iniciarSesion(value.email.trim(), value.contrasena);
         return undefined;
       },
       onInvalid: (field) => field().markAsTouched(),
     });
   }
 
-  private autenticar(peticion: ReturnType<AuthService['loginConCorreo']>): void {
+  private async iniciarSesion(email: string, contrasena: string): Promise<void> {
     this.cargando.set(true);
     this.serverError.set('');
-    peticion.subscribe({
+    try {
+      const respuesta = await firstValueFrom(this.authService.loginConCorreo(email, contrasena));
+      this.cargando.set(false);
+      this.redirigir(respuesta);
+    } catch (err: unknown) {
+      this.cargando.set(false);
+      const message = (err as { error?: { message?: string } })?.error?.message;
+      this.serverError.set(message ?? 'No pudimos iniciar sesión. Intenta nuevamente.');
+    }
+  }
+
+  private autenticarConGoogle(idToken: string): void {
+    this.cargando.set(true);
+    this.serverError.set('');
+    this.authService.loginConGoogle(idToken).subscribe({
       next: (respuesta) => {
         this.cargando.set(false);
         this.redirigir(respuesta);

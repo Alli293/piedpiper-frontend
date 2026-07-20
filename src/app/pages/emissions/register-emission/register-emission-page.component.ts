@@ -554,7 +554,7 @@ export class RegisterEmissionPageComponent {
         );
         this.model.set({ ...INITIAL_MODEL });
         this.registerForm().reset();
-      } catch (error) {
+      } catch (error: unknown) {
         this.reportSubmissionError(error);
       }
       return undefined;
@@ -581,7 +581,7 @@ export class RegisterEmissionPageComponent {
       this.flightModel.set(cloneFlightModel(INITIAL_FLIGHT_MODEL));
       this.flightTouched.set(new Set());
       this.flightSubmitted.set(false);
-    } catch (error) {
+    } catch (error: unknown) {
       this.reportSubmissionError(error);
     } finally {
       this.flightSubmitting.set(false);
@@ -611,7 +611,7 @@ export class RegisterEmissionPageComponent {
         );
         this.flotaModel.set({ ...INITIAL_FLOTA_MODEL });
         this.flotaForm().reset();
-      } catch (error) {
+      } catch (error: unknown) {
         this.reportSubmissionError(error);
       }
       return undefined;
@@ -642,7 +642,7 @@ export class RegisterEmissionPageComponent {
         );
         this.envioModel.set({ ...INITIAL_ENVIO_MODEL });
         this.envioForm().reset();
-      } catch (error) {
+      } catch (error: unknown) {
         this.reportSubmissionError(error);
       }
       return undefined;

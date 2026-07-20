@@ -257,7 +257,7 @@ export class LimitesPageComponent {
           );
           this.salirModoEdicion(false);
           this.cargarLimites();
-        } catch (error) {
+        } catch (error: unknown) {
           this.manejarErrorGuardado(error, request.anio);
         }
         return undefined;

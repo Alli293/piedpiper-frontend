@@ -11,50 +11,46 @@
       @if (cargando()) {
         <p class="ch-configuracion__cargando">{{ i18n.t('config.cargando') }}</p>
       } @else {
-        <div class="ch-configuracion__campos">
-          <div class="ch-configuracion__campo">
-            <app-select-input
-              [label]="i18n.t('config.idioma')"
-              [options]="opcionesIdioma"
-              [value]="idioma()"
-              [disabled]="guardando()"
-              (valueChange)="onIdiomaChange($event)"
-            />
+        <form novalidate (submit)="handleSubmit($event)">
+          <div class="ch-configuracion__campos">
+            <div class="ch-configuracion__campo">
+              <app-select-input
+                [label]="i18n.t('config.idioma')"
+                [options]="opcionesIdioma"
+                [formField]="preferenciasForm.idioma"
+              />
+            </div>
+
+            <div class="ch-configuracion__campo">
+              <app-select-input
+                [label]="i18n.t('config.moneda')"
+                [options]="opcionesMoneda"
+                [formField]="preferenciasForm.moneda"
+              />
+            </div>
+
+            <div class="ch-configuracion__campo">
+              <app-select-input
+                [label]="i18n.t('config.unidades')"
+                [options]="opcionesUnidades"
+                [formField]="preferenciasForm.unidades"
+              />
+              <p class="ch-configuracion__nota">{{ i18n.t('config.notaEmisiones') }}</p>
+            </div>
           </div>
 
-          <div class="ch-configuracion__campo">
-            <app-select-input
-              [label]="i18n.t('config.moneda')"
-              [options]="opcionesMoneda"
-              [value]="moneda()"
+          <div class="ch-configuracion__acciones">
+            <app-button
+              data-testid="guardar-preferencias"
+              variant="primary"
+              type="submit"
+              [loading]="guardando()"
               [disabled]="guardando()"
-              (valueChange)="onMonedaChange($event)"
-            />
+            >
+              {{ i18n.t('config.guardar') }}
+            </app-button>
           </div>
-
-          <div class="ch-configuracion__campo">
-            <app-select-input
-              [label]="i18n.t('config.unidades')"
-              [options]="opcionesUnidades"
-              [value]="unidades()"
-              [disabled]="guardando()"
-              (valueChange)="onUnidadesChange($event)"
-            />
-            <p class="ch-configuracion__nota">{{ i18n.t('config.notaEmisiones') }}</p>
-          </div>
-        </div>
-
-        <div class="ch-configuracion__acciones">
-          <app-button
-            data-testid="guardar-preferencias"
-            variant="primary"
-            [loading]="guardando()"
-            [disabled]="guardando()"
-            (click)="guardar()"
-          >
-            {{ i18n.t('config.guardar') }}
-          </app-button>
-        </div>
+        </form>
       }
     </app-card>
   </div>
