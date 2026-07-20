@@ -108,8 +108,8 @@
   align-items: center;
   justify-content: center;
   padding: var(--ch-space-5);
-  background: rgba(14, 42, 59, 0.45);
-  z-index: 50;
+  background: var(--ch-overlay-scrim);
+  z-index: var(--ch-z-overlay);
 }
 
 .invitaciones__modal {
