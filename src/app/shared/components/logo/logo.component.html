@@ -1,10 +1,10 @@
 <img
   class="ch-logo__icon"
-  [src]="iconSrc()"
+  [ngSrc]="iconSrc()"
   [alt]="iconAlt()"
   [attr.aria-hidden]="iconAlt() ? null : 'true'"
-  [style.width.px]="iconSize()"
-  [style.height.px]="iconSize()"
+  [width]="iconSize()"
+  [height]="iconSize()"
 />
 @if (type() === 'full') {
   <span

@@ -1,3 +1,4 @@
+import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
 
 export type LogoVariant = 'on-dark' | 'on-light';
@@ -20,6 +21,7 @@ const HUB_COLOR: Record<LogoVariant, string> = {
 
 @Component({
   selector: 'app-logo',
+  imports: [NgOptimizedImage],
   templateUrl: './logo.component.html',
   styleUrl: './logo.component.scss',
   host: {
