@@ -97,6 +97,33 @@ describe('VerificarCorreoPageComponent', () => {
     expect(root.querySelector('form')).not.toBeNull();
   });
 
+  it('reenviar con correo vacio o invalido muestra error y no llama al backend', async () => {
+    authService.verificarCorreo.mockReturnValue(
+      throwError(() => ({ status: 410, error: { message: 'expiró' } }))
+    );
+
+    const fixture = crear();
+    const root = fixture.nativeElement as HTMLElement;
+
+    const form = root.querySelector('form') as HTMLFormElement;
+    form.dispatchEvent(new Event('submit', { cancelable: true }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(root.textContent).toContain('Ingresa un correo electrónico válido.');
+    expect(authService.reenviarVerificacion).not.toHaveBeenCalled();
+
+    const emailInput = root.querySelector<HTMLInputElement>('input[type="email"]')!;
+    emailInput.value = 'no-es-un-correo';
+    emailInput.dispatchEvent(new Event('input'));
+    form.dispatchEvent(new Event('submit', { cancelable: true }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(root.textContent).toContain('Ingresa un correo electrónico válido.');
+    expect(authService.reenviarVerificacion).not.toHaveBeenCalled();
+  });
+
   it('reenviar con datos validos muestra el mensaje del backend', async () => {
     authService.verificarCorreo.mockReturnValue(
       throwError(() => ({ status: 410, error: { message: 'expiró' } }))

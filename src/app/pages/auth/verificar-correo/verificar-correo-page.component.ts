@@ -7,6 +7,8 @@ import { TextInputComponent } from '../../../shared/components/inputs/text-input
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { AuthService } from '../../../core/auth/auth.service';
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 @Component({
   selector: 'app-verificar-correo-page',
   imports: [
@@ -63,11 +65,18 @@ export class VerificarCorreoPageComponent implements OnInit {
     if (this.reenviarEnviando()) {
       return;
     }
-    this.reenviarEnviando.set(true);
     this.reenviarMensaje.set('');
     this.reenviarError.set('');
 
-    this.authService.reenviarVerificacion(this.reenviarEmail().trim()).subscribe({
+    const email = this.reenviarEmail().trim();
+    if (!email || !EMAIL_PATTERN.test(email)) {
+      this.reenviarError.set('Ingresa un correo electrónico válido.');
+      return;
+    }
+
+    this.reenviarEnviando.set(true);
+
+    this.authService.reenviarVerificacion(email).subscribe({
       next: (respuesta) => {
         this.reenviarEnviando.set(false);
         this.reenviarMensaje.set(respuesta.mensaje);
