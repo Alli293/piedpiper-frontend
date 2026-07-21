@@ -253,6 +253,8 @@ describe('RegisterEmissionPageComponent', () => {
     textInputs[0].dispatchEvent(new Event('input'));
     textInputs[1].value = 'yyz';
     textInputs[1].dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    clickButton(root, 'Agregar vuelta');
 
     await submitForm(fixture);
 
@@ -260,8 +262,42 @@ describe('RegisterEmissionPageComponent', () => {
       passengers: 2,
       distanceUnit: 'km',
       fechaActividad: '2026-07-01',
-      legs: [{ departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' }],
+      legs: [
+        { departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' },
+        { departureAirport: 'YYZ', destinationAirport: 'SFO', cabinClass: 'economy' },
+      ],
     });
+  });
+
+  it('adds one return leg and disables the return action for a completed round trip', async () => {
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    clickCategory(root, 'Vuelos');
+    fixture.detectChanges();
+
+    const textInputs = root.querySelectorAll<HTMLInputElement>('input[type="text"]');
+    textInputs[0].value = 'sfo';
+    textInputs[0].dispatchEvent(new Event('input'));
+    textInputs[1].value = 'yyz';
+    textInputs[1].dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    clickButton(root, 'Agregar vuelta');
+    fixture.detectChanges();
+
+    const roundTripInputs = root.querySelectorAll<HTMLInputElement>('input[type="text"]');
+    expect(root.querySelectorAll('.register-emission-page__leg')).toHaveLength(2);
+    expect(roundTripInputs[2].value).toBe('YYZ');
+    expect(roundTripInputs[3].value).toBe('SFO');
+
+    const returnButton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
+      (button) => button.textContent?.includes('Agregar vuelta')
+    );
+    expect(returnButton?.disabled).toBe(true);
+    returnButton?.click();
+    fixture.detectChanges();
+    expect(root.querySelectorAll('.register-emission-page__leg')).toHaveLength(2);
   });
 
   it('does not submit without an active session', async () => {
