@@ -5,8 +5,6 @@ const cargarPlaceholder = () =>
   import('./pages/placeholder/placeholder-page.component').then((m) => m.PlaceholderPageComponent);
 
 export const rutasPostAutenticacion = [
-  'panel',
-  'empresa/panel',
   'auditor/configuracion-inicial',
   'auditor/panel',
   'auditor/validacion-pendiente',
@@ -93,6 +91,18 @@ export const routes: Routes = [
     path: 'ui-kit',
     loadComponent: () =>
       import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),
+  },
+  {
+    path: 'panel',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent),
+  },
+  {
+    path: 'empresa/panel',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent),
   },
   ...rutasPlaceholder.map((path) => ({ path, loadComponent: cargarPlaceholder })),
   {
