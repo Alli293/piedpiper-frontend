@@ -4,6 +4,7 @@
       <div class="directorio__buscador">
         <app-text-input
           type="text"
+          label="Buscar auditor"
           placeholder="Buscar por nombre del auditor"
           autocomplete="off"
           [value]="terminoBusqueda()"
@@ -30,56 +31,61 @@
       </div>
     } @else if (sinResultados()) {
       <p class="directorio__estado">No se encontraron auditores que coincidan con tu búsqueda.</p>
-    } @else if (resultado(); as pagina) {
+    } @else if (resultado(); as paginaAuditores) {
       <div class="directorio__grid">
-        @for (auditor of pagina.contenido; track auditor.auditorId) {
-          <a class="auditor-card" [routerLink]="['/auditores', auditor.auditorId]">
+        @for (tarjeta of tarjetas(); track tarjeta.auditor.auditorId) {
+          <a
+            class="auditor-card"
+            [routerLink]="['/auditores', tarjeta.auditor.auditorId]"
+            [attr.aria-label]="'Ver perfil de ' + tarjeta.auditor.nombre"
+          >
             <header class="auditor-card__header">
               <app-avatar
                 size="md"
-                [initials]="iniciales(auditor.nombre)"
-                [imageUrl]="auditor.fotoPerfil ?? ''"
+                [initials]="tarjeta.iniciales"
+                [imageUrl]="tarjeta.auditor.fotoPerfil ?? ''"
               />
               <div class="auditor-card__id">
-                <span class="auditor-card__nombre">{{ auditor.nombre }}</span>
-                @if (ubicacion(auditor); as ubicacion) {
-                  <span class="auditor-card__ubicacion">{{ ubicacion }}</span>
+                <span class="auditor-card__nombre">{{ tarjeta.auditor.nombre }}</span>
+                @if (tarjeta.ubicacion) {
+                  <span class="auditor-card__ubicacion">{{ tarjeta.ubicacion }}</span>
                 }
               </div>
             </header>
 
             <div class="auditor-card__rating">
               <span class="auditor-card__estrellas" aria-hidden="true">
-                @for (llena of estrellas(auditor.calificacionPromedio); track $index) {
+                @for (llena of tarjeta.estrellas; track $index) {
                   <span [class.auditor-card__estrella--llena]="llena">★</span>
                 }
               </span>
-              @if (auditor.calificacionPromedio !== null) {
+              @if (tarjeta.auditor.calificacionPromedio !== null) {
                 <span class="auditor-card__nota">
-                  {{ auditor.calificacionPromedio }} · {{ auditor.totalResenas }} reseñas
+                  {{ tarjeta.auditor.calificacionPromedio }} ·
+                  {{ tarjeta.auditor.totalResenas }} reseñas
                 </span>
               } @else {
                 <span class="auditor-card__nota">Sin calificaciones aún</span>
               }
             </div>
 
-            @if (auditor.especialidadesPrincipales.length > 0) {
+            @if (tarjeta.etiquetas.length > 0) {
               <div class="auditor-card__especialidades">
-                @for (esp of auditor.especialidadesPrincipales; track esp) {
-                  <app-badge variant="neutral">{{ especialidad(esp) }}</app-badge>
+                @for (etiqueta of tarjeta.etiquetas; track etiqueta) {
+                  <app-badge variant="neutral">{{ etiqueta }}</app-badge>
                 }
               </div>
             }
 
             <footer class="auditor-card__footer">
               <span class="auditor-card__auditorias">
-                <strong>{{ auditor.auditoriasCompletadas }}</strong> auditorías completadas
+                <strong>{{ tarjeta.auditor.auditoriasCompletadas }}</strong> auditorías completadas
               </span>
               <span
                 class="auditor-card__disponible"
-                [class.auditor-card__disponible--activo]="auditor.disponible"
+                [class.auditor-card__disponible--activo]="tarjeta.auditor.disponible"
               >
-                {{ auditor.disponible ? 'Disponible' : 'No disponible' }}
+                {{ tarjeta.auditor.disponible ? 'Disponible' : 'No disponible' }}
               </span>
             </footer>
 
@@ -88,21 +94,21 @@
         }
       </div>
 
-      @if (pagina.totalPaginas > 1) {
+      @if (paginaAuditores.totalPaginas > 1) {
         <nav class="directorio__paginacion" aria-label="Paginación del directorio">
           <app-button
             variant="secondary"
             size="sm"
-            [disabled]="pagina.paginaActual === 0"
-            (click)="irAPagina(pagina.paginaActual - 1)"
+            [disabled]="paginaAuditores.paginaActual === 0"
+            (click)="irAPagina(paginaAuditores.paginaActual - 1)"
           >
             Anterior
           </app-button>
           @for (numero of paginas(); track numero) {
             <app-button
-              [variant]="numero === pagina.paginaActual ? 'primary' : 'tertiary'"
+              [variant]="numero === paginaAuditores.paginaActual ? 'primary' : 'tertiary'"
               size="sm"
-              [attr.aria-current]="numero === pagina.paginaActual ? 'page' : null"
+              [attr.aria-current]="numero === paginaAuditores.paginaActual ? 'page' : null"
               (click)="irAPagina(numero)"
             >
               {{ numero + 1 }}
@@ -111,16 +117,18 @@
           <app-button
             variant="secondary"
             size="sm"
-            [disabled]="pagina.paginaActual + 1 >= pagina.totalPaginas"
-            (click)="irAPagina(pagina.paginaActual + 1)"
+            [disabled]="paginaAuditores.paginaActual + 1 >= paginaAuditores.totalPaginas"
+            (click)="irAPagina(paginaAuditores.paginaActual + 1)"
           >
             Siguiente
           </app-button>
         </nav>
       }
 
-      @if (pagina.contenido.length > 0) {
-        <p class="directorio__conteo">{{ pagina.totalResultados }} auditores en el directorio</p>
+      @if (paginaAuditores.contenido.length > 0) {
+        <p class="directorio__conteo">
+          {{ paginaAuditores.totalResultados }} auditores en el directorio
+        </p>
       }
     }
   </section>

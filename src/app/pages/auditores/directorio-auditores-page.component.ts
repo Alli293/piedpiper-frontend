@@ -15,8 +15,15 @@ import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.compo
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { apiErrorMessage } from '../../shared/utils/http-error.utils';
+import { inicialesDe } from '../../shared/utils/iniciales.utils';
 import { AuditoresService } from './auditores.service';
-import { AuditorResumen, OrdenamientoAuditores, PaginaAuditores } from './auditor.model';
+import {
+  AuditorResumen,
+  LONGITUD_MAXIMA_BUSQUEDA,
+  LONGITUD_MINIMA_BUSQUEDA,
+  OrdenamientoAuditores,
+  PaginaAuditores,
+} from './auditor.model';
 
 const ESPECIALIDAD_ETIQUETAS: Record<string, string> = {
   AGROINDUSTRIA: 'Agroindustria',
@@ -37,6 +44,14 @@ const PROVINCIA_ETIQUETAS: Record<string, string> = {
 };
 
 const TOTAL_ESTRELLAS = 5;
+
+interface TarjetaAuditor {
+  auditor: AuditorResumen;
+  iniciales: string;
+  estrellas: boolean[];
+  ubicacion: string;
+  etiquetas: string[];
+}
 
 @Component({
   selector: 'app-directorio-auditores-page',
@@ -88,14 +103,44 @@ export class DirectorioAuditoresPageComponent {
     () => !this.cargando() && !this.error() && this.resultado()?.contenido.length === 0
   );
 
+  protected readonly tarjetas = computed<TarjetaAuditor[]>(
+    () => this.resultado()?.contenido.map((auditor) => this.tarjeta(auditor)) ?? []
+  );
+
+  protected readonly paginas = computed<number[]>(() =>
+    Array.from({ length: this.resultado()?.totalPaginas ?? 0 }, (_, indice) => indice)
+  );
+
   private readonly criterios = computed(() => ({
-    termino: this.terminoBusqueda().trim(),
+    termino: this.terminoNormalizado(),
     orden: this.ordenamiento(),
     pagina: this.pagina(),
     recarga: this.recarga(),
   }));
 
   constructor() {
+    this.iniciarBusquedaReactiva();
+  }
+
+  protected onBuscar(valor: string): void {
+    this.terminoBusqueda.set(valor);
+    this.pagina.set(0);
+  }
+
+  protected onOrdenar(valor: string): void {
+    this.ordenamiento.set(valor as OrdenamientoAuditores);
+    this.pagina.set(0);
+  }
+
+  protected irAPagina(numeroPagina: number): void {
+    this.pagina.set(numeroPagina);
+  }
+
+  protected reintentar(): void {
+    this.recarga.update((valor) => valor + 1);
+  }
+
+  private iniciarBusquedaReactiva(): void {
     toObservable(this.criterios)
       .pipe(
         debounceTime(250),
@@ -140,51 +185,30 @@ export class DirectorioAuditoresPageComponent {
       });
   }
 
-  protected onBuscar(valor: string): void {
-    this.terminoBusqueda.set(valor);
-    this.pagina.set(0);
+  private terminoNormalizado(): string {
+    const termino = this.terminoBusqueda().trim();
+    if (termino.length < LONGITUD_MINIMA_BUSQUEDA || termino.length > LONGITUD_MAXIMA_BUSQUEDA) {
+      return '';
+    }
+    return termino;
   }
 
-  protected onOrdenar(valor: string): void {
-    this.ordenamiento.set(valor as OrdenamientoAuditores);
-    this.pagina.set(0);
-  }
-
-  protected irAPagina(numeroPagina: number): void {
-    this.pagina.set(numeroPagina);
-  }
-
-  protected reintentar(): void {
-    this.recarga.update((valor) => valor + 1);
-  }
-
-  protected paginas(): number[] {
-    const total = this.resultado()?.totalPaginas ?? 0;
-    return Array.from({ length: total }, (_, indice) => indice);
-  }
-
-  protected iniciales(nombre: string): string {
-    return nombre
-      .split(' ')
-      .filter((parte) => parte.length > 0)
-      .slice(0, 2)
-      .map((parte) => parte[0]?.toUpperCase() ?? '')
-      .join('');
-  }
-
-  protected estrellas(calificacion: number | null): boolean[] {
-    const redondeada = calificacion === null ? 0 : Math.round(calificacion);
-    return Array.from({ length: TOTAL_ESTRELLAS }, (_, indice) => indice < redondeada);
-  }
-
-  protected especialidad(clave: string): string {
-    return ESPECIALIDAD_ETIQUETAS[clave] ?? clave;
-  }
-
-  protected ubicacion(auditor: AuditorResumen): string {
+  private tarjeta(auditor: AuditorResumen): TarjetaAuditor {
+    const redondeada =
+      auditor.calificacionPromedio === null ? 0 : Math.round(auditor.calificacionPromedio);
     const provincia = auditor.provincia ? PROVINCIA_ETIQUETAS[auditor.provincia] : null;
     const experiencia =
       auditor.aniosExperiencia !== null ? `${auditor.aniosExperiencia} años exp.` : null;
-    return [provincia, experiencia].filter((parte): parte is string => parte !== null).join(' · ');
+    return {
+      auditor,
+      iniciales: inicialesDe(auditor.nombre),
+      estrellas: Array.from({ length: TOTAL_ESTRELLAS }, (_, indice) => indice < redondeada),
+      ubicacion: [provincia, experiencia]
+        .filter((parte): parte is string => parte !== null)
+        .join(' · '),
+      etiquetas: auditor.especialidadesPrincipales.map(
+        (clave) => ESPECIALIDAD_ETIQUETAS[clave] ?? clave
+      ),
+    };
   }
 }

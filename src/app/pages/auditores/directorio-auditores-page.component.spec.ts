@@ -67,9 +67,7 @@ describe('DirectorioAuditoresPageComponent', () => {
       onOrdenar(v: string): void;
       pagina(): number;
       avisoBusqueda(): string;
-      estrellas(v: number | null): boolean[];
-      iniciales(v: string): string;
-      ubicacion(a: AuditorResumen): string;
+      tarjetas(): { iniciales: string; estrellas: boolean[]; ubicacion: string }[];
     };
   }
 
@@ -79,13 +77,13 @@ describe('DirectorioAuditoresPageComponent', () => {
   }
 
   it('consulta el directorio al iniciar con los criterios por defecto', async () => {
-    await new Promise((resolver) => setTimeout(resolver, 300));
-
-    expect(auditoresService.listar).toHaveBeenCalledWith({
-      terminoBusqueda: '',
-      pagina: 0,
-      ordenamiento: 'CALIFICACION',
-    });
+    await vi.waitFor(() =>
+      expect(auditoresService.listar).toHaveBeenCalledWith({
+        terminoBusqueda: '',
+        pagina: 0,
+        ordenamiento: 'CALIFICACION',
+      })
+    );
   });
 
   it('mientras carga muestra el estado de carga', () => {
@@ -140,10 +138,13 @@ describe('DirectorioAuditoresPageComponent', () => {
     expect(comp().pagina()).toBe(0);
   });
 
-  it('deriva iniciales, estrellas y ubicacion del auditor', () => {
-    expect(comp().iniciales('Ana Mora')).toBe('AM');
-    expect(comp().estrellas(4.5).filter(Boolean)).toHaveLength(5);
-    expect(comp().estrellas(null).filter(Boolean)).toHaveLength(0);
-    expect(comp().ubicacion(auditor)).toBe('San José · 8 años exp.');
+  it('deriva iniciales, estrellas y ubicacion en el view model de la tarjeta', () => {
+    comp().resultado.set(paginaBase);
+
+    const tarjeta = comp().tarjetas()[0];
+
+    expect(tarjeta.iniciales).toBe('AM');
+    expect(tarjeta.estrellas.filter(Boolean)).toHaveLength(5);
+    expect(tarjeta.ubicacion).toBe('San José · 8 años exp.');
   });
 });

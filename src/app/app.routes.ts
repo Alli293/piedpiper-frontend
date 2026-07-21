@@ -58,6 +58,11 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'auditores/:id',
+    canActivate: [authGuard],
+    loadComponent: cargarPlaceholder,
+  },
+  {
     path: 'limites',
     canActivate: [authGuard],
     loadComponent: () =>
