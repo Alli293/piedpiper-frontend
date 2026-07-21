@@ -41,7 +41,9 @@ describe('DashboardService', () => {
       expect(blob.type).toBe('application/pdf');
     });
 
-    const req = httpMock.expectOne(`${environment.apiBaseUrl}/emisiones/reporte/pdf?anio=2026&mes=7`);
+    const req = httpMock.expectOne(
+      `${environment.apiBaseUrl}/emisiones/reporte/pdf?anio=2026&mes=7`
+    );
     expect(req.request.method).toBe('GET');
     expect(req.request.responseType).toBe('blob');
     expect(req.request.params.get('anio')).toBe('2026');

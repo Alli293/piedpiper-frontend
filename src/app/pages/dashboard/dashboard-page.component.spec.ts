@@ -34,7 +34,9 @@ describe('DashboardPageComponent', () => {
       obtenerComparacion: vi.fn().mockReturnValue(of(comparacionBase)),
     };
     dashboardService = {
-      exportarReportePdf: vi.fn().mockReturnValue(of(new Blob(['pdf'], { type: 'application/pdf' }))),
+      exportarReportePdf: vi
+        .fn()
+        .mockReturnValue(of(new Blob(['pdf'], { type: 'application/pdf' }))),
     };
     authSession = {
       getUserInitials: vi.fn().mockReturnValue('AJ'),
