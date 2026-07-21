@@ -50,6 +50,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'auditores',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/auditores/directorio-auditores-page.component').then(
+        (m) => m.DirectorioAuditoresPageComponent
+      ),
+  },
+  {
     path: 'limites',
     canActivate: [authGuard],
     loadComponent: () =>

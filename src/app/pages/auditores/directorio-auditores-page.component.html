@@ -1,0 +1,127 @@
+<app-shell-layout [headerConfig]="headerConfig()">
+  <section class="directorio" aria-label="Directorio de auditores">
+    <div class="directorio__toolbar">
+      <div class="directorio__buscador">
+        <app-text-input
+          type="text"
+          placeholder="Buscar por nombre del auditor"
+          autocomplete="off"
+          [value]="terminoBusqueda()"
+          [hint]="avisoBusqueda()"
+          (valueChange)="onBuscar($event)"
+        />
+      </div>
+      <app-select-input
+        class="directorio__orden"
+        label="Ordenar por"
+        [options]="ordenOpciones"
+        [value]="ordenamiento()"
+        [disabled]="cargando()"
+        (valueChange)="onOrdenar($event)"
+      />
+    </div>
+
+    @if (cargando()) {
+      <p class="directorio__estado" role="status">Cargando auditores...</p>
+    } @else if (error()) {
+      <div class="directorio__estado directorio__estado--error" role="alert">
+        <p>No se pudo cargar el directorio de auditores. Intente nuevamente.</p>
+        <app-button variant="secondary" size="sm" (click)="reintentar()">Reintentar</app-button>
+      </div>
+    } @else if (sinResultados()) {
+      <p class="directorio__estado">No se encontraron auditores que coincidan con tu búsqueda.</p>
+    } @else if (resultado(); as pagina) {
+      <div class="directorio__grid">
+        @for (auditor of pagina.contenido; track auditor.auditorId) {
+          <a class="auditor-card" [routerLink]="['/auditores', auditor.auditorId]">
+            <header class="auditor-card__header">
+              <app-avatar
+                size="md"
+                [initials]="iniciales(auditor.nombre)"
+                [imageUrl]="auditor.fotoPerfil ?? ''"
+              />
+              <div class="auditor-card__id">
+                <span class="auditor-card__nombre">{{ auditor.nombre }}</span>
+                @if (ubicacion(auditor); as ubicacion) {
+                  <span class="auditor-card__ubicacion">{{ ubicacion }}</span>
+                }
+              </div>
+            </header>
+
+            <div class="auditor-card__rating">
+              <span class="auditor-card__estrellas" aria-hidden="true">
+                @for (llena of estrellas(auditor.calificacionPromedio); track $index) {
+                  <span [class.auditor-card__estrella--llena]="llena">★</span>
+                }
+              </span>
+              @if (auditor.calificacionPromedio !== null) {
+                <span class="auditor-card__nota">
+                  {{ auditor.calificacionPromedio }} · {{ auditor.totalResenas }} reseñas
+                </span>
+              } @else {
+                <span class="auditor-card__nota">Sin calificaciones aún</span>
+              }
+            </div>
+
+            @if (auditor.especialidadesPrincipales.length > 0) {
+              <div class="auditor-card__especialidades">
+                @for (esp of auditor.especialidadesPrincipales; track esp) {
+                  <app-badge variant="neutral">{{ especialidad(esp) }}</app-badge>
+                }
+              </div>
+            }
+
+            <footer class="auditor-card__footer">
+              <span class="auditor-card__auditorias">
+                <strong>{{ auditor.auditoriasCompletadas }}</strong> auditorías completadas
+              </span>
+              <span
+                class="auditor-card__disponible"
+                [class.auditor-card__disponible--activo]="auditor.disponible"
+              >
+                {{ auditor.disponible ? 'Disponible' : 'No disponible' }}
+              </span>
+            </footer>
+
+            <span class="auditor-card__perfil">Ver perfil</span>
+          </a>
+        }
+      </div>
+
+      @if (pagina.totalPaginas > 1) {
+        <nav class="directorio__paginacion" aria-label="Paginación del directorio">
+          <app-button
+            variant="secondary"
+            size="sm"
+            [disabled]="pagina.paginaActual === 0"
+            (click)="irAPagina(pagina.paginaActual - 1)"
+          >
+            Anterior
+          </app-button>
+          @for (numero of paginas(); track numero) {
+            <app-button
+              [variant]="numero === pagina.paginaActual ? 'primary' : 'tertiary'"
+              size="sm"
+              [attr.aria-current]="numero === pagina.paginaActual ? 'page' : null"
+              (click)="irAPagina(numero)"
+            >
+              {{ numero + 1 }}
+            </app-button>
+          }
+          <app-button
+            variant="secondary"
+            size="sm"
+            [disabled]="pagina.paginaActual + 1 >= pagina.totalPaginas"
+            (click)="irAPagina(pagina.paginaActual + 1)"
+          >
+            Siguiente
+          </app-button>
+        </nav>
+      }
+
+      @if (pagina.contenido.length > 0) {
+        <p class="directorio__conteo">{{ pagina.totalResultados }} auditores en el directorio</p>
+      }
+    }
+  </section>
+</app-shell-layout>
