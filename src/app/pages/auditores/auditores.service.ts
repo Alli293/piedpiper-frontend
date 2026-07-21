@@ -21,7 +21,7 @@ export class AuditoresService {
       .set('tamanioPagina', TAMANIO_PAGINA_DIRECTORIO)
       .set('ordenamiento', filtros.ordenamiento);
 
-    const termino = filtros.terminoBusqueda;
+    const termino = filtros.terminoBusqueda.trim();
     if (termino.length >= LONGITUD_MINIMA_BUSQUEDA && termino.length <= LONGITUD_MAXIMA_BUSQUEDA) {
       params = params.set('terminoBusqueda', termino);
     }

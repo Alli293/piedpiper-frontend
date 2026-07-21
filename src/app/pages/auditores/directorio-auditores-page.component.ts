@@ -19,6 +19,7 @@ import { inicialesDe } from '../../shared/utils/iniciales.utils';
 import { AuditoresService } from './auditores.service';
 import {
   AuditorResumen,
+  esOrdenamientoValido,
   LONGITUD_MAXIMA_BUSQUEDA,
   LONGITUD_MINIMA_BUSQUEDA,
   OrdenamientoAuditores,
@@ -128,7 +129,10 @@ export class DirectorioAuditoresPageComponent {
   }
 
   protected onOrdenar(valor: string): void {
-    this.ordenamiento.set(valor as OrdenamientoAuditores);
+    if (!esOrdenamientoValido(valor)) {
+      return;
+    }
+    this.ordenamiento.set(valor);
     this.pagina.set(0);
   }
 
