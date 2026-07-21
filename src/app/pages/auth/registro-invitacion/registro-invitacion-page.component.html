@@ -1,0 +1,53 @@
+<app-auth-layout>
+  <div class="invitacion">
+    @if (cargando()) {
+      <p class="invitacion__estado">Validando tu invitación...</p>
+    } @else if (mensajePantalla()) {
+      <div class="invitacion__bloqueo" role="alert">
+        <app-heading level="h1" text="Invitación no disponible" />
+        <p class="invitacion__texto">{{ mensajePantalla() }}</p>
+        <a class="invitacion__enlace" routerLink="/login" appLink>Ir al inicio de sesión</a>
+      </div>
+    } @else if (invitacion(); as datos) {
+      <header class="invitacion__header">
+        <app-badge class="invitacion__badge" variant="success">Invitación de empresa</app-badge>
+        <app-heading level="h1" [text]="'Únete a ' + datos.nombreEmpresa" />
+        <p class="invitacion__texto">
+          Fuiste invitado a unirte como usuario general. Regístrate con tu cuenta de Google para
+          continuar.
+        </p>
+      </header>
+
+      <dl class="invitacion__datos">
+        <div class="invitacion__dato">
+          <dt>Empresa</dt>
+          <dd>{{ datos.nombreEmpresa }}</dd>
+        </div>
+        <div class="invitacion__dato">
+          <dt>Correo invitado</dt>
+          <dd>{{ datos.email }}</dd>
+        </div>
+      </dl>
+
+      <app-checkbox
+        label="He leído y acepto los Términos y Condiciones y la Política de Privacidad"
+        [checked]="aceptaTerminos()"
+        (checkedChange)="aceptaTerminos.set($event)"
+        [disabled]="registrando()"
+      />
+
+      <div
+        class="invitacion__google"
+        [class.invitacion__google--bloqueado]="!aceptaTerminos() || registrando()"
+        #googleButton
+      ></div>
+
+      @if (error()) {
+        <p class="invitacion__error" role="alert">{{ error() }}</p>
+      }
+      @if (cuentaExistente()) {
+        <a class="invitacion__enlace" routerLink="/login" appLink>Iniciar sesión</a>
+      }
+    }
+  </div>
+</app-auth-layout>

@@ -38,6 +38,20 @@ export class AuthService {
       .pipe(tap((response) => this.guardarSesion(response)));
   }
 
+  registrarConInvitacion(
+    tokenInvitacion: string,
+    idToken: string,
+    aceptaTerminos: boolean
+  ): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.baseUrl}/registro/invitacion`, {
+        tokenInvitacion,
+        idToken,
+        aceptaTerminos,
+      })
+      .pipe(tap((response) => this.guardarSesion(response)));
+  }
+
   registrarAuditorCorreo(body: {
     nombre: string;
     apellidos: string;

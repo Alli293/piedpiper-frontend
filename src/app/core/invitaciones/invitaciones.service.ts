@@ -13,6 +13,11 @@ export interface Invitacion {
   fechaExpiracion: string;
 }
 
+export interface InvitacionPublica {
+  email: string;
+  nombreEmpresa: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class InvitacionesService {
   private readonly http = inject(HttpClient);
@@ -28,5 +33,9 @@ export class InvitacionesService {
 
   revocar(id: string): Observable<Invitacion> {
     return this.http.post<Invitacion>(`${this.baseUrl}/${id}/revocar`, {});
+  }
+
+  resolver(token: string): Observable<InvitacionPublica> {
+    return this.http.get<InvitacionPublica>(`${environment.apiBaseUrl}/auth/invitaciones/${token}`);
   }
 }
