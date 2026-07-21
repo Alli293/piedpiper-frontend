@@ -9,7 +9,6 @@ import {
 } from '../../shared/components/inputs/select-input/select-input.component';
 import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
-import { COMPANY_INITIALS } from '../../shared/layouts/shell-layout/sidebar-nav';
 import { ToastService } from '../../shared/services/toast.service';
 import { EmisionesService } from '../emissions/emisiones.service';
 import { CategoriaResumen, ResumenEmisionesResponse } from '../emissions/models/emision.model';
@@ -138,7 +137,7 @@ export class DashboardPageComponent {
     sectionLabel: 'PANEL EMPRESARIAL',
     pageTitle: 'Dashboard',
     showNotificationDot: true,
-    userInitials: COMPANY_INITIALS,
+    userInitials: 'MR',
   });
 
   constructor() {

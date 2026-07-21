@@ -1,26 +1,38 @@
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import { HeaderConfig } from '../page-layout/page-layout.component';
 import { ShellLayoutComponent } from './shell-layout.component';
-import { COMPANY_INITIALS, COMPANY_NAME, COMPANY_ROLE, SIDEBAR_NAV_ITEMS } from './sidebar-nav';
 
 const HEADER_CONFIG: HeaderConfig = {
   sectionLabel: 'PANEL EMPRESARIAL',
   pageTitle: 'Dashboard',
   showNotificationDot: true,
-  userInitials: COMPANY_INITIALS,
+  userInitials: 'MR',
 };
 
 describe('ShellLayoutComponent', () => {
+  let navigateByUrl: ReturnType<typeof vi.fn>;
+
   beforeEach(async () => {
+    navigateByUrl = vi.fn().mockResolvedValue(true);
+
     await TestBed.configureTestingModule({
       imports: [ShellLayoutComponent],
+      providers: [{ provide: Router, useValue: { navigateByUrl } }],
     }).compileComponents();
   });
 
-  async function createFixture(activeId: (typeof SIDEBAR_NAV_ITEMS)[number]['id']) {
+  async function createFixture(
+    inputs: { activeId?: string; companyRole?: string; settingsLabel?: string; backRoute?: string } = {}
+  ) {
     const fixture = TestBed.createComponent(ShellLayoutComponent);
-    fixture.componentRef.setInput('activeId', activeId);
     fixture.componentRef.setInput('headerConfig', HEADER_CONFIG);
+    if (inputs.activeId !== undefined) fixture.componentRef.setInput('activeId', inputs.activeId);
+    if (inputs.companyRole !== undefined)
+      fixture.componentRef.setInput('companyRole', inputs.companyRole);
+    if (inputs.settingsLabel !== undefined)
+      fixture.componentRef.setInput('settingsLabel', inputs.settingsLabel);
+    if (inputs.backRoute !== undefined) fixture.componentRef.setInput('backRoute', inputs.backRoute);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -28,66 +40,62 @@ describe('ShellLayoutComponent', () => {
   }
 
   function menuLabels(root: HTMLElement): string[] {
-    return Array.from(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item-label')).map(
-      (element) => element.textContent?.trim() ?? ''
-    );
+    return Array.from(
+      root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item-label')
+    ).map((element) => element.textContent?.trim() ?? '');
   }
 
-  it('renderiza exactamente los ítems de SIDEBAR_NAV_ITEMS, en orden y sin inventar entradas', async () => {
-    const fixture = await createFixture('dashboard');
+  it('renderiza los 3 ítems del menú de sidebar-nav, en orden', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard' });
     const root = fixture.nativeElement as HTMLElement;
 
     const items = root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item');
-    expect(items.length).toBe(SIDEBAR_NAV_ITEMS.length);
     expect(items.length).toBe(3);
-    expect(menuLabels(root)).toEqual(SIDEBAR_NAV_ITEMS.map((item) => item.label));
+    expect(menuLabels(root)).toEqual(['Dashboard', 'Mis Emisiones', 'Madurez ambiental']);
   });
 
   it('marca como activo el ítem indicado por activeId y solo ese', async () => {
-    const fixture = await createFixture('emissions');
+    const fixture = await createFixture({ activeId: 'emissions' });
     const root = fixture.nativeElement as HTMLElement;
 
     const activos = root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item--active');
     expect(activos.length).toBe(1);
-
-    const activo = activos[0];
-    const etiquetaEsperada = SIDEBAR_NAV_ITEMS.find((item) => item.id === 'emissions')?.label;
-    expect(activo.querySelector('.ch-sidebar__item-label')?.textContent?.trim()).toBe(
-      etiquetaEsperada
+    expect(activos[0].querySelector('.ch-sidebar__item-label')?.textContent?.trim()).toBe(
+      'Mis Emisiones'
     );
-    expect(activo.getAttribute('aria-current')).toBe('page');
+    expect(activos[0].getAttribute('aria-current')).toBe('page');
   });
 
-  it('mueve el estado activo cuando cambia activeId', async () => {
-    const fixture = await createFixture('dashboard');
+  it('sin activeId no marca ningún ítem como activo (páginas fuera del menú, p. ej. configuración)', async () => {
+    const fixture = await createFixture({});
     const root = fixture.nativeElement as HTMLElement;
 
-    let activo = root.querySelector('.ch-sidebar__nav .ch-sidebar__item--active');
-    expect(activo?.querySelector('.ch-sidebar__item-label')?.textContent?.trim()).toBe('Dashboard');
+    expect(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item--active').length).toBe(0);
+    expect(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item').length).toBe(3);
+  });
 
-    fixture.componentRef.setInput('activeId', 'benchmark');
-    fixture.detectChanges();
+  it('usa el companyRole recibido por input', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard', companyRole: 'Auditor externo' });
+    const root = fixture.nativeElement as HTMLElement;
 
-    const activos = root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item--active');
-    expect(activos.length).toBe(1);
-    activo = activos[0];
-    const etiquetaBenchmark = SIDEBAR_NAV_ITEMS.find((item) => item.id === 'benchmark')?.label;
-    expect(activo.querySelector('.ch-sidebar__item-label')?.textContent?.trim()).toBe(
-      etiquetaBenchmark
+    expect(root.querySelector('.ch-sidebar__company-role')?.textContent?.trim()).toBe(
+      'Auditor externo'
     );
   });
 
-  it('toma los datos de la empresa de las constantes compartidas', async () => {
-    const fixture = await createFixture('dashboard');
+  it('sobrescribe la etiqueta de Configuración con settingsLabel', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard', settingsLabel: 'Ajustes' });
     const root = fixture.nativeElement as HTMLElement;
 
-    expect(root.querySelector('.ch-sidebar__company-name')?.textContent?.trim()).toBe(COMPANY_NAME);
-    expect(root.querySelector('.ch-sidebar__company-role')?.textContent?.trim()).toBe(COMPANY_ROLE);
+    const bottomLabels = Array.from(
+      root.querySelectorAll('.ch-sidebar__bottom .ch-sidebar__item-label')
+    ).map((element) => element.textContent?.trim());
+    expect(bottomLabels).toContain('Ajustes');
+    expect(bottomLabels).not.toContain('Configuración');
   });
 
   it('proyecta el contenido de la página dentro del layout', async () => {
     const fixture = TestBed.createComponent(ShellLayoutComponent);
-    fixture.componentRef.setInput('activeId', 'dashboard');
     fixture.componentRef.setInput('headerConfig', HEADER_CONFIG);
 
     const projected = document.createElement('div');
@@ -102,16 +110,25 @@ describe('ShellLayoutComponent', () => {
     expect(root.querySelector('.contenido-proyectado')?.textContent).toBe('contenido de prueba');
   });
 
-  it('reemite menuItemClicked cuando se pulsa un ítem del menú', async () => {
-    const fixture = await createFixture('dashboard');
-    const root = fixture.nativeElement as HTMLElement;
+  it('con backRoute definido, el back navega a esa ruta sin emitir backClicked', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard', backRoute: '/emisiones' });
+    const emitido: void[] = [];
+    fixture.componentInstance.backClicked.subscribe(() => emitido.push(undefined));
 
-    const emitido: string[] = [];
-    fixture.componentInstance.menuItemClicked.subscribe((id) => emitido.push(id));
+    fixture.componentInstance['onBackClicked']();
 
-    const primerItem = root.querySelector<HTMLButtonElement>('.ch-sidebar__nav .ch-sidebar__item');
-    primerItem?.click();
+    expect(navigateByUrl).toHaveBeenCalledWith('/emisiones');
+    expect(emitido.length).toBe(0);
+  });
 
-    expect(emitido).toEqual([SIDEBAR_NAV_ITEMS[0].id]);
+  it('sin backRoute, el back emite backClicked y no navega', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard' });
+    const emitido: void[] = [];
+    fixture.componentInstance.backClicked.subscribe(() => emitido.push(undefined));
+
+    fixture.componentInstance['onBackClicked']();
+
+    expect(navigateByUrl).not.toHaveBeenCalled();
+    expect(emitido.length).toBe(1);
   });
 });
