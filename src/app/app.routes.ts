@@ -63,6 +63,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'empresa/invitaciones',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/empresa/invitaciones/invitaciones-page.component').then(
+        (m) => m.InvitacionesPageComponent
+      ),
+  },
+  {
     path: 'perfil/configuracion-inicial',
     canActivate: [authGuard],
     loadComponent: () =>

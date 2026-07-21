@@ -1,0 +1,122 @@
+:host {
+  display: block;
+}
+
+.invitaciones {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--ch-space-8) var(--ch-space-5);
+}
+
+.invitaciones__subtitle {
+  margin: 0 0 var(--ch-space-6);
+  color: var(--ch-text-secondary);
+  font-size: 15px;
+}
+
+.invitaciones__form {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--ch-space-4);
+}
+
+.invitaciones__form-field {
+  flex: 1;
+}
+
+.invitaciones__mensaje {
+  margin: var(--ch-space-4) 0 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.invitaciones__mensaje--exito {
+  color: var(--ch-green-dark);
+}
+
+.invitaciones__mensaje--error {
+  color: var(--ch-danger);
+}
+
+.invitaciones__lista {
+  margin-top: var(--ch-space-8);
+}
+
+.invitaciones__vacio {
+  margin: 0;
+  color: var(--ch-text-muted);
+  font-size: 14px;
+}
+
+.invitaciones__tabla-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-lg);
+}
+
+.invitaciones__tabla {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.invitaciones__tabla th {
+  text-align: left;
+  padding: var(--ch-space-3) var(--ch-space-4);
+  background: var(--ch-green-soft);
+  color: var(--ch-green-dark);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.invitaciones__tabla td {
+  padding: var(--ch-space-3) var(--ch-space-4);
+  border-top: 1px solid var(--ch-border);
+  color: var(--ch-text-primary);
+}
+
+.invitaciones__acciones {
+  text-align: right;
+}
+
+.invitaciones__overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ch-space-5);
+  background: var(--ch-overlay-scrim);
+  z-index: var(--ch-z-overlay);
+}
+
+.invitaciones__modal {
+  width: 100%;
+  max-width: 420px;
+  padding: var(--ch-space-6);
+  background: var(--ch-bg-white);
+  border-radius: var(--ch-radius-lg);
+}
+
+.invitaciones__modal-title {
+  margin: 0 0 var(--ch-space-3);
+  font-family: var(--ch-font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ch-text-primary);
+}
+
+.invitaciones__modal-text {
+  margin: 0 0 var(--ch-space-6);
+  color: var(--ch-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.invitaciones__modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ch-space-3);
+}
