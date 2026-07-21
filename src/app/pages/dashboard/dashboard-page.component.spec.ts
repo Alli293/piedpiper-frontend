@@ -316,7 +316,11 @@ describe('DashboardPageComponent', () => {
     );
     await createFixture();
 
-    expect(toastService.error).toHaveBeenCalledWith('El mes debe estar entre 1 y 12.', undefined, 5000);
+    expect(toastService.error).toHaveBeenCalledWith(
+      'El mes debe estar entre 1 y 12.',
+      undefined,
+      5000
+    );
   });
 
   it('muestra las etiquetas de categoría del diseño', async () => {
