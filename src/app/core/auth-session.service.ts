@@ -21,6 +21,19 @@ export class AuthSessionService {
     return this.getRole() === ADMINISTRADOR_EMPRESA;
   }
 
+  getUserInitials(): string {
+    const claims = this.getClaims();
+    const source = firstNonEmpty(
+      claims?.nombreCompleto,
+      claims?.name,
+      [claims?.nombre, claims?.apellidos].filter(Boolean).join(' '),
+      claims?.email,
+      claims?.sub
+    );
+
+    return initialsFrom(source);
+  }
+
   private getClaims(): JwtClaims | null {
     const token = this.getToken();
     if (!token) return null;
@@ -29,14 +42,20 @@ export class AuthSessionService {
       const payload = token.split('.')[1];
       if (!payload) return null;
       return JSON.parse(atob(toBase64(payload))) as JwtClaims;
-    } catch {
+    } catch (_err: unknown) {
       return null;
     }
   }
 }
 
 interface JwtClaims {
+  apellidos?: string;
+  email?: string;
+  name?: string;
+  nombre?: string;
+  nombreCompleto?: string;
   rol?: string;
+  sub?: string;
 }
 
 function normalizarRol(rol: string): string {
@@ -46,4 +65,25 @@ function normalizarRol(rol: string): string {
 function toBase64(base64Url: string): string {
   const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
   return base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+}
+
+function firstNonEmpty(...values: Array<string | undefined>): string {
+  return values.find((value) => value?.trim())?.trim() ?? '';
+}
+
+function initialsFrom(value: string): string {
+  if (!value) return 'US';
+
+  const base = value.includes('@') ? value.split('@')[0] : value;
+  const parts = base
+    .replace(/[._-]+/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+
+  const initials =
+    parts.length > 1
+      ? `${parts[0][0] ?? ''}${parts[parts.length - 1][0] ?? ''}`
+      : `${parts[0]?.[0] ?? ''}${parts[0]?.[1] ?? ''}`;
+
+  return initials.toUpperCase() || 'US';
 }

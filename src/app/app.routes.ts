@@ -104,6 +104,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent),
   },
+  {
+    path: 'benchmark',
+    canActivate: [authGuard],
+    loadComponent: cargarPlaceholder,
+  },
   ...rutasPlaceholder.map((path) => ({ path, loadComponent: cargarPlaceholder })),
   {
     path: 'emisiones',

@@ -1,5 +1,6 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth.service';
 import { HeaderConfig, PageLayoutComponent } from '../page-layout/page-layout.component';
 import { buildSidebarConfig, SidebarNavId } from '../page-layout/sidebar-nav';
 
@@ -17,6 +18,7 @@ const COMPANY_INITIALS = 'CV';
 })
 export class ShellLayoutComponent {
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   activeId = input<SidebarNavId>();
   companyRole = input('Empresa · Admin');
@@ -47,11 +49,17 @@ export class ShellLayoutComponent {
   }
 
   protected onMenuItem(id: string): void {
+    if (id === 'logout') {
+      this.authService.cerrarSesion();
+      void this.router.navigateByUrl('/login');
+      return;
+    }
+
     const rutas: Record<string, string> = {
+      benchmark: '/benchmark',
       dashboard: '/panel',
       emissions: '/emisiones/registrar',
       settings: '/configuracion',
-      logout: '/login',
     };
     const ruta = rutas[id];
     if (ruta) void this.router.navigateByUrl(ruta);
