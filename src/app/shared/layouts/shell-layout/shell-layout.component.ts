@@ -1,63 +1,48 @@
-import { Component, computed, input, output } from '@angular/core';
-import {
-  HeaderConfig,
-  PageLayoutComponent,
-  SidebarConfig,
-} from '../page-layout/page-layout.component';
-import {
-  buildSidebarMenuItems,
-  COMPANY_INITIALS,
-  COMPANY_NAME,
-  COMPANY_ROLE,
-  SIDEBAR_BOTTOM_ITEMS,
-  SidebarNavId,
-} from './sidebar-nav';
+import { Component, computed, inject, input, output } from '@angular/core';
+import { Router } from '@angular/router';
+import { HeaderConfig, PageLayoutComponent } from '../page-layout/page-layout.component';
+import { buildSidebarConfig, SidebarNavId } from '../page-layout/sidebar-nav';
+
+const COMPANY_NAME = 'Café del Valle S.A.';
+const COMPANY_INITIALS = 'CV';
 
 /**
- * Layout de las páginas autenticadas.
- *
- * Owns sidebar construction so pages only need to say which nav item is active,
- * not rebuild the whole config. Usa `buildSidebarMenuItems()` de `sidebar-nav.ts`
- * como única fuente de verdad para el menú y los datos de la empresa.
- *
- * Uso:
- *   <app-shell-layout activeId="dashboard" [headerConfig]="headerConfig()">
- *     ...contenido de la página...
- *   </app-shell-layout>
+ * Shared shell for authenticated pages: owns sidebar construction so pages
+ * only need to say which nav item is active, not rebuild the whole config.
  */
 @Component({
   selector: 'app-shell-layout',
   imports: [PageLayoutComponent],
-  template: `
-    <app-page-layout
-      [sidebarConfig]="sidebarConfig()"
-      [headerConfig]="headerConfig()"
-      (menuItemClicked)="menuItemClicked.emit($event)"
-      (notificationClicked)="notificationClicked.emit()"
-      (profileClicked)="profileClicked.emit()"
-      (backClicked)="backClicked.emit()"
-    >
-      <ng-content />
-    </app-page-layout>
-  `,
+  templateUrl: './shell-layout.component.html',
 })
 export class ShellLayoutComponent {
-  /** Ítem del menú que debe mostrarse como activo en esta página. */
-  activeId = input.required<SidebarNavId>();
+  private readonly router = inject(Router);
 
-  /** Configuración del header, propia de cada página. */
+  activeId = input<SidebarNavId>();
+  companyRole = input('Empresa · Admin');
+  settingsLabel = input<string>();
   headerConfig = input.required<HeaderConfig>();
+  /** Route the back button navigates to. Falls back to emitting `backClicked` if omitted. */
+  backRoute = input<string>();
 
-  menuItemClicked = output<string>();
-  notificationClicked = output<void>();
-  profileClicked = output<void>();
   backClicked = output<void>();
 
-  protected readonly sidebarConfig = computed<SidebarConfig>(() => ({
-    menuItems: buildSidebarMenuItems(this.activeId()),
-    bottomItems: [...SIDEBAR_BOTTOM_ITEMS],
-    companyName: COMPANY_NAME,
-    companyRole: COMPANY_ROLE,
-    companyInitials: COMPANY_INITIALS,
-  }));
+  protected readonly sidebarConfig = computed(() =>
+    buildSidebarConfig({
+      activeId: this.activeId(),
+      companyName: COMPANY_NAME,
+      companyRole: this.companyRole(),
+      companyInitials: COMPANY_INITIALS,
+      settingsLabel: this.settingsLabel(),
+    })
+  );
+
+  protected onBackClicked(): void {
+    const route = this.backRoute();
+    if (route) {
+      void this.router.navigateByUrl(route);
+      return;
+    }
+    this.backClicked.emit();
+  }
 }

@@ -158,6 +158,7 @@ describe('ConfiguracionInicialPerfilPageComponent', () => {
       preferencias: { idioma: 'ESPANOL', moneda: 'CRC', unidades: 'METRICO' },
     });
     req.flush({ ...perfilIndividual, configuracionCompleta: true, redirect: '/panel' });
+    await fixture.whenStable();
     fixture.detectChanges();
 
     expect(navegar).toHaveBeenCalledWith('/panel');
@@ -227,7 +228,7 @@ describe('ConfiguracionInicialPerfilPageComponent', () => {
     httpMock.expectNone(PerfilInicialService.URL);
   });
 
-  it('si la persistencia falla muestra el toast de error y permanece en la pantalla', () => {
+  it('si la persistencia falla muestra el toast de error y permanece en la pantalla', async () => {
     const navegar = vi.spyOn(router, 'navigateByUrl');
     flushCarga(perfilIndividual);
 
@@ -235,6 +236,7 @@ describe('ConfiguracionInicialPerfilPageComponent', () => {
     httpMock
       .expectOne(PerfilInicialService.URL)
       .flush({ message: 'error' }, { status: 500, statusText: 'Internal Server Error' });
+    await fixture.whenStable();
     fixture.detectChanges();
 
     const titulos = toastService.toasts().map((t) => t.title);

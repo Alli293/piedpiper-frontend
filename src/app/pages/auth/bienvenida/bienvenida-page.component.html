@@ -1,7 +1,7 @@
 <app-auth-layout>
   <div class="bienvenida">
     <header class="bienvenida__header">
-      <h1 class="bienvenida__title">Bienvenido a CarbonHub</h1>
+      <app-heading level="h1" text="Bienvenido a CarbonHub" />
       <p class="bienvenida__subtitle">Selecciona cómo deseas registrarte para comenzar.</p>
     </header>
 
@@ -16,7 +16,7 @@
               <span class="bienvenida__role-title">{{ rol.titulo }}</span>
               <span class="bienvenida__role-desc">{{ rol.descripcion }}</span>
             </span>
-            <span class="bienvenida__role-chevron" aria-hidden="true">›</span>
+            <span class="bienvenida__role-chevron" aria-hidden="true">&gt;</span>
           </a>
         </li>
       }
@@ -24,8 +24,8 @@
 
     <p class="bienvenida__terms">
       Al registrarte aceptas nuestros
-      <a routerLink="/terminos">Términos de uso</a> y la
-      <a routerLink="/privacidad">Política de privacidad</a>.
+      <a routerLink="/terminos" appLink>Términos de uso</a> y la
+      <a routerLink="/privacidad" appLink>Política de privacidad</a>.
     </p>
 
     <div class="bienvenida__divider">

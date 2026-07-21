@@ -1,47 +1,51 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
-import { Location } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
-import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import {
+  applyEach,
   disabled,
   form,
   FormField,
   maxDate,
   maxLength,
+  pattern,
   required,
   schema,
   submit,
   validate,
 } from '@angular/forms/signals';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { DateInputComponent } from '../../../shared/components/inputs/date-input/date-input.component';
 import { NumberInputComponent } from '../../../shared/components/inputs/number-input/number-input.component';
-import { RadioComponent } from '../../../shared/components/inputs/radio/radio.component';
-import { RadioGroupDirective } from '../../../shared/components/inputs/radio/radio-group.directive';
+import { RadioGroupFieldComponent } from '../../../shared/components/inputs/radio-group-field/radio-group-field.component';
 import {
   SelectInputComponent,
   SelectOption,
 } from '../../../shared/components/inputs/select-input/select-input.component';
 import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
 import { TextareaComponent } from '../../../shared/components/inputs/textarea/textarea.component';
-import {
-  HeaderConfig,
-  PageLayoutComponent,
-  SidebarConfig,
-} from '../../../shared/layouts/page-layout/page-layout.component';
+import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
+import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
+import { todayUtcMidnight, toIsoDateString } from '../../../shared/utils/date.utils';
+import { fieldError } from '../../../shared/utils/form-field.utils';
+import { apiErrorMessage, isAuthError } from '../../../shared/utils/http-error.utils';
+import { countDecimals } from '../../../shared/utils/number.utils';
+import {
+  EmissionCategoryTab,
+  EmissionCategoryTabsComponent,
+} from '../category-tabs/category-tabs.component';
 import { AuthService } from '../../../core/auth/auth.service';
 import { EmisionesService } from '../emisiones.service';
 import {
-  ApiErrorResponse,
   CabinClass,
-  EmisionResponse,
+  MetodoTransporte,
   RegistrarVueloRequest,
   TipoVehiculoOption,
   UnidadDistancia,
   UnidadElectricidad,
+  UnidadPeso,
 } from '../models/emision.model';
 
 interface RegistrarElectricidadFormModel {
@@ -73,36 +77,17 @@ interface RegistrarFlotaFormModel {
   fechaActividad: Date | null;
 }
 
-type EmissionCategory = 'electricidad' | 'vuelo' | 'flota';
-type FlightErrorKey =
-  | 'passengers'
-  | 'fechaActividad'
-  | 'legs'
-  | `legs.${number}.departureAirport`
-  | `legs.${number}.destinationAirport`
-  | `legs.${number}.cabinClass`;
-
-function countDecimals(value: number): number {
-  const text = value.toString();
-  const dotIndex = text.indexOf('.');
-  return dotIndex === -1 ? 0 : text.length - dotIndex - 1;
+interface RegistrarEnvioFormModel {
+  titulo: string;
+  weightValue: number | null;
+  weightUnit: UnidadPeso;
+  distanceValue: number | null;
+  distanceUnit: UnidadDistancia;
+  transportMethod: MetodoTransporte;
+  fechaActividad: Date | null;
 }
 
-function toIsoDate(date: Date): string {
-  const year = date.getUTCFullYear();
-  const month = `${date.getUTCMonth() + 1}`.padStart(2, '0');
-  const day = `${date.getUTCDate()}`.padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function isAuthError(error: unknown): boolean {
-  return error instanceof HttpErrorResponse && (error.status === 401 || error.status === 403);
-}
-
-function todayUtcMidnight(): Date {
-  const now = new Date();
-  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-}
+type EmissionCategory = 'electricidad' | 'vuelo' | 'flota' | 'envio';
 
 const INITIAL_MODEL: RegistrarElectricidadFormModel = {
   titulo: '',
@@ -127,6 +112,16 @@ const INITIAL_FLOTA_MODEL: RegistrarFlotaFormModel = {
   fechaActividad: null,
 };
 
+const INITIAL_ENVIO_MODEL: RegistrarEnvioFormModel = {
+  titulo: '',
+  weightValue: null,
+  weightUnit: 'KG',
+  distanceValue: null,
+  distanceUnit: 'km',
+  transportMethod: 'TRUCK',
+  fechaActividad: null,
+};
+
 const GENERIC_CONNECTION_ERROR =
   'No se pudo conectar con el servicio de cálculo de huella. Intente nuevamente más tarde.';
 
@@ -134,32 +129,45 @@ const SESSION_ERROR_MESSAGE = 'Tu sesión no tiene permisos para realizar esta a
 
 const CATALOGO_ERROR_MESSAGE = 'No se pudo cargar el catálogo de vehículos.';
 
+const CATEGORY_TABS: EmissionCategoryTab[] = [
+  { id: 'electricidad', label: 'Electricidad', icon: 'electricidad' },
+  { id: 'flota', label: 'Flota vehicular', icon: 'flota-vehicular' },
+  { id: 'vuelo', label: 'Vuelos', icon: 'vuelos' },
+  { id: 'envio', label: 'Envíos de carga', icon: 'envios-carga' },
+];
+
 @Component({
   selector: 'app-register-emission-page',
   imports: [
     FormField,
     ButtonComponent,
+    HeadingComponent,
     IconComponent,
     DateInputComponent,
     NumberInputComponent,
-    RadioComponent,
-    RadioGroupDirective,
+    RadioGroupFieldComponent,
     SelectInputComponent,
     TextInputComponent,
     TextareaComponent,
-    PageLayoutComponent,
+    ShellLayoutComponent,
+    EmissionCategoryTabsComponent,
   ],
   templateUrl: './register-emission-page.component.html',
   styleUrl: './register-emission-page.component.scss',
 })
 export class RegisterEmissionPageComponent {
-  private readonly location = inject(Location);
-  private readonly router = inject(Router);
+  protected readonly fieldError = fieldError;
+
   private readonly emisionesService = inject(EmisionesService);
   private readonly toastService = inject(ToastService);
   private readonly authService = inject(AuthService);
 
   protected readonly today = todayUtcMidnight();
+  protected readonly categoryTabs = CATEGORY_TABS;
+  protected readonly electricityUnitOptions: SelectOption[] = [
+    { value: 'kwh', label: 'kWh' },
+    { value: 'mwh', label: 'MWh' },
+  ];
   protected readonly distanceUnitOptions: SelectOption[] = [
     { value: 'km', label: 'km' },
     { value: 'mi', label: 'mi' },
@@ -168,21 +176,24 @@ export class RegisterEmissionPageComponent {
     { value: 'economy', label: 'Economy' },
     { value: 'premium', label: 'Premium' },
   ];
+  protected readonly weightUnitOptions: SelectOption[] = [
+    { value: 'G', label: 'g' },
+    { value: 'LB', label: 'lb' },
+    { value: 'KG', label: 'kg' },
+    { value: 'MT', label: 'mt' },
+  ];
+  protected readonly transportMethodOptions: SelectOption[] = [
+    { value: 'SHIP', label: 'Barco' },
+    { value: 'TRAIN', label: 'Tren' },
+    { value: 'TRUCK', label: 'Camión' },
+    { value: 'PLANE', label: 'Avión' },
+  ];
 
   protected readonly activeCategory = signal<EmissionCategory>('electricidad');
   protected readonly model = signal<RegistrarElectricidadFormModel>({ ...INITIAL_MODEL });
   protected readonly flightModel = signal<RegistrarVueloFormModel>(
     cloneFlightModel(INITIAL_FLIGHT_MODEL)
   );
-  protected readonly flightTouched = signal<Set<FlightErrorKey>>(new Set());
-  protected readonly flightSubmitted = signal(false);
-  protected readonly flightSubmitting = signal(false);
-  protected readonly emisiones = signal<EmisionResponse[]>([]);
-  protected readonly flightEmisiones = computed(() =>
-    this.emisiones().filter((emision) => emision.categoria === 'VUELO')
-  );
-  protected readonly loadingEmisiones = signal(false);
-  protected readonly editingFlightId = signal<string | null>(null);
   protected readonly hasSession = signal(this.hasActiveSession());
 
   protected readonly registerForm = form(
@@ -211,8 +222,6 @@ export class RegisterEmissionPageComponent {
       });
     })
   );
-
-  protected readonly lastResult = signal<{ carbonKg: number } | null>(null);
 
   protected readonly flotaModel = signal<RegistrarFlotaFormModel>({ ...INITIAL_FLOTA_MODEL });
 
@@ -251,6 +260,105 @@ export class RegisterEmissionPageComponent {
     })
   );
 
+  protected readonly flightForm = form(
+    this.flightModel,
+    schema<RegistrarVueloFormModel>((path) => {
+      required(path.passengers, { message: 'Ingrese al menos 1 pasajero.' });
+      validate(path.passengers, ({ value }) => {
+        const passengers = value();
+        if (passengers === null) return undefined;
+        if (!Number.isInteger(passengers) || passengers < 1) {
+          return { kind: 'minPassengers', message: 'Ingrese al menos 1 pasajero.' };
+        }
+        return undefined;
+      });
+
+      required(path.fechaActividad, { message: 'Ingrese una fecha para este registro.' });
+      maxDate(path.fechaActividad, this.today, {
+        message: 'La fecha no puede ser posterior a hoy.',
+      });
+
+      validate(path.legs, ({ value }) => {
+        if (value().length === 0) {
+          return { kind: 'minLegs', message: 'Agregue al menos un trayecto.' };
+        }
+        return undefined;
+      });
+
+      applyEach(path.legs, (leg) => {
+        required(leg.departureAirport, { message: 'Ingrese un código IATA de 3 letras.' });
+        pattern(leg.departureAirport, /^[A-Za-z]{3}$/, {
+          message: 'Ingrese un código IATA de 3 letras.',
+        });
+
+        required(leg.destinationAirport, { message: 'Ingrese un código IATA de 3 letras.' });
+        pattern(leg.destinationAirport, /^[A-Za-z]{3}$/, {
+          message: 'Ingrese un código IATA de 3 letras.',
+        });
+        validate(leg.destinationAirport, (ctx) => {
+          const destination = ctx.value();
+          const departure = ctx.valueOf(leg.departureAirport);
+          if (
+            /^[A-Za-z]{3}$/.test(departure) &&
+            /^[A-Za-z]{3}$/.test(destination) &&
+            departure.toUpperCase() === destination.toUpperCase()
+          ) {
+            return {
+              kind: 'sameAirport',
+              message: 'El origen y el destino no pueden ser iguales.',
+            };
+          }
+          return undefined;
+        });
+
+        required(leg.cabinClass, { message: 'Seleccione una clase válida.' });
+      });
+    })
+  );
+
+  protected readonly envioModel = signal<RegistrarEnvioFormModel>({ ...INITIAL_ENVIO_MODEL });
+
+  protected readonly envioForm = form(
+    this.envioModel,
+    schema<RegistrarEnvioFormModel>((path) => {
+      required(path.titulo, { message: 'Ingrese un título para este registro.' });
+      maxLength(path.titulo, 150, {
+        message: 'El título no puede contener más de 150 caracteres.',
+      });
+
+      required(path.weightValue, { message: 'Ingrese una cantidad mayor que 0.' });
+      validate(path.weightValue, ({ value }) => {
+        const amount = value();
+        if (amount === null) return undefined;
+        if (amount <= 0 || countDecimals(amount) > 3) {
+          return { kind: 'positiveAmount', message: 'Ingrese una cantidad mayor que 0.' };
+        }
+        return undefined;
+      });
+
+      required(path.weightUnit, { message: 'Seleccione una unidad válida.' });
+
+      required(path.distanceValue, { message: 'Ingrese una cantidad mayor que 0.' });
+      validate(path.distanceValue, ({ value }) => {
+        const amount = value();
+        if (amount === null) return undefined;
+        if (amount <= 0 || countDecimals(amount) > 3) {
+          return { kind: 'positiveAmount', message: 'Ingrese una cantidad mayor que 0.' };
+        }
+        return undefined;
+      });
+
+      required(path.distanceUnit, { message: 'Seleccione una unidad válida.' });
+
+      required(path.transportMethod, { message: 'Seleccione un método de transporte.' });
+
+      required(path.fechaActividad, { message: 'Ingrese una fecha para este registro.' });
+      maxDate(path.fechaActividad, this.today, {
+        message: 'La fecha no puede ser posterior a hoy.',
+      });
+    })
+  );
+
   protected readonly tiposVehiculo = signal<TipoVehiculoOption[]>([]);
   protected readonly catalogoLoading = signal(false);
   protected readonly catalogoError = signal('');
@@ -269,71 +377,78 @@ export class RegisterEmissionPageComponent {
     return tipo ? tipo.combustibles.map((c) => ({ value: c.id, label: c.nombre })) : [];
   });
 
-  protected readonly tituloError = computed(() => this.fieldError(this.registerForm.titulo()));
+  protected readonly tituloError = computed(() => fieldError(this.registerForm.titulo()));
   protected readonly electricityValueError = computed(() =>
-    this.fieldError(this.registerForm.electricityValue())
+    fieldError(this.registerForm.electricityValue())
   );
   protected readonly electricityUnitError = computed(() =>
-    this.fieldError(this.registerForm.electricityUnit())
+    fieldError(this.registerForm.electricityUnit())
   );
   protected readonly fechaActividadError = computed(() =>
-    this.fieldError(this.registerForm.fechaActividad())
+    fieldError(this.registerForm.fechaActividad())
   );
-  protected readonly flightErrors = computed(() =>
-    validateFlightModel(this.flightModel(), this.today)
+  protected readonly flightPassengersError = computed(() =>
+    fieldError(this.flightForm.passengers())
   );
+  protected readonly flightFechaActividadError = computed(() =>
+    fieldError(this.flightForm.fechaActividad())
+  );
+  protected readonly flightLegsError = computed(() => fieldError(this.flightForm.legs()));
+  protected readonly canAddReturnLeg = computed(() => {
+    const legs = this.flightModel().legs;
+    const leg = legs.at(-1);
+    if (!leg || !isCompleteFlightLeg(leg)) return false;
 
-  protected readonly flotaTituloError = computed(() => this.fieldError(this.flotaForm.titulo()));
-  protected readonly tipoVehiculoError = computed(() =>
-    this.fieldError(this.flotaForm.tipoVehiculo())
-  );
-  protected readonly combustibleError = computed(() =>
-    this.fieldError(this.flotaForm.combustible())
-  );
+    const previousLeg = legs.at(-2);
+    return !previousLeg || !areReverseFlightLegs(previousLeg, leg);
+  });
+
+  protected readonly flotaTituloError = computed(() => fieldError(this.flotaForm.titulo()));
+  protected readonly tipoVehiculoError = computed(() => fieldError(this.flotaForm.tipoVehiculo()));
+  protected readonly combustibleError = computed(() => fieldError(this.flotaForm.combustible()));
   protected readonly distanceValueError = computed(() =>
-    this.fieldError(this.flotaForm.distanceValue())
+    fieldError(this.flotaForm.distanceValue())
   );
-  protected readonly distanceUnitError = computed(() =>
-    this.fieldError(this.flotaForm.distanceUnit())
-  );
+  protected readonly distanceUnitError = computed(() => fieldError(this.flotaForm.distanceUnit()));
   protected readonly flotaFechaActividadError = computed(() =>
-    this.fieldError(this.flotaForm.fechaActividad())
+    fieldError(this.flotaForm.fechaActividad())
   );
 
-  protected readonly submitting = computed(() =>
-    this.activeCategory() === 'flota'
-      ? this.flotaForm().submitting()
-      : this.registerForm().submitting()
+  protected readonly envioTituloError = computed(() => fieldError(this.envioForm.titulo()));
+  protected readonly envioWeightValueError = computed(() =>
+    fieldError(this.envioForm.weightValue())
   );
+  protected readonly envioWeightUnitError = computed(() => fieldError(this.envioForm.weightUnit()));
+  protected readonly envioDistanceValueError = computed(() =>
+    fieldError(this.envioForm.distanceValue())
+  );
+  protected readonly envioDistanceUnitError = computed(() =>
+    fieldError(this.envioForm.distanceUnit())
+  );
+  protected readonly envioTransportMethodError = computed(() =>
+    fieldError(this.envioForm.transportMethod())
+  );
+  protected readonly envioFechaActividadError = computed(() =>
+    fieldError(this.envioForm.fechaActividad())
+  );
+
+  protected readonly submitting = computed(() => {
+    if (this.activeCategory() === 'flota') return this.flotaForm().submitting();
+    if (this.activeCategory() === 'envio') return this.envioForm().submitting();
+    if (this.activeCategory() === 'vuelo') return this.flightForm().submitting();
+    return this.registerForm().submitting();
+  });
   protected readonly canSubmit = computed(() => {
     if (this.activeCategory() === 'flota') {
       return this.flotaForm().valid() && !this.submitting();
     }
-    if (this.activeCategory() === 'electricidad') {
-      return this.registerForm().valid() && !this.submitting();
+    if (this.activeCategory() === 'envio') {
+      return this.envioForm().valid() && !this.submitting();
     }
-    return Object.keys(this.flightErrors()).length === 0 && !this.flightSubmitting();
-  });
-
-  protected readonly sidebarConfig = signal<SidebarConfig>({
-    menuItems: [
-      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', active: false },
-      { id: 'emissions', label: 'Mis Emisiones', icon: 'emisiones', active: true },
-      { id: 'auditors', label: 'Auditores', icon: 'auditores', active: false },
-      { id: 'audits', label: 'Auditorías', icon: 'auditorias', active: false },
-      { id: 'certifications', label: 'Certificaciones', icon: 'certificaciones', active: false },
-      { id: 'benchmark', label: 'Madurez ambiental', icon: 'benchmark', active: false },
-      { id: 'badges', label: 'Insignias', icon: 'insignias', active: false },
-      { id: 'public-profile', label: 'Perfil Público', icon: 'perfil-publico', active: false },
-      { id: 'team-members', label: 'Colaboradores', icon: 'colaboradores', active: false },
-    ],
-    bottomItems: [
-      { id: 'settings', label: 'Configuración', icon: 'config' },
-      { id: 'logout', label: 'Cerrar sesión', icon: 'logout' },
-    ],
-    companyName: 'Café del Valle S.A.',
-    companyRole: 'Empresa · Admin',
-    companyInitials: 'CV',
+    if (this.activeCategory() === 'vuelo') {
+      return this.flightForm().valid() && !this.submitting();
+    }
+    return this.registerForm().valid() && !this.submitting();
   });
 
   protected readonly headerConfig = signal<HeaderConfig>({
@@ -354,12 +469,8 @@ export class RegisterEmissionPageComponent {
     });
   }
 
-  protected goBack(): void {
-    this.location.back();
-  }
-
-  protected navigateToEnvio(): void {
-    void this.router.navigateByUrl('/emisiones/registrar/envio');
+  protected onCategorySelected(category: string): void {
+    this.selectCategory(category as EmissionCategory);
   }
 
   protected retryLoadTiposVehiculo(): void {
@@ -367,72 +478,49 @@ export class RegisterEmissionPageComponent {
   }
 
   protected onCancel(): void {
-    if (this.activeCategory() === 'electricidad') {
-      this.model.set({ ...INITIAL_MODEL });
-      this.registerForm().reset();
-    } else if (this.activeCategory() === 'flota') {
-      this.flotaModel.set({ ...INITIAL_FLOTA_MODEL });
-      this.flotaForm().reset();
-    } else {
-      this.flightModel.set(cloneFlightModel(INITIAL_FLIGHT_MODEL));
-      this.flightTouched.set(new Set());
-      this.flightSubmitted.set(false);
-      this.editingFlightId.set(null);
+    switch (this.activeCategory()) {
+      case 'electricidad':
+        this.model.set({ ...INITIAL_MODEL });
+        this.registerForm().reset();
+        break;
+      case 'flota':
+        this.flotaModel.set({ ...INITIAL_FLOTA_MODEL });
+        this.flotaForm().reset();
+        break;
+      case 'envio':
+        this.envioModel.set({ ...INITIAL_ENVIO_MODEL });
+        this.envioForm().reset();
+        break;
+      case 'vuelo':
+        this.flightModel.set(cloneFlightModel(INITIAL_FLIGHT_MODEL));
+        this.flightForm().reset();
+        break;
     }
-    this.lastResult.set(null);
   }
 
   protected handleSubmit(event: Event): void {
     event.preventDefault();
-    if (this.activeCategory() === 'electricidad') {
-      void this.onSubmit();
-      return;
+    switch (this.activeCategory()) {
+      case 'electricidad':
+        void this.onSubmit();
+        break;
+      case 'flota':
+        void this.onSubmitFlota();
+        break;
+      case 'envio':
+        void this.onSubmitEnvio();
+        break;
+      case 'vuelo':
+        void this.onFlightSubmit();
+        break;
     }
-    if (this.activeCategory() === 'flota') {
-      void this.onSubmitFlota();
-      return;
-    }
-    void this.onFlightSubmit();
   }
 
   protected selectCategory(category: EmissionCategory): void {
     this.activeCategory.set(category);
-    this.lastResult.set(null);
-    if (category === 'vuelo') {
-      void this.loadEmisiones();
-    }
     if (category === 'flota' && !this.catalogoLoaded() && !this.catalogoLoading()) {
       this.loadTiposVehiculo();
     }
-  }
-
-  protected updateFlightPassengers(passengers: number | null): void {
-    this.flightModel.update((model) => ({ ...model, passengers }));
-  }
-
-  protected updateFlightDate(fechaActividad: Date | null): void {
-    this.flightModel.update((model) => ({ ...model, fechaActividad }));
-  }
-
-  protected updateFlightDistanceUnit(distanceUnit: string): void {
-    this.flightModel.update((model) => ({
-      ...model,
-      distanceUnit: distanceUnit as UnidadDistancia,
-    }));
-  }
-
-  protected updateLeg(index: number, field: keyof RegistrarVueloLegFormModel, value: string): void {
-    this.flightModel.update((model) => ({
-      ...model,
-      legs: model.legs.map((leg, currentIndex) =>
-        currentIndex === index
-          ? {
-              ...leg,
-              [field]: field === 'cabinClass' ? (value as CabinClass) : value.toUpperCase(),
-            }
-          : leg
-      ),
-    }));
   }
 
   protected addLeg(): void {
@@ -445,21 +533,28 @@ export class RegisterEmissionPageComponent {
     }));
   }
 
+  protected addReturnLeg(): void {
+    const leg = this.flightModel().legs.at(-1);
+    if (!leg || !this.canAddReturnLeg()) return;
+
+    this.flightModel.update((model) => ({
+      ...model,
+      legs: [
+        ...model.legs,
+        {
+          departureAirport: leg.destinationAirport.toUpperCase(),
+          destinationAirport: leg.departureAirport.toUpperCase(),
+          cabinClass: leg.cabinClass,
+        },
+      ],
+    }));
+  }
+
   protected removeLeg(index: number): void {
     this.flightModel.update((model) => ({
       ...model,
       legs: model.legs.filter((_, currentIndex) => currentIndex !== index),
     }));
-  }
-
-  protected markFlightTouched(key: string): void {
-    this.flightTouched.update((current) => new Set(current).add(key as FlightErrorKey));
-  }
-
-  protected flightError(key: string): string {
-    const typedKey = key as FlightErrorKey;
-    if (!this.flightSubmitted() && !this.flightTouched().has(typedKey)) return '';
-    return this.flightErrors()[typedKey] ?? '';
   }
 
   private loadTiposVehiculo(): void {
@@ -490,17 +585,16 @@ export class RegisterEmissionPageComponent {
             titulo: value.titulo,
             electricityValue: value.electricityValue as number,
             electricityUnit: value.electricityUnit,
-            fechaActividad: toIsoDate(value.fechaActividad as Date),
+            fechaActividad: toIsoDateString(value.fechaActividad as Date),
           })
         );
-        this.lastResult.set({ carbonKg: response.carbonKg });
         this.toastService.success(
           'Consumo eléctrico registrado.',
           `Huella calculada: ${response.carbonKg} kg CO₂e.`
         );
         this.model.set({ ...INITIAL_MODEL });
         this.registerForm().reset();
-      } catch (error) {
+      } catch (error: unknown) {
         this.reportSubmissionError(error);
       }
       return undefined;
@@ -510,92 +604,22 @@ export class RegisterEmissionPageComponent {
   private async onFlightSubmit(): Promise<void> {
     if (!this.ensureSession()) return;
 
-    this.flightSubmitted.set(true);
-    if (Object.keys(this.flightErrors()).length > 0) {
-      return;
-    }
-
-    const value = this.flightModel();
-    this.flightSubmitting.set(true);
-    try {
-      const payload = buildFlightPayload(value);
-      const editingId = this.editingFlightId();
-      const response = await firstValueFrom(
-        editingId
-          ? this.emisionesService.actualizarVuelo(editingId, payload)
-          : this.emisionesService.registrarVuelo(payload)
-      );
-      this.lastResult.set({ carbonKg: response.carbonKg });
-      await this.loadEmisiones();
-      this.toastService.success(
-        editingId ? 'Viaje aéreo actualizado.' : 'Viaje aéreo registrado.',
-        `Huella calculada: ${response.carbonKg} kg CO₂e.`
-      );
-      this.flightModel.set(cloneFlightModel(INITIAL_FLIGHT_MODEL));
-      this.flightTouched.set(new Set());
-      this.flightSubmitted.set(false);
-      this.editingFlightId.set(null);
-    } catch (error) {
-      this.reportSubmissionError(error);
-    } finally {
-      this.flightSubmitting.set(false);
-    }
-  }
-
-  protected editFlight(emision: EmisionResponse): void {
-    if (emision.categoria !== 'VUELO') return;
-    this.activeCategory.set('vuelo');
-    this.editingFlightId.set(emision.id);
-    this.lastResult.set(null);
-    this.flightTouched.set(new Set());
-    this.flightSubmitted.set(false);
-    this.flightModel.set({
-      passengers: emision.passengers ?? 1,
-      distanceUnit: emision.distanceUnit ?? 'km',
-      fechaActividad: new Date(`${emision.fechaActividad}T00:00:00Z`),
-      legs: (emision.legs ?? []).map((leg) => ({
-        departureAirport: leg.departureAirport,
-        destinationAirport: leg.destinationAirport,
-        cabinClass: leg.cabinClass,
-      })),
-    });
-  }
-
-  protected async deleteEmission(emision: EmisionResponse): Promise<void> {
-    if (!this.ensureSession()) return;
-
-    const confirmed = globalThis.confirm(
-      `¿Eliminar el registro "${emision.titulo}"? Esta acción no se puede deshacer.`
-    );
-    if (!confirmed) return;
-
-    try {
-      await firstValueFrom(this.emisionesService.eliminarEmision(emision.id));
-      await this.loadEmisiones();
-      if (this.editingFlightId() === emision.id) {
-        this.onCancel();
+    await submit(this.flightForm, async (field) => {
+      const value = field().value();
+      try {
+        const payload = buildFlightPayload(value);
+        const response = await firstValueFrom(this.emisionesService.registrarVuelo(payload));
+        this.toastService.success(
+          'Viaje aéreo registrado.',
+          `Huella calculada: ${response.carbonKg} kg CO₂e.`
+        );
+        this.flightModel.set(cloneFlightModel(INITIAL_FLIGHT_MODEL));
+        this.flightForm().reset();
+      } catch (error: unknown) {
+        this.reportSubmissionError(error);
       }
-      this.toastService.success('Registro eliminado.');
-    } catch (error) {
-      this.reportSubmissionError(error);
-    }
-  }
-
-  private async loadEmisiones(): Promise<void> {
-    this.hasSession.set(this.hasActiveSession());
-    if (!this.hasSession()) {
-      this.emisiones.set([]);
-      return;
-    }
-
-    this.loadingEmisiones.set(true);
-    try {
-      this.emisiones.set(await firstValueFrom(this.emisionesService.listarEmisiones()));
-    } catch {
-      this.emisiones.set([]);
-    } finally {
-      this.loadingEmisiones.set(false);
-    }
+      return undefined;
+    });
   }
 
   private async onSubmitFlota(): Promise<void> {
@@ -612,15 +636,47 @@ export class RegisterEmissionPageComponent {
             combustible: value.combustible,
             distanceValue: value.distanceValue as number,
             distanceUnit: value.distanceUnit,
-            fechaActividad: toIsoDate(fechaActividad),
+            fechaActividad: toIsoDateString(fechaActividad),
           })
         );
         this.toastService.success(
           'Emisión de flota registrada.',
           `Huella calculada: ${response.carbonKg} kg CO₂e.`
         );
-        void this.router.navigateByUrl('/emisiones');
-      } catch (error) {
+        this.flotaModel.set({ ...INITIAL_FLOTA_MODEL });
+        this.flotaForm().reset();
+      } catch (error: unknown) {
+        this.reportSubmissionError(error);
+      }
+      return undefined;
+    });
+  }
+
+  private async onSubmitEnvio(): Promise<void> {
+    if (!this.ensureSession()) return;
+
+    await submit(this.envioForm, async (field) => {
+      const value = field().value();
+      try {
+        const fechaActividad = value.fechaActividad as Date;
+        const response = await firstValueFrom(
+          this.emisionesService.registrarEnvio({
+            titulo: value.titulo,
+            weightValue: value.weightValue as number,
+            weightUnit: value.weightUnit,
+            distanceValue: value.distanceValue as number,
+            distanceUnit: value.distanceUnit,
+            transportMethod: value.transportMethod,
+            fechaActividad: toIsoDateString(fechaActividad),
+          })
+        );
+        this.toastService.success(
+          'Envío registrado.',
+          `Huella calculada: ${response.carbonKg} kg CO₂e.`
+        );
+        this.envioModel.set({ ...INITIAL_ENVIO_MODEL });
+        this.envioForm().reset();
+      } catch (error: unknown) {
         this.reportSubmissionError(error);
       }
       return undefined;
@@ -628,12 +684,10 @@ export class RegisterEmissionPageComponent {
   }
 
   private reportSubmissionError(error: unknown): void {
-    if (error instanceof HttpErrorResponse) {
-      const apiError = error.error as ApiErrorResponse | null;
-      if (apiError?.message) {
-        this.toastService.error(apiError.message);
-        return;
-      }
+    const apiMessage = apiErrorMessage(error);
+    if (apiMessage) {
+      this.toastService.error(apiMessage);
+      return;
     }
     if (isAuthError(error)) {
       this.toastService.error(SESSION_ERROR_MESSAGE);
@@ -652,14 +706,6 @@ export class RegisterEmissionPageComponent {
   private hasActiveSession(): boolean {
     return Boolean(this.authService.token());
   }
-
-  private fieldError(field: {
-    touched(): boolean;
-    errors(): readonly { message?: string }[];
-  }): string {
-    if (!field.touched()) return '';
-    return field.errors()[0]?.message ?? '';
-  }
 }
 
 function cloneFlightModel(model: RegistrarVueloFormModel): RegistrarVueloFormModel {
@@ -669,54 +715,33 @@ function cloneFlightModel(model: RegistrarVueloFormModel): RegistrarVueloFormMod
   };
 }
 
+function isCompleteFlightLeg(leg: RegistrarVueloLegFormModel): boolean {
+  return (
+    /^[A-Za-z]{3}$/.test(leg.departureAirport) &&
+    /^[A-Za-z]{3}$/.test(leg.destinationAirport) &&
+    leg.departureAirport.toUpperCase() !== leg.destinationAirport.toUpperCase()
+  );
+}
+
+function areReverseFlightLegs(
+  first: RegistrarVueloLegFormModel,
+  second: RegistrarVueloLegFormModel
+): boolean {
+  return (
+    first.departureAirport.toUpperCase() === second.destinationAirport.toUpperCase() &&
+    first.destinationAirport.toUpperCase() === second.departureAirport.toUpperCase()
+  );
+}
+
 function buildFlightPayload(model: RegistrarVueloFormModel): RegistrarVueloRequest {
   return {
     passengers: model.passengers as number,
     distanceUnit: model.distanceUnit,
-    fechaActividad: toIsoDate(model.fechaActividad as Date),
+    fechaActividad: toIsoDateString(model.fechaActividad as Date),
     legs: model.legs.map((leg) => ({
       departureAirport: leg.departureAirport.toUpperCase(),
       destinationAirport: leg.destinationAirport.toUpperCase(),
       cabinClass: leg.cabinClass,
     })),
   };
-}
-
-function validateFlightModel(
-  model: RegistrarVueloFormModel,
-  today: Date
-): Partial<Record<FlightErrorKey, string>> {
-  const errors: Partial<Record<FlightErrorKey, string>> = {};
-  if (!Number.isInteger(model.passengers) || (model.passengers ?? 0) < 1) {
-    errors.passengers = 'Ingrese al menos 1 pasajero.';
-  }
-  if (model.legs.length === 0) {
-    errors.legs = 'Agregue al menos un trayecto.';
-  }
-  if (!model.fechaActividad) {
-    errors.fechaActividad = 'Ingrese una fecha para este registro.';
-  } else if (model.fechaActividad.getTime() > today.getTime()) {
-    errors.fechaActividad = 'La fecha no puede ser posterior a hoy.';
-  }
-  model.legs.forEach((leg, index) => {
-    const departureKey = `legs.${index}.departureAirport` as const;
-    const destinationKey = `legs.${index}.destinationAirport` as const;
-    const cabinKey = `legs.${index}.cabinClass` as const;
-    if (!/^[A-Za-z]{3}$/.test(leg.departureAirport)) {
-      errors[departureKey] = 'Ingrese un código IATA de 3 letras.';
-    }
-    if (!/^[A-Za-z]{3}$/.test(leg.destinationAirport)) {
-      errors[destinationKey] = 'Ingrese un código IATA de 3 letras.';
-    }
-    if (
-      /^[A-Za-z]{3}$/.test(leg.departureAirport) &&
-      leg.departureAirport.toUpperCase() === leg.destinationAirport.toUpperCase()
-    ) {
-      errors[destinationKey] = 'El origen y el destino no pueden ser iguales.';
-    }
-    if (!['economy', 'premium'].includes(leg.cabinClass)) {
-      errors[cabinKey] = 'Seleccione una clase válida.';
-    }
-  });
-  return errors;
 }

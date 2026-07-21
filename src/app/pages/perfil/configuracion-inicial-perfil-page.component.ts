@@ -1,12 +1,16 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { disabled, form, FormField, schema, submit, validate } from '@angular/forms/signals';
 import { ConfiguracionInicialLayoutComponent } from '../../shared/layouts/configuracion-inicial-layout/configuracion-inicial-layout.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { TextInputComponent } from '../../shared/components/inputs/text-input/text-input.component';
 import { NumberInputComponent } from '../../shared/components/inputs/number-input/number-input.component';
 import { SelectInputComponent } from '../../shared/components/inputs/select-input/select-input.component';
 import { ToastHostComponent } from '../../shared/components/toast/toast.component';
 import { ToastService } from '../../shared/services/toast.service';
+import { fieldError } from '../../shared/utils/form-field.utils';
 import { I18nService } from '../../core/services/i18n.service';
 import { PerfilInicialService } from '../../core/services/perfil-inicial.service';
 import {
@@ -24,11 +28,23 @@ import {
   Unidades,
 } from '../../core/models/preferencias.model';
 
+interface PerfilInicialFormModel {
+  nombreVisible: string;
+  idioma: string;
+  moneda: string;
+  unidades: string;
+  sectorIndustrial: string;
+  pais: string;
+  cantidadEmpleados: number | null;
+}
+
 @Component({
   selector: 'app-configuracion-inicial-perfil-page',
   imports: [
+    FormField,
     ConfiguracionInicialLayoutComponent,
     ButtonComponent,
+    HeadingComponent,
     TextInputComponent,
     NumberInputComponent,
     SelectInputComponent,
@@ -51,78 +67,83 @@ export class ConfiguracionInicialPerfilPageComponent implements OnInit {
   protected readonly cargando = signal(true);
   protected readonly errorCarga = signal(false);
   protected readonly guardando = signal(false);
-  protected readonly intentoGuardar = signal(false);
 
   protected readonly rol = signal<RolUsuario>('USUARIO_INDIVIDUAL');
   protected readonly empresa = signal<EmpresaPerfil | null>(null);
 
-  protected readonly nombreVisible = signal('');
-  protected readonly idioma = signal<Idioma>('ESPANOL');
-  protected readonly moneda = signal<Moneda>('CRC');
-  protected readonly unidades = signal<Unidades>('METRICO');
-
-  protected readonly sectorIndustrial = signal('');
-  protected readonly pais = signal('');
-  protected readonly cantidadEmpleados = signal<number | null>(null);
-
   protected readonly esAdminEmpresa = computed(() => this.rol() === 'ADMINISTRADOR_EMPRESA');
   protected readonly esAuditor = computed(() => this.rol() === 'AUDITOR_CERTIFICADO');
+  protected readonly editaEmpresa = computed(
+    () => this.esAdminEmpresa() && this.empresa() !== null
+  );
 
-  protected readonly nombreInvalido = computed(() => {
-    const largo = this.nombreVisible().trim().length;
-    return largo < 2 || largo > 100;
-  });
-  protected readonly errorNombre = computed(() => {
-    if (!this.intentoGuardar()) {
-      return '';
-    }
-    const largo = this.nombreVisible().trim().length;
-    if (largo < 2) {
-      return this.i18n.t('perfil.nombreError');
-    }
-    if (largo > 100) {
-      return this.i18n.t('perfil.nombreErrorMax');
-    }
-    return '';
+  protected readonly model = signal<PerfilInicialFormModel>({
+    nombreVisible: '',
+    idioma: 'ESPANOL',
+    moneda: 'CRC',
+    unidades: 'METRICO',
+    sectorIndustrial: '',
+    pais: '',
+    cantidadEmpleados: null,
   });
 
   // Espejan los mínimos del backend (DatosEmpresaPerfilDTO):
   // sector @NotBlank, país @NotBlank @Size(max=100), empleados @NotNull @Positive.
-  protected readonly editaEmpresa = computed(
-    () => this.esAdminEmpresa() && this.empresa() !== null
+  protected readonly perfilForm = form(
+    this.model,
+    schema<PerfilInicialFormModel>((path) => {
+      validate(path.nombreVisible, ({ value }) => {
+        const largo = value().trim().length;
+        if (largo < 2) {
+          return { kind: 'nombreCorto', message: this.i18n.t('perfil.nombreError') };
+        }
+        if (largo > 100) {
+          return { kind: 'nombreLargo', message: this.i18n.t('perfil.nombreErrorMax') };
+        }
+        return undefined;
+      });
+
+      validate(path.sectorIndustrial, ({ value }) => {
+        if (!this.editaEmpresa()) return undefined;
+        if (value().trim().length === 0) {
+          return { kind: 'sectorRequerido', message: this.i18n.t('perfil.sectorError') };
+        }
+        return undefined;
+      });
+
+      validate(path.pais, ({ value }) => {
+        if (!this.editaEmpresa()) return undefined;
+        const pais = value().trim();
+        if (pais.length === 0 || pais.length > 100) {
+          return { kind: 'paisInvalido', message: this.i18n.t('perfil.paisError') };
+        }
+        return undefined;
+      });
+
+      validate(path.cantidadEmpleados, ({ value }) => {
+        if (!this.editaEmpresa()) return undefined;
+        const cantidad = value();
+        if (cantidad === null || cantidad <= 0) {
+          return { kind: 'empleadosInvalidos', message: this.i18n.t('perfil.empleadosError') };
+        }
+        return undefined;
+      });
+
+      disabled(path.nombreVisible, { when: () => this.guardando() });
+      disabled(path.idioma, { when: () => this.guardando() });
+      disabled(path.moneda, { when: () => this.guardando() });
+      disabled(path.unidades, { when: () => this.guardando() });
+      disabled(path.sectorIndustrial, { when: () => this.guardando() });
+      disabled(path.pais, { when: () => this.guardando() });
+      disabled(path.cantidadEmpleados, { when: () => this.guardando() });
+    })
   );
-  protected readonly sectorInvalido = computed(
-    () => this.editaEmpresa() && this.sectorIndustrial().trim().length === 0
-  );
-  protected readonly paisInvalido = computed(() => {
-    if (!this.editaEmpresa()) {
-      return false;
-    }
-    const pais = this.pais().trim();
-    return pais.length === 0 || pais.length > 100;
-  });
-  protected readonly empleadosInvalidos = computed(() => {
-    if (!this.editaEmpresa()) {
-      return false;
-    }
-    const cantidad = this.cantidadEmpleados();
-    return cantidad === null || cantidad <= 0;
-  });
-  protected readonly errorSector = computed(() =>
-    this.intentoGuardar() && this.sectorInvalido() ? this.i18n.t('perfil.sectorError') : ''
-  );
-  protected readonly errorPais = computed(() =>
-    this.intentoGuardar() && this.paisInvalido() ? this.i18n.t('perfil.paisError') : ''
-  );
+
+  protected readonly errorNombre = computed(() => fieldError(this.perfilForm.nombreVisible()));
+  protected readonly errorSector = computed(() => fieldError(this.perfilForm.sectorIndustrial()));
+  protected readonly errorPais = computed(() => fieldError(this.perfilForm.pais()));
   protected readonly errorEmpleados = computed(() =>
-    this.intentoGuardar() && this.empleadosInvalidos() ? this.i18n.t('perfil.empleadosError') : ''
-  );
-  protected readonly formularioInvalido = computed(
-    () =>
-      this.nombreInvalido() ||
-      this.sectorInvalido() ||
-      this.paisInvalido() ||
-      this.empleadosInvalidos()
+    fieldError(this.perfilForm.cantidadEmpleados())
   );
 
   protected readonly sectorLabel = computed(() => {
@@ -141,15 +162,16 @@ export class ConfiguracionInicialPerfilPageComponent implements OnInit {
       next: (perfil) => {
         this.rol.set(perfil.rol);
         this.empresa.set(perfil.empresa);
-        this.nombreVisible.set(perfil.nombreVisible ?? '');
-        this.idioma.set(perfil.preferencias.idioma);
-        this.moneda.set(perfil.preferencias.moneda);
-        this.unidades.set(perfil.preferencias.unidades);
-        if (perfil.empresa) {
-          this.sectorIndustrial.set(perfil.empresa.sectorIndustrial ?? '');
-          this.pais.set(perfil.empresa.pais ?? '');
-          this.cantidadEmpleados.set(perfil.empresa.cantidadEmpleados ?? null);
-        }
+        this.model.update((m) => ({
+          ...m,
+          nombreVisible: perfil.nombreVisible ?? '',
+          idioma: perfil.preferencias.idioma,
+          moneda: perfil.preferencias.moneda,
+          unidades: perfil.preferencias.unidades,
+          sectorIndustrial: perfil.empresa?.sectorIndustrial ?? '',
+          pais: perfil.empresa?.pais ?? '',
+          cantidadEmpleados: perfil.empresa?.cantidadEmpleados ?? null,
+        }));
         this.cargando.set(false);
       },
       error: () => {
@@ -159,72 +181,52 @@ export class ConfiguracionInicialPerfilPageComponent implements OnInit {
     });
   }
 
-  protected guardar(): void {
+  protected handleSubmit(event: Event): void {
+    event.preventDefault();
+    void this.onSubmit();
+  }
+
+  private async onSubmit(): Promise<void> {
     if (this.guardando()) {
       return;
     }
-    this.intentoGuardar.set(true);
-    if (this.formularioInvalido()) {
-      return;
-    }
 
-    const request: PerfilInicialRequest = {
-      nombreVisible: this.nombreVisible().trim(),
-      preferencias: {
-        idioma: this.idioma(),
-        moneda: this.moneda(),
-        unidades: this.unidades(),
-      },
-    };
-    if (this.esAdminEmpresa() && this.empresa()) {
-      request.empresa = {
-        sectorIndustrial: this.sectorIndustrial(),
-        pais: this.pais().trim(),
-        cantidadEmpleados: this.cantidadEmpleados() ?? 0,
-      };
-    }
+    await submit(this.perfilForm, {
+      action: async (field) => {
+        const value = field().value();
+        const request: PerfilInicialRequest = {
+          nombreVisible: value.nombreVisible.trim(),
+          preferencias: {
+            idioma: value.idioma as Idioma,
+            moneda: value.moneda as Moneda,
+            unidades: value.unidades as Unidades,
+          },
+        };
+        if (this.esAdminEmpresa() && this.empresa()) {
+          request.empresa = {
+            sectorIndustrial: value.sectorIndustrial,
+            pais: value.pais.trim(),
+            cantidadEmpleados: value.cantidadEmpleados ?? 0,
+          };
+        }
 
-    this.guardando.set(true);
-    this.perfilService.completar(request).subscribe({
-      next: (perfil) => {
-        this.i18n.usarIdioma(perfil.preferencias.idioma);
-        this.guardando.set(false);
-        this.router.navigateByUrl(perfil.redirect || '/').catch((err) => {
-          console.error('Error al navegar tras completar el perfil inicial:', err);
-        });
+        this.guardando.set(true);
+        try {
+          const perfil = await firstValueFrom(this.perfilService.completar(request));
+          this.i18n.usarIdioma(perfil.preferencias.idioma);
+          this.guardando.set(false);
+          try {
+            await this.router.navigateByUrl(perfil.redirect || '/');
+          } catch (err: unknown) {
+            console.error('Error al navegar tras completar el perfil inicial:', err);
+          }
+        } catch (err: unknown) {
+          this.guardando.set(false);
+          this.toastService.error(this.i18n.t('perfil.errorGuardar'));
+        }
+        return undefined;
       },
-      error: () => {
-        this.guardando.set(false);
-        this.toastService.error(this.i18n.t('perfil.errorGuardar'));
-      },
+      onInvalid: (field) => field().markAsTouched(),
     });
-  }
-
-  protected onNombreChange(valor: string): void {
-    this.nombreVisible.set(valor);
-  }
-
-  protected onIdiomaChange(valor: string): void {
-    this.idioma.set(valor as Idioma);
-  }
-
-  protected onMonedaChange(valor: string): void {
-    this.moneda.set(valor as Moneda);
-  }
-
-  protected onUnidadesChange(valor: string): void {
-    this.unidades.set(valor as Unidades);
-  }
-
-  protected onSectorChange(valor: string): void {
-    this.sectorIndustrial.set(valor);
-  }
-
-  protected onPaisChange(valor: string): void {
-    this.pais.set(valor);
-  }
-
-  protected onCantidadEmpleadosChange(valor: number | null): void {
-    this.cantidadEmpleados.set(valor);
   }
 }

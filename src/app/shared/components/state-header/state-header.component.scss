@@ -9,33 +9,6 @@
   border-bottom: 1px solid var(--ch-border);
 }
 
-.ch-state-header__brand {
-  display: flex;
-  align-items: center;
-  gap: var(--ch-space-2);
-}
-
-.ch-state-header__logo-icon {
-  flex-shrink: 0;
-  width: 26px;
-  height: 26px;
-}
-
-.ch-state-header__logo-text {
-  font-family: var(--ch-font-heading);
-  font-size: 1rem;
-}
-
-.ch-state-header__logo-carbon {
-  color: var(--ch-text-primary);
-  font-weight: 600;
-}
-
-.ch-state-header__logo-hub {
-  color: var(--ch-green);
-  font-weight: 500;
-}
-
 .ch-state-header__actions {
   display: flex;
   align-items: center;

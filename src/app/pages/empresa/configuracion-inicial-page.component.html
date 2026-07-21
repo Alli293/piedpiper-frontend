@@ -2,7 +2,7 @@
   @if (!enviado()) {
     <div class="configuracion-empresa">
       <header class="configuracion-empresa__header">
-        <h1 class="configuracion-empresa__title">Información de tu empresa</h1>
+        <app-heading level="h1" text="Información de tu empresa" />
         <p class="configuracion-empresa__subtitle">
           Completa estos datos para terminar de configurar tu cuenta.
         </p>
@@ -73,7 +73,7 @@
     </div>
   } @else {
     <div class="configuracion-empresa__exito">
-      <h2 class="configuracion-empresa__exito-title">¡Listo!</h2>
+      <app-heading level="h2" text="¡Listo!" />
       <p class="configuracion-empresa__exito-text">
         Guardamos la información de <strong>{{ resultado()?.nombreEmpresa }}</strong
         >.

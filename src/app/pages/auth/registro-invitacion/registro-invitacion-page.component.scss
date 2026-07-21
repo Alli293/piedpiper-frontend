@@ -1,0 +1,90 @@
+:host {
+  display: block;
+}
+
+.invitacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-5);
+}
+
+.invitacion__estado {
+  margin: 0;
+  color: var(--ch-text-muted);
+  font-size: 14px;
+}
+
+.invitacion__badge {
+  margin-bottom: var(--ch-space-4);
+}
+
+.invitacion__texto {
+  margin: var(--ch-space-2) 0 0;
+  color: var(--ch-text-secondary);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.invitacion__datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-3);
+  margin: 0;
+  padding: var(--ch-space-4);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-lg);
+  background: var(--ch-green-soft);
+}
+
+.invitacion__dato {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--ch-space-4);
+}
+
+.invitacion__dato dt {
+  color: var(--ch-text-secondary);
+  font-size: 13px;
+}
+
+.invitacion__dato dd {
+  margin: 0;
+  color: var(--ch-text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.invitacion__google {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.invitacion__google--bloqueado {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.invitacion__error {
+  margin: 0;
+  color: var(--ch-danger);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.invitacion__enlace {
+  color: var(--ch-blue-mid);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.invitacion__enlace:hover {
+  text-decoration: underline;
+}
+
+.invitacion__bloqueo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-4);
+}

@@ -19,6 +19,14 @@
   flex-shrink: 0;
 }
 
+:host(.ch-badge--with-icon)::before {
+  content: none;
+}
+
+.ch-badge__icon {
+  color: currentColor;
+}
+
 :host(.ch-badge--success) {
   background: var(--ch-green-soft);
   color: var(--ch-green-dark);

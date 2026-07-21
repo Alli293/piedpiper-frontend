@@ -39,16 +39,8 @@
   background: var(--ch-border);
 }
 
-.not-found-page__title {
-  margin: 0 0 var(--ch-space-3);
-  font-family: var(--ch-font-heading);
-  font-weight: 700;
-  font-size: 1.5625rem;
-  color: var(--ch-text-primary);
-}
-
 .not-found-page__message {
-  margin: 0 0 var(--ch-space-10);
+  margin: var(--ch-space-3) 0 var(--ch-space-10);
   max-width: 340px;
   color: var(--ch-text-secondary);
   font-size: 0.875rem;

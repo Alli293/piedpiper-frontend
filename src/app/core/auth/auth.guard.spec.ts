@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { signal } from '@angular/core';
-import { authGuard } from './auth.guard';
+import { authGuard, rolGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 
 describe('authGuard', () => {
@@ -32,5 +32,47 @@ describe('authGuard', () => {
     const resultado = ejecutarGuard();
 
     expect(resultado).toEqual(router.parseUrl('/login'));
+  });
+});
+
+describe('rolGuard', () => {
+  let authService: {
+    token: ReturnType<typeof signal<string | null>>;
+    rol: ReturnType<typeof signal<string | null>>;
+  };
+  let router: Router;
+
+  beforeEach(() => {
+    authService = { token: signal<string | null>(null), rol: signal<string | null>(null) };
+
+    TestBed.configureTestingModule({
+      providers: [provideRouter([]), { provide: AuthService, useValue: authService }],
+    });
+
+    router = TestBed.inject(Router);
+  });
+
+  function ejecutarGuard() {
+    return TestBed.runInInjectionContext(() =>
+      rolGuard('ADMINISTRADOR_PLATAFORMA')({} as any, {} as any)
+    );
+  }
+
+  it('permite el acceso cuando el rol coincide', () => {
+    authService.token.set('jwt-123');
+    authService.rol.set('ADMINISTRADOR_PLATAFORMA');
+
+    expect(ejecutarGuard()).toBe(true);
+  });
+
+  it('redirige a la raíz cuando el rol no coincide', () => {
+    authService.token.set('jwt-123');
+    authService.rol.set('ADMINISTRADOR_EMPRESA');
+
+    expect(ejecutarGuard()).toEqual(router.parseUrl('/'));
+  });
+
+  it('redirige a /login cuando no hay token', () => {
+    expect(ejecutarGuard()).toEqual(router.parseUrl('/login'));
   });
 });

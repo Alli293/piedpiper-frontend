@@ -1,26 +1,12 @@
 <div class="ch-config-inicial-layout__topbar">
-  <div class="ch-config-inicial-layout__brand">
-    <img
-      class="ch-config-inicial-layout__logo"
-      src="images/logos/isotipo-mono-white.svg"
-      alt=""
-      aria-hidden="true"
-    />
-    <span class="ch-config-inicial-layout__brand-name">
-      <span class="ch-config-inicial-layout__brand-carbon">Carbon</span
-      ><span class="ch-config-inicial-layout__brand-hub">Hub</span>
-    </span>
-  </div>
+  <app-logo variant="on-dark" [iconSize]="24" textSize="18px" />
   <span class="ch-config-inicial-layout__divider" aria-hidden="true"></span>
   <span class="ch-config-inicial-layout__step">Configuración inicial</span>
 </div>
 
 <div class="ch-config-inicial-layout__body">
   <div class="ch-config-inicial-layout__card">
-    <span class="ch-config-inicial-layout__badge">
-      <app-icon [name]="rolIcon()" [size]="16" />
-      {{ rolLabel() }}
-    </span>
+    <app-badge variant="success" [icon]="rolIcon()">{{ rolLabel() }}</app-badge>
     <ng-content />
   </div>
 </div>

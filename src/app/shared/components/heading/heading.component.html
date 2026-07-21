@@ -1,0 +1,14 @@
+@switch (level()) {
+  @case ('h1') {
+    <h1 [class]="'ch-heading--' + resolvedAppearance()">{{ text() }}</h1>
+  }
+  @case ('h2') {
+    <h2 [class]="'ch-heading--' + resolvedAppearance()">{{ text() }}</h2>
+  }
+  @case ('h3') {
+    <h3 [class]="'ch-heading--' + resolvedAppearance()">{{ text() }}</h3>
+  }
+  @default {
+    <h4 [class]="'ch-heading--' + resolvedAppearance()">{{ text() }}</h4>
+  }
+}

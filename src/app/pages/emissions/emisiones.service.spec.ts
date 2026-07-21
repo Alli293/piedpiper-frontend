@@ -55,6 +55,37 @@ describe('EmisionesService', () => {
     req.flush({ id: '456', carbonKg: 0.5 });
   });
 
+  it('listarEmisiones envia los query params de filtros', () => {
+    service.listarEmisiones({ categoria: 'FLOTA', anio: 2026, mes: 7 }).subscribe();
+
+    const req = httpMock.expectOne(
+      (request) =>
+        request.url === base &&
+        request.params.get('categoria') === 'FLOTA' &&
+        request.params.get('anio') === '2026' &&
+        request.params.get('mes') === '7'
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  it('listarEmisiones omite categoria cuando el filtro es TODAS', () => {
+    service.listarEmisiones({ categoria: 'TODAS' }).subscribe();
+
+    const req = httpMock.expectOne(base);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.has('categoria')).toBeFalsy();
+    req.flush([]);
+  });
+
+  it('eliminarEmision hace DELETE al endpoint con el id', () => {
+    service.eliminarEmision('registro-1').subscribe();
+
+    const req = httpMock.expectOne(`${base}/registro-1`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
+
   it('posts the expected body to /emisiones/vuelo', () => {
     const payload = {
       passengers: 2,
@@ -62,6 +93,7 @@ describe('EmisionesService', () => {
       fechaActividad: '2026-07-09',
       legs: [
         { departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' as const },
+        { departureAirport: 'YYZ', destinationAirport: 'SFO', cabinClass: 'economy' as const },
       ],
     };
 

@@ -1,0 +1,109 @@
+<app-shell-layout [headerConfig]="headerConfig">
+  <main class="invitaciones">
+    <p class="invitaciones__subtitle">
+      Invita colaboradores para que se unan a tu empresa como usuarios generales.
+    </p>
+
+    <form class="invitaciones__form" novalidate (submit)="handleSubmit($event)">
+      <div class="invitaciones__form-field">
+        <app-text-input
+          label="Correo del colaborador"
+          type="email"
+          autocomplete="email"
+          placeholder="colaborador@correo.com"
+          [formField]="invitacionForm.email"
+          [error]="emailError()"
+        />
+      </div>
+      <app-button variant="primary" type="submit" [loading]="enviando()">
+        Enviar invitación
+      </app-button>
+    </form>
+
+    <section class="invitaciones__lista">
+      <app-heading level="h2" text="Invitaciones enviadas" />
+
+      @if (cargando()) {
+        <p class="invitaciones__vacio">Cargando invitaciones...</p>
+      } @else if (errorCarga()) {
+        <div class="invitaciones__vacio" role="alert">
+          <p>No pudimos cargar las invitaciones. Intenta nuevamente.</p>
+          <app-button variant="secondary" size="sm" (click)="reintentarCarga()">
+            Reintentar
+          </app-button>
+        </div>
+      } @else if (invitaciones().length === 0) {
+        <p class="invitaciones__vacio">Aún no has enviado invitaciones.</p>
+      } @else {
+        <div class="invitaciones__tabla-wrap">
+          <table class="invitaciones__tabla">
+            <thead>
+              <tr>
+                <th>Correo</th>
+                <th>Estado</th>
+                <th>Expira</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (invitacion of invitaciones(); track invitacion.id) {
+                <tr>
+                  <td>{{ invitacion.email }}</td>
+                  <td>
+                    <app-badge [variant]="variante(invitacion.estado)">
+                      {{ etiqueta(invitacion.estado) }}
+                    </app-badge>
+                  </td>
+                  <td>{{ invitacion.fechaExpiracion | date: 'dd/MM/yyyy' : 'UTC' }}</td>
+                  <td class="invitaciones__acciones">
+                    @if (invitacion.estado === 'ENVIADA') {
+                      <app-button
+                        variant="tertiary"
+                        size="sm"
+                        [attr.aria-label]="'Revocar invitación a ' + invitacion.email"
+                        (click)="abrirRevocacion(invitacion)"
+                      >
+                        Revocar
+                      </app-button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    @if (invitacionARevocar(); as invitacion) {
+      <div class="invitaciones__overlay" (click)="cerrarRevocacion()">
+        <div
+          #modalRevocar
+          class="invitaciones__modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="revocar-titulo"
+          tabindex="-1"
+          (click)="$event.stopPropagation()"
+          (keydown)="alPresionarTeclaModal($event)"
+        >
+          <h3 class="invitaciones__modal-title" id="revocar-titulo">Revocar invitación</h3>
+          <p class="invitaciones__modal-text">
+            La invitación a <strong>{{ invitacion.email }}</strong> dejará de ser válida y esa
+            persona no podrá registrarse con este enlace. ¿Deseas continuar?
+          </p>
+          <div class="invitaciones__modal-actions">
+            <app-button variant="secondary" [disabled]="revocando()" (click)="cerrarRevocacion()">
+              Cancelar
+            </app-button>
+            <app-button variant="danger" [loading]="revocando()" (click)="confirmarRevocacion()">
+              Revocar invitación
+            </app-button>
+          </div>
+        </div>
+      </div>
+    }
+  </main>
+
+  <app-toast-host />
+</app-shell-layout>
