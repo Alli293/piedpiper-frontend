@@ -23,7 +23,12 @@ describe('ShellLayoutComponent', () => {
   });
 
   async function createFixture(
-    inputs: { activeId?: string; companyRole?: string; settingsLabel?: string; backRoute?: string } = {}
+    inputs: {
+      activeId?: string;
+      companyRole?: string;
+      settingsLabel?: string;
+      backRoute?: string;
+    } = {}
   ) {
     const fixture = TestBed.createComponent(ShellLayoutComponent);
     fixture.componentRef.setInput('headerConfig', HEADER_CONFIG);
@@ -32,7 +37,8 @@ describe('ShellLayoutComponent', () => {
       fixture.componentRef.setInput('companyRole', inputs.companyRole);
     if (inputs.settingsLabel !== undefined)
       fixture.componentRef.setInput('settingsLabel', inputs.settingsLabel);
-    if (inputs.backRoute !== undefined) fixture.componentRef.setInput('backRoute', inputs.backRoute);
+    if (inputs.backRoute !== undefined)
+      fixture.componentRef.setInput('backRoute', inputs.backRoute);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -40,9 +46,9 @@ describe('ShellLayoutComponent', () => {
   }
 
   function menuLabels(root: HTMLElement): string[] {
-    return Array.from(
-      root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item-label')
-    ).map((element) => element.textContent?.trim() ?? '');
+    return Array.from(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item-label')).map(
+      (element) => element.textContent?.trim() ?? ''
+    );
   }
 
   it('renderiza los 3 ítems del menú de sidebar-nav, en orden', async () => {
