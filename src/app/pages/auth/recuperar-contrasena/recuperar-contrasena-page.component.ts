@@ -1,7 +1,15 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { FormField, form, pattern, required, schema, submit } from '@angular/forms/signals';
+import {
+  FormField,
+  disabled,
+  form,
+  pattern,
+  required,
+  schema,
+  submit,
+} from '@angular/forms/signals';
 import { AuthLayoutComponent } from '../../../shared/layouts/auth-layout/auth-layout.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
@@ -43,6 +51,7 @@ export class RecuperarContrasenaPageComponent {
     schema<RecuperarContrasenaFormModel>((path) => {
       required(path.email, { message: EMAIL_MENSAJE });
       pattern(path.email, EMAIL_PATTERN, { message: EMAIL_MENSAJE });
+      disabled(path.email, { when: () => this.submitting() });
     })
   );
 

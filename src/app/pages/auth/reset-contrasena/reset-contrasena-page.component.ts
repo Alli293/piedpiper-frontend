@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -133,8 +134,12 @@ export class ResetContrasenaPageComponent implements OnInit {
           this.mensajeExito.set(respuesta.mensaje);
           this.completado.set(true);
         } catch (err: unknown) {
-          const message = (err as { error?: { message?: string } })?.error?.message;
-          this.error.set(message ?? 'No pudimos actualizar tu contraseña. Intenta nuevamente.');
+          const message = err instanceof HttpErrorResponse ? err.error?.message : undefined;
+          if (err instanceof HttpErrorResponse && err.status === 410) {
+            this.mensajeInvalido.set(message ?? 'Este enlace no es válido o expiró.');
+          } else {
+            this.error.set(message ?? 'No pudimos actualizar tu contraseña. Intenta nuevamente.');
+          }
         }
         return undefined;
       },

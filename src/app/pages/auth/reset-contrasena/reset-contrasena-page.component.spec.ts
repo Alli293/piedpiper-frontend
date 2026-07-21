@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ResetContrasenaPageComponent } from './reset-contrasena-page.component';
@@ -116,12 +117,16 @@ describe('ResetContrasenaPageComponent', () => {
     expect(comp.mensajeExito()).toContain('actualizada');
   });
 
-  it('si el backend responde error al restablecer, lo muestra y no marca como completado', async () => {
+  it('si el backend responde un error inesperado al restablecer, lo muestra inline y no marca como completado', async () => {
     authService.validarTokenReset.mockReturnValue(of({ email: 'ana.perez@example.com' }));
     authService.restablecerContrasena.mockReturnValue(
-      throwError(() => ({
-        error: { message: 'Este enlace no es válido o expiró. Solicita uno nuevo.' },
-      }))
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 500,
+            error: { message: 'Ocurrió un error inesperado.' },
+          })
+      )
     );
     const fixture = crear();
     const comp = fixture.componentInstance as any;
@@ -134,7 +139,35 @@ describe('ResetContrasenaPageComponent', () => {
     comp.handleSubmit(new Event('submit'));
     await fixture.whenStable();
 
-    expect(comp.error()).toContain('Solicita uno nuevo');
+    expect(comp.error()).toContain('Ocurrió un error inesperado');
     expect(comp.completado()).toBe(false);
+    expect(comp.mensajeInvalido()).toBe('');
+  });
+
+  it('si el token se invalida justo al enviar el formulario, transiciona a la pantalla de enlace no valido', async () => {
+    authService.validarTokenReset.mockReturnValue(of({ email: 'ana.perez@example.com' }));
+    authService.restablecerContrasena.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 410,
+            error: { message: 'Este enlace no es válido o expiró. Solicita uno nuevo.' },
+          })
+      )
+    );
+    const fixture = crear();
+    const comp = fixture.componentInstance as any;
+    comp.model.update((m: any) => ({
+      ...m,
+      contrasena: 'Clave1234!',
+      confirmarContrasena: 'Clave1234!',
+    }));
+
+    comp.handleSubmit(new Event('submit'));
+    await fixture.whenStable();
+
+    expect(comp.mensajeInvalido()).toContain('Solicita uno nuevo');
+    expect(comp.completado()).toBe(false);
+    expect(comp.error()).toBe('');
   });
 });
