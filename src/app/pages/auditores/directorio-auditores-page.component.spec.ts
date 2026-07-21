@@ -12,7 +12,11 @@ import { DirectorioAuditoresPageComponent } from './directorio-auditores-page.co
 describe('DirectorioAuditoresPageComponent', () => {
   let fixture: ComponentFixture<DirectorioAuditoresPageComponent>;
   let component: DirectorioAuditoresPageComponent;
-  let auditoresService: { listar: ReturnType<typeof vi.fn> };
+  let auditoresService: {
+    listar: ReturnType<typeof vi.fn>;
+    obtenerEspecialidades: ReturnType<typeof vi.fn>;
+    obtenerZonas: ReturnType<typeof vi.fn>;
+  };
   let toastService: { error: ReturnType<typeof vi.fn> };
 
   const auditor: AuditorResumen = {
@@ -36,7 +40,13 @@ describe('DirectorioAuditoresPageComponent', () => {
   };
 
   beforeEach(async () => {
-    auditoresService = { listar: vi.fn().mockReturnValue(of(paginaBase)) };
+    auditoresService = {
+      listar: vi.fn().mockReturnValue(of(paginaBase)),
+      obtenerEspecialidades: vi
+        .fn()
+        .mockReturnValue(of([{ valor: 'AGROINDUSTRIA', etiqueta: 'Agroindustria' }])),
+      obtenerZonas: vi.fn().mockReturnValue(of([{ valor: 'SAN_JOSE', etiqueta: 'San José' }])),
+    };
     toastService = { error: vi.fn(), toasts: signal([]) } as any;
 
     await TestBed.configureTestingModule({
@@ -70,6 +80,12 @@ describe('DirectorioAuditoresPageComponent', () => {
       estrellas(v: number | null): boolean[];
       iniciales(v: string): string;
       ubicacion(a: AuditorResumen): string;
+      toggleEspecialidad(v: string, activa: boolean): void;
+      toggleZona(v: string, activa: boolean): void;
+      onSoloDisponibles(v: boolean): void;
+      limpiarFiltros(): void;
+      chipsActivos(): { tipo: string; valor: string; etiqueta: string }[];
+      hayFiltrosActivos(): boolean;
     };
   }
 
@@ -83,9 +99,54 @@ describe('DirectorioAuditoresPageComponent', () => {
 
     expect(auditoresService.listar).toHaveBeenCalledWith({
       terminoBusqueda: '',
+      especialidades: [],
+      zonaGeografica: null,
+      calificacionMinima: null,
+      soloDisponibles: false,
       pagina: 0,
       ordenamiento: 'CALIFICACION',
     });
+  });
+
+  it('carga los catalogos de especialidades y zonas al iniciar', () => {
+    expect(auditoresService.obtenerEspecialidades).toHaveBeenCalled();
+    expect(auditoresService.obtenerZonas).toHaveBeenCalled();
+  });
+
+  it('al aplicar un filtro aparece su chip y reinicia la pagina', () => {
+    (component as any).pagina.set(2);
+
+    comp().toggleEspecialidad('AGROINDUSTRIA', true);
+
+    expect(comp().hayFiltrosActivos()).toBe(true);
+    expect(
+      comp()
+        .chipsActivos()
+        .map((c) => c.etiqueta)
+    ).toContain('Agroindustria');
+    expect(comp().pagina()).toBe(0);
+  });
+
+  it('limpiar filtros quita todos los chips activos', () => {
+    comp().toggleEspecialidad('AGROINDUSTRIA', true);
+    comp().toggleZona('SAN_JOSE', true);
+    comp().onSoloDisponibles(true);
+    expect(comp().chipsActivos()).toHaveLength(3);
+
+    comp().limpiarFiltros();
+
+    expect(comp().chipsActivos()).toHaveLength(0);
+    expect(comp().hayFiltrosActivos()).toBe(false);
+  });
+
+  it('con filtros activos y sin resultados muestra el mensaje de ampliar criterios', () => {
+    comp().toggleZona('SAN_JOSE', true);
+    comp().resultado.set({ contenido: [], totalResultados: 0, paginaActual: 0, totalPaginas: 0 });
+    pintar();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'No hay auditores que cumplan con los filtros seleccionados. Intente ampliar los criterios.'
+    );
   });
 
   it('mientras carga muestra el estado de carga', () => {
