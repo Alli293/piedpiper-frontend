@@ -2,9 +2,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CatalogoItem, FiltrosDirectorio, PaginaAuditores } from './auditor.model';
-
-const TAMANIO_PAGINA = 12;
+import {
+  CatalogoItem,
+  FiltrosDirectorio,
+  LONGITUD_MAXIMA_BUSQUEDA,
+  LONGITUD_MINIMA_BUSQUEDA,
+  PaginaAuditores,
+  TAMANIO_PAGINA_DIRECTORIO,
+} from './auditor.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuditoresService {
@@ -15,12 +20,13 @@ export class AuditoresService {
   listar(filtros: FiltrosDirectorio): Observable<PaginaAuditores> {
     let params = new HttpParams()
       .set('pagina', filtros.pagina)
-      .set('tamanioPagina', TAMANIO_PAGINA)
+      .set('tamanioPagina', TAMANIO_PAGINA_DIRECTORIO)
       .set('ordenamiento', filtros.ordenamiento)
       .set('soloDisponibles', filtros.soloDisponibles);
 
-    if (filtros.terminoBusqueda.length >= 2) {
-      params = params.set('terminoBusqueda', filtros.terminoBusqueda);
+    const termino = filtros.terminoBusqueda;
+    if (termino.length >= LONGITUD_MINIMA_BUSQUEDA && termino.length <= LONGITUD_MAXIMA_BUSQUEDA) {
+      params = params.set('terminoBusqueda', termino);
     }
     for (const especialidad of filtros.especialidades) {
       params = params.append('especialidades', especialidad);

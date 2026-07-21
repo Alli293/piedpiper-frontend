@@ -1,12 +1,22 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { catchError, debounceTime, distinctUntilChanged, of, switchMap, tap } from 'rxjs';
+import {
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  firstValueFrom,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { AuthSessionService } from '../../core/auth-session.service';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CheckboxComponent } from '../../shared/components/inputs/checkbox/checkbox.component';
+import { RadioComponent } from '../../shared/components/inputs/radio/radio.component';
+import { RadioGroupDirective } from '../../shared/components/inputs/radio/radio-group.directive';
 import {
   SelectInputComponent,
   SelectOption,
@@ -16,20 +26,54 @@ import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.compo
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { apiErrorMessage } from '../../shared/utils/http-error.utils';
+import { inicialesDe } from '../../shared/utils/iniciales.utils';
 import { AuditoresService } from './auditores.service';
 import {
   AuditorResumen,
   CatalogoItem,
+  LONGITUD_MAXIMA_BUSQUEDA,
+  LONGITUD_MINIMA_BUSQUEDA,
   OrdenamientoAuditores,
   PaginaAuditores,
 } from './auditor.model';
 
 const TOTAL_ESTRELLAS = 5;
+const MENSAJE_ERROR_DIRECTORIO =
+  'No se pudo cargar el directorio de auditores. Intente nuevamente.';
+const MENSAJE_ERROR_FILTRO = 'No se pudo aplicar el filtro. Intente nuevamente.';
+
+interface FiltrosDirectorioModel {
+  terminoBusqueda: string;
+  especialidades: string[];
+  zona: string | null;
+  calificacionMinima: number | null;
+  soloDisponibles: boolean;
+  ordenamiento: OrdenamientoAuditores;
+  pagina: number;
+}
+
+const FILTROS_INICIALES: FiltrosDirectorioModel = {
+  terminoBusqueda: '',
+  especialidades: [],
+  zona: null,
+  calificacionMinima: null,
+  soloDisponibles: false,
+  ordenamiento: 'CALIFICACION',
+  pagina: 0,
+};
 
 interface ChipFiltro {
   tipo: 'especialidad' | 'zona' | 'calificacion' | 'disponible';
   valor: string;
   etiqueta: string;
+}
+
+interface TarjetaAuditor {
+  auditor: AuditorResumen;
+  iniciales: string;
+  estrellas: boolean[];
+  ubicacion: string;
+  etiquetas: string[];
 }
 
 @Component({
@@ -40,6 +84,8 @@ interface ChipFiltro {
     TextInputComponent,
     SelectInputComponent,
     CheckboxComponent,
+    RadioComponent,
+    RadioGroupDirective,
     AvatarComponent,
     BadgeComponent,
     ButtonComponent,
@@ -53,18 +99,13 @@ export class DirectorioAuditoresPageComponent {
   private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly terminoBusqueda = signal('');
-  protected readonly ordenamiento = signal<OrdenamientoAuditores>('CALIFICACION');
-  protected readonly pagina = signal(0);
+  protected readonly modelo = signal<FiltrosDirectorioModel>(FILTROS_INICIALES);
   private readonly recarga = signal(0);
-
-  protected readonly especialidadesSeleccionadas = signal<string[]>([]);
-  protected readonly zonaSeleccionada = signal<string | null>(null);
-  protected readonly calificacionMinima = signal<number | null>(null);
-  protected readonly soloDisponibles = signal(false);
 
   protected readonly especialidadesCatalogo = signal<CatalogoItem[]>([]);
   protected readonly zonasCatalogo = signal<CatalogoItem[]>([]);
+  protected readonly especialidadesCargando = signal(true);
+  protected readonly zonasCargando = signal(true);
   protected readonly especialidadesDeshabilitadas = signal(false);
   protected readonly zonasDeshabilitadas = signal(false);
 
@@ -93,33 +134,46 @@ export class DirectorioAuditoresPageComponent {
   }));
 
   protected readonly avisoBusqueda = computed(() =>
-    this.terminoBusqueda().trim().length === 1 ? 'Ingrese al menos 2 caracteres para buscar.' : ''
+    this.modelo().terminoBusqueda.trim().length === 1
+      ? 'Ingrese al menos 2 caracteres para buscar.'
+      : ''
   );
 
   protected readonly calificacionValor = computed(() => {
-    const valor = this.calificacionMinima();
+    const valor = this.modelo().calificacionMinima;
     return valor === null ? '' : String(valor);
   });
 
+  private readonly etiquetasEspecialidad = computed(
+    () => new Map(this.especialidadesCatalogo().map((item) => [item.valor, item.etiqueta]))
+  );
+
+  private readonly etiquetasZona = computed(
+    () => new Map(this.zonasCatalogo().map((item) => [item.valor, item.etiqueta]))
+  );
+
   protected readonly chipsActivos = computed<ChipFiltro[]>(() => {
-    const chips: ChipFiltro[] = this.especialidadesSeleccionadas().map((valor) => ({
-      tipo: 'especialidad',
+    const modelo = this.modelo();
+    const chips: ChipFiltro[] = modelo.especialidades.map((valor) => ({
+      tipo: 'especialidad' as const,
       valor,
-      etiqueta: this.etiquetaEspecialidad(valor),
+      etiqueta: this.etiquetasEspecialidad().get(valor) ?? valor,
     }));
-    const zona = this.zonaSeleccionada();
-    if (zona) {
-      chips.push({ tipo: 'zona', valor: zona, etiqueta: this.etiquetaZona(zona) });
-    }
-    const calificacion = this.calificacionMinima();
-    if (calificacion !== null) {
+    if (modelo.zona) {
       chips.push({
-        tipo: 'calificacion',
-        valor: String(calificacion),
-        etiqueta: `${calificacion}+ estrellas`,
+        tipo: 'zona',
+        valor: modelo.zona,
+        etiqueta: this.etiquetasZona().get(modelo.zona) ?? modelo.zona,
       });
     }
-    if (this.soloDisponibles()) {
+    if (modelo.calificacionMinima !== null) {
+      chips.push({
+        tipo: 'calificacion',
+        valor: String(modelo.calificacionMinima),
+        etiqueta: `${modelo.calificacionMinima}+ estrellas`,
+      });
+    }
+    if (modelo.soloDisponibles) {
       chips.push({ tipo: 'disponible', valor: 'true', etiqueta: 'Solo disponibles' });
     }
     return chips;
@@ -127,27 +181,135 @@ export class DirectorioAuditoresPageComponent {
 
   protected readonly hayFiltrosActivos = computed(() => this.chipsActivos().length > 0);
 
+  protected readonly mensajeError = computed(() =>
+    this.hayFiltrosActivos() ? MENSAJE_ERROR_FILTRO : MENSAJE_ERROR_DIRECTORIO
+  );
+
   protected readonly sinResultados = computed(
     () => !this.cargando() && !this.error() && this.resultado()?.contenido.length === 0
   );
 
-  private readonly criterios = computed(() => ({
-    termino: this.terminoBusqueda().trim(),
-    especialidades: this.especialidadesSeleccionadas(),
-    zona: this.zonaSeleccionada(),
-    calificacion: this.calificacionMinima(),
-    disponibles: this.soloDisponibles(),
-    orden: this.ordenamiento(),
-    pagina: this.pagina(),
-    recarga: this.recarga(),
-  }));
+  protected readonly tarjetas = computed<TarjetaAuditor[]>(
+    () => this.resultado()?.contenido.map((auditor) => this.tarjeta(auditor)) ?? []
+  );
+
+  protected readonly paginas = computed<number[]>(() =>
+    Array.from({ length: this.resultado()?.totalPaginas ?? 0 }, (_, indice) => indice)
+  );
+
+  private readonly criterios = computed(() => {
+    const modelo = this.modelo();
+    return {
+      termino: this.terminoNormalizado(modelo.terminoBusqueda),
+      especialidades: modelo.especialidades,
+      zona: modelo.zona,
+      calificacion: modelo.calificacionMinima,
+      disponibles: modelo.soloDisponibles,
+      orden: modelo.ordenamiento,
+      pagina: modelo.pagina,
+      recarga: this.recarga(),
+    };
+  });
 
   constructor() {
-    this.cargarCatalogos();
+    void this.cargarCatalogos();
+    this.iniciarBusquedaReactiva();
+  }
+
+  protected onBuscar(valor: string): void {
+    this.modelo.update((modelo) => ({ ...modelo, terminoBusqueda: valor, pagina: 0 }));
+  }
+
+  protected onOrdenar(valor: string): void {
+    this.modelo.update((modelo) => ({
+      ...modelo,
+      ordenamiento: valor as OrdenamientoAuditores,
+      pagina: 0,
+    }));
+  }
+
+  protected toggleEspecialidad(valor: string, activa: boolean): void {
+    this.modelo.update((modelo) => ({
+      ...modelo,
+      especialidades: activa
+        ? [...modelo.especialidades, valor]
+        : modelo.especialidades.filter((item) => item !== valor),
+      pagina: 0,
+    }));
+  }
+
+  protected onZona(valor: string | null): void {
+    this.modelo.update((modelo) => ({
+      ...modelo,
+      zona: valor === '' ? null : valor,
+      pagina: 0,
+    }));
+  }
+
+  protected onCalificacion(valor: string): void {
+    this.modelo.update((modelo) => ({
+      ...modelo,
+      calificacionMinima: valor === '' ? null : Number(valor),
+      pagina: 0,
+    }));
+  }
+
+  protected onSoloDisponibles(valor: boolean): void {
+    this.modelo.update((modelo) => ({ ...modelo, soloDisponibles: valor, pagina: 0 }));
+  }
+
+  protected estaEspecialidad(valor: string): boolean {
+    return this.modelo().especialidades.includes(valor);
+  }
+
+  protected quitarFiltro(chip: ChipFiltro): void {
+    switch (chip.tipo) {
+      case 'especialidad':
+        this.toggleEspecialidad(chip.valor, false);
+        break;
+      case 'zona':
+        this.onZona(null);
+        break;
+      case 'calificacion':
+        this.onCalificacion('');
+        break;
+      case 'disponible':
+        this.onSoloDisponibles(false);
+        break;
+    }
+  }
+
+  protected limpiarFiltros(): void {
+    this.modelo.update((modelo) => ({
+      ...FILTROS_INICIALES,
+      terminoBusqueda: modelo.terminoBusqueda,
+      ordenamiento: modelo.ordenamiento,
+    }));
+  }
+
+  protected irAPagina(numeroPagina: number): void {
+    this.modelo.update((modelo) => ({ ...modelo, pagina: numeroPagina }));
+  }
+
+  protected reintentar(): void {
+    this.recarga.update((valor) => valor + 1);
+  }
+
+  private iniciarBusquedaReactiva(): void {
     toObservable(this.criterios)
       .pipe(
         debounceTime(250),
-        distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+        distinctUntilChanged(
+          (a, b) =>
+            a.termino === b.termino &&
+            a.especialidades.join(',') === b.especialidades.join(',') &&
+            a.zona === b.zona &&
+            a.calificacion === b.calificacion &&
+            a.disponibles === b.disponibles &&
+            a.orden === b.orden &&
+            a.pagina === b.pagina &&
+            a.recarga === b.recarga
+        ),
         tap(() => {
           this.cargando.set(true);
           this.error.set(false);
@@ -167,8 +329,7 @@ export class DirectorioAuditoresPageComponent {
               catchError((err: unknown) => {
                 this.error.set(true);
                 this.toastService.error(
-                  apiErrorMessage(err) ??
-                    'No se pudo cargar el directorio de auditores. Intente nuevamente.',
+                  apiErrorMessage(err) ?? this.mensajeError(),
                   undefined,
                   5000
                 );
@@ -186,139 +347,70 @@ export class DirectorioAuditoresPageComponent {
       });
   }
 
-  protected onBuscar(valor: string): void {
-    this.terminoBusqueda.set(valor);
-    this.pagina.set(0);
+  private async cargarCatalogos(): Promise<void> {
+    await Promise.all([this.cargarEspecialidades(), this.cargarZonas()]);
   }
 
-  protected onOrdenar(valor: string): void {
-    this.ordenamiento.set(valor as OrdenamientoAuditores);
-    this.pagina.set(0);
-  }
-
-  protected toggleEspecialidad(valor: string, activa: boolean): void {
-    this.especialidadesSeleccionadas.update((actuales) =>
-      activa ? [...actuales, valor] : actuales.filter((item) => item !== valor)
-    );
-    this.pagina.set(0);
-  }
-
-  protected toggleZona(valor: string, activa: boolean): void {
-    this.zonaSeleccionada.set(activa ? valor : null);
-    this.pagina.set(0);
-  }
-
-  protected onCalificacion(valor: string): void {
-    this.calificacionMinima.set(valor === '' ? null : Number(valor));
-    this.pagina.set(0);
-  }
-
-  protected onSoloDisponibles(valor: boolean): void {
-    this.soloDisponibles.set(valor);
-    this.pagina.set(0);
-  }
-
-  protected estaEspecialidad(valor: string): boolean {
-    return this.especialidadesSeleccionadas().includes(valor);
-  }
-
-  protected quitarFiltro(chip: ChipFiltro): void {
-    switch (chip.tipo) {
-      case 'especialidad':
-        this.toggleEspecialidad(chip.valor, false);
-        break;
-      case 'zona':
-        this.zonaSeleccionada.set(null);
-        break;
-      case 'calificacion':
-        this.calificacionMinima.set(null);
-        break;
-      case 'disponible':
-        this.soloDisponibles.set(false);
-        break;
+  private async cargarEspecialidades(): Promise<void> {
+    try {
+      this.especialidadesCatalogo.set(
+        await firstValueFrom(this.auditoresService.obtenerEspecialidades())
+      );
+    } catch (err: unknown) {
+      this.especialidadesDeshabilitadas.set(true);
+      this.toastService.error(
+        apiErrorMessage(err) ??
+          'No se pudo cargar el catálogo de especialidades. Los demás filtros están disponibles.',
+        undefined,
+        5000
+      );
+    } finally {
+      this.especialidadesCargando.set(false);
     }
-    this.pagina.set(0);
   }
 
-  protected limpiarFiltros(): void {
-    this.especialidadesSeleccionadas.set([]);
-    this.zonaSeleccionada.set(null);
-    this.calificacionMinima.set(null);
-    this.soloDisponibles.set(false);
-    this.pagina.set(0);
+  private async cargarZonas(): Promise<void> {
+    try {
+      this.zonasCatalogo.set(await firstValueFrom(this.auditoresService.obtenerZonas()));
+    } catch (err: unknown) {
+      this.zonasDeshabilitadas.set(true);
+      this.toastService.error(
+        apiErrorMessage(err) ??
+          'No se pudo cargar el catálogo de zonas. Los demás filtros están disponibles.',
+        undefined,
+        5000
+      );
+    } finally {
+      this.zonasCargando.set(false);
+    }
   }
 
-  protected irAPagina(numeroPagina: number): void {
-    this.pagina.set(numeroPagina);
+  private terminoNormalizado(terminoBusqueda: string): string {
+    const termino = terminoBusqueda.trim();
+    if (termino.length < LONGITUD_MINIMA_BUSQUEDA || termino.length > LONGITUD_MAXIMA_BUSQUEDA) {
+      return '';
+    }
+    return termino;
   }
 
-  protected reintentar(): void {
-    this.recarga.update((valor) => valor + 1);
-  }
-
-  protected paginas(): number[] {
-    const total = this.resultado()?.totalPaginas ?? 0;
-    return Array.from({ length: total }, (_, indice) => indice);
-  }
-
-  protected iniciales(nombre: string): string {
-    return nombre
-      .split(' ')
-      .filter((parte) => parte.length > 0)
-      .slice(0, 2)
-      .map((parte) => parte[0]?.toUpperCase() ?? '')
-      .join('');
-  }
-
-  protected estrellas(calificacion: number | null): boolean[] {
-    const redondeada = calificacion === null ? 0 : Math.round(calificacion);
-    return Array.from({ length: TOTAL_ESTRELLAS }, (_, indice) => indice < redondeada);
-  }
-
-  protected etiquetaEspecialidad(valor: string): string {
-    return this.especialidadesCatalogo().find((item) => item.valor === valor)?.etiqueta ?? valor;
-  }
-
-  protected etiquetaZona(valor: string): string {
-    return this.zonasCatalogo().find((item) => item.valor === valor)?.etiqueta ?? valor;
-  }
-
-  protected ubicacion(auditor: AuditorResumen): string {
-    const provincia = auditor.provincia ? this.etiquetaZona(auditor.provincia) : null;
+  private tarjeta(auditor: AuditorResumen): TarjetaAuditor {
+    const redondeada =
+      auditor.calificacionPromedio === null ? 0 : Math.round(auditor.calificacionPromedio);
+    const provincia = auditor.provincia
+      ? (this.etiquetasZona().get(auditor.provincia) ?? auditor.provincia)
+      : null;
     const experiencia =
       auditor.aniosExperiencia !== null ? `${auditor.aniosExperiencia} años exp.` : null;
-    return [provincia, experiencia].filter((parte): parte is string => parte !== null).join(' · ');
-  }
-
-  private cargarCatalogos(): void {
-    this.auditoresService
-      .obtenerEspecialidades()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (catalogo) => this.especialidadesCatalogo.set(catalogo),
-        error: () => {
-          this.especialidadesDeshabilitadas.set(true);
-          this.toastService.error(
-            'No se pudo cargar el catálogo de especialidades. Los demás filtros están disponibles.',
-            undefined,
-            5000
-          );
-        },
-      });
-
-    this.auditoresService
-      .obtenerZonas()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (catalogo) => this.zonasCatalogo.set(catalogo),
-        error: () => {
-          this.zonasDeshabilitadas.set(true);
-          this.toastService.error(
-            'No se pudo cargar el catálogo de zonas. Los demás filtros están disponibles.',
-            undefined,
-            5000
-          );
-        },
-      });
+    return {
+      auditor,
+      iniciales: inicialesDe(auditor.nombre),
+      estrellas: Array.from({ length: TOTAL_ESTRELLAS }, (_, indice) => indice < redondeada),
+      ubicacion: [provincia, experiencia]
+        .filter((parte): parte is string => parte !== null)
+        .join(' · '),
+      etiquetas: auditor.especialidadesPrincipales.map(
+        (clave) => this.etiquetasEspecialidad().get(clave) ?? clave
+      ),
+    };
   }
 }

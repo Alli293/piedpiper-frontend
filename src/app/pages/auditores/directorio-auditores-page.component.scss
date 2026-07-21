@@ -1,3 +1,5 @@
+@use '../../shared/styles/mixins';
+
 :host {
   display: block;
 }
@@ -80,6 +82,12 @@
     font-size: 12px;
     color: var(--ch-text-muted);
   }
+
+  &__radios {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ch-space-2);
+  }
 }
 
 .directorio__contenido {
@@ -113,6 +121,10 @@
     font-size: 14px;
     line-height: 1;
     cursor: pointer;
+
+    &:focus-visible {
+      @include mixins.focus-ring;
+    }
   }
 }
 
@@ -269,7 +281,7 @@
   background: var(--ch-green-dark);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 992px) {
   .directorio__layout {
     grid-template-columns: 1fr;
   }
@@ -278,7 +290,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 720px) {
   .directorio__toolbar {
     flex-direction: column;
     align-items: stretch;

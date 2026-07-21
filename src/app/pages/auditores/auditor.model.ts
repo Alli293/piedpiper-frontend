@@ -34,3 +34,7 @@ export interface FiltrosDirectorio {
   pagina: number;
   ordenamiento: OrdenamientoAuditores;
 }
+
+export const TAMANIO_PAGINA_DIRECTORIO = 12;
+export const LONGITUD_MINIMA_BUSQUEDA = 2;
+export const LONGITUD_MAXIMA_BUSQUEDA = 100;
