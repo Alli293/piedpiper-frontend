@@ -121,6 +121,36 @@ describe('EmissionsListPageComponent', () => {
     expect(eliminarEmision).not.toHaveBeenCalled();
   });
 
+  it('cierra el modal al hacer click en el fondo', async () => {
+    const fixture = await createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    root.querySelector<HTMLButtonElement>('.ch-emissions-list-page__delete')?.click();
+    fixture.detectChanges();
+
+    root.querySelector<HTMLElement>('.ch-emissions-list-page__modal-backdrop')?.click();
+    fixture.detectChanges();
+
+    expect(root.querySelector('.ch-emissions-list-page__modal')).toBeNull();
+    expect(eliminarEmision).not.toHaveBeenCalled();
+  });
+
+  it('cierra el modal con Escape', async () => {
+    const fixture = await createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    root.querySelector<HTMLButtonElement>('.ch-emissions-list-page__delete')?.click();
+    fixture.detectChanges();
+
+    root
+      .querySelector<HTMLElement>('.ch-emissions-list-page__modal')
+      ?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+
+    expect(root.querySelector('.ch-emissions-list-page__modal')).toBeNull();
+    expect(eliminarEmision).not.toHaveBeenCalled();
+  });
+
   it('navega a limites anuales desde el boton del toolbar', async () => {
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
@@ -135,9 +165,7 @@ describe('EmissionsListPageComponent', () => {
 
   it('mantiene los contadores del periodo aunque se filtre por categoria', async () => {
     const registros = [REGISTRO_ELECTRICIDAD, REGISTRO_FLOTA, REGISTRO_VUELO];
-    listarEmisiones.mockImplementation((filtros) =>
-      of(filtros?.categoria === 'VUELO' ? [REGISTRO_VUELO] : registros)
-    );
+    listarEmisiones.mockReturnValue(of(registros));
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
@@ -162,10 +190,10 @@ describe('EmissionsListPageComponent', () => {
     const registros = [REGISTRO_ELECTRICIDAD, REGISTRO_FLOTA, REGISTRO_VUELO];
     const cargaInicial = new Subject<EmisionResponse[]>();
     let llamadas = 0;
-    listarEmisiones.mockImplementation((filtros) => {
+    listarEmisiones.mockImplementation(() => {
       llamadas += 1;
       if (llamadas === 1) return cargaInicial.asObservable();
-      return of(filtros?.categoria === 'FLOTA' ? [REGISTRO_FLOTA] : registros);
+      return of(registros);
     });
 
     const fixture = TestBed.createComponent(EmissionsListPageComponent);
@@ -191,6 +219,7 @@ describe('EmissionsListPageComponent', () => {
     expect(tableText).toContain('Ruta de reparto');
     expect(tableText).not.toContain('Pruebas');
     expect(tableText).not.toContain('Viaje aereo SJO-FRA-SJO');
+    expect(listarEmisiones).toHaveBeenLastCalledWith({ anio: null, mes: null });
   });
 
   it('filtra en pantalla por categoria aunque el servicio devuelva todos los registros', async () => {
@@ -218,9 +247,7 @@ describe('EmissionsListPageComponent', () => {
     listarEmisiones.mockReturnValue(of([REGISTRO_FLOTA, REGISTRO_FLOTA_OTRO_MES]));
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
-    const selects = root.querySelectorAll<HTMLSelectElement>(
-      '.ch-emissions-list-page__select select'
-    );
+    const selects = root.querySelectorAll<HTMLSelectElement>('app-select-input select');
 
     selects[0].value = '2026';
     selects[0].dispatchEvent(new Event('change'));

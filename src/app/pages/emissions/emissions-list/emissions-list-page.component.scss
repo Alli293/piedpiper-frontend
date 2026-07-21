@@ -31,9 +31,6 @@
 }
 
 .ch-emissions-list-page__chip,
-.ch-emissions-list-page__select,
-.ch-emissions-list-page__limits,
-.ch-emissions-list-page__register,
 .ch-emissions-list-page__delete {
   border: 1px solid var(--ch-border);
   background: var(--ch-bg-white);
@@ -80,57 +77,7 @@
 }
 
 .ch-emissions-list-page__select {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 40px;
-  padding: 0 12px;
-  border-radius: var(--ch-radius-md);
-}
-
-.ch-emissions-list-page__select span {
-  color: var(--ch-text-primary);
-  font-size: 0.83rem;
-  font-weight: 800;
-}
-
-.ch-emissions-list-page__select select {
-  min-width: 92px;
-  border: 0;
-  background: transparent;
-  color: var(--ch-text-primary);
-  font: inherit;
-  outline: 0;
-}
-
-.ch-emissions-list-page__limits,
-.ch-emissions-list-page__register {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 40px;
-  padding: 0 18px;
-  border-radius: var(--ch-radius-md);
-  font-weight: 800;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.ch-emissions-list-page__limits {
-  border-color: rgba(16, 122, 83, 0.32);
-  background: var(--ch-bg-white);
-  color: var(--ch-green-dark);
-}
-
-.ch-emissions-list-page__limits app-icon {
-  color: var(--ch-green-dark);
-}
-
-.ch-emissions-list-page__register {
-  border-color: var(--ch-green);
-  background: var(--ch-green);
-  color: #ffffff;
+  min-width: 132px;
 }
 
 .ch-emissions-list-page__register-plus {
@@ -436,16 +383,12 @@
 
 @media (max-width: 640px) {
   .ch-emissions-list-page__select,
-  .ch-emissions-list-page__register {
+  .ch-emissions-list-page__select-filters app-button {
     width: 100%;
   }
 
   .ch-emissions-list-page__select-filters {
     width: 100%;
-  }
-
-  .ch-emissions-list-page__select select {
-    flex: 1;
   }
 
   .ch-emissions-list-page__modal-actions {

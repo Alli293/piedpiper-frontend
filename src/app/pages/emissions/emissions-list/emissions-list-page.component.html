@@ -18,34 +18,33 @@
       </div>
 
       <div class="ch-emissions-list-page__select-filters">
-        <label class="ch-emissions-list-page__select">
-          <span>Año</span>
-          <select [value]="filtroAnio() ?? ''" (change)="cambiarAnio($any($event.target).value)">
-            <option value="">Todos</option>
-            @for (year of yearOptions(); track year) {
-              <option [value]="year">{{ year }}</option>
-            }
-          </select>
-        </label>
+        <app-select-input
+          class="ch-emissions-list-page__select"
+          label="Año"
+          placeholder="Todos"
+          [options]="yearOptions()"
+          [value]="filtroAnioValue()"
+          (valueChange)="cambiarAnio($event)"
+        />
 
-        <label class="ch-emissions-list-page__select">
-          <span>Mes</span>
-          <select [value]="filtroMes() ?? ''" (change)="cambiarMes($any($event.target).value)">
-            @for (option of monthOptions; track option.value) {
-              <option [value]="option.value">{{ option.label }}</option>
-            }
-          </select>
-        </label>
+        <app-select-input
+          class="ch-emissions-list-page__select"
+          label="Mes"
+          placeholder="Todos"
+          [options]="monthOptions"
+          [value]="filtroMesValue()"
+          (valueChange)="cambiarMes($event)"
+        />
 
-        <button type="button" class="ch-emissions-list-page__limits" (click)="verLimitesAnuales()">
+        <app-button variant="secondary" type="button" (click)="verLimitesAnuales()">
           <app-icon name="benchmark" [size]="16" />
           <span>Límites anuales</span>
-        </button>
+        </app-button>
 
-        <button type="button" class="ch-emissions-list-page__register" (click)="registrarEmision()">
+        <app-button type="button" (click)="registrarEmision()">
           <span class="ch-emissions-list-page__register-plus" aria-hidden="true">+</span>
           <span>Registrar emisión</span>
-        </button>
+        </app-button>
       </div>
     </section>
 
@@ -131,12 +130,19 @@
   </div>
 
   @if (confirmTarget(); as registro) {
-    <div class="ch-emissions-list-page__modal-backdrop" role="presentation">
+    <div
+      class="ch-emissions-list-page__modal-backdrop"
+      role="presentation"
+      (click)="cancelarEliminar()"
+    >
       <section
         class="ch-emissions-list-page__modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="delete-title"
+        tabindex="-1"
+        (click)="$event.stopPropagation()"
+        (keydown)="alPresionarTeclaModal($event)"
       >
         <div class="ch-emissions-list-page__modal-icon" aria-hidden="true">
           <app-icon name="delete" [size]="18" />

@@ -6,11 +6,16 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import {
+  SelectInputComponent,
+  SelectOption,
+} from '../../../shared/components/inputs/select-input/select-input.component';
+import {
   HeaderConfig,
   PageLayoutComponent,
   SidebarConfig,
 } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
+import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import { EmisionesService } from '../emisiones.service';
 import { CategoriaFiltroEmision, EmisionResponse } from '../models/emision.model';
 
@@ -28,7 +33,7 @@ const CATEGORY_OPTIONS: CategoriaOption[] = [
   { value: 'ENVIO', label: 'Envíos', icon: 'envios-carga' },
 ];
 
-const MONTH_OPTIONS = [
+const MONTH_OPTIONS: SelectOption[] = [
   { value: '', label: 'Todos' },
   { value: '1', label: 'Enero' },
   { value: '2', label: 'Febrero' },
@@ -46,7 +51,13 @@ const MONTH_OPTIONS = [
 
 @Component({
   selector: 'app-emissions-list-page',
-  imports: [ButtonComponent, HeadingComponent, IconComponent, PageLayoutComponent],
+  imports: [
+    ButtonComponent,
+    HeadingComponent,
+    IconComponent,
+    PageLayoutComponent,
+    SelectInputComponent,
+  ],
   templateUrl: './emissions-list-page.component.html',
   styleUrl: './emissions-list-page.component.scss',
 })
@@ -70,10 +81,18 @@ export class EmissionsListPageComponent {
   protected readonly totalCarbonKg = computed(() =>
     this.registros().reduce((total, registro) => total + (registro.carbonKg ?? 0), 0)
   );
-  protected readonly yearOptions = computed(() => {
+  protected readonly yearOptions = computed<SelectOption[]>(() => {
     const currentYear = new Date().getFullYear();
-    return Array.from({ length: currentYear - 1999 }, (_, index) => currentYear - index);
+    return [
+      { value: '', label: 'Todos' },
+      ...Array.from({ length: currentYear - 1999 }, (_, index) => {
+        const year = String(currentYear - index);
+        return { value: year, label: year };
+      }),
+    ];
   });
+  protected readonly filtroAnioValue = computed(() => this.filtroAnio()?.toString() ?? '');
+  protected readonly filtroMesValue = computed(() => this.filtroMes()?.toString() ?? '');
 
   protected readonly sidebarConfig = signal<SidebarConfig>({
     menuItems: [
@@ -116,31 +135,22 @@ export class EmissionsListPageComponent {
         mes: this.filtroMes(),
       };
       const categoria = this.filtroCategoria();
-      const registrosPromise = firstValueFrom(
-        this.emisionesService.listarEmisiones({
-          ...filtrosPeriodo,
-          categoria,
-        })
-      );
-      const conteoPromise =
-        categoria === 'TODAS'
-          ? registrosPromise
-          : firstValueFrom(this.emisionesService.listarEmisiones(filtrosPeriodo));
-      const [registros, registrosConteo] = await Promise.all([registrosPromise, conteoPromise]);
+      const registros = await firstValueFrom(this.emisionesService.listarEmisiones(filtrosPeriodo));
       if (requestId !== this.cargaRegistrosRequestId) return;
+      const registrosPeriodo = registros.filter((registro) =>
+        cumpleFiltros(registro, 'TODAS', filtrosPeriodo.anio, filtrosPeriodo.mes)
+      );
       this.registros.set(
-        registros.filter((registro) =>
+        registrosPeriodo.filter((registro) =>
           cumpleFiltros(registro, categoria, filtrosPeriodo.anio, filtrosPeriodo.mes)
         )
       );
-      this.registrosConteo.set(
-        registrosConteo.filter((registro) =>
-          cumpleFiltros(registro, 'TODAS', filtrosPeriodo.anio, filtrosPeriodo.mes)
-        )
-      );
+      this.registrosConteo.set(registrosPeriodo);
     } catch (error: unknown) {
       if (requestId !== this.cargaRegistrosRequestId) return;
-      this.toastService.error('No se pudo completar la operación. Intente nuevamente.');
+      this.toastService.error(
+        apiErrorMessage(error) ?? 'No se pudo completar la operación. Intente nuevamente.'
+      );
       this.registros.set([]);
       this.registrosConteo.set([]);
     } finally {
@@ -165,6 +175,13 @@ export class EmissionsListPageComponent {
     void this.cargarRegistros();
   }
 
+  protected alPresionarTeclaModal(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.cancelarEliminar();
+    }
+  }
+
   protected solicitarEliminar(registro: EmisionResponse): void {
     this.confirmTarget.set(registro);
   }
@@ -186,7 +203,7 @@ export class EmissionsListPageComponent {
       );
       this.toastService.success('Registro eliminado.');
       this.confirmTarget.set(null);
-    } catch (error) {
+    } catch (error: unknown) {
       this.manejarErrorEliminacion(error);
     } finally {
       this.deletingId.set(null);
@@ -245,11 +262,12 @@ export class EmissionsListPageComponent {
   }
 
   protected formatFecha(fecha: string): string {
+    const fechaActividad = parseFechaActividad(fecha);
     return new Intl.DateTimeFormat('es-CR', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
-    }).format(new Date(`${fecha}T00:00:00`));
+    }).format(new Date(fechaActividad.anio, fechaActividad.mes - 1, fechaActividad.dia));
   }
 
   protected formatCarbonKg(value: number): string {
@@ -262,17 +280,23 @@ export class EmissionsListPageComponent {
   private manejarErrorEliminacion(error: unknown): void {
     if (error instanceof HttpErrorResponse) {
       if (error.status === 404) {
-        this.toastService.error('El registro ya no existe o fue eliminado.');
+        this.toastService.error(
+          apiErrorMessage(error) ?? 'El registro ya no existe o fue eliminado.'
+        );
         this.confirmTarget.set(null);
         void this.cargarRegistros();
         return;
       }
       if (error.status === 403) {
-        this.toastService.error('No tiene permiso para eliminar este registro.');
+        this.toastService.error(
+          apiErrorMessage(error) ?? 'No tiene permiso para eliminar este registro.'
+        );
         return;
       }
     }
-    this.toastService.error('No se pudo completar la operación. Intente nuevamente.');
+    this.toastService.error(
+      apiErrorMessage(error) ?? 'No se pudo completar la operación. Intente nuevamente.'
+    );
   }
 
   private rutaVuelo(registro: EmisionResponse): string {
@@ -298,10 +322,15 @@ function cumpleFiltros(
   mes: number | null
 ): boolean {
   if (categoria !== 'TODAS' && registro.categoria !== categoria) return false;
-  const fecha = new Date(`${registro.fechaActividad}T00:00:00`);
-  if (anio !== null && fecha.getFullYear() !== anio) return false;
-  if (mes !== null && fecha.getMonth() + 1 !== mes) return false;
+  const fecha = parseFechaActividad(registro.fechaActividad);
+  if (anio !== null && fecha.anio !== anio) return false;
+  if (mes !== null && fecha.mes !== mes) return false;
   return true;
+}
+
+function parseFechaActividad(fecha: string): { anio: number; mes: number; dia: number } {
+  const [anio, mes, dia] = fecha.split('-').map(Number);
+  return { anio, mes, dia };
 }
 
 function formatText(value: string | undefined): string {

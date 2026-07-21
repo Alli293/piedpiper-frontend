@@ -13,6 +13,10 @@ export const rutasPostAutenticacion = [
   'admin/panel',
 ];
 
+const rutasPlaceholder = rutasPostAutenticacion.filter(
+  (path) => path !== 'emisiones' && path !== 'emisiones/registrar'
+);
+
 export const routes: Routes = [
   {
     path: 'login',
@@ -90,7 +94,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),
   },
-  ...rutasPostAutenticacion.map((path) => ({ path, loadComponent: cargarPlaceholder })),
+  ...rutasPlaceholder.map((path) => ({ path, loadComponent: cargarPlaceholder })),
   {
     path: 'emisiones',
     canActivate: [authGuard],
