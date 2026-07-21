@@ -38,29 +38,9 @@ describe('ImaPanelComponent', () => {
   });
 
   function imaCompleto(): ImaResponse {
-    return {
-      cobertura: 75,
-      puntajeIntensidadSectorial: 58,
-      consistencia: 80,
-      ima: 71,
-      parcial: false,
-      motivoParcial: null,
-      intensidad: 1.5,
-      calculatedAt: '2026-07-18T00:00:00Z',
-      interpretacionIa: null,
-    };
+    return { cobertura: 75, puntajeIntensidadSectorial: 58, consistencia: 80, ima: 71, parcial: false, motivoParcial: null, intensidad: 1.5, calculatedAt: '2026-07-18T00:00:00Z', interpretacionIa: null };
   }
   function imaParcial(): ImaResponse {
-    return {
-      cobertura: 50,
-      puntajeIntensidadSectorial: null,
-      consistencia: 25,
-      ima: 37.5,
-      parcial: true,
-      motivoParcial: 'Tu sector no tiene suficientes empresas.',
-      intensidad: null,
-      calculatedAt: '2026-01-18T00:00:00Z',
-      interpretacionIa: null,
-    };
+    return { cobertura: 50, puntajeIntensidadSectorial: null, consistencia: 25, ima: 37.5, parcial: true, motivoParcial: 'Tu sector no tiene suficientes empresas.', intensidad: null, calculatedAt: '2026-01-18T00:00:00Z', interpretacionIa: null };
   }
 });
