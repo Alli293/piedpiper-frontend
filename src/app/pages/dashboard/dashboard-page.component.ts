@@ -7,11 +7,9 @@ import {
   SelectInputComponent,
   SelectOption,
 } from '../../shared/components/inputs/select-input/select-input.component';
-import {
-  HeaderConfig,
-  PageLayoutComponent,
-  SidebarConfig,
-} from '../../shared/layouts/page-layout/page-layout.component';
+import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
+import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
+import { COMPANY_INITIALS } from '../../shared/layouts/shell-layout/sidebar-nav';
 import { ToastService } from '../../shared/services/toast.service';
 import { EmisionesService } from '../emissions/emisiones.service';
 import { CategoriaResumen, ResumenEmisionesResponse } from '../emissions/models/emision.model';
@@ -69,7 +67,7 @@ export const DONA_CIRCUNFERENCIA = 2 * Math.PI * DONA_RADIO;
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [DecimalPipe, FormField, SelectInputComponent, PageLayoutComponent],
+  imports: [DecimalPipe, FormField, SelectInputComponent, ShellLayoutComponent],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
 })
@@ -136,32 +134,11 @@ export class DashboardPageComponent {
     });
   });
 
-  protected readonly sidebarConfig = signal<SidebarConfig>({
-    menuItems: [
-      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', active: true },
-      { id: 'emissions', label: 'Mis Emisiones', icon: 'emisiones', active: false },
-      { id: 'auditors', label: 'Auditores', icon: 'auditores', active: false },
-      { id: 'audits', label: 'Auditorías', icon: 'auditorias', active: false },
-      { id: 'certifications', label: 'Certificaciones', icon: 'certificaciones', active: false },
-      { id: 'benchmark', label: 'Madurez ambiental', icon: 'benchmark', active: false },
-      { id: 'badges', label: 'Insignias', icon: 'insignias', active: false },
-      { id: 'public-profile', label: 'Perfil Público', icon: 'perfil-publico', active: false },
-      { id: 'team-members', label: 'Colaboradores', icon: 'colaboradores', active: false },
-    ],
-    bottomItems: [
-      { id: 'settings', label: 'Configuración', icon: 'config' },
-      { id: 'logout', label: 'Cerrar sesión', icon: 'logout' },
-    ],
-    companyName: 'Café del Valle S.A.',
-    companyRole: 'Empresa · Admin',
-    companyInitials: 'CV',
-  });
-
   protected readonly headerConfig = signal<HeaderConfig>({
     sectionLabel: 'PANEL EMPRESARIAL',
     pageTitle: 'Dashboard',
     showNotificationDot: true,
-    userInitials: 'MR',
+    userInitials: COMPANY_INITIALS,
   });
 
   constructor() {
