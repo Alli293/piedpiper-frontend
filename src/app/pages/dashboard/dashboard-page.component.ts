@@ -1,8 +1,11 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from '../../core/auth-session.service';
+import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 import {
   SelectInputComponent,
   SelectOption,
@@ -12,8 +15,9 @@ import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.compo
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { apiErrorMessage } from '../../shared/utils/http-error.utils';
-import { ComparacionEmisionesResponse, EstadoComparacion } from '../emissions/models/emision.model';
 import { EmisionesService } from '../emissions/emisiones.service';
+import { ComparacionEmisionesResponse, EstadoComparacion } from '../emissions/models/emision.model';
+import { DashboardService } from './dashboard.service';
 
 interface EstadoVisual {
   label: string;
@@ -22,7 +26,9 @@ interface EstadoVisual {
 @Component({
   selector: 'app-dashboard-page',
   imports: [
+    ButtonComponent,
     CardStatComponent,
+    IconComponent,
     LinkDirective,
     RouterLink,
     SelectInputComponent,
@@ -33,6 +39,7 @@ interface EstadoVisual {
 })
 export class DashboardPageComponent implements OnInit {
   private readonly emisionesService = inject(EmisionesService);
+  private readonly dashboardService = inject(DashboardService);
   private readonly authSession = inject(AuthSessionService);
   private readonly toastService = inject(ToastService);
 
@@ -40,6 +47,7 @@ export class DashboardPageComponent implements OnInit {
   protected readonly anioSeleccionado = signal(this.anioActual);
   protected readonly comparacion = signal<ComparacionEmisionesResponse | null>(null);
   protected readonly cargando = signal(false);
+  protected readonly exportandoPdf = signal(false);
 
   protected readonly anios = computed<SelectOption[]>(() =>
     Array.from({ length: 6 }, (_, index) => {
@@ -72,6 +80,33 @@ export class DashboardPageComponent implements OnInit {
 
     this.anioSeleccionado.set(anio);
     void this.cargarComparacion(anio);
+  }
+
+  protected exportarPdf(): void {
+    const anio = this.anioSeleccionado();
+    this.exportandoPdf.set(true);
+    this.dashboardService.exportarReportePdf(anio).subscribe({
+      next: (blob) => {
+        this.descargarBlob(blob, `reporte-huella-${anio}.pdf`);
+        this.exportandoPdf.set(false);
+      },
+      error: (error: unknown) => {
+        this.exportandoPdf.set(false);
+        if (error instanceof HttpErrorResponse && error.status >= 500) {
+          this.toastService.error(
+            'No se pudo generar el reporte PDF. Intente nuevamente.',
+            undefined,
+            5000
+          );
+          return;
+        }
+        this.toastService.error(
+          apiErrorMessage(error) ?? 'No se pudo descargar el reporte. Intente nuevamente.',
+          undefined,
+          5000
+        );
+      },
+    });
   }
 
   protected estadoVisual(estado: EstadoComparacion): EstadoVisual {
@@ -137,5 +172,16 @@ export class DashboardPageComponent implements OnInit {
     } finally {
       this.cargando.set(false);
     }
+  }
+
+  private descargarBlob(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
   }
 }

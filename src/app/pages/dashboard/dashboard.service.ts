@@ -23,4 +23,12 @@ export class DashboardService {
     const params = new HttpParams().set('anio', anio);
     return this.http.get<ComparacionEmisionesResponse>(`${this.baseUrl}/comparacion`, { params });
   }
+
+  exportarReportePdf(anio: number, mes?: number): Observable<Blob> {
+    let params = new HttpParams().set('anio', anio);
+    if (mes !== undefined) {
+      params = params.set('mes', mes);
+    }
+    return this.http.get(`${this.baseUrl}/reporte/pdf`, { params, responseType: 'blob' });
+  }
 }

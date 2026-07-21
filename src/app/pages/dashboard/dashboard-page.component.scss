@@ -10,7 +10,13 @@
 
 .dashboard-shell__toolbar {
   display: flex;
+  align-items: center;
+  gap: var(--ch-space-3);
   justify-content: flex-end;
+}
+
+.dashboard-shell__export {
+  min-width: 158px;
 }
 
 .dashboard-shell__year {
@@ -218,6 +224,16 @@
 }
 
 @media (max-width: 720px) {
+  .dashboard-shell__toolbar {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .dashboard-shell__export,
+  .dashboard-shell__year {
+    width: 100%;
+  }
+
   .annual-limit-panel__header,
   .annual-limit-panel__status {
     align-items: flex-start;

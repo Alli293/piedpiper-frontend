@@ -1,6 +1,17 @@
 <app-shell-layout activeId="dashboard" [headerConfig]="headerConfig()">
   <section class="dashboard-shell" aria-label="Límite anual de emisiones">
     <div class="dashboard-shell__toolbar">
+      <app-button
+        class="dashboard-shell__export"
+        variant="secondary"
+        size="md"
+        [disabled]="cargando()"
+        [loading]="exportandoPdf()"
+        (click)="exportarPdf()"
+      >
+        <app-icon name="descargar" [size]="16" />
+        <span>Exportar PDF</span>
+      </app-button>
       <app-select-input
         class="dashboard-shell__year"
         [options]="anios()"

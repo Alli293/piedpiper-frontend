@@ -1,19 +1,21 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthSessionService } from '../../core/auth-session.service';
 import { ToastService } from '../../shared/services/toast.service';
-import { ComparacionEmisionesResponse } from '../emissions/models/emision.model';
 import { EmisionesService } from '../emissions/emisiones.service';
+import { ComparacionEmisionesResponse } from '../emissions/models/emision.model';
 import { DashboardPageComponent } from './dashboard-page.component';
+import { DashboardService } from './dashboard.service';
 
 describe('DashboardPageComponent', () => {
   let fixture: ComponentFixture<DashboardPageComponent>;
   let component: DashboardPageComponent;
   let emisionesService: { obtenerComparacion: ReturnType<typeof vi.fn> };
+  let dashboardService: { exportarReportePdf: ReturnType<typeof vi.fn> };
   let authSession: { getUserInitials: ReturnType<typeof vi.fn> };
   let authService: { cerrarSesion: ReturnType<typeof vi.fn> };
   let toastService: { error: ReturnType<typeof vi.fn> };
@@ -31,6 +33,9 @@ describe('DashboardPageComponent', () => {
     emisionesService = {
       obtenerComparacion: vi.fn().mockReturnValue(of(comparacionBase)),
     };
+    dashboardService = {
+      exportarReportePdf: vi.fn().mockReturnValue(of(new Blob(['pdf'], { type: 'application/pdf' }))),
+    };
     authSession = {
       getUserInitials: vi.fn().mockReturnValue('AJ'),
     };
@@ -47,6 +52,7 @@ describe('DashboardPageComponent', () => {
       providers: [
         provideRouter([]),
         { provide: EmisionesService, useValue: emisionesService },
+        { provide: DashboardService, useValue: dashboardService },
         { provide: AuthService, useValue: authService },
         { provide: AuthSessionService, useValue: authSession },
         { provide: ToastService, useValue: toastService },
@@ -150,6 +156,54 @@ describe('DashboardPageComponent', () => {
 
     expect(toastService.error).toHaveBeenCalledWith(
       'No se pudo cargar la comparación. Intente nuevamente.',
+      undefined,
+      5000
+    );
+  });
+
+  it('dispara la descarga del blob recibido', () => {
+    const originalCreateObjectUrl = URL.createObjectURL;
+    const originalRevokeObjectUrl = URL.revokeObjectURL;
+    Object.defineProperty(URL, 'createObjectURL', {
+      configurable: true,
+      value: vi.fn().mockReturnValue('blob:reporte-huella'),
+    });
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      configurable: true,
+      value: vi.fn(),
+    });
+    const anchor = document.createElement('a');
+    const click = vi.spyOn(anchor, 'click').mockImplementation(() => undefined);
+    const createElement = vi.spyOn(document, 'createElement').mockReturnValue(anchor);
+
+    (component as any).exportarPdf();
+
+    expect(dashboardService.exportarReportePdf).toHaveBeenCalledWith(new Date().getFullYear());
+    expect(URL.createObjectURL).toHaveBeenCalled();
+    expect(anchor.download).toBe(`reporte-huella-${new Date().getFullYear()}.pdf`);
+    expect(click).toHaveBeenCalled();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:reporte-huella');
+
+    createElement.mockRestore();
+    Object.defineProperty(URL, 'createObjectURL', {
+      configurable: true,
+      value: originalCreateObjectUrl,
+    });
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      configurable: true,
+      value: originalRevokeObjectUrl,
+    });
+  });
+
+  it('muestra toast si el backend no pudo generar el PDF', () => {
+    dashboardService.exportarReportePdf.mockReturnValueOnce(
+      throwError(() => new HttpErrorResponse({ status: 500 }))
+    );
+
+    (component as any).exportarPdf();
+
+    expect(toastService.error).toHaveBeenCalledWith(
+      'No se pudo generar el reporte PDF. Intente nuevamente.',
       undefined,
       5000
     );

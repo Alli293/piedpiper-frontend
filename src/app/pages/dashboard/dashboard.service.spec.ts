@@ -35,4 +35,18 @@ describe('DashboardService', () => {
       mensaje: null,
     });
   });
+
+  it("exporta el reporte PDF con responseType 'blob'", () => {
+    service.exportarReportePdf(2026, 7).subscribe((blob) => {
+      expect(blob.type).toBe('application/pdf');
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/emisiones/reporte/pdf?anio=2026&mes=7`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.responseType).toBe('blob');
+    expect(req.request.params.get('anio')).toBe('2026');
+    expect(req.request.params.get('mes')).toBe('7');
+
+    req.flush(new Blob(['pdf'], { type: 'application/pdf' }));
+  });
 });
