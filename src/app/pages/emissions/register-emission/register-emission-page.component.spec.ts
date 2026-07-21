@@ -6,7 +6,12 @@ import { of, throwError } from 'rxjs';
 import { RegisterEmissionPageComponent } from './register-emission-page.component';
 import { EmisionesService } from '../emisiones.service';
 import { ToastService } from '../../../shared/services/toast.service';
-import { EmisionFlotaResponse, EmisionResponse, TipoVehiculoOption } from '../models/emision.model';
+import {
+  EmisionEnvioResponse,
+  EmisionFlotaResponse,
+  EmisionResponse,
+  TipoVehiculoOption,
+} from '../models/emision.model';
 
 const VALID_RESPONSE: EmisionResponse = {
   id: '1',
@@ -20,17 +25,6 @@ const VALID_RESPONSE: EmisionResponse = {
   factorEmisionId: 'factor-1',
   estimatedAt: '2026-07-01T00:00:00Z',
   createdAt: '2026-07-01T00:00:00Z',
-};
-
-const FLIGHT_RESPONSE: EmisionResponse = {
-  ...VALID_RESPONSE,
-  id: 'flight-1',
-  categoria: 'VUELO',
-  titulo: 'Viaje aéreo SFO-YYZ',
-  passengers: 2,
-  legs: [{ departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' }],
-  distanceUnit: 'km',
-  distanceValue: 7200,
 };
 
 const TIPOS_VEHICULO: TipoVehiculoOption[] = [
@@ -69,14 +63,29 @@ const VALID_FLOTA_RESPONSE: EmisionFlotaResponse = {
   createdAt: '2026-07-01T00:00:00Z',
 };
 
+const VALID_ENVIO_RESPONSE: EmisionEnvioResponse = {
+  id: '3',
+  categoria: 'ENVIO',
+  titulo: 'Envío de café a puerto',
+  fechaActividad: '2026-07-01',
+  weightValue: 200,
+  weightUnit: 'KG',
+  distanceValue: 500,
+  distanceUnit: 'km',
+  transportMethod: 'TRUCK',
+  carbonKg: 35.5,
+  carbonMt: 0.036,
+  factorEmisionId: 'factor-envio-1',
+  estimatedAt: '2026-07-01T00:00:00Z',
+  createdAt: '2026-07-01T00:00:00Z',
+};
+
 describe('RegisterEmissionPageComponent', () => {
   let registrarElectricidad: ReturnType<typeof vi.fn>;
   let registrarVuelo: ReturnType<typeof vi.fn>;
-  let listarEmisiones: ReturnType<typeof vi.fn>;
-  let actualizarVuelo: ReturnType<typeof vi.fn>;
-  let eliminarEmision: ReturnType<typeof vi.fn>;
   let obtenerTiposVehiculo: ReturnType<typeof vi.fn>;
   let registrarFlota: ReturnType<typeof vi.fn>;
+  let registrarEnvio: ReturnType<typeof vi.fn>;
   let storage: Storage;
   let toastError: ReturnType<typeof vi.spyOn>;
 
@@ -87,11 +96,9 @@ describe('RegisterEmissionPageComponent', () => {
     storage.setItem('carbonhub.token', 'test-token');
     registrarElectricidad = vi.fn();
     registrarVuelo = vi.fn();
-    listarEmisiones = vi.fn().mockReturnValue(of([]));
-    actualizarVuelo = vi.fn();
-    eliminarEmision = vi.fn().mockReturnValue(of(void 0));
     obtenerTiposVehiculo = vi.fn().mockReturnValue(of(TIPOS_VEHICULO));
     registrarFlota = vi.fn();
+    registrarEnvio = vi.fn();
 
     await TestBed.configureTestingModule({
       imports: [RegisterEmissionPageComponent],
@@ -103,11 +110,9 @@ describe('RegisterEmissionPageComponent', () => {
           useValue: {
             registrarElectricidad,
             registrarVuelo,
-            listarEmisiones,
-            actualizarVuelo,
-            eliminarEmision,
             obtenerTiposVehiculo,
             registrarFlota,
+            registrarEnvio,
           },
         },
       ],
@@ -161,14 +166,6 @@ describe('RegisterEmissionPageComponent', () => {
     button.click();
   }
 
-  function clickRecordButton(root: HTMLElement, label: string): void {
-    const button = Array.from(
-      root.querySelectorAll<HTMLButtonElement>('.register-emission-page__record-actions button')
-    ).find((item) => item.textContent?.includes(label));
-    if (!button) throw new Error(`Record button not found: ${label}`);
-    button.click();
-  }
-
   function selectTab(fixture: ReturnType<typeof createFixture>, label: string): HTMLElement {
     const root = fixture.nativeElement as HTMLElement;
     clickCategory(root, label);
@@ -178,6 +175,10 @@ describe('RegisterEmissionPageComponent', () => {
 
   function selectFlotaTab(fixture: ReturnType<typeof createFixture>): HTMLElement {
     return selectTab(fixture, 'Flota vehicular');
+  }
+
+  function selectEnvioTab(fixture: ReturnType<typeof createFixture>): HTMLElement {
+    return selectTab(fixture, 'Envíos de carga');
   }
 
   function clickRetry(root: HTMLElement): void {
@@ -222,17 +223,6 @@ describe('RegisterEmissionPageComponent', () => {
     });
   });
 
-  it('does not show flight records while electricity is selected', async () => {
-    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
-    const fixture = createFixture();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const root = fixture.nativeElement as HTMLElement;
-    expect(root.textContent).not.toContain('Vuelos registrados');
-    expect(root.textContent).not.toContain('Viaje aéreo SFO-YYZ');
-  });
-
   it('does not call the flight service without legs', async () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
@@ -263,6 +253,8 @@ describe('RegisterEmissionPageComponent', () => {
     textInputs[0].dispatchEvent(new Event('input'));
     textInputs[1].value = 'yyz';
     textInputs[1].dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    clickButton(root, 'Agregar vuelta');
 
     await submitForm(fixture);
 
@@ -270,84 +262,42 @@ describe('RegisterEmissionPageComponent', () => {
       passengers: 2,
       distanceUnit: 'km',
       fechaActividad: '2026-07-01',
-      legs: [{ departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' }],
+      legs: [
+        { departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' },
+        { departureAirport: 'YYZ', destinationAirport: 'SFO', cabinClass: 'economy' },
+      ],
     });
   });
 
-  it('loads the date when editing a flight', async () => {
-    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
+  it('adds one return leg and disables the return action for a completed round trip', async () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
+
     clickCategory(root, 'Vuelos');
-    await fixture.whenStable();
     fixture.detectChanges();
 
-    clickButton(root, 'Editar');
+    const textInputs = root.querySelectorAll<HTMLInputElement>('input[type="text"]');
+    textInputs[0].value = 'sfo';
+    textInputs[0].dispatchEvent(new Event('input'));
+    textInputs[1].value = 'yyz';
+    textInputs[1].dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    const dateInput = root.querySelector<HTMLInputElement>('input[type="date"]');
-    expect(dateInput?.value).toBe('2026-07-01');
-  });
-
-  it('keeps the edit flow stable when updating a flight fails', async () => {
-    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
-    actualizarVuelo.mockReturnValue(throwError(() => new Error('Network error')));
-    const fixture = createFixture();
-    const root = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
-    clickCategory(root, 'Vuelos');
-    await fixture.whenStable();
+    clickButton(root, 'Agregar vuelta');
     fixture.detectChanges();
 
-    clickButton(root, 'Editar');
-    await submitForm(fixture);
+    const roundTripInputs = root.querySelectorAll<HTMLInputElement>('input[type="text"]');
+    expect(root.querySelectorAll('.register-emission-page__leg')).toHaveLength(2);
+    expect(roundTripInputs[2].value).toBe('YYZ');
+    expect(roundTripInputs[3].value).toBe('SFO');
 
-    expect(actualizarVuelo).toHaveBeenCalledWith('flight-1', {
-      passengers: 2,
-      distanceUnit: 'km',
-      fechaActividad: '2026-07-01',
-      legs: [{ departureAirport: 'SFO', destinationAirport: 'YYZ', cabinClass: 'economy' }],
-    });
-  });
-
-  it('asks for confirmation before deleting an emission', async () => {
-    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
-    vi.stubGlobal(
-      'confirm',
-      vi.fn(() => true)
+    const returnButton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
+      (button) => button.textContent?.includes('Agregar vuelta')
     );
-    const fixture = createFixture();
-    const root = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
-    clickCategory(root, 'Vuelos');
-    await fixture.whenStable();
+    expect(returnButton?.disabled).toBe(true);
+    returnButton?.click();
     fixture.detectChanges();
-
-    clickRecordButton(root, 'Eliminar');
-    await fixture.whenStable();
-
-    expect(globalThis.confirm).toHaveBeenCalled();
-    expect(eliminarEmision).toHaveBeenCalledWith('flight-1');
-  });
-
-  it('does not delete when confirmation is cancelled', async () => {
-    listarEmisiones.mockReturnValue(of([FLIGHT_RESPONSE]));
-    vi.stubGlobal(
-      'confirm',
-      vi.fn(() => false)
-    );
-    const fixture = createFixture();
-    const root = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
-    clickCategory(root, 'Vuelos');
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    clickRecordButton(root, 'Eliminar');
-    await fixture.whenStable();
-
-    expect(eliminarEmision).not.toHaveBeenCalled();
+    expect(root.querySelectorAll('.register-emission-page__leg')).toHaveLength(2);
   });
 
   it('does not submit without an active session', async () => {
@@ -359,18 +309,6 @@ describe('RegisterEmissionPageComponent', () => {
     await submitForm(fixture);
 
     expect(registrarElectricidad).not.toHaveBeenCalled();
-  });
-
-  it('shows the empty state when loading emissions fails', async () => {
-    listarEmisiones.mockReturnValue(throwError(() => new Error('Network error')));
-    const fixture = createFixture();
-    const root = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
-    clickCategory(root, 'Vuelos');
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    expect(root.textContent).toContain('No hay vuelos registrados.');
   });
 
   describe('flota vehicular', () => {
@@ -474,7 +412,7 @@ describe('RegisterEmissionPageComponent', () => {
       expect(registrarFlota).not.toHaveBeenCalled();
     });
 
-    it('calls registrarFlota with the expected payload and navigates on success', async () => {
+    it('calls registrarFlota with the expected payload and resets the form on success', async () => {
       registrarFlota.mockReturnValue(of(VALID_FLOTA_RESPONSE));
 
       const fixture = createFixture();
@@ -504,7 +442,9 @@ describe('RegisterEmissionPageComponent', () => {
         distanceUnit: 'km',
         fechaActividad: '2026-07-01',
       });
-      expect(TestBed.inject(Router).navigateByUrl).toHaveBeenCalledWith('/emisiones');
+      expect(TestBed.inject(Router).navigateByUrl).not.toHaveBeenCalledWith('/emisiones');
+      fixture.detectChanges();
+      expect(root.querySelector<HTMLTextAreaElement>('textarea')?.value).toBe('');
     });
 
     it('refetches the vehicle catalog when the retry action is clicked after a failure', () => {
@@ -549,6 +489,115 @@ describe('RegisterEmissionPageComponent', () => {
       selectFlotaTab(fixture);
 
       expect(toastError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('envío de carga', () => {
+    function fillValidEnvioForm(root: HTMLElement): void {
+      setInputValue(root, 'textarea', 'Envío de café a puerto');
+      const numberInputs = root.querySelectorAll<HTMLInputElement>('app-number-input input');
+      numberInputs[0].value = '200';
+      numberInputs[0].dispatchEvent(new Event('input'));
+      numberInputs[1].value = '500';
+      numberInputs[1].dispatchEvent(new Event('input'));
+      setInputValue(root, 'app-date-input input', '2026-07-01');
+    }
+
+    it('does not call the service when weight is 0 (invalid form)', async () => {
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      const numberInputs = root.querySelectorAll<HTMLInputElement>('app-number-input input');
+      numberInputs[0].value = '0';
+      numberInputs[0].dispatchEvent(new Event('input'));
+
+      await submitForm(fixture);
+
+      expect(registrarEnvio).not.toHaveBeenCalled();
+    });
+
+    it('calls registrarEnvio with the expected payload and resets the form on success', async () => {
+      registrarEnvio.mockReturnValue(of(VALID_ENVIO_RESPONSE));
+
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      await submitForm(fixture);
+
+      expect(registrarEnvio).toHaveBeenCalledTimes(1);
+      expect(registrarEnvio).toHaveBeenCalledWith({
+        titulo: 'Envío de café a puerto',
+        weightValue: 200,
+        weightUnit: 'KG',
+        distanceValue: 500,
+        distanceUnit: 'km',
+        transportMethod: 'TRUCK',
+        fechaActividad: '2026-07-01',
+      });
+      expect(TestBed.inject(Router).navigateByUrl).not.toHaveBeenCalledWith('/emisiones');
+      fixture.detectChanges();
+      expect(root.querySelector<HTMLTextAreaElement>('textarea')?.value).toBe('');
+    });
+
+    it('does not call registrarEnvio without an active session', async () => {
+      storage.removeItem('carbonhub.token');
+
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      await submitForm(fixture);
+
+      expect(registrarEnvio).not.toHaveBeenCalled();
+    });
+
+    it('shows session error toast on 401 response', async () => {
+      registrarEnvio.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }))
+      );
+
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      await submitForm(fixture);
+
+      expect(toastError).toHaveBeenCalledWith(expect.stringContaining('sesión'));
+    });
+
+    it('shows the API error message when the backend returns one', async () => {
+      registrarEnvio.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 422,
+              statusText: 'Unprocessable Entity',
+              error: { status: 422, message: 'El peso excede el límite permitido.' },
+            })
+        )
+      );
+
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      await submitForm(fixture);
+
+      expect(toastError).toHaveBeenCalledWith('El peso excede el límite permitido.');
+    });
+
+    it('shows the generic connection error on an unknown failure', async () => {
+      registrarEnvio.mockReturnValue(throwError(() => new Error('Network error')));
+
+      const fixture = createFixture();
+      const root = selectEnvioTab(fixture);
+
+      fillValidEnvioForm(root);
+      await submitForm(fixture);
+
+      expect(toastError).toHaveBeenCalledWith(expect.stringContaining('No se pudo conectar'));
     });
   });
 });

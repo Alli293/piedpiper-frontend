@@ -32,18 +32,19 @@ describe('LoginPageComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('con campos vacios muestra error y no llama al backend', () => {
+  it('con campos vacios muestra error y no llama al backend', async () => {
     const fixture = TestBed.createComponent(LoginPageComponent);
     fixture.detectChanges();
     const comp = fixture.componentInstance as any;
 
     comp.enviar(new Event('submit'));
+    await fixture.whenStable();
 
     expect(comp.error()).toContain('Ingresa tu correo y contraseña.');
     expect(authService.loginConCorreo).not.toHaveBeenCalled();
   });
 
-  it('con credenciales llama a loginConCorreo y navega al redirect', () => {
+  it('con credenciales llama a loginConCorreo y navega al redirect', async () => {
     authService.loginConCorreo.mockReturnValue(
       of({ token: 't', rol: 'USUARIO_INDIVIDUAL', estado: 'ACTIVO', redirect: '/panel' })
     );
@@ -53,10 +54,10 @@ describe('LoginPageComponent', () => {
     const fixture = TestBed.createComponent(LoginPageComponent);
     fixture.detectChanges();
     const comp = fixture.componentInstance as any;
-    comp.email.set('a@b.com');
-    comp.contrasena.set('secreta');
+    comp.model.update((m: any) => ({ ...m, email: 'a@b.com', contrasena: 'secreta' }));
 
     comp.enviar(new Event('submit'));
+    await fixture.whenStable();
 
     expect(authService.loginConCorreo).toHaveBeenCalledWith('a@b.com', 'secreta');
     expect(navegar).toHaveBeenCalledWith('/panel');

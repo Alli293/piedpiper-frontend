@@ -22,6 +22,12 @@
     padding: var(--ch-space-4);
     border-radius: var(--ch-radius-lg);
   }
+
+  &--column {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--ch-space-3);
+  }
 }
 
 .ui-kit-page__card {

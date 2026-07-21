@@ -1,5 +1,7 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
+  DestroyRef,
   ElementRef,
   NgZone,
   OnInit,
@@ -9,10 +11,15 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { AuthLayoutComponent } from '../../../shared/layouts/auth-layout/auth-layout.component';
+import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { CheckboxComponent } from '../../../shared/components/inputs/checkbox/checkbox.component';
 import { SemanticCardComponent } from '../../../shared/components/semantic-card/semantic-card.component';
+import { HeadingComponent } from '../../../shared/components/heading/heading.component';
+import { LinkDirective } from '../../../shared/components/link/link.directive';
+import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import { AuthService } from '../../../core/auth/auth.service';
 import { GoogleIdentityService } from '../../../core/auth/google-identity.service';
 import {
@@ -25,8 +32,11 @@ import { RegistroInvitacionCorreoFormComponent } from './registro-invitacion-cor
   selector: 'app-registro-invitacion-page',
   imports: [
     AuthLayoutComponent,
+    BadgeComponent,
     CheckboxComponent,
+    HeadingComponent,
     RouterLink,
+    LinkDirective,
     SemanticCardComponent,
     RegistroInvitacionCorreoFormComponent,
   ],
@@ -39,6 +49,7 @@ export class RegistroInvitacionPageComponent implements OnInit {
   private readonly googleIdentity = inject(GoogleIdentityService);
   private readonly router = inject(Router);
   private readonly zone = inject(NgZone);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly token = input('');
 
@@ -82,6 +93,7 @@ export class RegistroInvitacionPageComponent implements OnInit {
     this.registrando.set(true);
     this.authService
       .registrarConInvitacion(this.token(), idToken, this.aceptaTerminos())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (respuesta) => {
           this.registrando.set(false);
@@ -89,13 +101,13 @@ export class RegistroInvitacionPageComponent implements OnInit {
             this.error.set('No pudimos abrir tu panel. Intenta nuevamente.');
           });
         },
-        error: (err) => {
+        error: (err: HttpErrorResponse) => {
           this.registrando.set(false);
-          if (err?.status === 409) {
+          if (err.status === 409) {
             this.cuentaExistente.set(true);
           }
           this.error.set(
-            err?.error?.message ??
+            apiErrorMessage(err) ??
               'Ocurrió un error al registrar tu cuenta. Por favor, intenta nuevamente.'
           );
         },
@@ -108,16 +120,19 @@ export class RegistroInvitacionPageComponent implements OnInit {
       this.mensajePantalla.set('Este enlace de invitación no es válido.');
       return;
     }
-    this.invitacionesService.resolver(this.token()).subscribe({
-      next: (invitacion) => {
-        this.cargando.set(false);
-        this.invitacion.set(invitacion);
-      },
-      error: (err) => {
-        this.cargando.set(false);
-        this.mensajePantalla.set(this.mensajePorEstado(err?.status));
-      },
-    });
+    this.invitacionesService
+      .resolver(this.token())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (invitacion) => {
+          this.cargando.set(false);
+          this.invitacion.set(invitacion);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.cargando.set(false);
+          this.mensajePantalla.set(this.mensajePorEstado(err.status));
+        },
+      });
   }
 
   private mensajePorEstado(status?: number): string {

@@ -4,9 +4,9 @@
       <p class="invitacion__estado">Validando tu invitación...</p>
     } @else if (mensajePantalla()) {
       <div class="invitacion__bloqueo" role="alert">
-        <h1 class="invitacion__title">Invitación no disponible</h1>
+        <app-heading level="h1" text="Invitación no disponible" />
         <p class="invitacion__texto">{{ mensajePantalla() }}</p>
-        <a class="invitacion__enlace" routerLink="/login">Ir al inicio de sesión</a>
+        <a class="invitacion__enlace" routerLink="/login" appLink>Ir al inicio de sesión</a>
       </div>
     } @else if (invitacion(); as datos) {
       <app-semantic-card variant="success" title="Invitación válida">
@@ -14,7 +14,8 @@
       </app-semantic-card>
 
       <header class="invitacion__header">
-        <h1 class="invitacion__title">Completa tu registro</h1>
+        <app-badge class="invitacion__badge" variant="success">Invitación de empresa</app-badge>
+        <app-heading level="h1" [text]="'Únete a ' + datos.nombreEmpresa" />
         <p class="invitacion__texto">
           Tu correo ya está registrado. Solo necesitas ingresar tu nombre y elegir una contraseña.
         </p>
@@ -41,7 +42,7 @@
         <p class="invitacion__error" role="alert">{{ error() }}</p>
       }
       @if (cuentaExistente()) {
-        <a class="invitacion__enlace" routerLink="/login">Iniciar sesión</a>
+        <a class="invitacion__enlace" routerLink="/login" appLink>Iniciar sesión</a>
       }
     }
   </div>

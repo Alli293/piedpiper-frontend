@@ -141,7 +141,33 @@ describe('AuthService', () => {
 
     expect(localStorage.getItem('carbonhub.token')).toBeNull();
   });
+
+  it('rol deriva el claim rol del token JWT', () => {
+    service.loginConCorreo('admin@carbonhub.cr', 'secreta').subscribe();
+
+    const req = httpMock.expectOne(`${base}/login`);
+    req.flush({ ...respuesta, token: jwtConRol('ADMINISTRADOR_PLATAFORMA') });
+
+    expect(service.rol()).toBe('ADMINISTRADOR_PLATAFORMA');
+  });
+
+  it('rol es null cuando no hay token o el token es invalido', () => {
+    expect(service.rol()).toBeNull();
+
+    service.loginConCorreo('a@b.com', 'secreta').subscribe();
+    httpMock.expectOne(`${base}/login`).flush({ ...respuesta, token: 'no-es-un-jwt' });
+
+    expect(service.rol()).toBeNull();
+  });
 });
+
+function jwtConRol(rol: string): string {
+  const payload = btoa(JSON.stringify({ rol }))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+  return `encabezado.${payload}.firma`;
+}
 
 function createStorageMock(): Storage {
   const values = new Map<string, string>();
