@@ -17,11 +17,99 @@
       />
     </form>
 
+    <section class="dashboard-summary" aria-label="Resumen de comparación anual">
+      @if (!cargandoComparacion() && comparacion(); as data) {
+        <article class="annual-limit-panel dashboard-summary__card">
+          <app-card-stat
+            [label]="'Huella total ' + data.anio"
+            [value]="formatToneladas(data.huellaAcumuladaT)"
+            delta="tCO2e acumuladas"
+          />
+        </article>
+
+        <article class="annual-limit-panel dashboard-summary__card">
+          <app-card-stat
+            label="Del limite anual"
+            [value]="porcentajeResumen(data.porcentajeConsumido)"
+            [delta]="detalleLimiteResumen(data)"
+          />
+        </article>
+      }
+    </section>
+
     <div class="dashboard-page__grid">
+      <article
+        class="annual-limit-panel"
+        [class.is-dentro]="tieneEstado('dentro')"
+        [class.is-cerca]="tieneEstado('cerca')"
+        [class.is-superado]="tieneEstado('superado')"
+        [class.is-sin-limite]="tieneEstado('sin_limite')"
+      >
+        <header class="annual-limit-panel__header">
+          <h2>Límite anual de emisiones</h2>
+
+          @if (comparacion(); as data) {
+            <div class="annual-limit-panel__status">
+              <span class="annual-limit-panel__badge">
+                {{ estadoVisual(data.estado).label }}
+              </span>
+              <span class="annual-limit-panel__limit">
+                Límite:
+                @if (data.limiteT !== null) {
+                  {{ formatToneladas(data.limiteT) }} tCO₂e
+                } @else {
+                  sin declarar
+                }
+              </span>
+            </div>
+          }
+        </header>
+
+        @if (cargandoComparacion()) {
+          <p class="annual-limit-panel__info">Cargando comparación...</p>
+        } @else if (comparacion(); as data) {
+          @if (data.estado === 'sin_limite') {
+            <div class="annual-limit-panel__empty">
+              <p>No se ha declarado un límite para {{ data.anio }}.</p>
+              <a routerLink="/limites" appLink>Declarar límite anual de emisiones</a>
+            </div>
+          } @else {
+            <div class="annual-limit-panel__meter" aria-hidden="true">
+              <div class="annual-limit-panel__track">
+                <span class="annual-limit-panel__fill" [style.width.%]="consumoBarra()"></span>
+              </div>
+              <div class="annual-limit-panel__scale">
+                <span>0 tCO₂e</span>
+                <strong>
+                  {{ formatToneladas(data.huellaAcumuladaT) }} tCO₂e ·
+                  {{ formatPorcentaje(data.porcentajeConsumido) }} %
+                </strong>
+                <span>{{ formatToneladas(data.limiteT) }} tCO₂e</span>
+              </div>
+            </div>
+
+            <dl class="annual-limit-panel__metrics">
+              <div>
+                <dt>Huella acumulada {{ data.anio }}</dt>
+                <dd>{{ formatToneladas(data.huellaAcumuladaT) }} tCO₂e</dd>
+              </div>
+              <div>
+                <dt>Límite declarado</dt>
+                <dd>{{ formatToneladas(data.limiteT) }} tCO₂e</dd>
+              </div>
+              <div>
+                <dt>Del límite anual</dt>
+                <dd>{{ formatPorcentaje(data.porcentajeConsumido) }} %</dd>
+              </div>
+            </dl>
+          }
+        }
+      </article>
+
       <section class="dashboard-page__card" aria-label="Desglose por categoría">
         <h2 class="dashboard-page__card-title">Desglose por categoría</h2>
 
-        @if (cargando()) {
+        @if (cargandoResumen()) {
           <p class="dashboard-page__estado">Cargando el desglose…</p>
         } @else if (errorCarga()) {
           <p class="dashboard-page__estado" role="alert">

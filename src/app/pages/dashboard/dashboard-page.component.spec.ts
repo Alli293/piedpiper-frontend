@@ -1,13 +1,28 @@
-import { TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
-import { of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
-import { DashboardPageComponent, SIN_EMISIONES_MENSAJE } from './dashboard-page.component';
-import { EmisionesService } from '../emissions/emisiones.service';
+import { signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { of, throwError } from 'rxjs';
+import { AuthService } from '../../core/auth/auth.service';
+import { AuthSessionService } from '../../core/auth-session.service';
 import { ToastService } from '../../shared/services/toast.service';
-import { ResumenEmisionesResponse } from '../emissions/models/emision.model';
+import {
+  ComparacionEmisionesResponse,
+  ResumenEmisionesResponse,
+} from '../emissions/models/emision.model';
+import { EmisionesService } from '../emissions/emisiones.service';
+import { DashboardPageComponent, SIN_EMISIONES_MENSAJE } from './dashboard-page.component';
 
 const ANIO_ACTUAL = new Date().getFullYear();
+
+const COMPARACION_BASE: ComparacionEmisionesResponse = {
+  anio: 2026,
+  huellaAcumuladaT: 30,
+  limiteT: 50,
+  porcentajeConsumido: 60,
+  estado: 'dentro',
+  mensaje: null,
+};
 
 const RESUMEN_CON_DATOS: ResumenEmisionesResponse = {
   anio: ANIO_ACTUAL,
@@ -36,33 +51,47 @@ const RESUMEN_VACIO: ResumenEmisionesResponse = {
 };
 
 describe('DashboardPageComponent', () => {
-  let obtenerResumen: ReturnType<typeof vi.fn>;
-  let toastError: ReturnType<typeof vi.fn>;
+  let fixture: ComponentFixture<DashboardPageComponent>;
+  let component: DashboardPageComponent;
+  let emisionesService: {
+    obtenerComparacion: ReturnType<typeof vi.fn>;
+    obtenerResumen: ReturnType<typeof vi.fn>;
+  };
+  let authSession: { getUserInitials: ReturnType<typeof vi.fn> };
+  let authService: { cerrarSesion: ReturnType<typeof vi.fn> };
+  let toastService: { error: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    obtenerResumen = vi.fn().mockReturnValue(of(RESUMEN_CON_DATOS));
-    toastError = vi.fn();
+    emisionesService = {
+      obtenerComparacion: vi.fn().mockReturnValue(of(COMPARACION_BASE)),
+      obtenerResumen: vi.fn().mockReturnValue(of(RESUMEN_CON_DATOS)),
+    };
+    authSession = {
+      getUserInitials: vi.fn().mockReturnValue('AJ'),
+    };
+    authService = {
+      cerrarSesion: vi.fn(),
+    };
+    toastService = {
+      toasts: signal([]),
+      error: vi.fn(),
+    } as any;
 
     await TestBed.configureTestingModule({
       imports: [DashboardPageComponent],
       providers: [
-        { provide: EmisionesService, useValue: { obtenerResumen } },
-        {
-          provide: ToastService,
-          useValue: {
-            toasts: signal([]),
-            error: toastError,
-            success: vi.fn(),
-            show: vi.fn(),
-            dismiss: vi.fn(),
-          },
-        },
+        provideRouter([]),
+        { provide: EmisionesService, useValue: emisionesService },
+        { provide: AuthService, useValue: authService },
+        { provide: AuthSessionService, useValue: authSession },
+        { provide: ToastService, useValue: toastService },
       ],
     }).compileComponents();
   });
 
-  async function createFixture() {
-    const fixture = TestBed.createComponent(DashboardPageComponent);
+  async function createFixture(): Promise<ComponentFixture<DashboardPageComponent>> {
+    fixture = TestBed.createComponent(DashboardPageComponent);
+    component = fixture.componentInstance;
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -77,14 +106,127 @@ describe('DashboardPageComponent', () => {
     select.dispatchEvent(new Event('change'));
   }
 
-  it('consulta el año actual completo al iniciar', async () => {
+  // ---------------------------------------------------------------------------
+  // Panel de límite anual (PP-40)
+  // ---------------------------------------------------------------------------
+
+  it('carga la comparacion con el anio actual por defecto', async () => {
     await createFixture();
 
-    expect(obtenerResumen).toHaveBeenCalledWith(ANIO_ACTUAL, undefined);
+    expect(emisionesService.obtenerComparacion).toHaveBeenCalledWith(ANIO_ACTUAL);
+    expect((component as any).comparacion()).toEqual(COMPARACION_BASE);
+  });
+
+  it('muestra los KPIs superiores de comparacion anual', async () => {
+    await createFixture();
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+    expect(texto).toContain('Huella total 2026');
+    expect(texto).toContain('Del limite anual');
+    expect(texto).toContain('30 / 50 tCO2e');
+  });
+
+  it('mantiene el acceso del shell compartido a mis emisiones', async () => {
+    await createFixture();
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+    expect(texto).toContain('Mis Emisiones');
+  });
+
+  it('usa el estado enviado por el backend para pintar el panel', async () => {
+    await createFixture();
+    (component as any).comparacion.set({
+      ...COMPARACION_BASE,
+      estado: 'superado',
+      porcentajeConsumido: 60,
+    });
+    fixture.detectChanges();
+
+    expect((component as any).tieneEstado('superado')).toBe(true);
+    expect(fixture.nativeElement.querySelector('.annual-limit-panel.is-superado')).toBeTruthy();
+  });
+
+  it('renderiza el estado superado', async () => {
+    await createFixture();
+    (component as any).comparacion.set({
+      ...COMPARACION_BASE,
+      huellaAcumuladaT: 60,
+      porcentajeConsumido: 120,
+      estado: 'superado',
+    });
+    fixture.detectChanges();
+
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(texto).toContain('Límite superado');
+    expect(fixture.nativeElement.querySelector('.annual-limit-panel.is-superado')).toBeTruthy();
+  });
+
+  it('renderiza el estado sin limite con appLink', async () => {
+    await createFixture();
+    (component as any).comparacion.set({
+      ...COMPARACION_BASE,
+      limiteT: null,
+      porcentajeConsumido: null,
+      estado: 'sin_limite',
+    });
+    fixture.detectChanges();
+
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    const link = fixture.nativeElement.querySelector('.annual-limit-panel__empty a.ch-link');
+    expect(texto).toContain('No se ha declarado un límite para 2026.');
+    expect(link).toBeTruthy();
+  });
+
+  it('usa iniciales de la sesion en el header', async () => {
+    await createFixture();
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+    expect(authSession.getUserInitials).toHaveBeenCalled();
+    expect(texto).toContain('AJ');
+  });
+
+  it('muestra mensaje de API si falla la carga de comparacion', async () => {
+    await createFixture();
+    emisionesService.obtenerComparacion.mockReturnValueOnce(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 500,
+            error: { message: 'Servicio no disponible.' },
+          })
+      )
+    );
+
+    await (component as any).cargarComparacion(2026);
+
+    expect(toastService.error).toHaveBeenCalledWith('Servicio no disponible.', undefined, 5000);
+  });
+
+  it('muestra fallback de 5 segundos si falla la comparacion sin mensaje de API', async () => {
+    await createFixture();
+    emisionesService.obtenerComparacion.mockReturnValueOnce(throwError(() => new Error('network')));
+
+    await (component as any).cargarComparacion(2026);
+
+    expect(toastService.error).toHaveBeenCalledWith(
+      'No se pudo cargar la comparación. Intente nuevamente.',
+      undefined,
+      5000
+    );
+  });
+
+  // ---------------------------------------------------------------------------
+  // Desglose por categoría (PP-39, dona)
+  // ---------------------------------------------------------------------------
+
+  it('consulta el resumen del año actual completo al iniciar', async () => {
+    await createFixture();
+
+    expect(emisionesService.obtenerResumen).toHaveBeenCalledWith(ANIO_ACTUAL, undefined);
   });
 
   it('calcula porcentajes correctos a partir de los subtotales por categoría', async () => {
-    obtenerResumen.mockReturnValue(
+    emisionesService.obtenerResumen.mockReturnValue(
       of({
         ...RESUMEN_CON_DATOS,
         totalKg: 3,
@@ -117,7 +259,7 @@ describe('DashboardPageComponent', () => {
   });
 
   it('con total 0 muestra 0 % en cada categoría, el mensaje de vacío y la dona sin segmentos', async () => {
-    obtenerResumen.mockReturnValue(of(RESUMEN_VACIO));
+    emisionesService.obtenerResumen.mockReturnValue(of(RESUMEN_VACIO));
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
@@ -133,28 +275,28 @@ describe('DashboardPageComponent', () => {
     expect(root.querySelectorAll('.dashboard-page__segmento').length).toBe(0);
   });
 
-  it('al cambiar el período vuelve a consultar y actualiza la vista', async () => {
+  it('al cambiar el mes vuelve a consultar el resumen y actualiza la vista', async () => {
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
-    obtenerResumen.mockReturnValue(of(RESUMEN_VACIO));
+    emisionesService.obtenerResumen.mockReturnValue(of(RESUMEN_VACIO));
 
     setSelectValue(root, 1, '3');
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(obtenerResumen).toHaveBeenLastCalledWith(ANIO_ACTUAL, 3);
+    expect(emisionesService.obtenerResumen).toHaveBeenLastCalledWith(ANIO_ACTUAL, 3);
     expect(root.querySelector('.dashboard-page__vacio')).not.toBeNull();
   });
 
-  it('ante un error de servidor muestra el toast de fallo de carga', async () => {
-    obtenerResumen.mockReturnValue(
+  it('ante un error de servidor muestra el toast de fallo de carga del desglose', async () => {
+    emisionesService.obtenerResumen.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 500, error: null }))
     );
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    expect(toastError).toHaveBeenCalledWith(
+    expect(toastService.error).toHaveBeenCalledWith(
       'No se pudo cargar el desglose. Intente nuevamente.',
       undefined,
       5000
@@ -162,8 +304,8 @@ describe('DashboardPageComponent', () => {
     expect(root.querySelector('.dashboard-page__leyenda')).toBeNull();
   });
 
-  it('expone el mensaje del API en el toast cuando la respuesta de error lo incluye', async () => {
-    obtenerResumen.mockReturnValue(
+  it('expone el mensaje del API en el toast cuando la respuesta de error del resumen lo incluye', async () => {
+    emisionesService.obtenerResumen.mockReturnValue(
       throwError(
         () =>
           new HttpErrorResponse({
@@ -174,7 +316,7 @@ describe('DashboardPageComponent', () => {
     );
     await createFixture();
 
-    expect(toastError).toHaveBeenCalledWith('El mes debe estar entre 1 y 12.', undefined, 5000);
+    expect(toastService.error).toHaveBeenCalledWith('El mes debe estar entre 1 y 12.', undefined, 5000);
   });
 
   it('muestra las etiquetas de categoría del diseño', async () => {

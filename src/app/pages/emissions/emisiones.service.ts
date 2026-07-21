@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   CategoriaFiltroEmision,
+  ComparacionEmisionesResponse,
   EmisionEnvioResponse,
   EmisionFlotaResponse,
   EmisionResponse,
@@ -67,6 +68,11 @@ export class EmisionesService {
 
   registrarFlota(payload: RegistrarFlotaRequest): Observable<EmisionFlotaResponse> {
     return this.http.post<EmisionFlotaResponse>(`${this.baseUrl}/flota`, payload);
+  }
+
+  obtenerComparacion(anio: number): Observable<ComparacionEmisionesResponse> {
+    const params = new HttpParams().set('anio', anio);
+    return this.http.get<ComparacionEmisionesResponse>(`${this.baseUrl}/comparacion`, { params });
   }
 
   obtenerResumen(anio: number, mes?: number): Observable<ResumenEmisionesResponse> {
