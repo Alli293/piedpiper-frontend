@@ -15,6 +15,24 @@ export interface ImaResponse {
   interpretacionIa: string | null;
 }
 
+export type PosicionBenchmark = 'POR_ENCIMA' | 'EN_LINEA' | 'POR_DEBAJO';
+
+export interface BenchmarkDimension {
+  valorEmpresa: number | null;
+  promedioSector: number | null;
+  posicion: PosicionBenchmark | null;
+}
+
+export interface BenchmarkSectorialResponse {
+  benchmarkDisponible: boolean;
+  cantidadEmpresas: number;
+  imaParcial: boolean;
+  ima: BenchmarkDimension | null;
+  cobertura: BenchmarkDimension | null;
+  puntajeIntensidadSectorial: BenchmarkDimension | null;
+  consistencia: BenchmarkDimension | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ImaService {
   private readonly http = inject(HttpClient);
@@ -23,5 +41,10 @@ export class ImaService {
   obtenerIma(anio: number, mes: number): Observable<ImaResponse> {
     const params = new HttpParams().set('anio', anio).set('mes', mes);
     return this.http.get<ImaResponse>(this.baseUrl, { params });
+  }
+
+  obtenerBenchmark(anio: number, mes: number): Observable<BenchmarkSectorialResponse> {
+    const params = new HttpParams().set('anio', anio).set('mes', mes);
+    return this.http.get<BenchmarkSectorialResponse>(`${this.baseUrl}/benchmark`, { params });
   }
 }

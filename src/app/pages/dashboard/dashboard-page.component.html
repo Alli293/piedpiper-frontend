@@ -100,13 +100,23 @@
     </article>
 
     <!-- PP-79: IMA -->
-    <app-ima-panel [ima]="imaData()" [anio]="anioSeleccionado()" [mes]="mesActual" (periodoChange)="onImaPeriodoChange($event)" />
+    <app-ima-panel
+      [ima]="imaData()"
+      [anio]="anioSeleccionado()"
+      [mes]="mesActual"
+      (periodoChange)="onImaPeriodoChange($event)"
+    />
+
+    <!-- PP-80: Benchmark sectorial -->
+    <app-benchmark-panel [benchmark]="benchmarkData()" />
 
     <!-- PP-41: Evolución histórica -->
     <article class="annual-limit-panel evolucion-panel">
       <h2>Evolución histórica de la huella</h2>
       @if (evolucionVacia()) {
-        <p class="evolucion-panel__empty">No hay emisiones registradas en {{ anioSeleccionado() }}.</p>
+        <p class="evolucion-panel__empty">
+          No hay emisiones registradas en {{ anioSeleccionado() }}.
+        </p>
       }
       <app-evolucion-chart [serie]="evolucionSerie()" [anio]="anioSeleccionado()" />
     </article>

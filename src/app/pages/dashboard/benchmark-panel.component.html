@@ -1,0 +1,133 @@
+<article class="benchmark-card" aria-label="Comparación contra tu sector">
+  <header class="benchmark-card__header">
+    <span class="benchmark-card__icon">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <circle cx="12" cy="12" r="9" />
+        <circle cx="12" cy="12" r="4" />
+      </svg>
+    </span>
+    <div class="benchmark-card__titles">
+      <h3 class="benchmark-card__title">Comparación contra tu sector</h3>
+      @if (benchmark(); as data) {
+        @if (data.benchmarkDisponible) {
+          <p class="benchmark-card__subtitle">
+            Tu empresa vs. promedio de tu sector ({{ data.cantidadEmpresas }} empresas).
+          </p>
+        }
+      }
+    </div>
+  </header>
+
+  @if (!benchmark()) {
+    <p class="benchmark-card__loading">Cargando benchmark sectorial...</p>
+  } @else if (!benchmark()!.benchmarkDisponible) {
+    <div class="benchmark-card__aviso">
+      <span class="benchmark-card__aviso-icon">
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <rect x="3" y="11" width="18" height="11" rx="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+      </span>
+      <div>
+        <p class="benchmark-card__aviso-titulo">
+          Tu sector aún no tiene suficientes empresas (mínimo 5) para mostrar el benchmark.
+        </p>
+        <p class="benchmark-card__aviso-detalle">
+          Por privacidad, la comparación sectorial se activa cuando hay al menos 5 empresas
+          registradas en tu sector.
+        </p>
+      </div>
+    </div>
+  } @else {
+    <div class="benchmark-card__body">
+      <div class="benchmark-radar">
+        <svg viewBox="0 0 200 200" class="benchmark-radar__svg" aria-hidden="true">
+          <polygon points="100,20 180,100 100,180 20,100" fill="none" stroke="var(--ch-border)" />
+          <polygon points="100,60 140,100 100,140 60,100" fill="none" stroke="var(--ch-border)" />
+          <line x1="100" y1="20" x2="100" y2="180" stroke="var(--ch-border)" />
+          <line x1="20" y1="100" x2="180" y2="100" stroke="var(--ch-border)" />
+          <polygon
+            [attr.points]="puntosPromedio()"
+            fill="rgba(14, 42, 59, 0.08)"
+            stroke="var(--ch-dark)"
+            stroke-width="1.5"
+            stroke-dasharray="4 3"
+          />
+          <polygon
+            [attr.points]="puntosEmpresa()"
+            fill="rgba(31, 138, 91, 0.18)"
+            stroke="var(--ch-green)"
+            stroke-width="2"
+          />
+        </svg>
+        <span class="benchmark-radar__eje benchmark-radar__eje--arriba">IMA</span>
+        <span class="benchmark-radar__eje benchmark-radar__eje--derecha">Cobertura</span>
+        <span class="benchmark-radar__eje benchmark-radar__eje--abajo">Consistencia</span>
+        <span class="benchmark-radar__eje benchmark-radar__eje--izquierda">Intensidad</span>
+        <div class="benchmark-radar__leyenda">
+          <span class="benchmark-radar__muestra benchmark-radar__muestra--empresa"></span>
+          <span>Tu empresa</span>
+          <span class="benchmark-radar__muestra benchmark-radar__muestra--sector"></span>
+          <span>Promedio sector</span>
+        </div>
+      </div>
+
+      <div class="benchmark-dims">
+        @for (fila of filas(); track fila.clave) {
+          <div class="benchmark-dim">
+            <div class="benchmark-dim__header">
+              <span class="benchmark-dim__nombre">{{ fila.etiqueta }}</span>
+              @if (posicionVisual(fila.dimension); as posicion) {
+                <span class="benchmark-chip {{ posicion.chipClass }}">{{ posicion.etiqueta }}</span>
+              } @else {
+                <span class="benchmark-chip benchmark-chip--na">No disponible</span>
+              }
+            </div>
+            @if (fila.dimension.valorEmpresa !== null) {
+              <div class="benchmark-dim__bar">
+                <div
+                  class="benchmark-dim__bar-fill benchmark-dim__bar-fill--{{ fila.colorClass }}"
+                  [style.width.%]="fila.dimension.valorEmpresa"
+                >
+                  <span class="benchmark-dim__valor">
+                    {{ fila.dimension.valorEmpresa | number: '1.0-0' }}
+                  </span>
+                </div>
+                @if (fila.dimension.promedioSector !== null) {
+                  <span
+                    class="benchmark-dim__marca"
+                    [style.left.%]="fila.dimension.promedioSector"
+                    [attr.aria-label]="'Promedio del sector: ' + fila.dimension.promedioSector"
+                  ></span>
+                }
+              </div>
+            } @else {
+              <p class="benchmark-dim__na">
+                No disponible para este período: tu IMA es parcial y no incluye el puntaje de
+                intensidad sectorial.
+              </p>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <p class="benchmark-card__leyenda">
+      Barra = tu empresa · Marca = promedio del sector · Umbral ±2 pts = en línea
+    </p>
+  }
+</article>

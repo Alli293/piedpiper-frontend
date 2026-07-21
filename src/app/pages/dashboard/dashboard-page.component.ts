@@ -12,9 +12,10 @@ import { ToastService } from '../../shared/services/toast.service';
 import { ComparacionEmisionesResponse, EstadoComparacion } from '../emissions/models/emision.model';
 import { EmisionesService } from '../emissions/emisiones.service';
 import { EvolucionService, PuntoMensual } from './evolucion.service';
-import { ImaService, ImaResponse } from './ima.service';
+import { ImaService, ImaResponse, BenchmarkSectorialResponse } from './ima.service';
 import { EvolucionChartComponent } from './evolucion-chart.component';
 import { ImaPanelComponent } from './ima-panel.component';
+import { BenchmarkPanelComponent } from './benchmark-panel.component';
 
 interface EstadoVisual {
   label: string;
@@ -22,7 +23,15 @@ interface EstadoVisual {
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [CardStatComponent, RouterLink, SelectInputComponent, ShellLayoutComponent, EvolucionChartComponent, ImaPanelComponent],
+  imports: [
+    CardStatComponent,
+    RouterLink,
+    SelectInputComponent,
+    ShellLayoutComponent,
+    EvolucionChartComponent,
+    ImaPanelComponent,
+    BenchmarkPanelComponent,
+  ],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
 })
@@ -40,6 +49,7 @@ export class DashboardPageComponent implements OnInit {
   protected readonly evolucionSerie = signal<PuntoMensual[]>([]);
   protected readonly evolucionVacia = signal(false);
   protected readonly imaData = signal<ImaResponse | null>(null);
+  protected readonly benchmarkData = signal<BenchmarkSectorialResponse | null>(null);
 
   protected readonly anios = computed<SelectOption[]>(() =>
     Array.from({ length: 6 }, (_, index) => {
@@ -66,6 +76,7 @@ export class DashboardPageComponent implements OnInit {
     void this.cargarComparacion(this.anioSeleccionado());
     void this.cargarEvolucion(this.anioSeleccionado());
     void this.cargarIma(this.anioSeleccionado(), this.mesActual);
+    void this.cargarBenchmark(this.anioSeleccionado(), this.mesActual);
   }
 
   protected onAnioChange(valor: string): void {
@@ -76,10 +87,12 @@ export class DashboardPageComponent implements OnInit {
     void this.cargarComparacion(anio);
     void this.cargarEvolucion(anio);
     void this.cargarIma(anio, this.mesActual);
+    void this.cargarBenchmark(anio, this.mesActual);
   }
 
   protected onImaPeriodoChange(evento: { anio: number; mes: number }): void {
     void this.cargarIma(evento.anio, evento.mes);
+    void this.cargarBenchmark(evento.anio, evento.mes);
   }
 
   protected estadoVisual(estado: EstadoComparacion): EstadoVisual {
@@ -174,8 +187,17 @@ export class DashboardPageComponent implements OnInit {
       const ima = await firstValueFrom(this.imaService.obtenerIma(anio, mes));
       this.imaData.set(ima);
     } catch {
+      this.toastService.error('No se pudo calcular tu IMA. Intente nuevamente.', undefined, 5000);
+    }
+  }
+
+  private async cargarBenchmark(anio: number, mes: number): Promise<void> {
+    try {
+      const benchmark = await firstValueFrom(this.imaService.obtenerBenchmark(anio, mes));
+      this.benchmarkData.set(benchmark);
+    } catch {
       this.toastService.error(
-        'No se pudo calcular tu IMA. Intente nuevamente.',
+        'No se pudo cargar el benchmark sectorial. Intente nuevamente.',
         undefined,
         5000
       );
