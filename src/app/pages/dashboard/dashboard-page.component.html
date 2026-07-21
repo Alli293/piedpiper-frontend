@@ -44,7 +44,7 @@
         @if (comparacion(); as data) {
           <div class="annual-limit-panel__status">
             <span class="annual-limit-panel__badge">
-              {{ estadoVisual(data.estado).label }}
+              {{ estadoVisual(estadoPresentacion(data)).label }}
             </span>
             <span class="annual-limit-panel__limit">
               Límite:
@@ -64,7 +64,7 @@
         @if (data.estado === 'sin_limite') {
           <div class="annual-limit-panel__empty">
             <p>No se ha declarado un límite para {{ data.anio }}.</p>
-            <a routerLink="/limites" appLink>Declarar límite anual de emisiones</a>
+            <a routerLink="/limites">Declarar límite anual de emisiones</a>
           </div>
         } @else {
           <div class="annual-limit-panel__meter" aria-hidden="true">
@@ -97,6 +97,25 @@
           </dl>
         }
       }
+    </article>
+
+    <!-- PP-79: IMA -->
+    <app-ima-panel
+      [ima]="imaData()"
+      [anio]="anioSeleccionado()"
+      [mes]="mesSeleccionado()"
+      (periodoChange)="onImaPeriodoChange($event)"
+    />
+
+    <!-- PP-41: Evolución histórica -->
+    <article class="annual-limit-panel evolucion-panel">
+      <app-heading level="h2" text="Evolución histórica de la huella" />
+      @if (evolucionVacia()) {
+        <p class="evolucion-panel__empty">
+          No hay emisiones registradas en {{ anioSeleccionado() }}.
+        </p>
+      }
+      <app-evolucion-chart [serie]="evolucionSerie()" [anio]="anioSeleccionado()" />
     </article>
   </section>
 </app-shell-layout>

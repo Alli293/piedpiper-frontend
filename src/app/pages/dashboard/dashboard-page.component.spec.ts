@@ -8,7 +8,17 @@ import { AuthSessionService } from '../../core/auth-session.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { ComparacionEmisionesResponse } from '../emissions/models/emision.model';
 import { EmisionesService } from '../emissions/emisiones.service';
+import { EvolucionService } from './evolucion.service';
+import { ImaService } from './ima.service';
+import { EvolucionChartComponent } from './evolucion-chart.component';
+import { Component, input } from '@angular/core';
 import { DashboardPageComponent } from './dashboard-page.component';
+
+@Component({ selector: 'app-evolucion-chart', standalone: true, template: '' })
+class StubChartComponent {
+  readonly serie = input([]);
+  readonly anio = input(2026);
+}
 
 describe('DashboardPageComponent', () => {
   let fixture: ComponentFixture<DashboardPageComponent>;
@@ -47,11 +57,24 @@ describe('DashboardPageComponent', () => {
       providers: [
         provideRouter([]),
         { provide: EmisionesService, useValue: emisionesService },
+        {
+          provide: EvolucionService,
+          useValue: { obtenerEvolucion: () => of({ anio: 2026, serie: [] }) },
+        },
+        {
+          provide: ImaService,
+          useValue: { obtenerIma: () => of({ cobertura: 0, consistencia: 0, ima: 0, parcial: true, motivoParcial: null, puntajeIntensidadSectorial: null, intensidad: null, calculatedAt: '', interpretacionIa: null }) },
+        },
         { provide: AuthService, useValue: authService },
         { provide: AuthSessionService, useValue: authSession },
         { provide: ToastService, useValue: toastService },
       ],
-    }).compileComponents();
+    })
+      .overrideComponent(DashboardPageComponent, {
+        remove: { imports: [EvolucionChartComponent] },
+        add: { imports: [StubChartComponent] },
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(DashboardPageComponent);
     component = fixture.componentInstance;
