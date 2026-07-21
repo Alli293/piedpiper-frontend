@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
+  CategoriaFiltroEmision,
   EmisionEnvioResponse,
   EmisionFlotaResponse,
   EmisionResponse,
@@ -12,6 +13,12 @@ import {
   RegistrarVueloRequest,
   TipoVehiculoOption,
 } from './models/emision.model';
+
+export interface EmisionesFiltros {
+  readonly categoria?: CategoriaFiltroEmision;
+  readonly anio?: number | null;
+  readonly mes?: number | null;
+}
 
 @Injectable({ providedIn: 'root' })
 export class EmisionesService {
@@ -30,8 +37,19 @@ export class EmisionesService {
     return this.http.post<EmisionResponse>(`${this.baseUrl}/vuelo`, payload);
   }
 
-  listarEmisiones(): Observable<EmisionResponse[]> {
-    return this.http.get<EmisionResponse[]>(this.baseUrl);
+  listarEmisiones(filtros: EmisionesFiltros = {}): Observable<EmisionResponse[]> {
+    let params = new HttpParams();
+    if (filtros.categoria && filtros.categoria !== 'TODAS') {
+      params = params.set('categoria', filtros.categoria);
+    }
+    if (filtros.anio) {
+      params = params.set('anio', filtros.anio);
+    }
+    if (filtros.mes) {
+      params = params.set('mes', filtros.mes);
+    }
+
+    return this.http.get<EmisionResponse[]>(this.baseUrl, { params });
   }
 
   actualizarVuelo(id: string, payload: RegistrarVueloRequest): Observable<EmisionResponse> {
