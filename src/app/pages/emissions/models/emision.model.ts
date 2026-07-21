@@ -1,7 +1,7 @@
 export type UnidadElectricidad = 'kwh' | 'mwh';
 export type CabinClass = 'economy' | 'premium';
 export type CategoriaFiltroEmision = 'TODAS' | 'ELECTRICIDAD' | 'FLOTA' | 'VUELO' | 'ENVIO';
-export type EstadoComparacion = 'dentro' | 'cerca' | 'superado' | 'sin_limite';
+export type EstadoComparacion = 'dentro' | 'cerca' | 'alcanzado' | 'superado' | 'sin_limite';
 
 export type UnidadPeso = 'G' | 'LB' | 'KG' | 'MT';
 // El backend serializa UnidadDistancia en minúscula (@JsonValue) para vuelo, envío y flota.

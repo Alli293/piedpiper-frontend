@@ -113,6 +113,7 @@ export class DashboardPageComponent implements OnInit {
     const estados: Record<EstadoComparacion, EstadoVisual> = {
       dentro: { label: 'En meta' },
       cerca: { label: 'Cerca del límite' },
+      alcanzado: { label: 'Alcanzado' },
       superado: { label: 'Límite superado' },
       sin_limite: { label: 'Sin límite' },
     };

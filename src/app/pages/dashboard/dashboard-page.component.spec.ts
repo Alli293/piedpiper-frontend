@@ -113,6 +113,20 @@ describe('DashboardPageComponent', () => {
     expect(fixture.nativeElement.querySelector('.annual-limit-panel.is-superado')).toBeTruthy();
   });
 
+  it('renderiza el estado alcanzado', () => {
+    (component as any).comparacion.set({
+      ...comparacionBase,
+      huellaAcumuladaT: 50,
+      porcentajeConsumido: 100,
+      estado: 'alcanzado',
+    });
+    fixture.detectChanges();
+
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(texto).toContain('Alcanzado');
+    expect(fixture.nativeElement.querySelector('.annual-limit-panel.is-alcanzado')).toBeTruthy();
+  });
+
   it('renderiza el estado sin limite con appLink', () => {
     (component as any).comparacion.set({
       ...comparacionBase,
