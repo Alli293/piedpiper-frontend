@@ -163,6 +163,20 @@ describe('DashboardPageComponent', () => {
     );
   });
 
+  it('no muestra datos de demostracion cuando falla la carga', async () => {
+    (component as any).comparacion.set(null);
+    emisionesService.obtenerComparacion.mockReturnValueOnce(throwError(() => new Error('network')));
+
+    await (component as any).cargarComparacion(2026);
+    fixture.detectChanges();
+
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect((component as any).comparacion()).toBeNull();
+    expect(texto).not.toContain('5.236');
+    expect(texto).not.toContain('12.47');
+    expect(texto).not.toContain('42');
+  });
+
   it('dispara la descarga del blob recibido', () => {
     const originalCreateObjectUrl = URL.createObjectURL;
     const originalRevokeObjectUrl = URL.revokeObjectURL;
