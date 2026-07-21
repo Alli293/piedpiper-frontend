@@ -12,7 +12,6 @@ interface FilaBenchmark {
 interface PosicionVisual {
   etiqueta: string;
   chipClass: string;
-  delta: string;
 }
 
 const POSICIONES: Record<
@@ -86,7 +85,6 @@ export class BenchmarkPanelComponent {
     return {
       etiqueta: `${config.flecha} ${config.etiqueta} · ${signo}${diferencia}`,
       chipClass: config.chipClass,
-      delta: `${signo}${diferencia}`,
     };
   }
 
