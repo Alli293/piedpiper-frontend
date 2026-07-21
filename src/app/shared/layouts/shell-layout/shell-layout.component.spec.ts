@@ -1,6 +1,6 @@
-<<<<<<< HEAD
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth.service';
 import { HeaderConfig } from '../page-layout/page-layout.component';
 import { ShellLayoutComponent } from './shell-layout.component';
 
@@ -13,13 +13,18 @@ const HEADER_CONFIG: HeaderConfig = {
 
 describe('ShellLayoutComponent', () => {
   let navigateByUrl: ReturnType<typeof vi.fn>;
+  let cerrarSesion: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     navigateByUrl = vi.fn().mockResolvedValue(true);
+    cerrarSesion = vi.fn();
 
     await TestBed.configureTestingModule({
       imports: [ShellLayoutComponent],
-      providers: [{ provide: Router, useValue: { navigateByUrl } }],
+      providers: [
+        { provide: Router, useValue: { navigateByUrl } },
+        { provide: AuthService, useValue: { cerrarSesion } },
+      ],
     }).compileComponents();
   });
 
@@ -30,7 +35,7 @@ describe('ShellLayoutComponent', () => {
       settingsLabel?: string;
       backRoute?: string;
     } = {}
-  ) {
+  ): Promise<ComponentFixture<ShellLayoutComponent>> {
     const fixture = TestBed.createComponent(ShellLayoutComponent);
     fixture.componentRef.setInput('headerConfig', HEADER_CONFIG);
     if (inputs.activeId !== undefined) fixture.componentRef.setInput('activeId', inputs.activeId);
@@ -137,54 +142,22 @@ describe('ShellLayoutComponent', () => {
 
     expect(navigateByUrl).not.toHaveBeenCalled();
     expect(emitido.length).toBe(1);
-=======
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
-import { AuthService } from '../../../core/auth/auth.service';
-import { ShellLayoutComponent } from './shell-layout.component';
-
-describe('ShellLayoutComponent', () => {
-  let fixture: ComponentFixture<ShellLayoutComponent>;
-  let router: { navigateByUrl: ReturnType<typeof vi.fn> };
-  let authService: { cerrarSesion: ReturnType<typeof vi.fn> };
-
-  beforeEach(async () => {
-    router = {
-      navigateByUrl: vi.fn(),
-    };
-    authService = {
-      cerrarSesion: vi.fn(),
-    };
-
-    await TestBed.configureTestingModule({
-      imports: [ShellLayoutComponent],
-      providers: [
-        { provide: Router, useValue: router },
-        { provide: AuthService, useValue: authService },
-      ],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(ShellLayoutComponent);
-    fixture.componentRef.setInput('headerConfig', {
-      sectionLabel: 'Panel',
-      pageTitle: 'Dashboard',
-      showNotificationDot: false,
-      userInitials: 'AJ',
-    });
-    fixture.detectChanges();
   });
 
-  it('cierra sesion antes de navegar al login', () => {
+  it('cierra sesion antes de navegar al login', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard' });
+
     (fixture.componentInstance as any).onMenuItem('logout');
 
-    expect(authService.cerrarSesion).toHaveBeenCalled();
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
+    expect(cerrarSesion).toHaveBeenCalled();
+    expect(navigateByUrl).toHaveBeenCalledWith('/login');
   });
 
-  it('navega al placeholder de benchmark', () => {
+  it('navega al placeholder de benchmark', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard' });
+
     (fixture.componentInstance as any).onMenuItem('benchmark');
 
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/benchmark');
->>>>>>> origin/develop
+    expect(navigateByUrl).toHaveBeenCalledWith('/benchmark');
   });
 });
