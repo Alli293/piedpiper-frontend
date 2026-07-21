@@ -31,6 +31,7 @@ import { AuditoresService } from './auditores.service';
 import {
   AuditorResumen,
   CatalogoItem,
+  esOrdenamientoValido,
   LONGITUD_MAXIMA_BUSQUEDA,
   LONGITUD_MINIMA_BUSQUEDA,
   OrdenamientoAuditores,
@@ -221,9 +222,12 @@ export class DirectorioAuditoresPageComponent {
   }
 
   protected onOrdenar(valor: string): void {
+    if (!esOrdenamientoValido(valor)) {
+      return;
+    }
     this.modelo.update((modelo) => ({
       ...modelo,
-      ordenamiento: valor as OrdenamientoAuditores,
+      ordenamiento: valor,
       pagina: 0,
     }));
   }

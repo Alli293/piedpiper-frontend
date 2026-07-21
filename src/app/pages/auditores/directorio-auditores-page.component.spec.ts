@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
@@ -79,7 +80,7 @@ describe('DirectorioAuditoresPageComponent', () => {
     return component as unknown as {
       resultado: { set(v: PaginaAuditores | null): void };
       cargando: { set(v: boolean): void };
-      error: { set(v: boolean): void };
+      error: { (): boolean; set(v: boolean): void };
       modelo(): { pagina: number; especialidades: string[] };
       onBuscar(v: string): void;
       onOrdenar(v: string): void;
@@ -259,6 +260,44 @@ describe('DirectorioAuditoresPageComponent', () => {
       'No se pudo cargar el directorio de auditores'
     );
     expect(html.textContent).toContain('Reintentar');
+  });
+
+  it('si la consulta falla activa el error y muestra el toast con el mensaje del backend', async () => {
+    await montar();
+    auditoresService.listar.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 500,
+            error: { message: 'El servicio no está disponible.' },
+          })
+      )
+    );
+
+    comp().reintentar();
+
+    await vi.waitFor(() => expect(comp().error()).toBe(true));
+    expect(toastService.error).toHaveBeenCalledWith(
+      'El servicio no está disponible.',
+      undefined,
+      5000
+    );
+  });
+
+  it('si el error no trae mensaje cae al texto por defecto del directorio', async () => {
+    await montar();
+    auditoresService.listar.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 0, statusText: 'Unknown Error' }))
+    );
+
+    comp().reintentar();
+
+    await vi.waitFor(() => expect(comp().error()).toBe(true));
+    expect(toastService.error).toHaveBeenCalledWith(
+      'No se pudo cargar el directorio de auditores. Intente nuevamente.',
+      undefined,
+      5000
+    );
   });
 
   it('un termino de un caracter muestra el aviso de minimo', async () => {

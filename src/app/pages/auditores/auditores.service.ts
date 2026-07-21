@@ -24,7 +24,7 @@ export class AuditoresService {
       .set('ordenamiento', filtros.ordenamiento)
       .set('soloDisponibles', filtros.soloDisponibles);
 
-    const termino = filtros.terminoBusqueda;
+    const termino = filtros.terminoBusqueda.trim();
     if (termino.length >= LONGITUD_MINIMA_BUSQUEDA && termino.length <= LONGITUD_MAXIMA_BUSQUEDA) {
       params = params.set('terminoBusqueda', termino);
     }

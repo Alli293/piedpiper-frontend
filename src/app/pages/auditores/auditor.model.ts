@@ -1,5 +1,15 @@
 export type OrdenamientoAuditores = 'CALIFICACION' | 'AUDITORIAS_COMPLETADAS' | 'TIEMPO_RESPUESTA';
 
+export const ORDENAMIENTOS_AUDITORES: readonly OrdenamientoAuditores[] = [
+  'CALIFICACION',
+  'AUDITORIAS_COMPLETADAS',
+  'TIEMPO_RESPUESTA',
+];
+
+export function esOrdenamientoValido(valor: string): valor is OrdenamientoAuditores {
+  return (ORDENAMIENTOS_AUDITORES as readonly string[]).includes(valor);
+}
+
 export interface AuditorResumen {
   auditorId: string;
   nombre: string;
