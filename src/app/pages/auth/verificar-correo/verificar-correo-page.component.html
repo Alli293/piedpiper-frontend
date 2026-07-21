@@ -8,16 +8,15 @@
     } @else if (mensajeInvalido()) {
       <app-semantic-card variant="warning" title="Enlace no válido" [text]="mensajeInvalido()" />
 
-      <form class="verificar-correo__reenvio" novalidate (submit)="reenviar($event)">
+      <form class="verificar-correo__reenvio" novalidate (submit)="handleReenviarSubmit($event)">
         <app-text-input
           id="txtReenviarEmail"
           label="Correo electrónico"
           type="email"
           autocomplete="email"
           placeholder="tucorreo@ejemplo.com"
-          [value]="reenviarEmail()"
-          (valueChange)="reenviarEmail.set($event)"
-          [disabled]="reenviarEnviando()"
+          [formField]="reenviarForm.email"
+          [error]="errorReenviarEmail()"
         />
 
         @if (reenviarError()) {
@@ -33,7 +32,6 @@
           size="lg"
           type="submit"
           [loading]="reenviarEnviando()"
-          [disabled]="reenviarEnviando()"
         >
           Reenviar correo de verificación
         </app-button>

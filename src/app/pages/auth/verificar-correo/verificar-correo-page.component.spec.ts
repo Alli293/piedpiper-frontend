@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { VerificarCorreoPageComponent } from './verificar-correo-page.component';
@@ -52,10 +53,13 @@ describe('VerificarCorreoPageComponent', () => {
 
   it('un 409 (correo ya verificado) se trata como positivo, no como invalido', () => {
     authService.verificarCorreo.mockReturnValue(
-      throwError(() => ({
-        status: 409,
-        error: { message: 'Tu correo ya fue verificado. Inicia sesión.' },
-      }))
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { message: 'Tu correo ya fue verificado. Inicia sesión.' },
+          })
+      )
     );
 
     const fixture = crear();
@@ -67,10 +71,13 @@ describe('VerificarCorreoPageComponent', () => {
 
   it('un 400 (token mal formado) muestra el formulario de reenvio', () => {
     authService.verificarCorreo.mockReturnValue(
-      throwError(() => ({
-        status: 400,
-        error: { message: 'El formato del enlace de verificación no es válido.' },
-      }))
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: { message: 'El formato del enlace de verificación no es válido.' },
+          })
+      )
     );
 
     const fixture = crear();
@@ -82,12 +89,15 @@ describe('VerificarCorreoPageComponent', () => {
 
   it('un 410 (invalido o expirado) muestra el mismo formulario de reenvio que el 400', () => {
     authService.verificarCorreo.mockReturnValue(
-      throwError(() => ({
-        status: 410,
-        error: {
-          message: 'Este enlace de verificación no es válido o expiró. Solicita uno nuevo.',
-        },
-      }))
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 410,
+            error: {
+              message: 'Este enlace de verificación no es válido o expiró. Solicita uno nuevo.',
+            },
+          })
+      )
     );
 
     const fixture = crear();
@@ -154,10 +164,13 @@ describe('VerificarCorreoPageComponent', () => {
       throwError(() => ({ status: 410, error: { message: 'expiró' } }))
     );
     authService.reenviarVerificacion.mockReturnValue(
-      throwError(() => ({
-        status: 429,
-        error: { message: 'Has solicitado demasiados reenvíos. Intenta de nuevo en una hora.' },
-      }))
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 429,
+            error: { message: 'Has solicitado demasiados reenvíos. Intenta de nuevo en una hora.' },
+          })
+      )
     );
 
     const fixture = crear();
