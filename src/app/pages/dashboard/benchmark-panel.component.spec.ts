@@ -38,19 +38,17 @@ describe('BenchmarkPanelComponent', () => {
     expect(html.textContent).toContain('Consistencia');
   });
 
-  it('pinta el chip con la clase y el delta segun la posicion', () => {
+  it('pinta el badge con la variante y el delta segun la posicion', () => {
     const fixture = crear(benchmarkCompleto);
-    const chips = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll('.benchmark-chip')
-    );
+    const badges = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('app-badge'));
 
-    expect(chips[0].className).toContain('benchmark-chip--encima');
-    expect(chips[0].textContent).toContain('Por encima');
-    expect(chips[0].textContent).toContain('+7');
-    expect(chips[2].className).toContain('benchmark-chip--debajo');
-    expect(chips[2].textContent).toContain('-8');
-    expect(chips[3].className).toContain('benchmark-chip--linea');
-    expect(chips[3].textContent).toContain('En línea');
+    expect(badges[0].className).toContain('ch-badge--success');
+    expect(badges[0].textContent).toContain('Por encima');
+    expect(badges[0].textContent).toContain('+7');
+    expect(badges[2].className).toContain('ch-badge--danger');
+    expect(badges[2].textContent).toContain('-8');
+    expect(badges[3].className).toContain('ch-badge--info');
+    expect(badges[3].textContent).toContain('En línea');
   });
 
   it('con benchmarkDisponible en false muestra el aviso de umbral y ninguna dimension', () => {
@@ -78,9 +76,13 @@ describe('BenchmarkPanelComponent', () => {
       puntajeIntensidadSectorial: { valorEmpresa: null, promedioSector: 66, posicion: null },
     });
     const html = fixture.nativeElement as HTMLElement;
+    const naBadge = Array.from(html.querySelectorAll('app-badge')).find((b) =>
+      b.textContent?.includes('No disponible')
+    );
 
-    expect(html.querySelector('.benchmark-chip--na')?.textContent).toContain('No disponible');
+    expect(naBadge?.className).toContain('ch-badge--neutral');
     expect(html.querySelectorAll('.benchmark-dim__bar')).toHaveLength(3);
+    expect(html.querySelector('.benchmark-radar')).toBeNull();
   });
 
   it('sin datos muestra el estado de carga', () => {
@@ -89,5 +91,18 @@ describe('BenchmarkPanelComponent', () => {
     expect((fixture.nativeElement as HTMLElement).textContent).toContain(
       'Cargando benchmark sectorial...'
     );
+  });
+
+  it('con error muestra el mensaje y no el estado de carga', () => {
+    const fixture = TestBed.createComponent(BenchmarkPanelComponent);
+    fixture.componentRef.setInput('benchmark', null);
+    fixture.componentRef.setInput('error', true);
+    fixture.detectChanges();
+    const html = fixture.nativeElement as HTMLElement;
+
+    expect(html.querySelector('[role="alert"]')?.textContent).toContain(
+      'No se pudo cargar el benchmark sectorial'
+    );
+    expect(html.textContent).not.toContain('Cargando benchmark sectorial...');
   });
 });

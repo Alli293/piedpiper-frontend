@@ -23,15 +23,29 @@ export interface BenchmarkDimension {
   posicion: PosicionBenchmark | null;
 }
 
-export interface BenchmarkSectorialResponse {
-  benchmarkDisponible: boolean;
+interface BenchmarkBase {
   cantidadEmpresas: number;
   imaParcial: boolean;
-  ima: BenchmarkDimension | null;
-  cobertura: BenchmarkDimension | null;
-  puntajeIntensidadSectorial: BenchmarkDimension | null;
-  consistencia: BenchmarkDimension | null;
 }
+
+export interface BenchmarkDisponibleResponse extends BenchmarkBase {
+  benchmarkDisponible: true;
+  ima: BenchmarkDimension;
+  cobertura: BenchmarkDimension;
+  puntajeIntensidadSectorial: BenchmarkDimension;
+  consistencia: BenchmarkDimension;
+}
+
+export interface BenchmarkNoDisponibleResponse extends BenchmarkBase {
+  benchmarkDisponible: false;
+  ima: null;
+  cobertura: null;
+  puntajeIntensidadSectorial: null;
+  consistencia: null;
+}
+
+export type BenchmarkSectorialResponse =
+  BenchmarkDisponibleResponse | BenchmarkNoDisponibleResponse;
 
 @Injectable({ providedIn: 'root' })
 export class ImaService {

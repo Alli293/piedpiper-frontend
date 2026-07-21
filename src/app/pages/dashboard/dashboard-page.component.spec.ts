@@ -5,12 +5,17 @@ import { of, throwError } from 'rxjs';
 import { ToastService } from '../../shared/services/toast.service';
 import { ComparacionEmisionesResponse } from '../emissions/models/emision.model';
 import { EmisionesService } from '../emissions/emisiones.service';
+import { ImaService } from './ima.service';
 import { DashboardPageComponent } from './dashboard-page.component';
 
 describe('DashboardPageComponent', () => {
   let fixture: ComponentFixture<DashboardPageComponent>;
   let component: DashboardPageComponent;
   let emisionesService: { obtenerComparacion: ReturnType<typeof vi.fn> };
+  let imaService: {
+    obtenerIma: ReturnType<typeof vi.fn>;
+    obtenerBenchmark: ReturnType<typeof vi.fn>;
+  };
   let toastService: { error: ReturnType<typeof vi.fn> };
 
   const comparacionBase: ComparacionEmisionesResponse = {
@@ -22,9 +27,23 @@ describe('DashboardPageComponent', () => {
     mensaje: null,
   };
 
+  const benchmarkBase = {
+    benchmarkDisponible: false,
+    cantidadEmpresas: 4,
+    imaParcial: false,
+    ima: null,
+    cobertura: null,
+    puntajeIntensidadSectorial: null,
+    consistencia: null,
+  };
+
   beforeEach(async () => {
     emisionesService = {
       obtenerComparacion: vi.fn().mockReturnValue(of(comparacionBase)),
+    };
+    imaService = {
+      obtenerIma: vi.fn().mockReturnValue(of({ ima: 0, parcial: true })),
+      obtenerBenchmark: vi.fn().mockReturnValue(of(benchmarkBase)),
     };
     toastService = {
       toasts: signal([]),
@@ -36,6 +55,7 @@ describe('DashboardPageComponent', () => {
       providers: [
         provideRouter([]),
         { provide: EmisionesService, useValue: emisionesService },
+        { provide: ImaService, useValue: imaService },
         { provide: ToastService, useValue: toastService },
       ],
     }).compileComponents();
@@ -88,6 +108,28 @@ describe('DashboardPageComponent', () => {
 
     expect(toastService.error).toHaveBeenCalledWith(
       'No se pudo cargar la comparación. Intente nuevamente.',
+      undefined,
+      5000
+    );
+  });
+
+  it('carga el benchmark sectorial con el periodo actual por defecto', () => {
+    expect(imaService.obtenerBenchmark).toHaveBeenCalledWith(
+      new Date().getFullYear(),
+      new Date().getMonth() + 1
+    );
+    expect((component as any).benchmarkData()).toEqual(benchmarkBase);
+    expect((component as any).benchmarkError()).toBe(false);
+  });
+
+  it('si falla el benchmark marca el error y muestra el toast', async () => {
+    imaService.obtenerBenchmark.mockReturnValueOnce(throwError(() => new Error('network')));
+
+    await (component as any).cargarBenchmark(2026, 7);
+
+    expect((component as any).benchmarkError()).toBe(true);
+    expect(toastService.error).toHaveBeenCalledWith(
+      'No se pudo cargar el benchmark sectorial. Intente nuevamente.',
       undefined,
       5000
     );

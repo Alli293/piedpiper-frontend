@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -50,6 +51,7 @@ export class DashboardPageComponent implements OnInit {
   protected readonly evolucionVacia = signal(false);
   protected readonly imaData = signal<ImaResponse | null>(null);
   protected readonly benchmarkData = signal<BenchmarkSectorialResponse | null>(null);
+  protected readonly benchmarkError = signal(false);
 
   protected readonly anios = computed<SelectOption[]>(() =>
     Array.from({ length: 6 }, (_, index) => {
@@ -192,15 +194,17 @@ export class DashboardPageComponent implements OnInit {
   }
 
   private async cargarBenchmark(anio: number, mes: number): Promise<void> {
+    this.benchmarkError.set(false);
     try {
       const benchmark = await firstValueFrom(this.imaService.obtenerBenchmark(anio, mes));
       this.benchmarkData.set(benchmark);
-    } catch {
-      this.toastService.error(
-        'No se pudo cargar el benchmark sectorial. Intente nuevamente.',
-        undefined,
-        5000
-      );
+    } catch (err: unknown) {
+      this.benchmarkError.set(true);
+      const mensaje =
+        err instanceof HttpErrorResponse
+          ? (err.error?.message ?? 'No se pudo cargar el benchmark sectorial. Intente nuevamente.')
+          : 'No se pudo cargar el benchmark sectorial. Intente nuevamente.';
+      this.toastService.error(mensaje, undefined, 5000);
     }
   }
 }

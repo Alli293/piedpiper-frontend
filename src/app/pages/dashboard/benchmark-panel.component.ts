@@ -1,39 +1,54 @@
 import { Component, computed, input } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { BadgeComponent, BadgeVariant } from '../../shared/components/badge/badge.component';
 import { BenchmarkDimension, BenchmarkSectorialResponse, PosicionBenchmark } from './ima.service';
+
+type ColorDimension = 'ima' | 'cobertura' | 'intensidad' | 'consistencia';
+
+interface PosicionVisual {
+  variant: BadgeVariant;
+  etiqueta: string;
+}
 
 interface FilaBenchmark {
   clave: string;
   etiqueta: string;
-  colorClass: string;
-  dimension: BenchmarkDimension;
-}
-
-interface PosicionVisual {
-  etiqueta: string;
-  chipClass: string;
+  color: ColorDimension;
+  valorEmpresa: number | null;
+  promedioSector: number | null;
+  barraWidth: number | null;
+  marcaLeft: number | null;
+  promedioAria: string;
+  posicion: PosicionVisual;
 }
 
 const POSICIONES: Record<
   PosicionBenchmark,
-  { etiqueta: string; chipClass: string; flecha: string }
+  { variant: BadgeVariant; etiqueta: string; flecha: string }
 > = {
-  POR_ENCIMA: { etiqueta: 'Por encima', chipClass: 'benchmark-chip--encima', flecha: '↗' },
-  EN_LINEA: { etiqueta: 'En línea', chipClass: 'benchmark-chip--linea', flecha: '→' },
-  POR_DEBAJO: { etiqueta: 'Por debajo', chipClass: 'benchmark-chip--debajo', flecha: '↘' },
+  POR_ENCIMA: { variant: 'success', etiqueta: 'Por encima', flecha: '↗' },
+  EN_LINEA: { variant: 'info', etiqueta: 'En línea', flecha: '→' },
+  POR_DEBAJO: { variant: 'danger', etiqueta: 'Por debajo', flecha: '↘' },
 };
+
+const NO_DISPONIBLE: PosicionVisual = { variant: 'neutral', etiqueta: 'No disponible' };
 
 const RADAR_CENTRO = 100;
 const RADAR_RADIO = 80;
 
+function acotar(valor: number): number {
+  return Math.min(Math.max(valor, 0), 100);
+}
+
 @Component({
   selector: 'app-benchmark-panel',
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, BadgeComponent],
   templateUrl: './benchmark-panel.component.html',
   styleUrl: './benchmark-panel.component.scss',
 })
 export class BenchmarkPanelComponent {
   readonly benchmark = input<BenchmarkSectorialResponse | null>(null);
+  readonly error = input(false);
 
   protected readonly filas = computed<FilaBenchmark[]>(() => {
     const data = this.benchmark();
@@ -41,50 +56,64 @@ export class BenchmarkPanelComponent {
       return [];
     }
     return [
-      { clave: 'ima', etiqueta: 'IMA global', colorClass: 'ima', dimension: data.ima! },
-      {
-        clave: 'cobertura',
-        etiqueta: 'Cobertura',
-        colorClass: 'cobertura',
-        dimension: data.cobertura!,
-      },
-      {
-        clave: 'puntajeIntensidadSectorial',
-        etiqueta: 'Intensidad sectorial',
-        colorClass: 'intensidad',
-        dimension: data.puntajeIntensidadSectorial!,
-      },
-      {
-        clave: 'consistencia',
-        etiqueta: 'Consistencia',
-        colorClass: 'consistencia',
-        dimension: data.consistencia!,
-      },
+      this.fila('ima', 'IMA global', 'ima', data.ima),
+      this.fila('cobertura', 'Cobertura', 'cobertura', data.cobertura),
+      this.fila(
+        'puntajeIntensidadSectorial',
+        'Intensidad sectorial',
+        'intensidad',
+        data.puntajeIntensidadSectorial
+      ),
+      this.fila('consistencia', 'Consistencia', 'consistencia', data.consistencia),
     ];
   });
 
-  protected readonly puntosEmpresa = computed(() =>
-    this.puntosRadar((dimension) => dimension.valorEmpresa)
-  );
+  protected readonly radarDisponible = computed(() => {
+    const data = this.benchmark();
+    return (
+      !!data && data.benchmarkDisponible && data.puntajeIntensidadSectorial.valorEmpresa !== null
+    );
+  });
 
-  protected readonly puntosPromedio = computed(() =>
-    this.puntosRadar((dimension) => dimension.promedioSector)
-  );
+  protected readonly puntosEmpresa = computed(() => this.puntosRadar((d) => d.valorEmpresa));
+  protected readonly puntosPromedio = computed(() => this.puntosRadar((d) => d.promedioSector));
 
-  protected posicionVisual(dimension: BenchmarkDimension): PosicionVisual | null {
+  private fila(
+    clave: string,
+    etiqueta: string,
+    color: ColorDimension,
+    dimension: BenchmarkDimension
+  ): FilaBenchmark {
+    return {
+      clave,
+      etiqueta,
+      color,
+      valorEmpresa: dimension.valorEmpresa,
+      promedioSector: dimension.promedioSector,
+      barraWidth: dimension.valorEmpresa === null ? null : acotar(dimension.valorEmpresa),
+      marcaLeft: dimension.promedioSector === null ? null : acotar(dimension.promedioSector),
+      promedioAria:
+        dimension.promedioSector === null
+          ? ''
+          : `Promedio del sector: ${Math.round(dimension.promedioSector)}`,
+      posicion: this.posicionVisual(dimension),
+    };
+  }
+
+  private posicionVisual(dimension: BenchmarkDimension): PosicionVisual {
     if (
       dimension.posicion === null ||
       dimension.valorEmpresa === null ||
       dimension.promedioSector === null
     ) {
-      return null;
+      return NO_DISPONIBLE;
     }
     const config = POSICIONES[dimension.posicion];
     const diferencia = Math.round(dimension.valorEmpresa - dimension.promedioSector);
     const signo = diferencia > 0 ? '+' : '';
     return {
+      variant: config.variant,
       etiqueta: `${config.flecha} ${config.etiqueta} · ${signo}${diferencia}`,
-      chipClass: config.chipClass,
     };
   }
 
@@ -93,21 +122,15 @@ export class BenchmarkPanelComponent {
     if (!data || !data.benchmarkDisponible) {
       return '';
     }
-    const arriba = valor(data.ima!) ?? 0;
-    const derecha = valor(data.cobertura!) ?? 0;
-    const abajo = valor(data.consistencia!) ?? 0;
-    const izquierda = valor(data.puntajeIntensidadSectorial!) ?? 0;
-
-    const punto = (magnitud: number, dx: number, dy: number): string => {
-      const escala = (Math.min(Math.max(magnitud, 0), 100) / 100) * RADAR_RADIO;
+    const punto = (magnitud: number | null, dx: number, dy: number): string => {
+      const escala = (acotar(magnitud ?? 0) / 100) * RADAR_RADIO;
       return `${RADAR_CENTRO + dx * escala},${RADAR_CENTRO + dy * escala}`;
     };
-
     return [
-      punto(arriba, 0, -1),
-      punto(derecha, 1, 0),
-      punto(abajo, 0, 1),
-      punto(izquierda, -1, 0),
+      punto(valor(data.ima), 0, -1),
+      punto(valor(data.cobertura), 1, 0),
+      punto(valor(data.consistencia), 0, 1),
+      punto(valor(data.puntajeIntensidadSectorial), -1, 0),
     ].join(' ');
   }
 }
