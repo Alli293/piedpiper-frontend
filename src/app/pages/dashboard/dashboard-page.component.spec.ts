@@ -191,7 +191,7 @@ describe('DashboardPageComponent', () => {
     expect(texto).not.toContain('42');
   });
 
-  it('dispara la descarga del blob recibido', () => {
+  it('dispara la descarga del blob recibido', async () => {
     const originalCreateObjectUrl = URL.createObjectURL;
     const originalRevokeObjectUrl = URL.revokeObjectURL;
     Object.defineProperty(URL, 'createObjectURL', {
@@ -206,7 +206,7 @@ describe('DashboardPageComponent', () => {
     const click = vi.spyOn(anchor, 'click').mockImplementation(() => undefined);
     const createElement = vi.spyOn(document, 'createElement').mockReturnValue(anchor);
 
-    (component as any).exportarPdf();
+    await (component as any).exportarPdf();
 
     expect(dashboardService.exportarReportePdf).toHaveBeenCalledWith(new Date().getFullYear());
     expect(URL.createObjectURL).toHaveBeenCalled();
@@ -225,17 +225,30 @@ describe('DashboardPageComponent', () => {
     });
   });
 
-  it('muestra toast si el backend no pudo generar el PDF', () => {
+  it('muestra toast si el backend no pudo generar el PDF', async () => {
     dashboardService.exportarReportePdf.mockReturnValueOnce(
       throwError(() => new HttpErrorResponse({ status: 500 }))
     );
 
-    (component as any).exportarPdf();
+    await (component as any).exportarPdf();
 
     expect(toastService.error).toHaveBeenCalledWith(
       'No se pudo generar el reporte PDF. Intente nuevamente.',
       undefined,
       5000
     );
+  });
+
+  it('muestra mensaje de API cuando el error de descarga llega como blob JSON', async () => {
+    const error = new Blob([JSON.stringify({ message: 'AÃ±o invÃ¡lido.' })], {
+      type: 'application/json',
+    });
+    dashboardService.exportarReportePdf.mockReturnValueOnce(
+      throwError(() => new HttpErrorResponse({ status: 400, error }))
+    );
+
+    await (component as any).exportarPdf();
+
+    expect(toastService.error).toHaveBeenCalledWith('AÃ±o invÃ¡lido.', undefined, 5000);
   });
 });

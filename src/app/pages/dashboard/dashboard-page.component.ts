@@ -14,7 +14,7 @@ import { LinkDirective } from '../../shared/components/link/link.directive';
 import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../shared/services/toast.service';
-import { apiErrorMessage } from '../../shared/utils/http-error.utils';
+import { apiErrorMessage, apiErrorMessageAsync } from '../../shared/utils/http-error.utils';
 import { EmisionesService } from '../emissions/emisiones.service';
 import { ComparacionEmisionesResponse, EstadoComparacion } from '../emissions/models/emision.model';
 import { DashboardService } from './dashboard.service';
@@ -82,31 +82,31 @@ export class DashboardPageComponent implements OnInit {
     void this.cargarComparacion(anio);
   }
 
-  protected exportarPdf(): void {
+  protected async exportarPdf(): Promise<void> {
     const anio = this.anioSeleccionado();
     this.exportandoPdf.set(true);
-    this.dashboardService.exportarReportePdf(anio).subscribe({
-      next: (blob) => {
-        this.descargarBlob(blob, `reporte-huella-${anio}.pdf`);
-        this.exportandoPdf.set(false);
-      },
-      error: (error: unknown) => {
-        this.exportandoPdf.set(false);
-        if (error instanceof HttpErrorResponse && error.status >= 500) {
-          this.toastService.error(
-            'No se pudo generar el reporte PDF. Intente nuevamente.',
-            undefined,
-            5000
-          );
-          return;
-        }
+
+    try {
+      const blob = await firstValueFrom(this.dashboardService.exportarReportePdf(anio));
+      this.descargarBlob(blob, `reporte-huella-${anio}.pdf`);
+    } catch (error: unknown) {
+      if (error instanceof HttpErrorResponse && error.status >= 500) {
         this.toastService.error(
-          apiErrorMessage(error) ?? 'No se pudo descargar el reporte. Intente nuevamente.',
+          'No se pudo generar el reporte PDF. Intente nuevamente.',
           undefined,
           5000
         );
-      },
-    });
+        return;
+      }
+      this.toastService.error(
+        (await apiErrorMessageAsync(error)) ??
+          'No se pudo descargar el reporte. Intente nuevamente.',
+        undefined,
+        5000
+      );
+    } finally {
+      this.exportandoPdf.set(false);
+    }
   }
 
   protected estadoVisual(estado: EstadoComparacion): EstadoVisual {
