@@ -1,8 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, throwError, EMPTY, NEVER } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthSessionService } from '../../core/auth-session.service';
 import { ToastService } from '../../shared/services/toast.service';
@@ -11,6 +11,7 @@ import { EmisionesService } from '../emissions/emisiones.service';
 import { EvolucionService } from './evolucion.service';
 import { ImaService } from './ima.service';
 import { EvolucionChartComponent } from './evolucion-chart.component';
+import { ImaPanelComponent } from './ima-panel.component';
 import { Component, input } from '@angular/core';
 import { DashboardPageComponent } from './dashboard-page.component';
 
@@ -18,6 +19,13 @@ import { DashboardPageComponent } from './dashboard-page.component';
 class StubChartComponent {
   readonly serie = input([]);
   readonly anio = input(2026);
+}
+
+@Component({ selector: 'app-ima-panel', standalone: true, template: '' })
+class StubImaPanelComponent {
+  readonly ima = input(null);
+  readonly anio = input(2026);
+  readonly mes = input(7);
 }
 
 describe('DashboardPageComponent', () => {
@@ -63,7 +71,20 @@ describe('DashboardPageComponent', () => {
         },
         {
           provide: ImaService,
-          useValue: { obtenerIma: () => of({ cobertura: 0, consistencia: 0, ima: 0, parcial: true, motivoParcial: null, puntajeIntensidadSectorial: null, intensidad: null, calculatedAt: '', interpretacionIa: null }) },
+          useValue: {
+            obtenerIma: () =>
+              of({
+                cobertura: 0,
+                consistencia: 0,
+                ima: 0,
+                parcial: true,
+                motivoParcial: null,
+                puntajeIntensidadSectorial: null,
+                intensidad: null,
+                calculatedAt: '',
+                interpretacionIa: null,
+              }),
+          },
         },
         { provide: AuthService, useValue: authService },
         { provide: AuthSessionService, useValue: authSession },
@@ -71,8 +92,8 @@ describe('DashboardPageComponent', () => {
       ],
     })
       .overrideComponent(DashboardPageComponent, {
-        remove: { imports: [EvolucionChartComponent] },
-        add: { imports: [StubChartComponent] },
+        remove: { imports: [EvolucionChartComponent, ImaPanelComponent] },
+        add: { imports: [StubChartComponent, StubImaPanelComponent], schemas: [CUSTOM_ELEMENTS_SCHEMA] },
       })
       .compileComponents();
 
