@@ -29,6 +29,7 @@ describe('app.routes', () => {
 
   it('las páginas privadas están protegidas con authGuard', () => {
     const rutasPrivadas = [
+      'benchmark',
       'configuracion',
       'empresa/configuracion-inicial',
       'perfil/configuracion-inicial',

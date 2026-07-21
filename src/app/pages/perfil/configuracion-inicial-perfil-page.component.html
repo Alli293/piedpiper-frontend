@@ -11,125 +11,112 @@
   } @else {
     <div class="perfil-inicial">
       <header class="perfil-inicial__header">
-        <h1 class="perfil-inicial__titulo">{{ i18n.t('perfil.titulo') }}</h1>
+        <app-heading level="h1" [text]="i18n.t('perfil.titulo')" />
         <p class="perfil-inicial__subtitulo">{{ i18n.t('perfil.subtitulo') }}</p>
       </header>
 
-      <div class="perfil-inicial__campos">
-        <app-text-input
-          data-testid="nombre-visible"
-          [label]="i18n.t('perfil.nombre')"
-          [value]="nombreVisible()"
-          [error]="errorNombre()"
-          [disabled]="guardando()"
-          [required]="true"
-          (valueChange)="onNombreChange($event)"
-        />
+      <form novalidate (submit)="handleSubmit($event)">
+        <div class="perfil-inicial__campos">
+          <app-text-input
+            data-testid="nombre-visible"
+            [label]="i18n.t('perfil.nombre')"
+            [formField]="perfilForm.nombreVisible"
+            [error]="errorNombre()"
+          />
 
-        <app-select-input
-          [label]="i18n.t('config.idioma')"
-          [options]="opcionesIdioma"
-          [value]="idioma()"
-          [disabled]="guardando()"
-          (valueChange)="onIdiomaChange($event)"
-        />
+          <app-select-input
+            [label]="i18n.t('config.idioma')"
+            [options]="opcionesIdioma"
+            [formField]="perfilForm.idioma"
+          />
 
-        <app-select-input
-          [label]="i18n.t('config.moneda')"
-          [options]="opcionesMoneda"
-          [value]="moneda()"
-          [disabled]="guardando()"
-          (valueChange)="onMonedaChange($event)"
-        />
+          <app-select-input
+            [label]="i18n.t('config.moneda')"
+            [options]="opcionesMoneda"
+            [formField]="perfilForm.moneda"
+          />
 
-        <app-select-input
-          [label]="i18n.t('config.unidades')"
-          [options]="opcionesUnidades"
-          [value]="unidades()"
-          [disabled]="guardando()"
-          (valueChange)="onUnidadesChange($event)"
-        />
-      </div>
+          <app-select-input
+            [label]="i18n.t('config.unidades')"
+            [options]="opcionesUnidades"
+            [formField]="perfilForm.unidades"
+          />
+        </div>
 
-      @if (empresa(); as datosEmpresa) {
-        <section class="perfil-inicial__empresa">
-          <h2 class="perfil-inicial__empresa-titulo">{{ i18n.t('perfil.empresa.titulo') }}</h2>
+        @if (empresa(); as datosEmpresa) {
+          <section class="perfil-inicial__empresa">
+            <app-heading level="h2" [text]="i18n.t('perfil.empresa.titulo')" />
 
-          @if (esAdminEmpresa()) {
-            <div class="perfil-inicial__campos">
-              <app-select-input
-                data-testid="sector-industrial-editable"
-                [label]="i18n.t('perfil.sector')"
-                [options]="opcionesSector"
-                [value]="sectorIndustrial()"
-                [error]="errorSector()"
-                [disabled]="guardando()"
-                (valueChange)="onSectorChange($event)"
-              />
-              <app-text-input
-                data-testid="pais-editable"
-                [label]="i18n.t('perfil.pais')"
-                [value]="pais()"
-                [error]="errorPais()"
-                [disabled]="guardando()"
-                (valueChange)="onPaisChange($event)"
-              />
-              <app-number-input
-                data-testid="cantidad-empleados-editable"
-                [label]="i18n.t('perfil.empleados')"
-                [value]="cantidadEmpleados()"
-                [error]="errorEmpleados()"
-                [disabled]="guardando()"
-                (valueChange)="onCantidadEmpleadosChange($event)"
-              />
-            </div>
-          } @else {
-            <p class="perfil-inicial__empresa-nota">{{ i18n.t('perfil.empresa.soloLectura') }}</p>
-            <div class="perfil-inicial__campos">
-              <app-text-input
-                data-testid="empresa-nombre"
-                [label]="i18n.t('perfil.empresa.nombre')"
-                [value]="datosEmpresa.nombreEmpresa"
-                [disabled]="true"
-              />
-              <app-text-input
-                data-testid="sector-industrial-lectura"
-                [label]="i18n.t('perfil.sector')"
-                [value]="sectorLabel()"
-                [disabled]="true"
-              />
-              <app-text-input
-                data-testid="pais-lectura"
-                [label]="i18n.t('perfil.pais')"
-                [value]="datosEmpresa.pais"
-                [disabled]="true"
-              />
-              <app-text-input
-                data-testid="cantidad-empleados-lectura"
-                [label]="i18n.t('perfil.empleados')"
-                [value]="'' + datosEmpresa.cantidadEmpleados"
-                [disabled]="true"
-              />
-            </div>
-          }
-        </section>
-      }
+            @if (esAdminEmpresa()) {
+              <div class="perfil-inicial__campos">
+                <app-select-input
+                  data-testid="sector-industrial-editable"
+                  [label]="i18n.t('perfil.sector')"
+                  [options]="opcionesSector"
+                  [formField]="perfilForm.sectorIndustrial"
+                  [error]="errorSector()"
+                />
+                <app-text-input
+                  data-testid="pais-editable"
+                  [label]="i18n.t('perfil.pais')"
+                  [formField]="perfilForm.pais"
+                  [error]="errorPais()"
+                />
+                <app-number-input
+                  data-testid="cantidad-empleados-editable"
+                  [label]="i18n.t('perfil.empleados')"
+                  [formField]="perfilForm.cantidadEmpleados"
+                  [error]="errorEmpleados()"
+                />
+              </div>
+            } @else {
+              <p class="perfil-inicial__empresa-nota">{{ i18n.t('perfil.empresa.soloLectura') }}</p>
+              <div class="perfil-inicial__campos">
+                <app-text-input
+                  data-testid="empresa-nombre"
+                  [label]="i18n.t('perfil.empresa.nombre')"
+                  [value]="datosEmpresa.nombreEmpresa"
+                  [disabled]="true"
+                />
+                <app-text-input
+                  data-testid="sector-industrial-lectura"
+                  [label]="i18n.t('perfil.sector')"
+                  [value]="sectorLabel()"
+                  [disabled]="true"
+                />
+                <app-text-input
+                  data-testid="pais-lectura"
+                  [label]="i18n.t('perfil.pais')"
+                  [value]="datosEmpresa.pais"
+                  [disabled]="true"
+                />
+                <app-text-input
+                  data-testid="cantidad-empleados-lectura"
+                  [label]="i18n.t('perfil.empleados')"
+                  [value]="'' + datosEmpresa.cantidadEmpleados"
+                  [disabled]="true"
+                />
+              </div>
+            }
+          </section>
+        }
 
-      @if (esAuditor()) {
-        <p class="perfil-inicial__auditor-nota">{{ i18n.t('perfil.auditor.nota') }}</p>
-      }
+        @if (esAuditor()) {
+          <p class="perfil-inicial__auditor-nota">{{ i18n.t('perfil.auditor.nota') }}</p>
+        }
 
-      <div class="perfil-inicial__acciones">
-        <app-button
-          data-testid="guardar-perfil"
-          variant="primary"
-          [loading]="guardando()"
-          [disabled]="guardando()"
-          (click)="guardar()"
-        >
-          {{ i18n.t('perfil.guardar') }}
-        </app-button>
-      </div>
+        <div class="perfil-inicial__acciones">
+          <app-button
+            data-testid="guardar-perfil"
+            variant="primary"
+            type="submit"
+            [loading]="guardando()"
+            [disabled]="guardando()"
+          >
+            {{ i18n.t('perfil.guardar') }}
+          </app-button>
+        </div>
+      </form>
     </div>
   }
 </app-configuracion-inicial-layout>

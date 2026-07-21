@@ -1,17 +1,19 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/auth/auth.guard';
+import { authGuard, rolGuard } from './core/auth/auth.guard';
 
 const cargarPlaceholder = () =>
   import('./pages/placeholder/placeholder-page.component').then((m) => m.PlaceholderPageComponent);
 
 export const rutasPostAutenticacion = [
-  'panel',
-  'empresa/panel',
   'auditor/configuracion-inicial',
   'auditor/panel',
   'auditor/validacion-pendiente',
   'admin/panel',
 ];
+
+const rutasPlaceholder = rutasPostAutenticacion.filter(
+  (path) => path !== 'emisiones' && path !== 'emisiones/registrar'
+);
 
 export const routes: Routes = [
   {
@@ -27,10 +29,10 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'registro/auditor',
+    path: 'registro/invitacion',
     loadComponent: () =>
-      import('./pages/registro-auditor/registro-auditor-page.component').then(
-        (m) => m.RegistroAuditorPageComponent
+      import('./pages/auth/registro-invitacion/registro-invitacion-page.component').then(
+        (m) => m.RegistroInvitacionPageComponent
       ),
   },
   {
@@ -56,8 +58,17 @@ export const routes: Routes = [
   },
   {
     path: 'limites',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/limites/limites-page.component').then((m) => m.LimitesPageComponent),
+  },
+  {
+    path: 'admin/solicitudes-auditor',
+    canActivate: [rolGuard('ADMINISTRADOR_PLATAFORMA')],
+    loadComponent: () =>
+      import('./pages/admin/solicitudes-auditor/solicitudes-auditor-page.component').then(
+        (m) => m.SolicitudesAuditorPageComponent
+      ),
   },
   {
     path: 'empresa/configuracion-inicial',
@@ -65,6 +76,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/empresa/configuracion-inicial-page.component').then(
         (m) => m.ConfiguracionInicialPageComponent
+      ),
+  },
+  {
+    path: 'empresa/invitaciones',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/empresa/invitaciones/invitaciones-page.component').then(
+        (m) => m.InvitacionesPageComponent
       ),
   },
   {
@@ -80,19 +99,38 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),
   },
-  ...rutasPostAutenticacion.map((path) => ({ path, loadComponent: cargarPlaceholder })),
   {
-    path: 'emisiones/registrar',
+    path: 'panel',
+    canActivate: [authGuard],
     loadComponent: () =>
-      import('./pages/emissions/register-emission/register-emission-page.component').then(
-        (m) => m.RegisterEmissionPageComponent
+      import('./pages/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent),
+  },
+  {
+    path: 'empresa/panel',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent),
+  },
+  {
+    path: 'benchmark',
+    canActivate: [authGuard],
+    loadComponent: cargarPlaceholder,
+  },
+  ...rutasPlaceholder.map((path) => ({ path, loadComponent: cargarPlaceholder })),
+  {
+    path: 'emisiones',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/emissions/emissions-list/emissions-list-page.component').then(
+        (m) => m.EmissionsListPageComponent
       ),
   },
   {
-    path: 'emisiones/registrar/envio',
+    path: 'emisiones/registrar',
+    canActivate: [authGuard],
     loadComponent: () =>
-      import('./pages/emissions/register-shipping/register-shipping-page.component').then(
-        (m) => m.RegisterShippingPageComponent
+      import('./pages/emissions/register-emission/register-emission-page.component').then(
+        (m) => m.RegisterEmissionPageComponent
       ),
   },
   {
