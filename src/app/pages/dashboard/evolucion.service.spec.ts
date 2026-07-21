@@ -9,9 +9,7 @@ describe('EvolucionService', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [EvolucionService, provideHttpClient(), provideHttpClientTesting()],
-    });
+    TestBed.configureTestingModule({ providers: [EvolucionService, provideHttpClient(), provideHttpClientTesting()] });
     service = TestBed.inject(EvolucionService);
     httpMock = TestBed.inject(HttpTestingController);
   });
@@ -22,9 +20,6 @@ describe('EvolucionService', () => {
     service.obtenerEvolucion(2026).subscribe();
     const req = httpMock.expectOne(`${environment.apiBaseUrl}/emisiones/evolucion?anio=2026`);
     expect(req.request.method).toBe('GET');
-    req.flush({
-      anio: 2026,
-      serie: Array.from({ length: 12 }, (_, i) => ({ mes: i + 1, totalCarbonKg: 0 })),
-    });
+    req.flush({ anio: 2026, serie: Array.from({ length: 12 }, (_, i) => ({ mes: i + 1, totalCarbonKg: 0 })) });
   });
 });
