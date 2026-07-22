@@ -64,6 +64,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'ecoruta/preferencias',
+    canActivate: [rolGuard('USUARIO_INDIVIDUAL')],
+    loadComponent: () =>
+      import('./pages/ecoruta/preferencias/ecoruta-preferencias-page.component').then(
+        (m) => m.EcoRutaPreferenciasPageComponent
+      ),
+  },
+  {
     path: 'empresa/configuracion-inicial',
     canActivate: [authGuard],
     loadComponent: () =>

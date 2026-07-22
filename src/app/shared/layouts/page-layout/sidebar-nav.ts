@@ -2,9 +2,9 @@ import { SidebarBottomItem, SidebarMenuItem } from '../../components/sidebar/sid
 import { IconName } from '../../components/icon/icon.component';
 import { SidebarConfig } from './page-layout.component';
 
-export type SidebarNavId = 'dashboard' | 'emissions' | 'benchmark';
+export type SidebarNavId = 'dashboard' | 'emissions' | 'benchmark' | 'ecoruta';
 
-interface SidebarNavItemDef {
+export interface SidebarNavItemDef {
   id: SidebarNavId;
   label: string;
   icon: IconName;
@@ -14,6 +14,11 @@ const SIDEBAR_NAV_ITEMS: readonly SidebarNavItemDef[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
   { id: 'emissions', label: 'Mis Emisiones', icon: 'emisiones' },
   { id: 'benchmark', label: 'Madurez ambiental', icon: 'benchmark' },
+];
+
+/** Nav items for the individual-traveler shell (USUARIO_INDIVIDUAL) — distinct from the company sidebar above. */
+export const ECORUTA_NAV_ITEMS: readonly SidebarNavItemDef[] = [
+  { id: 'ecoruta', label: 'Planificar viaje', icon: 'viajero' },
 ];
 
 const SIDEBAR_BOTTOM_ITEMS: readonly SidebarBottomItem[] = [
@@ -29,12 +34,15 @@ export interface BuildSidebarConfigOptions {
   companyInitials: string;
   /** Overrides the default 'Configuración' bottom-item label (e.g. for i18n). */
   settingsLabel?: string;
+  /** Overrides the default company nav items (e.g. ECORUTA_NAV_ITEMS for the individual-traveler shell). */
+  navItems?: readonly SidebarNavItemDef[];
 }
 
 export function buildSidebarConfig(options: BuildSidebarConfigOptions): SidebarConfig {
   const { activeId, companyName, companyRole, companyInitials } = options;
+  const navItems = options.navItems ?? SIDEBAR_NAV_ITEMS;
 
-  const menuItems: SidebarMenuItem[] = SIDEBAR_NAV_ITEMS.map((item) => ({
+  const menuItems: SidebarMenuItem[] = navItems.map((item) => ({
     id: item.id,
     label: item.label,
     icon: item.icon,
