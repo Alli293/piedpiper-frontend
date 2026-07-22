@@ -1,10 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { Router } from '@angular/router';
 import { sesionInterceptor } from './sesion.interceptor';
 import { AuthService } from './auth.service';
-import { ToastService } from '../../shared/services/toast.service';
+import { SesionInactividadService } from './sesion-inactividad.service';
 import { environment } from '../../../environments/environment';
 
 describe('sesionInterceptor', () => {
@@ -13,24 +12,22 @@ describe('sesionInterceptor', () => {
   let authServiceStub: {
     token: () => string | null;
     renovarToken: ReturnType<typeof vi.fn>;
-    cerrarSesion: ReturnType<typeof vi.fn>;
   };
-  let routerStub: { navigateByUrl: ReturnType<typeof vi.fn> };
+  let sesionInactividadStub: { cerrarSesionPorExpiracion: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     authServiceStub = {
       token: () => 'jwt-actual',
       renovarToken: vi.fn(),
-      cerrarSesion: vi.fn(),
     };
-    routerStub = { navigateByUrl: vi.fn() };
+    sesionInactividadStub = { cerrarSesionPorExpiracion: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withInterceptors([sesionInterceptor])),
         provideHttpClientTesting(),
         { provide: AuthService, useValue: authServiceStub },
-        { provide: Router, useValue: routerStub },
+        { provide: SesionInactividadService, useValue: sesionInactividadStub },
       ],
     });
 
@@ -60,22 +57,17 @@ describe('sesionInterceptor', () => {
     expect(authServiceStub.renovarToken).not.toHaveBeenCalled();
   });
 
-  it('ante un 401 con token adjunto, cierra la sesión, avisa y redirige a /login', () => {
+  it('ante un 401 con token adjunto, delega el cierre de sesión por expiración', () => {
     httpClient.get(`${environment.apiBaseUrl}/emisiones`).subscribe({ error: () => undefined });
 
-    const toastService = TestBed.inject(ToastService);
     httpMock
       .expectOne(`${environment.apiBaseUrl}/emisiones`)
       .flush({ message: 'No autorizado' }, { status: 401, statusText: 'Unauthorized' });
 
-    expect(authServiceStub.cerrarSesion).toHaveBeenCalled();
-    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/login');
-    expect(toastService.toasts().map((t) => t.title)).toContain(
-      'Tu sesión expiró. Inicia sesión nuevamente.'
-    );
+    expect(sesionInactividadStub.cerrarSesionPorExpiracion).toHaveBeenCalled();
   });
 
-  it('ante un 401 sin token adjunto (login), no cierra sesión ni redirige', () => {
+  it('ante un 401 sin token adjunto (login), no cierra sesión', () => {
     authServiceStub.token = () => null;
 
     httpClient.post(`${environment.apiBaseUrl}/auth/login`, {}).subscribe({
@@ -86,8 +78,7 @@ describe('sesionInterceptor', () => {
       .expectOne(`${environment.apiBaseUrl}/auth/login`)
       .flush({ message: 'Credenciales inválidas' }, { status: 401, statusText: 'Unauthorized' });
 
-    expect(authServiceStub.cerrarSesion).not.toHaveBeenCalled();
-    expect(routerStub.navigateByUrl).not.toHaveBeenCalled();
+    expect(sesionInactividadStub.cerrarSesionPorExpiracion).not.toHaveBeenCalled();
   });
 
   it('no intercepta llamadas fuera de la API', () => {

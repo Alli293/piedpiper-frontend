@@ -1,10 +1,10 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, effect, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
 import { ToastService } from '../../shared/services/toast.service';
 
 const INACTIVIDAD_MS = 30 * 60 * 1000;
-const MENSAJE_EXPIRACION = 'Tu sesión expiró. Inicia sesión nuevamente.';
+export const MENSAJE_SESION_EXPIRADA = 'Tu sesión expiró. Inicia sesión nuevamente.';
 
 @Injectable({ providedIn: 'root' })
 export class SesionInactividadService {
@@ -13,6 +13,16 @@ export class SesionInactividadService {
   private readonly router = inject(Router);
 
   private timerId: ReturnType<typeof setTimeout> | undefined;
+
+  constructor() {
+    effect(() => {
+      if (this.authService.token()) {
+        this.reiniciar();
+      } else {
+        this.detener();
+      }
+    });
+  }
 
   reiniciar(): void {
     this.detener();
@@ -26,10 +36,16 @@ export class SesionInactividadService {
     }
   }
 
+  /** Cierra la sesión por expiración (inactividad o 401 del backend), avisa y redirige. */
+  cerrarSesionPorExpiracion(): void {
+    this.detener();
+    this.authService.cerrarSesion();
+    this.toastService.error(MENSAJE_SESION_EXPIRADA);
+    void this.router.navigateByUrl('/login');
+  }
+
   private expirarPorInactividad(): void {
     this.timerId = undefined;
-    this.authService.cerrarSesion();
-    this.toastService.error(MENSAJE_EXPIRACION);
-    void this.router.navigateByUrl('/login');
+    this.cerrarSesionPorExpiracion();
   }
 }

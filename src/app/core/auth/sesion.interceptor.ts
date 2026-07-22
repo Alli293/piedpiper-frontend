@@ -1,12 +1,9 @@
 import { HttpErrorResponse, HttpInterceptorFn, HttpResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { catchError, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
-import { ToastService } from '../../shared/services/toast.service';
-
-const MENSAJE_EXPIRACION = 'Tu sesión expiró. Inicia sesión nuevamente.';
+import { SesionInactividadService } from './sesion-inactividad.service';
 
 export const sesionInterceptor: HttpInterceptorFn = (req, next) => {
   if (!req.url.startsWith(environment.apiBaseUrl)) {
@@ -14,8 +11,7 @@ export const sesionInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   const authService = inject(AuthService);
-  const toastService = inject(ToastService);
-  const router = inject(Router);
+  const sesionInactividadService = inject(SesionInactividadService);
   const teniaToken = Boolean(authService.token());
 
   return next(req).pipe(
@@ -29,9 +25,7 @@ export const sesionInterceptor: HttpInterceptorFn = (req, next) => {
     }),
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse && error.status === 401 && teniaToken) {
-        authService.cerrarSesion();
-        toastService.error(MENSAJE_EXPIRACION);
-        void router.navigateByUrl('/login');
+        sesionInactividadService.cerrarSesionPorExpiracion();
       }
       return throwError(() => error);
     })

@@ -1,17 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { SesionInactividadService } from './sesion-inactividad.service';
+import { signal } from '@angular/core';
+import { SesionInactividadService, MENSAJE_SESION_EXPIRADA } from './sesion-inactividad.service';
 import { AuthService } from './auth.service';
 import { ToastService } from '../../shared/services/toast.service';
 
 describe('SesionInactividadService', () => {
   let service: SesionInactividadService;
-  let authServiceStub: { cerrarSesion: ReturnType<typeof vi.fn> };
+  let authServiceStub: {
+    cerrarSesion: ReturnType<typeof vi.fn>;
+    token: ReturnType<typeof signal<string | null>>;
+  };
   let routerStub: { navigateByUrl: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     vi.useFakeTimers();
-    authServiceStub = { cerrarSesion: vi.fn() };
+    authServiceStub = { cerrarSesion: vi.fn(), token: signal<string | null>(null) };
     routerStub = { navigateByUrl: vi.fn() };
 
     TestBed.configureTestingModule({
@@ -23,6 +27,7 @@ describe('SesionInactividadService', () => {
     });
 
     service = TestBed.inject(SesionInactividadService);
+    TestBed.tick();
   });
 
   afterEach(() => {
@@ -37,9 +42,7 @@ describe('SesionInactividadService', () => {
 
     expect(authServiceStub.cerrarSesion).toHaveBeenCalled();
     expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/login');
-    expect(toastService.toasts().map((t) => t.title)).toContain(
-      'Tu sesión expiró. Inicia sesión nuevamente.'
-    );
+    expect(toastService.toasts().map((t) => t.title)).toContain(MENSAJE_SESION_EXPIRADA);
   });
 
   it('reiniciar antes de los 30 minutos evita la expiración', () => {
@@ -58,5 +61,40 @@ describe('SesionInactividadService', () => {
     vi.advanceTimersByTime(30 * 60 * 1000);
 
     expect(authServiceStub.cerrarSesion).not.toHaveBeenCalled();
+  });
+
+  it('arranca el temporizador solo con que exista un token, sin esperar una petición autenticada (login o recarga con sesión activa)', () => {
+    authServiceStub.token.set('jwt-existente');
+    TestBed.tick();
+
+    vi.advanceTimersByTime(30 * 60 * 1000);
+
+    expect(authServiceStub.cerrarSesion).toHaveBeenCalled();
+  });
+
+  it('detiene el temporizador automáticamente cuando el token se limpia (logout externo)', () => {
+    authServiceStub.token.set('jwt-existente');
+    TestBed.tick();
+
+    authServiceStub.token.set(null);
+    TestBed.tick();
+    vi.advanceTimersByTime(30 * 60 * 1000);
+
+    expect(authServiceStub.cerrarSesion).not.toHaveBeenCalled();
+  });
+
+  it('cerrarSesionPorExpiracion detiene el temporizador pendiente, cierra sesión, avisa y redirige', () => {
+    const toastService = TestBed.inject(ToastService);
+    service.reiniciar();
+
+    service.cerrarSesionPorExpiracion();
+
+    expect(authServiceStub.cerrarSesion).toHaveBeenCalled();
+    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/login');
+    expect(toastService.toasts().map((t) => t.title)).toContain(MENSAJE_SESION_EXPIRADA);
+
+    routerStub.navigateByUrl.mockClear();
+    vi.advanceTimersByTime(30 * 60 * 1000);
+    expect(routerStub.navigateByUrl).not.toHaveBeenCalled();
   });
 });
