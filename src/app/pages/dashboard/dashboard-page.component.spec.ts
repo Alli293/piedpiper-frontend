@@ -240,7 +240,7 @@ describe('DashboardPageComponent', () => {
   });
 
   it('muestra mensaje de API cuando el error de descarga llega como blob JSON', async () => {
-    const error = new Blob([JSON.stringify({ message: 'AÃ±o invÃ¡lido.' })], {
+    const error = new Blob([JSON.stringify({ message: 'Año inválido.' })], {
       type: 'application/json',
     });
     dashboardService.exportarReportePdf.mockReturnValueOnce(
@@ -249,6 +249,6 @@ describe('DashboardPageComponent', () => {
 
     await (component as any).exportarPdf();
 
-    expect(toastService.error).toHaveBeenCalledWith('AÃ±o invÃ¡lido.', undefined, 5000);
+    expect(toastService.error).toHaveBeenCalledWith('Año inválido.', undefined, 5000);
   });
 });
