@@ -31,17 +31,20 @@ export class EvolucionChartComponent {
     'Dic',
   ];
 
+  private readonly colorPrincipal =
+    getComputedStyle(document.documentElement).getPropertyValue('--ch-green').trim() || '#1f8a5b';
+
   chartData: ChartConfiguration<'line'>['data'] = {
     labels: this.meses,
     datasets: [
       {
         data: Array(12).fill(0),
         label: 'Huella (kg CO₂e)',
-        borderColor: '#1f8a5b',
-        backgroundColor: 'rgba(31, 138, 91, 0.1)',
+        borderColor: this.colorPrincipal,
+        backgroundColor: `${this.colorPrincipal}1a`,
         fill: true,
         tension: 0.3,
-        pointBackgroundColor: '#1f8a5b',
+        pointBackgroundColor: this.colorPrincipal,
       },
     ],
   };
@@ -65,11 +68,11 @@ export class EvolucionChartComponent {
           {
             data: datos,
             label: `Huella ${this.anio()} (kg CO₂e)`,
-            borderColor: '#1f8a5b',
-            backgroundColor: 'rgba(31, 138, 91, 0.1)',
+            borderColor: this.colorPrincipal,
+            backgroundColor: `${this.colorPrincipal}1a`,
             fill: true,
             tension: 0.3,
-            pointBackgroundColor: '#1f8a5b',
+            pointBackgroundColor: this.colorPrincipal,
           },
         ],
       };

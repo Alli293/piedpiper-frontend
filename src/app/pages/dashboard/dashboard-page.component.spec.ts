@@ -93,7 +93,10 @@ describe('DashboardPageComponent', () => {
     })
       .overrideComponent(DashboardPageComponent, {
         remove: { imports: [EvolucionChartComponent, ImaPanelComponent] },
-        add: { imports: [StubChartComponent, StubImaPanelComponent], schemas: [CUSTOM_ELEMENTS_SCHEMA] },
+        add: {
+          imports: [StubChartComponent, StubImaPanelComponent],
+          schemas: [CUSTOM_ELEMENTS_SCHEMA],
+        },
       })
       .compileComponents();
 
