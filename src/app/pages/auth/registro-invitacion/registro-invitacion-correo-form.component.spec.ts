@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { RegistroInvitacionCorreoFormComponent } from './registro-invitacion-correo-form.component';
@@ -41,8 +42,8 @@ describe('RegistroInvitacionCorreoFormComponent', () => {
   function fillValidForm(root: HTMLElement): void {
     setInputValue(root, 'input[autocomplete="given-name"]', 'Ana');
     setInputValue(root, 'input[autocomplete="family-name"]', 'Torres');
-    setInputValue(root, 'input[placeholder="Tu contraseña"]', 'clave1234');
-    setInputValue(root, 'input[placeholder="Repite tu contraseña"]', 'clave1234');
+    setInputValue(root, 'input[placeholder="Tu contraseña"]', 'Clave1234!');
+    setInputValue(root, 'input[placeholder="Repite tu contraseña"]', 'Clave1234!');
     setChecked(root, true);
   }
 
@@ -143,8 +144,8 @@ describe('RegistroInvitacionCorreoFormComponent', () => {
     expect(authService.registrarInvitacionConCorreo).toHaveBeenCalledWith('token-inv', {
       nombre: 'Ana',
       apellidos: 'Torres',
-      contrasena: 'clave1234',
-      confirmarContrasena: 'clave1234',
+      contrasena: 'Clave1234!',
+      confirmarContrasena: 'Clave1234!',
       aceptaTerminos: true,
     });
     expect(navigateSpy).toHaveBeenCalledWith('/perfil/configuracion-inicial');
@@ -152,7 +153,10 @@ describe('RegistroInvitacionCorreoFormComponent', () => {
 
   it('si el backend responde error, lo muestra y no navega', async () => {
     authService.registrarInvitacionConCorreo.mockReturnValue(
-      throwError(() => ({ error: { message: 'Esta invitación ya no está disponible.' } }))
+      throwError(
+        () =>
+          new HttpErrorResponse({ error: { message: 'Esta invitación ya no está disponible.' } })
+      )
     );
 
     const fixture = createFixture();
@@ -170,10 +174,15 @@ describe('RegistroInvitacionCorreoFormComponent', () => {
 
   it('un 409 muestra el mensaje y el enlace a iniciar sesion', async () => {
     authService.registrarInvitacionConCorreo.mockReturnValue(
-      throwError(() => ({
-        status: 409,
-        error: { message: 'Este correo ya tiene una cuenta en CarbonHub. ¿Deseas iniciar sesión?' },
-      }))
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: {
+              message: 'Este correo ya tiene una cuenta en CarbonHub. ¿Deseas iniciar sesión?',
+            },
+          })
+      )
     );
 
     const fixture = createFixture();
@@ -189,17 +198,5 @@ describe('RegistroInvitacionCorreoFormComponent', () => {
     );
     expect(comp.cuentaExistente()).toBe(true);
     expect(root.querySelector('a[href="/login"]')).not.toBeNull();
-  });
-
-  it('alternarContrasena y alternarConfirmar cambian la visibilidad de cada campo por separado', () => {
-    const fixture = createFixture();
-    const comp = fixture.componentInstance as any;
-
-    comp.alternarContrasena();
-    expect(comp.mostrarContrasena()).toBe(true);
-    expect(comp.mostrarConfirmar()).toBe(false);
-
-    comp.alternarConfirmar();
-    expect(comp.mostrarConfirmar()).toBe(true);
   });
 });

@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -12,11 +13,17 @@ import {
 } from '@angular/forms/signals';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
+import { PasswordInputComponent } from '../../../shared/components/inputs/password-input/password-input.component';
 import { CheckboxComponent } from '../../../shared/components/inputs/checkbox/checkbox.component';
-import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { LinkDirective } from '../../../shared/components/link/link.directive';
 import { AuthService } from '../../../core/auth/auth.service';
-
-const CONTRASENA_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+import {
+  CONTRASENA_HINT,
+  CONTRASENA_MENSAJE,
+  CONTRASENA_PATTERN,
+} from '../../../shared/utils/password.utils';
+import { fieldError } from '../../../shared/utils/form-field.utils';
+import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 
 interface RegistroInvitacionCorreoFormModel {
   nombre: string;
@@ -40,9 +47,10 @@ const INITIAL_MODEL: RegistroInvitacionCorreoFormModel = {
     FormField,
     ButtonComponent,
     TextInputComponent,
+    PasswordInputComponent,
     CheckboxComponent,
-    IconComponent,
     RouterLink,
+    LinkDirective,
   ],
   templateUrl: './registro-invitacion-correo-form.component.html',
   styleUrl: './registro-invitacion-correo-form.component.scss',
@@ -63,9 +71,7 @@ export class RegistroInvitacionCorreoFormComponent {
       required(path.apellidos, { message: 'Ingresa tus apellidos.' });
 
       required(path.contrasena, { message: 'Ingresa tu contraseña.' });
-      pattern(path.contrasena, CONTRASENA_PATTERN, {
-        message: 'La contraseña debe tener al menos 8 caracteres, con una letra y un número.',
-      });
+      pattern(path.contrasena, CONTRASENA_PATTERN, { message: CONTRASENA_MENSAJE });
 
       required(path.confirmarContrasena, { message: 'Debes confirmar tu contraseña.' });
       validate(path.confirmarContrasena, ({ value, valueOf }) => {
@@ -85,35 +91,20 @@ export class RegistroInvitacionCorreoFormComponent {
     })
   );
 
-  protected readonly mostrarContrasena = signal(false);
-  protected readonly mostrarConfirmar = signal(false);
+  protected readonly contrasenaHint = CONTRASENA_HINT;
 
   protected readonly error = signal('');
   protected readonly cuentaExistente = signal(false);
 
-  protected readonly errorNombre = computed(() => this.fieldError(this.registroForm.nombre()));
-  protected readonly errorApellidos = computed(() =>
-    this.fieldError(this.registroForm.apellidos())
-  );
-  protected readonly errorContrasena = computed(() =>
-    this.fieldError(this.registroForm.contrasena())
-  );
+  protected readonly errorNombre = computed(() => fieldError(this.registroForm.nombre()));
+  protected readonly errorApellidos = computed(() => fieldError(this.registroForm.apellidos()));
+  protected readonly errorContrasena = computed(() => fieldError(this.registroForm.contrasena()));
   protected readonly errorConfirmacion = computed(() =>
-    this.fieldError(this.registroForm.confirmarContrasena())
+    fieldError(this.registroForm.confirmarContrasena())
   );
-  protected readonly errorTerminos = computed(() =>
-    this.fieldError(this.registroForm.aceptaTerminos())
-  );
+  protected readonly errorTerminos = computed(() => fieldError(this.registroForm.aceptaTerminos()));
 
   protected readonly submitting = computed(() => this.registroForm().submitting());
-
-  protected alternarContrasena(): void {
-    this.mostrarContrasena.update((v) => !v);
-  }
-
-  protected alternarConfirmar(): void {
-    this.mostrarConfirmar.update((v) => !v);
-  }
 
   protected handleSubmit(event: Event): void {
     event.preventDefault();
@@ -121,39 +112,34 @@ export class RegistroInvitacionCorreoFormComponent {
   }
 
   private async onSubmit(): Promise<void> {
-    await submit(this.registroForm, async (field) => {
-      const value = field().value();
-      this.error.set('');
-      this.cuentaExistente.set(false);
-      try {
-        const respuesta = await firstValueFrom(
-          this.authService.registrarInvitacionConCorreo(this.token(), {
-            nombre: value.nombre.trim(),
-            apellidos: value.apellidos.trim(),
-            contrasena: value.contrasena,
-            confirmarContrasena: value.confirmarContrasena,
-            aceptaTerminos: value.aceptaTerminos,
-          })
-        );
-        this.router.navigateByUrl(respuesta.redirect || '/').catch(() => {
-          this.error.set('No pudimos abrir tu panel. Intenta nuevamente.');
-        });
-      } catch (err: unknown) {
-        const error = err as { status?: number; error?: { message?: string } };
-        this.cuentaExistente.set(error?.status === 409);
-        this.error.set(
-          error?.error?.message ?? 'No pudimos completar tu registro. Intenta nuevamente.'
-        );
-      }
-      return undefined;
-    });
-  }
+    this.error.set('');
+    this.cuentaExistente.set(false);
 
-  private fieldError(field: {
-    touched(): boolean;
-    errors(): readonly { message?: string }[];
-  }): string {
-    if (!field.touched()) return '';
-    return field.errors()[0]?.message ?? '';
+    await submit(this.registroForm, {
+      action: async (field) => {
+        const value = field().value();
+        try {
+          const respuesta = await firstValueFrom(
+            this.authService.registrarInvitacionConCorreo(this.token(), {
+              nombre: value.nombre.trim(),
+              apellidos: value.apellidos.trim(),
+              contrasena: value.contrasena,
+              confirmarContrasena: value.confirmarContrasena,
+              aceptaTerminos: value.aceptaTerminos,
+            })
+          );
+          this.router.navigateByUrl(respuesta.redirect || '/').catch(() => {
+            this.error.set('No pudimos abrir tu panel. Intenta nuevamente.');
+          });
+        } catch (err: unknown) {
+          this.cuentaExistente.set(err instanceof HttpErrorResponse && err.status === 409);
+          this.error.set(
+            apiErrorMessage(err) ?? 'No pudimos completar tu registro. Intenta nuevamente.'
+          );
+        }
+        return undefined;
+      },
+      onInvalid: (field) => field().markAsTouched(),
+    });
   }
 }

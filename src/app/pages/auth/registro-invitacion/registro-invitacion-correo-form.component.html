@@ -25,62 +25,41 @@
     [error]="errorApellidos()"
   />
 
-  <div class="registro-invitacion-correo-form__password">
-    <app-text-input
-      id="txtContrasena"
-      label="Contraseña"
-      [type]="mostrarContrasena() ? 'text' : 'password'"
-      autocomplete="new-password"
-      placeholder="Tu contraseña"
-      [formField]="registroForm.contrasena"
-      [error]="errorContrasena()"
-    />
-    <button
-      id="btnMostrarContrasena"
-      type="button"
-      class="registro-invitacion-correo-form__password-toggle"
-      [attr.aria-label]="mostrarContrasena() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-      (click)="alternarContrasena()"
-    >
-      <app-icon [name]="mostrarContrasena() ? 'ocultar' : 'ver'" [size]="18" />
-    </button>
-  </div>
+  <app-password-input
+    id="txtContrasena"
+    label="Contraseña"
+    autocomplete="new-password"
+    placeholder="Tu contraseña"
+    [formField]="registroForm.contrasena"
+    [error]="errorContrasena()"
+    [hint]="contrasenaHint"
+  />
 
-  <div class="registro-invitacion-correo-form__password">
-    <app-text-input
-      id="txtConfirmarContrasena"
-      label="Confirmar contraseña"
-      [type]="mostrarConfirmar() ? 'text' : 'password'"
-      autocomplete="new-password"
-      placeholder="Repite tu contraseña"
-      [formField]="registroForm.confirmarContrasena"
-      [error]="errorConfirmacion()"
-    />
-    <button
-      id="btnMostrarConfirmarContrasena"
-      type="button"
-      class="registro-invitacion-correo-form__password-toggle"
-      [attr.aria-label]="mostrarConfirmar() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-      (click)="alternarConfirmar()"
-    >
-      <app-icon [name]="mostrarConfirmar() ? 'ocultar' : 'ver'" [size]="18" />
-    </button>
-  </div>
+  <app-password-input
+    id="txtConfirmarContrasena"
+    label="Confirmar contraseña"
+    autocomplete="new-password"
+    placeholder="Repite tu contraseña"
+    [formField]="registroForm.confirmarContrasena"
+    [error]="errorConfirmacion()"
+  />
 
   <app-checkbox
     id="chkAceptaTerminos"
     [formField]="registroForm.aceptaTerminos"
     [error]="errorTerminos()"
   >
-    Acepto los <a routerLink="/terminos">Términos de servicio</a> y la
-    <a routerLink="/privacidad">Política de privacidad</a> de CarbonHub
+    Acepto los <a routerLink="/terminos" appLink>Términos de servicio</a> y la
+    <a routerLink="/privacidad" appLink>Política de privacidad</a> de CarbonHub
   </app-checkbox>
 
   @if (error()) {
     <p class="registro-invitacion-correo-form__error" role="alert">{{ error() }}</p>
   }
   @if (cuentaExistente()) {
-    <a class="registro-invitacion-correo-form__enlace" routerLink="/login">Iniciar sesión</a>
+    <a class="registro-invitacion-correo-form__enlace" routerLink="/login" appLink
+      >Iniciar sesión</a
+    >
   }
 
   <app-button
