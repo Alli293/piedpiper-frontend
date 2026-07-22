@@ -28,6 +28,7 @@ const COMPARACION_BASE: ComparacionEmisionesResponse = {
   porcentajeConsumido: 60,
   estado: 'dentro',
   mensaje: null,
+  categorias: [],
 };
 
 const RESUMEN_CON_DATOS: ResumenEmisionesResponse = {

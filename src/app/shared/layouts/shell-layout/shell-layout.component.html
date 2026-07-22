@@ -4,5 +4,6 @@
   (menuItemClicked)="onMenuItem($event)"
   (backClicked)="onBackClicked()"
 >
+  <ng-content select="[pageHeaderActions]" />
   <ng-content />
 </app-page-layout>

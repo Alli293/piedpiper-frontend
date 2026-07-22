@@ -154,8 +154,8 @@ describe('EmissionsListPageComponent', () => {
   it('navega a limites anuales desde el boton del toolbar', async () => {
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
-    const limitsButton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
-      (button) => button.textContent?.includes('Límites anuales')
+    const limitsButton = root.querySelector<HTMLButtonElement>(
+      '.ch-emissions-list-page__header-actions button'
     );
 
     limitsButton?.click();
@@ -219,7 +219,10 @@ describe('EmissionsListPageComponent', () => {
     expect(tableText).toContain('Ruta de reparto');
     expect(tableText).not.toContain('Pruebas');
     expect(tableText).not.toContain('Viaje aereo SJO-FRA-SJO');
-    expect(listarEmisiones).toHaveBeenLastCalledWith({ anio: null, mes: null });
+    expect(listarEmisiones).toHaveBeenLastCalledWith({
+      anio: new Date().getFullYear(),
+      mes: null,
+    });
   });
 
   it('filtra en pantalla por categoria aunque el servicio devuelva todos los registros', async () => {

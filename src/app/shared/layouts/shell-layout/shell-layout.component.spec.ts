@@ -160,4 +160,10 @@ describe('ShellLayoutComponent', () => {
 
     expect(navigateByUrl).toHaveBeenCalledWith('/benchmark');
   });
+
+  it('navega al listado al abrir mis emisiones', () => {
+    (fixture.componentInstance as any).onMenuItem('emissions');
+
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/emisiones');
+  });
 });

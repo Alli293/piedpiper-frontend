@@ -6,6 +6,12 @@
   font-family: var(--ch-font-body);
 }
 
+.ch-emissions-list-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+}
+
 .ch-emissions-list-page__controls {
   display: flex;
   align-items: center;
@@ -28,6 +34,21 @@
 
 .ch-emissions-list-page__select-filters {
   margin-left: auto;
+}
+
+.ch-emissions-list-page__filter-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-width: 144px;
+}
+
+.ch-emissions-list-page__filter-select app-icon {
+  position: absolute;
+  left: var(--ch-space-3);
+  z-index: 1;
+  color: var(--ch-text-secondary);
+  pointer-events: none;
 }
 
 .ch-emissions-list-page__chip,
@@ -77,7 +98,18 @@
 }
 
 .ch-emissions-list-page__select {
-  min-width: 132px;
+  width: 100%;
+  min-width: 144px;
+}
+
+.ch-emissions-list-page__filter-select ::ng-deep .ch-select-input__field {
+  height: 34px;
+  padding-right: var(--ch-space-8);
+  padding-left: var(--ch-space-8);
+  border-width: 1px;
+  border-radius: var(--ch-radius-md);
+  color: var(--ch-text-primary);
+  font-size: 0.82rem;
 }
 
 .ch-emissions-list-page__register-plus {

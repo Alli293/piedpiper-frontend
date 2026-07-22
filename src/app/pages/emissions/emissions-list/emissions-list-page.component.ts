@@ -34,7 +34,7 @@ const CATEGORY_OPTIONS: CategoriaOption[] = [
 ];
 
 const MONTH_OPTIONS: SelectOption[] = [
-  { value: '', label: 'Todos' },
+  { value: '', label: 'Mes: Todos' },
   { value: '1', label: 'Enero' },
   { value: '2', label: 'Febrero' },
   { value: '3', label: 'Marzo' },
@@ -73,7 +73,7 @@ export class EmissionsListPageComponent {
   protected readonly deletingId = signal<string | null>(null);
   protected readonly confirmTarget = signal<EmisionResponse | null>(null);
   protected readonly filtroCategoria = signal<CategoriaFiltroEmision>('TODAS');
-  protected readonly filtroAnio = signal<number | null>(null);
+  protected readonly filtroAnio = signal<number | null>(new Date().getFullYear());
   protected readonly filtroMes = signal<number | null>(null);
 
   protected readonly categoryOptions = CATEGORY_OPTIONS;
@@ -84,10 +84,10 @@ export class EmissionsListPageComponent {
   protected readonly yearOptions = computed<SelectOption[]>(() => {
     const currentYear = new Date().getFullYear();
     return [
-      { value: '', label: 'Todos' },
+      { value: '', label: 'Año: Todos' },
       ...Array.from({ length: currentYear - 1999 }, (_, index) => {
         const year = String(currentYear - index);
-        return { value: year, label: year };
+        return { value: year, label: `Año ${year}` };
       }),
     ];
   });
