@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuthService } from './auth.service';
+import { PerfilInicialService } from '../services/perfil-inicial.service';
 import { environment } from '../../../environments/environment';
 
 describe('AuthService', () => {
@@ -74,6 +75,25 @@ describe('AuthService', () => {
     service.cerrarSesion();
     expect(sessionStorage.getItem('carbonhub.token')).toBeNull();
     expect(service.token()).toBeNull();
+  });
+
+  it('cerrarSesion limpia el perfil cacheado para que la siguiente sesión no herede datos', () => {
+    const perfilInicialService = TestBed.inject(PerfilInicialService);
+    const limpiarCache = vi.spyOn(perfilInicialService, 'limpiarCache');
+
+    service.cerrarSesion();
+
+    expect(limpiarCache).toHaveBeenCalled();
+  });
+
+  it('loginConCorreo limpia el perfil cacheado de una sesión anterior', () => {
+    const perfilInicialService = TestBed.inject(PerfilInicialService);
+    const limpiarCache = vi.spyOn(perfilInicialService, 'limpiarCache');
+
+    service.loginConCorreo('otra@empresa.com', 'secreta').subscribe();
+    httpMock.expectOne(`${base}/login`).flush(respuesta);
+
+    expect(limpiarCache).toHaveBeenCalled();
   });
 
   it('renovarToken actualiza el token almacenado y la señal', () => {

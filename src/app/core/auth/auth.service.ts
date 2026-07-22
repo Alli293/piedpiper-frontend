@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { PerfilInicialService } from '../services/perfil-inicial.service';
 import {
   AuthResponse,
   LoginRequest,
@@ -15,6 +16,7 @@ const TOKEN_KEY = 'carbonhub.token';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly perfilInicialService = inject(PerfilInicialService);
   private readonly baseUrl = `${environment.apiBaseUrl}/auth`;
 
   readonly token = signal<string | null>(sessionStorage.getItem(TOKEN_KEY));
@@ -92,6 +94,7 @@ export class AuthService {
   private guardarSesion(response: AuthResponse): void {
     sessionStorage.setItem(TOKEN_KEY, response.token);
     this.token.set(response.token);
+    this.perfilInicialService.limpiarCache();
   }
 
   renovarToken(token: string): void {
@@ -102,6 +105,7 @@ export class AuthService {
   cerrarSesion(): void {
     sessionStorage.removeItem(TOKEN_KEY);
     this.token.set(null);
+    this.perfilInicialService.limpiarCache();
   }
 
   private leerRolDeToken(token: string | null): string | null {
