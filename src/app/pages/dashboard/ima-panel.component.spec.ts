@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
-import { provideRouter } from '@angular/router';
 import { ImaPanelComponent } from './ima-panel.component';
 import { ImaResponse } from './ima.service';
 
@@ -11,7 +10,6 @@ describe('ImaPanelComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ImaPanelComponent],
-      providers: [provideRouter([])],
     }).compileComponents();
     fixture = TestBed.createComponent(ImaPanelComponent);
     componentRef = fixture.componentRef;
@@ -50,57 +48,8 @@ describe('ImaPanelComponent', () => {
     expect((fixture.nativeElement as HTMLElement).querySelector('.ima-card__notice')).toBeFalsy();
   });
 
-  // Validates: Requirements 5.1
-  it('muestra interpretación y siguiente paso cuando ambos son válidos', () => {
-    const ima = imaCompleto();
-    ima.interpretacion = 'Tu empresa muestra buen desempeño ambiental frente al sector.';
-    ima.siguientePaso = 'Incrementar la cobertura de registros en categoría transporte.';
-    componentRef.setInput('ima', ima);
-    fixture.detectChanges();
-
-    const el = fixture.nativeElement as HTMLElement;
-    const iaSection = el.querySelector('.ima-ia');
-    expect(iaSection).toBeTruthy();
-
-    const iaText = el.querySelector('.ima-ia__text');
-    expect(iaText?.textContent?.trim()).toBe(
-      'Tu empresa muestra buen desempeño ambiental frente al sector.'
-    );
-    const stepText = el.querySelector('.ima-ia__step-text');
-    expect(stepText?.textContent?.trim()).toBe(
-      'Incrementar la cobertura de registros en categoría transporte.'
-    );
-  });
-
-  // Validates: Requirements 5.2
-  it('muestra aviso estático cuando interpretacion es "No disponible"', () => {
-    const ima = imaCompleto();
-    ima.interpretacion = 'No disponible';
-    ima.siguientePaso = 'No disponible';
-    componentRef.setInput('ima', ima);
-    fixture.detectChanges();
-
-    const el = fixture.nativeElement as HTMLElement;
-    const unavailable = el.querySelector('.ima-card__ia-unavailable');
-    expect(unavailable).toBeTruthy();
-    expect(unavailable?.textContent?.trim()).toBe(
-      'La interpretación con IA no está disponible en este momento.'
-    );
-    expect(el.querySelector('.ima-ia')).toBeFalsy();
-  });
-
-  // Validates: Requirements 5.2
-  it('muestra aviso estático cuando solo siguientePaso es "No disponible"', () => {
-    const ima = imaCompleto();
-    ima.interpretacion = 'Texto válido de interpretación.';
-    ima.siguientePaso = 'No disponible';
-    componentRef.setInput('ima', ima);
-    fixture.detectChanges();
-
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('.ima-card__ia-unavailable')).toBeTruthy();
-    expect(el.querySelector('.ima-ia')).toBeFalsy();
-  });
+  // Validates: Requirements 5.1 (now rendered in dashboard, not ima-panel)
+  // IA interpretation section tests moved to dashboard-page.component.spec.ts
 
   // Validates: Requirements 5.4
   it('emite periodoChange al llamar onMesChange', () => {
