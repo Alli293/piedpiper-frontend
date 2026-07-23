@@ -66,7 +66,7 @@ export class ShellLayoutComponent {
       benchmark: '/benchmark',
       dashboard: '/panel',
       ecoruta: '/ecoruta/preferencias',
-      emissions: '/emisiones/registrar',
+      emissions: '/emisiones',
       settings: '/configuracion',
     };
     const ruta = rutas[id];
