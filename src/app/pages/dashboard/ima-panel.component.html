@@ -188,8 +188,15 @@
       </div>
     }
 
-    @if (ima()!.interpretacionIa) {
-      <p class="ima-card__interpretation">{{ ima()!.interpretacionIa }}</p>
+    @if (ima()!.interpretacion && ima()!.interpretacion !== 'No disponible' && ima()!.siguientePaso && ima()!.siguientePaso !== 'No disponible') {
+      <div class="ima-card__ia-section">
+        <h4 class="ima-card__ia-title">Interpretación IA</h4>
+        <p class="ima-card__ia-text">{{ ima()!.interpretacion }}</p>
+        <h4 class="ima-card__ia-title">Siguiente paso</h4>
+        <p class="ima-card__ia-text">{{ ima()!.siguientePaso }}</p>
+      </div>
+    } @else if (ima()!.interpretacion === 'No disponible' || ima()!.siguientePaso === 'No disponible') {
+      <p class="ima-card__ia-unavailable">La interpretación con IA no está disponible en este momento.</p>
     }
   }
 </article>

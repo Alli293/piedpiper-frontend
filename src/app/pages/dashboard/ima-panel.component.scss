@@ -82,17 +82,33 @@
       color: var(--ch-text-secondary);
     }
   }
-  &__interpretation {
-    margin-top: 14px;
-    padding: 14px 16px;
+  &__ia-section {
+    margin-top: 1rem;
+    padding: 1rem;
     background: var(--ch-bg-main);
     border: 1px solid var(--ch-border);
     border-radius: 11px;
+  }
+  &__ia-title {
     font-family: var(--ch-font-body);
-    font-size: 12.5px;
-    font-weight: 400;
-    line-height: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
     color: var(--ch-text-secondary);
+  }
+  &__ia-text {
+    font-family: var(--ch-font-body);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+    color: var(--ch-text-primary);
+  }
+  &__ia-unavailable {
+    margin-top: 1rem;
+    font-family: var(--ch-font-body);
+    font-size: 0.875rem;
+    color: var(--ch-text-secondary);
+    font-style: italic;
   }
 }
 
