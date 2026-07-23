@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from '../../core/auth-session.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
+import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import {
   SelectInputComponent,
@@ -25,6 +26,10 @@ import {
 } from '../emissions/models/emision.model';
 import { EmisionesService } from '../emissions/emisiones.service';
 import { DashboardService } from './dashboard.service';
+import { EvolucionService, PuntoMensual } from './evolucion.service';
+import { ImaService, ImaResponse } from './ima.service';
+import { EvolucionChartComponent } from './evolucion-chart.component';
+import { ImaPanelComponent } from './ima-panel.component';
 
 interface PeriodoResumenFormModel {
   anio: string;
@@ -89,11 +94,14 @@ export const DONA_CIRCUNFERENCIA = 2 * Math.PI * DONA_RADIO;
     CardStatComponent,
     DecimalPipe,
     FormField,
+    HeadingComponent,
     IconComponent,
     LinkDirective,
     RouterLink,
     SelectInputComponent,
     ShellLayoutComponent,
+    EvolucionChartComponent,
+    ImaPanelComponent,
   ],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
@@ -101,11 +109,16 @@ export const DONA_CIRCUNFERENCIA = 2 * Math.PI * DONA_RADIO;
 export class DashboardPageComponent {
   private readonly emisionesService = inject(EmisionesService);
   private readonly dashboardService = inject(DashboardService);
+  private readonly evolucionService = inject(EvolucionService);
+  private readonly imaService = inject(ImaService);
   private readonly authSession = inject(AuthSessionService);
   private readonly toastService = inject(ToastService);
 
   private readonly anioActual = new Date().getFullYear();
   private solicitudResumen = 0;
+
+  protected readonly mesActual = new Date().getMonth() + 1;
+  protected readonly mesSeleccionado = signal(this.mesActual);
 
   protected readonly sinEmisionesMensaje = SIN_EMISIONES_MENSAJE;
   protected readonly circunferencia = DONA_CIRCUNFERENCIA;
@@ -131,6 +144,13 @@ export class DashboardPageComponent {
   protected readonly cargandoComparacion = signal(false);
   protected readonly comparacion = signal<ComparacionEmisionesResponse | null>(null);
   protected readonly exportandoPdf = signal(false);
+
+  // --- PP-41: Evolución histórica ---
+  protected readonly evolucionSerie = signal<PuntoMensual[]>([]);
+  protected readonly evolucionVacia = signal(false);
+
+  // --- PP-79: IMA ---
+  protected readonly imaData = signal<ImaResponse | null>(null);
 
   // Deshabilita el botón de exportar mientras cualquiera de las dos cargas esté en curso.
   protected readonly cargando = computed(
@@ -207,8 +227,15 @@ export class DashboardPageComponent {
       if (!anioField.valid()) return;
       untracked(() => {
         void this.cargarComparacion(Number(anio));
+        void this.cargarEvolucion(Number(anio));
+        void this.cargarIma(Number(anio), this.mesSeleccionado());
       });
     });
+  }
+
+  protected onImaPeriodoChange(evento: { anio: number; mes: number }): void {
+    this.mesSeleccionado.set(evento.mes);
+    void this.cargarIma(evento.anio, evento.mes);
   }
 
   private async cargarResumen(anio: number, mes?: number): Promise<void> {
@@ -333,5 +360,32 @@ export class DashboardPageComponent {
     anchor.click();
     anchor.remove();
     URL.revokeObjectURL(url);
+  }
+
+  private async cargarEvolucion(anio: number): Promise<void> {
+    try {
+      const resp = await firstValueFrom(this.evolucionService.obtenerEvolucion(anio));
+      this.evolucionSerie.set(resp.serie);
+      this.evolucionVacia.set(resp.serie.every((p) => p.totalCarbonKg === 0));
+    } catch (err: unknown) {
+      this.toastService.error(
+        apiErrorMessage(err) ?? 'No se pudo cargar la evolución histórica. Intente nuevamente.',
+        undefined,
+        5000
+      );
+    }
+  }
+
+  private async cargarIma(anio: number, mes: number): Promise<void> {
+    try {
+      const ima = await firstValueFrom(this.imaService.obtenerIma(anio, mes));
+      this.imaData.set(ima);
+    } catch (err: unknown) {
+      this.toastService.error(
+        apiErrorMessage(err) ?? 'No se pudo calcular tu IMA. Intente nuevamente.',
+        undefined,
+        5000
+      );
+    }
   }
 }
