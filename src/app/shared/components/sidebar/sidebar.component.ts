@@ -11,6 +11,7 @@ export interface SidebarMenuItem {
   icon: IconName;
   id: string;
   active: boolean;
+  disabled?: boolean;
 }
 
 export interface SidebarBottomItem {

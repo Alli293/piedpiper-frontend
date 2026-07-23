@@ -150,6 +150,12 @@
     }
   }
 
+  &--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
   @include mixins.desktop-up {
     justify-content: flex-start;
   }

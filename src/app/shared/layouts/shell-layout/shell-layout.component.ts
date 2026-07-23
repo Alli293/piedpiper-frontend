@@ -1,16 +1,25 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
+import { AuthSessionService } from '../../../core/auth-session.service';
 import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
 import { SidebarBottomItemId } from '../../components/sidebar/sidebar.component';
 import { HeaderConfig, PageLayoutComponent } from '../page-layout/page-layout.component';
-import { buildSidebarConfig, SidebarNavId, SidebarNavVariant } from '../page-layout/sidebar-nav';
+import {
+  AuditorSidebarNavId,
+  buildAuditorSidebarConfig,
+  buildSidebarConfig,
+  SidebarNavId,
+  SidebarNavVariant,
+} from '../page-layout/sidebar-nav';
 
 const COMPANY_NAME = 'Café del Valle S.A.';
 const COMPANY_INITIALS = 'CV';
 
-/** Ids this shell's own sidebarConfig can ever emit (see buildSidebarConfig). */
-type ShellMenuItemId = SidebarNavId | SidebarBottomItemId;
+export type SidebarVariant = 'empresa' | 'auditor';
+
+/** Ids this shell's own sidebarConfig can ever emit. */
+type ShellMenuItemId = SidebarNavId | AuditorSidebarNavId | SidebarBottomItemId;
 
 /**
  * Shared shell for authenticated pages: owns sidebar construction so pages
@@ -24,10 +33,12 @@ type ShellMenuItemId = SidebarNavId | SidebarBottomItemId;
 export class ShellLayoutComponent {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly authSessionService = inject(AuthSessionService);
   private readonly sesionInactividadService = inject(SesionInactividadService);
 
-  activeId = input<SidebarNavId>();
+  activeId = input<SidebarNavId | AuditorSidebarNavId>();
   variant = input<SidebarNavVariant>('empresa');
+  sidebarVariant = input<SidebarVariant>('empresa');
   companyName = input(COMPANY_NAME);
   companyRole = input('Empresa · Admin');
   companyInitials = input(COMPANY_INITIALS);
@@ -42,16 +53,25 @@ export class ShellLayoutComponent {
 
   backClicked = output<void>();
 
-  protected readonly sidebarConfig = computed(() =>
-    buildSidebarConfig({
-      activeId: this.activeId(),
+  protected readonly sidebarConfig = computed(() => {
+    if (this.sidebarVariant() === 'auditor') {
+      return buildAuditorSidebarConfig({
+        activeId: this.activeId() as AuditorSidebarNavId | undefined,
+        auditorName: this.authSessionService.getUserName() || 'Auditor',
+        auditorInitials: this.authSessionService.getUserInitials(),
+        settingsLabel: this.settingsLabel(),
+      });
+    }
+
+    return buildSidebarConfig({
+      activeId: this.activeId() as SidebarNavId | undefined,
       companyName: this.displayName() ?? this.companyName(),
       companyRole: this.companyRole(),
       companyInitials: this.displayInitials() ?? this.companyInitials(),
       settingsLabel: this.settingsLabel(),
       variant: this.variant(),
-    })
-  );
+    });
+  });
 
   protected onBackClicked(): void {
     const route = this.backRoute();
@@ -79,6 +99,8 @@ export class ShellLayoutComponent {
       'ecoruta-itinerarios': '/ecoruta/itinerarios',
       'ecoruta-insignias': '/ecoruta/insignias',
       settings: '/configuracion',
+      'perfil-publico': '/auditor/perfil',
+      auditorias: '/auditor/panel',
     };
     void this.router.navigateByUrl(rutas[menuId]);
   }
