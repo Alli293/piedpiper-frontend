@@ -367,6 +367,16 @@
   }
 }
 
+.annual-limit-panel__categories {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.annual-limit-panel__category-track {
+  height: 4px;
+  margin: var(--ch-space-2) 0;
+  border: 0;
+}
+
 .annual-limit-panel__info,
 .annual-limit-panel__empty {
   margin: 0;

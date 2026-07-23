@@ -50,6 +50,14 @@ interface EstadoVisual {
   label: string;
 }
 
+interface CategoriaComparacionVisual {
+  readonly categoria: CategoriaResumen;
+  readonly label: string;
+  readonly huellaT: number;
+  readonly porcentaje: number;
+  readonly color: string;
+}
+
 const ORDEN_CATEGORIAS: CategoriaResumen[] = ['ELECTRICIDAD', 'FLOTA', 'VUELO', 'ENVIO'];
 
 // La etiqueta visible sigue el diseño de Figma; el valor interno es el del enum del backend.
@@ -58,6 +66,13 @@ const ETIQUETAS_CATEGORIA: Record<CategoriaResumen, string> = {
   FLOTA: 'Flota vehicular',
   VUELO: 'Vuelos',
   ENVIO: 'Envíos',
+};
+
+const COLORES_CATEGORIA: Record<CategoriaResumen, string> = {
+  ELECTRICIDAD: 'var(--ch-green)',
+  FLOTA: 'var(--ch-sky)',
+  VUELO: 'var(--ch-dark)',
+  ENVIO: 'var(--ch-warning)',
 };
 
 const MESES: SelectOption[] = [
@@ -422,9 +437,29 @@ export class DashboardPageComponent {
     return 'igual';
   }
 
+  protected categoriasComparacion(
+    comparacion: ComparacionEmisionesResponse
+  ): CategoriaComparacionVisual[] {
+    const categorias = comparacion.categorias ?? [];
+    return ORDEN_CATEGORIAS.map((categoria) => {
+      const data = categorias.find((item) => item.categoria === categoria);
+      return {
+        categoria,
+        label: ETIQUETAS_CATEGORIA[categoria],
+        huellaT: data?.huellaT ?? 0,
+        porcentaje: this.porcentajeCategoria(data?.porcentaje ?? 0),
+        color: COLORES_CATEGORIA[categoria],
+      };
+    });
+  }
+
   private calcularPorcentaje(subtotalKg: number, totalKg: number): number {
     if (totalKg === 0) return 0;
     return Math.round((subtotalKg / totalKg) * 1000) / 10;
+  }
+
+  private porcentajeCategoria(valor: number): number {
+    return Math.min(Math.max(valor, 0), 100);
   }
 
   private async cargarResumenHuella(periodo: PeriodoDashboard, anio: number): Promise<void> {
@@ -440,6 +475,13 @@ export class DashboardPageComponent {
       this.periodoSeleccionado.set(resumen.periodoSeleccionado);
     } catch (err: unknown) {
       if (solicitud !== this.solicitudResumenHuella) return;
+      const fallback = await this.resumenHuellaDesdeEmisiones(periodo, anio);
+      if (solicitud !== this.solicitudResumenHuella) return;
+      if (fallback) {
+        this.resumenHuella.set(fallback);
+        this.periodoSeleccionado.set(fallback.periodoSeleccionado);
+        return;
+      }
       this.resumenHuella.set(null);
       this.resumenHuellaError.set(
         apiErrorMessage(err) ?? 'No fue posible cargar esta sección. Intenta recargar la página.'
@@ -449,6 +491,48 @@ export class DashboardPageComponent {
         this.cargandoResumenHuella.set(false);
       }
     }
+  }
+
+  private async resumenHuellaDesdeEmisiones(
+    periodo: PeriodoDashboard,
+    anio: number
+  ): Promise<ResumenHuellaDashboardResponse | null> {
+    try {
+      if (periodo === 'año') {
+        const resumenAnual = await firstValueFrom(this.emisionesService.obtenerResumen(anio));
+        return this.mapearResumenHuella(periodo, resumenAnual.totalT, resumenAnual.totalKg);
+      }
+
+      const meses =
+        periodo === 'trimestre' ? this.mesesTrimestreActual() : [new Date().getMonth() + 1];
+      const resumenes = await Promise.all(
+        meses.map((mes) => firstValueFrom(this.emisionesService.obtenerResumen(anio, mes)))
+      );
+      const totalT = resumenes.reduce((total, resumen) => total + resumen.totalT, 0);
+      const totalKg = resumenes.reduce((total, resumen) => total + resumen.totalKg, 0);
+      return this.mapearResumenHuella(periodo, totalT, totalKg);
+    } catch (_err: unknown) {
+      return null;
+    }
+  }
+
+  private mapearResumenHuella(
+    periodo: PeriodoDashboard,
+    huellaTotalT: number,
+    totalKg: number
+  ): ResumenHuellaDashboardResponse {
+    return {
+      periodoSeleccionado: periodo,
+      huellaTotalT,
+      variacionPorcentual: null,
+      tieneDatos: totalKg > 0,
+    };
+  }
+
+  private mesesTrimestreActual(): number[] {
+    const mesActual = new Date().getMonth() + 1;
+    const primerMes = Math.floor((mesActual - 1) / 3) * 3 + 1;
+    return [primerMes, primerMes + 1, primerMes + 2];
   }
 
   private normalizarPeriodo(valor: string): PeriodoDashboard {

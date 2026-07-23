@@ -186,19 +186,26 @@
               </div>
             </div>
 
-            <dl class="annual-limit-panel__metrics">
-              <div>
-                <dt>Huella acumulada {{ data.anio }}</dt>
-                <dd>{{ formatToneladas(data.huellaAcumuladaT) }} tCO₂e</dd>
-              </div>
-              <div>
-                <dt>Límite declarado</dt>
-                <dd>{{ formatToneladas(data.limiteT) }} tCO₂e</dd>
-              </div>
-              <div>
-                <dt>Del límite anual</dt>
-                <dd>{{ formatPorcentaje(data.porcentajeConsumido) }} %</dd>
-              </div>
+            <dl class="annual-limit-panel__metrics annual-limit-panel__categories">
+              @for (categoria of categoriasComparacion(data); track categoria.categoria) {
+                <div>
+                  <dt>
+                    <span [style.color]="categoria.color" aria-hidden="true">■</span>
+                    {{ categoria.label }}
+                  </dt>
+                  <div
+                    class="annual-limit-panel__track annual-limit-panel__category-track"
+                    aria-hidden="true"
+                  >
+                    <span
+                      class="annual-limit-panel__fill"
+                      [style.background]="categoria.color"
+                      [style.width.%]="categoria.porcentaje"
+                    ></span>
+                  </div>
+                  <dd>{{ formatToneladas(categoria.huellaT) }} tCO₂e</dd>
+                </div>
+              }
             </dl>
           }
         }

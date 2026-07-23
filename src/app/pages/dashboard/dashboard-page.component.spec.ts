@@ -24,12 +24,17 @@ const ANIO_ACTUAL = new Date().getFullYear();
 
 const COMPARACION_BASE: ComparacionEmisionesResponse = {
   anio: 2026,
-  huellaAcumuladaT: 30,
-  limiteT: 50,
-  porcentajeConsumido: 60,
+  huellaAcumuladaT: 5.236,
+  limiteT: 12.47,
+  porcentajeConsumido: 42,
   estado: 'dentro',
   mensaje: null,
-  categorias: [],
+  categorias: [
+    { categoria: 'ELECTRICIDAD', huellaT: 2.357, porcentaje: 45 },
+    { categoria: 'FLOTA', huellaT: 1.466, porcentaje: 28 },
+    { categoria: 'VUELO', huellaT: 0.942, porcentaje: 18 },
+    { categoria: 'ENVIO', huellaT: 0.471, porcentaje: 9 },
+  ],
 };
 
 const RESUMEN_HUELLA_BASE: ResumenHuellaDashboardResponse = {
@@ -191,7 +196,7 @@ describe('DashboardPageComponent', () => {
 
     expect(texto).toContain('Huella total 2026');
     expect(texto).toContain('Del limite anual');
-    expect(texto).toContain('30 / 50 tCO2e');
+    expect(texto).toContain('5,236 / 12,47 tCO2e');
   });
 
   it('carga el resumen de huella con mes actual y el anio seleccionado por defecto', async () => {
@@ -240,6 +245,7 @@ describe('DashboardPageComponent', () => {
           })
       )
     );
+    emisionesService.obtenerResumen.mockReturnValueOnce(throwError(() => new Error('network')));
 
     await (component as any).cargarResumenHuella('mes_actual', 2026);
     fixture.detectChanges();
@@ -247,6 +253,26 @@ describe('DashboardPageComponent', () => {
     const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(texto).toContain('Servicio temporalmente no disponible.');
     expect(texto).toContain('Del limite anual');
+  });
+
+  it('usa el resumen de emisiones como fallback cuando falla el endpoint de resumen de huella', async () => {
+    await createFixture();
+    dashboardService.obtenerResumenHuella.mockReturnValueOnce(throwError(() => new Error('404')));
+    emisionesService.obtenerResumen.mockReturnValueOnce(
+      of({
+        ...RESUMEN_CON_DATOS,
+        mes: new Date().getMonth() + 1,
+        totalKg: 620000,
+        totalT: 620,
+      })
+    );
+
+    await (component as any).cargarResumenHuella('mes_actual', 2026);
+    fixture.detectChanges();
+
+    expect(emisionesService.obtenerResumen).toHaveBeenCalledWith(2026, new Date().getMonth() + 1);
+    expect((component as any).resumenHuella().huellaTotalT).toBe(620);
+    expect((component as any).resumenHuellaError()).toBeNull();
   });
 
   it('el cambio de periodo solo recarga el resumen de huella', async () => {
@@ -371,6 +397,22 @@ describe('DashboardPageComponent', () => {
 
     expect((component as any).tieneEstado('superado')).toBe(true);
     expect(fixture.nativeElement.querySelector('.annual-limit-panel.is-superado')).toBeTruthy();
+  });
+
+  it('muestra el limite anual desglosado por categorias', async () => {
+    await createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    const texto = root.textContent ?? '';
+
+    expect(texto).toContain('Electricidad');
+    expect(texto).toContain('Flota vehicular');
+    expect(texto).toContain('Vuelos');
+    expect(texto).toContain('Envíos');
+    expect(texto).toContain('2,357 tCO₂e');
+    expect(texto).toContain('1,466 tCO₂e');
+    expect(texto).toContain('0,942 tCO₂e');
+    expect(texto).toContain('0,471 tCO₂e');
+    expect(root.querySelectorAll('.annual-limit-panel__categories dd')).toHaveLength(4);
   });
 
   it('renderiza el estado superado', async () => {
