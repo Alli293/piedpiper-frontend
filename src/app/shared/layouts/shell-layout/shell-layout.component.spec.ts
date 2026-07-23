@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { ShellLayoutComponent } from './shell-layout.component';
 import { AuthService } from '../../../core/auth/auth.service';
+import { AuthSessionService } from '../../../core/auth-session.service';
 import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
 import { HeaderConfig } from '../page-layout/page-layout.component';
 
@@ -28,6 +29,16 @@ describe('ShellLayoutComponent', () => {
         { provide: AuthService, useValue: authServiceStub },
         { provide: SesionInactividadService, useValue: sesionInactividadStub },
         { provide: Router, useValue: routerStub },
+        {
+          provide: AuthSessionService,
+          useValue: {
+            getRole: vi.fn().mockReturnValue('administrador_empresa'),
+            getUserName: vi.fn().mockReturnValue('Test User'),
+            getUserInitials: vi.fn().mockReturnValue('TU'),
+            getUserEmail: vi.fn().mockReturnValue('test@test.com'),
+            getUserId: vi.fn().mockReturnValue('123'),
+          },
+        },
       ],
     }).compileComponents();
   });
@@ -174,7 +185,7 @@ describe('ShellLayoutComponent', () => {
     expect(emitido.length).toBe(1);
   });
 
-  it('cierra sesion, detiene la inactividad y navega al login', async () => {
+  it('cierra sesión, detiene la inactividad y navega al login', async () => {
     const fixture = await createFixture({ activeId: 'dashboard' });
 
     (fixture.componentInstance as any).onMenuItem('logout');
