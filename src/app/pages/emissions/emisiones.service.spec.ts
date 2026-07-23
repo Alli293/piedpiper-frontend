@@ -167,25 +167,60 @@ describe('EmisionesService', () => {
     });
   });
 
-  it('obtenerResumen hace GET a /emisiones/resumen con el query param anio', () => {
-    service.obtenerResumen(2026).subscribe();
+  it('obtenerResumen usa /emisiones y calcula los totales por anio', () => {
+    let resumen: unknown;
+    service.obtenerResumen(2026).subscribe((response) => {
+      resumen = response;
+    });
 
-    const req = httpMock.expectOne(
-      (request) => request.url === `${base}/resumen` && request.method === 'GET'
-    );
-    expect(req.request.params.get('anio')).toBe('2026');
+    const req = httpMock.expectOne((request) => request.url === base && request.method === 'GET');
+    expect(req.request.params.has('anio')).toBe(false);
     expect(req.request.params.has('mes')).toBe(false);
-    req.flush({ anio: 2026, mes: null, totalKg: 0, totalT: 0, categorias: [] });
+    req.flush([
+      { categoria: 'ELECTRICIDAD', fechaActividad: '2026-01-01', carbonKg: 1000 },
+      { categoria: 'FLOTA', fechaActividad: '2026-07-01', carbonKg: 3000 },
+      { categoria: 'VUELO', fechaActividad: '2025-07-01', carbonKg: 9000 },
+    ]);
+
+    expect(resumen).toEqual({
+      anio: 2026,
+      mes: null,
+      totalKg: 4000,
+      totalT: 4,
+      categorias: [
+        { categoria: 'ELECTRICIDAD', totalKg: 1000, porcentaje: 25 },
+        { categoria: 'FLOTA', totalKg: 3000, porcentaje: 75 },
+        { categoria: 'VUELO', totalKg: 0, porcentaje: 0 },
+        { categoria: 'ENVIO', totalKg: 0, porcentaje: 0 },
+      ],
+    });
   });
 
-  it('obtenerResumen incluye el query param mes cuando se indica', () => {
-    service.obtenerResumen(2026, 3).subscribe();
+  it('obtenerResumen incluye el query param mes y devuelve cero cuando no hay emisiones', () => {
+    let resumen: unknown;
+    service.obtenerResumen(2026, 3).subscribe((response) => {
+      resumen = response;
+    });
 
-    const req = httpMock.expectOne(
-      (request) => request.url === `${base}/resumen` && request.method === 'GET'
-    );
-    expect(req.request.params.get('anio')).toBe('2026');
-    expect(req.request.params.get('mes')).toBe('3');
-    req.flush({ anio: 2026, mes: 3, totalKg: 0, totalT: 0, categorias: [] });
+    const req = httpMock.expectOne((request) => request.url === base && request.method === 'GET');
+    expect(req.request.params.has('anio')).toBe(false);
+    expect(req.request.params.has('mes')).toBe(false);
+    req.flush([
+      { categoria: 'ENVIO', fechaActividad: '2026-4-01', carbonKg: 8000 },
+      { categoria: 'FLOTA', fechaActividad: '2025-3-01', carbonKg: 5000 },
+    ]);
+
+    expect(resumen).toEqual({
+      anio: 2026,
+      mes: 3,
+      totalKg: 0,
+      totalT: 0,
+      categorias: [
+        { categoria: 'ELECTRICIDAD', totalKg: 0, porcentaje: 0 },
+        { categoria: 'FLOTA', totalKg: 0, porcentaje: 0 },
+        { categoria: 'VUELO', totalKg: 0, porcentaje: 0 },
+        { categoria: 'ENVIO', totalKg: 0, porcentaje: 0 },
+      ],
+    });
   });
 });

@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
+  CategoriaEmision,
   CategoriaFiltroEmision,
   ComparacionEmisionesResponse,
   EmisionEnvioResponse,
@@ -15,6 +16,8 @@ import {
   ResumenEmisionesResponse,
   TipoVehiculoOption,
 } from './models/emision.model';
+
+const CATEGORIAS_RESUMEN: CategoriaEmision[] = ['ELECTRICIDAD', 'FLOTA', 'VUELO', 'ENVIO'];
 
 export interface EmisionesFiltros {
   readonly categoria?: CategoriaFiltroEmision;
@@ -76,10 +79,41 @@ export class EmisionesService {
   }
 
   obtenerResumen(anio: number, mes?: number): Observable<ResumenEmisionesResponse> {
-    let params = new HttpParams().set('anio', anio);
-    if (mes !== undefined) {
-      params = params.set('mes', mes);
-    }
-    return this.http.get<ResumenEmisionesResponse>(`${this.baseUrl}/resumen`, { params });
+    return this.listarEmisiones().pipe(
+      map((emisiones) => {
+        const emisionesPeriodo = emisiones.filter((emision) => enPeriodo(emision, anio, mes));
+        const totalKg = emisionesPeriodo.reduce((total, emision) => total + emision.carbonKg, 0);
+        const totalesPorCategoria = CATEGORIAS_RESUMEN.map((categoria) => {
+          const categoriaTotalKg = emisionesPeriodo
+            .filter((emision) => emision.categoria === categoria)
+            .reduce((total, emision) => total + emision.carbonKg, 0);
+
+          return {
+            categoria,
+            totalKg: categoriaTotalKg,
+            porcentaje: totalKg === 0 ? 0 : Math.round((categoriaTotalKg / totalKg) * 1000) / 10,
+          };
+        });
+
+        return {
+          anio,
+          mes: mes ?? null,
+          totalKg,
+          totalT: totalKg / 1000,
+          categorias: totalesPorCategoria,
+        };
+      })
+    );
   }
+}
+
+function enPeriodo(emision: EmisionResponse, anio: number, mes?: number): boolean {
+  const fecha = parseFechaActividad(emision.fechaActividad);
+  if (fecha.anio !== anio) return false;
+  return mes === undefined || fecha.mes === mes;
+}
+
+function parseFechaActividad(fecha: string): { anio: number; mes: number } {
+  const [anio, mes] = fecha.split('-').map(Number);
+  return { anio, mes };
 }

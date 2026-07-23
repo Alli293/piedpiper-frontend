@@ -236,10 +236,7 @@ describe('EmissionsListPageComponent', () => {
     expect(tableText).toContain('Ruta de reparto');
     expect(tableText).not.toContain('Pruebas');
     expect(tableText).not.toContain('Viaje aereo SJO-FRA-SJO');
-    expect(listarEmisiones).toHaveBeenLastCalledWith({
-      anio: new Date().getFullYear(),
-      mes: null,
-    });
+    expect(listarEmisiones).toHaveBeenLastCalledWith();
   });
 
   it('filtra en pantalla por categoria aunque el servicio devuelva todos los registros', async () => {

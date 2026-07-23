@@ -34,7 +34,6 @@ import { ImaPanelComponent } from './ima-panel.component';
 
 interface PeriodoResumenFormModel {
   anio: string;
-  mes: string;
 }
 
 interface SegmentoDesglose {
@@ -74,22 +73,6 @@ const COLORES_CATEGORIA: Record<CategoriaResumen, string> = {
   VUELO: 'var(--ch-dark)',
   ENVIO: 'var(--ch-warning)',
 };
-
-const MESES: SelectOption[] = [
-  { value: '', label: 'Todo el año' },
-  { value: '1', label: 'Enero' },
-  { value: '2', label: 'Febrero' },
-  { value: '3', label: 'Marzo' },
-  { value: '4', label: 'Abril' },
-  { value: '5', label: 'Mayo' },
-  { value: '6', label: 'Junio' },
-  { value: '7', label: 'Julio' },
-  { value: '8', label: 'Agosto' },
-  { value: '9', label: 'Septiembre' },
-  { value: '10', label: 'Octubre' },
-  { value: '11', label: 'Noviembre' },
-  { value: '12', label: 'Diciembre' },
-];
 
 const PERIODOS_DASHBOARD: SelectOption[] = [
   { value: 'mes_actual', label: 'Mes actual' },
@@ -149,7 +132,6 @@ export class DashboardPageComponent {
 
   protected readonly model = signal<PeriodoResumenFormModel>({
     anio: String(this.anioActual),
-    mes: '',
   });
 
   protected readonly periodoForm = form(
@@ -192,11 +174,10 @@ export class DashboardPageComponent {
     { length: this.anioActual - ANIO_MINIMO + 1 },
     (_, index) => {
       const anio = this.anioActual - index;
-      return { value: String(anio), label: String(anio) };
+      return { value: String(anio), label: `Año ${anio}` };
     }
   );
 
-  protected readonly mesOptions: SelectOption[] = MESES;
   protected readonly periodos = PERIODOS_DASHBOARD;
 
   protected readonly anioSeleccionado = computed(() => Number(this.periodoForm.anio().value()));
@@ -246,15 +227,13 @@ export class DashboardPageComponent {
   );
 
   constructor() {
-    // El año gobierna ambas tarjetas; el mes solo afecta el desglose de la dona.
+    // El año gobierna las tarjetas y el desglose anual de la dona.
     effect(() => {
       const anioField = this.periodoForm.anio();
-      const mesField = this.periodoForm.mes();
       const anio = anioField.value();
-      const mes = mesField.value();
       if (!anioField.valid()) return;
       untracked(() => {
-        void this.cargarResumen(Number(anio), mes === '' ? undefined : Number(mes));
+        void this.cargarResumen(Number(anio));
       });
     });
 
@@ -441,13 +420,15 @@ export class DashboardPageComponent {
     comparacion: ComparacionEmisionesResponse
   ): CategoriaComparacionVisual[] {
     const categorias = comparacion.categorias ?? [];
+    const totalCategorias = categorias.reduce((total, item) => total + item.huellaT, 0);
     return ORDEN_CATEGORIAS.map((categoria) => {
       const data = categorias.find((item) => item.categoria === categoria);
+      const huellaT = data?.huellaT ?? 0;
       return {
         categoria,
         label: ETIQUETAS_CATEGORIA[categoria],
-        huellaT: data?.huellaT ?? 0,
-        porcentaje: this.porcentajeCategoria(data?.porcentaje ?? 0),
+        huellaT,
+        porcentaje: this.porcentajeCategoria(huellaT, totalCategorias),
         color: COLORES_CATEGORIA[categoria],
       };
     });
@@ -458,8 +439,9 @@ export class DashboardPageComponent {
     return Math.round((subtotalKg / totalKg) * 1000) / 10;
   }
 
-  private porcentajeCategoria(valor: number): number {
-    return Math.min(Math.max(valor, 0), 100);
+  private porcentajeCategoria(huellaT: number, totalT: number): number {
+    if (totalT <= 0) return 0;
+    return Math.min(Math.max((huellaT / totalT) * 100, 0), 100);
   }
 
   private async cargarResumenHuella(periodo: PeriodoDashboard, anio: number): Promise<void> {

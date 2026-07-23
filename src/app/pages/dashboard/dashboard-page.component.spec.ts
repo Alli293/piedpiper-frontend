@@ -415,6 +415,27 @@ describe('DashboardPageComponent', () => {
     expect(root.querySelectorAll('.annual-limit-panel__categories dd')).toHaveLength(4);
   });
 
+  it('calcula el ancho de las barras de categoria desde la huella emitida', async () => {
+    await createFixture();
+    (component as any).comparacion.set({
+      ...COMPARACION_BASE,
+      categorias: [
+        { categoria: 'ELECTRICIDAD', huellaT: 30, porcentaje: 0 },
+        { categoria: 'FLOTA', huellaT: 10, porcentaje: 0 },
+        { categoria: 'VUELO', huellaT: 0, porcentaje: 0 },
+        { categoria: 'ENVIO', huellaT: 0, porcentaje: 0 },
+      ],
+    });
+    fixture.detectChanges();
+
+    const barras = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
+        '.annual-limit-panel__category-track span'
+      )
+    );
+    expect(barras.map((barra) => barra.style.width)).toEqual(['75%', '25%', '0%', '0%']);
+  });
+
   it('renderiza el estado superado', async () => {
     await createFixture();
     (component as any).comparacion.set({
@@ -606,17 +627,17 @@ describe('DashboardPageComponent', () => {
     expect(root.querySelectorAll('.dashboard-page__segmento').length).toBe(0);
   });
 
-  it('al cambiar el mes vuelve a consultar el resumen y actualiza la vista', async () => {
+  it('al cambiar el año vuelve a consultar el desglose anual y actualiza la vista', async () => {
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
     emisionesService.obtenerResumen.mockReturnValue(of(RESUMEN_VACIO));
 
-    setSelectValue(root, 1, '3');
+    setSelectValue(root, 0, '2021');
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(emisionesService.obtenerResumen).toHaveBeenLastCalledWith(ANIO_ACTUAL, 3);
+    expect(emisionesService.obtenerResumen).toHaveBeenLastCalledWith(2021, undefined);
     expect(root.querySelector('.dashboard-page__vacio')).not.toBeNull();
   });
 

@@ -111,7 +111,7 @@ export class EmissionsListPageComponent {
         mes: this.filtroMes(),
       };
       const categoria = this.filtroCategoria();
-      const registros = await firstValueFrom(this.emisionesService.listarEmisiones(filtrosPeriodo));
+      const registros = await firstValueFrom(this.emisionesService.listarEmisiones());
       if (requestId !== this.cargaRegistrosRequestId) return;
       const registrosPeriodo = registros.filter((registro) =>
         cumpleFiltros(registro, 'TODAS', filtrosPeriodo.anio, filtrosPeriodo.mes)

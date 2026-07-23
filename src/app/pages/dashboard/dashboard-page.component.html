@@ -1,33 +1,25 @@
 <app-shell-layout activeId="dashboard" [headerConfig]="headerConfig()">
-  <div class="dashboard-page">
-    <div class="dashboard-page__toolbar">
-      <app-button
-        class="dashboard-shell__export"
-        variant="secondary"
-        size="md"
-        [disabled]="cargando()"
-        [loading]="exportandoPdf()"
-        (click)="exportarPdf()"
-      >
-        <app-icon name="descargar" [size]="16" />
-        <span>Exportar PDF</span>
-      </app-button>
-    </div>
+  <app-button
+    pageHeaderActions
+    class="dashboard-header__export"
+    variant="primary"
+    size="sm"
+    [disabled]="cargando()"
+    [loading]="exportandoPdf()"
+    (click)="exportarPdf()"
+  >
+    <app-icon name="descargar" [size]="14" />
+    <span>Exportar PDF</span>
+  </app-button>
 
+  <div class="dashboard-page">
     <form class="dashboard-page__filters" novalidate aria-label="Período a consultar">
       <app-select-input
-        class="dashboard-page__filter"
-        label="Año"
+        class="dashboard-page__year-filter"
         placeholder=""
+        ariaLabel="Seleccionar año del dashboard"
         [options]="anioOptions"
         [formField]="periodoForm.anio"
-      />
-      <app-select-input
-        class="dashboard-page__filter"
-        label="Mes"
-        placeholder=""
-        [options]="mesOptions"
-        [formField]="periodoForm.mes"
       />
     </form>
 
@@ -119,96 +111,16 @@
       (periodoChange)="onImaPeriodoChange($event)"
     />
 
-    <!-- PP-41: Evolución histórica -->
-    <article class="annual-limit-panel evolucion-panel">
-      <app-heading level="h2" text="Evolución histórica de la huella" />
-      @if (evolucionVacia()) {
-        <p class="evolucion-panel__empty">
-          No hay emisiones registradas en {{ anioSeleccionado() }}.
-        </p>
-      }
-      <app-evolucion-chart [serie]="evolucionSerie()" [anio]="anioSeleccionado()" />
-    </article>
-
     <div class="dashboard-page__grid">
-      <article
-        class="annual-limit-panel"
-        [class.is-dentro]="tieneEstado('dentro')"
-        [class.is-cerca]="tieneEstado('cerca')"
-        [class.is-alcanzado]="tieneEstado('alcanzado')"
-        [class.is-superado]="tieneEstado('superado')"
-        [class.is-sin-limite]="tieneEstado('sin_limite')"
-      >
-        <header class="annual-limit-panel__header">
-          <h2>Límite anual de emisiones</h2>
-
-          @if (comparacion(); as data) {
-            <div class="annual-limit-panel__status">
-              <span class="annual-limit-panel__badge">
-                {{ estadoVisual(data.estado).label }}
-              </span>
-              <span class="annual-limit-panel__limit">
-                Límite:
-                @if (data.limiteT !== null) {
-                  {{ formatToneladas(data.limiteT) }} tCO₂e
-                } @else {
-                  sin declarar
-                }
-              </span>
-            </div>
-          }
-        </header>
-
-        @if (cargandoComparacion()) {
-          <p class="annual-limit-panel__info">Cargando comparación...</p>
-        } @else if (comparacionError(); as error) {
-          <p class="annual-limit-panel__info annual-limit-panel__info--error" role="alert">
-            {{ error }}
+      <!-- PP-41: Evolución histórica -->
+      <article class="annual-limit-panel evolucion-panel">
+        <app-heading level="h2" text="Evolución histórica de la huella" />
+        @if (evolucionVacia()) {
+          <p class="evolucion-panel__empty">
+            No hay emisiones registradas en {{ anioSeleccionado() }}.
           </p>
-        } @else if (comparacion(); as data) {
-          @if (data.estado === 'sin_limite') {
-            <div class="annual-limit-panel__empty">
-              <p>No se ha declarado un límite para {{ data.anio }}.</p>
-              <a routerLink="/limites" appLink>Declarar límite anual de emisiones</a>
-            </div>
-          } @else {
-            <div class="annual-limit-panel__meter" aria-hidden="true">
-              <div class="annual-limit-panel__track">
-                <span class="annual-limit-panel__fill" [style.width.%]="consumoBarra()"></span>
-              </div>
-              <div class="annual-limit-panel__scale">
-                <span>0 tCO₂e</span>
-                <strong>
-                  {{ formatToneladas(data.huellaAcumuladaT) }} tCO₂e ·
-                  {{ formatPorcentaje(data.porcentajeConsumido) }} %
-                </strong>
-                <span>{{ formatToneladas(data.limiteT) }} tCO₂e</span>
-              </div>
-            </div>
-
-            <dl class="annual-limit-panel__metrics annual-limit-panel__categories">
-              @for (categoria of categoriasComparacion(data); track categoria.categoria) {
-                <div>
-                  <dt>
-                    <span [style.color]="categoria.color" aria-hidden="true">■</span>
-                    {{ categoria.label }}
-                  </dt>
-                  <div
-                    class="annual-limit-panel__track annual-limit-panel__category-track"
-                    aria-hidden="true"
-                  >
-                    <span
-                      class="annual-limit-panel__fill"
-                      [style.background]="categoria.color"
-                      [style.width.%]="categoria.porcentaje"
-                    ></span>
-                  </div>
-                  <dd>{{ formatToneladas(categoria.huellaT) }} tCO₂e</dd>
-                </div>
-              }
-            </dl>
-          }
         }
+        <app-evolucion-chart [serie]="evolucionSerie()" [anio]="anioSeleccionado()" />
       </article>
 
       <section class="dashboard-page__card" aria-label="Desglose por categoría">
@@ -287,5 +199,85 @@
         }
       </section>
     </div>
+
+    <article
+      class="annual-limit-panel"
+      [class.is-dentro]="tieneEstado('dentro')"
+      [class.is-cerca]="tieneEstado('cerca')"
+      [class.is-alcanzado]="tieneEstado('alcanzado')"
+      [class.is-superado]="tieneEstado('superado')"
+      [class.is-sin-limite]="tieneEstado('sin_limite')"
+    >
+      <header class="annual-limit-panel__header">
+        <h2>Límite anual de emisiones</h2>
+
+        @if (comparacion(); as data) {
+          <div class="annual-limit-panel__status">
+            <span class="annual-limit-panel__badge">
+              {{ estadoVisual(data.estado).label }}
+            </span>
+            <span class="annual-limit-panel__limit">
+              Límite:
+              @if (data.limiteT !== null) {
+                {{ formatToneladas(data.limiteT) }} tCO₂e
+              } @else {
+                sin declarar
+              }
+            </span>
+          </div>
+        }
+      </header>
+
+      @if (cargandoComparacion()) {
+        <p class="annual-limit-panel__info">Cargando comparación...</p>
+      } @else if (comparacionError(); as error) {
+        <p class="annual-limit-panel__info annual-limit-panel__info--error" role="alert">
+          {{ error }}
+        </p>
+      } @else if (comparacion(); as data) {
+        @if (data.estado === 'sin_limite') {
+          <div class="annual-limit-panel__empty">
+            <p>No se ha declarado un límite para {{ data.anio }}.</p>
+            <a routerLink="/limites" appLink>Declarar límite anual de emisiones</a>
+          </div>
+        } @else {
+          <div class="annual-limit-panel__meter" aria-hidden="true">
+            <div class="annual-limit-panel__track">
+              <span class="annual-limit-panel__fill" [style.width.%]="consumoBarra()"></span>
+            </div>
+            <div class="annual-limit-panel__scale">
+              <span>0 tCO₂e</span>
+              <strong>
+                {{ formatToneladas(data.huellaAcumuladaT) }} tCO₂e ·
+                {{ formatPorcentaje(data.porcentajeConsumido) }} %
+              </strong>
+              <span>{{ formatToneladas(data.limiteT) }} tCO₂e</span>
+            </div>
+          </div>
+
+          <dl class="annual-limit-panel__metrics annual-limit-panel__categories">
+            @for (categoria of categoriasComparacion(data); track categoria.categoria) {
+              <div>
+                <dt>
+                  <span [style.color]="categoria.color" aria-hidden="true">■</span>
+                  {{ categoria.label }}
+                </dt>
+                <div
+                  class="annual-limit-panel__track annual-limit-panel__category-track"
+                  aria-hidden="true"
+                >
+                  <span
+                    style="display: block; height: 100%; border-radius: inherit"
+                    [style.background-color]="categoria.color"
+                    [style.width.%]="categoria.porcentaje"
+                  ></span>
+                </div>
+                <dd>{{ formatToneladas(categoria.huellaT) }} tCO₂e</dd>
+              </div>
+            }
+          </dl>
+        }
+      }
+    </article>
   </div>
 </app-shell-layout>
