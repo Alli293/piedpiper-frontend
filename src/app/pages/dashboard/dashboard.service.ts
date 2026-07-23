@@ -13,12 +13,9 @@ export class DashboardService {
 
   obtenerResumenHuella(
     periodo: PeriodoDashboard,
-    anio?: number
+    anio: number
   ): Observable<ResumenHuellaDashboardResponse> {
-    let params = new HttpParams().set('periodo', periodo);
-    if (anio !== undefined) {
-      params = params.set('anio', anio);
-    }
+    const params = new HttpParams().set('periodo', periodo).set('anio', anio);
     return this.http.get<ResumenHuellaDashboardResponse>(`${this.dashboardBaseUrl}/huella`, {
       params,
     });

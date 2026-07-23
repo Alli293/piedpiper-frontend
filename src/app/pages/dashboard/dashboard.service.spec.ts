@@ -35,12 +35,15 @@ describe('DashboardService', () => {
     req.flush(new Blob(['pdf'], { type: 'application/pdf' }));
   });
 
-  it('consulta el resumen de huella con el periodo como query param', () => {
-    service.obtenerResumenHuella('mes_actual').subscribe();
+  it('consulta el resumen de huella con el periodo y anio como query params', () => {
+    service.obtenerResumenHuella('mes_actual', 2021).subscribe();
 
-    const req = httpMock.expectOne(`${environment.apiBaseUrl}/dashboard/huella?periodo=mes_actual`);
+    const req = httpMock.expectOne(
+      `${environment.apiBaseUrl}/dashboard/huella?periodo=mes_actual&anio=2021`
+    );
     expect(req.request.method).toBe('GET');
     expect(req.request.params.get('periodo')).toBe('mes_actual');
+    expect(req.request.params.get('anio')).toBe('2021');
 
     req.flush({
       periodoSeleccionado: 'mes_actual',

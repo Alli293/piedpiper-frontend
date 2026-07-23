@@ -194,6 +194,101 @@ describe('DashboardPageComponent', () => {
     expect(texto).toContain('30 / 50 tCO2e');
   });
 
+  it('carga el resumen de huella con mes actual y el anio seleccionado por defecto', async () => {
+    await createFixture();
+
+    expect(dashboardService.obtenerResumenHuella).toHaveBeenCalledWith('mes_actual', ANIO_ACTUAL);
+    expect((component as any).resumenHuella()).toEqual(RESUMEN_HUELLA_BASE);
+  });
+
+  it('muestra la huella del periodo y su variacion', async () => {
+    await createFixture();
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+    expect(texto).toContain('5,236');
+    expect(texto).toContain('tCO2e este mes');
+    expect(texto).toContain('+30,9 % vs periodo anterior');
+  });
+
+  it('si el periodo no tiene datos muestra mensaje sin indicador de variacion', async () => {
+    await createFixture();
+    dashboardService.obtenerResumenHuella.mockReturnValueOnce(
+      of({
+        periodoSeleccionado: 'mes_actual',
+        huellaTotalT: 0,
+        variacionPorcentual: null,
+        tieneDatos: false,
+      })
+    );
+
+    await (component as any).cargarResumenHuella('mes_actual', 2026);
+    fixture.detectChanges();
+
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(texto).toContain('No hay datos de huella registrados para este periodo.');
+    expect(texto).not.toContain('vs periodo anterior');
+  });
+
+  it('si falla el resumen muestra error sin borrar la comparacion anual', async () => {
+    await createFixture();
+    dashboardService.obtenerResumenHuella.mockReturnValueOnce(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 500,
+            error: { message: 'Servicio temporalmente no disponible.' },
+          })
+      )
+    );
+
+    await (component as any).cargarResumenHuella('mes_actual', 2026);
+    fixture.detectChanges();
+
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(texto).toContain('Servicio temporalmente no disponible.');
+    expect(texto).toContain('Del limite anual');
+  });
+
+  it('el cambio de periodo solo recarga el resumen de huella', async () => {
+    await createFixture();
+    dashboardService.obtenerResumenHuella.mockClear();
+    emisionesService.obtenerComparacion.mockClear();
+    dashboardService.obtenerResumenHuella.mockReturnValueOnce(
+      of({
+        periodoSeleccionado: 'trimestre',
+        huellaTotalT: 7.5,
+        variacionPorcentual: null,
+        tieneDatos: true,
+      })
+    );
+
+    (component as any).onPeriodoChange('trimestre');
+    await fixture.whenStable();
+
+    expect(dashboardService.obtenerResumenHuella).toHaveBeenCalledWith('trimestre', ANIO_ACTUAL);
+    expect(emisionesService.obtenerComparacion).not.toHaveBeenCalled();
+  });
+
+  it('al cambiar el anio recarga el resumen de huella con ese anio', async () => {
+    const fixture = await createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    dashboardService.obtenerResumenHuella.mockClear();
+    dashboardService.obtenerResumenHuella.mockReturnValueOnce(
+      of({
+        periodoSeleccionado: 'mes_actual',
+        huellaTotalT: 0,
+        variacionPorcentual: null,
+        tieneDatos: false,
+      })
+    );
+
+    setSelectValue(root, 0, '2021');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(dashboardService.obtenerResumenHuella).toHaveBeenCalledWith('mes_actual', 2021);
+  });
+
   it('mantiene el acceso del shell compartido a mis emisiones', async () => {
     await createFixture();
     const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
