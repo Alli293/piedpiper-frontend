@@ -81,16 +81,17 @@ describe('RegistroInvitacionPageComponent', () => {
     );
   });
 
-  it('sin aceptar los terminos no registra', () => {
+  it('no registra de nuevo si ya hay un registro en curso', () => {
     const fixture = crear();
     const comp = fixture.componentInstance as any;
+    comp.registrando.set(true);
 
     comp.registrar('id-token');
 
     expect(authService.registrarConInvitacion).not.toHaveBeenCalled();
   });
 
-  it('con terminos aceptados registra y navega al redirect', () => {
+  it('registra con Google y navega al redirect, enviando aceptaTerminos en true', () => {
     authService.registrarConInvitacion.mockReturnValue(
       of({
         token: 't',
@@ -103,7 +104,6 @@ describe('RegistroInvitacionPageComponent', () => {
     const navegar = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
     const fixture = crear();
     const comp = fixture.componentInstance as any;
-    comp.aceptaTerminos.set(true);
 
     comp.registrar('id-token');
 
@@ -120,7 +120,6 @@ describe('RegistroInvitacionPageComponent', () => {
     );
     const fixture = crear();
     const comp = fixture.componentInstance as any;
-    comp.aceptaTerminos.set(true);
 
     comp.registrar('id-token');
     fixture.detectChanges();

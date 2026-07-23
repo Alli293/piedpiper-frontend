@@ -20,6 +20,7 @@ import { IconComponent } from '../../icon/icon.component';
   ],
 })
 export class PasswordInputComponent implements ControlValueAccessor {
+  id = input<string>();
   label = input<string>();
   placeholder = input('');
   autocomplete = input('');

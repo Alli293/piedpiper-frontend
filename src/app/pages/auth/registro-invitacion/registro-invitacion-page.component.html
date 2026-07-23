@@ -25,18 +25,17 @@
 
       <div class="invitacion__divisor"><span>o</span></div>
 
-      <app-checkbox
-        label="He leído y acepto los Términos y Condiciones y la Política de Privacidad"
-        [checked]="aceptaTerminos()"
-        (checkedChange)="aceptaTerminos.set($event)"
-        [disabled]="registrando()"
-      />
-
       <div
         class="invitacion__google"
-        [class.invitacion__google--bloqueado]="!aceptaTerminos() || registrando()"
+        [class.invitacion__google--bloqueado]="registrando()"
         #googleButton
       ></div>
+
+      <p class="invitacion__terms">
+        Al registrarte aceptas nuestros
+        <a routerLink="/terminos" appLink>Términos de uso</a> y la
+        <a routerLink="/privacidad" appLink>Política de privacidad</a>.
+      </p>
 
       @if (error()) {
         <p class="invitacion__error" role="alert">{{ error() }}</p>

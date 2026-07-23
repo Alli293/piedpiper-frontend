@@ -15,7 +15,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { AuthLayoutComponent } from '../../../shared/layouts/auth-layout/auth-layout.component';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
-import { CheckboxComponent } from '../../../shared/components/inputs/checkbox/checkbox.component';
 import { SemanticCardComponent } from '../../../shared/components/semantic-card/semantic-card.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { LinkDirective } from '../../../shared/components/link/link.directive';
@@ -33,7 +32,6 @@ import { RegistroInvitacionCorreoFormComponent } from './registro-invitacion-cor
   imports: [
     AuthLayoutComponent,
     BadgeComponent,
-    CheckboxComponent,
     HeadingComponent,
     RouterLink,
     LinkDirective,
@@ -59,7 +57,6 @@ export class RegistroInvitacionPageComponent implements OnInit {
   protected readonly cargando = signal(true);
   protected readonly invitacion = signal<InvitacionPublica | null>(null);
   protected readonly mensajePantalla = signal('');
-  protected readonly aceptaTerminos = signal(false);
   protected readonly registrando = signal(false);
   protected readonly error = signal('');
   protected readonly cuentaExistente = signal(false);
@@ -85,14 +82,14 @@ export class RegistroInvitacionPageComponent implements OnInit {
   }
 
   protected registrar(idToken: string): void {
-    if (!this.aceptaTerminos() || this.registrando()) {
+    if (this.registrando()) {
       return;
     }
     this.error.set('');
     this.cuentaExistente.set(false);
     this.registrando.set(true);
     this.authService
-      .registrarConInvitacion(this.token(), idToken, this.aceptaTerminos())
+      .registrarConInvitacion(this.token(), idToken, true)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (respuesta) => {
