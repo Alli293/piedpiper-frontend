@@ -109,6 +109,16 @@ export class AuthService {
     });
   }
 
+  verificarCorreo(token: string): Observable<MensajeResponse> {
+    return this.http.get<MensajeResponse>(`${this.baseUrl}/verificar-correo`, {
+      params: { token },
+    });
+  }
+
+  reenviarVerificacion(email: string): Observable<MensajeResponse> {
+    return this.http.post<MensajeResponse>(`${this.baseUrl}/reenviar-verificacion`, { email });
+  }
+
   private login(request: LoginRequest): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.baseUrl}/login`, request)

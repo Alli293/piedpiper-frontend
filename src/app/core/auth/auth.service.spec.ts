@@ -115,6 +115,40 @@ describe('AuthService', () => {
     expect(localStorage.getItem('carbonhub.token')).toBeNull();
   });
 
+  it('verificarCorreo hace GET a /auth/verificar-correo con el token como query param', () => {
+    let recibida: { mensaje: string } | undefined;
+    service.verificarCorreo('tok-123').subscribe((r) => (recibida = r));
+
+    const req = httpMock.expectOne(`${base}/verificar-correo?token=tok-123`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ mensaje: 'Tu correo fue verificado. Ya puedes iniciar sesión.' });
+
+    expect(recibida!.mensaje).toBe('Tu correo fue verificado. Ya puedes iniciar sesión.');
+  });
+
+  it('verificarCorreo no guarda ningun token en localStorage', () => {
+    service.verificarCorreo('tok-123').subscribe();
+
+    const req = httpMock.expectOne(`${base}/verificar-correo?token=tok-123`);
+    req.flush({ mensaje: 'OK' });
+
+    expect(localStorage.getItem('carbonhub.token')).toBeNull();
+  });
+
+  it('reenviarVerificacion hace POST a /auth/reenviar-verificacion con el email', () => {
+    let recibida: { mensaje: string } | undefined;
+    service.reenviarVerificacion('ana@correo.com').subscribe((r) => (recibida = r));
+
+    const req = httpMock.expectOne(`${base}/reenviar-verificacion`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ email: 'ana@correo.com' });
+    req.flush({ mensaje: 'Si tu cuenta requiere verificación, te enviamos un nuevo enlace.' });
+
+    expect(recibida!.mensaje).toBe(
+      'Si tu cuenta requiere verificación, te enviamos un nuevo enlace.'
+    );
+  });
+
   it('cerrarSesion limpia el token', () => {
     localStorage.setItem('carbonhub.token', 'x');
     service.cerrarSesion();
