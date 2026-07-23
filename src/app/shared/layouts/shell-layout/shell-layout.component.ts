@@ -16,7 +16,7 @@ import {
 const COMPANY_NAME = 'Café del Valle S.A.';
 const COMPANY_INITIALS = 'CV';
 
-export type SidebarVariant = 'empresa' | 'auditor';
+export type SidebarVariant = 'empresa' | 'auditor' | 'auto';
 
 /** Ids this shell's own sidebarConfig can ever emit. */
 type ShellMenuItemId = SidebarNavId | AuditorSidebarNavId | SidebarBottomItemId;
@@ -38,7 +38,7 @@ export class ShellLayoutComponent {
 
   activeId = input<SidebarNavId | AuditorSidebarNavId>();
   variant = input<SidebarNavVariant>('empresa');
-  sidebarVariant = input<SidebarVariant>('empresa');
+  sidebarVariant = input<SidebarVariant>('auto');
   companyName = input(COMPANY_NAME);
   companyRole = input('Empresa · Admin');
   companyInitials = input(COMPANY_INITIALS);
@@ -53,8 +53,16 @@ export class ShellLayoutComponent {
 
   backClicked = output<void>();
 
+  private readonly resolvedVariant = computed<'empresa' | 'auditor'>(() => {
+    const explicit = this.sidebarVariant();
+    if (explicit === 'empresa' || explicit === 'auditor') return explicit;
+    // Auto-detect from role
+    const role = this.authSessionService.getRole();
+    return role === 'auditor_certificado' ? 'auditor' : 'empresa';
+  });
+
   protected readonly sidebarConfig = computed(() => {
-    if (this.sidebarVariant() === 'auditor') {
+    if (this.resolvedVariant() === 'auditor') {
       return buildAuditorSidebarConfig({
         activeId: this.activeId() as AuditorSidebarNavId | undefined,
         auditorName: this.authSessionService.getUserName() || 'Auditor',
