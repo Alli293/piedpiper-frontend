@@ -27,4 +27,24 @@ describe('EvolucionService', () => {
       serie: Array.from({ length: 12 }, (_, i) => ({ mes: i + 1, totalCarbonKg: 0 })),
     });
   });
+
+  it('devuelve una serie de 12 puntos mensuales', async () => {
+    const serie = Array.from({ length: 12 }, (_, i) => ({
+      mes: i + 1,
+      totalCarbonKg: (i + 1) * 100,
+    }));
+
+    let result: any;
+    service.obtenerEvolucion(2025).subscribe((resp) => {
+      result = resp;
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/emisiones/evolucion?anio=2025`);
+    req.flush({ anio: 2025, serie });
+
+    expect(result.anio).toBe(2025);
+    expect(result.serie).toHaveLength(12);
+    expect(result.serie[0].totalCarbonKg).toBe(100);
+    expect(result.serie[11].totalCarbonKg).toBe(1200);
+  });
 });

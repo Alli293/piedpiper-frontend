@@ -25,6 +25,15 @@ describe('ImaPanelComponent', () => {
     expect(el.querySelector('.ima-gauge__value')?.textContent?.trim()).toBe('71');
   });
 
+  it('muestra N/A cuando puntaje intensidad sectorial es null', () => {
+    componentRef.setInput('ima', imaParcial());
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const naElement = el.querySelector('.ima-dim__score--na');
+    expect(naElement).toBeTruthy();
+    expect(naElement?.textContent?.trim()).toBe('N/A');
+  });
+
   it('muestra aviso cuando parcial', () => {
     componentRef.setInput('ima', imaParcial());
     fixture.detectChanges();
@@ -35,6 +44,19 @@ describe('ImaPanelComponent', () => {
     componentRef.setInput('ima', imaCompleto());
     fixture.detectChanges();
     expect((fixture.nativeElement as HTMLElement).querySelector('.ima-card__notice')).toBeFalsy();
+  });
+
+  it('muestra interpretacion IA cuando presente', () => {
+    const ima = imaCompleto();
+    ima.interpretacionIa = 'Tu empresa muestra buen desempeño ambiental.';
+    componentRef.setInput('ima', ima);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const interpretation = el.querySelector('.ima-card__interpretation');
+    expect(interpretation).toBeTruthy();
+    expect(interpretation?.textContent?.trim()).toBe(
+      'Tu empresa muestra buen desempeño ambiental.'
+    );
   });
 
   function imaCompleto(): ImaResponse {

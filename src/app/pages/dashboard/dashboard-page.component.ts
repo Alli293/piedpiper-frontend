@@ -1,15 +1,17 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { HttpErrorResponse } from '@angular/common/http';
+import { AuthSessionService } from '../../core/auth-session.service';
 import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
 import {
   SelectInputComponent,
   SelectOption,
 } from '../../shared/components/inputs/select-input/select-input.component';
+import { LinkDirective } from '../../shared/components/link/link.directive';
 import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../shared/services/toast.service';
+import { apiErrorMessage } from '../../shared/utils/http-error.utils';
 import { ComparacionEmisionesResponse, EstadoComparacion } from '../emissions/models/emision.model';
 import { EmisionesService } from '../emissions/emisiones.service';
 import { EvolucionService, PuntoMensual } from './evolucion.service';
@@ -26,6 +28,7 @@ interface EstadoVisual {
   selector: 'app-dashboard-page',
   imports: [
     CardStatComponent,
+    LinkDirective,
     RouterLink,
     SelectInputComponent,
     ShellLayoutComponent,
@@ -40,6 +43,7 @@ export class DashboardPageComponent implements OnInit {
   private readonly emisionesService = inject(EmisionesService);
   private readonly evolucionService = inject(EvolucionService);
   private readonly imaService = inject(ImaService);
+  private readonly authSession = inject(AuthSessionService);
   private readonly toastService = inject(ToastService);
 
   protected readonly anioActual = new Date().getFullYear();
@@ -65,7 +69,7 @@ export class DashboardPageComponent implements OnInit {
     sectionLabel: 'PANEL EMPRESARIAL',
     pageTitle: 'Dashboard',
     showNotificationDot: true,
-    userInitials: 'MR',
+    userInitials: this.authSession.getUserInitials(),
   }));
 
   protected readonly consumoBarra = computed(() => {
@@ -106,15 +110,7 @@ export class DashboardPageComponent implements OnInit {
 
   protected tieneEstado(estado: EstadoComparacion): boolean {
     const comparacion = this.comparacion();
-    return comparacion ? this.estadoPresentacion(comparacion) === estado : false;
-  }
-
-  protected estadoPresentacion(comparacion: ComparacionEmisionesResponse): EstadoComparacion {
-    const porcentaje = comparacion.porcentajeConsumido;
-    if (comparacion.limiteT === null || porcentaje === null) return 'sin_limite';
-    if (porcentaje > 100) return 'superado';
-    if (porcentaje >= 80) return 'cerca';
-    return 'dentro';
+    return comparacion?.estado === estado;
   }
 
   protected formatToneladas(valor: number | null): string {
@@ -143,7 +139,7 @@ export class DashboardPageComponent implements OnInit {
 
   protected detalleLimiteResumen(comparacion: ComparacionEmisionesResponse): string {
     if (comparacion.limiteT === null || comparacion.porcentajeConsumido === null) {
-      return 'Sin limite declarado';
+      return 'Sin límite declarado';
     }
 
     return `${this.formatToneladas(comparacion.huellaAcumuladaT)} / ${this.formatToneladas(
@@ -156,9 +152,9 @@ export class DashboardPageComponent implements OnInit {
     try {
       const comparacion = await firstValueFrom(this.emisionesService.obtenerComparacion(anio));
       this.comparacion.set(comparacion);
-    } catch {
+    } catch (err: unknown) {
       this.toastService.error(
-        'No se pudo cargar la comparación. Intente nuevamente.',
+        apiErrorMessage(err) ?? 'No se pudo cargar la comparación. Intente nuevamente.',
         undefined,
         5000
       );
@@ -173,11 +169,11 @@ export class DashboardPageComponent implements OnInit {
       this.evolucionSerie.set(resp.serie);
       this.evolucionVacia.set(resp.serie.every((p) => p.totalCarbonKg === 0));
     } catch (err: unknown) {
-      const mensaje =
-        err instanceof HttpErrorResponse
-          ? (err.error?.message ?? 'No se pudo cargar la evolución histórica. Intente nuevamente.')
-          : 'No se pudo cargar la evolución histórica. Intente nuevamente.';
-      this.toastService.error(mensaje, undefined, 5000);
+      this.toastService.error(
+        apiErrorMessage(err) ?? 'No se pudo cargar la evolución histórica. Intente nuevamente.',
+        undefined,
+        5000
+      );
     }
   }
 
@@ -186,11 +182,11 @@ export class DashboardPageComponent implements OnInit {
       const ima = await firstValueFrom(this.imaService.obtenerIma(anio, mes));
       this.imaData.set(ima);
     } catch (err: unknown) {
-      const mensaje =
-        err instanceof HttpErrorResponse
-          ? (err.error?.message ?? 'No se pudo calcular tu IMA. Intente nuevamente.')
-          : 'No se pudo calcular tu IMA. Intente nuevamente.';
-      this.toastService.error(mensaje, undefined, 5000);
+      this.toastService.error(
+        apiErrorMessage(err) ?? 'No se pudo calcular tu IMA. Intente nuevamente.',
+        undefined,
+        5000
+      );
     }
   }
 }

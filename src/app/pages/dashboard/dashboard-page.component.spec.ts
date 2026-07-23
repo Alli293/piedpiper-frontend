@@ -201,4 +201,27 @@ describe('DashboardPageComponent', () => {
       5000
     );
   });
+
+  it('persiste el mes seleccionado cuando el usuario cambia mes en IMA', async () => {
+    const imaService = TestBed.inject(ImaService) as any;
+    const obtenerImaSpy = vi.spyOn(imaService, 'obtenerIma').mockReturnValue(
+      of({
+        cobertura: 75,
+        puntajeIntensidadSectorial: 58,
+        consistencia: 80,
+        ima: 71,
+        parcial: false,
+        motivoParcial: null,
+        intensidad: 1.5,
+        calculatedAt: '2026-03-18T00:00:00Z',
+        interpretacionIa: null,
+      })
+    );
+
+    (component as any).onImaPeriodoChange({ anio: 2026, mes: 3 });
+    await fixture.whenStable();
+
+    expect((component as any).mesSeleccionado()).toBe(3);
+    expect(obtenerImaSpy).toHaveBeenCalledWith(2026, 3);
+  });
 });

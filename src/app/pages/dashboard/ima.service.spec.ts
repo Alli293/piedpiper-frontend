@@ -34,4 +34,28 @@ describe('ImaService', () => {
       interpretacionIa: null,
     });
   });
+
+  it('maneja respuesta parcial cuando el sector no tiene suficientes empresas', () => {
+    let result: any;
+    service.obtenerIma(2026, 1).subscribe((resp) => {
+      result = resp;
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/ima?anio=2026&mes=1`);
+    req.flush({
+      cobertura: 50,
+      puntajeIntensidadSectorial: null,
+      consistencia: 25,
+      ima: 37.5,
+      parcial: true,
+      motivoParcial: 'Tu sector no tiene suficientes empresas.',
+      intensidad: null,
+      calculatedAt: '2026-01-18T00:00:00Z',
+      interpretacionIa: null,
+    });
+
+    expect(result.parcial).toBe(true);
+    expect(result.puntajeIntensidadSectorial).toBeNull();
+    expect(result.motivoParcial).toBe('Tu sector no tiene suficientes empresas.');
+  });
 });
