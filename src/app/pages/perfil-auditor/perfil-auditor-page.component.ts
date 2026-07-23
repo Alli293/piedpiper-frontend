@@ -12,6 +12,7 @@ import { ToastService } from '../../shared/services/toast.service';
 import { PerfilAuditorService } from '../../core/perfil-auditor/perfil-auditor.service';
 import { AuthSessionService } from '../../core/auth-session.service';
 import { ActualizarPerfilRequest } from '../../core/models/perfil-auditor.model';
+import { CatalogoItem } from '../../core/models/catalogo.model';
 import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
 import { fieldError } from '../../shared/utils/form-field.utils';
 import { apiErrorMessage } from '../../shared/utils/http-error.utils';
@@ -23,14 +24,6 @@ interface PerfilAuditorFormModel {
 
 const MAX_ESPECIALIDADES = 8;
 const MAX_DESCRIPCION = 500;
-
-/** Converts ENUM_NAME to human-readable label (e.g., HUELLA_CARBONO → Huella de carbono) */
-function formatearNombreEnum(valor: string): string {
-  return valor
-    .replace(/_/g, ' ')
-    .toLowerCase()
-    .replace(/^\w/, (c) => c.toUpperCase());
-}
 
 @Component({
   selector: 'app-perfil-auditor-page',
@@ -53,8 +46,8 @@ export class PerfilAuditorPageComponent implements OnInit {
 
   protected readonly cargandoCatalogos = signal(true);
   protected readonly errorCatalogos = signal(false);
-  protected readonly especialidades = signal<string[]>([]);
-  protected readonly zonasCobertura = signal<string[]>([]);
+  protected readonly especialidades = signal<CatalogoItem[]>([]);
+  protected readonly zonasCobertura = signal<CatalogoItem[]>([]);
 
   // Multi-select state (arrays managed via signals, not form model)
   protected readonly especialidadesSeleccionadas = signal<string[]>([]);
@@ -113,7 +106,10 @@ export class PerfilAuditorPageComponent implements OnInit {
     () => `${this.model().descripcionProfesional.length}/${MAX_DESCRIPCION}`
   );
 
-  // Overall form validity (combines signal form + array validations)
+  // Overall form validity (combines signal form + array validations).
+  // NOTE: The descripcion length check here is intentionally redundant with the form schema
+  // validation. formularioInvalido() must work independently of whether fields are touched/dirty,
+  // while the schema validation only fires when the field is dirty.
   protected readonly formularioInvalido = computed(() => {
     const especialidades = this.especialidadesSeleccionadas();
     const zonas = this.zonasSeleccionadas();
@@ -137,7 +133,7 @@ export class PerfilAuditorPageComponent implements OnInit {
     sectionLabel: 'PERFIL AUDITOR',
     pageTitle: 'Mi Perfil de Auditor',
     showNotificationDot: false,
-    userInitials: 'AU',
+    userInitials: this.userInitials(),
   }));
 
   // Display-only signals for profile header card
@@ -182,10 +178,6 @@ export class PerfilAuditorPageComponent implements OnInit {
 
   protected isZonaSeleccionada(valor: string): boolean {
     return this.zonasSeleccionadas().includes(valor);
-  }
-
-  protected formatearNombre(valor: string): string {
-    return formatearNombreEnum(valor);
   }
 
   protected handleSubmit(event: Event): void {

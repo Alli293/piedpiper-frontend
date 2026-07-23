@@ -6,6 +6,7 @@ import {
   ActualizarPerfilRequest,
   PerfilAuditorResponse,
 } from '../models/perfil-auditor.model';
+import { CatalogoItem } from '../models/catalogo.model';
 
 @Injectable({ providedIn: 'root' })
 export class PerfilAuditorService {
@@ -22,15 +23,15 @@ export class PerfilAuditorService {
     );
   }
 
-  obtenerEspecialidades(): Observable<string[]> {
-    return this.http.get<string[]>(
+  obtenerEspecialidades(): Observable<CatalogoItem[]> {
+    return this.http.get<CatalogoItem[]>(
       `${environment.apiBaseUrl}/catalogos/especialidades`
     );
   }
 
-  obtenerZonasCobertura(): Observable<string[]> {
-    return this.http.get<string[]>(
-      `${environment.apiBaseUrl}/catalogos/zonas-cobertura`
+  obtenerZonasCobertura(): Observable<CatalogoItem[]> {
+    return this.http.get<CatalogoItem[]>(
+      `${environment.apiBaseUrl}/catalogos/zonas`
     );
   }
 }

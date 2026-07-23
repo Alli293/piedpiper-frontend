@@ -9,6 +9,12 @@ import { ToastService } from '../../shared/services/toast.service';
 import { AuthSessionService } from '../../core/auth-session.service';
 import { environment } from '../../../environments/environment';
 
+/**
+ * NOTE: Bracket notation (component['signalName']()) is used intentionally throughout
+ * these tests. This is a common Angular testing pattern for signal-based components
+ * that allows unit testing internal state without requiring DOM interaction or
+ * template rendering for every assertion.
+ */
 describe('PerfilAuditorPageComponent', () => {
   let fixture: ComponentFixture<PerfilAuditorPageComponent>;
   let component: PerfilAuditorPageComponent;
@@ -16,16 +22,20 @@ describe('PerfilAuditorPageComponent', () => {
   let toastService: ToastService;
 
   const urlEspecialidades = `${environment.apiBaseUrl}/catalogos/especialidades`;
-  const urlZonas = `${environment.apiBaseUrl}/catalogos/zonas-cobertura`;
+  const urlZonas = `${environment.apiBaseUrl}/catalogos/zonas`;
 
   const mockAuditorId = '550e8400-e29b-41d4-a716-446655440000';
 
   const mockEspecialidades = [
-    'HUELLA_CARBONO',
-    'ENERGIA_RENOVABLE',
-    'GESTION_RESIDUOS',
+    { valor: 'HUELLA_CARBONO', etiqueta: 'Huella carbono' },
+    { valor: 'ENERGIA_RENOVABLE', etiqueta: 'Energia renovable' },
+    { valor: 'GESTION_RESIDUOS', etiqueta: 'Gestion residuos' },
   ];
-  const mockZonas = ['SAN_JOSE', 'ALAJUELA', 'CARTAGO'];
+  const mockZonas = [
+    { valor: 'SAN_JOSE', etiqueta: 'San jose' },
+    { valor: 'ALAJUELA', etiqueta: 'Alajuela' },
+    { valor: 'CARTAGO', etiqueta: 'Cartago' },
+  ];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

@@ -33,11 +33,11 @@
             <fieldset class="ch-perfil-auditor__fieldset">
               <legend class="ch-perfil-auditor__card-title">Especialidades</legend>
               <div class="ch-perfil-auditor__chip-grid">
-                @for (esp of especialidades(); track esp) {
+                @for (esp of especialidades(); track esp.valor) {
                   <app-checkbox
-                    [label]="formatearNombre(esp)"
-                    [checked]="isEspecialidadSeleccionada(esp)"
-                    (checkedChange)="toggleEspecialidad(esp)"
+                    [label]="esp.etiqueta"
+                    [checked]="isEspecialidadSeleccionada(esp.valor)"
+                    (checkedChange)="toggleEspecialidad(esp.valor)"
                   />
                 }
               </div>
@@ -52,11 +52,11 @@
             <fieldset class="ch-perfil-auditor__fieldset">
               <legend class="ch-perfil-auditor__card-title">Zonas de cobertura</legend>
               <div class="ch-perfil-auditor__chip-grid">
-                @for (zona of zonasCobertura(); track zona) {
+                @for (zona of zonasCobertura(); track zona.valor) {
                   <app-checkbox
-                    [label]="formatearNombre(zona)"
-                    [checked]="isZonaSeleccionada(zona)"
-                    (checkedChange)="toggleZona(zona)"
+                    [label]="zona.etiqueta"
+                    [checked]="isZonaSeleccionada(zona.valor)"
+                    (checkedChange)="toggleZona(zona.valor)"
                   />
                 }
               </div>

@@ -59,7 +59,10 @@ describe('PerfilAuditorService', () => {
 
   describe('obtenerEspecialidades', () => {
     it('envía GET a /api/catalogos/especialidades', () => {
-      const mockEspecialidades = ['HUELLA_CARBONO', 'ENERGIA_RENOVABLE'];
+      const mockEspecialidades = [
+        { valor: 'HUELLA_CARBONO', etiqueta: 'Huella carbono' },
+        { valor: 'ENERGIA_RENOVABLE', etiqueta: 'Energia renovable' },
+      ];
 
       let resultado: any;
       service.obtenerEspecialidades().subscribe((r) => (resultado = r));
@@ -73,13 +76,16 @@ describe('PerfilAuditorService', () => {
   });
 
   describe('obtenerZonasCobertura', () => {
-    it('envía GET a /api/catalogos/zonas-cobertura', () => {
-      const mockZonas = ['SAN_JOSE', 'HEREDIA'];
+    it('envía GET a /api/catalogos/zonas', () => {
+      const mockZonas = [
+        { valor: 'SAN_JOSE', etiqueta: 'San jose' },
+        { valor: 'HEREDIA', etiqueta: 'Heredia' },
+      ];
 
       let resultado: any;
       service.obtenerZonasCobertura().subscribe((r) => (resultado = r));
 
-      const req = httpMock.expectOne(`${baseCatalogos}/zonas-cobertura`);
+      const req = httpMock.expectOne(`${baseCatalogos}/zonas`);
       expect(req.request.method).toBe('GET');
       req.flush(mockZonas);
 

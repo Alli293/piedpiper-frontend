@@ -9,18 +9,28 @@ import { PerfilAuditorPageComponent } from './perfil-auditor-page.component';
 import { environment } from '../../../environments/environment';
 
 const catalogoEspecialidades = [
-  'HUELLA_CARBONO',
-  'ENERGIA_RENOVABLE',
-  'GESTION_RESIDUOS',
-  'EFICIENCIA_ENERGETICA',
-  'BIODIVERSIDAD',
-  'ECONOMIA_CIRCULAR',
-  'TRANSPORTE_SOSTENIBLE',
-  'AGUA_Y_SANEAMIENTO',
-  'CAMBIO_CLIMATICO',
-  'RESPONSABILIDAD_SOCIAL',
+  { valor: 'HUELLA_CARBONO', etiqueta: 'Huella carbono' },
+  { valor: 'ENERGIA_RENOVABLE', etiqueta: 'Energia renovable' },
+  { valor: 'GESTION_RESIDUOS', etiqueta: 'Gestion residuos' },
+  { valor: 'EFICIENCIA_ENERGETICA', etiqueta: 'Eficiencia energetica' },
+  { valor: 'BIODIVERSIDAD', etiqueta: 'Biodiversidad' },
+  { valor: 'ECONOMIA_CIRCULAR', etiqueta: 'Economia circular' },
+  { valor: 'TRANSPORTE_SOSTENIBLE', etiqueta: 'Transporte sostenible' },
+  { valor: 'AGUA_Y_SANEAMIENTO', etiqueta: 'Agua y saneamiento' },
+  { valor: 'CAMBIO_CLIMATICO', etiqueta: 'Cambio climatico' },
+  { valor: 'RESPONSABILIDAD_SOCIAL', etiqueta: 'Responsabilidad social' },
 ];
-const catalogoZonas = ['SAN_JOSE', 'ALAJUELA', 'CARTAGO', 'HEREDIA', 'GUANACASTE', 'PUNTARENAS', 'LIMON'];
+const catalogoEspecialidadesValores = catalogoEspecialidades.map((e) => e.valor);
+const catalogoZonas = [
+  { valor: 'SAN_JOSE', etiqueta: 'San jose' },
+  { valor: 'ALAJUELA', etiqueta: 'Alajuela' },
+  { valor: 'CARTAGO', etiqueta: 'Cartago' },
+  { valor: 'HEREDIA', etiqueta: 'Heredia' },
+  { valor: 'GUANACASTE', etiqueta: 'Guanacaste' },
+  { valor: 'PUNTARENAS', etiqueta: 'Puntarenas' },
+  { valor: 'LIMON', etiqueta: 'Limon' },
+];
+const catalogoZonasValores = catalogoZonas.map((z) => z.valor);
 
 /**
  * Property 8: Frontend specialties cardinality blocks submission
@@ -36,7 +46,7 @@ describe('Property 8: Frontend specialties cardinality blocks submission', () =>
   let httpMock: HttpTestingController;
 
   const urlEspecialidades = `${environment.apiBaseUrl}/catalogos/especialidades`;
-  const urlZonas = `${environment.apiBaseUrl}/catalogos/zonas-cobertura`;
+  const urlZonas = `${environment.apiBaseUrl}/catalogos/zonas`;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -61,11 +71,11 @@ describe('Property 8: Frontend specialties cardinality blocks submission', () =>
     fixture.detectChanges();
   }
 
-  // Arbitrary: generate arrays with >8 items (uses catalog + synthetic extras)
+  // Arbitrary: generate arrays with >8 items (uses catalog valores + synthetic extras)
   const tooManyEspecialidades = fc.integer({ min: 9, max: 15 }).chain((size) =>
-    fc.shuffledSubarray(catalogoEspecialidades, {
-      minLength: catalogoEspecialidades.length,
-      maxLength: catalogoEspecialidades.length,
+    fc.shuffledSubarray(catalogoEspecialidadesValores, {
+      minLength: catalogoEspecialidadesValores.length,
+      maxLength: catalogoEspecialidadesValores.length,
     }).map((arr) => {
       const result = [...arr];
       for (let i = arr.length; i < size; i++) {
@@ -75,9 +85,9 @@ describe('Property 8: Frontend specialties cardinality blocks submission', () =>
     })
   );
 
-  // Arbitrary: generate valid specialty arrays (1-8 items from catalog)
+  // Arbitrary: generate valid specialty arrays (1-8 items from catalog valores)
   const validEspecialidades = fc.integer({ min: 1, max: 8 }).chain((size) =>
-    fc.shuffledSubarray(catalogoEspecialidades, { minLength: size, maxLength: size })
+    fc.shuffledSubarray(catalogoEspecialidadesValores, { minLength: size, maxLength: size })
   );
 
   // Arbitrary: valid description (0-500 chars)
@@ -85,7 +95,7 @@ describe('Property 8: Frontend specialties cardinality blocks submission', () =>
 
   // Arbitrary: at least one valid zona
   const validZonas = fc.integer({ min: 1, max: 7 }).chain((size) =>
-    fc.shuffledSubarray(catalogoZonas, { minLength: size, maxLength: size })
+    fc.shuffledSubarray(catalogoZonasValores, { minLength: size, maxLength: size })
   );
 
   it('formularioInvalido() es true cuando especialidades tiene 0 items (con otros campos válidos)', () => {
@@ -156,16 +166,20 @@ describe('Property 9: Frontend description length blocks submission', () => {
   let httpMock: HttpTestingController;
 
   const urlEspecialidades = `${environment.apiBaseUrl}/catalogos/especialidades`;
-  const urlZonas = `${environment.apiBaseUrl}/catalogos/zonas-cobertura`;
+  const urlZonas = `${environment.apiBaseUrl}/catalogos/zonas`;
 
   const mockEspecialidades = [
-    'HUELLA_CARBONO',
-    'ENERGIA_RENOVABLE',
-    'GESTION_RESIDUOS',
-    'EFICIENCIA_ENERGETICA',
-    'BIODIVERSIDAD',
+    { valor: 'HUELLA_CARBONO', etiqueta: 'Huella carbono' },
+    { valor: 'ENERGIA_RENOVABLE', etiqueta: 'Energia renovable' },
+    { valor: 'GESTION_RESIDUOS', etiqueta: 'Gestion residuos' },
+    { valor: 'EFICIENCIA_ENERGETICA', etiqueta: 'Eficiencia energetica' },
+    { valor: 'BIODIVERSIDAD', etiqueta: 'Biodiversidad' },
   ];
-  const mockZonas = ['SAN_JOSE', 'ALAJUELA', 'CARTAGO'];
+  const mockZonas = [
+    { valor: 'SAN_JOSE', etiqueta: 'San jose' },
+    { valor: 'ALAJUELA', etiqueta: 'Alajuela' },
+    { valor: 'CARTAGO', etiqueta: 'Cartago' },
+  ];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
