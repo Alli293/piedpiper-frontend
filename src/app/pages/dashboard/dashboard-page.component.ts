@@ -90,20 +90,11 @@ export class DashboardPageComponent implements OnInit {
       const blob = await firstValueFrom(this.dashboardService.exportarReportePdf(anio));
       this.descargarBlob(blob, `reporte-huella-${anio}.pdf`);
     } catch (error: unknown) {
-      if (error instanceof HttpErrorResponse && error.status >= 500) {
-        this.toastService.error(
-          'No se pudo generar el reporte PDF. Intente nuevamente.',
-          undefined,
-          5000
-        );
-        return;
-      }
-      this.toastService.error(
-        (await apiErrorMessageAsync(error)) ??
-          'No se pudo descargar el reporte. Intente nuevamente.',
-        undefined,
-        5000
-      );
+      const fallback =
+        error instanceof HttpErrorResponse && error.status >= 500
+          ? 'No se pudo generar el reporte PDF. Intente nuevamente.'
+          : 'No se pudo descargar el reporte. Intente nuevamente.';
+      this.toastService.error((await apiErrorMessageAsync(error)) ?? fallback, undefined, 5000);
     } finally {
       this.exportandoPdf.set(false);
     }

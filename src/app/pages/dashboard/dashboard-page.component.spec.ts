@@ -239,6 +239,26 @@ describe('DashboardPageComponent', () => {
     );
   });
 
+  it('muestra mensaje de API si el 500 de exportación llega como blob JSON', async () => {
+    const error = new Blob(
+      [JSON.stringify({ message: 'No se pudo generar el reporte PDF desde la API.' })],
+      {
+        type: 'application/json',
+      }
+    );
+    dashboardService.exportarReportePdf.mockReturnValueOnce(
+      throwError(() => new HttpErrorResponse({ status: 500, error }))
+    );
+
+    await (component as any).exportarPdf();
+
+    expect(toastService.error).toHaveBeenCalledWith(
+      'No se pudo generar el reporte PDF desde la API.',
+      undefined,
+      5000
+    );
+  });
+
   it('muestra mensaje de API cuando el error de descarga llega como blob JSON', async () => {
     const error = new Blob([JSON.stringify({ message: 'Año inválido.' })], {
       type: 'application/json',
@@ -250,5 +270,17 @@ describe('DashboardPageComponent', () => {
     await (component as any).exportarPdf();
 
     expect(toastService.error).toHaveBeenCalledWith('Año inválido.', undefined, 5000);
+  });
+
+  it('muestra fallback de descarga cuando ocurre un error de red', async () => {
+    dashboardService.exportarReportePdf.mockReturnValueOnce(throwError(() => new Error('offline')));
+
+    await (component as any).exportarPdf();
+
+    expect(toastService.error).toHaveBeenCalledWith(
+      'No se pudo descargar el reporte. Intente nuevamente.',
+      undefined,
+      5000
+    );
   });
 });
