@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { form, FormField, schema, validate } from '@angular/forms/signals';
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
@@ -9,8 +10,11 @@ import { CheckboxComponent } from '../../shared/components/inputs/checkbox/check
 import { TextareaComponent } from '../../shared/components/inputs/textarea/textarea.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { PerfilAuditorService } from '../../core/perfil-auditor/perfil-auditor.service';
+import { AuthSessionService } from '../../core/auth-session.service';
+import { ActualizarPerfilRequest } from '../../core/models/perfil-auditor.model';
 import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
 import { fieldError } from '../../shared/utils/form-field.utils';
+import { apiErrorMessage } from '../../shared/utils/http-error.utils';
 
 interface PerfilAuditorFormModel {
   descripcionProfesional: string;
@@ -36,6 +40,7 @@ const MAX_DESCRIPCION = 500;
 })
 export class PerfilAuditorPageComponent implements OnInit {
   private readonly perfilAuditorService = inject(PerfilAuditorService);
+  private readonly authSessionService = inject(AuthSessionService);
   private readonly toastService = inject(ToastService);
 
   protected readonly cargandoCatalogos = signal(true);
@@ -165,6 +170,46 @@ export class PerfilAuditorPageComponent implements OnInit {
     this.especialidadesTocado.set(true);
     this.zonasTocado.set(true);
     this.perfilForm.descripcionProfesional().markAsTouched();
+
+    if (this.formularioInvalido()) {
+      return;
+    }
+
+    const auditorId = this.authSessionService.getUserId();
+    if (!auditorId) {
+      this.toastService.error('No se pudo identificar al usuario. Inicie sesión nuevamente.');
+      return;
+    }
+
+    const dto: ActualizarPerfilRequest = {
+      especialidades: this.especialidadesSeleccionadas(),
+      zonasCobertura: this.zonasSeleccionadas(),
+      disponible: this.model().disponible,
+      descripcionProfesional: this.model().descripcionProfesional || null,
+    };
+
+    this.guardando.set(true);
+
+    this.perfilAuditorService.actualizarPerfil(auditorId, dto).subscribe({
+      next: () => {
+        this.guardando.set(false);
+        this.toastService.success('Perfil actualizado correctamente.', undefined, 5000);
+      },
+      error: (err: unknown) => {
+        this.guardando.set(false);
+        this.manejarErrorGuardado(err);
+      },
+    });
+  }
+
+  private manejarErrorGuardado(error: unknown): void {
+    if (error instanceof HttpErrorResponse && error.status === 403) {
+      const mensaje = apiErrorMessage(error) ?? 'No tiene permiso para editar este perfil.';
+      this.toastService.error(mensaje);
+      return;
+    }
+
+    this.toastService.error('No se pudo guardar el perfil. Intente nuevamente.');
   }
 
   private cargarCatalogos(): void {

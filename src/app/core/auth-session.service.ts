@@ -17,6 +17,10 @@ export class AuthSessionService {
     return this.authService.token();
   }
 
+  getUserId(): string | null {
+    return this.getClaims()?.sub ?? null;
+  }
+
   isAdministradorEmpresa(): boolean {
     return this.getRole() === ADMINISTRADOR_EMPRESA;
   }
