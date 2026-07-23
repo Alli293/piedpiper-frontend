@@ -90,7 +90,9 @@ export interface BuildAuditorSidebarConfigOptions {
   settingsLabel?: string;
 }
 
-export function buildAuditorSidebarConfig(options: BuildAuditorSidebarConfigOptions): SidebarConfig {
+export function buildAuditorSidebarConfig(
+  options: BuildAuditorSidebarConfigOptions
+): SidebarConfig {
   const { activeId, auditorName, auditorInitials } = options;
 
   const menuItems: SidebarMenuItem[] = AUDITOR_NAV_ITEMS.map((item) => ({

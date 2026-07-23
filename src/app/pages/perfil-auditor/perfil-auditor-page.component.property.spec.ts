@@ -1,9 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import {
-  provideHttpClientTesting,
-  HttpTestingController,
-} from '@angular/common/http/testing';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import * as fc from 'fast-check';
 import { PerfilAuditorPageComponent } from './perfil-auditor-page.component';
 import { environment } from '../../../environments/environment';
@@ -73,30 +70,36 @@ describe('Property 8: Frontend specialties cardinality blocks submission', () =>
 
   // Arbitrary: generate arrays with >8 items (uses catalog valores + synthetic extras)
   const tooManyEspecialidades = fc.integer({ min: 9, max: 15 }).chain((size) =>
-    fc.shuffledSubarray(catalogoEspecialidadesValores, {
-      minLength: catalogoEspecialidadesValores.length,
-      maxLength: catalogoEspecialidadesValores.length,
-    }).map((arr) => {
-      const result = [...arr];
-      for (let i = arr.length; i < size; i++) {
-        result.push(`EXTRA_${i}`);
-      }
-      return result;
-    })
+    fc
+      .shuffledSubarray(catalogoEspecialidadesValores, {
+        minLength: catalogoEspecialidadesValores.length,
+        maxLength: catalogoEspecialidadesValores.length,
+      })
+      .map((arr) => {
+        const result = [...arr];
+        for (let i = arr.length; i < size; i++) {
+          result.push(`EXTRA_${i}`);
+        }
+        return result;
+      })
   );
 
   // Arbitrary: generate valid specialty arrays (1-8 items from catalog valores)
-  const validEspecialidades = fc.integer({ min: 1, max: 8 }).chain((size) =>
-    fc.shuffledSubarray(catalogoEspecialidadesValores, { minLength: size, maxLength: size })
-  );
+  const validEspecialidades = fc
+    .integer({ min: 1, max: 8 })
+    .chain((size) =>
+      fc.shuffledSubarray(catalogoEspecialidadesValores, { minLength: size, maxLength: size })
+    );
 
   // Arbitrary: valid description (0-500 chars)
   const validDescripcion = fc.string({ minLength: 0, maxLength: 100 });
 
   // Arbitrary: at least one valid zona
-  const validZonas = fc.integer({ min: 1, max: 7 }).chain((size) =>
-    fc.shuffledSubarray(catalogoZonasValores, { minLength: size, maxLength: size })
-  );
+  const validZonas = fc
+    .integer({ min: 1, max: 7 })
+    .chain((size) =>
+      fc.shuffledSubarray(catalogoZonasValores, { minLength: size, maxLength: size })
+    );
 
   it('formularioInvalido() es true cuando especialidades tiene 0 items (con otros campos válidos)', () => {
     fc.assert(
@@ -118,36 +121,46 @@ describe('Property 8: Frontend specialties cardinality blocks submission', () =>
 
   it('formularioInvalido() es true cuando especialidades tiene más de 8 items (con otros campos válidos)', () => {
     fc.assert(
-      fc.property(tooManyEspecialidades, validZonas, validDescripcion, (especialidades, zonas, descripcion) => {
-        createComponentAndFlushCatalogs();
+      fc.property(
+        tooManyEspecialidades,
+        validZonas,
+        validDescripcion,
+        (especialidades, zonas, descripcion) => {
+          createComponentAndFlushCatalogs();
 
-        // Set valid zonas
-        component['zonasSeleccionadas'].set(zonas);
-        // Set valid description
-        component['model'].set({ descripcionProfesional: descripcion, disponible: true });
-        // Set >8 especialidades
-        component['especialidadesSeleccionadas'].set(especialidades);
+          // Set valid zonas
+          component['zonasSeleccionadas'].set(zonas);
+          // Set valid description
+          component['model'].set({ descripcionProfesional: descripcion, disponible: true });
+          // Set >8 especialidades
+          component['especialidadesSeleccionadas'].set(especialidades);
 
-        expect(component['formularioInvalido']()).toBe(true);
-      }),
+          expect(component['formularioInvalido']()).toBe(true);
+        }
+      ),
       { numRuns: 100 }
     );
   });
 
   it('formularioInvalido() es false cuando especialidades tiene 1-8 items válidos (con otros campos válidos)', () => {
     fc.assert(
-      fc.property(validEspecialidades, validZonas, validDescripcion, (especialidades, zonas, descripcion) => {
-        createComponentAndFlushCatalogs();
+      fc.property(
+        validEspecialidades,
+        validZonas,
+        validDescripcion,
+        (especialidades, zonas, descripcion) => {
+          createComponentAndFlushCatalogs();
 
-        // Set valid zonas
-        component['zonasSeleccionadas'].set(zonas);
-        // Set valid description
-        component['model'].set({ descripcionProfesional: descripcion, disponible: true });
-        // Set valid especialidades (1-8 items)
-        component['especialidadesSeleccionadas'].set(especialidades);
+          // Set valid zonas
+          component['zonasSeleccionadas'].set(zonas);
+          // Set valid description
+          component['model'].set({ descripcionProfesional: descripcion, disponible: true });
+          // Set valid especialidades (1-8 items)
+          component['especialidadesSeleccionadas'].set(especialidades);
 
-        expect(component['formularioInvalido']()).toBe(false);
-      }),
+          expect(component['formularioInvalido']()).toBe(false);
+        }
+      ),
       { numRuns: 100 }
     );
   });
@@ -206,48 +219,42 @@ describe('Property 9: Frontend description length blocks submission', () => {
 
   it('formularioInvalido() returns true for any description with length > 500', () => {
     fc.assert(
-      fc.property(
-        fc.string({ minLength: 501, maxLength: 1500 }),
-        (descripcionLarga) => {
-          createComponentAndFlushCatalogs();
+      fc.property(fc.string({ minLength: 501, maxLength: 1500 }), (descripcionLarga) => {
+        createComponentAndFlushCatalogs();
 
-          // Set valid especialidades (1-8 items)
-          component['especialidadesSeleccionadas'].set(['HUELLA_CARBONO', 'ENERGIA_RENOVABLE']);
-          // Set valid zonas (1+ items)
-          component['zonasSeleccionadas'].set(['SAN_JOSE']);
-          // Set description > 500 chars
-          component['model'].set({
-            descripcionProfesional: descripcionLarga,
-            disponible: true,
-          });
+        // Set valid especialidades (1-8 items)
+        component['especialidadesSeleccionadas'].set(['HUELLA_CARBONO', 'ENERGIA_RENOVABLE']);
+        // Set valid zonas (1+ items)
+        component['zonasSeleccionadas'].set(['SAN_JOSE']);
+        // Set description > 500 chars
+        component['model'].set({
+          descripcionProfesional: descripcionLarga,
+          disponible: true,
+        });
 
-          expect(component['formularioInvalido']()).toBe(true);
-        }
-      ),
+        expect(component['formularioInvalido']()).toBe(true);
+      }),
       { numRuns: 100 }
     );
   });
 
   it('formularioInvalido() returns false for any description with length <= 500 (with other fields valid)', () => {
     fc.assert(
-      fc.property(
-        fc.string({ minLength: 0, maxLength: 500 }),
-        (descripcionValida) => {
-          createComponentAndFlushCatalogs();
+      fc.property(fc.string({ minLength: 0, maxLength: 500 }), (descripcionValida) => {
+        createComponentAndFlushCatalogs();
 
-          // Set valid especialidades (1-8 items)
-          component['especialidadesSeleccionadas'].set(['HUELLA_CARBONO', 'ENERGIA_RENOVABLE']);
-          // Set valid zonas (1+ items)
-          component['zonasSeleccionadas'].set(['SAN_JOSE']);
-          // Set description <= 500 chars
-          component['model'].set({
-            descripcionProfesional: descripcionValida,
-            disponible: true,
-          });
+        // Set valid especialidades (1-8 items)
+        component['especialidadesSeleccionadas'].set(['HUELLA_CARBONO', 'ENERGIA_RENOVABLE']);
+        // Set valid zonas (1+ items)
+        component['zonasSeleccionadas'].set(['SAN_JOSE']);
+        // Set description <= 500 chars
+        component['model'].set({
+          descripcionProfesional: descripcionValida,
+          disponible: true,
+        });
 
-          expect(component['formularioInvalido']()).toBe(false);
-        }
-      ),
+        expect(component['formularioInvalido']()).toBe(false);
+      }),
       { numRuns: 100 }
     );
   });

@@ -250,8 +250,6 @@ export class PerfilAuditorPageComponent implements OnInit {
   }
 
   private mostrarErrorCatalogo(_err: unknown): void {
-    this.toastService.error(
-      'No se pudo cargar el catálogo. Intente recargar la página.'
-    );
+    this.toastService.error('No se pudo cargar el catálogo. Intente recargar la página.');
   }
 }

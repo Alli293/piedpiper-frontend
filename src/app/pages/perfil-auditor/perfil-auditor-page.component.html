@@ -1,4 +1,8 @@
-<app-shell-layout [headerConfig]="headerConfig()" sidebarVariant="auditor" activeId="perfil-publico">
+<app-shell-layout
+  [headerConfig]="headerConfig()"
+  sidebarVariant="auditor"
+  activeId="perfil-publico"
+>
   <div class="ch-perfil-auditor">
     @if (cargandoCatalogos()) {
       <p class="ch-perfil-auditor__cargando">Cargando catálogos...</p>
@@ -42,7 +46,9 @@
                 }
               </div>
               @if (errorEspecialidades()) {
-                <p class="ch-perfil-auditor__field-error" role="alert">{{ errorEspecialidades() }}</p>
+                <p class="ch-perfil-auditor__field-error" role="alert">
+                  {{ errorEspecialidades() }}
+                </p>
               }
             </fieldset>
           </div>

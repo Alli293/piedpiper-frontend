@@ -1,9 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import {
-  provideHttpClientTesting,
-  HttpTestingController,
-} from '@angular/common/http/testing';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { PerfilAuditorPageComponent } from './perfil-auditor-page.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { AuthSessionService } from '../../core/auth-session.service';
@@ -136,18 +133,14 @@ describe('PerfilAuditorPageComponent', () => {
     expect(component['formularioBloqueado']()).toBe(true);
 
     const mensajes = toastService.toasts().map((t) => t.title);
-    expect(mensajes).toContain(
-      'No se pudo cargar el catálogo. Intente recargar la página.'
-    );
+    expect(mensajes).toContain('No se pudo cargar el catálogo. Intente recargar la página.');
   });
 
   it('muestra toast de error y bloquea formulario si falla carga de zonas', () => {
     fixture.detectChanges();
 
     httpMock.expectOne(urlEspecialidades).flush(mockEspecialidades);
-    httpMock
-      .expectOne(urlZonas)
-      .flush(null, { status: 500, statusText: 'Internal Server Error' });
+    httpMock.expectOne(urlZonas).flush(null, { status: 500, statusText: 'Internal Server Error' });
     fixture.detectChanges();
 
     expect(component['cargandoCatalogos']()).toBe(false);
@@ -155,9 +148,7 @@ describe('PerfilAuditorPageComponent', () => {
     expect(component['formularioBloqueado']()).toBe(true);
 
     const mensajes = toastService.toasts().map((t) => t.title);
-    expect(mensajes).toContain(
-      'No se pudo cargar el catálogo. Intente recargar la página.'
-    );
+    expect(mensajes).toContain('No se pudo cargar el catálogo. Intente recargar la página.');
   });
 
   // --- Form validation tests ---
@@ -193,10 +184,7 @@ describe('PerfilAuditorPageComponent', () => {
     });
 
     it('formularioInvalido() es false con especialidades 1-8, zonas válidas y descripción corta', () => {
-      component['especialidadesSeleccionadas'].set([
-        'HUELLA_CARBONO',
-        'ENERGIA_RENOVABLE',
-      ]);
+      component['especialidadesSeleccionadas'].set(['HUELLA_CARBONO', 'ENERGIA_RENOVABLE']);
       component['zonasSeleccionadas'].set(['SAN_JOSE', 'CARTAGO']);
       component['model'].set({
         descripcionProfesional: 'Mi descripción profesional',
@@ -284,7 +272,11 @@ describe('PerfilAuditorPageComponent', () => {
 
       expect(component['guardando']()).toBe(false);
       const mensajes = toastService.toasts();
-      expect(mensajes.some((t) => t.title === 'Perfil actualizado correctamente.' && t.variant === 'success')).toBe(true);
+      expect(
+        mensajes.some(
+          (t) => t.title === 'Perfil actualizado correctamente.' && t.variant === 'success'
+        )
+      ).toBe(true);
     });
 
     it('en respuesta 403, guardando es false y muestra toast con mensaje del backend', () => {
@@ -299,7 +291,11 @@ describe('PerfilAuditorPageComponent', () => {
 
       expect(component['guardando']()).toBe(false);
       const mensajes = toastService.toasts();
-      expect(mensajes.some((t) => t.title === 'No tiene permiso para editar este perfil.' && t.variant === 'error')).toBe(true);
+      expect(
+        mensajes.some(
+          (t) => t.title === 'No tiene permiso para editar este perfil.' && t.variant === 'error'
+        )
+      ).toBe(true);
     });
 
     it('en respuesta 500, guardando es false y muestra toast genérico de error', () => {
@@ -311,7 +307,12 @@ describe('PerfilAuditorPageComponent', () => {
 
       expect(component['guardando']()).toBe(false);
       const mensajes = toastService.toasts();
-      expect(mensajes.some((t) => t.title === 'No se pudo guardar el perfil. Intente nuevamente.' && t.variant === 'error')).toBe(true);
+      expect(
+        mensajes.some(
+          (t) =>
+            t.title === 'No se pudo guardar el perfil. Intente nuevamente.' && t.variant === 'error'
+        )
+      ).toBe(true);
     });
   });
 
@@ -328,9 +329,7 @@ describe('PerfilAuditorPageComponent', () => {
       component['toggleEspecialidad']('HUELLA_CARBONO');
 
       expect(component['especialidadesSeleccionadas']()).toEqual([]);
-      expect(component['errorEspecialidades']()).toBe(
-        'Seleccione al menos una especialidad.'
-      );
+      expect(component['errorEspecialidades']()).toBe('Seleccione al menos una especialidad.');
     });
 
     it('errorZonas() muestra mensaje cuando se deselecciona hasta vacío', () => {
@@ -338,9 +337,7 @@ describe('PerfilAuditorPageComponent', () => {
       component['toggleZona']('SAN_JOSE');
 
       expect(component['zonasSeleccionadas']()).toEqual([]);
-      expect(component['errorZonas']()).toBe(
-        'Seleccione al menos una zona de cobertura.'
-      );
+      expect(component['errorZonas']()).toBe('Seleccione al menos una zona de cobertura.');
     });
   });
 });
