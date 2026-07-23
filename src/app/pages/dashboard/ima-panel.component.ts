@@ -1,5 +1,6 @@
 import { Component, computed, input, output } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import {
   SelectInputComponent,
   SelectOption,
@@ -10,7 +11,7 @@ import { ImaResponse } from './ima.service';
 @Component({
   selector: 'app-ima-panel',
   standalone: true,
-  imports: [DecimalPipe, SelectInputComponent, HeadingComponent],
+  imports: [DecimalPipe, SelectInputComponent, HeadingComponent, RouterLink],
   templateUrl: './ima-panel.component.html',
   styleUrl: './ima-panel.component.scss',
 })

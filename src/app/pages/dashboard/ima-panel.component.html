@@ -189,12 +189,31 @@
     }
 
     @if (ima()!.interpretacion && ima()!.interpretacion !== 'No disponible' && ima()!.siguientePaso && ima()!.siguientePaso !== 'No disponible') {
-      <div class="ima-card__ia-section">
-        <h4 class="ima-card__ia-title">Interpretación IA</h4>
-        <p class="ima-card__ia-text">{{ ima()!.interpretacion }}</p>
-        <h4 class="ima-card__ia-title">Siguiente paso</h4>
-        <p class="ima-card__ia-text">{{ ima()!.siguientePaso }}</p>
-      </div>
+      <section class="ima-ia" aria-label="Interpretación generada por inteligencia artificial">
+        <header class="ima-ia__header">
+          <span class="ima-ia__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </span>
+          <h4 class="ima-ia__title">Interpretación y siguiente paso</h4>
+          <span class="ima-ia__badge">✦ GENERADO POR IA</span>
+        </header>
+        <div class="ima-ia__content">
+          <p class="ima-ia__text">{{ ima()!.interpretacion }}</p>
+          <aside class="ima-ia__step">
+            <span class="ima-ia__step-label">● SIGUIENTE PASO RECOMENDADO</span>
+            <p class="ima-ia__step-text">{{ ima()!.siguientePaso }}</p>
+            <a routerLink="/limites" class="ima-ia__step-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                <line x1="4" y1="22" x2="4" y2="15"/>
+              </svg>
+              Crear meta de reducción
+            </a>
+          </aside>
+        </div>
+      </section>
     } @else if (ima()!.interpretacion === 'No disponible' || ima()!.siguientePaso === 'No disponible') {
       <p class="ima-card__ia-unavailable">La interpretación con IA no está disponible en este momento.</p>
     }

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { ImaPanelComponent } from './ima-panel.component';
 import { ImaResponse } from './ima.service';
 
@@ -8,7 +9,10 @@ describe('ImaPanelComponent', () => {
   let fixture: ComponentFixture<ImaPanelComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [ImaPanelComponent] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [ImaPanelComponent],
+      providers: [provideRouter([])],
+    }).compileComponents();
     fixture = TestBed.createComponent(ImaPanelComponent);
     componentRef = fixture.componentRef;
   });
@@ -55,15 +59,15 @@ describe('ImaPanelComponent', () => {
     fixture.detectChanges();
 
     const el = fixture.nativeElement as HTMLElement;
-    const iaSection = el.querySelector('.ima-card__ia-section');
+    const iaSection = el.querySelector('.ima-ia');
     expect(iaSection).toBeTruthy();
 
-    const iaTexts = el.querySelectorAll('.ima-card__ia-text');
-    expect(iaTexts.length).toBe(2);
-    expect(iaTexts[0].textContent?.trim()).toBe(
+    const iaText = el.querySelector('.ima-ia__text');
+    expect(iaText?.textContent?.trim()).toBe(
       'Tu empresa muestra buen desempeño ambiental frente al sector.'
     );
-    expect(iaTexts[1].textContent?.trim()).toBe(
+    const stepText = el.querySelector('.ima-ia__step-text');
+    expect(stepText?.textContent?.trim()).toBe(
       'Incrementar la cobertura de registros en categoría transporte.'
     );
   });
@@ -82,7 +86,7 @@ describe('ImaPanelComponent', () => {
     expect(unavailable?.textContent?.trim()).toBe(
       'La interpretación con IA no está disponible en este momento.'
     );
-    expect(el.querySelector('.ima-card__ia-section')).toBeFalsy();
+    expect(el.querySelector('.ima-ia')).toBeFalsy();
   });
 
   // Validates: Requirements 5.2
@@ -95,7 +99,7 @@ describe('ImaPanelComponent', () => {
 
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('.ima-card__ia-unavailable')).toBeTruthy();
-    expect(el.querySelector('.ima-card__ia-section')).toBeFalsy();
+    expect(el.querySelector('.ima-ia')).toBeFalsy();
   });
 
   // Validates: Requirements 5.4
