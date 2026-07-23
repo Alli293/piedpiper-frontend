@@ -1,7 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
+  disabled,
   FormField,
   form,
   maxLength,
@@ -88,6 +89,7 @@ export class EcoRutaPreferenciasPageComponent implements OnInit {
   private readonly authSession = inject(AuthSessionService);
   private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected readonly navItems = ECORUTA_NAV_ITEMS;
   protected readonly tipoViajeOptions = TIPO_VIAJE_OPTIONS;
@@ -113,11 +115,14 @@ export class EcoRutaPreferenciasPageComponent implements OnInit {
         }
         return undefined;
       });
+      disabled(path.cantidadDias, { when: () => this.cargando() });
 
       required(path.fechaInicio, { message: 'Selecciona una fecha válida.' });
       minDate(path.fechaInicio, this.minFecha, { message: 'Selecciona una fecha válida.' });
+      disabled(path.fechaInicio, { when: () => this.cargando() });
 
       required(path.tipoViaje, { message: 'Selecciona el tipo de viaje.' });
+      disabled(path.tipoViaje, { when: () => this.cargando() });
 
       validate(path.intereses, ({ value }) => {
         if (value().length === 0) {
@@ -125,6 +130,12 @@ export class EcoRutaPreferenciasPageComponent implements OnInit {
         }
         return undefined;
       });
+      disabled(path.intereses, { when: () => this.cargando() });
+
+      disabled(path.presupuesto, { when: () => this.cargando() });
+      disabled(path.provinciaPreferida, { when: () => this.cargando() });
+      disabled(path.buscarCercaDeMi, { when: () => this.cargando() });
+      disabled(path.requiereHospedaje, { when: () => this.cargando() });
 
       validate(path.ubicacionActual, ({ value, valueOf }) => {
         if (valueOf(path.buscarCercaDeMi) && !value().trim()) {
@@ -135,10 +146,12 @@ export class EcoRutaPreferenciasPageComponent implements OnInit {
         }
         return undefined;
       });
+      disabled(path.ubicacionActual, { when: () => this.cargando() });
 
       maxLength(path.limitacionesMovilidad, 500, {
         message: 'El campo no puede superar 500 caracteres.',
       });
+      disabled(path.limitacionesMovilidad, { when: () => this.cargando() });
     })
   );
 
@@ -159,7 +172,7 @@ export class EcoRutaPreferenciasPageComponent implements OnInit {
 
   protected readonly submitting = computed(() => this.preferenciasForm().submitting());
   protected readonly canSubmit = computed(
-    () => this.preferenciasForm().valid() && !this.submitting()
+    () => this.preferenciasForm().valid() && !this.submitting() && !this.cargando()
   );
 
   protected readonly mostrarUbicacion = computed(() => this.model().buscarCercaDeMi);
@@ -231,6 +244,49 @@ export class EcoRutaPreferenciasPageComponent implements OnInit {
       },
       onInvalid: (field) => field().markAsTouched(),
     });
+
+    if (!this.preferenciasForm().valid()) {
+      this.enfocarPrimerCampoInvalido();
+    }
+  }
+
+  /**
+   * Recorre los campos en el mismo orden en que aparecen en el formulario y enfoca el
+   * primer control invalido. Usa el estado del field tree (no el DOM) para decidir cual
+   * es el primero invalido, ya que aria-invalid tarda un ciclo de render en reflejarse.
+   */
+  private enfocarPrimerCampoInvalido(): void {
+    const root = this.elementRef.nativeElement;
+    const gruposDeChips = root.querySelectorAll<HTMLElement>('app-chip-select');
+
+    const candidatos: { invalido: boolean; elemento: HTMLElement | null }[] = [
+      {
+        invalido: this.preferenciasForm.fechaInicio().invalid(),
+        elemento: root.querySelector('app-date-input input'),
+      },
+      {
+        invalido: this.preferenciasForm.cantidadDias().invalid(),
+        elemento: root.querySelector('app-number-input input'),
+      },
+      {
+        invalido: this.preferenciasForm.tipoViaje().invalid(),
+        elemento: gruposDeChips[0]?.querySelector('button') ?? null,
+      },
+      {
+        invalido: this.preferenciasForm.intereses().invalid(),
+        elemento: gruposDeChips[1]?.querySelector('button') ?? null,
+      },
+      {
+        invalido: this.preferenciasForm.ubicacionActual().invalid(),
+        elemento: root.querySelector('app-text-input input'),
+      },
+      {
+        invalido: this.preferenciasForm.limitacionesMovilidad().invalid(),
+        elemento: root.querySelector('app-textarea textarea'),
+      },
+    ];
+
+    candidatos.find((candidato) => candidato.invalido)?.elemento?.focus();
   }
 
   private aplicarRespuesta(response: PreferenciasViajeResponse): void {

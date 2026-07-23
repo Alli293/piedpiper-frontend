@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideLocationMocks } from '@angular/common/testing';
 import { provideRouter, Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { EcoRutaPreferenciasPageComponent } from './ecoruta-preferencias-page.component';
 import { EcoRutaPreferenciasService } from '../ecoruta-preferencias.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -170,6 +170,36 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     fixture.detectChanges();
 
     expect(root.querySelector('app-text-input')).not.toBeNull();
+  });
+
+  it('deshabilita el formulario mientras se precarga el borrador', async () => {
+    const obtener$ = new Subject<PreferenciasViajeResponse>();
+    obtener.mockReturnValue(obtener$);
+
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    const dateInput = root.querySelector<HTMLInputElement>('app-date-input input');
+    const submitBtn = root.querySelector<HTMLButtonElement>('button[type="submit"]');
+    expect(dateInput?.disabled).toBe(true);
+    expect(submitBtn?.disabled).toBe(true);
+
+    obtener$.next(VALID_RESPONSE);
+    obtener$.complete();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(dateInput?.disabled).toBe(false);
+  });
+
+  it('mueve el foco al primer campo invalido cuando el submit falla la validacion', async () => {
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    await submitForm(fixture);
+
+    const dateInput = root.querySelector<HTMLInputElement>('app-date-input input');
+    expect(document.activeElement).toBe(dateInput);
   });
 
   it('muestra el mensaje de error del backend cuando el guardado falla', async () => {
