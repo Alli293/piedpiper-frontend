@@ -15,10 +15,79 @@
           No se pudieron cargar los catálogos. Intente recargar la página.
         </p>
       } @else {
-        <!-- El formulario con sus campos será implementado en la tarea 6.2 -->
-        <form novalidate class="ch-perfil-auditor__formulario">
+        <form novalidate class="ch-perfil-auditor__formulario" (submit)="handleSubmit($event)">
           <div class="ch-perfil-auditor__campos">
-            <!-- Campos del formulario se implementarán en task 6.2 -->
+            <!-- Especialidades (multi-select con checkboxes del catálogo) -->
+            <fieldset class="ch-perfil-auditor__fieldset">
+              <legend class="ch-perfil-auditor__label">Especialidades</legend>
+              <div class="ch-perfil-auditor__checkbox-group">
+                @for (esp of especialidades(); track esp) {
+                  <label class="ch-perfil-auditor__checkbox-item">
+                    <input
+                      type="checkbox"
+                      [checked]="isEspecialidadSeleccionada(esp)"
+                      (change)="toggleEspecialidad(esp)"
+                    />
+                    <span>{{ esp }}</span>
+                  </label>
+                }
+              </div>
+              @if (errorEspecialidades()) {
+                <p class="ch-perfil-auditor__field-error" role="alert">{{ errorEspecialidades() }}</p>
+              }
+            </fieldset>
+
+            <!-- Zonas de cobertura (multi-select con checkboxes del catálogo) -->
+            <fieldset class="ch-perfil-auditor__fieldset">
+              <legend class="ch-perfil-auditor__label">Zonas de cobertura</legend>
+              <div class="ch-perfil-auditor__checkbox-group">
+                @for (zona of zonasCobertura(); track zona) {
+                  <label class="ch-perfil-auditor__checkbox-item">
+                    <input
+                      type="checkbox"
+                      [checked]="isZonaSeleccionada(zona)"
+                      (change)="toggleZona(zona)"
+                    />
+                    <span>{{ zona }}</span>
+                  </label>
+                }
+              </div>
+              @if (errorZonas()) {
+                <p class="ch-perfil-auditor__field-error" role="alert">{{ errorZonas() }}</p>
+              }
+            </fieldset>
+
+            <!-- Disponibilidad (toggle/checkbox) -->
+            <div class="ch-perfil-auditor__campo">
+              <app-checkbox
+                label="Disponible para auditorías"
+                [formField]="perfilForm.disponible"
+              />
+            </div>
+
+            <!-- Descripción profesional (textarea) -->
+            <div class="ch-perfil-auditor__campo">
+              <app-textarea
+                label="Descripción profesional (opcional)"
+                placeholder="Describe tu experiencia y servicios profesionales..."
+                [rows]="4"
+                [formField]="perfilForm.descripcionProfesional"
+                [error]="errorDescripcion()"
+                [hint]="descripcionContador()"
+              />
+            </div>
+          </div>
+
+          <div class="ch-perfil-auditor__acciones">
+            <app-button
+              variant="primary"
+              size="lg"
+              type="submit"
+              [loading]="guardando()"
+              [disabled]="formularioInvalido() || guardando()"
+            >
+              Guardar
+            </app-button>
           </div>
         </form>
       }
