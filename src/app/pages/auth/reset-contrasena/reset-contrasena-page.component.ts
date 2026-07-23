@@ -1,4 +1,5 @@
-import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -25,6 +26,7 @@ import {
   CONTRASENA_PATTERN,
 } from '../../../shared/utils/password.utils';
 import { fieldError } from '../../../shared/utils/form-field.utils';
+import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 
 interface RestablecerContrasenaFormModel {
   contrasena: string;
@@ -48,6 +50,7 @@ interface RestablecerContrasenaFormModel {
 })
 export class ResetContrasenaPageComponent implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly token = input('');
 
@@ -99,17 +102,19 @@ export class ResetContrasenaPageComponent implements OnInit {
       return;
     }
 
-    this.authService.validarTokenReset(this.token()).subscribe({
-      next: (respuesta) => {
-        this.cargando.set(false);
-        this.email.set(respuesta.email);
-      },
-      error: (err) => {
-        this.cargando.set(false);
-        const message = err?.error?.message;
-        this.mensajeInvalido.set(message ?? 'Este enlace no es válido o expiró.');
-      },
-    });
+    this.authService
+      .validarTokenReset(this.token())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (respuesta) => {
+          this.cargando.set(false);
+          this.email.set(respuesta.email);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.cargando.set(false);
+          this.mensajeInvalido.set(apiErrorMessage(err) ?? 'Este enlace no es válido o expiró.');
+        },
+      });
   }
 
   protected handleSubmit(event: Event): void {
@@ -134,7 +139,7 @@ export class ResetContrasenaPageComponent implements OnInit {
           this.mensajeExito.set(respuesta.mensaje);
           this.completado.set(true);
         } catch (err: unknown) {
-          const message = err instanceof HttpErrorResponse ? err.error?.message : undefined;
+          const message = apiErrorMessage(err);
           if (err instanceof HttpErrorResponse && err.status === 410) {
             this.mensajeInvalido.set(message ?? 'Este enlace no es válido o expiró.');
           } else {

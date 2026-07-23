@@ -49,10 +49,13 @@ describe('ResetContrasenaPageComponent', () => {
 
   it('con token invalido o expirado muestra el mensaje y no el formulario', () => {
     authService.validarTokenReset.mockReturnValue(
-      throwError(() => ({
-        status: 410,
-        error: { message: 'Este enlace no es válido o expiró. Solicita uno nuevo.' },
-      }))
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 410,
+            error: { message: 'Este enlace no es válido o expiró. Solicita uno nuevo.' },
+          })
+      )
     );
 
     const fixture = crear();

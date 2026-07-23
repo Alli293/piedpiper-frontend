@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
@@ -71,7 +72,9 @@ describe('RecuperarContrasenaPageComponent', () => {
 
   it('si el backend responde error, lo muestra y no marca como enviado', async () => {
     authService.solicitarResetContrasena.mockReturnValue(
-      throwError(() => ({ error: { message: 'Ocurrió un error inesperado.' } }))
+      throwError(
+        () => new HttpErrorResponse({ error: { message: 'Ocurrió un error inesperado.' } })
+      )
     );
     const fixture = crear();
     const comp = fixture.componentInstance as any;

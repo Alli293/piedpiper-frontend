@@ -18,6 +18,7 @@ import { LinkDirective } from '../../../shared/components/link/link.directive';
 import { AuthService } from '../../../core/auth/auth.service';
 import { EMAIL_MENSAJE, EMAIL_PATTERN } from '../../../shared/utils/email.utils';
 import { fieldError } from '../../../shared/utils/form-field.utils';
+import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 
 interface RecuperarContrasenaFormModel {
   email: string;
@@ -76,8 +77,9 @@ export class RecuperarContrasenaPageComponent {
           this.mensaje.set(respuesta.mensaje);
           this.enviado.set(true);
         } catch (err: unknown) {
-          const message = (err as { error?: { message?: string } })?.error?.message;
-          this.error.set(message ?? 'No pudimos procesar tu solicitud. Intenta nuevamente.');
+          this.error.set(
+            apiErrorMessage(err) ?? 'No pudimos procesar tu solicitud. Intenta nuevamente.'
+          );
         }
         return undefined;
       },
