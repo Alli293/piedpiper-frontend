@@ -6,7 +6,7 @@
   [class.ch-select-input__field--error]="hasError()"
   [id]="inputId"
   [disabled]="effectiveDisabled()"
-  [attr.aria-label]="ariaLabel()"
+  [attr.aria-label]="accessibleLabel()"
   [attr.aria-invalid]="hasError() ? 'true' : null"
   [attr.aria-describedby]="describedBy()"
   (change)="onChangeEvent($event)"

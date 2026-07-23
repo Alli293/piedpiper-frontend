@@ -191,6 +191,19 @@
   position: relative;
 }
 
+.dashboard-summary__card--total,
+.dashboard-summary__card--period {
+  ::ng-deep .ch-card-stat__value {
+    color: var(--ch-sky);
+  }
+}
+
+.dashboard-summary__card--limit {
+  ::ng-deep .ch-card-stat__value {
+    color: var(--ch-green);
+  }
+}
+
 .dashboard-summary__card-header {
   position: absolute;
   top: var(--ch-space-5);

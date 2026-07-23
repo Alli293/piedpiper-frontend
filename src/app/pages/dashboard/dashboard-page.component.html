@@ -31,24 +31,38 @@
       />
     </form>
 
-    <section class="dashboard-summary" aria-label="Resumen de comparación anual">
-      @if (!cargandoComparacion() && comparacion(); as data) {
-        <article class="annual-limit-panel dashboard-summary__card">
+    <section class="dashboard-summary" aria-label="Resumen de huella de carbono">
+      <article class="annual-limit-panel dashboard-summary__card dashboard-summary__card--total">
+        @if (!cargandoComparacion() && comparacion(); as data) {
           <app-card-stat
             [label]="'Huella total ' + data.anio"
             [value]="formatToneladas(data.huellaAcumuladaT)"
             delta="tCO2e acumuladas"
           />
-        </article>
+        } @else if (comparacionError(); as error) {
+          <p class="dashboard-summary__state dashboard-summary__state--error" role="alert">
+            {{ error }}
+          </p>
+        } @else {
+          <p class="dashboard-summary__state">Cargando huella...</p>
+        }
+      </article>
 
-        <article class="annual-limit-panel dashboard-summary__card">
+      <article class="annual-limit-panel dashboard-summary__card dashboard-summary__card--limit">
+        @if (!cargandoComparacion() && comparacion(); as data) {
           <app-card-stat
             label="Del limite anual"
             [value]="porcentajeResumen(data.porcentajeConsumido)"
             [delta]="detalleLimiteResumen(data)"
           />
-        </article>
-      }
+        } @else if (comparacionError(); as error) {
+          <p class="dashboard-summary__state dashboard-summary__state--error" role="alert">
+            {{ error }}
+          </p>
+        } @else {
+          <p class="dashboard-summary__state">Cargando limite...</p>
+        }
+      </article>
 
       <article class="annual-limit-panel dashboard-summary__card dashboard-summary__card--period">
         <header class="dashboard-summary__card-header">
@@ -145,6 +159,10 @@
 
         @if (cargandoComparacion()) {
           <p class="annual-limit-panel__info">Cargando comparación...</p>
+        } @else if (comparacionError(); as error) {
+          <p class="annual-limit-panel__info annual-limit-panel__info--error" role="alert">
+            {{ error }}
+          </p>
         } @else if (comparacion(); as data) {
           @if (data.estado === 'sin_limite') {
             <div class="annual-limit-panel__empty">

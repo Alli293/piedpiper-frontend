@@ -46,6 +46,7 @@ export class SelectInputComponent implements ControlValueAccessor {
     if (this.hint()) return this.hintId;
     return null;
   });
+  protected readonly accessibleLabel = computed(() => this.ariaLabel() ?? this.label() ?? null);
 
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};
