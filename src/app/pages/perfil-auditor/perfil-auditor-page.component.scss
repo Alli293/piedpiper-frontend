@@ -58,20 +58,6 @@
     gap: var(--ch-space-2) var(--ch-space-4);
   }
 
-  &__checkbox-item {
-    display: flex;
-    align-items: center;
-    gap: var(--ch-space-2);
-    font-family: var(--ch-font-body);
-    font-size: 14px;
-    color: var(--ch-text-primary);
-    cursor: pointer;
-
-    input[type='checkbox'] {
-      cursor: pointer;
-    }
-  }
-
   &__campo {
     display: flex;
     flex-direction: column;

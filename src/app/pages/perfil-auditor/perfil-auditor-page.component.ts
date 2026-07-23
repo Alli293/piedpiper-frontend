@@ -24,6 +24,14 @@ interface PerfilAuditorFormModel {
 const MAX_ESPECIALIDADES = 8;
 const MAX_DESCRIPCION = 500;
 
+/** Converts ENUM_NAME to human-readable label (e.g., HUELLA_CARBONO → Huella de carbono) */
+function formatearNombreEnum(valor: string): string {
+  return valor
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/^\w/, (c) => c.toUpperCase());
+}
+
 @Component({
   selector: 'app-perfil-auditor-page',
   imports: [
@@ -162,6 +170,10 @@ export class PerfilAuditorPageComponent implements OnInit {
 
   protected isZonaSeleccionada(valor: string): boolean {
     return this.zonasSeleccionadas().includes(valor);
+  }
+
+  protected formatearNombre(valor: string): string {
+    return formatearNombreEnum(valor);
   }
 
   protected handleSubmit(event: Event): void {

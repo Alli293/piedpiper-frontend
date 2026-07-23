@@ -22,14 +22,11 @@
               <legend class="ch-perfil-auditor__label">Especialidades</legend>
               <div class="ch-perfil-auditor__checkbox-group">
                 @for (esp of especialidades(); track esp) {
-                  <label class="ch-perfil-auditor__checkbox-item">
-                    <input
-                      type="checkbox"
-                      [checked]="isEspecialidadSeleccionada(esp)"
-                      (change)="toggleEspecialidad(esp)"
-                    />
-                    <span>{{ esp }}</span>
-                  </label>
+                  <app-checkbox
+                    [label]="formatearNombre(esp)"
+                    [checked]="isEspecialidadSeleccionada(esp)"
+                    (checkedChange)="toggleEspecialidad(esp)"
+                  />
                 }
               </div>
               @if (errorEspecialidades()) {
@@ -42,14 +39,11 @@
               <legend class="ch-perfil-auditor__label">Zonas de cobertura</legend>
               <div class="ch-perfil-auditor__checkbox-group">
                 @for (zona of zonasCobertura(); track zona) {
-                  <label class="ch-perfil-auditor__checkbox-item">
-                    <input
-                      type="checkbox"
-                      [checked]="isZonaSeleccionada(zona)"
-                      (change)="toggleZona(zona)"
-                    />
-                    <span>{{ zona }}</span>
-                  </label>
+                  <app-checkbox
+                    [label]="formatearNombre(zona)"
+                    [checked]="isZonaSeleccionada(zona)"
+                    (checkedChange)="toggleZona(zona)"
+                  />
                 }
               </div>
               @if (errorZonas()) {
