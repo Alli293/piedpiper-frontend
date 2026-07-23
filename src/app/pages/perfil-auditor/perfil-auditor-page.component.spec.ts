@@ -35,7 +35,12 @@ describe('PerfilAuditorPageComponent', () => {
         provideHttpClientTesting(),
         {
           provide: AuthSessionService,
-          useValue: { getUserId: () => mockAuditorId },
+          useValue: {
+            getUserId: () => mockAuditorId,
+            getUserInitials: () => 'AU',
+            getUserName: () => 'Auditor Test',
+            getUserEmail: () => 'auditor@test.com',
+          },
         },
       ],
     }).compileComponents();

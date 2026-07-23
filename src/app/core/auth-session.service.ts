@@ -21,6 +21,19 @@ export class AuthSessionService {
     return this.getClaims()?.sub ?? null;
   }
 
+  getUserName(): string {
+    const claims = this.getClaims();
+    return firstNonEmpty(
+      claims?.nombreCompleto,
+      claims?.name,
+      [claims?.nombre, claims?.apellidos].filter(Boolean).join(' ')
+    );
+  }
+
+  getUserEmail(): string {
+    return this.getClaims()?.email ?? '';
+  }
+
   isAdministradorEmpresa(): boolean {
     return this.getRole() === ADMINISTRADOR_EMPRESA;
   }

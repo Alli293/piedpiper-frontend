@@ -3,11 +3,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { form, FormField, schema, validate } from '@angular/forms/signals';
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
-import { CardComponent } from '../../shared/components/card/card.component';
-import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CheckboxComponent } from '../../shared/components/inputs/checkbox/checkbox.component';
 import { TextareaComponent } from '../../shared/components/inputs/textarea/textarea.component';
+import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
+import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { PerfilAuditorService } from '../../core/perfil-auditor/perfil-auditor.service';
 import { AuthSessionService } from '../../core/auth-session.service';
@@ -37,11 +37,11 @@ function formatearNombreEnum(valor: string): string {
   imports: [
     FormField,
     ShellLayoutComponent,
-    CardComponent,
-    HeadingComponent,
     ButtonComponent,
     CheckboxComponent,
     TextareaComponent,
+    AvatarComponent,
+    BadgeComponent,
   ],
   templateUrl: './perfil-auditor-page.component.html',
   styleUrl: './perfil-auditor-page.component.scss',
@@ -139,6 +139,18 @@ export class PerfilAuditorPageComponent implements OnInit {
     showNotificationDot: false,
     userInitials: 'AU',
   }));
+
+  // Display-only signals for profile header card
+  protected readonly userInitials = computed(() => this.authSessionService.getUserInitials());
+  protected readonly userName = computed(() => {
+    const name = this.authSessionService.getUserName();
+    return name || 'Auditor';
+  });
+  protected readonly userEmail = computed(() => this.authSessionService.getUserEmail());
+  protected readonly memberSince = computed(() => {
+    const now = new Date();
+    return `${now.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`;
+  });
 
   ngOnInit(): void {
     this.cargarCatalogos();
