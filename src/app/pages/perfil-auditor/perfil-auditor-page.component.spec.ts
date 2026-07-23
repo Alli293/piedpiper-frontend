@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http/testing';
 import { PerfilAuditorPageComponent } from './perfil-auditor-page.component';
 import { ToastService } from '../../shared/services/toast.service';
+import { AuthSessionService } from '../../core/auth-session.service';
 import { environment } from '../../../environments/environment';
 
 describe('PerfilAuditorPageComponent', () => {
@@ -17,6 +18,8 @@ describe('PerfilAuditorPageComponent', () => {
   const urlEspecialidades = `${environment.apiBaseUrl}/catalogos/especialidades`;
   const urlZonas = `${environment.apiBaseUrl}/catalogos/zonas-cobertura`;
 
+  const mockAuditorId = '550e8400-e29b-41d4-a716-446655440000';
+
   const mockEspecialidades = [
     'HUELLA_CARBONO',
     'ENERGIA_RENOVABLE',
@@ -27,7 +30,14 @@ describe('PerfilAuditorPageComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [PerfilAuditorPageComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: AuthSessionService,
+          useValue: { getUserId: () => mockAuditorId },
+        },
+      ],
     }).compileComponents();
 
     httpMock = TestBed.inject(HttpTestingController);
@@ -133,5 +143,189 @@ describe('PerfilAuditorPageComponent', () => {
     expect(mensajes).toContain(
       'No se pudo cargar el catálogo. Intente recargar la página.'
     );
+  });
+
+  // --- Form validation tests ---
+
+  describe('validación de formulario', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+      flushCatalogosExitosamente();
+    });
+
+    it('formularioInvalido() es true cuando especialidades está vacío', () => {
+      component['especialidadesSeleccionadas'].set([]);
+      component['zonasSeleccionadas'].set(['SAN_JOSE']);
+
+      expect(component['formularioInvalido']()).toBe(true);
+    });
+
+    it('formularioInvalido() es true cuando especialidades tiene más de 8 valores', () => {
+      component['especialidadesSeleccionadas'].set([
+        'HUELLA_CARBONO',
+        'ENERGIA_RENOVABLE',
+        'GESTION_RESIDUOS',
+        'EFICIENCIA_ENERGETICA',
+        'BIODIVERSIDAD',
+        'ECONOMIA_CIRCULAR',
+        'TRANSPORTE_SOSTENIBLE',
+        'AGUA_Y_SANEAMIENTO',
+        'CAMBIO_CLIMATICO',
+      ]);
+      component['zonasSeleccionadas'].set(['SAN_JOSE']);
+
+      expect(component['formularioInvalido']()).toBe(true);
+    });
+
+    it('formularioInvalido() es false con especialidades 1-8, zonas válidas y descripción corta', () => {
+      component['especialidadesSeleccionadas'].set([
+        'HUELLA_CARBONO',
+        'ENERGIA_RENOVABLE',
+      ]);
+      component['zonasSeleccionadas'].set(['SAN_JOSE', 'CARTAGO']);
+      component['model'].set({
+        descripcionProfesional: 'Mi descripción profesional',
+        disponible: true,
+      });
+
+      expect(component['formularioInvalido']()).toBe(false);
+    });
+
+    it('formularioInvalido() es true cuando zonasCobertura está vacío', () => {
+      component['especialidadesSeleccionadas'].set(['HUELLA_CARBONO']);
+      component['zonasSeleccionadas'].set([]);
+
+      expect(component['formularioInvalido']()).toBe(true);
+    });
+
+    it('formularioInvalido() es true cuando descripcionProfesional supera 500 caracteres', () => {
+      component['especialidadesSeleccionadas'].set(['HUELLA_CARBONO']);
+      component['zonasSeleccionadas'].set(['SAN_JOSE']);
+      component['model'].set({
+        descripcionProfesional: 'x'.repeat(501),
+        disponible: true,
+      });
+
+      expect(component['formularioInvalido']()).toBe(true);
+    });
+  });
+
+  // --- Save/spinner tests ---
+
+  describe('guardado y spinner', () => {
+    const urlPerfil = `${environment.apiBaseUrl}/auditores/${mockAuditorId}/perfil`;
+
+    beforeEach(() => {
+      fixture.detectChanges();
+      flushCatalogosExitosamente();
+      // Set valid form state
+      component['especialidadesSeleccionadas'].set(['HUELLA_CARBONO']);
+      component['zonasSeleccionadas'].set(['SAN_JOSE']);
+      component['model'].set({
+        descripcionProfesional: 'Descripción válida',
+        disponible: true,
+      });
+    });
+
+    it('handleSubmit con formulario válido activa guardando y envía PUT', () => {
+      const event = new Event('submit');
+
+      component['handleSubmit'](event);
+
+      expect(component['guardando']()).toBe(true);
+
+      const req = httpMock.expectOne(urlPerfil);
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body).toEqual({
+        especialidades: ['HUELLA_CARBONO'],
+        zonasCobertura: ['SAN_JOSE'],
+        disponible: true,
+        descripcionProfesional: 'Descripción válida',
+      });
+
+      req.flush({
+        auditorId: mockAuditorId,
+        especialidades: ['HUELLA_CARBONO'],
+        zonasCobertura: ['SAN_JOSE'],
+        disponible: true,
+        descripcionProfesional: 'Descripción válida',
+        actualizadoEn: '2024-01-01T00:00:00Z',
+      });
+    });
+
+    it('en respuesta 200, guardando es false y muestra toast de éxito', () => {
+      const event = new Event('submit');
+      component['handleSubmit'](event);
+
+      const req = httpMock.expectOne(urlPerfil);
+      req.flush({
+        auditorId: mockAuditorId,
+        especialidades: ['HUELLA_CARBONO'],
+        zonasCobertura: ['SAN_JOSE'],
+        disponible: true,
+        descripcionProfesional: 'Descripción válida',
+        actualizadoEn: '2024-01-01T00:00:00Z',
+      });
+
+      expect(component['guardando']()).toBe(false);
+      const mensajes = toastService.toasts();
+      expect(mensajes.some((t) => t.title === 'Perfil actualizado correctamente.' && t.variant === 'success')).toBe(true);
+    });
+
+    it('en respuesta 403, guardando es false y muestra toast con mensaje del backend', () => {
+      const event = new Event('submit');
+      component['handleSubmit'](event);
+
+      const req = httpMock.expectOne(urlPerfil);
+      req.flush(
+        { message: 'No tiene permiso para editar este perfil.' },
+        { status: 403, statusText: 'Forbidden' }
+      );
+
+      expect(component['guardando']()).toBe(false);
+      const mensajes = toastService.toasts();
+      expect(mensajes.some((t) => t.title === 'No tiene permiso para editar este perfil.' && t.variant === 'error')).toBe(true);
+    });
+
+    it('en respuesta 500, guardando es false y muestra toast genérico de error', () => {
+      const event = new Event('submit');
+      component['handleSubmit'](event);
+
+      const req = httpMock.expectOne(urlPerfil);
+      req.flush(null, { status: 500, statusText: 'Internal Server Error' });
+
+      expect(component['guardando']()).toBe(false);
+      const mensajes = toastService.toasts();
+      expect(mensajes.some((t) => t.title === 'No se pudo guardar el perfil. Intente nuevamente.' && t.variant === 'error')).toBe(true);
+    });
+  });
+
+  // --- Error messages display tests ---
+
+  describe('mensajes de error inline', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+      flushCatalogosExitosamente();
+    });
+
+    it('errorEspecialidades() muestra mensaje cuando se deselecciona hasta vacío', () => {
+      component['especialidadesSeleccionadas'].set(['HUELLA_CARBONO']);
+      component['toggleEspecialidad']('HUELLA_CARBONO');
+
+      expect(component['especialidadesSeleccionadas']()).toEqual([]);
+      expect(component['errorEspecialidades']()).toBe(
+        'Seleccione al menos una especialidad.'
+      );
+    });
+
+    it('errorZonas() muestra mensaje cuando se deselecciona hasta vacío', () => {
+      component['zonasSeleccionadas'].set(['SAN_JOSE']);
+      component['toggleZona']('SAN_JOSE');
+
+      expect(component['zonasSeleccionadas']()).toEqual([]);
+      expect(component['errorZonas']()).toBe(
+        'Seleccione al menos una zona de cobertura.'
+      );
+    });
   });
 });
