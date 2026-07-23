@@ -128,3 +128,19 @@ export interface ComparacionEmisionesResponse {
   readonly estado: EstadoComparacion;
   readonly mensaje: string | null;
 }
+
+export type CategoriaResumen = 'ELECTRICIDAD' | 'FLOTA' | 'VUELO' | 'ENVIO';
+
+export interface ResumenCategoriaResponse {
+  readonly categoria: CategoriaResumen;
+  readonly totalKg: number;
+  readonly porcentaje: number;
+}
+
+export interface ResumenEmisionesResponse {
+  readonly anio: number;
+  readonly mes: number | null;
+  readonly totalKg: number;
+  readonly totalT: number;
+  readonly categorias: ResumenCategoriaResponse[];
+}

@@ -1,6 +1,6 @@
 <app-shell-layout activeId="dashboard" [headerConfig]="headerConfig()">
-  <section class="dashboard-shell" aria-label="Límite anual de emisiones">
-    <div class="dashboard-shell__toolbar">
+  <div class="dashboard-page">
+    <div class="dashboard-page__toolbar">
       <app-button
         class="dashboard-shell__export"
         variant="secondary"
@@ -12,18 +12,27 @@
         <app-icon name="descargar" [size]="16" />
         <span>Exportar PDF</span>
       </app-button>
-      <app-select-input
-        class="dashboard-shell__year"
-        [options]="anios()"
-        [value]="anioSeleccionadoValue()"
-        [disabled]="cargando()"
-        placeholder="Año"
-        (valueChange)="onAnioChange($event)"
-      />
     </div>
 
-    @if (!cargando() && comparacion(); as data) {
-      <section class="dashboard-summary" aria-label="Resumen de comparacion anual">
+    <form class="dashboard-page__filters" novalidate aria-label="Período a consultar">
+      <app-select-input
+        class="dashboard-page__filter"
+        label="Año"
+        placeholder=""
+        [options]="anioOptions"
+        [formField]="periodoForm.anio"
+      />
+      <app-select-input
+        class="dashboard-page__filter"
+        label="Mes"
+        placeholder=""
+        [options]="mesOptions"
+        [formField]="periodoForm.mes"
+      />
+    </form>
+
+    <section class="dashboard-summary" aria-label="Resumen de comparación anual">
+      @if (!cargandoComparacion() && comparacion(); as data) {
         <article class="annual-limit-panel dashboard-summary__card">
           <app-card-stat
             [label]="'Huella total ' + data.anio"
@@ -39,76 +48,154 @@
             [delta]="detalleLimiteResumen(data)"
           />
         </article>
-      </section>
-    }
-
-    <article
-      class="annual-limit-panel"
-      [class.is-dentro]="tieneEstado('dentro')"
-      [class.is-cerca]="tieneEstado('cerca')"
-      [class.is-alcanzado]="tieneEstado('alcanzado')"
-      [class.is-superado]="tieneEstado('superado')"
-      [class.is-sin-limite]="tieneEstado('sin_limite')"
-    >
-      <header class="annual-limit-panel__header">
-        <h2>Límite anual de emisiones</h2>
-
-        @if (comparacion(); as data) {
-          <div class="annual-limit-panel__status">
-            <span class="annual-limit-panel__badge">
-              {{ estadoVisual(data.estado).label }}
-            </span>
-            <span class="annual-limit-panel__limit">
-              Límite:
-              @if (data.limiteT !== null) {
-                {{ formatToneladas(data.limiteT) }} tCO₂e
-              } @else {
-                sin declarar
-              }
-            </span>
-          </div>
-        }
-      </header>
-
-      @if (cargando()) {
-        <p class="annual-limit-panel__info">Cargando comparación...</p>
-      } @else if (comparacion(); as data) {
-        @if (data.estado === 'sin_limite') {
-          <div class="annual-limit-panel__empty">
-            <p>No se ha declarado un límite para {{ data.anio }}.</p>
-            <a routerLink="/limites" appLink>Declarar límite anual de emisiones</a>
-          </div>
-        } @else {
-          <div class="annual-limit-panel__meter" aria-hidden="true">
-            <div class="annual-limit-panel__track">
-              <span class="annual-limit-panel__fill" [style.width.%]="consumoBarra()"></span>
-            </div>
-            <div class="annual-limit-panel__scale">
-              <span>0 tCO₂e</span>
-              <strong>
-                {{ formatToneladas(data.huellaAcumuladaT) }} tCO₂e ·
-                {{ formatPorcentaje(data.porcentajeConsumido) }} %
-              </strong>
-              <span>{{ formatToneladas(data.limiteT) }} tCO₂e</span>
-            </div>
-          </div>
-
-          <dl class="annual-limit-panel__metrics">
-            <div>
-              <dt>Huella acumulada {{ data.anio }}</dt>
-              <dd>{{ formatToneladas(data.huellaAcumuladaT) }} tCO₂e</dd>
-            </div>
-            <div>
-              <dt>Límite declarado</dt>
-              <dd>{{ formatToneladas(data.limiteT) }} tCO₂e</dd>
-            </div>
-            <div>
-              <dt>Del límite anual</dt>
-              <dd>{{ formatPorcentaje(data.porcentajeConsumido) }} %</dd>
-            </div>
-          </dl>
-        }
       }
-    </article>
-  </section>
+    </section>
+
+    <div class="dashboard-page__grid">
+      <article
+        class="annual-limit-panel"
+        [class.is-dentro]="tieneEstado('dentro')"
+        [class.is-cerca]="tieneEstado('cerca')"
+        [class.is-alcanzado]="tieneEstado('alcanzado')"
+        [class.is-superado]="tieneEstado('superado')"
+        [class.is-sin-limite]="tieneEstado('sin_limite')"
+      >
+        <header class="annual-limit-panel__header">
+          <h2>Límite anual de emisiones</h2>
+
+          @if (comparacion(); as data) {
+            <div class="annual-limit-panel__status">
+              <span class="annual-limit-panel__badge">
+                {{ estadoVisual(data.estado).label }}
+              </span>
+              <span class="annual-limit-panel__limit">
+                Límite:
+                @if (data.limiteT !== null) {
+                  {{ formatToneladas(data.limiteT) }} tCO₂e
+                } @else {
+                  sin declarar
+                }
+              </span>
+            </div>
+          }
+        </header>
+
+        @if (cargandoComparacion()) {
+          <p class="annual-limit-panel__info">Cargando comparación...</p>
+        } @else if (comparacion(); as data) {
+          @if (data.estado === 'sin_limite') {
+            <div class="annual-limit-panel__empty">
+              <p>No se ha declarado un límite para {{ data.anio }}.</p>
+              <a routerLink="/limites" appLink>Declarar límite anual de emisiones</a>
+            </div>
+          } @else {
+            <div class="annual-limit-panel__meter" aria-hidden="true">
+              <div class="annual-limit-panel__track">
+                <span class="annual-limit-panel__fill" [style.width.%]="consumoBarra()"></span>
+              </div>
+              <div class="annual-limit-panel__scale">
+                <span>0 tCO₂e</span>
+                <strong>
+                  {{ formatToneladas(data.huellaAcumuladaT) }} tCO₂e ·
+                  {{ formatPorcentaje(data.porcentajeConsumido) }} %
+                </strong>
+                <span>{{ formatToneladas(data.limiteT) }} tCO₂e</span>
+              </div>
+            </div>
+
+            <dl class="annual-limit-panel__metrics">
+              <div>
+                <dt>Huella acumulada {{ data.anio }}</dt>
+                <dd>{{ formatToneladas(data.huellaAcumuladaT) }} tCO₂e</dd>
+              </div>
+              <div>
+                <dt>Límite declarado</dt>
+                <dd>{{ formatToneladas(data.limiteT) }} tCO₂e</dd>
+              </div>
+              <div>
+                <dt>Del límite anual</dt>
+                <dd>{{ formatPorcentaje(data.porcentajeConsumido) }} %</dd>
+              </div>
+            </dl>
+          }
+        }
+      </article>
+
+      <section class="dashboard-page__card" aria-label="Desglose por categoría">
+        <h2 class="dashboard-page__card-title">Desglose por categoría</h2>
+
+        @if (cargandoResumen()) {
+          <p class="dashboard-page__estado">Cargando el desglose…</p>
+        } @else if (errorCarga()) {
+          <p class="dashboard-page__estado" role="alert">
+            No se pudo cargar la información del período seleccionado.
+          </p>
+        } @else if (resumen()) {
+          <div class="dashboard-page__dona-wrapper">
+            <svg
+              class="dashboard-page__dona"
+              viewBox="0 0 160 160"
+              role="img"
+              aria-label="Composición de la huella por categoría"
+            >
+              <circle
+                class="dashboard-page__dona-fondo"
+                cx="80"
+                cy="80"
+                r="60"
+                fill="none"
+                stroke-width="22"
+              />
+              @if (!sinDatos()) {
+                @for (item of desglose(); track item.categoria) {
+                  @if (item.porcentaje > 0) {
+                    <circle
+                      class="dashboard-page__segmento"
+                      [class]="'dashboard-page__segmento--' + item.categoria.toLowerCase()"
+                      cx="80"
+                      cy="80"
+                      r="60"
+                      fill="none"
+                      stroke-width="22"
+                      [attr.stroke-dasharray]="item.largo + ' ' + circunferencia"
+                      [attr.stroke-dashoffset]="item.offset"
+                      transform="rotate(-90 80 80)"
+                    ></circle>
+                  }
+                }
+              }
+            </svg>
+            <div class="dashboard-page__dona-centro">
+              <span class="dashboard-page__dona-eyebrow">Total</span>
+              <span class="dashboard-page__dona-total">{{ totalT() | number: '1.0-3' }}</span>
+              <span class="dashboard-page__dona-unidad">tCO₂e</span>
+            </div>
+          </div>
+
+          @if (sinDatos()) {
+            <p class="dashboard-page__vacio">{{ sinEmisionesMensaje }}</p>
+          }
+
+          <ul class="dashboard-page__leyenda">
+            @for (item of desglose(); track item.categoria) {
+              <li
+                class="dashboard-page__fila"
+                [title]="(item.totalKg | number: '1.0-3') + ' kg CO₂e'"
+              >
+                <span
+                  class="dashboard-page__punto"
+                  [class]="'dashboard-page__punto--' + item.categoria.toLowerCase()"
+                  aria-hidden="true"
+                ></span>
+                <span class="dashboard-page__fila-etiqueta">{{ item.etiqueta }}</span>
+                <span class="dashboard-page__fila-porcentaje">
+                  {{ item.porcentaje | number: '1.0-1' }} %
+                </span>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
+  </div>
 </app-shell-layout>
