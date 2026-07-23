@@ -133,7 +133,9 @@ export class DashboardPageComponent {
   protected readonly exportandoPdf = signal(false);
 
   // Deshabilita el botón de exportar mientras cualquiera de las dos cargas esté en curso.
-  protected readonly cargando = computed(() => this.cargandoResumen() || this.cargandoComparacion());
+  protected readonly cargando = computed(
+    () => this.cargandoResumen() || this.cargandoComparacion()
+  );
 
   protected readonly anioOptions: SelectOption[] = Array.from(
     { length: this.anioActual - ANIO_MINIMO + 1 },

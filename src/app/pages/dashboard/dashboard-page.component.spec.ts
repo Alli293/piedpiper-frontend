@@ -246,7 +246,11 @@ describe('DashboardPageComponent', () => {
     await (component as any).cargarComparacion(2026);
     fixture.detectChanges();
 
-    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    // Se acota la búsqueda a la sección de KPIs: el textContent de toda la página
+    // incluye el <select> de año (2026...2000), cuyas opciones concatenadas generan
+    // falsos positivos como "42" (borde entre "2004" y "2003").
+    const resumenSection = fixture.nativeElement.querySelector('.dashboard-summary') as HTMLElement;
+    const texto = resumenSection?.textContent ?? '';
     expect((component as any).comparacion()).toBeNull();
     expect(texto).not.toContain('5.236');
     expect(texto).not.toContain('12.47');
@@ -365,4 +369,9 @@ describe('DashboardPageComponent', () => {
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    const
+    const etiquetas = Array.from(root.querySelectorAll('.dashboard-page__fila-etiqueta')).map(
+      (element) => element.textContent?.trim()
+    );
+    expect(etiquetas).toEqual(['Electricidad', 'Flota vehicular', 'Vuelos', 'Envíos']);
+  });
+});
