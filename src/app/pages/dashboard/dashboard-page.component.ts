@@ -5,7 +5,9 @@ import { form, FormField, required, schema } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from '../../core/auth-session.service';
+import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 import {
   SelectInputComponent,
   SelectOption,
@@ -14,7 +16,7 @@ import { LinkDirective } from '../../shared/components/link/link.directive';
 import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../shared/services/toast.service';
-import { apiErrorMessage } from '../../shared/utils/http-error.utils';
+import { apiErrorMessage, apiErrorMessageAsync } from '../../shared/utils/http-error.utils';
 import {
   CategoriaResumen,
   ComparacionEmisionesResponse,
@@ -22,6 +24,7 @@ import {
   ResumenEmisionesResponse,
 } from '../emissions/models/emision.model';
 import { EmisionesService } from '../emissions/emisiones.service';
+import { DashboardService } from './dashboard.service';
 
 interface PeriodoResumenFormModel {
   anio: string;
@@ -82,9 +85,11 @@ export const DONA_CIRCUNFERENCIA = 2 * Math.PI * DONA_RADIO;
 @Component({
   selector: 'app-dashboard-page',
   imports: [
+    ButtonComponent,
+    CardStatComponent,
     DecimalPipe,
     FormField,
-    CardStatComponent,
+    IconComponent,
     LinkDirective,
     RouterLink,
     SelectInputComponent,
@@ -95,6 +100,7 @@ export const DONA_CIRCUNFERENCIA = 2 * Math.PI * DONA_RADIO;
 })
 export class DashboardPageComponent {
   private readonly emisionesService = inject(EmisionesService);
+  private readonly dashboardService = inject(DashboardService);
   private readonly authSession = inject(AuthSessionService);
   private readonly toastService = inject(ToastService);
 
@@ -124,6 +130,10 @@ export class DashboardPageComponent {
   // --- Comparación contra el límite anual ---
   protected readonly cargandoComparacion = signal(false);
   protected readonly comparacion = signal<ComparacionEmisionesResponse | null>(null);
+  protected readonly exportandoPdf = signal(false);
+
+  // Deshabilita el botón de exportar mientras cualquiera de las dos cargas esté en curso.
+  protected readonly cargando = computed(() => this.cargandoResumen() || this.cargandoComparacion());
 
   protected readonly anioOptions: SelectOption[] = Array.from(
     { length: this.anioActual - ANIO_MINIMO + 1 },
@@ -134,6 +144,8 @@ export class DashboardPageComponent {
   );
 
   protected readonly mesOptions: SelectOption[] = MESES;
+
+  protected readonly anioSeleccionado = computed(() => Number(this.periodoForm.anio().value()));
 
   protected readonly totalKg = computed(() => this.resumen()?.totalKg ?? 0);
   protected readonly totalT = computed(() => this.resumen()?.totalT ?? 0);
@@ -237,10 +249,29 @@ export class DashboardPageComponent {
     }
   }
 
+  protected async exportarPdf(): Promise<void> {
+    const anio = this.anioSeleccionado();
+    this.exportandoPdf.set(true);
+
+    try {
+      const blob = await firstValueFrom(this.dashboardService.exportarReportePdf(anio));
+      this.descargarBlob(blob, `reporte-huella-${anio}.pdf`);
+    } catch (error: unknown) {
+      const fallback =
+        error instanceof HttpErrorResponse && error.status >= 500
+          ? 'No se pudo generar el reporte PDF. Intente nuevamente.'
+          : 'No se pudo descargar el reporte. Intente nuevamente.';
+      this.toastService.error((await apiErrorMessageAsync(error)) ?? fallback, undefined, 5000);
+    } finally {
+      this.exportandoPdf.set(false);
+    }
+  }
+
   protected estadoVisual(estado: EstadoComparacion): EstadoVisual {
     const estados: Record<EstadoComparacion, EstadoVisual> = {
       dentro: { label: 'En meta' },
       cerca: { label: 'Cerca del límite' },
+      alcanzado: { label: 'Alcanzado' },
       superado: { label: 'Límite superado' },
       sin_limite: { label: 'Sin límite' },
     };
@@ -289,5 +320,16 @@ export class DashboardPageComponent {
   private calcularPorcentaje(subtotalKg: number, totalKg: number): number {
     if (totalKg === 0) return 0;
     return Math.round((subtotalKg / totalKg) * 1000) / 10;
+  }
+
+  private descargarBlob(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
   }
 }

@@ -1,5 +1,19 @@
 <app-shell-layout activeId="dashboard" [headerConfig]="headerConfig()">
   <div class="dashboard-page">
+    <div class="dashboard-page__toolbar">
+      <app-button
+        class="dashboard-shell__export"
+        variant="secondary"
+        size="md"
+        [disabled]="cargando()"
+        [loading]="exportandoPdf()"
+        (click)="exportarPdf()"
+      >
+        <app-icon name="descargar" [size]="16" />
+        <span>Exportar PDF</span>
+      </app-button>
+    </div>
+
     <form class="dashboard-page__filters" novalidate aria-label="Período a consultar">
       <app-select-input
         class="dashboard-page__filter"
@@ -42,6 +56,7 @@
         class="annual-limit-panel"
         [class.is-dentro]="tieneEstado('dentro')"
         [class.is-cerca]="tieneEstado('cerca')"
+        [class.is-alcanzado]="tieneEstado('alcanzado')"
         [class.is-superado]="tieneEstado('superado')"
         [class.is-sin-limite]="tieneEstado('sin_limite')"
       >

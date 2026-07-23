@@ -12,6 +12,7 @@ import {
 } from '../emissions/models/emision.model';
 import { EmisionesService } from '../emissions/emisiones.service';
 import { DashboardPageComponent, SIN_EMISIONES_MENSAJE } from './dashboard-page.component';
+import { DashboardService } from './dashboard.service';
 
 const ANIO_ACTUAL = new Date().getFullYear();
 
@@ -57,6 +58,7 @@ describe('DashboardPageComponent', () => {
     obtenerComparacion: ReturnType<typeof vi.fn>;
     obtenerResumen: ReturnType<typeof vi.fn>;
   };
+  let dashboardService: { exportarReportePdf: ReturnType<typeof vi.fn> };
   let authSession: { getUserInitials: ReturnType<typeof vi.fn> };
   let authService: { cerrarSesion: ReturnType<typeof vi.fn> };
   let toastService: { error: ReturnType<typeof vi.fn> };
@@ -65,6 +67,11 @@ describe('DashboardPageComponent', () => {
     emisionesService = {
       obtenerComparacion: vi.fn().mockReturnValue(of(COMPARACION_BASE)),
       obtenerResumen: vi.fn().mockReturnValue(of(RESUMEN_CON_DATOS)),
+    };
+    dashboardService = {
+      exportarReportePdf: vi
+        .fn()
+        .mockReturnValue(of(new Blob(['pdf'], { type: 'application/pdf' }))),
     };
     authSession = {
       getUserInitials: vi.fn().mockReturnValue('AJ'),
@@ -82,6 +89,7 @@ describe('DashboardPageComponent', () => {
       providers: [
         provideRouter([]),
         { provide: EmisionesService, useValue: emisionesService },
+        { provide: DashboardService, useValue: dashboardService },
         { provide: AuthService, useValue: authService },
         { provide: AuthSessionService, useValue: authSession },
         { provide: ToastService, useValue: toastService },
@@ -161,6 +169,21 @@ describe('DashboardPageComponent', () => {
     expect(fixture.nativeElement.querySelector('.annual-limit-panel.is-superado')).toBeTruthy();
   });
 
+  it('renderiza el estado alcanzado', async () => {
+    await createFixture();
+    (component as any).comparacion.set({
+      ...COMPARACION_BASE,
+      huellaAcumuladaT: 50,
+      porcentajeConsumido: 100,
+      estado: 'alcanzado',
+    });
+    fixture.detectChanges();
+
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(texto).toContain('Alcanzado');
+    expect(fixture.nativeElement.querySelector('.annual-limit-panel.is-alcanzado')).toBeTruthy();
+  });
+
   it('renderiza el estado sin limite con appLink', async () => {
     await createFixture();
     (component as any).comparacion.set({
@@ -213,6 +236,21 @@ describe('DashboardPageComponent', () => {
       undefined,
       5000
     );
+  });
+
+  it('no muestra datos de demostracion cuando falla la carga', async () => {
+    await createFixture();
+    (component as any).comparacion.set(null);
+    emisionesService.obtenerComparacion.mockReturnValueOnce(throwError(() => new Error('network')));
+
+    await (component as any).cargarComparacion(2026);
+    fixture.detectChanges();
+
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect((component as any).comparacion()).toBeNull();
+    expect(texto).not.toContain('5.236');
+    expect(texto).not.toContain('12.47');
+    expect(texto).not.toContain('42');
   });
 
   // ---------------------------------------------------------------------------
@@ -327,9 +365,4 @@ describe('DashboardPageComponent', () => {
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    const etiquetas = Array.from(root.querySelectorAll('.dashboard-page__fila-etiqueta')).map(
-      (element) => element.textContent?.trim()
-    );
-    expect(etiquetas).toEqual(['Electricidad', 'Flota vehicular', 'Vuelos', 'Envíos']);
-  });
-});
+    const

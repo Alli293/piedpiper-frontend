@@ -205,6 +205,15 @@ describe('RegisterEmissionPageComponent', () => {
     expect(registrarElectricidad).not.toHaveBeenCalled();
   });
 
+  it('navigates to dashboard from the sidebar menu', () => {
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    clickButton(root, 'Dashboard');
+
+    expect(TestBed.inject(Router).navigateByUrl).toHaveBeenCalledWith('/panel');
+  });
+
   it('calls the service exactly once when the form is valid', async () => {
     registrarElectricidad.mockReturnValue(of(VALID_RESPONSE));
 
