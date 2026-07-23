@@ -1,5 +1,5 @@
 @if (label()) {
-  <label class="ch-text-input__label" [for]="inputId">
+  <label class="ch-text-input__label" [for]="inputId()">
     {{ label() }}
     @if (required()) {
       <span aria-hidden="true"> *</span>
@@ -9,7 +9,7 @@
 <input
   class="ch-text-input__field"
   [class.ch-text-input__field--error]="hasError()"
-  [id]="inputId"
+  [id]="inputId()"
   [type]="type()"
   [value]="value()"
   [placeholder]="placeholder()"
@@ -22,7 +22,7 @@
   (blur)="onBlur()"
 />
 @if (hasError()) {
-  <p class="ch-text-input__error" [id]="errorId">{{ error() }}</p>
+  <p class="ch-text-input__error" [id]="errorId()">{{ error() }}</p>
 } @else if (hint()) {
-  <p class="ch-text-input__hint" [id]="hintId">{{ hint() }}</p>
+  <p class="ch-text-input__hint" [id]="hintId()">{{ hint() }}</p>
 }

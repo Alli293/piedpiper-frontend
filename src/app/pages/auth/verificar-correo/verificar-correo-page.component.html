@@ -6,36 +6,38 @@
       <app-semantic-card variant="success" title="¡Listo!" [text]="mensajeExito()" />
       <a class="verificar-correo__enlace" routerLink="/login">Iniciar sesión</a>
     } @else if (mensajeInvalido()) {
-      <app-semantic-card variant="warning" title="Enlace no válido" [text]="mensajeInvalido()" />
+      <div class="verificar-correo__invalido" role="alert">
+        <app-semantic-card variant="warning" title="Enlace no válido" [text]="mensajeInvalido()" />
 
-      <form class="verificar-correo__reenvio" novalidate (submit)="handleReenviarSubmit($event)">
-        <app-text-input
-          id="txtReenviarEmail"
-          label="Correo electrónico"
-          type="email"
-          autocomplete="email"
-          placeholder="tucorreo@ejemplo.com"
-          [formField]="reenviarForm.email"
-          [error]="errorReenviarEmail()"
-        />
+        <form class="verificar-correo__reenvio" novalidate (submit)="handleReenviarSubmit($event)">
+          <app-text-input
+            id="txtReenviarEmail"
+            label="Correo electrónico"
+            type="email"
+            autocomplete="email"
+            placeholder="tucorreo@ejemplo.com"
+            [formField]="reenviarForm.email"
+            [error]="errorReenviarEmail()"
+          />
 
-        @if (reenviarError()) {
-          <p class="verificar-correo__error" role="alert">{{ reenviarError() }}</p>
-        }
-        @if (reenviarMensaje()) {
-          <p class="verificar-correo__mensaje" role="status">{{ reenviarMensaje() }}</p>
-        }
+          @if (reenviarError()) {
+            <p class="verificar-correo__error" role="alert">{{ reenviarError() }}</p>
+          }
+          @if (reenviarMensaje()) {
+            <p class="verificar-correo__mensaje" role="status">{{ reenviarMensaje() }}</p>
+          }
 
-        <app-button
-          id="btnReenviarVerificacion"
-          variant="primary"
-          size="lg"
-          type="submit"
-          [loading]="reenviarEnviando()"
-        >
-          Reenviar correo de verificación
-        </app-button>
-      </form>
+          <app-button
+            id="btnReenviarVerificacion"
+            variant="primary"
+            size="lg"
+            type="submit"
+            [loading]="reenviarEnviando()"
+          >
+            Reenviar correo de verificación
+          </app-button>
+        </form>
+      </div>
     }
   </app-card>
 </app-state-layout>
