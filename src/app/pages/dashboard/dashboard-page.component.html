@@ -49,6 +49,50 @@
           />
         </article>
       }
+
+      <article class="annual-limit-panel dashboard-summary__card dashboard-summary__card--period">
+        <header class="dashboard-summary__card-header">
+          <app-select-input
+            class="dashboard-summary__period"
+            [options]="periodos"
+            [value]="periodoSeleccionadoValue()"
+            [disabled]="cargandoResumenHuella()"
+            [ariaLabel]="periodoSelectorAriaLabel()"
+            placeholder="Periodo"
+            (valueChange)="onPeriodoChange($event)"
+          />
+        </header>
+
+        @if (cargandoResumenHuella()) {
+          <p class="dashboard-summary__state">Cargando resumen...</p>
+        } @else if (resumenHuellaError(); as error) {
+          <p class="dashboard-summary__state dashboard-summary__state--error" role="alert">
+            {{ error }}
+          </p>
+        } @else if (resumenHuella(); as resumen) {
+          @if (resumen.tieneDatos) {
+            <app-card-stat
+              [label]="periodoResumenTitulo(resumen.periodoSeleccionado)"
+              [value]="formatToneladas(resumen.huellaTotalT)"
+              [delta]="periodoResumenDetalle(resumen.periodoSeleccionado)"
+            />
+            @if (variacionTipo(resumen.variacionPorcentual); as tipo) {
+              <span
+                class="dashboard-summary__variation"
+                [class.dashboard-summary__variation--up]="tipo === 'sube'"
+                [class.dashboard-summary__variation--down]="tipo === 'baja'"
+                [class.dashboard-summary__variation--flat]="tipo === 'igual'"
+              >
+                {{ variacionLabel(resumen.variacionPorcentual) }}
+              </span>
+            }
+          } @else {
+            <p class="dashboard-summary__state">
+              No hay datos de huella registrados para este periodo.
+            </p>
+          }
+        }
+      </article>
     </section>
 
     <!-- PP-79: IMA -->

@@ -31,6 +31,7 @@ export class SelectInputComponent implements ControlValueAccessor {
   error = input('');
   hint = input('');
   disabled = input(false);
+  ariaLabel = input<string | null>(null);
 
   protected readonly inputId = `ch-select-input-${nextId++}`;
   protected readonly errorId = `${this.inputId}-error`;

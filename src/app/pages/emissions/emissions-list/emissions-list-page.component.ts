@@ -9,11 +9,8 @@ import {
   SelectInputComponent,
   SelectOption,
 } from '../../../shared/components/inputs/select-input/select-input.component';
-import {
-  HeaderConfig,
-  PageLayoutComponent,
-  SidebarConfig,
-} from '../../../shared/layouts/page-layout/page-layout.component';
+import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
+import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import { EmisionesService } from '../emisiones.service';
@@ -55,8 +52,8 @@ const MONTH_OPTIONS: SelectOption[] = [
     ButtonComponent,
     HeadingComponent,
     IconComponent,
-    PageLayoutComponent,
     SelectInputComponent,
+    ShellLayoutComponent,
   ],
   templateUrl: './emissions-list-page.component.html',
   styleUrl: './emissions-list-page.component.scss',
@@ -93,27 +90,6 @@ export class EmissionsListPageComponent {
   });
   protected readonly filtroAnioValue = computed(() => this.filtroAnio()?.toString() ?? '');
   protected readonly filtroMesValue = computed(() => this.filtroMes()?.toString() ?? '');
-
-  protected readonly sidebarConfig = signal<SidebarConfig>({
-    menuItems: [
-      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', active: false },
-      { id: 'emissions', label: 'Mis Emisiones', icon: 'emisiones', active: true },
-      { id: 'auditors', label: 'Auditores', icon: 'auditores', active: false },
-      { id: 'audits', label: 'Auditorías', icon: 'auditorias', active: false },
-      { id: 'certifications', label: 'Certificaciones', icon: 'certificaciones', active: false },
-      { id: 'benchmark', label: 'Madurez ambiental', icon: 'benchmark', active: false },
-      { id: 'badges', label: 'Insignias', icon: 'insignias', active: false },
-      { id: 'public-profile', label: 'Perfil Público', icon: 'perfil-publico', active: false },
-      { id: 'team-members', label: 'Colaboradores', icon: 'colaboradores', active: false },
-    ],
-    bottomItems: [
-      { id: 'settings', label: 'Configuración', icon: 'config' },
-      { id: 'logout', label: 'Cerrar sesión', icon: 'logout' },
-    ],
-    companyName: 'Café del Valle S.A.',
-    companyRole: 'Empresa',
-    companyInitials: 'CV',
-  });
 
   protected readonly headerConfig = signal<HeaderConfig>({
     sectionLabel: 'PANEL EMPRESARIAL',

@@ -34,4 +34,19 @@ describe('DashboardService', () => {
 
     req.flush(new Blob(['pdf'], { type: 'application/pdf' }));
   });
+
+  it('consulta el resumen de huella con el periodo como query param', () => {
+    service.obtenerResumenHuella('mes_actual').subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/dashboard/huella?periodo=mes_actual`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('periodo')).toBe('mes_actual');
+
+    req.flush({
+      periodoSeleccionado: 'mes_actual',
+      huellaTotalT: 5.236,
+      variacionPorcentual: 30.9,
+      tieneDatos: true,
+    });
+  });
 });

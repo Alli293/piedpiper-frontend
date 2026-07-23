@@ -26,6 +26,7 @@ import {
 } from '../emissions/models/emision.model';
 import { EmisionesService } from '../emissions/emisiones.service';
 import { DashboardService } from './dashboard.service';
+import { PeriodoDashboard, ResumenHuellaDashboardResponse } from './dashboard.model';
 import { EvolucionService, PuntoMensual } from './evolucion.service';
 import { ImaService, ImaResponse } from './ima.service';
 import { EvolucionChartComponent } from './evolucion-chart.component';
@@ -75,6 +76,12 @@ const MESES: SelectOption[] = [
   { value: '12', label: 'Diciembre' },
 ];
 
+const PERIODOS_DASHBOARD: SelectOption[] = [
+  { value: 'mes_actual', label: 'Mes actual' },
+  { value: 'trimestre', label: 'Trimestre' },
+  { value: 'año', label: 'Año' },
+];
+
 const ANIO_MINIMO = 2000;
 
 const ERROR_RESUMEN_MENSAJE = 'No se pudo cargar el desglose. Intente nuevamente.';
@@ -116,6 +123,7 @@ export class DashboardPageComponent {
 
   private readonly anioActual = new Date().getFullYear();
   private solicitudResumen = 0;
+  private solicitudResumenHuella = 0;
 
   protected readonly mesActual = new Date().getMonth() + 1;
   protected readonly mesSeleccionado = signal(this.mesActual);
@@ -140,9 +148,16 @@ export class DashboardPageComponent {
   protected readonly errorCarga = signal(false);
   protected readonly resumen = signal<ResumenEmisionesResponse | null>(null);
 
+  // --- Resumen de huella por período (PP-73) ---
+  protected readonly periodoSeleccionado = signal<PeriodoDashboard>('mes_actual');
+  protected readonly resumenHuella = signal<ResumenHuellaDashboardResponse | null>(null);
+  protected readonly cargandoResumenHuella = signal(false);
+  protected readonly resumenHuellaError = signal<string | null>(null);
+
   // --- Comparación contra el límite anual ---
   protected readonly cargandoComparacion = signal(false);
   protected readonly comparacion = signal<ComparacionEmisionesResponse | null>(null);
+  protected readonly comparacionError = signal<string | null>(null);
   protected readonly exportandoPdf = signal(false);
 
   // --- PP-41: Evolución histórica ---
@@ -154,7 +169,7 @@ export class DashboardPageComponent {
 
   // Deshabilita el botón de exportar mientras cualquiera de las dos cargas esté en curso.
   protected readonly cargando = computed(
-    () => this.cargandoResumen() || this.cargandoComparacion()
+    () => this.cargandoResumen() || this.cargandoComparacion() || this.cargandoResumenHuella()
   );
 
   protected readonly anioOptions: SelectOption[] = Array.from(
@@ -166,8 +181,10 @@ export class DashboardPageComponent {
   );
 
   protected readonly mesOptions: SelectOption[] = MESES;
+  protected readonly periodos = PERIODOS_DASHBOARD;
 
   protected readonly anioSeleccionado = computed(() => Number(this.periodoForm.anio().value()));
+  protected readonly periodoSeleccionadoValue = computed(() => this.periodoSeleccionado());
 
   protected readonly totalKg = computed(() => this.resumen()?.totalKg ?? 0);
   protected readonly totalT = computed(() => this.resumen()?.totalT ?? 0);
@@ -208,6 +225,10 @@ export class DashboardPageComponent {
     userInitials: this.authSession.getUserInitials(),
   }));
 
+  protected readonly periodoSelectorAriaLabel = computed(
+    () => `Seleccionar período del resumen. Actual: ${this.periodoResumenOpcionLabel()}`
+  );
+
   constructor() {
     // El año gobierna ambas tarjetas; el mes solo afecta el desglose de la dona.
     effect(() => {
@@ -227,6 +248,7 @@ export class DashboardPageComponent {
       if (!anioField.valid()) return;
       untracked(() => {
         void this.cargarComparacion(Number(anio));
+        void this.cargarResumenHuella(this.periodoSeleccionado(), Number(anio));
         void this.cargarEvolucion(Number(anio));
         void this.cargarIma(Number(anio), this.mesSeleccionado());
       });
@@ -236,6 +258,12 @@ export class DashboardPageComponent {
   protected onImaPeriodoChange(evento: { anio: number; mes: number }): void {
     this.mesSeleccionado.set(evento.mes);
     void this.cargarIma(evento.anio, evento.mes);
+  }
+
+  protected onPeriodoChange(valor: string): void {
+    const periodo = this.normalizarPeriodo(valor);
+    this.periodoSeleccionado.set(periodo);
+    void this.cargarResumenHuella(periodo, this.anioSeleccionado());
   }
 
   private async cargarResumen(anio: number, mes?: number): Promise<void> {
@@ -264,15 +292,15 @@ export class DashboardPageComponent {
 
   private async cargarComparacion(anio: number): Promise<void> {
     this.cargandoComparacion.set(true);
+    this.comparacionError.set(null);
     try {
       const comparacion = await firstValueFrom(this.emisionesService.obtenerComparacion(anio));
       this.comparacion.set(comparacion);
     } catch (err: unknown) {
-      this.toastService.error(
-        apiErrorMessage(err) ?? ERROR_COMPARACION_MENSAJE,
-        undefined,
-        TOAST_DURACION_MS
-      );
+      const mensaje = apiErrorMessage(err) ?? ERROR_COMPARACION_MENSAJE;
+      this.comparacion.set(null);
+      this.comparacionError.set(mensaje);
+      this.toastService.error(mensaje, undefined, TOAST_DURACION_MS);
     } finally {
       this.cargandoComparacion.set(false);
     }
@@ -346,9 +374,82 @@ export class DashboardPageComponent {
     )} tCO2e`;
   }
 
+  protected periodoResumenOpcionLabel(): string {
+    const option = PERIODOS_DASHBOARD.find((item) => item.value === this.periodoSeleccionado());
+    return option?.label ?? 'Mes actual';
+  }
+
+  protected periodoResumenTitulo(periodo: PeriodoDashboard): string {
+    if (periodo === 'trimestre') {
+      return `Trimestre ${this.anioSeleccionado()}`;
+    }
+    if (periodo === 'año') {
+      return `Año ${this.anioSeleccionado()}`;
+    }
+
+    const mes = new Intl.DateTimeFormat('es-CR', { month: 'long' }).format(new Date());
+    return `${mes} ${this.anioSeleccionado()}`;
+  }
+
+  protected periodoResumenDetalle(periodo: PeriodoDashboard): string {
+    if (periodo === 'trimestre') {
+      return 'tCO₂e este trimestre';
+    }
+    if (periodo === 'año') {
+      return 'tCO₂e este año';
+    }
+
+    return 'tCO₂e este mes';
+  }
+
+  protected variacionLabel(valor: number | null): string {
+    if (valor === null) return '';
+
+    const prefijo = valor > 0 ? '+' : '';
+    return `${prefijo}${this.formatPorcentaje(valor)} % vs periodo anterior`;
+  }
+
+  protected variacionTipo(valor: number | null): 'sube' | 'baja' | 'igual' | null {
+    if (valor === null) return null;
+    if (valor > 0) return 'sube';
+    if (valor < 0) return 'baja';
+    return 'igual';
+  }
+
   private calcularPorcentaje(subtotalKg: number, totalKg: number): number {
     if (totalKg === 0) return 0;
     return Math.round((subtotalKg / totalKg) * 1000) / 10;
+  }
+
+  private async cargarResumenHuella(periodo: PeriodoDashboard, anio: number): Promise<void> {
+    const solicitud = ++this.solicitudResumenHuella;
+    this.cargandoResumenHuella.set(true);
+    this.resumenHuellaError.set(null);
+    try {
+      const resumen = await firstValueFrom(
+        this.dashboardService.obtenerResumenHuella(periodo, anio)
+      );
+      if (solicitud !== this.solicitudResumenHuella) return;
+      this.resumenHuella.set(resumen);
+      this.periodoSeleccionado.set(resumen.periodoSeleccionado);
+    } catch (err: unknown) {
+      if (solicitud !== this.solicitudResumenHuella) return;
+      this.resumenHuella.set(null);
+      this.resumenHuellaError.set(
+        apiErrorMessage(err) ?? 'No fue posible cargar esta sección. Intenta recargar la página.'
+      );
+    } finally {
+      if (solicitud === this.solicitudResumenHuella) {
+        this.cargandoResumenHuella.set(false);
+      }
+    }
+  }
+
+  private normalizarPeriodo(valor: string): PeriodoDashboard {
+    if (valor === 'trimestre' || valor === 'año') {
+      return valor;
+    }
+    return 'mes_actual';
   }
 
   private descargarBlob(blob: Blob, filename: string): void {

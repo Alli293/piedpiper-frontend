@@ -187,6 +187,76 @@
   gap: var(--ch-space-4);
 }
 
+.dashboard-summary__card--period {
+  position: relative;
+}
+
+.dashboard-summary__card-header {
+  position: absolute;
+  top: var(--ch-space-5);
+  right: var(--ch-space-5);
+  z-index: 1;
+}
+
+.dashboard-summary__period {
+  width: 96px;
+}
+
+.dashboard-summary__state {
+  margin: 0;
+  color: var(--ch-text-secondary);
+  font-size: 14px;
+}
+
+.dashboard-summary__state--error {
+  color: var(--ch-danger);
+}
+
+.dashboard-summary__variation {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+  margin-top: var(--ch-space-2);
+  font-family: var(--ch-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+
+  &::before {
+    content: '';
+    width: 0;
+    height: 0;
+    border-right: 5px solid transparent;
+    border-left: 5px solid transparent;
+  }
+}
+
+.dashboard-summary__variation--up {
+  color: var(--ch-danger);
+
+  &::before {
+    border-bottom: 8px solid currentColor;
+  }
+}
+
+.dashboard-summary__variation--down {
+  color: var(--ch-green);
+
+  &::before {
+    border-top: 8px solid currentColor;
+  }
+}
+
+.dashboard-summary__variation--flat {
+  color: var(--ch-text-secondary);
+
+  &::before {
+    width: 10px;
+    height: 2px;
+    border: 0;
+    background: currentColor;
+  }
+}
+
 /* --- Panel de límite anual (PP-40) --- */
 .annual-limit-panel {
   background: var(--ch-bg-white);

@@ -12,6 +12,7 @@ import {
 } from '../emissions/models/emision.model';
 import { EmisionesService } from '../emissions/emisiones.service';
 import { DashboardPageComponent, SIN_EMISIONES_MENSAJE } from './dashboard-page.component';
+import { ResumenHuellaDashboardResponse } from './dashboard.model';
 import { DashboardService } from './dashboard.service';
 import { EvolucionService } from './evolucion.service';
 import { ImaService } from './ima.service';
@@ -29,6 +30,13 @@ const COMPARACION_BASE: ComparacionEmisionesResponse = {
   estado: 'dentro',
   mensaje: null,
   categorias: [],
+};
+
+const RESUMEN_HUELLA_BASE: ResumenHuellaDashboardResponse = {
+  periodoSeleccionado: 'mes_actual',
+  huellaTotalT: 5.236,
+  variacionPorcentual: 30.9,
+  tieneDatos: true,
 };
 
 const RESUMEN_CON_DATOS: ResumenEmisionesResponse = {
@@ -77,7 +85,10 @@ describe('DashboardPageComponent', () => {
     obtenerComparacion: ReturnType<typeof vi.fn>;
     obtenerResumen: ReturnType<typeof vi.fn>;
   };
-  let dashboardService: { exportarReportePdf: ReturnType<typeof vi.fn> };
+  let dashboardService: {
+    exportarReportePdf: ReturnType<typeof vi.fn>;
+    obtenerResumenHuella: ReturnType<typeof vi.fn>;
+  };
   let authSession: { getUserInitials: ReturnType<typeof vi.fn> };
   let authService: { cerrarSesion: ReturnType<typeof vi.fn> };
   let toastService: { error: ReturnType<typeof vi.fn> };
@@ -88,6 +99,7 @@ describe('DashboardPageComponent', () => {
       obtenerResumen: vi.fn().mockReturnValue(of(RESUMEN_CON_DATOS)),
     };
     dashboardService = {
+      obtenerResumenHuella: vi.fn().mockReturnValue(of(RESUMEN_HUELLA_BASE)),
       exportarReportePdf: vi
         .fn()
         .mockReturnValue(of(new Blob(['pdf'], { type: 'application/pdf' }))),
