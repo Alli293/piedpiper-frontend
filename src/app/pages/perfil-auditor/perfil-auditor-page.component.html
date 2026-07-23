@@ -1,0 +1,27 @@
+<app-shell-layout [headerConfig]="headerConfig()" settingsLabel="PERFIL AUDITOR">
+  <div class="ch-perfil-auditor">
+    <app-card padding="lg" class="ch-perfil-auditor__card">
+      <div class="ch-perfil-auditor__encabezado">
+        <app-heading level="h2" text="Perfil Profesional" />
+        <p class="ch-perfil-auditor__descripcion">
+          Gestiona tus especialidades, zonas de cobertura, disponibilidad y descripción profesional.
+        </p>
+      </div>
+
+      @if (cargandoCatalogos()) {
+        <p class="ch-perfil-auditor__cargando">Cargando catálogos...</p>
+      } @else if (errorCatalogos()) {
+        <p class="ch-perfil-auditor__error">
+          No se pudieron cargar los catálogos. Intente recargar la página.
+        </p>
+      } @else {
+        <!-- El formulario con sus campos será implementado en la tarea 6.2 -->
+        <form novalidate class="ch-perfil-auditor__formulario">
+          <div class="ch-perfil-auditor__campos">
+            <!-- Campos del formulario se implementarán en task 6.2 -->
+          </div>
+        </form>
+      }
+    </app-card>
+  </div>
+</app-shell-layout>

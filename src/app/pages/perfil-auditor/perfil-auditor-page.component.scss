@@ -1,0 +1,39 @@
+.ch-perfil-auditor {
+  max-width: 640px;
+
+  &__encabezado {
+    margin-bottom: var(--ch-space-6);
+  }
+
+  &__descripcion {
+    font-family: var(--ch-font-body);
+    font-size: 14px;
+    color: var(--ch-text-secondary);
+    margin: var(--ch-space-2) 0 0;
+  }
+
+  &__cargando {
+    font-family: var(--ch-font-body);
+    font-size: 14px;
+    color: var(--ch-text-muted);
+    margin: 0;
+  }
+
+  &__error {
+    font-family: var(--ch-font-body);
+    font-size: 14px;
+    color: var(--ch-text-muted);
+    margin: 0;
+  }
+
+  &__formulario {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__campos {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ch-space-5);
+  }
+}
