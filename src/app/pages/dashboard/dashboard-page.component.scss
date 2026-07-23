@@ -89,9 +89,6 @@
 .dashboard-page__punto--flota {
   stroke: var(--ch-sky);
   background: var(--ch-sky);
-  align-items: center;
-  gap: var(--ch-space-3);
-  justify-content: flex-end;
 }
 
 .dashboard-page__segmento--vuelo,
@@ -119,7 +116,6 @@
 }
 
 .dashboard-page__dona-eyebrow {
-  font-family: var(--ch-font-mono);
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -134,7 +130,6 @@
 }
 
 .dashboard-page__dona-unidad {
-  font-family: var(--ch-font-mono);
   font-size: 11px;
   color: var(--ch-text-muted);
 }
@@ -259,17 +254,6 @@
   }
 }
 
-.dashboard-summary__variation--flat {
-  color: var(--ch-text-secondary);
-
-  &::before {
-    width: 10px;
-    height: 2px;
-    border: 0;
-    background: currentColor;
-  }
-}
-
 /* --- Panel de límite anual (PP-40) --- */
 .annual-limit-panel {
   background: var(--ch-bg-white);
@@ -300,7 +284,6 @@
   align-items: center;
   gap: var(--ch-space-3);
   color: var(--ch-text-secondary);
-  font-family: var(--ch-font-mono);
   font-size: 12px;
 }
 
@@ -311,7 +294,6 @@
   min-height: 26px;
   padding: 0 var(--ch-space-3);
   border-radius: var(--ch-radius-pill);
-  font-family: var(--ch-font-mono);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -392,6 +374,10 @@
   font-size: 14px;
 }
 
+.annual-limit-panel__info--error {
+  color: var(--ch-danger);
+}
+
 .annual-limit-panel__empty {
   padding: var(--ch-space-4);
   border: 1px dashed var(--ch-border);
@@ -428,21 +414,7 @@
   }
 }
 
-.is-cerca {
-  .annual-limit-panel__badge {
-    background: var(--ch-warning-bg);
-    color: var(--ch-warning-dark);
-  }
-
-  .annual-limit-panel__fill {
-    background: var(--ch-warning);
-  }
-
-  .annual-limit-panel__metrics div {
-    border-color: var(--ch-warning);
-  }
-}
-
+.is-cerca,
 .is-alcanzado {
   .annual-limit-panel__badge {
     background: var(--ch-warning-bg);
@@ -481,13 +453,7 @@
 }
 
 @media (max-width: 720px) {
-  .dashboard-shell__toolbar {
-    align-items: stretch;
-    flex-direction: column-reverse;
-  }
-
-  .dashboard-shell__export,
-  .dashboard-shell__year {
+  .dashboard-shell__export {
     width: 100%;
   }
 

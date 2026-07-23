@@ -124,6 +124,7 @@ export class DashboardPageComponent {
   private readonly anioActual = new Date().getFullYear();
   private solicitudResumen = 0;
   private solicitudResumenHuella = 0;
+  private comparacionSolicitudId = 0;
 
   protected readonly mesActual = new Date().getMonth() + 1;
   protected readonly mesSeleccionado = signal(this.mesActual);
@@ -291,18 +292,23 @@ export class DashboardPageComponent {
   }
 
   private async cargarComparacion(anio: number): Promise<void> {
+    const solicitud = ++this.comparacionSolicitudId;
     this.cargandoComparacion.set(true);
     this.comparacionError.set(null);
     try {
       const comparacion = await firstValueFrom(this.emisionesService.obtenerComparacion(anio));
+      if (solicitud !== this.comparacionSolicitudId) return;
       this.comparacion.set(comparacion);
     } catch (err: unknown) {
+      if (solicitud !== this.comparacionSolicitudId) return;
       const mensaje = apiErrorMessage(err) ?? ERROR_COMPARACION_MENSAJE;
       this.comparacion.set(null);
       this.comparacionError.set(mensaje);
       this.toastService.error(mensaje, undefined, TOAST_DURACION_MS);
     } finally {
-      this.cargandoComparacion.set(false);
+      if (solicitud === this.comparacionSolicitudId) {
+        this.cargandoComparacion.set(false);
+      }
     }
   }
 

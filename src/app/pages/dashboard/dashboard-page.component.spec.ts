@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of, throwError, EMPTY, NEVER } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthSessionService } from '../../core/auth-session.service';
 import { ToastService } from '../../shared/services/toast.service';
@@ -206,7 +206,7 @@ describe('DashboardPageComponent', () => {
     const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
 
     expect(texto).toContain('5,236');
-    expect(texto).toContain('tCO2e este mes');
+    expect(texto).toContain('tCO₂e este mes');
     expect(texto).toContain('+30,9 % vs periodo anterior');
   });
 
@@ -267,6 +267,70 @@ describe('DashboardPageComponent', () => {
 
     expect(dashboardService.obtenerResumenHuella).toHaveBeenCalledWith('trimestre', ANIO_ACTUAL);
     expect(emisionesService.obtenerComparacion).not.toHaveBeenCalled();
+  });
+
+  it('ignora respuestas viejas si el periodo cambia rapidamente', async () => {
+    await createFixture();
+    const respuestaLenta = new Subject<ResumenHuellaDashboardResponse>();
+    const respuestaRapida = new Subject<ResumenHuellaDashboardResponse>();
+    dashboardService.obtenerResumenHuella.mockClear();
+    dashboardService.obtenerResumenHuella.mockReturnValueOnce(respuestaLenta.asObservable());
+    dashboardService.obtenerResumenHuella.mockReturnValueOnce(respuestaRapida.asObservable());
+
+    (component as any).onPeriodoChange('trimestre');
+    (component as any).onPeriodoChange('año');
+
+    respuestaRapida.next({
+      periodoSeleccionado: 'año',
+      huellaTotalT: 9,
+      variacionPorcentual: null,
+      tieneDatos: true,
+    });
+    respuestaRapida.complete();
+    await fixture.whenStable();
+
+    respuestaLenta.next({
+      periodoSeleccionado: 'trimestre',
+      huellaTotalT: 2,
+      variacionPorcentual: null,
+      tieneDatos: true,
+    });
+    respuestaLenta.complete();
+    await fixture.whenStable();
+
+    expect((component as any).periodoSeleccionado()).toBe('año');
+    expect((component as any).resumenHuella().huellaTotalT).toBe(9);
+  });
+
+  it('ignora respuestas viejas si el anio cambia rapidamente', async () => {
+    await createFixture();
+    const comparacionLenta = new Subject<ComparacionEmisionesResponse>();
+    const comparacionRapida = new Subject<ComparacionEmisionesResponse>();
+    emisionesService.obtenerComparacion.mockClear();
+    emisionesService.obtenerComparacion.mockReturnValueOnce(comparacionLenta.asObservable());
+    emisionesService.obtenerComparacion.mockReturnValueOnce(comparacionRapida.asObservable());
+
+    void (component as any).cargarComparacion(2021);
+    void (component as any).cargarComparacion(2022);
+
+    comparacionRapida.next({
+      ...COMPARACION_BASE,
+      anio: 2022,
+      huellaAcumuladaT: 22,
+    });
+    comparacionRapida.complete();
+    await fixture.whenStable();
+
+    comparacionLenta.next({
+      ...COMPARACION_BASE,
+      anio: 2021,
+      huellaAcumuladaT: 21,
+    });
+    comparacionLenta.complete();
+    await fixture.whenStable();
+
+    expect((component as any).comparacion().anio).toBe(2022);
+    expect((component as any).comparacion().huellaAcumuladaT).toBe(22);
   });
 
   it('al cambiar el anio recarga el resumen de huella con ese anio', async () => {
