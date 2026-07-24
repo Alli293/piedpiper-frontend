@@ -45,7 +45,13 @@ describe('BenchmarkPageComponent', () => {
   let fixture: ComponentFixture<BenchmarkPageComponent>;
   let component: BenchmarkPageComponent;
   let imaService: { obtenerIma: ReturnType<typeof vi.fn> };
-  let authSession: { getUserInitials: ReturnType<typeof vi.fn> };
+  let authSession: {
+    getUserInitials: ReturnType<typeof vi.fn>;
+    getRole: ReturnType<typeof vi.fn>;
+    getUserName: ReturnType<typeof vi.fn>;
+    getUserEmail: ReturnType<typeof vi.fn>;
+    getUserId: ReturnType<typeof vi.fn>;
+  };
   let toastService: { error: ReturnType<typeof vi.fn>; toasts: ReturnType<typeof signal> };
 
   beforeEach(async () => {
@@ -54,6 +60,10 @@ describe('BenchmarkPageComponent', () => {
     };
     authSession = {
       getUserInitials: vi.fn().mockReturnValue('AJ'),
+      getRole: vi.fn().mockReturnValue('administrador_empresa'),
+      getUserName: vi.fn().mockReturnValue('Test User'),
+      getUserEmail: vi.fn().mockReturnValue('test@test.com'),
+      getUserId: vi.fn().mockReturnValue('123'),
     };
     toastService = {
       toasts: signal([]),

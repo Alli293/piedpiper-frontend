@@ -56,6 +56,8 @@ export class ShellLayoutComponent {
   private readonly resolvedVariant = computed<'empresa' | 'auditor'>(() => {
     const explicit = this.sidebarVariant();
     if (explicit === 'empresa' || explicit === 'auditor') return explicit;
+    // EcoRuta already selects its own explicit navigation variant.
+    if (this.variant() === 'ecoruta') return 'empresa';
     // Auto-detect from role
     const role = this.authSessionService.getRole();
     return role === 'auditor_certificado' ? 'auditor' : 'empresa';

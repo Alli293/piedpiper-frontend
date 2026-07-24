@@ -11,6 +11,11 @@
         No se pudieron cargar los catálogos. Intente recargar la página.
       </p>
     } @else {
+      @if (errorCarga()) {
+        <div class="perfil-error">
+          No se pudo cargar tu perfil actual. Recarga la página antes de guardar cambios.
+        </div>
+      }
       <form novalidate class="ch-perfil-auditor__layout" (submit)="handleSubmit($event)">
         <!-- LEFT COLUMN -->
         <div class="ch-perfil-auditor__col-left">
@@ -19,7 +24,7 @@
             <div class="ch-perfil-auditor__header">
               <app-avatar [initials]="userInitials()" size="lg" />
               <div class="ch-perfil-auditor__header-info">
-                <h2 class="ch-perfil-auditor__name">{{ userName() }}</h2>
+                <app-heading level="h2" [text]="userName()" />
                 <p class="ch-perfil-auditor__email">{{ userEmail() }}</p>
                 <app-badge variant="success">Auditor Certificado</app-badge>
               </div>

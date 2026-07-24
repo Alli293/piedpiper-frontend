@@ -7,10 +7,10 @@ import { AuthSessionService } from '../../core/auth-session.service';
 import { environment } from '../../../environments/environment';
 
 /**
- * NOTE: Bracket notation (component['signalName']()) is used intentionally throughout
- * these tests. This is a common Angular testing pattern for signal-based components
- * that allows unit testing internal state without requiring DOM interaction or
- * template rendering for every assertion.
+ * NOTA: La notación de corchetes (component['signalName']()) se usa intencionalmente
+ * en estas pruebas. Es un patrón común en testing de componentes Angular basados en
+ * signals que permite probar estado interno sin requerir interacción con el DOM o
+ * renderizado del template para cada aserción.
  */
 describe('PerfilAuditorPageComponent', () => {
   let fixture: ComponentFixture<PerfilAuditorPageComponent>;
@@ -69,7 +69,7 @@ describe('PerfilAuditorPageComponent', () => {
   });
 
   afterEach(() => {
-    // Discard any pending requests that were cancelled by forkJoin unsubscription
+    // Descarta solicitudes pendientes que fueron canceladas por la desuscripción de forkJoin
     httpMock.match(() => true);
   });
 
@@ -104,7 +104,7 @@ describe('PerfilAuditorPageComponent', () => {
     await flushPerfil404();
   }
 
-  it('should create', async () => {
+  it('se crea correctamente', async () => {
     await inicializarSinPerfil();
     expect(component).toBeTruthy();
   });
@@ -185,7 +185,7 @@ describe('PerfilAuditorPageComponent', () => {
     expect(mensajes).toContain('No se pudo cargar el catálogo. Intente recargar la página.');
   });
 
-  // --- Profile pre-fill tests ---
+  // --- Pruebas de pre-llenado del perfil ---
 
   describe('carga de perfil existente', () => {
     it('pre-llena el formulario con datos del perfil existente', async () => {
@@ -224,7 +224,7 @@ describe('PerfilAuditorPageComponent', () => {
     });
   });
 
-  // --- Form validation tests ---
+  // --- Pruebas de validación de formulario ---
 
   describe('validación de formulario', () => {
     beforeEach(async () => {
@@ -285,12 +285,12 @@ describe('PerfilAuditorPageComponent', () => {
     });
   });
 
-  // --- Save/spinner tests ---
+  // --- Pruebas de guardado y spinner ---
 
   describe('guardado y spinner', () => {
     beforeEach(async () => {
       await inicializarSinPerfil();
-      // Set valid form state
+      // Configurar formulario en estado válido
       component['especialidadesSeleccionadas'].set(['HUELLA_CARBONO']);
       component['zonasSeleccionadas'].set(['SAN_JOSE']);
       component['model'].set({
@@ -393,7 +393,7 @@ describe('PerfilAuditorPageComponent', () => {
     });
   });
 
-  // --- Error messages display tests ---
+  // --- Pruebas de mensajes de error inline ---
 
   describe('mensajes de error inline', () => {
     beforeEach(async () => {

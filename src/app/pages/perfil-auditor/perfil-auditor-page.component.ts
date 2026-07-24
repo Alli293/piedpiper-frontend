@@ -48,6 +48,7 @@ export class PerfilAuditorPageComponent implements OnInit {
 
   protected readonly cargandoCatalogos = signal(true);
   protected readonly errorCatalogos = signal(false);
+  protected readonly errorCarga = signal(false);
   protected readonly especialidades = signal<CatalogoItem[]>([]);
   protected readonly zonasCobertura = signal<CatalogoItem[]>([]);
 
@@ -179,6 +180,16 @@ export class PerfilAuditorPageComponent implements OnInit {
 
   protected async handleSubmit(event: Event): Promise<void> {
     event.preventDefault();
+
+    if (this.errorCarga()) {
+      this.toastService.error(
+        'Recarga la página para cargar tu perfil antes de guardar.',
+        undefined,
+        5000
+      );
+      return;
+    }
+
     // Mark multi-select fields as touched on submit attempt
     this.especialidadesTocado.set(true);
     this.zonasTocado.set(true);
@@ -264,7 +275,13 @@ export class PerfilAuditorPageComponent implements OnInit {
       if (err instanceof HttpErrorResponse && err.status === 404) {
         return;
       }
-      // Other errors are non-critical — form stays empty but user can still fill it
+      // Non-404 errors block the form to prevent overwriting data
+      this.errorCarga.set(true);
+      this.toastService.error(
+        'No se pudo cargar tu perfil. Intenta recargar la página.',
+        undefined,
+        5000
+      );
     }
   }
 }
