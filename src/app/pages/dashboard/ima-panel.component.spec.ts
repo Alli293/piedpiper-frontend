@@ -8,14 +8,23 @@ describe('ImaPanelComponent', () => {
   let fixture: ComponentFixture<ImaPanelComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [ImaPanelComponent] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [ImaPanelComponent],
+    }).compileComponents();
     fixture = TestBed.createComponent(ImaPanelComponent);
     componentRef = fixture.componentRef;
   });
 
-  it('muestra carga cuando ima es null', () => {
+  it('muestra carga cuando loading es true', () => {
+    componentRef.setInput('loading', true);
     fixture.detectChanges();
     expect((fixture.nativeElement as HTMLElement).querySelector('.ima-card__loading')).toBeTruthy();
+  });
+
+  it('muestra mensaje vacío cuando ima es null y no está cargando', () => {
+    componentRef.setInput('loading', false);
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('.ima-card__empty')).toBeTruthy();
   });
 
   it('muestra puntajes cuando IMA completo', () => {
@@ -46,17 +55,21 @@ describe('ImaPanelComponent', () => {
     expect((fixture.nativeElement as HTMLElement).querySelector('.ima-card__notice')).toBeFalsy();
   });
 
-  it('muestra interpretacion IA cuando presente', () => {
-    const ima = imaCompleto();
-    ima.interpretacionIa = 'Tu empresa muestra buen desempeño ambiental.';
-    componentRef.setInput('ima', ima);
+  // Validates: Requirements 5.1 (now rendered in dashboard, not ima-panel)
+  // IA interpretation section tests moved to dashboard-page.component.spec.ts
+
+  // Validates: Requirements 5.4
+  it('emite periodoChange al llamar onMesChange', () => {
+    componentRef.setInput('ima', imaCompleto());
+    componentRef.setInput('anio', 2025);
     fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    const interpretation = el.querySelector('.ima-card__interpretation');
-    expect(interpretation).toBeTruthy();
-    expect(interpretation?.textContent?.trim()).toBe(
-      'Tu empresa muestra buen desempeño ambiental.'
-    );
+
+    let emitted: { anio: number; mes: number } | undefined;
+    fixture.componentInstance.periodoChange.subscribe((v) => (emitted = v));
+
+    (fixture.componentInstance as any).onMesChange('3');
+
+    expect(emitted).toEqual({ anio: 2025, mes: 3 });
   });
 
   function imaCompleto(): ImaResponse {
@@ -69,9 +82,11 @@ describe('ImaPanelComponent', () => {
       motivoParcial: null,
       intensidad: 1.5,
       calculatedAt: '2026-07-18T00:00:00Z',
-      interpretacionIa: null,
+      interpretacion: null,
+      siguientePaso: null,
     };
   }
+
   function imaParcial(): ImaResponse {
     return {
       cobertura: 50,
@@ -82,7 +97,8 @@ describe('ImaPanelComponent', () => {
       motivoParcial: 'Tu sector no tiene suficientes empresas.',
       intensidad: null,
       calculatedAt: '2026-01-18T00:00:00Z',
-      interpretacionIa: null,
+      interpretacion: null,
+      siguientePaso: null,
     };
   }
 });

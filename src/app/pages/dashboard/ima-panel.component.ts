@@ -16,6 +16,7 @@ import { ImaResponse } from './ima.service';
 })
 export class ImaPanelComponent {
   readonly ima = input<ImaResponse | null>(null);
+  readonly loading = input(false);
   readonly anio = input(new Date().getFullYear());
   readonly mes = input(new Date().getMonth() + 1);
 

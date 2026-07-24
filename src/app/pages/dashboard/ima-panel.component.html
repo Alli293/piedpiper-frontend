@@ -28,8 +28,10 @@
     />
   </header>
 
-  @if (!ima()) {
+  @if (loading()) {
     <p class="ima-card__loading">Cargando IMA...</p>
+  } @else if (!ima()) {
+    <p class="ima-card__empty">No hay datos de IMA disponibles.</p>
   } @else {
     <div class="ima-card__body">
       <div class="ima-gauge">
@@ -186,10 +188,6 @@
         </svg>
         <span>{{ ima()!.motivoParcial }}</span>
       </div>
-    }
-
-    @if (ima()!.interpretacionIa) {
-      <p class="ima-card__interpretation">{{ ima()!.interpretacionIa }}</p>
     }
   }
 </article>

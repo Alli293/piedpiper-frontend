@@ -142,7 +142,8 @@ export const routes: Routes = [
   {
     path: 'benchmark',
     canActivate: [authGuard],
-    loadComponent: cargarPlaceholder,
+    loadComponent: () =>
+      import('./pages/benchmark/benchmark-page.component').then((m) => m.BenchmarkPageComponent),
   },
   {
     path: 'ecoruta',
