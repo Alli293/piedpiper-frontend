@@ -49,6 +49,8 @@ export interface RegistroInvitacionCorreoRequest {
   contrasena: string;
   confirmarContrasena: string;
   aceptaTerminos: boolean;
+}
+
 export interface MensajeResponse {
   mensaje: string;
 }

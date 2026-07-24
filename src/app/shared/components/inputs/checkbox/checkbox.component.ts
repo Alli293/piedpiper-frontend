@@ -9,6 +9,7 @@ let nextId = 0;
   styleUrl: './checkbox.component.scss',
   host: {
     class: 'ch-checkbox',
+    '[attr.id]': 'null',
   },
   providers: [
     {

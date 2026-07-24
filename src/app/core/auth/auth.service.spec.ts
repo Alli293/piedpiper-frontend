@@ -96,6 +96,8 @@ describe('AuthService', () => {
     expect(recibida!.redirect).toBe('/perfil/configuracion-inicial');
     expect(localStorage.getItem('carbonhub.token')).toBe('jwt-app');
     expect(service.token()).toBe('jwt-app');
+  });
+
   it('verificarCorreo hace GET a /auth/verificar-correo con el token como query param', () => {
     let recibida: { mensaje: string } | undefined;
     service.verificarCorreo('tok-123').subscribe((r) => (recibida = r));

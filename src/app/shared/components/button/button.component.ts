@@ -9,6 +9,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
   styleUrl: './button.component.scss',
   host: {
     '[class]': 'hostClass()',
+    '[attr.id]': 'null',
   },
 })
 export class ButtonComponent {

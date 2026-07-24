@@ -11,6 +11,7 @@ let nextId = 0;
   styleUrl: './text-input.component.scss',
   host: {
     class: 'ch-text-input',
+    '[attr.id]': 'null',
   },
   providers: [
     {
