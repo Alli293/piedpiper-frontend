@@ -17,6 +17,12 @@ const rutasPlaceholder = rutasPostAutenticacion.filter(
 
 export const routes: Routes = [
   {
+    path: '',
+    pathMatch: 'full' as const,
+    loadComponent: () =>
+      import('./pages/landing/landing-page.component').then((m) => m.LandingPageComponent),
+  },
+  {
     path: 'login',
     loadComponent: () =>
       import('./pages/auth/login/login-page.component').then((m) => m.LoginPageComponent),
@@ -85,6 +91,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'ecoruta/preferencias',
+    canActivate: [rolGuard('USUARIO_INDIVIDUAL')],
+    loadComponent: () =>
+      import('./pages/ecoruta/preferencias/ecoruta-preferencias-page.component').then(
+        (m) => m.EcoRutaPreferenciasPageComponent
+      ),
+  },
+  {
     path: 'empresa/configuracion-inicial',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -129,6 +143,12 @@ export const routes: Routes = [
     path: 'benchmark',
     canActivate: [authGuard],
     loadComponent: () =>
+      import('./pages/benchmark/benchmark-page.component').then((m) => m.BenchmarkPageComponent),
+  },
+  {
+    path: 'madurez-ambiental',
+    canActivate: [authGuard],
+    loadComponent: () =>
       import('./pages/madurez-ambiental/madurez-ambiental-page.component').then(
         (m) => m.MadurezAmbientalPageComponent
       ),
@@ -162,11 +182,6 @@ export const routes: Routes = [
       import('./pages/configuracion/configuracion-page.component').then(
         (m) => m.ConfiguracionPageComponent
       ),
-  },
-  {
-    path: '',
-    redirectTo: 'login',
-    pathMatch: 'full' as const,
   },
   {
     path: '**',

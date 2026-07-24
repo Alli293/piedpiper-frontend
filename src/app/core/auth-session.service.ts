@@ -22,16 +22,18 @@ export class AuthSessionService {
   }
 
   getUserInitials(): string {
+    return initialsFrom(this.getUserDisplayName());
+  }
+
+  getUserDisplayName(): string {
     const claims = this.getClaims();
-    const source = firstNonEmpty(
+    return firstNonEmpty(
       claims?.nombreCompleto,
       claims?.name,
       [claims?.nombre, claims?.apellidos].filter(Boolean).join(' '),
       claims?.email,
       claims?.sub
     );
-
-    return initialsFrom(source);
   }
 
   private getClaims(): JwtClaims | null {
