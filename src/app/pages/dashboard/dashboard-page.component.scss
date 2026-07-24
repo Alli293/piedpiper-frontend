@@ -185,19 +185,6 @@
   position: relative;
 }
 
-.dashboard-summary__card--total,
-.dashboard-summary__card--period {
-  ::ng-deep .ch-card-stat__value {
-    color: var(--ch-sky);
-  }
-}
-
-.dashboard-summary__card--limit {
-  ::ng-deep .ch-card-stat__value {
-    color: var(--ch-green);
-  }
-}
-
 .dashboard-summary__card-header {
   position: absolute;
   top: var(--ch-space-5);
@@ -266,6 +253,10 @@
 
 /* --- Panel de límite anual (PP-40) --- */
 .annual-limit-panel {
+  --annual-limit-accent: var(--ch-green);
+  --annual-limit-badge-bg: var(--ch-green-soft);
+  --annual-limit-badge-color: var(--ch-green-dark);
+
   background: var(--ch-bg-white);
   border: 1px solid var(--ch-border);
   border-radius: var(--ch-radius-md);
@@ -308,6 +299,8 @@
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  background: var(--annual-limit-badge-bg);
+  color: var(--annual-limit-badge-color);
 
   &::before {
     content: '';
@@ -330,6 +323,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
+  background: var(--annual-limit-accent);
 }
 
 .annual-limit-panel__scale {
@@ -359,7 +353,7 @@
 
   div {
     padding-top: var(--ch-space-2);
-    border-top: 4px solid var(--ch-border);
+    border-top: 4px solid var(--annual-limit-accent);
   }
 
   dt {
@@ -409,57 +403,22 @@
   }
 }
 
-.is-dentro {
-  .annual-limit-panel__badge {
-    background: var(--ch-green-soft);
-    color: var(--ch-green-dark);
-  }
-
-  .annual-limit-panel__fill {
-    background: var(--ch-green);
-  }
-
-  .annual-limit-panel__metrics div {
-    border-color: var(--ch-green);
-  }
-}
-
 .is-cerca,
 .is-alcanzado {
-  .annual-limit-panel__badge {
-    background: var(--ch-warning-bg);
-    color: var(--ch-warning-dark);
-  }
-
-  .annual-limit-panel__fill {
-    background: var(--ch-warning);
-  }
-
-  .annual-limit-panel__metrics div {
-    border-color: var(--ch-warning);
-  }
+  --annual-limit-accent: var(--ch-warning);
+  --annual-limit-badge-bg: var(--ch-warning-bg);
+  --annual-limit-badge-color: var(--ch-warning-dark);
 }
 
 .is-superado {
-  .annual-limit-panel__badge {
-    background: var(--ch-danger-bg);
-    color: var(--ch-danger);
-  }
-
-  .annual-limit-panel__fill {
-    background: var(--ch-danger);
-  }
-
-  .annual-limit-panel__metrics div {
-    border-color: var(--ch-danger);
-  }
+  --annual-limit-accent: var(--ch-danger);
+  --annual-limit-badge-bg: var(--ch-danger-bg);
+  --annual-limit-badge-color: var(--ch-danger);
 }
 
 .is-sin-limite {
-  .annual-limit-panel__badge {
-    background: var(--ch-info-bg);
-    color: var(--ch-info);
-  }
+  --annual-limit-badge-bg: var(--ch-info-bg);
+  --annual-limit-badge-color: var(--ch-info);
 }
 
 .annual-limit-panel__categories {
