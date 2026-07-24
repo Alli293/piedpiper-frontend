@@ -3,6 +3,7 @@
 @use 'app/shared/styles/reset';
 @use 'app/shared/styles/tokens';
 @use 'app/shared/styles/typography';
+@use 'app/shared/styles/annual-limit-panel';
 
 body {
   font-family: var(--ch-font-body);

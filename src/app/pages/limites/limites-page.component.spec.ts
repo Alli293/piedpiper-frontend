@@ -1,8 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthSessionService } from '../../core/auth-session.service';
+import { AuthService } from '../../core/auth/auth.service';
+import { SesionInactividadService } from '../../core/auth/sesion-inactividad.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { LimitesPageComponent } from './limites-page.component';
 import { LimitesService } from './limites.service';
@@ -11,6 +15,7 @@ describe('LimitesPageComponent', () => {
   let fixture: ComponentFixture<LimitesPageComponent>;
   let component: LimitesPageComponent;
   let toastService: ToastService;
+  let navigateByUrl: ReturnType<typeof vi.spyOn>;
   let limitesService: {
     obtenerLimite: ReturnType<typeof vi.fn>;
     listarLimites: ReturnType<typeof vi.fn>;
@@ -54,6 +59,7 @@ describe('LimitesPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [LimitesPageComponent],
       providers: [
+        provideRouter([]),
         ToastService,
         {
           provide: LimitesService,
@@ -63,9 +69,18 @@ describe('LimitesPageComponent', () => {
           provide: AuthSessionService,
           useValue: { isAdministradorEmpresa: () => true },
         },
+        {
+          provide: AuthService,
+          useValue: { token: signal('fake-token'), cerrarSesion: vi.fn() },
+        },
+        {
+          provide: SesionInactividadService,
+          useValue: { reiniciar: vi.fn(), detener: vi.fn() },
+        },
       ],
     }).compileComponents();
 
+    navigateByUrl = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     fixture = TestBed.createComponent(LimitesPageComponent);
     component = fixture.componentInstance;
     toastService = TestBed.inject(ToastService);
@@ -80,6 +95,14 @@ describe('LimitesPageComponent', () => {
   it('precarga el valor existente', () => {
     expect(limitesService.obtenerLimite).toHaveBeenCalledWith(new Date().getFullYear());
     expect((component as any).model().limiteMt).toBe('50');
+  });
+
+  it('vuelve al listado de emisiones desde el boton de retroceso', () => {
+    const root = fixture.nativeElement as HTMLElement;
+
+    root.querySelector<HTMLButtonElement>('.ch-header__back-button')?.click();
+
+    expect(navigateByUrl).toHaveBeenCalledWith('/emisiones');
   });
 
   it('formulario invalido no llama al servicio de guardado', async () => {

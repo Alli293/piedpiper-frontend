@@ -174,4 +174,12 @@ describe('ShellLayoutComponent', () => {
 
     expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/benchmark');
   });
+
+  it('navega al listado al abrir mis emisiones', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard' });
+
+    (fixture.componentInstance as any).onMenuItem('emissions');
+
+    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/emisiones');
+  });
 });

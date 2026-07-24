@@ -126,6 +126,7 @@ export class LimitesPageComponent {
     pageTitle: 'Límite anual de emisiones',
     showNotificationDot: true,
     userInitials: 'CA',
+    showBackButton: true,
   };
 
   constructor() {
