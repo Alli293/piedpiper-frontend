@@ -9,18 +9,11 @@ import { ToastService } from '../../shared/services/toast.service';
 import { apiErrorMessage } from '../../shared/utils/http-error.utils';
 import { ImaService, ImaResponse } from '../dashboard/ima.service';
 import { ImaPanelComponent } from '../dashboard/ima-panel.component';
-import { MadurezAmbientalPageComponent } from '../madurez-ambiental/madurez-ambiental-page.component';
 
 @Component({
   selector: 'app-benchmark-page',
   standalone: true,
-  imports: [
-    RouterLink,
-    ShellLayoutComponent,
-    HeadingComponent,
-    ImaPanelComponent,
-    MadurezAmbientalPageComponent,
-  ],
+  imports: [RouterLink, ShellLayoutComponent, HeadingComponent, ImaPanelComponent],
   templateUrl: './benchmark-page.component.html',
   styleUrl: './benchmark-page.component.scss',
 })

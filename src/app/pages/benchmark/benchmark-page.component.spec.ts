@@ -44,10 +44,7 @@ function imaNoDisponible(): ImaResponse {
 describe('BenchmarkPageComponent', () => {
   let fixture: ComponentFixture<BenchmarkPageComponent>;
   let component: BenchmarkPageComponent;
-  let imaService: {
-    obtenerIma: ReturnType<typeof vi.fn>;
-    obtenerTendencia: ReturnType<typeof vi.fn>;
-  };
+  let imaService: { obtenerIma: ReturnType<typeof vi.fn> };
   let authSession: {
     getUserInitials: ReturnType<typeof vi.fn>;
     getRole: ReturnType<typeof vi.fn>;
@@ -60,11 +57,6 @@ describe('BenchmarkPageComponent', () => {
   beforeEach(async () => {
     imaService = {
       obtenerIma: vi.fn().mockReturnValue(of(imaCompleto())),
-      obtenerTendencia: vi
-        .fn()
-        .mockReturnValue(
-          of({ mesesAtras: 12, serie: [], sinDatosSectoriales: false, eventos: [] })
-        ),
     };
     authSession = {
       getUserInitials: vi.fn().mockReturnValue('AJ'),

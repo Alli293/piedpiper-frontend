@@ -93,26 +93,6 @@ describe('ImaService', () => {
     expect(result!.siguientePaso).toBeNull();
   });
 
-  it('consulta el benchmark sectorial con anio y mes como query params', () => {
-    service.obtenerBenchmark(2026, 7).subscribe();
-
-    const req = httpMock.expectOne(`${environment.apiBaseUrl}/ima/benchmark?anio=2026&mes=7`);
-    expect(req.request.method).toBe('GET');
-    req.flush({
-      benchmarkDisponible: true,
-      cantidadEmpresas: 8,
-      imaParcial: false,
-      ima: { valorEmpresa: 71, promedioSector: 64, posicion: 'POR_ENCIMA' },
-      cobertura: { valorEmpresa: 75, promedioSector: 70, posicion: 'POR_ENCIMA' },
-      puntajeIntensidadSectorial: {
-        valorEmpresa: 58,
-        promedioSector: 66,
-        posicion: 'POR_DEBAJO',
-      },
-      consistencia: { valorEmpresa: 80, promedioSector: 62, posicion: 'POR_ENCIMA' },
-    });
-  });
-
   it('consulta la tendencia con la ventana como query param', () => {
     service.obtenerTendencia(12).subscribe();
     const req = httpMock.expectOne(`${environment.apiBaseUrl}/ima/tendencia?mesesAtras=12`);
@@ -120,7 +100,7 @@ describe('ImaService', () => {
     req.flush({ mesesAtras: 12, serie: [], sinDatosSectoriales: false, eventos: [] });
   });
 
-  it('envía la ventana solicitada cuando no es la de por defecto', () => {
+  it('envia la ventana solicitada cuando no es la de por defecto', () => {
     service.obtenerTendencia(6).subscribe();
     const req = httpMock.expectOne(`${environment.apiBaseUrl}/ima/tendencia?mesesAtras=6`);
     expect(req.request.params.get('mesesAtras')).toBe('6');
@@ -175,6 +155,26 @@ describe('ImaService', () => {
     expect(result?.eventos[0].mes).toBe('2026-06');
   });
 
+  it('consulta el benchmark sectorial con anio y mes como query params', () => {
+    service.obtenerBenchmark(2026, 7).subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/ima/benchmark?anio=2026&mes=7`);
+    expect(req.request.method).toBe('GET');
+    req.flush({
+      benchmarkDisponible: true,
+      cantidadEmpresas: 8,
+      imaParcial: false,
+      ima: { valorEmpresa: 71, promedioSector: 64, posicion: 'POR_ENCIMA' },
+      cobertura: { valorEmpresa: 75, promedioSector: 70, posicion: 'POR_ENCIMA' },
+      puntajeIntensidadSectorial: {
+        valorEmpresa: 58,
+        promedioSector: 66,
+        posicion: 'POR_DEBAJO',
+      },
+      consistencia: { valorEmpresa: 80, promedioSector: 62, posicion: 'POR_ENCIMA' },
+    });
+  });
+
   function buildImaResponse(overrides: Partial<ImaResponse> = {}): ImaResponse {
     return {
       cobertura: 75,
@@ -184,7 +184,7 @@ describe('ImaService', () => {
       parcial: false,
       motivoParcial: null,
       intensidad: 1.5,
-      calculatedAt: '2024-06-18T00:00:00Z',
+      calculatedAt: '2026-07-18T00:00:00Z',
       interpretacion: null,
       siguientePaso: null,
       ...overrides,

@@ -15,6 +15,28 @@ export interface ImaResponse {
   interpretacion: string | null;
   siguientePaso: string | null;
 }
+/** Punto de la serie histórica del IMA. Los valores en null no se grafican. */
+export interface ImaTendenciaPunto {
+  mes: string;
+  imaEmpresa: number | null;
+  imaPromedioSector: number | null;
+}
+
+export type TipoEventoIma = 'CRUCE_SECTOR' | 'MAYOR_VARIACION' | 'HUECO_DATOS' | 'NUEVA_CATEGORIA';
+
+/** Evento anotado sobre la serie, calculado por el backend. */
+export interface ImaEvento {
+  mes: string;
+  tipo: TipoEventoIma;
+  texto: string;
+}
+
+export interface ImaTendenciaResponse {
+  mesesAtras: number;
+  serie: ImaTendenciaPunto[];
+  sinDatosSectoriales: boolean;
+  eventos: ImaEvento[];
+}
 
 export type PosicionBenchmark = 'POR_ENCIMA' | 'EN_LINEA' | 'POR_DEBAJO';
 
@@ -48,29 +70,6 @@ export interface BenchmarkNoDisponibleResponse extends BenchmarkBase {
 export type BenchmarkSectorialResponse =
   BenchmarkDisponibleResponse | BenchmarkNoDisponibleResponse;
 
-/** Punto de la serie histórica del IMA. Los valores en null no se grafican. */
-export interface ImaTendenciaPunto {
-  mes: string;
-  imaEmpresa: number | null;
-  imaPromedioSector: number | null;
-}
-
-export type TipoEventoIma = 'CRUCE_SECTOR' | 'MAYOR_VARIACION' | 'HUECO_DATOS' | 'NUEVA_CATEGORIA';
-
-/** Evento anotado sobre la serie, calculado por el backend. */
-export interface ImaEvento {
-  mes: string;
-  tipo: TipoEventoIma;
-  texto: string;
-}
-
-export interface ImaTendenciaResponse {
-  mesesAtras: number;
-  serie: ImaTendenciaPunto[];
-  sinDatosSectoriales: boolean;
-  eventos: ImaEvento[];
-}
-
 @Injectable({ providedIn: 'root' })
 export class ImaService {
   private readonly http = inject(HttpClient);
@@ -81,13 +80,13 @@ export class ImaService {
     return this.http.get<ImaResponse>(this.baseUrl, { params });
   }
 
-  obtenerBenchmark(anio: number, mes: number): Observable<BenchmarkSectorialResponse> {
-    const params = new HttpParams().set('anio', anio).set('mes', mes);
-    return this.http.get<BenchmarkSectorialResponse>(`${this.baseUrl}/benchmark`, { params });
-  }
-
   obtenerTendencia(mesesAtras: number): Observable<ImaTendenciaResponse> {
     const params = new HttpParams().set('mesesAtras', mesesAtras);
     return this.http.get<ImaTendenciaResponse>(`${this.baseUrl}/tendencia`, { params });
+  }
+
+  obtenerBenchmark(anio: number, mes: number): Observable<BenchmarkSectorialResponse> {
+    const params = new HttpParams().set('anio', anio).set('mes', mes);
+    return this.http.get<BenchmarkSectorialResponse>(`${this.baseUrl}/benchmark`, { params });
   }
 }
