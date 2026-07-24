@@ -1,10 +1,10 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
+import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
 import { SidebarBottomItemId } from '../../components/sidebar/sidebar.component';
 import { HeaderConfig, PageLayoutComponent } from '../page-layout/page-layout.component';
-import { buildSidebarConfig, SidebarNavId, SidebarNavItemDef } from '../page-layout/sidebar-nav';
-import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
+import { buildSidebarConfig, SidebarNavId, SidebarNavVariant } from '../page-layout/sidebar-nav';
 
 const COMPANY_NAME = 'Café del Valle S.A.';
 const COMPANY_INITIALS = 'CV';
@@ -27,28 +27,29 @@ export class ShellLayoutComponent {
   private readonly sesionInactividadService = inject(SesionInactividadService);
 
   activeId = input<SidebarNavId>();
+  variant = input<SidebarNavVariant>('empresa');
+  companyName = input(COMPANY_NAME);
   companyRole = input('Empresa · Admin');
+  companyInitials = input(COMPANY_INITIALS);
   settingsLabel = input<string>();
   headerConfig = input.required<HeaderConfig>();
   /** Route the back button navigates to. Falls back to emitting `backClicked` if omitted. */
   backRoute = input<string>();
-  /** Overrides the sidebar's display name (defaults to the company name). E.g. an individual user's own name. */
+  /** Overrides the sidebar's display name (defaults to the company name). */
   displayName = input<string>();
   /** Overrides the sidebar's avatar initials (defaults to the company initials). */
   displayInitials = input<string>();
-  /** Overrides the sidebar's nav items (e.g. ECORUTA_NAV_ITEMS for the individual-traveler shell). */
-  navItems = input<readonly SidebarNavItemDef[]>();
 
   backClicked = output<void>();
 
   protected readonly sidebarConfig = computed(() =>
     buildSidebarConfig({
       activeId: this.activeId(),
-      companyName: this.displayName() ?? COMPANY_NAME,
+      companyName: this.displayName() ?? this.companyName(),
       companyRole: this.companyRole(),
-      companyInitials: this.displayInitials() ?? COMPANY_INITIALS,
+      companyInitials: this.displayInitials() ?? this.companyInitials(),
       settingsLabel: this.settingsLabel(),
-      navItems: this.navItems(),
+      variant: this.variant(),
     })
   );
 
@@ -73,8 +74,10 @@ export class ShellLayoutComponent {
     const rutas: Record<Exclude<ShellMenuItemId, 'logout'>, string> = {
       benchmark: '/benchmark',
       dashboard: '/panel',
-      ecoruta: '/ecoruta/preferencias',
       emissions: '/emisiones',
+      'ecoruta-planificar': '/ecoruta/planificar',
+      'ecoruta-itinerarios': '/ecoruta/itinerarios',
+      'ecoruta-insignias': '/ecoruta/insignias',
       settings: '/configuracion',
     };
     void this.router.navigateByUrl(rutas[menuId]);

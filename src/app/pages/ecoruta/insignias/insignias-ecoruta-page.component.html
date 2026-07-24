@@ -1,0 +1,153 @@
+<app-shell-layout
+  activeId="ecoruta-insignias"
+  variant="ecoruta"
+  companyName="EcoRuta"
+  companyRole="Viajes sostenibles"
+  companyInitials="ER"
+  [headerConfig]="headerConfig()"
+>
+  @if (cargando()) {
+    <section class="ch-ecoruta-insignias__estado" aria-live="polite">
+      <span class="ch-ecoruta-insignias__loader" aria-hidden="true"></span>
+      <p>Cargando tus insignias...</p>
+    </section>
+  } @else if (errorCarga()) {
+    <section class="ch-ecoruta-insignias__estado" role="alert">
+      <app-icon name="warning" [size]="32" />
+      <p>No se pudieron cargar tus insignias.</p>
+      <app-button variant="secondary" (click)="cargarInsignias()">Reintentar</app-button>
+    </section>
+  } @else if (insigniasOrdenadas().length === 0) {
+    <section class="ch-ecoruta-insignias__vacio">
+      <span class="ch-ecoruta-insignias__vacio-icono" aria-hidden="true">
+        <app-icon name="insignias" [size]="34" />
+      </span>
+      <app-heading level="h1" text="Aún no tenés insignias" />
+      <p>
+        Las insignias se desbloquean automáticamente al planificar y completar itinerarios de bajo
+        impacto. Empezá tu primer viaje para ganar la primera.
+      </p>
+      <app-button (click)="planificarItinerario()">
+        <app-icon name="new" [size]="16" />
+        <span>Planificar un itinerario</span>
+      </app-button>
+    </section>
+  } @else {
+    <div class="ch-ecoruta-insignias">
+      <div class="ch-ecoruta-insignias__contenido">
+        <section class="ch-ecoruta-insignias__principal">
+          <section class="ch-ecoruta-insignias__resumen" aria-label="Resumen de insignias EcoRuta">
+            <div class="ch-ecoruta-insignias__resumen-icono" aria-hidden="true">
+              <app-icon name="insignias" [size]="20" />
+            </div>
+            <div>
+              <app-heading level="h2" text="Tus logros en EcoRuta" />
+              <p>Se desbloquean automáticamente al completar acciones en tus itinerarios.</p>
+            </div>
+            <dl class="ch-ecoruta-insignias__metricas">
+              <div>
+                <dt>Obtenidas</dt>
+                <dd class="ch-ecoruta-insignias__metrica-numero--verde">
+                  {{ insigniasOrdenadas().length }}
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          <div class="ch-ecoruta-insignias__seccion-titulo">
+            <span>Insignias obtenidas</span>
+            <strong>{{ insigniasOrdenadas().length }}</strong>
+          </div>
+
+          <div class="ch-ecoruta-insignias__grid">
+            @for (insignia of insigniasOrdenadas(); track insignia.idInsignia) {
+              <button
+                type="button"
+                class="ch-ecoruta-insignias__card"
+                [class.ch-ecoruta-insignias__card--activa]="
+                  insigniaSeleccionada()?.idInsignia === insignia.idInsignia
+                "
+                [attr.aria-label]="'Ver detalle de ' + insignia.nombre"
+                (click)="seleccionar(insignia)"
+              >
+                <span class="ch-ecoruta-insignias__card-icono" aria-hidden="true">
+                  <app-icon [name]="iconoInsignia(insignia.idInsignia)" [size]="24" />
+                </span>
+                <span class="ch-ecoruta-insignias__card-copy">
+                  <strong>{{ insignia.nombre }}</strong>
+                  <span>{{ insignia.descripcion }}</span>
+                  <small>
+                    <app-icon name="calendario" [size]="12" aria-hidden="true" />
+                    {{ insignia.fechaObtencion | date: 'dd/MM/yyyy' }}
+                  </small>
+                </span>
+              </button>
+            }
+          </div>
+
+          @if (proximasInsignias().length > 0) {
+            <div class="ch-ecoruta-insignias__seccion-titulo">
+              <span>Próximas insignias</span>
+              <strong>{{ proximasInsignias().length }}</strong>
+            </div>
+
+            <div class="ch-ecoruta-insignias__proximas">
+              @for (insignia of proximasInsignias(); track insignia.idInsignia) {
+                <article class="ch-ecoruta-insignias__proxima">
+                  <span class="ch-ecoruta-insignias__proxima-icono" aria-hidden="true">
+                    <app-icon [name]="insignia.icono" [size]="22" />
+                  </span>
+                  <strong>{{ insignia.nombre }}</strong>
+                  <p>{{ insignia.descripcion }}</p>
+                  <app-badge variant="neutral">Pendiente</app-badge>
+                </article>
+              }
+            </div>
+          }
+        </section>
+
+        @if (insigniaSeleccionada(); as insignia) {
+          <div class="ch-ecoruta-insignias__lateral">
+            <aside class="ch-ecoruta-insignias__detalle" aria-label="Detalle de la insignia">
+              <div class="ch-ecoruta-insignias__detalle-hero">
+                <span class="ch-ecoruta-insignias__detalle-icono" aria-hidden="true">
+                  <app-icon [name]="iconoInsignia(insignia.idInsignia)" [size]="38" />
+                </span>
+                <app-heading level="h2" [text]="insignia.nombre" />
+                <app-badge variant="success" icon="success">Insignia obtenida</app-badge>
+              </div>
+
+              <dl class="ch-ecoruta-insignias__detalle-lista">
+                <div>
+                  <dt>Descripción</dt>
+                  <dd>{{ insignia.descripcion }}</dd>
+                </div>
+                <div>
+                  <dt>Obtenida</dt>
+                  <dd>{{ insignia.fechaObtencion | date: 'dd/MM/yyyy - HH:mm' }}</dd>
+                </div>
+                <div>
+                  <dt>Evento</dt>
+                  <dd>{{ insignia.eventoDesbloqueo }}</dd>
+                </div>
+              </dl>
+
+              <p class="ch-ecoruta-insignias__nota">
+                Otorgada automáticamente al cumplir la regla de desbloqueo. Cada insignia se otorga
+                una única vez.
+              </p>
+            </aside>
+
+            <p class="ch-ecoruta-insignias__ayuda-detalle">
+              <app-icon name="info" [size]="14" aria-hidden="true" />
+              <span>
+                Seleccioná cualquier insignia obtenida para ver su detalle: fecha y evento de
+                desbloqueo.
+              </span>
+            </p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</app-shell-layout>
