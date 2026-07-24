@@ -1,0 +1,124 @@
+.who-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.who {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 20px;
+  padding: 0 30px 30px;
+  box-shadow: 0 12px 34px rgba(14, 42, 59, 0.07);
+  position: relative;
+  overflow: hidden;
+}
+.who-top {
+  height: 6px;
+  margin: 0 -30px 28px;
+}
+.who.g .who-top {
+  background: linear-gradient(90deg, var(--green), var(--mint));
+}
+.who.s .who-top {
+  background: linear-gradient(90deg, #135f82, var(--sky));
+}
+.who.a .who-top {
+  background: linear-gradient(90deg, #a07400, var(--gold));
+}
+.who-ic {
+  width: 62px;
+  height: 62px;
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+  box-shadow: 0 8px 20px rgba(14, 42, 59, 0.1);
+}
+.who-ic .landing-icon {
+  font-size: 31px;
+}
+.wi-green {
+  background: linear-gradient(135deg, var(--green), var(--green-dark));
+  color: #fff;
+}
+.wi-sky {
+  background: linear-gradient(135deg, var(--sky), #135f82);
+  color: #fff;
+}
+.wi-amber {
+  background: linear-gradient(135deg, var(--gold), #a07400);
+  color: #fff;
+}
+.who-tag {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 9px;
+}
+.who.s .who-tag {
+  color: #135f82;
+}
+.who.a .who-tag {
+  color: #a07400;
+}
+.who-name {
+  font-family: var(--display);
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.01em;
+  margin-bottom: 11px;
+}
+.who-desc {
+  font-size: 14px;
+  color: var(--ink-2);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.who-list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.who-li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ink);
+  line-height: 1.45;
+  font-weight: 500;
+}
+.who-li .landing-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.who.g .who-li .landing-icon {
+  color: var(--green);
+}
+.who.s .who-li .landing-icon {
+  color: var(--sky);
+}
+.who.a .who-li .landing-icon {
+  color: var(--gold);
+}
+.who.g {
+  border-radius: 26px 26px 26px 8px;
+}
+.who.s {
+  border-radius: 26px 8px 26px 26px;
+}
+.who.a {
+  border-radius: 8px 26px 26px 26px;
+}
+
+@media (max-width: 1024px) {
+  .who-grid {
+    grid-template-columns: 1fr;
+  }
+}
