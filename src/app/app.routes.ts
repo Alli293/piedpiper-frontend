@@ -77,6 +77,19 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'auditores',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/auditores/directorio-auditores-page.component').then(
+        (m) => m.DirectorioAuditoresPageComponent
+      ),
+  },
+  {
+    path: 'auditores/:id',
+    canActivate: [authGuard],
+    loadComponent: cargarPlaceholder,
+  },
+  {
     path: 'limites',
     canActivate: [authGuard],
     loadComponent: () =>
