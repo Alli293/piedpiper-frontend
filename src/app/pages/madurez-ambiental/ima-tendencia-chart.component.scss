@@ -1,4 +1,4 @@
-.ima-tendencia {
+.ch-ima-tendencia {
   position: relative;
 
   &__aviso {
@@ -54,7 +54,7 @@
     z-index: 2;
     display: flex;
     gap: 10px;
-    width: 280px;
+    width: min(280px, calc(100% - 20px));
     padding: 12px 14px;
     transform: translateX(-50%);
     background: #0e2a3b;

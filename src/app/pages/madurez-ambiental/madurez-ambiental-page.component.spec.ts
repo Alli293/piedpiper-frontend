@@ -1,11 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { AuthService } from '../../core/auth/auth.service';
-import { SesionInactividadService } from '../../core/auth/sesion-inactividad.service';
-import { AuthSessionService } from '../../core/auth-session.service';
 import { ToastService } from '../../shared/services/toast.service';
 import {
   ImaEvento,
@@ -54,17 +50,7 @@ describe('MadurezAmbientalPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [MadurezAmbientalPageComponent],
       providers: [
-        provideRouter([]),
         { provide: ImaService, useValue: imaService },
-        { provide: AuthService, useValue: { token: signal('fake-token'), cerrarSesion: vi.fn() } },
-        { provide: SesionInactividadService, useValue: { reiniciar: vi.fn(), detener: vi.fn() } },
-        {
-          provide: AuthSessionService,
-          useValue: {
-            getUserInitials: vi.fn(() => 'AJ'),
-            getRole: vi.fn(() => 'administrador_empresa'),
-          },
-        },
         { provide: ToastService, useValue: toastService },
       ],
     })
@@ -136,6 +122,31 @@ describe('MadurezAmbientalPageComponent', () => {
     await fixture.whenStable();
 
     expect(imaService.obtenerTendencia).toHaveBeenCalledWith(6);
+  });
+
+  it('ignora ventanas que no están disponibles en el selector', async () => {
+    await crearComponente();
+    imaService.obtenerTendencia.mockClear();
+
+    (fixture.componentInstance as any).onVentanaChange('24');
+
+    expect(imaService.obtenerTendencia).not.toHaveBeenCalled();
+  });
+
+  it('conserva el último gráfico cuando falla una recarga', async () => {
+    await crearComponente();
+    imaService.obtenerTendencia.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 }))
+    );
+
+    (fixture.componentInstance as any).onVentanaChange('6');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect((fixture.componentInstance as any).serie()).toEqual(SERIE_CON_DATOS);
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('app-ima-tendencia-chart')
+    ).toBeTruthy();
   });
 
   it('muestra un toast con el mensaje de la API cuando falla la carga', async () => {

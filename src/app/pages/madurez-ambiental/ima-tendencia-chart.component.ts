@@ -87,6 +87,8 @@ interface PosicionMarcador {
 }
 
 const RADIO_MARCADOR = 13;
+const TOOLTIP_ANCHO = 280;
+const TOOLTIP_MARGEN = 10;
 
 @Component({
   selector: 'app-ima-tendencia-chart',
@@ -266,6 +268,14 @@ export class ImaTendenciaChartComponent {
     this.marcadorActivo.set(null);
   }
 
+  protected marcadorPorNumero(numero: number): MarcadorEvento {
+    return this.marcadores().find((marcador) => marcador.numero === numero)!;
+  }
+
+  protected tooltipId(numero: number): string {
+    return `ch-ima-tooltip-${numero}`;
+  }
+
   /** Posición del círculo numerado, centrado sobre el eje superior. */
   protected estiloMarcador(posicion: PosicionMarcador): Record<string, string> {
     return {
@@ -278,8 +288,12 @@ export class ImaTendenciaChartComponent {
   protected estiloTooltip(posicion: PosicionMarcador): Record<string, string> {
     const ancho = this.contenedor()?.nativeElement.clientWidth ?? 0;
     // Se mantiene el globo dentro del contenedor cuando el marcador está en un borde.
+    const anchoReal = Math.min(TOOLTIP_ANCHO, Math.max(ancho - TOOLTIP_MARGEN * 2, 0));
+    const medioTooltip = anchoReal / 2;
+    const minimo = TOOLTIP_MARGEN + medioTooltip;
+    const maximo = ancho - TOOLTIP_MARGEN - medioTooltip;
     const izquierda =
-      ancho > 0 ? Math.min(Math.max(posicion.x, 150), Math.max(ancho - 150, 150)) : posicion.x;
+      ancho > 0 ? Math.min(Math.max(posicion.x, minimo), Math.max(maximo, minimo)) : posicion.x;
     return {
       left: `${izquierda}px`,
       top: `${posicion.yTop + RADIO_MARCADOR + 8}px`,

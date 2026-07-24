@@ -155,5 +155,21 @@ describe('ImaTendenciaChartComponent', () => {
 
       expect(marcadores()).toEqual([]);
     });
+
+    it('centra el tooltip dentro de un contenedor angosto', () => {
+      fixture.detectChanges();
+      const contenedor = (fixture.nativeElement as HTMLElement).querySelector(
+        '.ch-ima-tendencia__grafico'
+      ) as HTMLElement;
+      Object.defineProperty(contenedor, 'clientWidth', { configurable: true, value: 240 });
+
+      const estilo = (fixture.componentInstance as any).estiloTooltip({
+        numero: 1,
+        x: 220,
+        yTop: 20,
+      });
+
+      expect(estilo.left).toBe('120px');
+    });
   });
 });
