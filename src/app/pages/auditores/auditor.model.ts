@@ -10,6 +10,14 @@ export function esOrdenamientoValido(valor: string): valor is OrdenamientoAudito
   return (ORDENAMIENTOS_AUDITORES as readonly string[]).includes(valor);
 }
 
+export type CalificacionMinima = '' | '3' | '4' | '5';
+
+export const CALIFICACIONES_MINIMAS: readonly CalificacionMinima[] = ['', '3', '4', '5'];
+
+export function esCalificacionValida(valor: string): valor is CalificacionMinima {
+  return (CALIFICACIONES_MINIMAS as readonly string[]).includes(valor);
+}
+
 export interface AuditorResumen {
   auditorId: string;
   nombre: string;

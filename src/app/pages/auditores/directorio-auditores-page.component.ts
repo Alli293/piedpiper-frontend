@@ -32,6 +32,7 @@ import {
   AuditorResumen,
   CatalogoItem,
   esOrdenamientoValido,
+  esCalificacionValida,
   LONGITUD_MAXIMA_BUSQUEDA,
   LONGITUD_MINIMA_BUSQUEDA,
   OrdenamientoAuditores,
@@ -251,6 +252,9 @@ export class DirectorioAuditoresPageComponent {
   }
 
   protected onCalificacion(valor: string): void {
+    if (!esCalificacionValida(valor)) {
+      return;
+    }
     this.modelo.update((modelo) => ({
       ...modelo,
       calificacionMinima: valor === '' ? null : Number(valor),
