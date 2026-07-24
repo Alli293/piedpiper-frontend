@@ -15,6 +15,8 @@ const rutasPlaceholder = rutasPostAutenticacion.filter(
   (path) => path !== 'emisiones' && path !== 'emisiones/registrar'
 );
 
+export const usuarioIndividualGuard = rolGuard('USUARIO_INDIVIDUAL');
+
 export const routes: Routes = [
   {
     path: '',
@@ -105,7 +107,7 @@ export const routes: Routes = [
   },
   {
     path: 'ecoruta/preferencias',
-    canActivate: [rolGuard('USUARIO_INDIVIDUAL')],
+    canActivate: [usuarioIndividualGuard],
     loadComponent: () =>
       import('./pages/ecoruta/preferencias/ecoruta-preferencias-page.component').then(
         (m) => m.EcoRutaPreferenciasPageComponent
@@ -160,12 +162,12 @@ export const routes: Routes = [
   },
   {
     path: 'ecoruta',
-    canActivate: [authGuard],
+    canActivate: [usuarioIndividualGuard],
     loadComponent: cargarPlaceholder,
   },
   {
     path: 'ecoruta/insignias',
-    canActivate: [authGuard],
+    canActivate: [usuarioIndividualGuard],
     loadComponent: () =>
       import('./pages/ecoruta/insignias/insignias-ecoruta-page.component').then(
         (m) => m.InsigniasEcoRutaPageComponent
@@ -173,12 +175,12 @@ export const routes: Routes = [
   },
   {
     path: 'ecoruta/planificar',
-    canActivate: [authGuard],
+    canActivate: [usuarioIndividualGuard],
     loadComponent: cargarPlaceholder,
   },
   {
     path: 'ecoruta/itinerarios',
-    canActivate: [authGuard],
+    canActivate: [usuarioIndividualGuard],
     loadComponent: cargarPlaceholder,
   },
   ...rutasPlaceholder.map((path) => ({ path, loadComponent: cargarPlaceholder })),

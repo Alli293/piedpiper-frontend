@@ -1,4 +1,4 @@
-import { routes, rutasPostAutenticacion } from './app.routes';
+import { routes, rutasPostAutenticacion, usuarioIndividualGuard } from './app.routes';
 import { authGuard } from './core/auth/auth.guard';
 
 describe('app.routes', () => {
@@ -27,19 +27,32 @@ describe('app.routes', () => {
     }
   });
 
-  it('las páginas privadas están protegidas con authGuard', () => {
+  it('las paginas privadas generales estan protegidas con authGuard', () => {
     const rutasPrivadas = [
       'benchmark',
       'configuracion',
-      'ecoruta/insignias',
-      'ecoruta/itinerarios',
-      'ecoruta/planificar',
       'empresa/configuracion-inicial',
       'perfil/configuracion-inicial',
     ];
+
     for (const path of rutasPrivadas) {
       const ruta = routes.find((r) => r.path === path);
       expect(ruta?.canActivate).toContain(authGuard);
+    }
+  });
+
+  it('las paginas de EcoRuta son exclusivas de usuario individual', () => {
+    const rutasEcoRuta = [
+      'ecoruta',
+      'ecoruta/preferencias',
+      'ecoruta/insignias',
+      'ecoruta/itinerarios',
+      'ecoruta/planificar',
+    ];
+
+    for (const path of rutasEcoRuta) {
+      const ruta = routes.find((r) => r.path === path);
+      expect(ruta?.canActivate).toEqual([usuarioIndividualGuard]);
     }
   });
 });

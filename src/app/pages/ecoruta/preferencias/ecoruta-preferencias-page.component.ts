@@ -24,7 +24,6 @@ import { TextInputComponent } from '../../../shared/components/inputs/text-input
 import { TextareaComponent } from '../../../shared/components/inputs/textarea/textarea.component';
 import { ToggleSwitchComponent } from '../../../shared/components/inputs/toggle-switch/toggle-switch.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
-import { ECORUTA_NAV_ITEMS } from '../../../shared/layouts/page-layout/sidebar-nav';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
 import { todayUtcMidnight, toIsoDateString } from '../../../shared/utils/date.utils';
@@ -91,7 +90,6 @@ export class EcoRutaPreferenciasPageComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  protected readonly navItems = ECORUTA_NAV_ITEMS;
   protected readonly tipoViajeOptions = TIPO_VIAJE_OPTIONS;
   protected readonly interesOptions = INTERES_OPTIONS;
   protected readonly provinciaOptions = PROVINCIA_OPTIONS;

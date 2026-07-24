@@ -115,10 +115,6 @@
   color: var(--ch-green);
 }
 
-.ch-ecoruta-insignias__metrica-numero--celeste {
-  color: var(--ch-blue-mid);
-}
-
 .ch-ecoruta-insignias__contenido {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
@@ -261,35 +257,6 @@
   min-height: 38px;
   font-size: 0.82rem;
   line-height: 1.45;
-}
-
-.ch-ecoruta-insignias__progreso {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  margin-top: auto;
-  color: var(--ch-text-secondary);
-  font-size: 0.72rem;
-  font-weight: 800;
-}
-
-.ch-ecoruta-insignias__progreso-barra {
-  width: 100%;
-  height: 4px;
-  overflow: hidden;
-  border-radius: var(--ch-radius-pill);
-  background: #dfe8ef;
-}
-
-.ch-ecoruta-insignias__progreso-barra span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--ch-blue-mid);
-}
-
-.ch-ecoruta-insignias__proxima:first-child .ch-ecoruta-insignias__progreso-barra span {
-  background: var(--ch-green);
 }
 
 .ch-ecoruta-insignias__detalle {

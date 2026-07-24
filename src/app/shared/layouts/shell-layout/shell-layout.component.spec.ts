@@ -35,7 +35,10 @@ describe('ShellLayoutComponent', () => {
   async function createFixture(
     inputs: {
       activeId?: string;
+      variant?: string;
+      companyName?: string;
       companyRole?: string;
+      companyInitials?: string;
       settingsLabel?: string;
       backRoute?: string;
     } = {}
@@ -43,8 +46,13 @@ describe('ShellLayoutComponent', () => {
     const fixture = TestBed.createComponent(ShellLayoutComponent);
     fixture.componentRef.setInput('headerConfig', HEADER_CONFIG);
     if (inputs.activeId !== undefined) fixture.componentRef.setInput('activeId', inputs.activeId);
+    if (inputs.variant !== undefined) fixture.componentRef.setInput('variant', inputs.variant);
+    if (inputs.companyName !== undefined)
+      fixture.componentRef.setInput('companyName', inputs.companyName);
     if (inputs.companyRole !== undefined)
       fixture.componentRef.setInput('companyRole', inputs.companyRole);
+    if (inputs.companyInitials !== undefined)
+      fixture.componentRef.setInput('companyInitials', inputs.companyInitials);
     if (inputs.settingsLabel !== undefined)
       fixture.componentRef.setInput('settingsLabel', inputs.settingsLabel);
     if (inputs.backRoute !== undefined)
@@ -97,6 +105,24 @@ describe('ShellLayoutComponent', () => {
     expect(root.querySelector('.ch-sidebar__company-role')?.textContent?.trim()).toBe(
       'Auditor externo'
     );
+  });
+
+  it('renderiza navegación EcoRuta cuando recibe la variante ecoruta', async () => {
+    const fixture = await createFixture({
+      activeId: 'ecoruta-insignias',
+      variant: 'ecoruta',
+      companyName: 'EcoRuta',
+      companyRole: 'Viajes sostenibles',
+      companyInitials: 'ER',
+    });
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(menuLabels(root)).toEqual(['Planificar viaje', 'Mis itinerarios', 'Mis insignias']);
+    expect(root.querySelector('.ch-sidebar__company-name')?.textContent?.trim()).toBe('EcoRuta');
+    expect(root.querySelector('.ch-sidebar__company-role')?.textContent?.trim()).toBe(
+      'Viajes sostenibles'
+    );
+    expect(root.querySelector('.ch-sidebar__item--active')?.textContent).toContain('Mis insignias');
   });
 
   it('sobrescribe la etiqueta de Configuración con settingsLabel', async () => {
@@ -181,5 +207,13 @@ describe('ShellLayoutComponent', () => {
     (fixture.componentInstance as any).onMenuItem('emissions');
 
     expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/emisiones');
+  });
+
+  it('navega a las rutas de EcoRuta desde el sidebar compartido', async () => {
+    const fixture = await createFixture({ activeId: 'ecoruta-insignias', variant: 'ecoruta' });
+
+    (fixture.componentInstance as any).onMenuItem('ecoruta-planificar');
+
+    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/ecoruta/planificar');
   });
 });

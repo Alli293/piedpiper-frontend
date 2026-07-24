@@ -1,7 +1,10 @@
-<app-page-layout
-  [sidebarConfig]="sidebarConfig()"
+<app-shell-layout
+  activeId="ecoruta-insignias"
+  variant="ecoruta"
+  companyName="EcoRuta"
+  companyRole="Viajes sostenibles"
+  companyInitials="ER"
   [headerConfig]="headerConfig()"
-  (menuItemClicked)="onMenuItem($event)"
 >
   @if (cargando()) {
     <section class="ch-ecoruta-insignias__estado" aria-live="polite">
@@ -48,12 +51,6 @@
                   {{ insigniasOrdenadas().length }}
                 </dd>
               </div>
-              <div>
-                <dt>Itinerarios</dt>
-                <dd class="ch-ecoruta-insignias__metrica-numero--celeste">
-                  {{ itinerariosHechos() }}
-                </dd>
-              </div>
             </dl>
           </section>
 
@@ -95,20 +92,14 @@
             </div>
 
             <div class="ch-ecoruta-insignias__proximas">
-              @for (insignia of proximasConProgreso(); track insignia.idInsignia) {
+              @for (insignia of proximasInsignias(); track insignia.idInsignia) {
                 <article class="ch-ecoruta-insignias__proxima">
                   <span class="ch-ecoruta-insignias__proxima-icono" aria-hidden="true">
                     <app-icon [name]="insignia.icono" [size]="22" />
                   </span>
                   <strong>{{ insignia.nombre }}</strong>
                   <p>{{ insignia.descripcion }}</p>
-                  <div class="ch-ecoruta-insignias__progreso">
-                    <span>{{ insignia.progresoActual }} / {{ insignia.objetivoProgreso }}</span>
-                    <span>{{ insignia.progresoPorcentaje }}%</span>
-                  </div>
-                  <div class="ch-ecoruta-insignias__progreso-barra" aria-hidden="true">
-                    <span [style.width.%]="insignia.progresoPorcentaje"></span>
-                  </div>
+                  <app-badge variant="neutral">Pendiente</app-badge>
                 </article>
               }
             </div>
@@ -136,8 +127,8 @@
                   <dd>{{ insignia.fechaObtencion | date: 'dd/MM/y - h:mm a' }}</dd>
                 </div>
                 <div>
-                  <dt>Origen</dt>
-                  <dd>{{ origen() }}</dd>
+                  <dt>Evento</dt>
+                  <dd>{{ insignia.eventoDesbloqueo }}</dd>
                 </div>
               </dl>
 
@@ -150,8 +141,8 @@
             <p class="ch-ecoruta-insignias__ayuda-detalle">
               <app-icon name="info" [size]="14" aria-hidden="true" />
               <span>
-                Seleccioná cualquier insignia obtenida para ver su detalle: fecha, evento de
-                desbloqueo e itinerario de origen.
+                Seleccioná cualquier insignia obtenida para ver su detalle: fecha y evento de
+                desbloqueo.
               </span>
             </p>
           </div>
@@ -159,4 +150,4 @@
       </div>
     </div>
   }
-</app-page-layout>
+</app-shell-layout>
