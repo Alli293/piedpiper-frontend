@@ -5,6 +5,7 @@ import { provideRouter } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { AuthSessionService } from '../../../core/auth-session.service';
 import { InsigniasEcoRutaService } from '../../../core/services/insignias-ecoruta.service';
+import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
 import { InsigniasEcoRutaPageComponent } from './insignias-ecoruta-page.component';
 
 describe('InsigniasEcoRutaPageComponent', () => {
@@ -39,6 +40,7 @@ describe('InsigniasEcoRutaPageComponent', () => {
   });
 
   it('muestra las insignias obtenidas ordenadas y el detalle seleccionado', async () => {
+    flushPerfil();
     httpMock.expectOne(InsigniasEcoRutaService.URL).flush([
       {
         idInsignia: 1,
@@ -63,13 +65,33 @@ describe('InsigniasEcoRutaPageComponent', () => {
     expect(texto).toContain('EcoScore Excelente');
     expect(texto).toContain('Primer itinerario');
     expect(texto).toContain('Insignia obtenida');
+    expect(texto).toContain('Itinerarios');
+    expect(texto).toContain('Costa Rica sostenible · 5 días');
+    expect(texto).toContain('Seleccioná cualquier insignia obtenida');
   });
 
   it('muestra estado vacio cuando el usuario aun no tiene insignias', async () => {
+    flushPerfil();
     httpMock.expectOne(InsigniasEcoRutaService.URL).flush([]);
     await fixture.whenStable();
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Aún no tenés insignias');
   });
+
+  function flushPerfil(): void {
+    httpMock.expectOne(PerfilInicialService.URL).flush({
+      nombreVisible: 'Juana Rojas',
+      preferencias: { idioma: 'ESPANOL', moneda: 'CRC', unidades: 'METRICO' },
+      rol: 'USUARIO_INDIVIDUAL',
+      configuracionCompleta: true,
+      redirect: '/ecoruta/insignias',
+      empresa: {
+        nombreEmpresa: 'EcoRuta',
+        sectorIndustrial: null,
+        pais: 'Costa Rica',
+        cantidadEmpleados: 1,
+      },
+    });
+  }
 });

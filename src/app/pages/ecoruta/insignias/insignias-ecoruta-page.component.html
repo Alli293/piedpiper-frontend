@@ -31,28 +31,32 @@
     </section>
   } @else {
     <div class="ch-ecoruta-insignias">
-      <section class="ch-ecoruta-insignias__resumen" aria-label="Resumen de insignias EcoRuta">
-        <div class="ch-ecoruta-insignias__resumen-icono" aria-hidden="true">
-          <app-icon name="insignias" [size]="24" />
-        </div>
-        <div>
-          <app-heading level="h2" text="Tus logros en EcoRuta" />
-          <p>Se desbloquean automáticamente al completar acciones en tus itinerarios.</p>
-        </div>
-        <dl class="ch-ecoruta-insignias__metricas">
-          <div>
-            <dt>Obtenidas</dt>
-            <dd>{{ insigniasOrdenadas().length }}</dd>
-          </div>
-          <div>
-            <dt>Disponibles</dt>
-            <dd>{{ insigniasOrdenadas().length + proximasInsignias().length }}</dd>
-          </div>
-        </dl>
-      </section>
-
       <div class="ch-ecoruta-insignias__contenido">
         <section class="ch-ecoruta-insignias__principal">
+          <section class="ch-ecoruta-insignias__resumen" aria-label="Resumen de insignias EcoRuta">
+            <div class="ch-ecoruta-insignias__resumen-icono" aria-hidden="true">
+              <app-icon name="insignias" [size]="20" />
+            </div>
+            <div>
+              <app-heading level="h2" text="Tus logros en EcoRuta" />
+              <p>Se desbloquean automáticamente al completar acciones en tus itinerarios.</p>
+            </div>
+            <dl class="ch-ecoruta-insignias__metricas">
+              <div>
+                <dt>Obtenidas</dt>
+                <dd class="ch-ecoruta-insignias__metrica-numero--verde">
+                  {{ insigniasOrdenadas().length }}
+                </dd>
+              </div>
+              <div>
+                <dt>Itinerarios</dt>
+                <dd class="ch-ecoruta-insignias__metrica-numero--celeste">
+                  {{ itinerariosHechos() }}
+                </dd>
+              </div>
+            </dl>
+          </section>
+
           <div class="ch-ecoruta-insignias__seccion-titulo">
             <span>Insignias obtenidas</span>
             <strong>{{ insigniasOrdenadas().length }}</strong>
@@ -91,14 +95,20 @@
             </div>
 
             <div class="ch-ecoruta-insignias__proximas">
-              @for (insignia of proximasInsignias(); track insignia.idInsignia) {
+              @for (insignia of proximasConProgreso(); track insignia.idInsignia) {
                 <article class="ch-ecoruta-insignias__proxima">
                   <span class="ch-ecoruta-insignias__proxima-icono" aria-hidden="true">
                     <app-icon [name]="insignia.icono" [size]="22" />
                   </span>
                   <strong>{{ insignia.nombre }}</strong>
                   <p>{{ insignia.descripcion }}</p>
-                  <app-badge variant="neutral">Pendiente</app-badge>
+                  <div class="ch-ecoruta-insignias__progreso">
+                    <span>{{ insignia.progresoActual }} / {{ insignia.objetivoProgreso }}</span>
+                    <span>{{ insignia.progresoPorcentaje }}%</span>
+                  </div>
+                  <div class="ch-ecoruta-insignias__progreso-barra" aria-hidden="true">
+                    <span [style.width.%]="insignia.progresoPorcentaje"></span>
+                  </div>
                 </article>
               }
             </div>
@@ -106,35 +116,45 @@
         </section>
 
         @if (insigniaSeleccionada(); as insignia) {
-          <aside class="ch-ecoruta-insignias__detalle" aria-label="Detalle de la insignia">
-            <div class="ch-ecoruta-insignias__detalle-hero">
-              <span class="ch-ecoruta-insignias__detalle-icono" aria-hidden="true">
-                <app-icon [name]="iconoInsignia(insignia.idInsignia)" [size]="38" />
+          <div class="ch-ecoruta-insignias__lateral">
+            <aside class="ch-ecoruta-insignias__detalle" aria-label="Detalle de la insignia">
+              <div class="ch-ecoruta-insignias__detalle-hero">
+                <span class="ch-ecoruta-insignias__detalle-icono" aria-hidden="true">
+                  <app-icon [name]="iconoInsignia(insignia.idInsignia)" [size]="38" />
+                </span>
+                <app-heading level="h2" [text]="insignia.nombre" />
+                <app-badge variant="success" icon="success">Insignia obtenida</app-badge>
+              </div>
+
+              <dl class="ch-ecoruta-insignias__detalle-lista">
+                <div>
+                  <dt>Descripción</dt>
+                  <dd>{{ insignia.descripcion }}</dd>
+                </div>
+                <div>
+                  <dt>Obtenida</dt>
+                  <dd>{{ insignia.fechaObtencion | date: 'dd/MM/y - h:mm a' }}</dd>
+                </div>
+                <div>
+                  <dt>Origen</dt>
+                  <dd>{{ origen() }}</dd>
+                </div>
+              </dl>
+
+              <p class="ch-ecoruta-insignias__nota">
+                Otorgada automáticamente al cumplir la regla de desbloqueo. Cada insignia se otorga
+                una única vez.
+              </p>
+            </aside>
+
+            <p class="ch-ecoruta-insignias__ayuda-detalle">
+              <app-icon name="info" [size]="14" aria-hidden="true" />
+              <span>
+                Seleccioná cualquier insignia obtenida para ver su detalle: fecha, evento de
+                desbloqueo e itinerario de origen.
               </span>
-              <app-heading level="h2" [text]="insignia.nombre" />
-              <app-badge variant="success" icon="success">Insignia obtenida</app-badge>
-            </div>
-
-            <dl class="ch-ecoruta-insignias__detalle-lista">
-              <div>
-                <dt>Descripción</dt>
-                <dd>{{ insignia.descripcion }}</dd>
-              </div>
-              <div>
-                <dt>Obtenida</dt>
-                <dd>{{ insignia.fechaObtencion | date: 'dd/MM/y - h:mm a' }}</dd>
-              </div>
-              <div>
-                <dt>Origen</dt>
-                <dd>{{ origen(insignia) }}</dd>
-              </div>
-            </dl>
-
-            <p class="ch-ecoruta-insignias__nota">
-              Otorgada automáticamente al cumplir la regla de desbloqueo. Cada insignia se otorga
-              una única vez.
             </p>
-          </aside>
+          </div>
         }
       </div>
     </div>
