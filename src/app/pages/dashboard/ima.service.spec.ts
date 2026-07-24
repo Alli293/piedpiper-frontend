@@ -93,42 +93,6 @@ describe('ImaService', () => {
     expect(result!.siguientePaso).toBeNull();
   });
 
-  it('consulta la tendencia con la ventana como query param', () => {
-    service.obtenerTendencia(12).subscribe();
-    const req = httpMock.expectOne(`${environment.apiBaseUrl}/ima/tendencia?mesesAtras=12`);
-    expect(req.request.method).toBe('GET');
-    req.flush({ mesesAtras: 12, serie: [], sinDatosSectoriales: false });
-  });
-
-  it('envia la ventana solicitada cuando no es la de por defecto', () => {
-    service.obtenerTendencia(6).subscribe();
-    const req = httpMock.expectOne(`${environment.apiBaseUrl}/ima/tendencia?mesesAtras=6`);
-    expect(req.request.params.get('mesesAtras')).toBe('6');
-    req.flush({ mesesAtras: 6, serie: [], sinDatosSectoriales: false });
-  });
-
-  it('conserva los puntos nulos de la serie sin convertirlos en ceros', () => {
-    let result: ImaTendenciaResponse | undefined;
-    service.obtenerTendencia(3).subscribe((resp) => {
-      result = resp;
-    });
-
-    const req = httpMock.expectOne(`${environment.apiBaseUrl}/ima/tendencia?mesesAtras=3`);
-    req.flush({
-      mesesAtras: 3,
-      serie: [
-        { mes: '2026-04', imaEmpresa: null, imaPromedioSector: null },
-        { mes: '2026-05', imaEmpresa: 68, imaPromedioSector: 63.5 },
-        { mes: '2026-06', imaEmpresa: 71, imaPromedioSector: null },
-      ],
-      sinDatosSectoriales: false,
-    });
-
-    expect(result?.serie[0].imaEmpresa).toBeNull();
-    expect(result?.serie[1].imaPromedioSector).toBe(63.5);
-    expect(result?.serie[2].imaPromedioSector).toBeNull();
-  });
-
   it('consulta el benchmark sectorial con anio y mes como query params', () => {
     service.obtenerBenchmark(2026, 7).subscribe();
 
@@ -149,6 +113,68 @@ describe('ImaService', () => {
     });
   });
 
+  it('consulta la tendencia con la ventana como query param', () => {
+    service.obtenerTendencia(12).subscribe();
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/ima/tendencia?mesesAtras=12`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ mesesAtras: 12, serie: [], sinDatosSectoriales: false, eventos: [] });
+  });
+
+  it('envía la ventana solicitada cuando no es la de por defecto', () => {
+    service.obtenerTendencia(6).subscribe();
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/ima/tendencia?mesesAtras=6`);
+    expect(req.request.params.get('mesesAtras')).toBe('6');
+    req.flush({ mesesAtras: 6, serie: [], sinDatosSectoriales: false, eventos: [] });
+  });
+
+  it('conserva los puntos nulos de la serie sin convertirlos en ceros', () => {
+    let result: ImaTendenciaResponse | undefined;
+    service.obtenerTendencia(3).subscribe((resp) => {
+      result = resp;
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/ima/tendencia?mesesAtras=3`);
+    req.flush({
+      mesesAtras: 3,
+      serie: [
+        { mes: '2026-04', imaEmpresa: null, imaPromedioSector: null },
+        { mes: '2026-05', imaEmpresa: 68, imaPromedioSector: 63.5 },
+        { mes: '2026-06', imaEmpresa: 71, imaPromedioSector: null },
+      ],
+      sinDatosSectoriales: false,
+      eventos: [],
+    });
+
+    expect(result?.serie[0].imaEmpresa).toBeNull();
+    expect(result?.serie[1].imaPromedioSector).toBe(63.5);
+    expect(result?.serie[2].imaPromedioSector).toBeNull();
+  });
+
+  it('lee el arreglo de eventos anotados de la respuesta', () => {
+    let result: ImaTendenciaResponse | undefined;
+    service.obtenerTendencia(12).subscribe((resp) => {
+      result = resp;
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/ima/tendencia?mesesAtras=12`);
+    req.flush({
+      mesesAtras: 12,
+      serie: [{ mes: '2026-06', imaEmpresa: 71, imaPromedioSector: 64 }],
+      sinDatosSectoriales: false,
+      eventos: [
+        {
+          mes: '2026-06',
+          tipo: 'CRUCE_SECTOR',
+          texto: 'En junio 2026 tu IMA superó el promedio de tu sector.',
+        },
+      ],
+    });
+
+    expect(result?.eventos).toHaveLength(1);
+    expect(result?.eventos[0].tipo).toBe('CRUCE_SECTOR');
+    expect(result?.eventos[0].mes).toBe('2026-06');
+  });
+
   function buildImaResponse(overrides: Partial<ImaResponse> = {}): ImaResponse {
     return {
       cobertura: 75,
@@ -158,7 +184,7 @@ describe('ImaService', () => {
       parcial: false,
       motivoParcial: null,
       intensidad: 1.5,
-      calculatedAt: '2026-07-18T00:00:00Z',
+      calculatedAt: '2024-06-18T00:00:00Z',
       interpretacion: null,
       siguientePaso: null,
       ...overrides,

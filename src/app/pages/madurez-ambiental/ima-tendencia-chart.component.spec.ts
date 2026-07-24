@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { ImaTendenciaChartComponent, etiquetaMes } from './ima-tendencia-chart.component';
-import { ImaTendenciaPunto } from '../dashboard/ima.service';
+import { ImaEvento, ImaTendenciaPunto } from '../dashboard/ima.service';
 
 interface ChartDataAccesible {
   labels: string[];
@@ -34,7 +34,7 @@ describe('ImaTendenciaChartComponent', () => {
     fixture.detectChanges();
 
     const data = chartData();
-    expect(data.datasets).toHaveLength(2);
+    // El tercer dataset son los marcadores de eventos (PP-83), no una línea.
     expect(data.datasets[0].label).toBe('Tu empresa');
     expect(data.datasets[1].label).toBe('Promedio del sector');
     expect(data.datasets[0].data).toEqual([null, 68, 71]);
@@ -78,5 +78,55 @@ describe('ImaTendenciaChartComponent', () => {
   it('etiquetaMes convierte el periodo ISO en el mes abreviado', () => {
     expect(etiquetaMes('2026-01')).toBe('Ene');
     expect(etiquetaMes('2026-12')).toBe('Dic');
+  });
+
+  describe('marcadores de eventos (PP-83)', () => {
+    const eventos: ImaEvento[] = [
+      {
+        mes: '2026-06',
+        tipo: 'CRUCE_SECTOR',
+        texto: 'En junio 2026 tu IMA superó el promedio de tu sector.',
+      },
+    ];
+
+    it('pinta un marcador en el mes del evento y ninguno en los demas', () => {
+      componentRef.setInput('serie', serie);
+      componentRef.setInput('eventos', eventos);
+      fixture.detectChanges();
+
+      const marcadores = chartData().datasets[2];
+      expect(marcadores.label).toBe('Eventos');
+      // serie = [2026-04, 2026-05, 2026-06] -> solo el ultimo tiene evento
+      expect(marcadores.data).toEqual([null, null, 71]);
+    });
+
+    it('agrupa varios eventos del mismo mes en un unico marcador', () => {
+      componentRef.setInput('serie', serie);
+      componentRef.setInput('eventos', [
+        ...eventos,
+        { mes: '2026-06', tipo: 'MAYOR_VARIACION', texto: 'Mayor cambio de IMA (+3).' },
+      ] satisfies ImaEvento[]);
+      fixture.detectChanges();
+
+      expect(chartData().datasets[2].data.filter((v) => v !== null)).toHaveLength(1);
+    });
+
+    it('no pinta marcadores cuando no hay eventos', () => {
+      componentRef.setInput('serie', serie);
+      fixture.detectChanges();
+
+      expect(chartData().datasets[2].data).toEqual([null, null, null]);
+    });
+
+    it('coloca el marcador sobre la linea sectorial si la empresa no tiene dato ese mes', () => {
+      componentRef.setInput('serie', serie);
+      componentRef.setInput('eventos', [
+        { mes: '2026-04', tipo: 'HUECO_DATOS', texto: 'No registraste emisiones.' },
+      ] satisfies ImaEvento[]);
+      fixture.detectChanges();
+
+      // 2026-04 tiene imaEmpresa null y imaPromedioSector null -> queda null
+      expect(chartData().datasets[2].data[0]).toBeNull();
+    });
   });
 });
