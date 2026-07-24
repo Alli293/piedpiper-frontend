@@ -43,6 +43,20 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'recuperar-contrasena',
+    loadComponent: () =>
+      import('./pages/auth/recuperar-contrasena/recuperar-contrasena-page.component').then(
+        (m) => m.RecuperarContrasenaPageComponent
+      ),
+  },
+  {
+    path: 'reset-contrasena',
+    loadComponent: () =>
+      import('./pages/auth/reset-contrasena/reset-contrasena-page.component').then(
+        (m) => m.ResetContrasenaPageComponent
+      ),
+  },
+  {
     path: 'verificar-correo',
     loadComponent: () =>
       import('./pages/auth/verificar-correo/verificar-correo-page.component').then(

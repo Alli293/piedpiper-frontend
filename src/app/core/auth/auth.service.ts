@@ -9,6 +9,7 @@ import {
   RegistroEmpresaCorreoRequest,
   RegistroPendienteResponse,
   RegistroUsuarioCorreoRequest,
+  ValidarTokenResetResponse,
 } from './auth.models';
 
 const TOKEN_KEY = 'carbonhub.token';
@@ -82,6 +83,30 @@ export class AuthService {
       `${this.baseUrl}/registro/usuario/correo`,
       datos
     );
+  }
+
+  solicitarResetContrasena(email: string): Observable<MensajeResponse> {
+    return this.http.post<MensajeResponse>(`${this.baseUrl}/solicitar-reset-contrasena`, {
+      email,
+    });
+  }
+
+  validarTokenReset(token: string): Observable<ValidarTokenResetResponse> {
+    return this.http.get<ValidarTokenResetResponse>(`${this.baseUrl}/reset-contrasena`, {
+      params: { token },
+    });
+  }
+
+  restablecerContrasena(
+    token: string,
+    nuevaContrasena: string,
+    confirmarContrasena: string
+  ): Observable<MensajeResponse> {
+    return this.http.post<MensajeResponse>(`${this.baseUrl}/restablecer-contrasena`, {
+      token,
+      nuevaContrasena,
+      confirmarContrasena,
+    });
   }
 
   verificarCorreo(token: string): Observable<MensajeResponse> {

@@ -46,3 +46,7 @@ export interface RegistroUsuarioCorreoRequest {
 export interface MensajeResponse {
   mensaje: string;
 }
+
+export interface ValidarTokenResetResponse {
+  email: string;
+}
