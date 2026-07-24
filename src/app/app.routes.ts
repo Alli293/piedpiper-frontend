@@ -128,7 +128,10 @@ export const routes: Routes = [
   {
     path: 'benchmark',
     canActivate: [authGuard],
-    loadComponent: cargarPlaceholder,
+    loadComponent: () =>
+      import('./pages/madurez-ambiental/madurez-ambiental-page.component').then(
+        (m) => m.MadurezAmbientalPageComponent
+      ),
   },
   {
     path: 'ecoruta',
