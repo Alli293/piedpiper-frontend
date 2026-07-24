@@ -17,7 +17,6 @@ import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/b
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
-import { ToastHostComponent } from '../../../shared/components/toast/toast.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -49,7 +48,6 @@ const ESTADOS: Record<EstadoInvitacion, { etiqueta: string; variante: BadgeVaria
     HeadingComponent,
     ShellLayoutComponent,
     TextInputComponent,
-    ToastHostComponent,
     DatePipe,
     FormField,
   ],

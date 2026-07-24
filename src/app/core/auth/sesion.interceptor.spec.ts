@@ -81,6 +81,18 @@ describe('sesionInterceptor', () => {
     expect(sesionInactividadStub.cerrarSesionPorExpiracion).not.toHaveBeenCalled();
   });
 
+  it('si el token se limpia mientras la request está en vuelo, no cierra sesión de nuevo ante el 401', () => {
+    httpClient.get(`${environment.apiBaseUrl}/emisiones`).subscribe({ error: () => undefined });
+
+    authServiceStub.token = () => null;
+
+    httpMock
+      .expectOne(`${environment.apiBaseUrl}/emisiones`)
+      .flush({ message: 'No autorizado' }, { status: 401, statusText: 'Unauthorized' });
+
+    expect(sesionInactividadStub.cerrarSesionPorExpiracion).not.toHaveBeenCalled();
+  });
+
   it('no intercepta llamadas fuera de la API', () => {
     httpClient.get('https://external.example.com/resource').subscribe();
 

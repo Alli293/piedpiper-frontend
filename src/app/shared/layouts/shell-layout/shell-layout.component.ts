@@ -1,12 +1,16 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
+import { SidebarBottomItemId } from '../../components/sidebar/sidebar.component';
 import { HeaderConfig, PageLayoutComponent } from '../page-layout/page-layout.component';
 import { buildSidebarConfig, SidebarNavId } from '../page-layout/sidebar-nav';
 import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
 
 const COMPANY_NAME = 'Café del Valle S.A.';
 const COMPANY_INITIALS = 'CV';
+
+/** Ids this shell's own sidebarConfig can ever emit (see buildSidebarConfig). */
+type ShellMenuItemId = SidebarNavId | SidebarBottomItemId;
 
 /**
  * Shared shell for authenticated pages: owns sidebar construction so pages
@@ -51,20 +55,20 @@ export class ShellLayoutComponent {
   }
 
   protected onMenuItem(id: string): void {
-    if (id === 'logout') {
+    const menuId = id as ShellMenuItemId;
+    if (menuId === 'logout') {
       this.authService.cerrarSesion();
       this.sesionInactividadService.detener();
       void this.router.navigateByUrl('/login');
       return;
     }
 
-    const rutas: Record<string, string> = {
+    const rutas: Record<Exclude<ShellMenuItemId, 'logout'>, string> = {
       benchmark: '/benchmark',
       dashboard: '/panel',
       emissions: '/emisiones/registrar',
       settings: '/configuracion',
     };
-    const ruta = rutas[id];
-    if (ruta) void this.router.navigateByUrl(ruta);
+    void this.router.navigateByUrl(rutas[menuId]);
   }
 }

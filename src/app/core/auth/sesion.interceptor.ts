@@ -12,7 +12,6 @@ export const sesionInterceptor: HttpInterceptorFn = (req, next) => {
 
   const authService = inject(AuthService);
   const sesionInactividadService = inject(SesionInactividadService);
-  const teniaToken = Boolean(authService.token());
 
   return next(req).pipe(
     tap((event) => {
@@ -24,7 +23,7 @@ export const sesionInterceptor: HttpInterceptorFn = (req, next) => {
       }
     }),
     catchError((error: unknown) => {
-      if (error instanceof HttpErrorResponse && error.status === 401 && teniaToken) {
+      if (error instanceof HttpErrorResponse && error.status === 401 && authService.token()) {
         sesionInactividadService.cerrarSesionPorExpiracion();
       }
       return throwError(() => error);

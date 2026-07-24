@@ -3,6 +3,9 @@ import { AvatarComponent } from '../avatar/avatar.component';
 import { IconComponent, IconName } from '../icon/icon.component';
 import { LogoComponent } from '../logo/logo.component';
 
+/** Bottom-of-sidebar items are fixed app-wide (unlike the per-page top menu items). */
+export type SidebarBottomItemId = 'settings' | 'logout';
+
 export interface SidebarMenuItem {
   label: string;
   icon: IconName;
@@ -13,7 +16,7 @@ export interface SidebarMenuItem {
 export interface SidebarBottomItem {
   label: string;
   icon: IconName;
-  id: string;
+  id: SidebarBottomItemId;
 }
 
 @Component({
