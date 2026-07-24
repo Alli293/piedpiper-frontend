@@ -428,3 +428,21 @@
     grid-template-columns: 1fr;
   }
 }
+
+.evolucion-panel__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--ch-space-4);
+}
+
+.evolucion-panel__rango {
+  font-family: var(--ch-font-body);
+  font-size: 0.8125rem;
+  color: var(--ch-text-secondary);
+}
+
+.evolucion-panel__empty {
+  color: var(--ch-text-secondary);
+  font-size: 0.875rem;
+}

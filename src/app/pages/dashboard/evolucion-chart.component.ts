@@ -53,13 +53,13 @@ export class EvolucionChartComponent {
     getComputedStyle(document.documentElement).getPropertyValue('--ch-green').trim() || '#1f8a5b';
 
   readonly chartData = computed<ChartConfiguration<'line'>['data']>(() => {
-    const datos = this.serie().map((p) => p.totalCarbonKg);
+    const datos = this.serie().map((p) => p.totalCarbonKg / 1000);
     return {
       labels: this.meses,
       datasets: [
         {
           data: datos,
-          label: `Huella ${this.anio()} (kg CO₂e)`,
+          label: `Emisiones ${this.anio()} (tCO₂e)`,
           borderColor: this.colorPrincipal,
           backgroundColor: `${this.colorPrincipal}1a`,
           fill: true,
@@ -76,7 +76,7 @@ export class EvolucionChartComponent {
     plugins: { legend: { display: false } },
     scales: {
       x: { grid: { display: false } },
-      y: { beginAtZero: true, ticks: { callback: (value) => `${value} kg` } },
+      y: { beginAtZero: true, ticks: { callback: (value) => `${value} t` } },
     },
   };
 }
