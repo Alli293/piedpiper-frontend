@@ -1,10 +1,5 @@
 :host {
   display: block;
-  --ch-card-stat-value-color: var(--ch-sky);
-}
-
-:host(.ch-card-stat--green) {
-  --ch-card-stat-value-color: var(--ch-green);
 }
 
 .ch-card-stat__value {
@@ -13,7 +8,7 @@
   font-family: var(--ch-font-heading);
   font-size: 26px;
   font-weight: 700;
-  color: var(--ch-card-stat-value-color);
+  color: var(--ch-sky);
   letter-spacing: 0;
   line-height: 1.2;
 }
