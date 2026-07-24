@@ -58,7 +58,13 @@ describe('MadurezAmbientalPageComponent', () => {
         { provide: ImaService, useValue: imaService },
         { provide: AuthService, useValue: { token: signal('fake-token'), cerrarSesion: vi.fn() } },
         { provide: SesionInactividadService, useValue: { reiniciar: vi.fn(), detener: vi.fn() } },
-        { provide: AuthSessionService, useValue: { getUserInitials: vi.fn(() => 'AJ') } },
+        {
+          provide: AuthSessionService,
+          useValue: {
+            getUserInitials: vi.fn(() => 'AJ'),
+            getRole: vi.fn(() => 'administrador_empresa'),
+          },
+        },
         { provide: ToastService, useValue: toastService },
       ],
     })
