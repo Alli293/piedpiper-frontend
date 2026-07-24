@@ -406,8 +406,7 @@ export class DashboardPageComponent {
       this.benchmarkError.set(true);
       const mensaje =
         err instanceof HttpErrorResponse
-          ? (err.error?.message ??
-            'No se pudo cargar el benchmark sectorial. Intente nuevamente.')
+          ? (err.error?.message ?? 'No se pudo cargar el benchmark sectorial. Intente nuevamente.')
           : 'No se pudo cargar el benchmark sectorial. Intente nuevamente.';
       this.toastService.error(mensaje, undefined, 5000);
     }

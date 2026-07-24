@@ -45,8 +45,7 @@ export interface BenchmarkNoDisponibleResponse extends BenchmarkBase {
 }
 
 export type BenchmarkSectorialResponse =
-  | BenchmarkDisponibleResponse
-  | BenchmarkNoDisponibleResponse;
+  BenchmarkDisponibleResponse | BenchmarkNoDisponibleResponse;
 
 @Injectable({ providedIn: 'root' })
 export class ImaService {
