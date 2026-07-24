@@ -83,7 +83,7 @@ describe('AuthService', () => {
     });
 
     expect(recibida!.mensaje).toContain('Si existe una cuenta');
-    expect(localStorage.getItem('carbonhub.token')).toBeNull();
+    expect(sessionStorage.getItem('carbonhub.token')).toBeNull();
   });
 
   it('validarTokenReset hace GET a /auth/reset-contrasena con el token como query param', () => {
@@ -113,7 +113,36 @@ describe('AuthService', () => {
     req.flush({ mensaje: 'Tu contraseña fue actualizada. Ya puedes iniciar sesión.' });
 
     expect(recibida!.mensaje).toContain('actualizada');
-    expect(localStorage.getItem('carbonhub.token')).toBeNull();
+    expect(sessionStorage.getItem('carbonhub.token')).toBeNull();
+  });
+
+  it('registrarInvitacionConCorreo hace POST con tokenInvitacion junto a los datos y guarda el token', () => {
+    let recibida;
+    service
+      .registrarInvitacionConCorreo('token-inv', {
+        nombre: 'Ana',
+        apellidos: 'Torres',
+        contrasena: 'clave1234',
+        confirmarContrasena: 'clave1234',
+        aceptaTerminos: true,
+      })
+      .subscribe((r) => (recibida = r));
+
+    const req = httpMock.expectOne(`${base}/registro/invitacion/correo`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      tokenInvitacion: 'token-inv',
+      nombre: 'Ana',
+      apellidos: 'Torres',
+      contrasena: 'clave1234',
+      confirmarContrasena: 'clave1234',
+      aceptaTerminos: true,
+    });
+    req.flush({ ...respuesta, rol: 'USUARIO_GENERAL', redirect: '/perfil/configuracion-inicial' });
+
+    expect(recibida!.redirect).toBe('/perfil/configuracion-inicial');
+    expect(sessionStorage.getItem('carbonhub.token')).toBe('jwt-app');
+    expect(service.token()).toBe('jwt-app');
   });
 
   it('verificarCorreo hace GET a /auth/verificar-correo con el token como query param', () => {
@@ -127,13 +156,13 @@ describe('AuthService', () => {
     expect(recibida!.mensaje).toBe('Tu correo fue verificado. Ya puedes iniciar sesión.');
   });
 
-  it('verificarCorreo no guarda ningun token en localStorage', () => {
+  it('verificarCorreo no guarda ningun token en sessionStorage', () => {
     service.verificarCorreo('tok-123').subscribe();
 
     const req = httpMock.expectOne(`${base}/verificar-correo?token=tok-123`);
     req.flush({ mensaje: 'OK' });
 
-    expect(localStorage.getItem('carbonhub.token')).toBeNull();
+    expect(sessionStorage.getItem('carbonhub.token')).toBeNull();
   });
 
   it('reenviarVerificacion hace POST a /auth/reenviar-verificacion con el email', () => {

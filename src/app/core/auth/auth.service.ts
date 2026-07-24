@@ -8,6 +8,7 @@ import {
   LoginRequest,
   MensajeResponse,
   RegistroEmpresaCorreoRequest,
+  RegistroInvitacionCorreoRequest,
   RegistroPendienteResponse,
   RegistroUsuarioCorreoRequest,
   ValidarTokenResetResponse,
@@ -52,6 +53,18 @@ export class AuthService {
         tokenInvitacion,
         idToken,
         aceptaTerminos,
+      })
+      .pipe(tap((response) => this.guardarSesion(response)));
+  }
+
+  registrarInvitacionConCorreo(
+    tokenInvitacion: string,
+    datos: RegistroInvitacionCorreoRequest
+  ): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.baseUrl}/registro/invitacion/correo`, {
+        tokenInvitacion,
+        ...datos,
       })
       .pipe(tap((response) => this.guardarSesion(response)));
   }

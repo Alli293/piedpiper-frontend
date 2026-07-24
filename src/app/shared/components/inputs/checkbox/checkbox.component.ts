@@ -9,6 +9,7 @@ let nextId = 0;
   styleUrl: './checkbox.component.scss',
   host: {
     class: 'ch-checkbox',
+    '[attr.id]': 'null',
   },
   providers: [
     {
@@ -19,12 +20,14 @@ let nextId = 0;
   ],
 })
 export class CheckboxComponent implements ControlValueAccessor {
+  id = input<string>();
   checked = model(false);
   disabled = input(false);
   label = input('');
   error = input('');
 
-  protected readonly inputId = `ch-checkbox-${nextId++}`;
+  private readonly autoId = `ch-checkbox-${nextId++}`;
+  protected readonly inputId = computed(() => this.id() ?? this.autoId);
   protected readonly formDisabled = signal(false);
   protected readonly effectiveDisabled = computed(() => this.disabled() || this.formDisabled());
   protected readonly hasError = computed(() => this.error().length > 0);

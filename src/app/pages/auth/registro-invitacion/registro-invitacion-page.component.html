@@ -9,38 +9,34 @@
         <a class="invitacion__enlace" routerLink="/login" appLink>Ir al inicio de sesión</a>
       </div>
     } @else if (invitacion(); as datos) {
+      <app-semantic-card variant="success" title="Invitación válida">
+        Enviada por <strong>{{ datos.nombreEmpresa }}</strong> · Rol: colaborador de empresa
+      </app-semantic-card>
+
       <header class="invitacion__header">
         <app-badge class="invitacion__badge" variant="success">Invitación de empresa</app-badge>
         <app-heading level="h1" [text]="'Únete a ' + datos.nombreEmpresa" />
         <p class="invitacion__texto">
-          Fuiste invitado a unirte como usuario general. Regístrate con tu cuenta de Google para
-          continuar.
+          Tu correo ya viene prellenado desde la invitación. Solo necesitas ingresar tu nombre y
+          elegir una contraseña.
         </p>
       </header>
 
-      <dl class="invitacion__datos">
-        <div class="invitacion__dato">
-          <dt>Empresa</dt>
-          <dd>{{ datos.nombreEmpresa }}</dd>
-        </div>
-        <div class="invitacion__dato">
-          <dt>Correo invitado</dt>
-          <dd>{{ datos.email }}</dd>
-        </div>
-      </dl>
+      <app-registro-invitacion-correo-form [email]="datos.email" [token]="token()" />
 
-      <app-checkbox
-        label="He leído y acepto los Términos y Condiciones y la Política de Privacidad"
-        [checked]="aceptaTerminos()"
-        (checkedChange)="aceptaTerminos.set($event)"
-        [disabled]="registrando()"
-      />
+      <div class="invitacion__divisor"><span>o</span></div>
 
       <div
         class="invitacion__google"
-        [class.invitacion__google--bloqueado]="!aceptaTerminos() || registrando()"
+        [class.invitacion__google--bloqueado]="registrando()"
         #googleButton
       ></div>
+
+      <p class="invitacion__terms">
+        Al registrarte aceptas nuestros
+        <a routerLink="/terminos" appLink>Términos de uso</a> y la
+        <a routerLink="/privacidad" appLink>Política de privacidad</a>.
+      </p>
 
       @if (error()) {
         <p class="invitacion__error" role="alert">{{ error() }}</p>

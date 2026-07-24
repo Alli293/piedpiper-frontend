@@ -43,6 +43,14 @@ export interface RegistroUsuarioCorreoRequest {
   aceptaTerminos: boolean;
 }
 
+export interface RegistroInvitacionCorreoRequest {
+  nombre: string;
+  apellidos: string;
+  contrasena: string;
+  confirmarContrasena: string;
+  aceptaTerminos: boolean;
+}
+
 export interface MensajeResponse {
   mensaje: string;
 }

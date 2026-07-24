@@ -1,13 +1,13 @@
 <label
   class="ch-checkbox__wrapper"
   [class.ch-checkbox__wrapper--disabled]="effectiveDisabled()"
-  [for]="inputId"
+  [for]="inputId()"
 >
   <input
     type="checkbox"
     class="ch-checkbox__input"
     [class.ch-checkbox__input--error]="hasError()"
-    [id]="inputId"
+    [id]="inputId()"
     [checked]="checked()"
     [disabled]="effectiveDisabled()"
     [attr.aria-invalid]="hasError() ? 'true' : null"

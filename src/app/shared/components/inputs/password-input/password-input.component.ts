@@ -9,6 +9,7 @@ import { IconComponent } from '../../icon/icon.component';
   styleUrl: './password-input.component.scss',
   host: {
     class: 'ch-password-input',
+    '[attr.id]': 'null',
   },
   imports: [TextInputComponent, IconComponent],
   providers: [
@@ -20,6 +21,7 @@ import { IconComponent } from '../../icon/icon.component';
   ],
 })
 export class PasswordInputComponent implements ControlValueAccessor {
+  id = input<string>();
   label = input<string>();
   placeholder = input('');
   autocomplete = input('');
