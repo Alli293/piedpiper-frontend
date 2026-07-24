@@ -67,7 +67,14 @@ describe('LimitesPageComponent', () => {
         },
         {
           provide: AuthSessionService,
-          useValue: { isAdministradorEmpresa: () => true },
+          useValue: {
+            isAdministradorEmpresa: () => true,
+            getRole: vi.fn().mockReturnValue('administrador_empresa'),
+            getUserName: vi.fn().mockReturnValue('Admin'),
+            getUserInitials: vi.fn().mockReturnValue('AD'),
+            getUserEmail: vi.fn().mockReturnValue('admin@test.com'),
+            getUserId: vi.fn().mockReturnValue('123'),
+          },
         },
         {
           provide: AuthService,

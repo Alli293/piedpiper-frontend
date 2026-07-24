@@ -114,6 +114,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'auditor/perfil',
+    canActivate: [rolGuard('AUDITOR_CERTIFICADO')],
+    loadComponent: () =>
+      import('./pages/perfil-auditor/perfil-auditor-page.component').then(
+        (m) => m.PerfilAuditorPageComponent
+      ),
+  },
+  {
     path: 'empresa/configuracion-inicial',
     canActivate: [authGuard],
     loadComponent: () =>

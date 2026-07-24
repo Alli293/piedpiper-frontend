@@ -115,7 +115,13 @@ describe('DashboardPageComponent', () => {
     obtenerIma: ReturnType<typeof vi.fn>;
     obtenerBenchmark: ReturnType<typeof vi.fn>;
   };
-  let authSession: { getUserInitials: ReturnType<typeof vi.fn> };
+  let authSession: {
+    getUserInitials: ReturnType<typeof vi.fn>;
+    getRole: ReturnType<typeof vi.fn>;
+    getUserName: ReturnType<typeof vi.fn>;
+    getUserEmail: ReturnType<typeof vi.fn>;
+    getUserId: ReturnType<typeof vi.fn>;
+  };
   let authService: {
     cerrarSesion: ReturnType<typeof vi.fn>;
     token: ReturnType<typeof signal<string | null>>;
@@ -152,6 +158,10 @@ describe('DashboardPageComponent', () => {
     };
     authSession = {
       getUserInitials: vi.fn().mockReturnValue('AJ'),
+      getRole: vi.fn().mockReturnValue('administrador_empresa'),
+      getUserName: vi.fn().mockReturnValue('Admin Test'),
+      getUserEmail: vi.fn().mockReturnValue('admin@test.com'),
+      getUserId: vi.fn().mockReturnValue('123'),
     };
     authService = {
       cerrarSesion: vi.fn(),

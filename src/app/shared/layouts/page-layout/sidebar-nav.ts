@@ -66,3 +66,54 @@ export function buildSidebarConfig(options: BuildSidebarConfigOptions): SidebarC
 
   return { menuItems, bottomItems, companyName, companyRole, companyInitials };
 }
+
+// --- Auditor sidebar ---
+
+export type AuditorSidebarNavId = 'auditorias' | 'perfil-publico';
+
+interface AuditorNavItemDef {
+  id: AuditorSidebarNavId;
+  label: string;
+  icon: IconName;
+  disabled?: boolean;
+}
+
+const AUDITOR_NAV_ITEMS: readonly AuditorNavItemDef[] = [
+  { id: 'auditorias', label: 'Auditorías', icon: 'auditorias', disabled: true },
+  { id: 'perfil-publico', label: 'Perfil Público', icon: 'perfil-publico' },
+];
+
+export interface BuildAuditorSidebarConfigOptions {
+  activeId?: AuditorSidebarNavId;
+  auditorName: string;
+  auditorInitials: string;
+  settingsLabel?: string;
+}
+
+export function buildAuditorSidebarConfig(
+  options: BuildAuditorSidebarConfigOptions
+): SidebarConfig {
+  const { activeId, auditorName, auditorInitials } = options;
+
+  const menuItems: SidebarMenuItem[] = AUDITOR_NAV_ITEMS.map((item) => ({
+    id: item.id,
+    label: item.label,
+    icon: item.icon,
+    active: item.id === activeId,
+    disabled: item.disabled ?? false,
+  }));
+
+  const bottomItems: SidebarBottomItem[] = options.settingsLabel
+    ? SIDEBAR_BOTTOM_ITEMS.map((item) =>
+        item.id === 'settings' ? { ...item, label: options.settingsLabel as string } : item
+      )
+    : [...SIDEBAR_BOTTOM_ITEMS];
+
+  return {
+    menuItems,
+    bottomItems,
+    companyName: auditorName,
+    companyRole: 'Auditor · Verificado',
+    companyInitials: auditorInitials,
+  };
+}

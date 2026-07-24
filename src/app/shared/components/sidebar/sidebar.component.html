@@ -24,10 +24,12 @@
       type="button"
       class="ch-sidebar__item"
       [class.ch-sidebar__item--active]="item.active"
+      [class.ch-sidebar__item--disabled]="item.disabled"
       [attr.aria-current]="item.active ? 'page' : null"
+      [attr.aria-disabled]="item.disabled || null"
       [attr.aria-label]="item.label"
       [attr.title]="item.label"
-      (click)="menuItemClicked.emit(item.id)"
+      (click)="!item.disabled && menuItemClicked.emit(item.id)"
     >
       <app-icon class="ch-sidebar__item-icon" [name]="item.icon" [size]="18" />
       <span class="ch-sidebar__item-label">{{ item.label }}</span>

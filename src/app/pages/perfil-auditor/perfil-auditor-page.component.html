@@ -1,0 +1,115 @@
+<app-shell-layout
+  [headerConfig]="headerConfig()"
+  sidebarVariant="auditor"
+  activeId="perfil-publico"
+>
+  <div class="ch-perfil-auditor">
+    @if (cargandoCatalogos()) {
+      <p class="ch-perfil-auditor__cargando">Cargando catálogos...</p>
+    } @else if (errorCatalogos()) {
+      <p class="ch-perfil-auditor__error" role="alert">
+        No se pudieron cargar los catálogos. Intente recargar la página.
+      </p>
+    } @else {
+      @if (errorCarga()) {
+        <div class="ch-perfil-auditor__error" role="alert">
+          No se pudo cargar tu perfil actual. Recarga la página antes de guardar cambios.
+        </div>
+      }
+      <form novalidate class="ch-perfil-auditor__layout" (submit)="handleSubmit($event)">
+        <!-- LEFT COLUMN -->
+        <div class="ch-perfil-auditor__col-left">
+          <!-- Header Card -->
+          <div class="ch-perfil-auditor__card">
+            <div class="ch-perfil-auditor__header">
+              <app-avatar [initials]="userInitials()" size="lg" />
+              <div class="ch-perfil-auditor__header-info">
+                <app-heading level="h2" [text]="userName()" />
+                <p class="ch-perfil-auditor__email">{{ userEmail() }}</p>
+                <app-badge variant="success">Auditor Certificado</app-badge>
+              </div>
+            </div>
+            <div class="ch-perfil-auditor__disponibilidad">
+              <app-checkbox
+                label="Disponible para auditorías"
+                [formField]="perfilForm.disponible"
+              />
+            </div>
+          </div>
+
+          <!-- Especialidades Card -->
+          <div class="ch-perfil-auditor__card">
+            <fieldset class="ch-perfil-auditor__fieldset">
+              <legend class="ch-perfil-auditor__card-title">Especialidades</legend>
+              <div class="ch-perfil-auditor__chip-grid">
+                @for (esp of especialidades(); track esp.valor) {
+                  <app-checkbox
+                    [label]="esp.etiqueta"
+                    [checked]="isEspecialidadSeleccionada(esp.valor)"
+                    (checkedChange)="toggleEspecialidad(esp.valor)"
+                  />
+                }
+              </div>
+              @if (errorEspecialidades()) {
+                <p class="ch-perfil-auditor__field-error" role="alert">
+                  {{ errorEspecialidades() }}
+                </p>
+              }
+            </fieldset>
+          </div>
+
+          <!-- Zonas de Cobertura Card -->
+          <div class="ch-perfil-auditor__card">
+            <fieldset class="ch-perfil-auditor__fieldset">
+              <legend class="ch-perfil-auditor__card-title">Zonas de cobertura</legend>
+              <div class="ch-perfil-auditor__chip-grid">
+                @for (zona of zonasCobertura(); track zona.valor) {
+                  <app-checkbox
+                    [label]="zona.etiqueta"
+                    [checked]="isZonaSeleccionada(zona.valor)"
+                    (checkedChange)="toggleZona(zona.valor)"
+                  />
+                }
+              </div>
+              @if (errorZonas()) {
+                <p class="ch-perfil-auditor__field-error" role="alert">{{ errorZonas() }}</p>
+              }
+            </fieldset>
+          </div>
+
+          <!-- Descripción Card -->
+          <div class="ch-perfil-auditor__card">
+            <app-heading level="h3" text="Descripción profesional" />
+            <app-textarea
+              placeholder="Describe tu experiencia y servicios profesionales..."
+              [rows]="4"
+              [formField]="perfilForm.descripcionProfesional"
+              [error]="errorDescripcion()"
+              [hint]="descripcionContador()"
+            />
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="ch-perfil-auditor__col-right">
+          <!-- Acciones Card -->
+          <div class="ch-perfil-auditor__card">
+            <app-heading level="h3" text="Acciones" />
+            <app-button
+              variant="primary"
+              size="lg"
+              type="submit"
+              [loading]="guardando()"
+              [disabled]="formularioInvalido() || guardando() || errorCarga()"
+            >
+              Guardar
+            </app-button>
+            @if (guardando()) {
+              <p class="ch-perfil-auditor__status">Guardando cambios...</p>
+            }
+          </div>
+        </div>
+      </form>
+    }
+  </div>
+</app-shell-layout>
