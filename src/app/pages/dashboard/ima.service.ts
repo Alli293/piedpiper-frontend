@@ -28,7 +28,6 @@ export interface ImaTendenciaResponse {
   sinDatosSectoriales: boolean;
 }
 
-
 export type PosicionBenchmark = 'POR_ENCIMA' | 'EN_LINEA' | 'POR_DEBAJO';
 
 export interface BenchmarkDimension {
@@ -74,6 +73,8 @@ export class ImaService {
   obtenerTendencia(mesesAtras: number): Observable<ImaTendenciaResponse> {
     const params = new HttpParams().set('mesesAtras', mesesAtras);
     return this.http.get<ImaTendenciaResponse>(`${this.baseUrl}/tendencia`, { params });
+  }
+
   obtenerBenchmark(anio: number, mes: number): Observable<BenchmarkSectorialResponse> {
     const params = new HttpParams().set('anio', anio).set('mes', mes);
     return this.http.get<BenchmarkSectorialResponse>(`${this.baseUrl}/benchmark`, { params });

@@ -127,6 +127,8 @@ describe('ImaService', () => {
     expect(result?.serie[0].imaEmpresa).toBeNull();
     expect(result?.serie[1].imaPromedioSector).toBe(63.5);
     expect(result?.serie[2].imaPromedioSector).toBeNull();
+  });
+
   it('consulta el benchmark sectorial con anio y mes como query params', () => {
     service.obtenerBenchmark(2026, 7).subscribe();
 
