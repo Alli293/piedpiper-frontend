@@ -1,7 +1,7 @@
 <app-shell-layout [headerConfig]="headerConfig()">
-  <section class="directorio" aria-label="Directorio de auditores">
-    <div class="directorio__toolbar">
-      <div class="directorio__buscador">
+  <section class="ch-directorio" aria-label="Directorio de auditores">
+    <div class="ch-directorio__toolbar">
+      <div class="ch-directorio__buscador">
         <app-text-input
           type="text"
           label="Buscar auditor"
@@ -13,7 +13,7 @@
         />
       </div>
       <app-select-input
-        class="directorio__orden"
+        class="ch-directorio__orden"
         label="Ordenar por"
         [options]="ordenOpciones"
         [value]="modelo().ordenamiento"
@@ -22,14 +22,14 @@
       />
     </div>
 
-    <div class="directorio__layout">
-      <aside class="directorio__filtros" aria-label="Filtros del directorio">
-        <fieldset class="filtro-grupo">
-          <legend class="filtro-grupo__titulo">Especialidad</legend>
+    <div class="ch-directorio__layout">
+      <aside class="ch-directorio__filtros" aria-label="Filtros del directorio">
+        <fieldset class="ch-filtro-grupo">
+          <legend class="ch-filtro-grupo__titulo">Especialidad</legend>
           @if (especialidadesCargando()) {
-            <p class="filtro-grupo__vacio" role="status">Cargando catálogo...</p>
+            <p class="ch-filtro-grupo__vacio" role="status">Cargando catálogo...</p>
           } @else if (especialidadesDeshabilitadas()) {
-            <p class="filtro-grupo__vacio">Catálogo no disponible.</p>
+            <p class="ch-filtro-grupo__vacio">Catálogo no disponible.</p>
           } @else {
             @for (item of especialidadesCatalogo(); track item.valor) {
               <app-checkbox
@@ -42,15 +42,15 @@
           }
         </fieldset>
 
-        <fieldset class="filtro-grupo">
-          <legend class="filtro-grupo__titulo">Provincia</legend>
+        <fieldset class="ch-filtro-grupo">
+          <legend class="ch-filtro-grupo__titulo">Provincia</legend>
           @if (zonasCargando()) {
-            <p class="filtro-grupo__vacio" role="status">Cargando catálogo...</p>
+            <p class="ch-filtro-grupo__vacio" role="status">Cargando catálogo...</p>
           } @else if (zonasDeshabilitadas()) {
-            <p class="filtro-grupo__vacio">Catálogo no disponible.</p>
+            <p class="ch-filtro-grupo__vacio">Catálogo no disponible.</p>
           } @else {
             <div
-              class="filtro-grupo__radios"
+              class="ch-filtro-grupo__radios"
               appRadioGroup
               [value]="modelo().zona ?? ''"
               (valueChange)="onZona($event)"
@@ -63,8 +63,8 @@
           }
         </fieldset>
 
-        <div class="filtro-grupo">
-          <span class="filtro-grupo__titulo">Calificación mínima</span>
+        <div class="ch-filtro-grupo">
+          <span class="ch-filtro-grupo__titulo">Calificación mínima</span>
           <app-select-input
             [options]="calificacionOpciones"
             [value]="calificacionValor()"
@@ -73,7 +73,7 @@
           />
         </div>
 
-        <div class="filtro-grupo">
+        <div class="ch-filtro-grupo">
           <app-checkbox
             label="Solo disponibles"
             [checked]="modelo().soloDisponibles"
@@ -89,15 +89,15 @@
         }
       </aside>
 
-      <div class="directorio__contenido">
+      <div class="ch-directorio__contenido">
         @if (hayFiltrosActivos()) {
-          <div class="directorio__chips" role="group" aria-label="Filtros activos">
+          <div class="ch-directorio__chips" role="group" aria-label="Filtros activos">
             @for (chip of chipsActivos(); track chip.tipo + ':' + chip.valor) {
-              <span class="directorio__chip">
+              <span class="ch-directorio__chip">
                 <app-badge variant="info">{{ chip.etiqueta }}</app-badge>
                 <button
                   type="button"
-                  class="directorio__chip-quitar"
+                  class="ch-directorio__chip-quitar"
                   [attr.aria-label]="'Quitar filtro ' + chip.etiqueta"
                   (click)="quitarFiltro(chip)"
                 >
@@ -109,14 +109,14 @@
         }
 
         @if (cargando()) {
-          <p class="directorio__estado" role="status">Cargando auditores...</p>
+          <p class="ch-directorio__estado" role="status">Cargando auditores...</p>
         } @else if (error()) {
-          <div class="directorio__estado directorio__estado--error" role="alert">
+          <div class="ch-directorio__estado ch-directorio__estado--error" role="alert">
             <p>{{ mensajeError() }}</p>
             <app-button variant="secondary" size="sm" (click)="reintentar()">Reintentar</app-button>
           </div>
         } @else if (sinResultados()) {
-          <p class="directorio__estado">
+          <p class="ch-directorio__estado">
             @if (hayFiltrosActivos()) {
               No hay auditores que cumplan con los filtros seleccionados. Intente ampliar los
               criterios.
@@ -125,71 +125,71 @@
             }
           </p>
         } @else if (resultado(); as paginaAuditores) {
-          <div class="directorio__grid">
+          <div class="ch-directorio__grid">
             @for (tarjeta of tarjetas(); track tarjeta.auditor.auditorId) {
               <a
-                class="auditor-card"
+                class="ch-auditor-card"
                 [routerLink]="['/auditores', tarjeta.auditor.auditorId]"
                 [attr.aria-label]="'Ver perfil de ' + tarjeta.auditor.nombre"
               >
-                <header class="auditor-card__header">
+                <header class="ch-auditor-card__header">
                   <app-avatar
                     size="md"
                     [initials]="tarjeta.iniciales"
                     [imageUrl]="tarjeta.auditor.fotoPerfil ?? ''"
                   />
-                  <div class="auditor-card__id">
-                    <span class="auditor-card__nombre">{{ tarjeta.auditor.nombre }}</span>
+                  <div class="ch-auditor-card__id">
+                    <span class="ch-auditor-card__nombre">{{ tarjeta.auditor.nombre }}</span>
                     @if (tarjeta.ubicacion) {
-                      <span class="auditor-card__ubicacion">{{ tarjeta.ubicacion }}</span>
+                      <span class="ch-auditor-card__ubicacion">{{ tarjeta.ubicacion }}</span>
                     }
                   </div>
                 </header>
 
-                <div class="auditor-card__rating">
-                  <span class="auditor-card__estrellas" aria-hidden="true">
+                <div class="ch-auditor-card__rating">
+                  <span class="ch-auditor-card__estrellas" aria-hidden="true">
                     @for (llena of tarjeta.estrellas; track $index) {
-                      <span [class.auditor-card__estrella--llena]="llena">★</span>
+                      <span [class.ch-auditor-card__estrella--llena]="llena">★</span>
                     }
                   </span>
                   @if (tarjeta.auditor.calificacionPromedio !== null) {
-                    <span class="auditor-card__nota">
+                    <span class="ch-auditor-card__nota">
                       {{ tarjeta.auditor.calificacionPromedio }} ·
                       {{ tarjeta.auditor.totalResenas }} reseñas
                     </span>
                   } @else {
-                    <span class="auditor-card__nota">Sin calificaciones aún</span>
+                    <span class="ch-auditor-card__nota">Sin calificaciones aún</span>
                   }
                 </div>
 
                 @if (tarjeta.etiquetas.length > 0) {
-                  <div class="auditor-card__especialidades">
+                  <div class="ch-auditor-card__especialidades">
                     @for (etiqueta of tarjeta.etiquetas; track etiqueta) {
                       <app-badge variant="neutral">{{ etiqueta }}</app-badge>
                     }
                   </div>
                 }
 
-                <footer class="auditor-card__footer">
-                  <span class="auditor-card__auditorias">
+                <footer class="ch-auditor-card__footer">
+                  <span class="ch-auditor-card__auditorias">
                     <strong>{{ tarjeta.auditor.auditoriasCompletadas }}</strong> auditorías
                     completadas
                   </span>
                   <span
-                    class="auditor-card__disponible"
-                    [class.auditor-card__disponible--activo]="tarjeta.auditor.disponible"
+                    class="ch-auditor-card__disponible"
+                    [class.ch-auditor-card__disponible--activo]="tarjeta.auditor.disponible"
                   >
                     {{ tarjeta.auditor.disponible ? 'Disponible' : 'No disponible' }}
                   </span>
                 </footer>
 
-                <span class="auditor-card__perfil">Ver perfil</span>
+                <span class="ch-auditor-card__perfil">Ver perfil</span>
               </a>
             }
           </div>
 
           @if (paginaAuditores.totalPaginas > 1) {
-            <nav class="directorio__paginacion" aria-label="Paginación del directorio">
+            <nav class="ch-directorio__paginacion" aria-label="Paginación del directorio">
               <app-button
                 variant="secondary"
                 size="sm"
@@ -220,7 +220,7 @@
           }
 
           @if (paginaAuditores.contenido.length > 0) {
-            <p class="directorio__conteo">
+            <p class="ch-directorio__conteo">
               {{ paginaAuditores.totalResultados }} auditores en el directorio
             </p>
           }

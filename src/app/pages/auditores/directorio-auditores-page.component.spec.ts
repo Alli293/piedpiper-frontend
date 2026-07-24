@@ -154,7 +154,7 @@ describe('DirectorioAuditoresPageComponent', () => {
     expect(comp().chipsActivos()).toHaveLength(2);
 
     const quitar = (fixture.nativeElement as HTMLElement).querySelector(
-      '.directorio__chip-quitar'
+      '.ch-directorio__chip-quitar'
     ) as HTMLButtonElement;
     quitar.click();
     fixture.detectChanges();
@@ -237,10 +237,10 @@ describe('DirectorioAuditoresPageComponent', () => {
     pintar();
     const html = fixture.nativeElement as HTMLElement;
 
-    expect(html.querySelectorAll('.auditor-card')).toHaveLength(1);
+    expect(html.querySelectorAll('.ch-auditor-card')).toHaveLength(1);
     expect(html.textContent).toContain('Ana Mora');
     expect(html.textContent).toContain('42');
-    expect(html.querySelector('.auditor-card')?.getAttribute('href')).toBe('/auditores/aud-1');
+    expect(html.querySelector('.ch-auditor-card')?.getAttribute('href')).toBe('/auditores/aud-1');
   });
 
   it('con lista vacia muestra el texto de sin resultados', async () => {
