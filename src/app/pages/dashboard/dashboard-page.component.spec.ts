@@ -415,13 +415,13 @@ describe('DashboardPageComponent', () => {
     expect(root.querySelectorAll('.annual-limit-panel__categories dd')).toHaveLength(4);
   });
 
-  it('calcula el ancho de las barras de categoria desde la huella emitida', async () => {
+  it('usa el porcentaje enviado por el backend para las barras de categoria', async () => {
     await createFixture();
     (component as any).comparacion.set({
       ...COMPARACION_BASE,
       categorias: [
-        { categoria: 'ELECTRICIDAD', huellaT: 30, porcentaje: 0 },
-        { categoria: 'FLOTA', huellaT: 10, porcentaje: 0 },
+        { categoria: 'ELECTRICIDAD', huellaT: 30, porcentaje: 60 },
+        { categoria: 'FLOTA', huellaT: 10, porcentaje: 40 },
         { categoria: 'VUELO', huellaT: 0, porcentaje: 0 },
         { categoria: 'ENVIO', huellaT: 0, porcentaje: 0 },
       ],
@@ -433,7 +433,7 @@ describe('DashboardPageComponent', () => {
         '.annual-limit-panel__category-track span'
       )
     );
-    expect(barras.map((barra) => barra.style.width)).toEqual(['75%', '25%', '0%', '0%']);
+    expect(barras.map((barra) => barra.style.width)).toEqual(['60%', '40%', '0%', '0%']);
   });
 
   it('renderiza el estado superado', async () => {

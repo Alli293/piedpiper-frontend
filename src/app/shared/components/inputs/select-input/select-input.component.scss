@@ -73,6 +73,7 @@
 }
 
 :host(.ch-select-input--compact) {
+  // Variante icon-only: el valor visible se oculta a propósito; el caller debe proveer aria-label.
   .ch-select-input__field {
     height: 56px;
     padding: 0;

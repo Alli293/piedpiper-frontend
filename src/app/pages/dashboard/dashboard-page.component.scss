@@ -253,6 +253,17 @@
   }
 }
 
+.dashboard-summary__variation--flat {
+  color: var(--ch-text-muted);
+
+  &::before {
+    width: 10px;
+    height: 2px;
+    border: 0;
+    background: currentColor;
+  }
+}
+
 /* --- Panel de límite anual (PP-40) --- */
 .annual-limit-panel {
   background: var(--ch-bg-white);

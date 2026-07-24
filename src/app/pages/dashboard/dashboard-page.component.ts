@@ -420,7 +420,6 @@ export class DashboardPageComponent {
     comparacion: ComparacionEmisionesResponse
   ): CategoriaComparacionVisual[] {
     const categorias = comparacion.categorias ?? [];
-    const totalCategorias = categorias.reduce((total, item) => total + item.huellaT, 0);
     return ORDEN_CATEGORIAS.map((categoria) => {
       const data = categorias.find((item) => item.categoria === categoria);
       const huellaT = data?.huellaT ?? 0;
@@ -428,7 +427,7 @@ export class DashboardPageComponent {
         categoria,
         label: ETIQUETAS_CATEGORIA[categoria],
         huellaT,
-        porcentaje: this.porcentajeCategoria(huellaT, totalCategorias),
+        porcentaje: data?.porcentaje ?? 0,
         color: COLORES_CATEGORIA[categoria],
       };
     });
@@ -437,11 +436,6 @@ export class DashboardPageComponent {
   private calcularPorcentaje(subtotalKg: number, totalKg: number): number {
     if (totalKg === 0) return 0;
     return Math.round((subtotalKg / totalKg) * 1000) / 10;
-  }
-
-  private porcentajeCategoria(huellaT: number, totalT: number): number {
-    if (totalT <= 0) return 0;
-    return Math.min(Math.max((huellaT / totalT) * 100, 0), 100);
   }
 
   private async cargarResumenHuella(periodo: PeriodoDashboard, anio: number): Promise<void> {
