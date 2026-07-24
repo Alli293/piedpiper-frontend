@@ -64,7 +64,7 @@ describe('BenchmarkPanelComponent', () => {
     const html = fixture.nativeElement as HTMLElement;
 
     expect(html.textContent).toContain(
-      'Tu sector aún no tiene suficientes empresas (mínimo 5) para mostrar el benchmark.'
+      'Tu sector tiene 4 de 5 empresas necesarias para mostrar el benchmark.'
     );
     expect(html.querySelectorAll('.benchmark-dim')).toHaveLength(0);
   });

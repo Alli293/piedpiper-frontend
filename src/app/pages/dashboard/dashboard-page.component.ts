@@ -404,11 +404,11 @@ export class DashboardPageComponent {
       this.benchmarkData.set(benchmark);
     } catch (err: unknown) {
       this.benchmarkError.set(true);
-      const mensaje =
-        err instanceof HttpErrorResponse
-          ? (err.error?.message ?? 'No se pudo cargar el benchmark sectorial. Intente nuevamente.')
-          : 'No se pudo cargar el benchmark sectorial. Intente nuevamente.';
-      this.toastService.error(mensaje, undefined, 5000);
+      this.toastService.error(
+        apiErrorMessage(err) ?? 'No se pudo cargar el benchmark sectorial. Intente nuevamente.',
+        undefined,
+        5000
+      );
     }
   }
 }

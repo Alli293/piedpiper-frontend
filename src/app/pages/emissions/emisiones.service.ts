@@ -54,11 +54,6 @@ export class EmisionesService {
     return this.http.get<EmisionResponse[]>(this.baseUrl, { params });
   }
 
-  obtenerComparacion(anio: number): Observable<ComparacionEmisionesResponse> {
-    const params = new HttpParams().set('anio', anio);
-    return this.http.get<ComparacionEmisionesResponse>(`${this.baseUrl}/comparacion`, { params });
-  }
-
   actualizarVuelo(id: string, payload: RegistrarVueloRequest): Observable<EmisionResponse> {
     return this.http.put<EmisionResponse>(`${this.baseUrl}/vuelo/${id}`, payload);
   }
@@ -73,6 +68,11 @@ export class EmisionesService {
 
   registrarFlota(payload: RegistrarFlotaRequest): Observable<EmisionFlotaResponse> {
     return this.http.post<EmisionFlotaResponse>(`${this.baseUrl}/flota`, payload);
+  }
+
+  obtenerComparacion(anio: number): Observable<ComparacionEmisionesResponse> {
+    const params = new HttpParams().set('anio', anio);
+    return this.http.get<ComparacionEmisionesResponse>(`${this.baseUrl}/comparacion`, { params });
   }
 
   obtenerResumen(anio: number, mes?: number): Observable<ResumenEmisionesResponse> {

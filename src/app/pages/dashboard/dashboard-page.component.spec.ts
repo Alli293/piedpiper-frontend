@@ -381,6 +381,19 @@ describe('DashboardPageComponent', () => {
     );
   });
 
+  it('si falla el benchmark con HttpErrorResponse muestra el mensaje del backend', async () => {
+    await createFixture();
+    imaService.obtenerBenchmark.mockReturnValueOnce(
+      throwError(
+        () => new HttpErrorResponse({ status: 500, error: { message: 'Sector no encontrado.' } })
+      )
+    );
+
+    await (component as any).cargarBenchmark(2026, 7);
+
+    expect(toastService.error).toHaveBeenCalledWith('Sector no encontrado.', undefined, 5000);
+  });
+
   // ---------------------------------------------------------------------------
   // Desglose por categoría (PP-39, dona)
   // ---------------------------------------------------------------------------

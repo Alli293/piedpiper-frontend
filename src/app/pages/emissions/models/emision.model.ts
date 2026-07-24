@@ -114,6 +114,12 @@ export interface EmisionFlotaResponse {
   readonly createdAt: string;
 }
 
+export interface ApiErrorResponse {
+  readonly status: number;
+  readonly message: string;
+  readonly timestamp: string;
+}
+
 export interface ComparacionEmisionesResponse {
   readonly anio: number;
   readonly huellaAcumuladaT: number;
@@ -121,12 +127,6 @@ export interface ComparacionEmisionesResponse {
   readonly porcentajeConsumido: number | null;
   readonly estado: EstadoComparacion;
   readonly mensaje: string | null;
-}
-
-export interface ApiErrorResponse {
-  readonly status: number;
-  readonly message: string;
-  readonly timestamp: string;
 }
 
 export type CategoriaResumen = 'ELECTRICIDAD' | 'FLOTA' | 'VUELO' | 'ENVIO';
