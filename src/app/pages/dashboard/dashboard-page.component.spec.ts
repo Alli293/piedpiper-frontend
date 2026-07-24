@@ -14,10 +14,7 @@ import { EmisionesService } from '../emissions/emisiones.service';
 import { DashboardPageComponent, SIN_EMISIONES_MENSAJE } from './dashboard-page.component';
 import { DashboardService } from './dashboard.service';
 import { EvolucionService } from './evolucion.service';
-import { ImaService } from './ima.service';
 import { EvolucionChartComponent } from './evolucion-chart.component';
-import { ImaPanelComponent } from './ima-panel.component';
-import { BenchmarkPanelComponent } from './benchmark-panel.component';
 import { Component, input } from '@angular/core';
 
 const ANIO_ACTUAL = new Date().getFullYear();
@@ -57,33 +54,10 @@ const RESUMEN_VACIO: ResumenEmisionesResponse = {
   ],
 };
 
-const BENCHMARK_BASE = {
-  benchmarkDisponible: false,
-  cantidadEmpresas: 4,
-  imaParcial: false,
-  ima: null,
-  cobertura: null,
-  puntajeIntensidadSectorial: null,
-  consistencia: null,
-};
-
 @Component({ selector: 'app-evolucion-chart', standalone: true, template: '' })
 class StubChartComponent {
   readonly serie = input([]);
   readonly anio = input(2026);
-}
-
-@Component({ selector: 'app-ima-panel', standalone: true, template: '' })
-class StubImaPanelComponent {
-  readonly ima = input(null);
-  readonly anio = input(2026);
-  readonly mes = input(7);
-}
-
-@Component({ selector: 'app-benchmark-panel', standalone: true, template: '' })
-class StubBenchmarkPanelComponent {
-  readonly benchmark = input(null);
-  readonly error = input(false);
 }
 
 describe('DashboardPageComponent', () => {
@@ -94,12 +68,11 @@ describe('DashboardPageComponent', () => {
     obtenerResumen: ReturnType<typeof vi.fn>;
   };
   let dashboardService: { exportarReportePdf: ReturnType<typeof vi.fn> };
-  let imaService: {
-    obtenerIma: ReturnType<typeof vi.fn>;
-    obtenerBenchmark: ReturnType<typeof vi.fn>;
-  };
   let authSession: { getUserInitials: ReturnType<typeof vi.fn> };
-  let authService: { cerrarSesion: ReturnType<typeof vi.fn> };
+  let authService: {
+    cerrarSesion: ReturnType<typeof vi.fn>;
+    token: ReturnType<typeof signal<string | null>>;
+  };
   let toastService: { error: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
@@ -112,27 +85,12 @@ describe('DashboardPageComponent', () => {
         .fn()
         .mockReturnValue(of(new Blob(['pdf'], { type: 'application/pdf' }))),
     };
-    imaService = {
-      obtenerIma: vi.fn().mockReturnValue(
-        of({
-          cobertura: 0,
-          consistencia: 0,
-          ima: 0,
-          parcial: true,
-          motivoParcial: null,
-          puntajeIntensidadSectorial: null,
-          intensidad: null,
-          calculatedAt: '',
-          interpretacionIa: null,
-        })
-      ),
-      obtenerBenchmark: vi.fn().mockReturnValue(of(BENCHMARK_BASE)),
-    };
     authSession = {
       getUserInitials: vi.fn().mockReturnValue('AJ'),
     };
     authService = {
       cerrarSesion: vi.fn(),
+      token: signal<string | null>(null),
     };
     toastService = {
       toasts: signal([]),
@@ -149,16 +107,15 @@ describe('DashboardPageComponent', () => {
           provide: EvolucionService,
           useValue: { obtenerEvolucion: () => of({ anio: 2026, serie: [] }) },
         },
-        { provide: ImaService, useValue: imaService },
         { provide: AuthService, useValue: authService },
         { provide: AuthSessionService, useValue: authSession },
         { provide: ToastService, useValue: toastService },
       ],
     })
       .overrideComponent(DashboardPageComponent, {
-        remove: { imports: [EvolucionChartComponent, ImaPanelComponent, BenchmarkPanelComponent] },
+        remove: { imports: [EvolucionChartComponent] },
         add: {
-          imports: [StubChartComponent, StubImaPanelComponent, StubBenchmarkPanelComponent],
+          imports: [StubChartComponent],
           schemas: [CUSTOM_ELEMENTS_SCHEMA],
         },
       })
@@ -323,75 +280,6 @@ describe('DashboardPageComponent', () => {
     expect(texto).not.toContain('5.236');
     expect(texto).not.toContain('12.47');
     expect(texto).not.toContain('42');
-  });
-
-  // ---------------------------------------------------------------------------
-  // PP-41: IMA panel
-  // ---------------------------------------------------------------------------
-
-  it('persiste el mes seleccionado cuando el usuario cambia mes en IMA', async () => {
-    await createFixture();
-    const obtenerImaSpy = imaService.obtenerIma.mockReturnValue(
-      of({
-        cobertura: 75,
-        puntajeIntensidadSectorial: 58,
-        consistencia: 80,
-        ima: 71,
-        parcial: false,
-        motivoParcial: null,
-        intensidad: 1.5,
-        calculatedAt: '2026-03-18T00:00:00Z',
-        interpretacionIa: null,
-      })
-    );
-
-    (component as any).onImaPeriodoChange({ anio: 2026, mes: 3 });
-    await fixture.whenStable();
-
-    expect((component as any).mesSeleccionado()).toBe(3);
-    expect(obtenerImaSpy).toHaveBeenCalledWith(2026, 3);
-  });
-
-  // ---------------------------------------------------------------------------
-  // PP-80: Benchmark sectorial
-  // ---------------------------------------------------------------------------
-
-  it('carga el benchmark sectorial con el periodo actual por defecto', async () => {
-    await createFixture();
-
-    expect(imaService.obtenerBenchmark).toHaveBeenCalledWith(
-      ANIO_ACTUAL,
-      new Date().getMonth() + 1
-    );
-    expect((component as any).benchmarkData()).toEqual(BENCHMARK_BASE);
-    expect((component as any).benchmarkError()).toBe(false);
-  });
-
-  it('si falla el benchmark marca el error y muestra el toast', async () => {
-    await createFixture();
-    imaService.obtenerBenchmark.mockReturnValueOnce(throwError(() => new Error('network')));
-
-    await (component as any).cargarBenchmark(2026, 7);
-
-    expect((component as any).benchmarkError()).toBe(true);
-    expect(toastService.error).toHaveBeenCalledWith(
-      'No se pudo cargar el benchmark sectorial. Intente nuevamente.',
-      undefined,
-      5000
-    );
-  });
-
-  it('si falla el benchmark con HttpErrorResponse muestra el mensaje del backend', async () => {
-    await createFixture();
-    imaService.obtenerBenchmark.mockReturnValueOnce(
-      throwError(
-        () => new HttpErrorResponse({ status: 500, error: { message: 'Sector no encontrado.' } })
-      )
-    );
-
-    await (component as any).cargarBenchmark(2026, 7);
-
-    expect(toastService.error).toHaveBeenCalledWith('Sector no encontrado.', undefined, 5000);
   });
 
   // ---------------------------------------------------------------------------

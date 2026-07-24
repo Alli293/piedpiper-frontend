@@ -12,7 +12,8 @@ export interface ImaResponse {
   motivoParcial: string | null;
   intensidad: number | null;
   calculatedAt: string;
-  interpretacionIa: string | null;
+  interpretacion: string | null;
+  siguientePaso: string | null;
 }
 
 export type PosicionBenchmark = 'POR_ENCIMA' | 'EN_LINEA' | 'POR_DEBAJO';
