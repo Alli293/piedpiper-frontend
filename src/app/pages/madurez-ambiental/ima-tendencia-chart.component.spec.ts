@@ -19,7 +19,7 @@ describe('ImaTendenciaChartComponent', () => {
   ];
 
   const chartData = (): ChartDataAccesible =>
-    (fixture.componentInstance as unknown as { chartData: () => ChartDataAccesible }).chartData();
+    fixture.componentInstance.chartData() as ChartDataAccesible;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

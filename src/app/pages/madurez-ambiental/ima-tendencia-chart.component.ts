@@ -61,7 +61,7 @@ export class ImaTendenciaChartComponent {
   private readonly colorSector =
     this.estilos.getPropertyValue('--ch-text-secondary').trim() || '#64748b';
 
-  protected readonly chartData = computed<ChartConfiguration<'line'>['data']>(() => {
+  readonly chartData = computed<ChartConfiguration<'line'>['data']>(() => {
     const puntos = this.serie();
     return {
       labels: puntos.map((punto) => etiquetaMes(punto.mes)),
