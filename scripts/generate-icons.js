@@ -24,12 +24,18 @@ function toIconName(fileName) {
 }
 
 function cleanSvg(raw) {
-  return raw
-    .trim()
+  const trimmed = raw.trim();
+  const svgEnd = trimmed.indexOf('>');
+  if (svgEnd === -1) {
+    return trimmed.replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
+  }
+
+  const openingSvg = trimmed
+    .slice(0, svgEnd)
     .replace(/\s+width="[^"]*"/, '')
-    .replace(/\s+height="[^"]*"/, '')
-    .replace(/`/g, '\\`')
-    .replace(/\$\{/g, '\\${');
+    .replace(/\s+height="[^"]*"/, '');
+
+  return `${openingSvg}${trimmed.slice(svgEnd)}`.replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
 }
 
 function formatObjectKey(key) {
