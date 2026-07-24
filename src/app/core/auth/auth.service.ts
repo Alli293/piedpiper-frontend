@@ -1,13 +1,15 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AuthResponse,
   LoginRequest,
+  MensajeResponse,
   RegistroEmpresaCorreoRequest,
   RegistroPendienteResponse,
   RegistroUsuarioCorreoRequest,
+  ValidarTokenResetResponse,
 } from './auth.models';
 
 const TOKEN_KEY = 'carbonhub.token';
@@ -18,6 +20,8 @@ export class AuthService {
   private readonly baseUrl = `${environment.apiBaseUrl}/auth`;
 
   readonly token = signal<string | null>(localStorage.getItem(TOKEN_KEY));
+
+  readonly rol = computed(() => this.leerRolDeToken(this.token()));
 
   loginConCorreo(email: string, contrasena: string): Observable<AuthResponse> {
     return this.login({ metodo: 'CORREO', email, contrasena });
@@ -33,6 +37,20 @@ export class AuthService {
   ): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.baseUrl}/registro/${tipo}`, { idToken, aceptaTerminos: true })
+      .pipe(tap((response) => this.guardarSesion(response)));
+  }
+
+  registrarConInvitacion(
+    tokenInvitacion: string,
+    idToken: string,
+    aceptaTerminos: boolean
+  ): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.baseUrl}/registro/invitacion`, {
+        tokenInvitacion,
+        idToken,
+        aceptaTerminos,
+      })
       .pipe(tap((response) => this.guardarSesion(response)));
   }
 
@@ -67,6 +85,40 @@ export class AuthService {
     );
   }
 
+  solicitarResetContrasena(email: string): Observable<MensajeResponse> {
+    return this.http.post<MensajeResponse>(`${this.baseUrl}/solicitar-reset-contrasena`, {
+      email,
+    });
+  }
+
+  validarTokenReset(token: string): Observable<ValidarTokenResetResponse> {
+    return this.http.get<ValidarTokenResetResponse>(`${this.baseUrl}/reset-contrasena`, {
+      params: { token },
+    });
+  }
+
+  restablecerContrasena(
+    token: string,
+    nuevaContrasena: string,
+    confirmarContrasena: string
+  ): Observable<MensajeResponse> {
+    return this.http.post<MensajeResponse>(`${this.baseUrl}/restablecer-contrasena`, {
+      token,
+      nuevaContrasena,
+      confirmarContrasena,
+    });
+  }
+
+  verificarCorreo(token: string): Observable<MensajeResponse> {
+    return this.http.get<MensajeResponse>(`${this.baseUrl}/verificar-correo`, {
+      params: { token },
+    });
+  }
+
+  reenviarVerificacion(email: string): Observable<MensajeResponse> {
+    return this.http.post<MensajeResponse>(`${this.baseUrl}/reenviar-verificacion`, { email });
+  }
+
   private login(request: LoginRequest): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.baseUrl}/login`, request)
@@ -81,5 +133,25 @@ export class AuthService {
   cerrarSesion(): void {
     localStorage.removeItem(TOKEN_KEY);
     this.token.set(null);
+  }
+
+  private leerRolDeToken(token: string | null): string | null {
+    if (!token) {
+      return null;
+    }
+
+    const payload = token.split('.')[1];
+    if (!payload) {
+      return null;
+    }
+
+    try {
+      const normalizado = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const relleno = normalizado.padEnd(Math.ceil(normalizado.length / 4) * 4, '=');
+      const datos = JSON.parse(atob(relleno)) as { rol?: string };
+      return datos.rol ?? null;
+    } catch {
+      return null;
+    }
   }
 }

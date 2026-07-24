@@ -176,9 +176,19 @@
         <div class="register-emission-page__legs">
           <div class="register-emission-page__legs-header">
             <span class="register-emission-page__field-label">Trayectos</span>
-            <button class="register-emission-page__link-button" type="button" (click)="addLeg()">
-              + Agregar trayecto
-            </button>
+            <div class="register-emission-page__legs-actions">
+              <button class="register-emission-page__link-button" type="button" (click)="addLeg()">
+                + Agregar trayecto
+              </button>
+              <button
+                class="register-emission-page__link-button"
+                type="button"
+                [disabled]="!canAddReturnLeg()"
+                (click)="addReturnLeg()"
+              >
+                + Agregar vuelta
+              </button>
+            </div>
           </div>
           @if (flightLegsError()) {
             <p class="register-emission-page__field-error" role="alert">{{ flightLegsError() }}</p>

@@ -394,6 +394,14 @@ export class RegisterEmissionPageComponent {
     fieldError(this.flightForm.fechaActividad())
   );
   protected readonly flightLegsError = computed(() => fieldError(this.flightForm.legs()));
+  protected readonly canAddReturnLeg = computed(() => {
+    const legs = this.flightModel().legs;
+    const leg = legs.at(-1);
+    if (!leg || !isCompleteFlightLeg(leg)) return false;
+
+    const previousLeg = legs.at(-2);
+    return !previousLeg || !areReverseFlightLegs(previousLeg, leg);
+  });
 
   protected readonly flotaTituloError = computed(() => fieldError(this.flotaForm.titulo()));
   protected readonly tipoVehiculoError = computed(() => fieldError(this.flotaForm.tipoVehiculo()));
@@ -521,6 +529,23 @@ export class RegisterEmissionPageComponent {
       legs: [
         ...model.legs,
         { departureAirport: '', destinationAirport: '', cabinClass: 'economy' },
+      ],
+    }));
+  }
+
+  protected addReturnLeg(): void {
+    const leg = this.flightModel().legs.at(-1);
+    if (!leg || !this.canAddReturnLeg()) return;
+
+    this.flightModel.update((model) => ({
+      ...model,
+      legs: [
+        ...model.legs,
+        {
+          departureAirport: leg.destinationAirport.toUpperCase(),
+          destinationAirport: leg.departureAirport.toUpperCase(),
+          cabinClass: leg.cabinClass,
+        },
       ],
     }));
   }
@@ -688,6 +713,24 @@ function cloneFlightModel(model: RegistrarVueloFormModel): RegistrarVueloFormMod
     ...model,
     legs: model.legs.map((leg) => ({ ...leg })),
   };
+}
+
+function isCompleteFlightLeg(leg: RegistrarVueloLegFormModel): boolean {
+  return (
+    /^[A-Za-z]{3}$/.test(leg.departureAirport) &&
+    /^[A-Za-z]{3}$/.test(leg.destinationAirport) &&
+    leg.departureAirport.toUpperCase() !== leg.destinationAirport.toUpperCase()
+  );
+}
+
+function areReverseFlightLegs(
+  first: RegistrarVueloLegFormModel,
+  second: RegistrarVueloLegFormModel
+): boolean {
+  return (
+    first.departureAirport.toUpperCase() === second.destinationAirport.toUpperCase() &&
+    first.destinationAirport.toUpperCase() === second.departureAirport.toUpperCase()
+  );
 }
 
 function buildFlightPayload(model: RegistrarVueloFormModel): RegistrarVueloRequest {

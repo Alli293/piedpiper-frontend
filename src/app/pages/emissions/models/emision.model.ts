@@ -1,11 +1,12 @@
 export type UnidadElectricidad = 'kwh' | 'mwh';
 export type CabinClass = 'economy' | 'premium';
+export type CategoriaFiltroEmision = 'TODAS' | 'ELECTRICIDAD' | 'FLOTA' | 'VUELO' | 'ENVIO';
+export type EstadoComparacion = 'dentro' | 'cerca' | 'alcanzado' | 'superado' | 'sin_limite';
 
 export type UnidadPeso = 'G' | 'LB' | 'KG' | 'MT';
 // El backend serializa UnidadDistancia en minúscula (@JsonValue) para vuelo, envío y flota.
 export type UnidadDistancia = 'km' | 'mi';
 export type MetodoTransporte = 'SHIP' | 'TRAIN' | 'TRUCK' | 'PLANE';
-export type EstadoComparacion = 'dentro' | 'cerca' | 'superado' | 'sin_limite';
 
 export interface RegistrarElectricidadRequest {
   readonly titulo: string;
@@ -36,6 +37,11 @@ export interface EmisionResponse {
   readonly electricityUnit?: UnidadElectricidad;
   readonly passengers?: number;
   readonly legs?: RegistrarVueloLegRequest[];
+  readonly tipoVehiculo?: string;
+  readonly combustible?: string;
+  readonly weightValue?: number;
+  readonly weightUnit?: UnidadPeso;
+  readonly transportMethod?: MetodoTransporte;
   readonly distanceUnit?: UnidadDistancia;
   readonly distanceValue?: number;
   readonly carbonKg: number;
@@ -121,4 +127,20 @@ export interface ApiErrorResponse {
   readonly status: number;
   readonly message: string;
   readonly timestamp: string;
+}
+
+export type CategoriaResumen = 'ELECTRICIDAD' | 'FLOTA' | 'VUELO' | 'ENVIO';
+
+export interface ResumenCategoriaResponse {
+  readonly categoria: CategoriaResumen;
+  readonly totalKg: number;
+  readonly porcentaje: number;
+}
+
+export interface ResumenEmisionesResponse {
+  readonly anio: number;
+  readonly mes: number | null;
+  readonly totalKg: number;
+  readonly totalT: number;
+  readonly categorias: ResumenCategoriaResponse[];
 }

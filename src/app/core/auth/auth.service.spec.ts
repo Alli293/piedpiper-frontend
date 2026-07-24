@@ -69,6 +69,86 @@ describe('AuthService', () => {
     expect(localStorage.getItem('carbonhub.token')).toBe('jwt-app');
   });
 
+  it('solicitarResetContrasena hace POST a /auth/solicitar-reset-contrasena y no guarda token', () => {
+    let recibida: { mensaje: string } | undefined;
+    service.solicitarResetContrasena('ana.perez@example.com').subscribe((r) => (recibida = r));
+
+    const req = httpMock.expectOne(`${base}/solicitar-reset-contrasena`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ email: 'ana.perez@example.com' });
+    req.flush({
+      mensaje:
+        'Si existe una cuenta con ese correo, te enviamos un enlace para restablecer tu contraseña.',
+    });
+
+    expect(recibida!.mensaje).toContain('Si existe una cuenta');
+    expect(localStorage.getItem('carbonhub.token')).toBeNull();
+  });
+
+  it('validarTokenReset hace GET a /auth/reset-contrasena con el token como query param', () => {
+    let recibida: { email: string } | undefined;
+    service.validarTokenReset('tok-123').subscribe((r) => (recibida = r));
+
+    const req = httpMock.expectOne(`${base}/reset-contrasena?token=tok-123`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ email: 'ana.perez@example.com' });
+
+    expect(recibida!.email).toBe('ana.perez@example.com');
+  });
+
+  it('restablecerContrasena hace POST a /auth/restablecer-contrasena con token y contrasenas, sin guardar token', () => {
+    let recibida: { mensaje: string } | undefined;
+    service
+      .restablecerContrasena('tok-123', 'Clave1234!', 'Clave1234!')
+      .subscribe((r) => (recibida = r));
+
+    const req = httpMock.expectOne(`${base}/restablecer-contrasena`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      token: 'tok-123',
+      nuevaContrasena: 'Clave1234!',
+      confirmarContrasena: 'Clave1234!',
+    });
+    req.flush({ mensaje: 'Tu contraseña fue actualizada. Ya puedes iniciar sesión.' });
+
+    expect(recibida!.mensaje).toContain('actualizada');
+    expect(localStorage.getItem('carbonhub.token')).toBeNull();
+  });
+
+  it('verificarCorreo hace GET a /auth/verificar-correo con el token como query param', () => {
+    let recibida: { mensaje: string } | undefined;
+    service.verificarCorreo('tok-123').subscribe((r) => (recibida = r));
+
+    const req = httpMock.expectOne(`${base}/verificar-correo?token=tok-123`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ mensaje: 'Tu correo fue verificado. Ya puedes iniciar sesión.' });
+
+    expect(recibida!.mensaje).toBe('Tu correo fue verificado. Ya puedes iniciar sesión.');
+  });
+
+  it('verificarCorreo no guarda ningun token en localStorage', () => {
+    service.verificarCorreo('tok-123').subscribe();
+
+    const req = httpMock.expectOne(`${base}/verificar-correo?token=tok-123`);
+    req.flush({ mensaje: 'OK' });
+
+    expect(localStorage.getItem('carbonhub.token')).toBeNull();
+  });
+
+  it('reenviarVerificacion hace POST a /auth/reenviar-verificacion con el email', () => {
+    let recibida: { mensaje: string } | undefined;
+    service.reenviarVerificacion('ana@correo.com').subscribe((r) => (recibida = r));
+
+    const req = httpMock.expectOne(`${base}/reenviar-verificacion`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ email: 'ana@correo.com' });
+    req.flush({ mensaje: 'Si tu cuenta requiere verificación, te enviamos un nuevo enlace.' });
+
+    expect(recibida!.mensaje).toBe(
+      'Si tu cuenta requiere verificación, te enviamos un nuevo enlace.'
+    );
+  });
+
   it('cerrarSesion limpia el token', () => {
     localStorage.setItem('carbonhub.token', 'x');
     service.cerrarSesion();
@@ -112,7 +192,33 @@ describe('AuthService', () => {
 
     expect(localStorage.getItem('carbonhub.token')).toBeNull();
   });
+
+  it('rol deriva el claim rol del token JWT', () => {
+    service.loginConCorreo('admin@carbonhub.cr', 'secreta').subscribe();
+
+    const req = httpMock.expectOne(`${base}/login`);
+    req.flush({ ...respuesta, token: jwtConRol('ADMINISTRADOR_PLATAFORMA') });
+
+    expect(service.rol()).toBe('ADMINISTRADOR_PLATAFORMA');
+  });
+
+  it('rol es null cuando no hay token o el token es invalido', () => {
+    expect(service.rol()).toBeNull();
+
+    service.loginConCorreo('a@b.com', 'secreta').subscribe();
+    httpMock.expectOne(`${base}/login`).flush({ ...respuesta, token: 'no-es-un-jwt' });
+
+    expect(service.rol()).toBeNull();
+  });
 });
+
+function jwtConRol(rol: string): string {
+  const payload = btoa(JSON.stringify({ rol }))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+  return `encabezado.${payload}.firma`;
+}
 
 function createStorageMock(): Storage {
   const values = new Map<string, string>();

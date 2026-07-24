@@ -1,11 +1,16 @@
 import { Component, computed, input, output } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import {
+  SelectInputComponent,
+  SelectOption,
+} from '../../shared/components/inputs/select-input/select-input.component';
+import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { ImaResponse } from './ima.service';
 
 @Component({
   selector: 'app-ima-panel',
   standalone: true,
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, SelectInputComponent, HeadingComponent],
   templateUrl: './ima-panel.component.html',
   styleUrl: './ima-panel.component.scss',
 })
@@ -16,12 +21,22 @@ export class ImaPanelComponent {
 
   readonly periodoChange = output<{ anio: number; mes: number }>();
 
-  protected readonly meses = [
-    { value: 1, label: 'Enero' }, { value: 2, label: 'Febrero' }, { value: 3, label: 'Marzo' },
-    { value: 4, label: 'Abril' }, { value: 5, label: 'Mayo' }, { value: 6, label: 'Junio' },
-    { value: 7, label: 'Julio' }, { value: 8, label: 'Agosto' }, { value: 9, label: 'Septiembre' },
-    { value: 10, label: 'Octubre' }, { value: 11, label: 'Noviembre' }, { value: 12, label: 'Diciembre' },
-  ];
+  protected readonly String = String;
+
+  protected readonly mesesOptions = computed<SelectOption[]>(() => [
+    { value: '1', label: 'Enero' },
+    { value: '2', label: 'Febrero' },
+    { value: '3', label: 'Marzo' },
+    { value: '4', label: 'Abril' },
+    { value: '5', label: 'Mayo' },
+    { value: '6', label: 'Junio' },
+    { value: '7', label: 'Julio' },
+    { value: '8', label: 'Agosto' },
+    { value: '9', label: 'Septiembre' },
+    { value: '10', label: 'Octubre' },
+    { value: '11', label: 'Noviembre' },
+    { value: '12', label: 'Diciembre' },
+  ]);
 
   protected readonly donutDasharray = computed(() => {
     const data = this.ima();
@@ -39,8 +54,8 @@ export class ImaPanelComponent {
     return `(${Math.round(data.cobertura)} + ${Math.round(data.consistencia)}) ÷ 2`;
   });
 
-  protected onMesChange(event: Event): void {
-    const mesNuevo = Number((event.target as HTMLSelectElement).value);
+  protected onMesChange(valor: string): void {
+    const mesNuevo = Number(valor);
     this.periodoChange.emit({ anio: this.anio(), mes: mesNuevo });
   }
 }

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/auth/auth.guard';
+import { authGuard, rolGuard } from './core/auth/auth.guard';
 
 const cargarPlaceholder = () =>
   import('./pages/placeholder/placeholder-page.component').then((m) => m.PlaceholderPageComponent);
@@ -10,6 +10,10 @@ export const rutasPostAutenticacion = [
   'auditor/validacion-pendiente',
   'admin/panel',
 ];
+
+const rutasPlaceholder = rutasPostAutenticacion.filter(
+  (path) => path !== 'emisiones' && path !== 'emisiones/registrar'
+);
 
 export const routes: Routes = [
   {
@@ -25,10 +29,38 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'registro/invitacion',
+    loadComponent: () =>
+      import('./pages/auth/registro-invitacion/registro-invitacion-page.component').then(
+        (m) => m.RegistroInvitacionPageComponent
+      ),
+  },
+  {
     path: 'registro/:rol',
     loadComponent: () =>
       import('./pages/auth/registro/registro-rol-page.component').then(
         (m) => m.RegistroRolPageComponent
+      ),
+  },
+  {
+    path: 'recuperar-contrasena',
+    loadComponent: () =>
+      import('./pages/auth/recuperar-contrasena/recuperar-contrasena-page.component').then(
+        (m) => m.RecuperarContrasenaPageComponent
+      ),
+  },
+  {
+    path: 'reset-contrasena',
+    loadComponent: () =>
+      import('./pages/auth/reset-contrasena/reset-contrasena-page.component').then(
+        (m) => m.ResetContrasenaPageComponent
+      ),
+  },
+  {
+    path: 'verificar-correo',
+    loadComponent: () =>
+      import('./pages/auth/verificar-correo/verificar-correo-page.component').then(
+        (m) => m.VerificarCorreoPageComponent
       ),
   },
   {
@@ -45,11 +77,27 @@ export const routes: Routes = [
       import('./pages/limites/limites-page.component').then((m) => m.LimitesPageComponent),
   },
   {
+    path: 'admin/solicitudes-auditor',
+    canActivate: [rolGuard('ADMINISTRADOR_PLATAFORMA')],
+    loadComponent: () =>
+      import('./pages/admin/solicitudes-auditor/solicitudes-auditor-page.component').then(
+        (m) => m.SolicitudesAuditorPageComponent
+      ),
+  },
+  {
     path: 'empresa/configuracion-inicial',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/empresa/configuracion-inicial-page.component').then(
         (m) => m.ConfiguracionInicialPageComponent
+      ),
+  },
+  {
+    path: 'empresa/invitaciones',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/empresa/invitaciones/invitaciones-page.component').then(
+        (m) => m.InvitacionesPageComponent
       ),
   },
   {
@@ -77,7 +125,25 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent),
   },
-  ...rutasPostAutenticacion.map((path) => ({ path, loadComponent: cargarPlaceholder })),
+  {
+    path: 'benchmark',
+    canActivate: [authGuard],
+    loadComponent: cargarPlaceholder,
+  },
+  {
+    path: 'ecoruta',
+    canActivate: [authGuard],
+    loadComponent: cargarPlaceholder,
+  },
+  ...rutasPlaceholder.map((path) => ({ path, loadComponent: cargarPlaceholder })),
+  {
+    path: 'emisiones',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/emissions/emissions-list/emissions-list-page.component').then(
+        (m) => m.EmissionsListPageComponent
+      ),
+  },
   {
     path: 'emisiones/registrar',
     canActivate: [authGuard],
