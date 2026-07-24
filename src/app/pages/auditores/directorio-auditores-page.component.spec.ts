@@ -64,7 +64,10 @@ describe('DirectorioAuditoresPageComponent', () => {
           provide: AuthSessionService,
           useValue: { getUserInitials: vi.fn().mockReturnValue('MR') },
         },
-        { provide: AuthService, useValue: { cerrarSesion: vi.fn() } },
+        {
+          provide: AuthService,
+          useValue: { cerrarSesion: vi.fn(), token: signal<string | null>(null) },
+        },
         { provide: ToastService, useValue: toastService },
       ],
     }).compileComponents();
