@@ -51,16 +51,6 @@
       }
     </section>
 
-    <!-- PP-79: IMA -->
-    <app-ima-panel
-      [ima]="imaData()"
-      [anio]="anioSeleccionado()"
-      [mes]="mesSeleccionado()"
-      (periodoChange)="onImaPeriodoChange($event)"
-    />
-
-
-
     <!-- PP-41: Evolución histórica -->
     <article class="annual-limit-panel evolucion-panel">
       <app-heading level="h2" text="Evolución histórica de la huella" />
