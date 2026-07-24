@@ -35,7 +35,7 @@ describe('EvolucionChartComponent', () => {
     componentRef.setInput('serie', serie);
     componentRef.setInput('anio', 2026);
     fixture.detectChanges();
-    expect(component.chartData().datasets[0].data[0]).toBe(500);
+    expect(component.chartData().datasets[0].data[0]).toBe(0.5);
     expect(component.chartData().datasets[0].data[3]).toBe(0);
   });
 
@@ -62,6 +62,6 @@ describe('EvolucionChartComponent', () => {
       Array.from({ length: 12 }, (_, i) => ({ mes: i + 1, totalCarbonKg: 100 }))
     );
     // No second detectChanges() needed — chartData is a computed signal
-    expect(component.chartData().datasets[0].data[0]).toBe(100);
+    expect(component.chartData().datasets[0].data[0]).toBe(0.1);
   });
 });
