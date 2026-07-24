@@ -1,0 +1,362 @@
+.ch-ecoruta-insignias {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-5);
+  min-height: 100%;
+}
+
+.ch-ecoruta-insignias__estado,
+.ch-ecoruta-insignias__vacio {
+  min-height: min(560px, calc(100vh - 180px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-8);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-white);
+  text-align: center;
+  color: var(--ch-text-secondary);
+}
+
+.ch-ecoruta-insignias__vacio p {
+  max-width: 520px;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.ch-ecoruta-insignias__vacio-icono,
+.ch-ecoruta-insignias__resumen-icono,
+.ch-ecoruta-insignias__card-icono,
+.ch-ecoruta-insignias__detalle-icono,
+.ch-ecoruta-insignias__proxima-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.ch-ecoruta-insignias__vacio-icono {
+  width: 96px;
+  height: 96px;
+  border-radius: var(--ch-radius-full);
+  border: 2px solid #d8e1e8;
+  color: var(--ch-text-muted);
+  background: #f6f9fb;
+}
+
+.ch-ecoruta-insignias__loader {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--ch-radius-full);
+  border: 3px solid var(--ch-border);
+  border-top-color: var(--ch-green);
+  animation: ch-ecoruta-spin 900ms linear infinite;
+}
+
+.ch-ecoruta-insignias__resumen {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-5);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-white);
+  box-shadow: var(--ch-shadow-sm);
+}
+
+.ch-ecoruta-insignias__resumen p {
+  margin: var(--ch-space-1) 0 0;
+  color: var(--ch-text-secondary);
+}
+
+.ch-ecoruta-insignias__resumen-icono {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--ch-radius-md);
+  color: var(--ch-green);
+  background: var(--ch-green-soft);
+}
+
+.ch-ecoruta-insignias__metricas {
+  display: flex;
+  gap: var(--ch-space-6);
+  margin: 0;
+}
+
+.ch-ecoruta-insignias__metricas div {
+  display: grid;
+  gap: var(--ch-space-1);
+  text-align: center;
+}
+
+.ch-ecoruta-insignias__metricas dt {
+  order: 2;
+  color: var(--ch-text-secondary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.ch-ecoruta-insignias__metricas dd {
+  margin: 0;
+  color: var(--ch-green);
+  font-family: var(--ch-font-heading);
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.ch-ecoruta-insignias__contenido {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--ch-space-5);
+  align-items: start;
+}
+
+.ch-ecoruta-insignias__principal {
+  min-width: 0;
+}
+
+.ch-ecoruta-insignias__seccion-titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+  margin: var(--ch-space-2) 0 var(--ch-space-4);
+  color: var(--ch-text-secondary);
+  font-family: var(--ch-font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.ch-ecoruta-insignias__seccion-titulo::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: var(--ch-border);
+}
+
+.ch-ecoruta-insignias__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ch-space-4);
+  margin-bottom: var(--ch-space-5);
+}
+
+.ch-ecoruta-insignias__card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--ch-space-4);
+  width: 100%;
+  min-height: 112px;
+  padding: var(--ch-space-4);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-white);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--ch-transition),
+    box-shadow var(--ch-transition),
+    transform var(--ch-transition);
+}
+
+.ch-ecoruta-insignias__card:hover,
+.ch-ecoruta-insignias__card:focus-visible,
+.ch-ecoruta-insignias__card--activa {
+  border-color: var(--ch-green);
+  box-shadow: var(--ch-shadow-sm);
+}
+
+.ch-ecoruta-insignias__card:focus-visible {
+  outline: 3px solid rgba(31, 138, 91, 0.2);
+  outline-offset: 2px;
+}
+
+.ch-ecoruta-insignias__card-icono {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--ch-radius-full);
+  color: var(--ch-green);
+  border: 2px solid var(--ch-green);
+  background: var(--ch-green-soft);
+}
+
+.ch-ecoruta-insignias__card-copy {
+  display: grid;
+  gap: var(--ch-space-2);
+  min-width: 0;
+}
+
+.ch-ecoruta-insignias__card-copy strong {
+  color: var(--ch-text-primary);
+  font-family: var(--ch-font-heading);
+  font-size: 0.98rem;
+}
+
+.ch-ecoruta-insignias__card-copy span {
+  color: var(--ch-text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.ch-ecoruta-insignias__card-copy small {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-1);
+  color: var(--ch-green);
+  font-weight: 800;
+}
+
+.ch-ecoruta-insignias__proximas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--ch-space-3);
+}
+
+.ch-ecoruta-insignias__proxima {
+  min-height: 162px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ch-space-2);
+  padding: var(--ch-space-4);
+  border: 1px dashed #cfd9e2;
+  border-radius: var(--ch-radius-md);
+  background: rgba(255, 255, 255, 0.65);
+  color: var(--ch-text-secondary);
+  text-align: center;
+}
+
+.ch-ecoruta-insignias__proxima-icono {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--ch-radius-full);
+  color: var(--ch-text-muted);
+  background: #edf2f6;
+}
+
+.ch-ecoruta-insignias__proxima strong {
+  color: var(--ch-text-primary);
+  font-family: var(--ch-font-heading);
+}
+
+.ch-ecoruta-insignias__proxima p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.ch-ecoruta-insignias__detalle {
+  position: sticky;
+  top: var(--ch-space-5);
+  overflow: hidden;
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-white);
+  box-shadow: var(--ch-shadow-sm);
+}
+
+.ch-ecoruta-insignias__detalle-hero {
+  display: flex;
+  min-height: 180px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ch-space-3);
+  padding: var(--ch-space-6);
+  background: var(--ch-dark);
+  color: var(--ch-text-on-dark);
+  text-align: center;
+}
+
+.ch-ecoruta-insignias__detalle-icono {
+  width: 78px;
+  height: 78px;
+  border-radius: var(--ch-radius-full);
+  color: var(--ch-green-light);
+  border: 2px solid var(--ch-green);
+  background: rgba(31, 138, 91, 0.16);
+}
+
+.ch-ecoruta-insignias__detalle-lista {
+  margin: 0;
+  padding: var(--ch-space-5);
+}
+
+.ch-ecoruta-insignias__detalle-lista div {
+  display: grid;
+  grid-template-columns: 108px minmax(0, 1fr);
+  gap: var(--ch-space-3);
+  padding: var(--ch-space-3) 0;
+  border-bottom: 1px solid var(--ch-border);
+}
+
+.ch-ecoruta-insignias__detalle-lista div:first-child {
+  padding-top: 0;
+}
+
+.ch-ecoruta-insignias__detalle-lista div:last-child {
+  border-bottom: 0;
+}
+
+.ch-ecoruta-insignias__detalle-lista dt {
+  color: var(--ch-text-secondary);
+  font-size: 0.78rem;
+}
+
+.ch-ecoruta-insignias__detalle-lista dd {
+  margin: 0;
+  color: var(--ch-text-primary);
+  font-size: 0.88rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.ch-ecoruta-insignias__nota {
+  margin: 0 var(--ch-space-5) var(--ch-space-5);
+  padding: var(--ch-space-4);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-green-soft);
+  color: var(--ch-green-dark);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+@keyframes ch-ecoruta-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1180px) {
+  .ch-ecoruta-insignias__contenido {
+    grid-template-columns: 1fr;
+  }
+
+  .ch-ecoruta-insignias__detalle {
+    position: static;
+  }
+}
+
+@media (max-width: 780px) {
+  .ch-ecoruta-insignias__resumen,
+  .ch-ecoruta-insignias__grid,
+  .ch-ecoruta-insignias__proximas {
+    grid-template-columns: 1fr;
+  }
+
+  .ch-ecoruta-insignias__metricas {
+    justify-content: space-between;
+  }
+
+  .ch-ecoruta-insignias__detalle-lista div {
+    grid-template-columns: 1fr;
+    gap: var(--ch-space-1);
+  }
+}

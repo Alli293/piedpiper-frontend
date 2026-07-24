@@ -163,6 +163,24 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: cargarPlaceholder,
   },
+  {
+    path: 'ecoruta/insignias',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/ecoruta/insignias/insignias-ecoruta-page.component').then(
+        (m) => m.InsigniasEcoRutaPageComponent
+      ),
+  },
+  {
+    path: 'ecoruta/planificar',
+    canActivate: [authGuard],
+    loadComponent: cargarPlaceholder,
+  },
+  {
+    path: 'ecoruta/itinerarios',
+    canActivate: [authGuard],
+    loadComponent: cargarPlaceholder,
+  },
   ...rutasPlaceholder.map((path) => ({ path, loadComponent: cargarPlaceholder })),
   {
     path: 'emisiones',

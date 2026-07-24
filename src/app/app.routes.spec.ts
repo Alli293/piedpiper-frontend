@@ -31,6 +31,9 @@ describe('app.routes', () => {
     const rutasPrivadas = [
       'benchmark',
       'configuracion',
+      'ecoruta/insignias',
+      'ecoruta/itinerarios',
+      'ecoruta/planificar',
       'empresa/configuracion-inicial',
       'perfil/configuracion-inicial',
     ];
