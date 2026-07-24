@@ -69,7 +69,10 @@ describe('DashboardPageComponent', () => {
   };
   let dashboardService: { exportarReportePdf: ReturnType<typeof vi.fn> };
   let authSession: { getUserInitials: ReturnType<typeof vi.fn> };
-  let authService: { cerrarSesion: ReturnType<typeof vi.fn> };
+  let authService: {
+    cerrarSesion: ReturnType<typeof vi.fn>;
+    token: ReturnType<typeof signal<string | null>>;
+  };
   let toastService: { error: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
@@ -87,6 +90,7 @@ describe('DashboardPageComponent', () => {
     };
     authService = {
       cerrarSesion: vi.fn(),
+      token: signal<string | null>(null),
     };
     toastService = {
       toasts: signal([]),

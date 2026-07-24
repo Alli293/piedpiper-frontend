@@ -1,11 +1,16 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
+import { SidebarBottomItemId } from '../../components/sidebar/sidebar.component';
 import { HeaderConfig, PageLayoutComponent } from '../page-layout/page-layout.component';
 import { buildSidebarConfig, SidebarNavId, SidebarNavItemDef } from '../page-layout/sidebar-nav';
+import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
 
 const COMPANY_NAME = 'Café del Valle S.A.';
 const COMPANY_INITIALS = 'CV';
+
+/** Ids this shell's own sidebarConfig can ever emit (see buildSidebarConfig). */
+type ShellMenuItemId = SidebarNavId | SidebarBottomItemId;
 
 /**
  * Shared shell for authenticated pages: owns sidebar construction so pages
@@ -19,6 +24,7 @@ const COMPANY_INITIALS = 'CV';
 export class ShellLayoutComponent {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly sesionInactividadService = inject(SesionInactividadService);
 
   activeId = input<SidebarNavId>();
   companyRole = input('Empresa · Admin');
@@ -56,20 +62,21 @@ export class ShellLayoutComponent {
   }
 
   protected onMenuItem(id: string): void {
-    if (id === 'logout') {
+    const menuId = id as ShellMenuItemId;
+    if (menuId === 'logout') {
       this.authService.cerrarSesion();
+      this.sesionInactividadService.detener();
       void this.router.navigateByUrl('/login');
       return;
     }
 
-    const rutas: Record<string, string> = {
+    const rutas: Record<Exclude<ShellMenuItemId, 'logout'>, string> = {
       benchmark: '/benchmark',
       dashboard: '/panel',
       ecoruta: '/ecoruta/preferencias',
       emissions: '/emisiones',
       settings: '/configuracion',
     };
-    const ruta = rutas[id];
-    if (ruta) void this.router.navigateByUrl(ruta);
+    void this.router.navigateByUrl(rutas[menuId]);
   }
 }

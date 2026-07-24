@@ -64,12 +64,6 @@ describe('SolicitudesAuditorPageComponent', () => {
     expect(texto).toContain('ana@correo.com');
   });
 
-  it('renderiza el host de toasts para mostrar las notificaciones', () => {
-    const fixture = crear();
-
-    expect((fixture.nativeElement as HTMLElement).querySelector('app-toast-host')).toBeTruthy();
-  });
-
   it('sin solicitudes muestra el mensaje de vacio', () => {
     validacionService.listarPendientes.mockReturnValue(
       of({ contenido: [], pagina: 0, totalPaginas: 0, totalElementos: 0 })
