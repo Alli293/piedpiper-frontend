@@ -1,7 +1,9 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
+import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
 import { EmisionesService } from '../emisiones.service';
 import { EmisionResponse } from '../models/emision.model';
 import { EmissionsListPageComponent } from './emissions-list-page.component';
@@ -74,7 +76,11 @@ describe('EmissionsListPageComponent', () => {
         },
         {
           provide: AuthService,
-          useValue: { cerrarSesion: vi.fn() },
+          useValue: { token: signal('fake-token'), cerrarSesion: vi.fn() },
+        },
+        {
+          provide: SesionInactividadService,
+          useValue: { reiniciar: vi.fn(), detener: vi.fn() },
         },
       ],
     }).compileComponents();

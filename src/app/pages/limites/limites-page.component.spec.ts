@@ -1,10 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthSessionService } from '../../core/auth-session.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { SesionInactividadService } from '../../core/auth/sesion-inactividad.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { LimitesPageComponent } from './limites-page.component';
 import { LimitesService } from './limites.service';
@@ -69,7 +71,11 @@ describe('LimitesPageComponent', () => {
         },
         {
           provide: AuthService,
-          useValue: { cerrarSesion: vi.fn() },
+          useValue: { token: signal('fake-token'), cerrarSesion: vi.fn() },
+        },
+        {
+          provide: SesionInactividadService,
+          useValue: { reiniciar: vi.fn(), detener: vi.fn() },
         },
       ],
     }).compileComponents();
