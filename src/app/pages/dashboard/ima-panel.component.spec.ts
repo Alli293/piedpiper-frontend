@@ -15,9 +15,16 @@ describe('ImaPanelComponent', () => {
     componentRef = fixture.componentRef;
   });
 
-  it('muestra carga cuando ima es null', () => {
+  it('muestra carga cuando loading es true', () => {
+    componentRef.setInput('loading', true);
     fixture.detectChanges();
     expect((fixture.nativeElement as HTMLElement).querySelector('.ima-card__loading')).toBeTruthy();
+  });
+
+  it('muestra mensaje vacío cuando ima es null y no está cargando', () => {
+    componentRef.setInput('loading', false);
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('.ima-card__empty')).toBeTruthy();
   });
 
   it('muestra puntajes cuando IMA completo', () => {

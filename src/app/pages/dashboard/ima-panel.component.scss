@@ -62,6 +62,10 @@
     color: var(--ch-text-secondary);
     font-size: 0.875rem;
   }
+  &__empty {
+    color: var(--ch-text-secondary);
+    font-size: 0.875rem;
+  }
   &__notice {
     display: flex;
     align-items: flex-start;
@@ -218,7 +222,6 @@
     font-family: var(--ch-font-heading);
     font-weight: 800;
     font-size: 22px;
-    letter-spacing: -0.02em;
     color: var(--ch-text-primary);
     &--na {
       font-size: 16px;
@@ -229,7 +232,6 @@
     font-family: var(--ch-font-heading);
     font-weight: 600;
     font-size: 12px;
-    letter-spacing: -0.0367em;
     color: var(--ch-text-secondary);
   }
   &__bar {

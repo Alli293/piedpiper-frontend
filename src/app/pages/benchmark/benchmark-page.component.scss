@@ -29,6 +29,13 @@
   color: var(--ch-text-primary);
 }
 
+.benchmark-shell__loading {
+  color: var(--ch-text-secondary);
+  font-size: 0.875rem;
+}
+
+// IA interpretation section — uses custom dark theme colors per Figma design
+// These don't map to existing tokens as this is a themed promotional block
 .ima-ia {
   padding: 1.5rem;
   background: linear-gradient(135deg, #0f2d2a 0%, #1a3f3a 40%, #0d3330 100%);

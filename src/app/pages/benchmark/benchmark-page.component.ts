@@ -25,6 +25,10 @@ export class BenchmarkPageComponent implements OnInit {
   protected readonly anioSeleccionado = signal(new Date().getFullYear());
   protected readonly mesSeleccionado = signal(new Date().getMonth() + 1);
   protected readonly imaData = signal<ImaResponse | null>(null);
+  protected readonly cargandoIma = signal(true);
+  protected readonly errorIma = signal(false);
+
+  private requestId = 0;
 
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'MADUREZ AMBIENTAL',
@@ -43,16 +47,28 @@ export class BenchmarkPageComponent implements OnInit {
   }
 
   private async cargarIma(anio: number, mes: number): Promise<void> {
+    const currentRequest = ++this.requestId;
+    this.cargandoIma.set(true);
+    this.errorIma.set(false);
     try {
       const ima = await firstValueFrom(this.imaService.obtenerIma(anio, mes));
-      this.imaData.set(ima);
+      if (currentRequest === this.requestId) {
+        this.imaData.set(ima);
+      }
     } catch (err: unknown) {
-      this.imaData.set(null);
-      this.toastService.error(
-        apiErrorMessage(err) ?? 'No se pudo calcular tu IMA. Intente nuevamente.',
-        undefined,
-        5000
-      );
+      if (currentRequest === this.requestId) {
+        this.imaData.set(null);
+        this.toastService.error(
+          apiErrorMessage(err) ?? 'No se pudo calcular tu IMA. Intente nuevamente.',
+          undefined,
+          5000
+        );
+        this.errorIma.set(true);
+      }
+    } finally {
+      if (currentRequest === this.requestId) {
+        this.cargandoIma.set(false);
+      }
     }
   }
 }
