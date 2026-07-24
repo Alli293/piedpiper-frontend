@@ -15,6 +15,18 @@ export interface ImaResponse {
   interpretacion: string | null;
   siguientePaso: string | null;
 }
+/** Punto de la serie histórica del IMA. Los valores en null no se grafican. */
+export interface ImaTendenciaPunto {
+  mes: string;
+  imaEmpresa: number | null;
+  imaPromedioSector: number | null;
+}
+
+export interface ImaTendenciaResponse {
+  mesesAtras: number;
+  serie: ImaTendenciaPunto[];
+  sinDatosSectoriales: boolean;
+}
 
 export type PosicionBenchmark = 'POR_ENCIMA' | 'EN_LINEA' | 'POR_DEBAJO';
 
@@ -56,6 +68,11 @@ export class ImaService {
   obtenerIma(anio: number, mes: number): Observable<ImaResponse> {
     const params = new HttpParams().set('anio', anio).set('mes', mes);
     return this.http.get<ImaResponse>(this.baseUrl, { params });
+  }
+
+  obtenerTendencia(mesesAtras: number): Observable<ImaTendenciaResponse> {
+    const params = new HttpParams().set('mesesAtras', mesesAtras);
+    return this.http.get<ImaTendenciaResponse>(`${this.baseUrl}/tendencia`, { params });
   }
 
   obtenerBenchmark(anio: number, mes: number): Observable<BenchmarkSectorialResponse> {

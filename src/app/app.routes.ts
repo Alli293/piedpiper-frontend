@@ -166,7 +166,17 @@ export const routes: Routes = [
     path: 'benchmark',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./pages/benchmark/benchmark-page.component').then((m) => m.BenchmarkPageComponent),
+      import('./pages/madurez-ambiental/madurez-ambiental-page.component').then(
+        (m) => m.MadurezAmbientalPageComponent
+      ),
+  },
+  {
+    path: 'madurez-ambiental',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/madurez-ambiental/madurez-ambiental-page.component').then(
+        (m) => m.MadurezAmbientalPageComponent
+      ),
   },
   {
     path: 'ecoruta',
