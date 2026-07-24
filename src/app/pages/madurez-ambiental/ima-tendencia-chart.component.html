@@ -1,3 +1,52 @@
-<div class="ima-tendencia-chart">
-  <canvas baseChart [data]="chartData()" [options]="chartOptions()" [type]="'line'"></canvas>
+<div class="ima-tendencia">
+  @if (hayMarcadores()) {
+    <p class="ima-tendencia__aviso">
+      <span aria-hidden="true">&#9873;</span>
+      Eventos anotados — pasá el cursor para ver el detalle
+    </p>
+  }
+
+  <div class="ima-tendencia__grafico" #contenedor>
+    <canvas
+      baseChart
+      [data]="chartData()"
+      [options]="chartOptions()"
+      [plugins]="chartPlugins"
+      [type]="'line'"
+    ></canvas>
+
+    @for (posicion of posiciones(); track posicion.numero) {
+      @let marcador = marcadores()[posicion.numero - 1];
+      <button
+        type="button"
+        class="ima-tendencia__marcador"
+        [style]="estiloMarcador(posicion)"
+        [style.background]="color(marcador.tipo)"
+        [attr.aria-label]="marcador.encabezado + ': ' + marcador.textos.join(' ')"
+        (mouseenter)="abrir(posicion.numero)"
+        (mouseleave)="cerrar()"
+        (focus)="abrir(posicion.numero)"
+        (blur)="cerrar()"
+      >
+        {{ posicion.numero }}
+      </button>
+    }
+
+    @if (tooltipAbierto(); as abierto) {
+      <div class="ima-tendencia__tooltip" role="tooltip" [style]="estiloTooltip(abierto.posicion)">
+        <span
+          class="ima-tendencia__tooltip-numero"
+          [style.background]="color(abierto.marcador.tipo)"
+          aria-hidden="true"
+          >{{ abierto.marcador.numero }}</span
+        >
+        <div class="ima-tendencia__tooltip-cuerpo">
+          <p class="ima-tendencia__tooltip-mes">{{ abierto.marcador.encabezado }} · EVENTO</p>
+          @for (texto of abierto.marcador.textos; track texto) {
+            <p class="ima-tendencia__tooltip-texto">{{ texto }}</p>
+          }
+        </div>
+      </div>
+    }
+  </div>
 </div>

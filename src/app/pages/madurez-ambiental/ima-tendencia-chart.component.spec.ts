@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
-import { ImaTendenciaChartComponent, etiquetaMes } from './ima-tendencia-chart.component';
+import {
+  encabezadoMes,
+  etiquetaMes,
+  ImaTendenciaChartComponent,
+  MarcadorEvento,
+} from './ima-tendencia-chart.component';
 import { ImaEvento, ImaTendenciaPunto } from '../dashboard/ima.service';
-
-interface ChartDataAccesible {
-  labels: string[];
-  datasets: { label: string; data: (number | null)[] }[];
-}
 
 describe('ImaTendenciaChartComponent', () => {
   let fixture: ComponentFixture<ImaTendenciaChartComponent>;
@@ -18,8 +18,8 @@ describe('ImaTendenciaChartComponent', () => {
     { mes: '2026-06', imaEmpresa: 71, imaPromedioSector: null },
   ];
 
-  const chartData = (): ChartDataAccesible =>
-    fixture.componentInstance.chartData() as ChartDataAccesible;
+  const chartData = () => fixture.componentInstance.chartData();
+  const marcadores = (): MarcadorEvento[] => fixture.componentInstance.marcadores();
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -34,7 +34,7 @@ describe('ImaTendenciaChartComponent', () => {
     fixture.detectChanges();
 
     const data = chartData();
-    // El tercer dataset son los marcadores de eventos (PP-83), no una línea.
+    expect(data.datasets).toHaveLength(2);
     expect(data.datasets[0].label).toBe('Tu empresa');
     expect(data.datasets[1].label).toBe('Promedio del sector');
     expect(data.datasets[0].data).toEqual([null, 68, 71]);
@@ -80,6 +80,10 @@ describe('ImaTendenciaChartComponent', () => {
     expect(etiquetaMes('2026-12')).toBe('Dic');
   });
 
+  it('encabezadoMes arma el titulo del tooltip en mayusculas', () => {
+    expect(encabezadoMes('2026-05')).toBe('MAYO 2026');
+  });
+
   describe('marcadores de eventos (PP-83)', () => {
     const eventos: ImaEvento[] = [
       {
@@ -89,15 +93,27 @@ describe('ImaTendenciaChartComponent', () => {
       },
     ];
 
-    it('pinta un marcador en el mes del evento y ninguno en los demas', () => {
+    it('crea un marcador en el indice del mes con evento', () => {
       componentRef.setInput('serie', serie);
       componentRef.setInput('eventos', eventos);
       fixture.detectChanges();
 
-      const marcadores = chartData().datasets[2];
-      expect(marcadores.label).toBe('Eventos');
-      // serie = [2026-04, 2026-05, 2026-06] -> solo el ultimo tiene evento
-      expect(marcadores.data).toEqual([null, null, 71]);
+      expect(marcadores()).toHaveLength(1);
+      expect(marcadores()[0].indice).toBe(2);
+      expect(marcadores()[0].mes).toBe('2026-06');
+    });
+
+    it('numera los marcadores en orden cronologico', () => {
+      componentRef.setInput('serie', serie);
+      componentRef.setInput('eventos', [
+        { mes: '2026-06', tipo: 'CRUCE_SECTOR', texto: 'Segundo.' },
+        { mes: '2026-05', tipo: 'HUECO_DATOS', texto: 'Primero.' },
+      ] satisfies ImaEvento[]);
+      fixture.detectChanges();
+
+      expect(marcadores().map((m) => m.numero)).toEqual([1, 2]);
+      expect(marcadores()[0].mes).toBe('2026-05');
+      expect(marcadores()[1].mes).toBe('2026-06');
     });
 
     it('agrupa varios eventos del mismo mes en un unico marcador', () => {
@@ -108,25 +124,36 @@ describe('ImaTendenciaChartComponent', () => {
       ] satisfies ImaEvento[]);
       fixture.detectChanges();
 
-      expect(chartData().datasets[2].data.filter((v) => v !== null)).toHaveLength(1);
+      expect(marcadores()).toHaveLength(1);
+      expect(marcadores()[0].textos).toEqual([
+        'En junio 2026 tu IMA superó el promedio de tu sector.',
+        'Mayor cambio de IMA (+3).',
+      ]);
     });
 
-    it('no pinta marcadores cuando no hay eventos', () => {
+    it('expone el encabezado del mes para el tooltip', () => {
+      componentRef.setInput('serie', serie);
+      componentRef.setInput('eventos', eventos);
+      fixture.detectChanges();
+
+      expect(marcadores()[0].encabezado).toBe('JUNIO 2026');
+    });
+
+    it('no crea marcadores cuando no hay eventos', () => {
       componentRef.setInput('serie', serie);
       fixture.detectChanges();
 
-      expect(chartData().datasets[2].data).toEqual([null, null, null]);
+      expect(marcadores()).toEqual([]);
     });
 
-    it('coloca el marcador sobre la linea sectorial si la empresa no tiene dato ese mes', () => {
+    it('ignora eventos de meses que no estan en la serie', () => {
       componentRef.setInput('serie', serie);
       componentRef.setInput('eventos', [
-        { mes: '2026-04', tipo: 'HUECO_DATOS', texto: 'No registraste emisiones.' },
+        { mes: '2025-01', tipo: 'HUECO_DATOS', texto: 'Fuera de la ventana.' },
       ] satisfies ImaEvento[]);
       fixture.detectChanges();
 
-      // 2026-04 tiene imaEmpresa null y imaPromedioSector null -> queda null
-      expect(chartData().datasets[2].data[0]).toBeNull();
+      expect(marcadores()).toEqual([]);
     });
   });
 });
