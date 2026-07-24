@@ -148,6 +148,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'madurez-ambiental',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/madurez-ambiental/madurez-ambiental-page.component').then(
+        (m) => m.MadurezAmbientalPageComponent
+      ),
+  },
+  {
     path: 'ecoruta',
     canActivate: [authGuard],
     loadComponent: cargarPlaceholder,
