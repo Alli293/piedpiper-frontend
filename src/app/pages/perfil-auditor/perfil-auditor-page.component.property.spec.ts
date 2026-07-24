@@ -30,14 +30,14 @@ const catalogoZonas = [
 const catalogoZonasValores = catalogoZonas.map((z) => z.valor);
 
 /**
- * Property 8: Frontend specialties cardinality blocks submission
- * Validates: Requirements 4.1, 4.2, 4.6
+ * Propiedad 8: La cardinalidad de especialidades bloquea el envío del formulario
+ * Valida: Requisitos 4.1, 4.2, 4.6
  *
- * For any form state where especialidades has 0 items or more than 8 items selected,
- * the form SHALL be invalid and the submit button SHALL be disabled.
- * Conversely, for 1-8 valid items with other fields valid, the form SHALL be valid.
+ * Para cualquier estado del formulario donde especialidades tiene 0 o más de 8 items seleccionados,
+ * el formulario DEBE ser inválido y el botón de envío DEBE estar deshabilitado.
+ * Inversamente, para 1-8 items válidos con los demás campos válidos, el formulario DEBE ser válido.
  */
-describe('Property 8: Frontend specialties cardinality blocks submission', () => {
+describe('Propiedad 8: cardinalidad de especialidades bloquea el envío', () => {
   let fixture: ComponentFixture<PerfilAuditorPageComponent>;
   let component: PerfilAuditorPageComponent;
   let httpMock: HttpTestingController;

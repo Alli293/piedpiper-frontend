@@ -209,7 +209,7 @@ describe('PerfilAuditorPageComponent', () => {
       expect(component['model']().disponible).toBe(true);
     });
 
-    it('deja formulario vacío cuando obtener perfil falla con error no-404', async () => {
+    it('deja formulario vacío y bloquea guardado cuando obtener perfil falla con error no-404', async () => {
       fixture.detectChanges();
       flushCatalogos();
       await fixture.whenStable();
@@ -220,6 +220,7 @@ describe('PerfilAuditorPageComponent', () => {
       expect(component['especialidadesSeleccionadas']()).toEqual([]);
       expect(component['zonasSeleccionadas']()).toEqual([]);
       expect(component['model']().descripcionProfesional).toBe('');
+      expect(component['errorCarga']()).toBe(true);
     });
   });
 
