@@ -17,22 +17,24 @@
 
     @for (posicion of posiciones(); track posicion.numero) {
       @let marcador = marcadorPorNumero(posicion.numero);
-      <button
-        type="button"
-        class="ch-ima-tendencia__marcador"
-        [style]="estiloMarcador(posicion)"
-        [style.background]="color(marcador.tipo)"
-        [attr.aria-label]="marcador.encabezado + ': ' + marcador.textos.join(' ')"
-        [attr.aria-describedby]="
-          marcadorActivo() === posicion.numero ? tooltipId(posicion.numero) : null
-        "
-        (mouseenter)="abrir(posicion.numero)"
-        (mouseleave)="cerrar()"
-        (focus)="abrir(posicion.numero)"
-        (blur)="cerrar()"
-      >
-        {{ posicion.numero }}
-      </button>
+      @if (marcador) {
+        <button
+          type="button"
+          class="ch-ima-tendencia__marcador"
+          [style]="estiloMarcador(posicion)"
+          [style.background]="color(marcador.tipo)"
+          [attr.aria-label]="marcador.encabezado + ': ' + marcador.textos.join(' ')"
+          [attr.aria-describedby]="
+            marcadorActivo() === posicion.numero ? tooltipId(posicion.numero) : null
+          "
+          (mouseenter)="abrir(posicion.numero)"
+          (mouseleave)="cerrar()"
+          (focus)="abrir(posicion.numero)"
+          (blur)="cerrar()"
+        >
+          {{ posicion.numero }}
+        </button>
+      }
     }
 
     @if (tooltipAbierto(); as abierto) {

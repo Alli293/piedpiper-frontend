@@ -171,5 +171,31 @@ describe('ImaTendenciaChartComponent', () => {
 
       expect(estilo.left).toBe('120px');
     });
+
+    it('no produce error al cambiar de una ventana con eventos a otra sin eventos', () => {
+      // Primero: ventana con eventos
+      componentRef.setInput('serie', serie);
+      componentRef.setInput('eventos', [
+        { mes: '2026-06', tipo: 'CRUCE_SECTOR', texto: 'Evento de junio.' },
+      ] satisfies ImaEvento[]);
+      fixture.detectChanges();
+
+      expect(marcadores()).toHaveLength(1);
+
+      // Simular que el plugin publicó posiciones para esa ventana
+      (fixture.componentInstance as any).posicionesRaw.set([{ numero: 1, x: 100, yTop: 20 }]);
+
+      // Ahora: cambiar a una ventana sin eventos (marcadores se vacía)
+      componentRef.setInput('serie', [
+        { mes: '2025-01', imaEmpresa: 50, imaPromedioSector: 45 },
+        { mes: '2025-02', imaEmpresa: 55, imaPromedioSector: 46 },
+      ] satisfies ImaTendenciaPunto[]);
+      componentRef.setInput('eventos', []);
+
+      // Las posiciones viejas deben filtrarse por el computed — no debería haber marcadores visibles
+      expect(marcadores()).toEqual([]);
+      // posiciones computed filtra los valores viejos que ya no corresponden a marcadores válidos
+      expect((fixture.componentInstance as any).posiciones()).toEqual([]);
+    });
   });
 });

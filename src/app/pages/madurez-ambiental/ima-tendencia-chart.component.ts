@@ -111,7 +111,16 @@ export class ImaTendenciaChartComponent {
   private readonly colorEventoAlt = this.estilos.getPropertyValue('--ch-green').trim() || '#1f8a5b';
 
   /** Posiciones calculadas por el plugin en cada repintado. */
-  protected readonly posiciones = signal<PosicionMarcador[]>([]);
+  private readonly posicionesRaw = signal<PosicionMarcador[]>([]);
+
+  /**
+   * Posiciones filtradas: solo incluye las que corresponden a marcadores actualmente válidos.
+   * Esto evita un desfase transitorio entre el repintado del canvas y la recomputación de marcadores.
+   */
+  protected readonly posiciones = computed(() => {
+    const numerosValidos = new Set(this.marcadores().map((m) => m.numero));
+    return this.posicionesRaw().filter((p) => numerosValidos.has(p.numero));
+  });
 
   /** Número del marcador cuyo tooltip está abierto; null si ninguno. */
   protected readonly marcadorActivo = signal<number | null>(null);
@@ -200,7 +209,7 @@ export class ImaTendenciaChartComponent {
       ctx.restore();
 
       // Se publica fuera del ciclo de dibujo para no disparar un repintado inmediato.
-      queueMicrotask(() => this.posiciones.set(posiciones));
+      queueMicrotask(() => this.posicionesRaw.set(posiciones));
     },
   };
 
@@ -268,8 +277,8 @@ export class ImaTendenciaChartComponent {
     this.marcadorActivo.set(null);
   }
 
-  protected marcadorPorNumero(numero: number): MarcadorEvento {
-    return this.marcadores().find((marcador) => marcador.numero === numero)!;
+  protected marcadorPorNumero(numero: number): MarcadorEvento | undefined {
+    return this.marcadores().find((marcador) => marcador.numero === numero);
   }
 
   protected tooltipId(numero: number): string {
