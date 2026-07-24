@@ -5,11 +5,13 @@ import { provideRouter } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { AuthSessionService } from '../../../core/auth-session.service';
 import { InsigniasEcoRutaService } from '../../../core/services/insignias-ecoruta.service';
+import { ToastService } from '../../../shared/services/toast.service';
 import { InsigniasEcoRutaPageComponent } from './insignias-ecoruta-page.component';
 
 describe('InsigniasEcoRutaPageComponent', () => {
   let fixture: ComponentFixture<InsigniasEcoRutaPageComponent>;
   let httpMock: HttpTestingController;
+  let toastService: ToastService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -31,6 +33,7 @@ describe('InsigniasEcoRutaPageComponent', () => {
 
     fixture = TestBed.createComponent(InsigniasEcoRutaPageComponent);
     httpMock = TestBed.inject(HttpTestingController);
+    toastService = TestBed.inject(ToastService);
     fixture.detectChanges();
   });
 
@@ -76,5 +79,30 @@ describe('InsigniasEcoRutaPageComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Aún no tenés insignias');
+  });
+  it('muestra toast de permiso cuando la api responde 403', async () => {
+    const errorSpy = vi.spyOn(toastService, 'error');
+
+    httpMock
+      .expectOne(InsigniasEcoRutaService.URL)
+      .flush({}, { status: 403, statusText: 'Forbidden' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('permiso'));
+    expect(fixture.nativeElement.textContent).toContain('No se pudieron cargar tus insignias.');
+  });
+
+  it('muestra toast de insignias no encontradas cuando la api responde 404', async () => {
+    const errorSpy = vi.spyOn(toastService, 'error');
+
+    httpMock
+      .expectOne(InsigniasEcoRutaService.URL)
+      .flush({}, { status: 404, statusText: 'Not Found' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('No encontramos'));
+    expect(fixture.nativeElement.textContent).toContain('No se pudieron cargar tus insignias.');
   });
 });

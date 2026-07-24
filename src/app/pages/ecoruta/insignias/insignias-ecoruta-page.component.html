@@ -78,7 +78,7 @@
                   <span>{{ insignia.descripcion }}</span>
                   <small>
                     <app-icon name="calendario" [size]="12" aria-hidden="true" />
-                    {{ insignia.fechaObtencion | date: 'dd MMM y' }}
+                    {{ insignia.fechaObtencion | date: 'dd/MM/yyyy' }}
                   </small>
                 </span>
               </button>
@@ -124,7 +124,7 @@
                 </div>
                 <div>
                   <dt>Obtenida</dt>
-                  <dd>{{ insignia.fechaObtencion | date: 'dd/MM/y - h:mm a' }}</dd>
+                  <dd>{{ insignia.fechaObtencion | date: 'dd/MM/yyyy - HH:mm' }}</dd>
                 </div>
                 <div>
                   <dt>Evento</dt>

@@ -44,6 +44,7 @@
         @if (!cargandoComparacion() && comparacion(); as data) {
           <app-card-stat
             label="Del limite anual"
+            tono="green"
             [value]="porcentajeResumen(data.porcentajeConsumido)"
             [delta]="detalleLimiteResumen(data)"
           />

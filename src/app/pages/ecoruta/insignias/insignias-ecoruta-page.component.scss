@@ -42,9 +42,9 @@
   width: 96px;
   height: 96px;
   border-radius: var(--ch-radius-full);
-  border: 2px solid #d8e1e8;
+  border: 2px solid var(--ch-border);
   color: var(--ch-text-muted);
-  background: #f6f9fb;
+  background: color-mix(in srgb, var(--ch-bg-main) 45%, var(--ch-bg-white));
 }
 
 .ch-ecoruta-insignias__loader {
@@ -180,7 +180,7 @@
 }
 
 .ch-ecoruta-insignias__card:focus-visible {
-  outline: 3px solid rgba(31, 138, 91, 0.2);
+  outline: 3px solid color-mix(in srgb, var(--ch-green) 20%, transparent);
   outline-offset: 2px;
 }
 
@@ -232,9 +232,9 @@
   align-items: center;
   gap: var(--ch-space-2);
   padding: var(--ch-space-4);
-  border: 1px dashed #cfd9e2;
+  border: 1px dashed var(--ch-border);
   border-radius: var(--ch-radius-md);
-  background: rgba(255, 255, 255, 0.65);
+  background: color-mix(in srgb, var(--ch-bg-white) 65%, transparent);
   color: var(--ch-text-secondary);
   text-align: center;
 }
@@ -244,7 +244,7 @@
   height: 52px;
   border-radius: var(--ch-radius-full);
   color: var(--ch-text-muted);
-  background: #edf2f6;
+  background: var(--ch-bg-main);
 }
 
 .ch-ecoruta-insignias__proxima strong {
@@ -294,7 +294,7 @@
   border-radius: var(--ch-radius-full);
   color: var(--ch-green-light);
   border: 2px solid var(--ch-green);
-  background: rgba(31, 138, 91, 0.16);
+  background: color-mix(in srgb, var(--ch-green) 16%, transparent);
 }
 
 .ch-ecoruta-insignias__detalle-lista {
