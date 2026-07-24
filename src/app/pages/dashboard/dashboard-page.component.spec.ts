@@ -15,7 +15,10 @@ import { DashboardPageComponent, SIN_EMISIONES_MENSAJE } from './dashboard-page.
 import { ResumenHuellaDashboardResponse } from './dashboard.model';
 import { DashboardService } from './dashboard.service';
 import { EvolucionService } from './evolucion.service';
+import { BenchmarkPanelComponent } from './benchmark-panel.component';
 import { EvolucionChartComponent } from './evolucion-chart.component';
+import { ImaPanelComponent } from './ima-panel.component';
+import { BenchmarkSectorialResponse, ImaService } from './ima.service';
 import { Component, input } from '@angular/core';
 
 const ANIO_ACTUAL = new Date().getFullYear();
@@ -68,10 +71,33 @@ const RESUMEN_VACIO: ResumenEmisionesResponse = {
   ],
 };
 
+const BENCHMARK_BASE: BenchmarkSectorialResponse = {
+  benchmarkDisponible: false,
+  cantidadEmpresas: 4,
+  imaParcial: false,
+  ima: null,
+  cobertura: null,
+  puntajeIntensidadSectorial: null,
+  consistencia: null,
+};
+
 @Component({ selector: 'app-evolucion-chart', standalone: true, template: '' })
 class StubChartComponent {
   readonly serie = input([]);
   readonly anio = input(2026);
+}
+
+@Component({ selector: 'app-ima-panel', standalone: true, template: '' })
+class StubImaPanelComponent {
+  readonly ima = input(null);
+  readonly anio = input(2026);
+  readonly mes = input(7);
+}
+
+@Component({ selector: 'app-benchmark-panel', standalone: true, template: '' })
+class StubBenchmarkPanelComponent {
+  readonly benchmark = input(null);
+  readonly error = input(false);
 }
 
 describe('DashboardPageComponent', () => {
@@ -84,6 +110,10 @@ describe('DashboardPageComponent', () => {
   let dashboardService: {
     exportarReportePdf: ReturnType<typeof vi.fn>;
     obtenerResumenHuella: ReturnType<typeof vi.fn>;
+  };
+  let imaService: {
+    obtenerIma: ReturnType<typeof vi.fn>;
+    obtenerBenchmark: ReturnType<typeof vi.fn>;
   };
   let authSession: { getUserInitials: ReturnType<typeof vi.fn> };
   let authService: {
@@ -102,6 +132,23 @@ describe('DashboardPageComponent', () => {
       exportarReportePdf: vi
         .fn()
         .mockReturnValue(of(new Blob(['pdf'], { type: 'application/pdf' }))),
+    };
+    imaService = {
+      obtenerIma: vi.fn().mockReturnValue(
+        of({
+          cobertura: 0,
+          consistencia: 0,
+          ima: 0,
+          parcial: true,
+          motivoParcial: null,
+          puntajeIntensidadSectorial: null,
+          intensidad: null,
+          calculatedAt: '',
+          interpretacion: null,
+          siguientePaso: null,
+        })
+      ),
+      obtenerBenchmark: vi.fn().mockReturnValue(of(BENCHMARK_BASE)),
     };
     authSession = {
       getUserInitials: vi.fn().mockReturnValue('AJ'),
@@ -125,15 +172,16 @@ describe('DashboardPageComponent', () => {
           provide: EvolucionService,
           useValue: { obtenerEvolucion: () => of({ anio: 2026, serie: [] }) },
         },
+        { provide: ImaService, useValue: imaService },
         { provide: AuthService, useValue: authService },
         { provide: AuthSessionService, useValue: authSession },
         { provide: ToastService, useValue: toastService },
       ],
     })
       .overrideComponent(DashboardPageComponent, {
-        remove: { imports: [EvolucionChartComponent] },
+        remove: { imports: [EvolucionChartComponent, ImaPanelComponent, BenchmarkPanelComponent] },
         add: {
-          imports: [StubChartComponent],
+          imports: [StubChartComponent, StubImaPanelComponent, StubBenchmarkPanelComponent],
           schemas: [CUSTOM_ELEMENTS_SCHEMA],
         },
       })
@@ -515,6 +563,43 @@ describe('DashboardPageComponent', () => {
     expect(texto).not.toContain('5.236');
     expect(texto).not.toContain('12.47');
     expect(texto).not.toContain('42');
+  });
+
+  it('carga el IMA y el benchmark con el periodo actual por defecto', async () => {
+    await createFixture();
+
+    expect(imaService.obtenerIma).toHaveBeenCalledWith(ANIO_ACTUAL, new Date().getMonth() + 1);
+    expect(imaService.obtenerBenchmark).toHaveBeenCalledWith(
+      ANIO_ACTUAL,
+      new Date().getMonth() + 1
+    );
+    expect((component as any).benchmarkData()).toEqual(BENCHMARK_BASE);
+    expect((component as any).benchmarkError()).toBe(false);
+  });
+
+  it('recarga el IMA y el benchmark cuando cambia su periodo', async () => {
+    await createFixture();
+
+    (component as any).onImaPeriodoChange({ anio: 2026, mes: 3 });
+    await fixture.whenStable();
+
+    expect((component as any).mesSeleccionado()).toBe(3);
+    expect(imaService.obtenerIma).toHaveBeenLastCalledWith(2026, 3);
+    expect(imaService.obtenerBenchmark).toHaveBeenLastCalledWith(2026, 3);
+  });
+
+  it('usa el mensaje de la API cuando falla el benchmark', async () => {
+    await createFixture();
+    imaService.obtenerBenchmark.mockReturnValueOnce(
+      throwError(
+        () => new HttpErrorResponse({ status: 500, error: { message: 'Sector no encontrado.' } })
+      )
+    );
+
+    await (component as any).cargarBenchmark(2026, 7);
+
+    expect((component as any).benchmarkError()).toBe(true);
+    expect(toastService.error).toHaveBeenCalledWith('Sector no encontrado.', undefined, 5000);
   });
 
   // ---------------------------------------------------------------------------

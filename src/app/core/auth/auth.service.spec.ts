@@ -21,6 +21,7 @@ describe('AuthService', () => {
   beforeEach(() => {
     storage = createStorageMock();
     vi.stubGlobal('sessionStorage', storage);
+    vi.stubGlobal('localStorage', createStorageMock());
     TestBed.configureTestingModule({
       providers: [AuthService, provideHttpClient(), provideHttpClientTesting()],
     });

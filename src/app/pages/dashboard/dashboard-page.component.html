@@ -104,6 +104,15 @@
       </article>
     </section>
 
+    <app-ima-panel
+      [ima]="imaData()"
+      [anio]="anioSeleccionado()"
+      [mes]="mesSeleccionado()"
+      (periodoChange)="onImaPeriodoChange($event)"
+    />
+
+    <app-benchmark-panel [benchmark]="benchmarkData()" [error]="benchmarkError()" />
+
     <!-- PP-41: Evolución histórica -->
     <article class="annual-limit-panel evolucion-panel">
       <header class="evolucion-panel__header">
