@@ -130,6 +130,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: cargarPlaceholder,
   },
+  {
+    path: 'ecoruta',
+    canActivate: [authGuard],
+    loadComponent: cargarPlaceholder,
+  },
   ...rutasPlaceholder.map((path) => ({ path, loadComponent: cargarPlaceholder })),
   {
     path: 'emisiones',
