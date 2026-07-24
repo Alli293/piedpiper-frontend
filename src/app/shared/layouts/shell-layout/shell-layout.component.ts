@@ -58,7 +58,7 @@ export class ShellLayoutComponent {
     const rutas: Record<string, string> = {
       benchmark: '/benchmark',
       dashboard: '/panel',
-      emissions: '/emisiones/registrar',
+      emissions: '/emisiones',
       settings: '/configuracion',
     };
     const ruta = rutas[id];

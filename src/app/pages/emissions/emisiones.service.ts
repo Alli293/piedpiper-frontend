@@ -12,6 +12,7 @@ import {
   RegistrarEnvioRequest,
   RegistrarFlotaRequest,
   RegistrarVueloRequest,
+  ResumenEmisionesResponse,
   TipoVehiculoOption,
 } from './models/emision.model';
 
@@ -72,5 +73,13 @@ export class EmisionesService {
   obtenerComparacion(anio: number): Observable<ComparacionEmisionesResponse> {
     const params = new HttpParams().set('anio', anio);
     return this.http.get<ComparacionEmisionesResponse>(`${this.baseUrl}/comparacion`, { params });
+  }
+
+  obtenerResumen(anio: number, mes?: number): Observable<ResumenEmisionesResponse> {
+    let params = new HttpParams().set('anio', anio);
+    if (mes !== undefined) {
+      params = params.set('mes', mes);
+    }
+    return this.http.get<ResumenEmisionesResponse>(`${this.baseUrl}/resumen`, { params });
   }
 }

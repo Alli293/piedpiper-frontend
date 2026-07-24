@@ -43,6 +43,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'verificar-correo',
+    loadComponent: () =>
+      import('./pages/auth/verificar-correo/verificar-correo-page.component').then(
+        (m) => m.VerificarCorreoPageComponent
+      ),
+  },
+  {
     path: 'validacion-pendiente',
     loadComponent: () =>
       import('./pages/validacion-pendiente/validacion-pendiente-page.component').then(
