@@ -13,7 +13,11 @@ import { DirectorioAuditoresPageComponent } from './directorio-auditores-page.co
 describe('DirectorioAuditoresPageComponent', () => {
   let fixture: ComponentFixture<DirectorioAuditoresPageComponent>;
   let component: DirectorioAuditoresPageComponent;
-  let auditoresService: { listar: ReturnType<typeof vi.fn> };
+  let auditoresService: {
+    listar: ReturnType<typeof vi.fn>;
+    obtenerEspecialidades: ReturnType<typeof vi.fn>;
+    obtenerZonas: ReturnType<typeof vi.fn>;
+  };
   let toastService: { error: ReturnType<typeof vi.fn> };
 
   const auditor: AuditorResumen = {
@@ -36,8 +40,19 @@ describe('DirectorioAuditoresPageComponent', () => {
     totalPaginas: 1,
   };
 
-  beforeEach(async () => {
-    auditoresService = { listar: vi.fn().mockReturnValue(of(paginaBase)) };
+  async function montar(overrides?: {
+    especialidades?: ReturnType<typeof vi.fn>;
+    zonas?: ReturnType<typeof vi.fn>;
+  }) {
+    auditoresService = {
+      listar: vi.fn().mockReturnValue(of(paginaBase)),
+      obtenerEspecialidades:
+        overrides?.especialidades ??
+        vi.fn().mockReturnValue(of([{ valor: 'AGROINDUSTRIA', etiqueta: 'Agroindustria' }])),
+      obtenerZonas:
+        overrides?.zonas ??
+        vi.fn().mockReturnValue(of([{ valor: 'SAN_JOSE', etiqueta: 'San José' }])),
+    };
     toastService = { error: vi.fn(), toasts: signal([]) } as any;
 
     await TestBed.configureTestingModule({
@@ -57,19 +72,31 @@ describe('DirectorioAuditoresPageComponent', () => {
     fixture = TestBed.createComponent(DirectorioAuditoresPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  });
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
 
   function comp() {
     return component as unknown as {
       resultado: { set(v: PaginaAuditores | null): void };
       cargando: { set(v: boolean): void };
       error: { (): boolean; set(v: boolean): void };
+      modelo(): { pagina: number; especialidades: string[] };
       onBuscar(v: string): void;
       onOrdenar(v: string): void;
-      reintentar(): void;
-      pagina(): number;
       avisoBusqueda(): string;
+      mensajeError(): string;
       tarjetas(): { iniciales: string; estrellas: boolean[]; ubicacion: string }[];
+      toggleEspecialidad(v: string, activa: boolean): void;
+      onZona(v: string | null): void;
+      onSoloDisponibles(v: boolean): void;
+      limpiarFiltros(): void;
+      irAPagina(n: number): void;
+      chipsActivos(): { tipo: string; valor: string; etiqueta: string }[];
+      hayFiltrosActivos(): boolean;
+      especialidadesDeshabilitadas(): boolean;
+      zonasDeshabilitadas(): boolean;
+      reintentar(): void;
     };
   }
 
@@ -79,20 +106,130 @@ describe('DirectorioAuditoresPageComponent', () => {
   }
 
   it('consulta el directorio al iniciar con los criterios por defecto', async () => {
+    await montar();
+
     await vi.waitFor(() =>
       expect(auditoresService.listar).toHaveBeenCalledWith({
         terminoBusqueda: '',
+        especialidades: [],
+        zonaGeografica: null,
+        calificacionMinima: null,
+        soloDisponibles: false,
         pagina: 0,
         ordenamiento: 'CALIFICACION',
       })
     );
   });
 
-  it('mientras carga muestra el estado de carga', () => {
+  it('carga los catalogos de especialidades y zonas al iniciar', async () => {
+    await montar();
+
+    expect(auditoresService.obtenerEspecialidades).toHaveBeenCalled();
+    expect(auditoresService.obtenerZonas).toHaveBeenCalled();
+  });
+
+  it('al aplicar un filtro aparece su chip y reinicia la pagina', async () => {
+    await montar();
+    comp().irAPagina(2);
+
+    comp().toggleEspecialidad('AGROINDUSTRIA', true);
+
+    expect(comp().hayFiltrosActivos()).toBe(true);
+    expect(
+      comp()
+        .chipsActivos()
+        .map((c) => c.etiqueta)
+    ).toContain('Agroindustria');
+    expect(comp().modelo().pagina).toBe(0);
+  });
+
+  it('quitar un chip remueve ese filtro y conserva los demas', async () => {
+    await montar();
+    comp().toggleEspecialidad('AGROINDUSTRIA', true);
+    comp().onSoloDisponibles(true);
+    pintar();
+    expect(comp().chipsActivos()).toHaveLength(2);
+
+    const quitar = (fixture.nativeElement as HTMLElement).querySelector(
+      '.directorio__chip-quitar'
+    ) as HTMLButtonElement;
+    quitar.click();
+    fixture.detectChanges();
+
+    expect(comp().chipsActivos()).toHaveLength(1);
+    expect(comp().chipsActivos()[0].etiqueta).toBe('Solo disponibles');
+    expect(comp().modelo().especialidades).toHaveLength(0);
+  });
+
+  it('limpiar filtros quita todos los chips activos', async () => {
+    await montar();
+    comp().toggleEspecialidad('AGROINDUSTRIA', true);
+    comp().onZona('SAN_JOSE');
+    comp().onSoloDisponibles(true);
+    expect(comp().chipsActivos()).toHaveLength(3);
+
+    comp().limpiarFiltros();
+
+    expect(comp().chipsActivos()).toHaveLength(0);
+    expect(comp().hayFiltrosActivos()).toBe(false);
+  });
+
+  it('con filtros activos y sin resultados muestra el mensaje de ampliar criterios', async () => {
+    await montar();
+    comp().onZona('SAN_JOSE');
+    comp().resultado.set({ contenido: [], totalResultados: 0, paginaActual: 0, totalPaginas: 0 });
+    pintar();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'No hay auditores que cumplan con los filtros seleccionados. Intente ampliar los criterios.'
+    );
+  });
+
+  it('el mensaje de error cambia cuando hay filtros activos', async () => {
+    await montar();
+
+    expect(comp().mensajeError()).toBe(
+      'No se pudo cargar el directorio de auditores. Intente nuevamente.'
+    );
+
+    comp().onSoloDisponibles(true);
+
+    expect(comp().mensajeError()).toBe('No se pudo aplicar el filtro. Intente nuevamente.');
+  });
+
+  it('si falla un catalogo se deshabilita ese filtro y los demas siguen disponibles', async () => {
+    await montar({
+      especialidades: vi.fn().mockReturnValue(throwError(() => new Error('network'))),
+    });
+    await vi.waitFor(() => expect(comp().especialidadesDeshabilitadas()).toBe(true));
+    fixture.detectChanges();
+
+    expect(comp().zonasDeshabilitadas()).toBe(false);
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Catálogo no disponible.');
+    expect(toastService.error).toHaveBeenCalledWith(
+      'No se pudo cargar el catálogo de especialidades. Los demás filtros están disponibles.',
+      undefined,
+      5000
+    );
+  });
+
+  it('reintentar vuelve a consultar el directorio', async () => {
+    await montar();
+    await vi.waitFor(() => expect(auditoresService.listar).toHaveBeenCalledTimes(1));
+
+    comp().reintentar();
+
+    await vi.waitFor(() => expect(auditoresService.listar).toHaveBeenCalledTimes(2));
+  });
+
+  it('mientras carga muestra el estado de carga', async () => {
+    await montar();
+
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('Cargando auditores...');
   });
 
-  it('pinta una tarjeta por cada auditor con nombre y auditorias', () => {
+  it('pinta una tarjeta por cada auditor con nombre y auditorias', async () => {
+    await montar();
     comp().resultado.set(paginaBase);
     pintar();
     const html = fixture.nativeElement as HTMLElement;
@@ -103,7 +240,8 @@ describe('DirectorioAuditoresPageComponent', () => {
     expect(html.querySelector('.auditor-card')?.getAttribute('href')).toBe('/auditores/aud-1');
   });
 
-  it('con lista vacia muestra el texto de sin resultados', () => {
+  it('con lista vacia muestra el texto de sin resultados', async () => {
+    await montar();
     comp().resultado.set({ contenido: [], totalResultados: 0, paginaActual: 0, totalPaginas: 0 });
     pintar();
 
@@ -112,7 +250,8 @@ describe('DirectorioAuditoresPageComponent', () => {
     );
   });
 
-  it('ante un error muestra el aviso con reintentar', () => {
+  it('ante un error muestra el aviso con reintentar', async () => {
+    await montar();
     comp().error.set(true);
     pintar();
     const html = fixture.nativeElement as HTMLElement;
@@ -124,6 +263,7 @@ describe('DirectorioAuditoresPageComponent', () => {
   });
 
   it('si la consulta falla activa el error y muestra el toast con el mensaje del backend', async () => {
+    await montar();
     auditoresService.listar.mockReturnValue(
       throwError(
         () =>
@@ -145,6 +285,7 @@ describe('DirectorioAuditoresPageComponent', () => {
   });
 
   it('si el error no trae mensaje cae al texto por defecto del directorio', async () => {
+    await montar();
     auditoresService.listar.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 0, statusText: 'Unknown Error' }))
     );
@@ -159,24 +300,26 @@ describe('DirectorioAuditoresPageComponent', () => {
     );
   });
 
-  it('un termino de un caracter muestra el aviso de minimo', () => {
+  it('un termino de un caracter muestra el aviso de minimo', async () => {
+    await montar();
+
     comp().onBuscar('a');
 
     expect(comp().avisoBusqueda()).toBe('Ingrese al menos 2 caracteres para buscar.');
-    expect(comp().pagina()).toBe(0);
+    expect(comp().modelo().pagina).toBe(0);
   });
 
-  it('cambiar el orden reinicia a la primera pagina', () => {
-    comp().resultado.set(paginaBase);
-    pintar();
-    (component as any).pagina.set(3);
+  it('cambiar el orden reinicia a la primera pagina', async () => {
+    await montar();
+    comp().irAPagina(3);
 
     comp().onOrdenar('TIEMPO_RESPUESTA');
 
-    expect(comp().pagina()).toBe(0);
+    expect(comp().modelo().pagina).toBe(0);
   });
 
-  it('deriva iniciales, estrellas y ubicacion en el view model de la tarjeta', () => {
+  it('deriva iniciales, estrellas y ubicacion en el view model de la tarjeta', async () => {
+    await montar();
     comp().resultado.set(paginaBase);
 
     const tarjeta = comp().tarjetas()[0];

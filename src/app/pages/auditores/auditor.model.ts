@@ -30,8 +30,17 @@ export interface PaginaAuditores {
   totalPaginas: number;
 }
 
+export interface CatalogoItem {
+  valor: string;
+  etiqueta: string;
+}
+
 export interface FiltrosDirectorio {
   terminoBusqueda: string;
+  especialidades: string[];
+  zonaGeografica: string | null;
+  calificacionMinima: number | null;
+  soloDisponibles: boolean;
   pagina: number;
   ordenamiento: OrdenamientoAuditores;
 }
