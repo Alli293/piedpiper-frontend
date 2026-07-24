@@ -1,6 +1,7 @@
 export type UnidadElectricidad = 'kwh' | 'mwh';
 export type CabinClass = 'economy' | 'premium';
-export type CategoriaFiltroEmision = 'TODAS' | 'ELECTRICIDAD' | 'FLOTA' | 'VUELO' | 'ENVIO';
+export type CategoriaEmision = 'ELECTRICIDAD' | 'FLOTA' | 'VUELO' | 'ENVIO';
+export type CategoriaFiltroEmision = 'TODAS' | CategoriaEmision;
 export type EstadoComparacion = 'dentro' | 'cerca' | 'alcanzado' | 'superado' | 'sin_limite';
 
 export type UnidadPeso = 'G' | 'LB' | 'KG' | 'MT';
@@ -127,9 +128,16 @@ export interface ComparacionEmisionesResponse {
   readonly porcentajeConsumido: number | null;
   readonly estado: EstadoComparacion;
   readonly mensaje: string | null;
+  readonly categorias: ComparacionCategoriaEmision[];
 }
 
-export type CategoriaResumen = 'ELECTRICIDAD' | 'FLOTA' | 'VUELO' | 'ENVIO';
+export interface ComparacionCategoriaEmision {
+  readonly categoria: CategoriaEmision;
+  readonly huellaT: number;
+  readonly porcentaje: number;
+}
+
+export type CategoriaResumen = CategoriaEmision;
 
 export interface ResumenCategoriaResponse {
   readonly categoria: CategoriaResumen;

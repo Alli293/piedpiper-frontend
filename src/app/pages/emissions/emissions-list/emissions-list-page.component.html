@@ -1,4 +1,16 @@
-<app-page-layout [sidebarConfig]="sidebarConfig()" [headerConfig]="headerConfig()">
+<app-shell-layout activeId="emissions" [headerConfig]="headerConfig()">
+  <div pageHeaderActions class="ch-emissions-list-page__header-actions">
+    <app-button variant="secondary" size="sm" type="button" (click)="verLimitesAnuales()">
+      <app-icon name="benchmark" [size]="14" />
+      <span>L&iacute;mites anuales</span>
+    </app-button>
+
+    <app-button size="sm" type="button" (click)="registrarEmision()">
+      <span class="ch-emissions-list-page__register-plus" aria-hidden="true">+</span>
+      <span>Registrar emisi&oacute;n</span>
+    </app-button>
+  </div>
+
   <div class="ch-emissions-list-page">
     <section class="ch-emissions-list-page__controls" aria-label="Filtros de emisiones">
       <div class="ch-emissions-list-page__category-filters" role="group" aria-label="Categoría">
@@ -18,33 +30,27 @@
       </div>
 
       <div class="ch-emissions-list-page__select-filters">
-        <app-select-input
-          class="ch-emissions-list-page__select"
-          label="Año"
-          placeholder="Todos"
-          [options]="yearOptions()"
-          [value]="filtroAnioValue()"
-          (valueChange)="cambiarAnio($event)"
-        />
+        <div class="ch-emissions-list-page__filter-select">
+          <app-icon name="calendario" [size]="14" />
+          <app-select-input
+            class="ch-emissions-list-page__select"
+            placeholder="Año: Todos"
+            [options]="yearOptions()"
+            [value]="filtroAnioValue()"
+            (valueChange)="cambiarAnio($event)"
+          />
+        </div>
 
-        <app-select-input
-          class="ch-emissions-list-page__select"
-          label="Mes"
-          placeholder="Todos"
-          [options]="monthOptions"
-          [value]="filtroMesValue()"
-          (valueChange)="cambiarMes($event)"
-        />
-
-        <app-button variant="secondary" type="button" (click)="verLimitesAnuales()">
-          <app-icon name="benchmark" [size]="16" />
-          <span>Límites anuales</span>
-        </app-button>
-
-        <app-button type="button" (click)="registrarEmision()">
-          <span class="ch-emissions-list-page__register-plus" aria-hidden="true">+</span>
-          <span>Registrar emisión</span>
-        </app-button>
+        <div class="ch-emissions-list-page__filter-select">
+          <app-icon name="calendario" [size]="14" />
+          <app-select-input
+            class="ch-emissions-list-page__select"
+            placeholder="Mes: Todos"
+            [options]="monthOptions"
+            [value]="filtroMesValue()"
+            (valueChange)="cambiarMes($event)"
+          />
+        </div>
       </div>
     </section>
 
@@ -205,4 +211,4 @@
       </section>
     </div>
   }
-</app-page-layout>
+</app-shell-layout>

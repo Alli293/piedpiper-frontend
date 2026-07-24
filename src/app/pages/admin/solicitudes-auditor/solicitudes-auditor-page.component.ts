@@ -17,7 +17,6 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 import { RadioGroupFieldComponent } from '../../../shared/components/inputs/radio-group-field/radio-group-field.component';
 import { SelectOption } from '../../../shared/components/inputs/select-input/select-input.component';
 import { TextareaComponent } from '../../../shared/components/inputs/textarea/textarea.component';
-import { ToastHostComponent } from '../../../shared/components/toast/toast.component';
 import { ToastService } from '../../../shared/services/toast.service';
 import { fieldError } from '../../../shared/utils/form-field.utils';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
@@ -39,14 +38,7 @@ const MOTIVO_MAX = 500;
 
 @Component({
   selector: 'app-solicitudes-auditor-page',
-  imports: [
-    ButtonComponent,
-    RadioGroupFieldComponent,
-    TextareaComponent,
-    DatePipe,
-    ToastHostComponent,
-    FormField,
-  ],
+  imports: [ButtonComponent, RadioGroupFieldComponent, TextareaComponent, DatePipe, FormField],
   templateUrl: './solicitudes-auditor-page.component.html',
   styleUrl: './solicitudes-auditor-page.component.scss',
 })

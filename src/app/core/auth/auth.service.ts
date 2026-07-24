@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { PerfilInicialService } from '../services/perfil-inicial.service';
 import {
   AuthResponse,
   LoginRequest,
@@ -10,6 +11,7 @@ import {
   RegistroInvitacionCorreoRequest,
   RegistroPendienteResponse,
   RegistroUsuarioCorreoRequest,
+  ValidarTokenResetResponse,
 } from './auth.models';
 
 const TOKEN_KEY = 'carbonhub.token';
@@ -17,9 +19,10 @@ const TOKEN_KEY = 'carbonhub.token';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly perfilInicialService = inject(PerfilInicialService);
   private readonly baseUrl = `${environment.apiBaseUrl}/auth`;
 
-  readonly token = signal<string | null>(localStorage.getItem(TOKEN_KEY));
+  readonly token = signal<string | null>(sessionStorage.getItem(TOKEN_KEY));
 
   readonly rol = computed(() => this.leerRolDeToken(this.token()));
 
@@ -97,6 +100,30 @@ export class AuthService {
     );
   }
 
+  solicitarResetContrasena(email: string): Observable<MensajeResponse> {
+    return this.http.post<MensajeResponse>(`${this.baseUrl}/solicitar-reset-contrasena`, {
+      email,
+    });
+  }
+
+  validarTokenReset(token: string): Observable<ValidarTokenResetResponse> {
+    return this.http.get<ValidarTokenResetResponse>(`${this.baseUrl}/reset-contrasena`, {
+      params: { token },
+    });
+  }
+
+  restablecerContrasena(
+    token: string,
+    nuevaContrasena: string,
+    confirmarContrasena: string
+  ): Observable<MensajeResponse> {
+    return this.http.post<MensajeResponse>(`${this.baseUrl}/restablecer-contrasena`, {
+      token,
+      nuevaContrasena,
+      confirmarContrasena,
+    });
+  }
+
   verificarCorreo(token: string): Observable<MensajeResponse> {
     return this.http.get<MensajeResponse>(`${this.baseUrl}/verificar-correo`, {
       params: { token },
@@ -114,13 +141,20 @@ export class AuthService {
   }
 
   private guardarSesion(response: AuthResponse): void {
-    localStorage.setItem(TOKEN_KEY, response.token);
+    sessionStorage.setItem(TOKEN_KEY, response.token);
     this.token.set(response.token);
+    this.perfilInicialService.limpiarCache();
+  }
+
+  renovarToken(token: string): void {
+    sessionStorage.setItem(TOKEN_KEY, token);
+    this.token.set(token);
   }
 
   cerrarSesion(): void {
-    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
     this.token.set(null);
+    this.perfilInicialService.limpiarCache();
   }
 
   private leerRolDeToken(token: string | null): string | null {

@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of, throwError, EMPTY, NEVER } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthSessionService } from '../../core/auth-session.service';
 import { ToastService } from '../../shared/services/toast.service';
@@ -12,22 +12,34 @@ import {
 } from '../emissions/models/emision.model';
 import { EmisionesService } from '../emissions/emisiones.service';
 import { DashboardPageComponent, SIN_EMISIONES_MENSAJE } from './dashboard-page.component';
+import { ResumenHuellaDashboardResponse } from './dashboard.model';
 import { DashboardService } from './dashboard.service';
 import { EvolucionService } from './evolucion.service';
-import { ImaService } from './ima.service';
 import { EvolucionChartComponent } from './evolucion-chart.component';
-import { ImaPanelComponent } from './ima-panel.component';
 import { Component, input } from '@angular/core';
 
 const ANIO_ACTUAL = new Date().getFullYear();
 
 const COMPARACION_BASE: ComparacionEmisionesResponse = {
   anio: 2026,
-  huellaAcumuladaT: 30,
-  limiteT: 50,
-  porcentajeConsumido: 60,
+  huellaAcumuladaT: 5.236,
+  limiteT: 12.47,
+  porcentajeConsumido: 42,
   estado: 'dentro',
   mensaje: null,
+  categorias: [
+    { categoria: 'ELECTRICIDAD', huellaT: 2.357, porcentaje: 45 },
+    { categoria: 'FLOTA', huellaT: 1.466, porcentaje: 28 },
+    { categoria: 'VUELO', huellaT: 0.942, porcentaje: 18 },
+    { categoria: 'ENVIO', huellaT: 0.471, porcentaje: 9 },
+  ],
+};
+
+const RESUMEN_HUELLA_BASE: ResumenHuellaDashboardResponse = {
+  periodoSeleccionado: 'mes_actual',
+  huellaTotalT: 5.236,
+  variacionPorcentual: 30.9,
+  tieneDatos: true,
 };
 
 const RESUMEN_CON_DATOS: ResumenEmisionesResponse = {
@@ -62,13 +74,6 @@ class StubChartComponent {
   readonly anio = input(2026);
 }
 
-@Component({ selector: 'app-ima-panel', standalone: true, template: '' })
-class StubImaPanelComponent {
-  readonly ima = input(null);
-  readonly anio = input(2026);
-  readonly mes = input(7);
-}
-
 describe('DashboardPageComponent', () => {
   let fixture: ComponentFixture<DashboardPageComponent>;
   let component: DashboardPageComponent;
@@ -76,9 +81,15 @@ describe('DashboardPageComponent', () => {
     obtenerComparacion: ReturnType<typeof vi.fn>;
     obtenerResumen: ReturnType<typeof vi.fn>;
   };
-  let dashboardService: { exportarReportePdf: ReturnType<typeof vi.fn> };
+  let dashboardService: {
+    exportarReportePdf: ReturnType<typeof vi.fn>;
+    obtenerResumenHuella: ReturnType<typeof vi.fn>;
+  };
   let authSession: { getUserInitials: ReturnType<typeof vi.fn> };
-  let authService: { cerrarSesion: ReturnType<typeof vi.fn> };
+  let authService: {
+    cerrarSesion: ReturnType<typeof vi.fn>;
+    token: ReturnType<typeof signal<string | null>>;
+  };
   let toastService: { error: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
@@ -87,6 +98,7 @@ describe('DashboardPageComponent', () => {
       obtenerResumen: vi.fn().mockReturnValue(of(RESUMEN_CON_DATOS)),
     };
     dashboardService = {
+      obtenerResumenHuella: vi.fn().mockReturnValue(of(RESUMEN_HUELLA_BASE)),
       exportarReportePdf: vi
         .fn()
         .mockReturnValue(of(new Blob(['pdf'], { type: 'application/pdf' }))),
@@ -96,6 +108,7 @@ describe('DashboardPageComponent', () => {
     };
     authService = {
       cerrarSesion: vi.fn(),
+      token: signal<string | null>(null),
     };
     toastService = {
       toasts: signal([]),
@@ -112,32 +125,15 @@ describe('DashboardPageComponent', () => {
           provide: EvolucionService,
           useValue: { obtenerEvolucion: () => of({ anio: 2026, serie: [] }) },
         },
-        {
-          provide: ImaService,
-          useValue: {
-            obtenerIma: () =>
-              of({
-                cobertura: 0,
-                consistencia: 0,
-                ima: 0,
-                parcial: true,
-                motivoParcial: null,
-                puntajeIntensidadSectorial: null,
-                intensidad: null,
-                calculatedAt: '',
-                interpretacionIa: null,
-              }),
-          },
-        },
         { provide: AuthService, useValue: authService },
         { provide: AuthSessionService, useValue: authSession },
         { provide: ToastService, useValue: toastService },
       ],
     })
       .overrideComponent(DashboardPageComponent, {
-        remove: { imports: [EvolucionChartComponent, ImaPanelComponent] },
+        remove: { imports: [EvolucionChartComponent] },
         add: {
-          imports: [StubChartComponent, StubImaPanelComponent],
+          imports: [StubChartComponent],
           schemas: [CUSTOM_ELEMENTS_SCHEMA],
         },
       })
@@ -178,7 +174,187 @@ describe('DashboardPageComponent', () => {
 
     expect(texto).toContain('Huella total 2026');
     expect(texto).toContain('Del limite anual');
-    expect(texto).toContain('30 / 50 tCO2e');
+    expect(texto).toContain('5,236 / 12,47 tCO2e');
+  });
+
+  it('carga el resumen de huella con mes actual y el anio seleccionado por defecto', async () => {
+    await createFixture();
+
+    expect(dashboardService.obtenerResumenHuella).toHaveBeenCalledWith('mes_actual', ANIO_ACTUAL);
+    expect((component as any).resumenHuella()).toEqual(RESUMEN_HUELLA_BASE);
+  });
+
+  it('muestra la huella del periodo y su variacion', async () => {
+    await createFixture();
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+    expect(texto).toContain('5,236');
+    expect(texto).toContain('tCO₂e este mes');
+    expect(texto).toContain('+30,9 % vs periodo anterior');
+  });
+
+  it('si el periodo no tiene datos muestra mensaje sin indicador de variacion', async () => {
+    await createFixture();
+    dashboardService.obtenerResumenHuella.mockReturnValueOnce(
+      of({
+        periodoSeleccionado: 'mes_actual',
+        huellaTotalT: 0,
+        variacionPorcentual: null,
+        tieneDatos: false,
+      })
+    );
+
+    await (component as any).cargarResumenHuella('mes_actual', 2026);
+    fixture.detectChanges();
+
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(texto).toContain('No hay datos de huella registrados para este periodo.');
+    expect(texto).not.toContain('vs periodo anterior');
+  });
+
+  it('si falla el resumen muestra error sin borrar la comparacion anual', async () => {
+    await createFixture();
+    dashboardService.obtenerResumenHuella.mockReturnValueOnce(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 500,
+            error: { message: 'Servicio temporalmente no disponible.' },
+          })
+      )
+    );
+    emisionesService.obtenerResumen.mockReturnValueOnce(throwError(() => new Error('network')));
+
+    await (component as any).cargarResumenHuella('mes_actual', 2026);
+    fixture.detectChanges();
+
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(texto).toContain('Servicio temporalmente no disponible.');
+    expect(texto).toContain('Del limite anual');
+  });
+
+  it('usa el resumen de emisiones como fallback cuando falla el endpoint de resumen de huella', async () => {
+    await createFixture();
+    dashboardService.obtenerResumenHuella.mockReturnValueOnce(throwError(() => new Error('404')));
+    emisionesService.obtenerResumen.mockReturnValueOnce(
+      of({
+        ...RESUMEN_CON_DATOS,
+        mes: new Date().getMonth() + 1,
+        totalKg: 620000,
+        totalT: 620,
+      })
+    );
+
+    await (component as any).cargarResumenHuella('mes_actual', 2026);
+    fixture.detectChanges();
+
+    expect(emisionesService.obtenerResumen).toHaveBeenCalledWith(2026, new Date().getMonth() + 1);
+    expect((component as any).resumenHuella().huellaTotalT).toBe(620);
+    expect((component as any).resumenHuellaError()).toBeNull();
+  });
+
+  it('el cambio de periodo solo recarga el resumen de huella', async () => {
+    await createFixture();
+    dashboardService.obtenerResumenHuella.mockClear();
+    emisionesService.obtenerComparacion.mockClear();
+    dashboardService.obtenerResumenHuella.mockReturnValueOnce(
+      of({
+        periodoSeleccionado: 'trimestre',
+        huellaTotalT: 7.5,
+        variacionPorcentual: null,
+        tieneDatos: true,
+      })
+    );
+
+    (component as any).onPeriodoChange('trimestre');
+    await fixture.whenStable();
+
+    expect(dashboardService.obtenerResumenHuella).toHaveBeenCalledWith('trimestre', ANIO_ACTUAL);
+    expect(emisionesService.obtenerComparacion).not.toHaveBeenCalled();
+  });
+
+  it('ignora respuestas viejas si el periodo cambia rapidamente', async () => {
+    await createFixture();
+    const respuestaLenta = new Subject<ResumenHuellaDashboardResponse>();
+    const respuestaRapida = new Subject<ResumenHuellaDashboardResponse>();
+    dashboardService.obtenerResumenHuella.mockClear();
+    dashboardService.obtenerResumenHuella.mockReturnValueOnce(respuestaLenta.asObservable());
+    dashboardService.obtenerResumenHuella.mockReturnValueOnce(respuestaRapida.asObservable());
+
+    (component as any).onPeriodoChange('trimestre');
+    (component as any).onPeriodoChange('año');
+
+    respuestaRapida.next({
+      periodoSeleccionado: 'año',
+      huellaTotalT: 9,
+      variacionPorcentual: null,
+      tieneDatos: true,
+    });
+    respuestaRapida.complete();
+    await fixture.whenStable();
+
+    respuestaLenta.next({
+      periodoSeleccionado: 'trimestre',
+      huellaTotalT: 2,
+      variacionPorcentual: null,
+      tieneDatos: true,
+    });
+    respuestaLenta.complete();
+    await fixture.whenStable();
+
+    expect((component as any).periodoSeleccionado()).toBe('año');
+    expect((component as any).resumenHuella().huellaTotalT).toBe(9);
+  });
+
+  it('ignora respuestas viejas si el anio cambia rapidamente', async () => {
+    await createFixture();
+    const comparacionLenta = new Subject<ComparacionEmisionesResponse>();
+    const comparacionRapida = new Subject<ComparacionEmisionesResponse>();
+    emisionesService.obtenerComparacion.mockClear();
+    emisionesService.obtenerComparacion.mockReturnValueOnce(comparacionLenta.asObservable());
+    emisionesService.obtenerComparacion.mockReturnValueOnce(comparacionRapida.asObservable());
+
+    void (component as any).cargarComparacion(2021);
+    void (component as any).cargarComparacion(2022);
+
+    comparacionRapida.next({
+      ...COMPARACION_BASE,
+      anio: 2022,
+      huellaAcumuladaT: 22,
+    });
+    comparacionRapida.complete();
+    await fixture.whenStable();
+
+    comparacionLenta.next({
+      ...COMPARACION_BASE,
+      anio: 2021,
+      huellaAcumuladaT: 21,
+    });
+    comparacionLenta.complete();
+    await fixture.whenStable();
+
+    expect((component as any).comparacion().anio).toBe(2022);
+    expect((component as any).comparacion().huellaAcumuladaT).toBe(22);
+  });
+
+  it('al cambiar el anio recarga el resumen de huella con ese anio', async () => {
+    const fixture = await createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    dashboardService.obtenerResumenHuella.mockClear();
+    dashboardService.obtenerResumenHuella.mockReturnValueOnce(
+      of({
+        periodoSeleccionado: 'mes_actual',
+        huellaTotalT: 0,
+        variacionPorcentual: null,
+        tieneDatos: false,
+      })
+    );
+
+    setSelectValue(root, 0, '2021');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(dashboardService.obtenerResumenHuella).toHaveBeenCalledWith('mes_actual', 2021);
   });
 
   it('mantiene el acceso del shell compartido a mis emisiones', async () => {
@@ -199,6 +375,43 @@ describe('DashboardPageComponent', () => {
 
     expect((component as any).tieneEstado('superado')).toBe(true);
     expect(fixture.nativeElement.querySelector('.annual-limit-panel.is-superado')).toBeTruthy();
+  });
+
+  it('muestra el limite anual desglosado por categorias', async () => {
+    await createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    const texto = root.textContent ?? '';
+
+    expect(texto).toContain('Electricidad');
+    expect(texto).toContain('Flota vehicular');
+    expect(texto).toContain('Vuelos');
+    expect(texto).toContain('Envíos');
+    expect(texto).toContain('2,357 tCO₂e');
+    expect(texto).toContain('1,466 tCO₂e');
+    expect(texto).toContain('0,942 tCO₂e');
+    expect(texto).toContain('0,471 tCO₂e');
+    expect(root.querySelectorAll('.annual-limit-panel__categories dd')).toHaveLength(4);
+  });
+
+  it('usa el porcentaje enviado por el backend para las barras de categoria', async () => {
+    await createFixture();
+    (component as any).comparacion.set({
+      ...COMPARACION_BASE,
+      categorias: [
+        { categoria: 'ELECTRICIDAD', huellaT: 30, porcentaje: 60 },
+        { categoria: 'FLOTA', huellaT: 10, porcentaje: 40 },
+        { categoria: 'VUELO', huellaT: 0, porcentaje: 0 },
+        { categoria: 'ENVIO', huellaT: 0, porcentaje: 0 },
+      ],
+    });
+    fixture.detectChanges();
+
+    const barras = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
+        '.annual-limit-panel__category-track span'
+      )
+    );
+    expect(barras.map((barra) => barra.style.width)).toEqual(['60%', '40%', '0%', '0%']);
   });
 
   it('renderiza el estado superado', async () => {
@@ -305,34 +518,6 @@ describe('DashboardPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // PP-41: IMA panel
-  // ---------------------------------------------------------------------------
-
-  it('persiste el mes seleccionado cuando el usuario cambia mes en IMA', async () => {
-    await createFixture();
-    const imaService = TestBed.inject(ImaService) as any;
-    const obtenerImaSpy = vi.spyOn(imaService, 'obtenerIma').mockReturnValue(
-      of({
-        cobertura: 75,
-        puntajeIntensidadSectorial: 58,
-        consistencia: 80,
-        ima: 71,
-        parcial: false,
-        motivoParcial: null,
-        intensidad: 1.5,
-        calculatedAt: '2026-03-18T00:00:00Z',
-        interpretacionIa: null,
-      })
-    );
-
-    (component as any).onImaPeriodoChange({ anio: 2026, mes: 3 });
-    await fixture.whenStable();
-
-    expect((component as any).mesSeleccionado()).toBe(3);
-    expect(obtenerImaSpy).toHaveBeenCalledWith(2026, 3);
-  });
-
-  // ---------------------------------------------------------------------------
   // Desglose por categoría (PP-39, dona)
   // ---------------------------------------------------------------------------
 
@@ -392,17 +577,17 @@ describe('DashboardPageComponent', () => {
     expect(root.querySelectorAll('.dashboard-page__segmento').length).toBe(0);
   });
 
-  it('al cambiar el mes vuelve a consultar el resumen y actualiza la vista', async () => {
+  it('al cambiar el año vuelve a consultar el desglose anual y actualiza la vista', async () => {
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
     emisionesService.obtenerResumen.mockReturnValue(of(RESUMEN_VACIO));
 
-    setSelectValue(root, 1, '3');
+    setSelectValue(root, 0, '2021');
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(emisionesService.obtenerResumen).toHaveBeenLastCalledWith(ANIO_ACTUAL, 3);
+    expect(emisionesService.obtenerResumen).toHaveBeenLastCalledWith(2021, undefined);
     expect(root.querySelector('.dashboard-page__vacio')).not.toBeNull();
   });
 

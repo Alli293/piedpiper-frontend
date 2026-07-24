@@ -1,0 +1,109 @@
+<app-shell-layout
+  activeId="ecoruta"
+  [navItems]="navItems"
+  [displayName]="displayName()"
+  [displayInitials]="headerConfig().userInitials"
+  companyRole="Viajero sostenible"
+  [headerConfig]="headerConfig()"
+>
+  <div class="ecoruta-preferencias-page">
+    <form novalidate (submit)="handleSubmit($event)">
+      <section class="ecoruta-preferencias-page__section" aria-labelledby="duracion-title">
+        <app-heading level="h2" id="duracion-title" text="Duración y fecha" />
+        <div class="ecoruta-preferencias-page__row">
+          <app-date-input
+            label="Fecha de inicio"
+            [formField]="preferenciasForm.fechaInicio"
+            [error]="fechaInicioError()"
+          />
+          <app-number-input
+            label="Cantidad de días"
+            placeholder="5"
+            [formField]="preferenciasForm.cantidadDias"
+            [error]="cantidadDiasError()"
+            hint="Entre 1 y 30 días"
+          />
+        </div>
+      </section>
+
+      <section class="ecoruta-preferencias-page__section" aria-labelledby="tipo-viaje-title">
+        <app-heading level="h2" id="tipo-viaje-title" text="Tipo de viaje" />
+        <app-chip-select
+          [options]="tipoViajeOptions"
+          [formField]="preferenciasForm.tipoViaje"
+          [error]="tipoViajeError()"
+        />
+      </section>
+
+      <section class="ecoruta-preferencias-page__section" aria-labelledby="intereses-title">
+        <app-heading level="h2" id="intereses-title" text="Intereses" />
+        <app-chip-select
+          [options]="interesOptions"
+          [multiple]="true"
+          [formField]="preferenciasForm.intereses"
+          [error]="interesesError()"
+        />
+      </section>
+
+      <section class="ecoruta-preferencias-page__section" aria-labelledby="presupuesto-title">
+        <app-heading level="h2" id="presupuesto-title" text="Presupuesto y alojamiento" />
+        <div class="ecoruta-preferencias-page__row">
+          <div class="ecoruta-preferencias-page__select">
+            <app-select-input
+              label="Presupuesto (opcional)"
+              placeholder="Selecciona un presupuesto"
+              [options]="presupuestoOptions"
+              [formField]="preferenciasForm.presupuesto"
+            />
+          </div>
+          <app-toggle-switch
+            label="¿Necesitas hospedaje?"
+            [formField]="preferenciasForm.requiereHospedaje"
+          />
+        </div>
+      </section>
+
+      <section class="ecoruta-preferencias-page__section" aria-labelledby="ubicacion-title">
+        <app-heading level="h2" id="ubicacion-title" text="Ubicación" />
+        <app-toggle-switch
+          label="Buscar actividades cerca de mí"
+          [formField]="preferenciasForm.buscarCercaDeMi"
+        />
+        @if (mostrarUbicacion()) {
+          <app-text-input
+            label="Ubicación actual"
+            placeholder="San José, Costa Rica"
+            [formField]="preferenciasForm.ubicacionActual"
+            [error]="ubicacionActualError()"
+          />
+        }
+        <div class="ecoruta-preferencias-page__select">
+          <app-select-input
+            label="Provincia preferida (opcional)"
+            placeholder="Sin preferencia"
+            [options]="provinciaOptions"
+            [formField]="preferenciasForm.provinciaPreferida"
+          />
+        </div>
+      </section>
+
+      <section class="ecoruta-preferencias-page__section" aria-labelledby="detalles-title">
+        <app-heading level="h2" id="detalles-title" text="Detalles adicionales" />
+        <app-textarea
+          label="Limitaciones de movilidad (opcional)"
+          placeholder="Cuéntanos si tienes alguna limitación de movilidad."
+          [rows]="3"
+          [formField]="preferenciasForm.limitacionesMovilidad"
+          [error]="limitacionesMovilidadError()"
+          hint="Máximo 500 caracteres"
+        />
+      </section>
+
+      <div class="ecoruta-preferencias-page__actions">
+        <app-button type="submit" [disabled]="!canSubmit()" [loading]="submitting()">
+          Generar itinerario
+        </app-button>
+      </div>
+    </form>
+  </div>
+</app-shell-layout>

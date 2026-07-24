@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../core/auth/auth.service';
-import { HeaderConfig } from '../page-layout/page-layout.component';
 import { ShellLayoutComponent } from './shell-layout.component';
+import { AuthService } from '../../../core/auth/auth.service';
+import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
+import { HeaderConfig } from '../page-layout/page-layout.component';
 
 const HEADER_CONFIG: HeaderConfig = {
   sectionLabel: 'PANEL EMPRESARIAL',
@@ -12,18 +13,21 @@ const HEADER_CONFIG: HeaderConfig = {
 };
 
 describe('ShellLayoutComponent', () => {
-  let navigateByUrl: ReturnType<typeof vi.fn>;
-  let cerrarSesion: ReturnType<typeof vi.fn>;
+  let authServiceStub: { cerrarSesion: ReturnType<typeof vi.fn> };
+  let sesionInactividadStub: { detener: ReturnType<typeof vi.fn> };
+  let routerStub: { navigateByUrl: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    navigateByUrl = vi.fn().mockResolvedValue(true);
-    cerrarSesion = vi.fn();
+    authServiceStub = { cerrarSesion: vi.fn() };
+    sesionInactividadStub = { detener: vi.fn() };
+    routerStub = { navigateByUrl: vi.fn().mockResolvedValue(true) };
 
     await TestBed.configureTestingModule({
       imports: [ShellLayoutComponent],
       providers: [
-        { provide: Router, useValue: { navigateByUrl } },
-        { provide: AuthService, useValue: { cerrarSesion } },
+        { provide: AuthService, useValue: authServiceStub },
+        { provide: SesionInactividadService, useValue: sesionInactividadStub },
+        { provide: Router, useValue: routerStub },
       ],
     }).compileComponents();
   });
@@ -129,7 +133,7 @@ describe('ShellLayoutComponent', () => {
 
     fixture.componentInstance['onBackClicked']();
 
-    expect(navigateByUrl).toHaveBeenCalledWith('/emisiones');
+    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/emisiones');
     expect(emitido.length).toBe(0);
   });
 
@@ -140,17 +144,27 @@ describe('ShellLayoutComponent', () => {
 
     fixture.componentInstance['onBackClicked']();
 
-    expect(navigateByUrl).not.toHaveBeenCalled();
+    expect(routerStub.navigateByUrl).not.toHaveBeenCalled();
     expect(emitido.length).toBe(1);
   });
 
-  it('cierra sesion antes de navegar al login', async () => {
+  it('cierra sesion, detiene la inactividad y navega al login', async () => {
     const fixture = await createFixture({ activeId: 'dashboard' });
 
     (fixture.componentInstance as any).onMenuItem('logout');
 
-    expect(cerrarSesion).toHaveBeenCalled();
-    expect(navigateByUrl).toHaveBeenCalledWith('/login');
+    expect(authServiceStub.cerrarSesion).toHaveBeenCalled();
+    expect(sesionInactividadStub.detener).toHaveBeenCalled();
+    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/login');
+  });
+
+  it('navega a /configuracion sin cerrar sesión', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard' });
+
+    (fixture.componentInstance as any).onMenuItem('settings');
+
+    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/configuracion');
+    expect(authServiceStub.cerrarSesion).not.toHaveBeenCalled();
   });
 
   it('navega al placeholder de benchmark', async () => {
@@ -158,6 +172,14 @@ describe('ShellLayoutComponent', () => {
 
     (fixture.componentInstance as any).onMenuItem('benchmark');
 
-    expect(navigateByUrl).toHaveBeenCalledWith('/benchmark');
+    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/benchmark');
+  });
+
+  it('navega al listado al abrir mis emisiones', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard' });
+
+    (fixture.componentInstance as any).onMenuItem('emissions');
+
+    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/emisiones');
   });
 });

@@ -17,11 +17,11 @@
     (notificationClicked)="notificationClicked.emit()"
     (profileClicked)="profileClicked.emit()"
     (backClicked)="backClicked.emit()"
-  />
+  >
+    <ng-content select="[pageHeaderActions]" />
+  </app-header>
 
   <main class="ch-page-layout__content">
     <ng-content />
   </main>
-
-  <app-toast-host />
 </div>

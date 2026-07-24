@@ -9,11 +9,8 @@ import {
   SelectInputComponent,
   SelectOption,
 } from '../../../shared/components/inputs/select-input/select-input.component';
-import {
-  HeaderConfig,
-  PageLayoutComponent,
-  SidebarConfig,
-} from '../../../shared/layouts/page-layout/page-layout.component';
+import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
+import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import { EmisionesService } from '../emisiones.service';
@@ -34,7 +31,7 @@ const CATEGORY_OPTIONS: CategoriaOption[] = [
 ];
 
 const MONTH_OPTIONS: SelectOption[] = [
-  { value: '', label: 'Todos' },
+  { value: '', label: 'Mes: Todos' },
   { value: '1', label: 'Enero' },
   { value: '2', label: 'Febrero' },
   { value: '3', label: 'Marzo' },
@@ -55,8 +52,8 @@ const MONTH_OPTIONS: SelectOption[] = [
     ButtonComponent,
     HeadingComponent,
     IconComponent,
-    PageLayoutComponent,
     SelectInputComponent,
+    ShellLayoutComponent,
   ],
   templateUrl: './emissions-list-page.component.html',
   styleUrl: './emissions-list-page.component.scss',
@@ -73,7 +70,7 @@ export class EmissionsListPageComponent {
   protected readonly deletingId = signal<string | null>(null);
   protected readonly confirmTarget = signal<EmisionResponse | null>(null);
   protected readonly filtroCategoria = signal<CategoriaFiltroEmision>('TODAS');
-  protected readonly filtroAnio = signal<number | null>(null);
+  protected readonly filtroAnio = signal<number | null>(new Date().getFullYear());
   protected readonly filtroMes = signal<number | null>(null);
 
   protected readonly categoryOptions = CATEGORY_OPTIONS;
@@ -84,36 +81,15 @@ export class EmissionsListPageComponent {
   protected readonly yearOptions = computed<SelectOption[]>(() => {
     const currentYear = new Date().getFullYear();
     return [
-      { value: '', label: 'Todos' },
+      { value: '', label: 'Año: Todos' },
       ...Array.from({ length: currentYear - 1999 }, (_, index) => {
         const year = String(currentYear - index);
-        return { value: year, label: year };
+        return { value: year, label: `Año ${year}` };
       }),
     ];
   });
   protected readonly filtroAnioValue = computed(() => this.filtroAnio()?.toString() ?? '');
   protected readonly filtroMesValue = computed(() => this.filtroMes()?.toString() ?? '');
-
-  protected readonly sidebarConfig = signal<SidebarConfig>({
-    menuItems: [
-      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', active: false },
-      { id: 'emissions', label: 'Mis Emisiones', icon: 'emisiones', active: true },
-      { id: 'auditors', label: 'Auditores', icon: 'auditores', active: false },
-      { id: 'audits', label: 'Auditorías', icon: 'auditorias', active: false },
-      { id: 'certifications', label: 'Certificaciones', icon: 'certificaciones', active: false },
-      { id: 'benchmark', label: 'Madurez ambiental', icon: 'benchmark', active: false },
-      { id: 'badges', label: 'Insignias', icon: 'insignias', active: false },
-      { id: 'public-profile', label: 'Perfil Público', icon: 'perfil-publico', active: false },
-      { id: 'team-members', label: 'Colaboradores', icon: 'colaboradores', active: false },
-    ],
-    bottomItems: [
-      { id: 'settings', label: 'Configuración', icon: 'config' },
-      { id: 'logout', label: 'Cerrar sesión', icon: 'logout' },
-    ],
-    companyName: 'Café del Valle S.A.',
-    companyRole: 'Empresa',
-    companyInitials: 'CV',
-  });
 
   protected readonly headerConfig = signal<HeaderConfig>({
     sectionLabel: 'PANEL EMPRESARIAL',
@@ -135,7 +111,7 @@ export class EmissionsListPageComponent {
         mes: this.filtroMes(),
       };
       const categoria = this.filtroCategoria();
-      const registros = await firstValueFrom(this.emisionesService.listarEmisiones(filtrosPeriodo));
+      const registros = await firstValueFrom(this.emisionesService.listarEmisiones());
       if (requestId !== this.cargaRegistrosRequestId) return;
       const registrosPeriodo = registros.filter((registro) =>
         cumpleFiltros(registro, 'TODAS', filtrosPeriodo.anio, filtrosPeriodo.mes)
