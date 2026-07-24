@@ -42,3 +42,11 @@ export interface RegistroUsuarioCorreoRequest {
   confirmarContrasena: string;
   aceptaTerminos: boolean;
 }
+
+export interface MensajeResponse {
+  mensaje: string;
+}
+
+export interface ValidarTokenResetResponse {
+  email: string;
+}

@@ -17,6 +17,12 @@ const rutasPlaceholder = rutasPostAutenticacion.filter(
 
 export const routes: Routes = [
   {
+    path: '',
+    pathMatch: 'full' as const,
+    loadComponent: () =>
+      import('./pages/landing/landing-page.component').then((m) => m.LandingPageComponent),
+  },
+  {
     path: 'login',
     loadComponent: () =>
       import('./pages/auth/login/login-page.component').then((m) => m.LoginPageComponent),
@@ -40,6 +46,27 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/auth/registro/registro-rol-page.component').then(
         (m) => m.RegistroRolPageComponent
+      ),
+  },
+  {
+    path: 'recuperar-contrasena',
+    loadComponent: () =>
+      import('./pages/auth/recuperar-contrasena/recuperar-contrasena-page.component').then(
+        (m) => m.RecuperarContrasenaPageComponent
+      ),
+  },
+  {
+    path: 'reset-contrasena',
+    loadComponent: () =>
+      import('./pages/auth/reset-contrasena/reset-contrasena-page.component').then(
+        (m) => m.ResetContrasenaPageComponent
+      ),
+  },
+  {
+    path: 'verificar-correo',
+    loadComponent: () =>
+      import('./pages/auth/verificar-correo/verificar-correo-page.component').then(
+        (m) => m.VerificarCorreoPageComponent
       ),
   },
   {
@@ -74,6 +101,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/admin/solicitudes-auditor/solicitudes-auditor-page.component').then(
         (m) => m.SolicitudesAuditorPageComponent
+      ),
+  },
+  {
+    path: 'ecoruta/preferencias',
+    canActivate: [rolGuard('USUARIO_INDIVIDUAL')],
+    loadComponent: () =>
+      import('./pages/ecoruta/preferencias/ecoruta-preferencias-page.component').then(
+        (m) => m.EcoRutaPreferenciasPageComponent
       ),
   },
   {
@@ -120,6 +155,12 @@ export const routes: Routes = [
   {
     path: 'benchmark',
     canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/benchmark/benchmark-page.component').then((m) => m.BenchmarkPageComponent),
+  },
+  {
+    path: 'ecoruta',
+    canActivate: [authGuard],
     loadComponent: cargarPlaceholder,
   },
   ...rutasPlaceholder.map((path) => ({ path, loadComponent: cargarPlaceholder })),
@@ -146,11 +187,6 @@ export const routes: Routes = [
       import('./pages/configuracion/configuracion-page.component').then(
         (m) => m.ConfiguracionPageComponent
       ),
-  },
-  {
-    path: '',
-    redirectTo: 'login',
-    pathMatch: 'full' as const,
   },
   {
     path: '**',

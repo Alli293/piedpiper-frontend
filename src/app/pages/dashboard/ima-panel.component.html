@@ -1,0 +1,193 @@
+<article class="ima-card" aria-label="Índice de Madurez Ambiental">
+  <header class="ima-card__header">
+    <span class="ima-card__icon ima-card__icon--green">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+      </svg>
+    </span>
+    <div class="ima-card__titles">
+      <app-heading level="h3" text="IMA actual y sus dimensiones" />
+      <p class="ima-card__subtitle">
+        Promedio de Cobertura, Intensidad sectorial y Consistencia (0–100).
+      </p>
+    </div>
+    <app-select-input
+      class="ima-card__mes-select"
+      [options]="mesesOptions()"
+      [value]="String(mes())"
+      placeholder="Mes"
+      (valueChange)="onMesChange($event)"
+      aria-label="Seleccionar mes del IMA"
+    />
+  </header>
+
+  @if (loading()) {
+    <p class="ima-card__loading">Cargando IMA...</p>
+  } @else if (!ima()) {
+    <p class="ima-card__empty">No hay datos de IMA disponibles.</p>
+  } @else {
+    <div class="ima-card__body">
+      <div class="ima-gauge">
+        <svg class="ima-gauge__svg" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="54" fill="none" stroke="var(--ch-border)" stroke-width="10" />
+          <circle
+            cx="60"
+            cy="60"
+            r="54"
+            fill="none"
+            stroke="var(--ch-green)"
+            stroke-width="10"
+            stroke-linecap="round"
+            [attr.stroke-dasharray]="donutDasharray()"
+            transform="rotate(-90 60 60)"
+          />
+        </svg>
+        <div class="ima-gauge__center">
+          <span class="ima-gauge__value">{{ ima()!.ima | number: '1.0-0' }}</span>
+          <span class="ima-gauge__max">/ 100</span>
+        </div>
+        <p class="ima-gauge__label">IMA GLOBAL · {{ anio() }}</p>
+        <p class="ima-gauge__formula">Promedio de las dimensiones:<br />{{ formulaText() }}</p>
+      </div>
+
+      <div class="ima-dims">
+        <div class="ima-dim">
+          <div class="ima-dim__header">
+            <span class="ima-dim__icon ima-dim__icon--cobertura">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M9 12l2 2 4-4" />
+              </svg>
+            </span>
+            <div class="ima-dim__text">
+              <span class="ima-dim__name">Cobertura</span>
+              <span class="ima-dim__desc"
+                >{{ ima()!.cobertura / 25 | number: '1.0-0' }} de 4 categorías con registros</span
+              >
+            </div>
+            <div class="ima-dim__value">
+              <span class="ima-dim__score">{{ ima()!.cobertura | number: '1.0-0' }}</span
+              ><span class="ima-dim__of">/100</span>
+            </div>
+          </div>
+          <div class="ima-dim__bar">
+            <div
+              class="ima-dim__bar-fill ima-dim__bar-fill--cobertura"
+              [style.width.%]="ima()!.cobertura"
+            ></div>
+          </div>
+        </div>
+
+        <div class="ima-dim">
+          <div class="ima-dim__header">
+            <span class="ima-dim__icon ima-dim__icon--intensidad">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M12 2v20M2 12h20" />
+                <circle cx="12" cy="12" r="4" />
+              </svg>
+            </span>
+            <div class="ima-dim__text">
+              <span class="ima-dim__name">
+                Puntaje de intensidad sectorial
+                @if (
+                  ima()!.puntajeIntensidadSectorial !== null &&
+                  ima()!.puntajeIntensidadSectorial! < 50
+                ) {
+                  <span class="ima-dim__tag ima-dim__tag--low">↘ Más baja</span>
+                }
+              </span>
+              <span class="ima-dim__desc"
+                >Intensidad (tCO₂e por empleado) comparada con el sector</span
+              >
+            </div>
+            <div class="ima-dim__value">
+              @if (ima()!.puntajeIntensidadSectorial !== null) {
+                <span class="ima-dim__score">{{
+                  ima()!.puntajeIntensidadSectorial | number: '1.0-0'
+                }}</span
+                ><span class="ima-dim__of">/100</span>
+              } @else {
+                <span class="ima-dim__score ima-dim__score--na">N/A</span>
+              }
+            </div>
+          </div>
+          <div class="ima-dim__bar">
+            <div
+              class="ima-dim__bar-fill ima-dim__bar-fill--intensidad"
+              [style.width.%]="ima()!.puntajeIntensidadSectorial ?? 0"
+            ></div>
+          </div>
+        </div>
+
+        <div class="ima-dim">
+          <div class="ima-dim__header">
+            <span class="ima-dim__icon ima-dim__icon--consistencia">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+              </svg>
+            </span>
+            <div class="ima-dim__text">
+              <span class="ima-dim__name">Consistencia</span>
+              <span class="ima-dim__desc">Regularidad del registro de emisiones mes a mes</span>
+            </div>
+            <div class="ima-dim__value">
+              <span class="ima-dim__score">{{ ima()!.consistencia | number: '1.0-0' }}</span
+              ><span class="ima-dim__of">/100</span>
+            </div>
+          </div>
+          <div class="ima-dim__bar">
+            <div
+              class="ima-dim__bar-fill ima-dim__bar-fill--consistencia"
+              [style.width.%]="ima()!.consistencia"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (ima()!.parcial && ima()!.motivoParcial) {
+      <div class="ima-card__notice">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 8v4M12 16h.01" />
+        </svg>
+        <span>{{ ima()!.motivoParcial }}</span>
+      </div>
+    }
+  }
+</article>

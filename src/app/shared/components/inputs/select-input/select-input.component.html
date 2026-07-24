@@ -1,21 +1,35 @@
 @if (label()) {
   <label class="ch-select-input__label" [for]="inputId">{{ label() }}</label>
 }
-<select
-  class="ch-select-input__field"
-  [class.ch-select-input__field--error]="hasError()"
-  [id]="inputId"
-  [disabled]="effectiveDisabled()"
-  [attr.aria-invalid]="hasError() ? 'true' : null"
-  [attr.aria-describedby]="describedBy()"
-  (change)="onChangeEvent($event)"
-  (blur)="onBlur()"
->
-  <option value="" disabled [selected]="!value()">{{ placeholder() }}</option>
-  @for (option of options(); track option.value) {
-    <option [value]="option.value" [selected]="option.value === value()">{{ option.label }}</option>
+<div class="ch-select-input__control">
+  @if (hasIcon()) {
+    <app-icon class="ch-select-input__icon" [name]="icon()!" [size]="18" />
   }
-</select>
+
+  <select
+    class="ch-select-input__field"
+    [class.ch-select-input__field--error]="hasError()"
+    [class.ch-select-input__field--with-icon]="hasIcon()"
+    [id]="inputId"
+    [disabled]="effectiveDisabled()"
+    [attr.aria-label]="accessibleLabel()"
+    [attr.aria-invalid]="hasError() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+    (change)="onChangeEvent($event)"
+    (blur)="onBlur()"
+  >
+    <option value="" disabled [selected]="!value()">{{ placeholder() }}</option>
+    @for (option of options(); track option.value) {
+      <option [value]="option.value" [selected]="option.value === value()">
+        {{ option.label }}
+      </option>
+    }
+  </select>
+
+  @if (variant() === 'compact') {
+    <app-icon class="ch-select-input__chevron" name="chevron-abajo" [size]="18" />
+  }
+</div>
 @if (hasError()) {
   <p class="ch-select-input__error" [id]="errorId">{{ error() }}</p>
 } @else if (hint()) {

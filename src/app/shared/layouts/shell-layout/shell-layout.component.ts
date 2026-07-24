@@ -1,11 +1,16 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
+import { SidebarBottomItemId } from '../../components/sidebar/sidebar.component';
 import { HeaderConfig, PageLayoutComponent } from '../page-layout/page-layout.component';
-import { buildSidebarConfig, SidebarNavId } from '../page-layout/sidebar-nav';
+import { buildSidebarConfig, SidebarNavId, SidebarNavItemDef } from '../page-layout/sidebar-nav';
+import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
 
 const COMPANY_NAME = 'Café del Valle S.A.';
 const COMPANY_INITIALS = 'CV';
+
+/** Ids this shell's own sidebarConfig can ever emit (see buildSidebarConfig). */
+type ShellMenuItemId = SidebarNavId | SidebarBottomItemId;
 
 /**
  * Shared shell for authenticated pages: owns sidebar construction so pages
@@ -19,6 +24,7 @@ const COMPANY_INITIALS = 'CV';
 export class ShellLayoutComponent {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly sesionInactividadService = inject(SesionInactividadService);
 
   activeId = input<SidebarNavId>();
   companyRole = input('Empresa · Admin');
@@ -26,16 +32,23 @@ export class ShellLayoutComponent {
   headerConfig = input.required<HeaderConfig>();
   /** Route the back button navigates to. Falls back to emitting `backClicked` if omitted. */
   backRoute = input<string>();
+  /** Overrides the sidebar's display name (defaults to the company name). E.g. an individual user's own name. */
+  displayName = input<string>();
+  /** Overrides the sidebar's avatar initials (defaults to the company initials). */
+  displayInitials = input<string>();
+  /** Overrides the sidebar's nav items (e.g. ECORUTA_NAV_ITEMS for the individual-traveler shell). */
+  navItems = input<readonly SidebarNavItemDef[]>();
 
   backClicked = output<void>();
 
   protected readonly sidebarConfig = computed(() =>
     buildSidebarConfig({
       activeId: this.activeId(),
-      companyName: COMPANY_NAME,
+      companyName: this.displayName() ?? COMPANY_NAME,
       companyRole: this.companyRole(),
-      companyInitials: COMPANY_INITIALS,
+      companyInitials: this.displayInitials() ?? COMPANY_INITIALS,
       settingsLabel: this.settingsLabel(),
+      navItems: this.navItems(),
     })
   );
 
@@ -49,19 +62,21 @@ export class ShellLayoutComponent {
   }
 
   protected onMenuItem(id: string): void {
-    if (id === 'logout') {
+    const menuId = id as ShellMenuItemId;
+    if (menuId === 'logout') {
       this.authService.cerrarSesion();
+      this.sesionInactividadService.detener();
       void this.router.navigateByUrl('/login');
       return;
     }
 
-    const rutas: Record<string, string> = {
+    const rutas: Record<Exclude<ShellMenuItemId, 'logout'>, string> = {
       benchmark: '/benchmark',
       dashboard: '/panel',
-      emissions: '/emisiones/registrar',
+      ecoruta: '/ecoruta/preferencias',
+      emissions: '/emisiones',
       settings: '/configuracion',
     };
-    const ruta = rutas[id];
-    if (ruta) void this.router.navigateByUrl(ruta);
+    void this.router.navigateByUrl(rutas[menuId]);
   }
 }

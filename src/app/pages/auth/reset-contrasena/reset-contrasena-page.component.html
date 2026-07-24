@@ -1,0 +1,67 @@
+<app-auth-layout>
+  <div class="reset-contrasena">
+    @if (cargando()) {
+      <p class="reset-contrasena__estado">Verificando tu enlace...</p>
+    } @else if (completado()) {
+      <header class="reset-contrasena__header">
+        <app-heading level="h1" text="Contraseña actualizada" />
+        <p class="reset-contrasena__subtitle">{{ mensajeExito() }}</p>
+      </header>
+      <a class="reset-contrasena__enlace" routerLink="/login" appLink>Iniciar sesión</a>
+    } @else if (mensajeInvalido()) {
+      <header class="reset-contrasena__header">
+        <app-heading level="h1" text="Enlace no válido" />
+        <p class="reset-contrasena__subtitle">{{ mensajeInvalido() }}</p>
+      </header>
+      <a class="reset-contrasena__enlace" routerLink="/recuperar-contrasena" appLink
+        >Solicitar un enlace nuevo</a
+      >
+    } @else {
+      <header class="reset-contrasena__header">
+        <app-heading level="h1" text="Crea tu nueva contraseña" />
+        <p class="reset-contrasena__subtitle">
+          Introduce y confirma tu nueva contraseña para restablecer el acceso a tu cuenta.
+        </p>
+      </header>
+
+      <app-badge class="reset-contrasena__badge" variant="success" icon="success">
+        Enlace verificado · {{ email() }}
+      </app-badge>
+
+      <form class="reset-contrasena__form" novalidate (submit)="handleSubmit($event)">
+        <app-password-input
+          id="txtContrasena"
+          label="Contraseña"
+          autocomplete="new-password"
+          placeholder="Tu contraseña"
+          [formField]="restablecerForm.contrasena"
+          [error]="errorContrasena()"
+          [hint]="contrasenaHint"
+        />
+
+        <app-password-input
+          id="txtConfirmarContrasena"
+          label="Confirmar contraseña"
+          autocomplete="new-password"
+          placeholder="Repite tu contraseña"
+          [formField]="restablecerForm.confirmarContrasena"
+          [error]="errorConfirmacion()"
+        />
+
+        @if (error()) {
+          <p class="reset-contrasena__error" role="alert">{{ error() }}</p>
+        }
+
+        <app-button
+          id="btnEstablecerContrasena"
+          variant="primary"
+          size="lg"
+          type="submit"
+          [loading]="submitting()"
+        >
+          Establecer nueva contraseña →
+        </app-button>
+      </form>
+    }
+  </div>
+</app-auth-layout>

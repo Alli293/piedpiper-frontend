@@ -71,6 +71,12 @@
   gap: var(--ch-space-4);
 }
 
+.ch-header__right ::ng-deep [pageHeaderActions] {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+}
+
 .ch-header__icon-button {
   position: relative;
   display: inline-flex;

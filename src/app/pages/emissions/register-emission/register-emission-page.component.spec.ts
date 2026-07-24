@@ -91,8 +91,8 @@ describe('RegisterEmissionPageComponent', () => {
 
   beforeEach(async () => {
     storage = createStorageMock();
-    vi.stubGlobal('localStorage', storage);
-    vi.stubGlobal('sessionStorage', createStorageMock());
+    vi.stubGlobal('sessionStorage', storage);
+    vi.stubGlobal('localStorage', createStorageMock());
     storage.setItem('carbonhub.token', 'test-token');
     registrarElectricidad = vi.fn();
     registrarVuelo = vi.fn();
@@ -203,6 +203,15 @@ describe('RegisterEmissionPageComponent', () => {
     await submitForm(fixture);
 
     expect(registrarElectricidad).not.toHaveBeenCalled();
+  });
+
+  it('navigates to dashboard from the sidebar menu', () => {
+    const fixture = createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    clickButton(root, 'Dashboard');
+
+    expect(TestBed.inject(Router).navigateByUrl).toHaveBeenCalledWith('/panel');
   });
 
   it('calls the service exactly once when the form is valid', async () => {

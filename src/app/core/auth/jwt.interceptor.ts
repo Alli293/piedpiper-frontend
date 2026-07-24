@@ -2,6 +2,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
+import { SesionInactividadService } from './sesion-inactividad.service';
 
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   if (!req.url.startsWith(environment.apiBaseUrl)) {
@@ -14,6 +15,8 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   if (!token) {
     return next(req);
   }
+
+  inject(SesionInactividadService).reiniciar();
 
   return next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }));
 };

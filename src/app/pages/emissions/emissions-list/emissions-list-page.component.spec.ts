@@ -1,6 +1,9 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
+import { AuthService } from '../../../core/auth/auth.service';
+import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
 import { EmisionesService } from '../emisiones.service';
 import { EmisionResponse } from '../models/emision.model';
 import { EmissionsListPageComponent } from './emissions-list-page.component';
@@ -70,6 +73,14 @@ describe('EmissionsListPageComponent', () => {
             listarEmisiones,
             eliminarEmision,
           },
+        },
+        {
+          provide: AuthService,
+          useValue: { token: signal('fake-token'), cerrarSesion: vi.fn() },
+        },
+        {
+          provide: SesionInactividadService,
+          useValue: { reiniciar: vi.fn(), detener: vi.fn() },
         },
       ],
     }).compileComponents();
@@ -154,13 +165,25 @@ describe('EmissionsListPageComponent', () => {
   it('navega a limites anuales desde el boton del toolbar', async () => {
     const fixture = await createFixture();
     const root = fixture.nativeElement as HTMLElement;
-    const limitsButton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
-      (button) => button.textContent?.includes('Límites anuales')
+    const limitsButton = root.querySelector<HTMLButtonElement>(
+      '.ch-emissions-list-page__header-actions button'
     );
 
     limitsButton?.click();
 
     expect(navigateByUrl).toHaveBeenCalledWith('/limites');
+  });
+
+  it('navega al dashboard desde el sidebar', async () => {
+    const fixture = await createFixture();
+    const root = fixture.nativeElement as HTMLElement;
+    const dashboardButton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
+      (button) => button.textContent?.includes('Dashboard')
+    );
+
+    dashboardButton?.click();
+
+    expect(navigateByUrl).toHaveBeenCalledWith('/panel');
   });
 
   it('mantiene los contadores del periodo aunque se filtre por categoria', async () => {
@@ -219,7 +242,7 @@ describe('EmissionsListPageComponent', () => {
     expect(tableText).toContain('Ruta de reparto');
     expect(tableText).not.toContain('Pruebas');
     expect(tableText).not.toContain('Viaje aereo SJO-FRA-SJO');
-    expect(listarEmisiones).toHaveBeenLastCalledWith({ anio: null, mes: null });
+    expect(listarEmisiones).toHaveBeenLastCalledWith();
   });
 
   it('filtra en pantalla por categoria aunque el servicio devuelva todos los registros', async () => {

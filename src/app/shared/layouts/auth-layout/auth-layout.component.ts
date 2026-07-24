@@ -1,3 +1,4 @@
+import { NgOptimizedImage } from '@angular/common';
 import { Component } from '@angular/core';
 import { LogoComponent } from '../../components/logo/logo.component';
 
@@ -9,7 +10,7 @@ interface AuthStat {
 
 @Component({
   selector: 'app-auth-layout',
-  imports: [LogoComponent],
+  imports: [LogoComponent, NgOptimizedImage],
   templateUrl: './auth-layout.component.html',
   styleUrl: './auth-layout.component.scss',
   host: {

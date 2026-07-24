@@ -1,7 +1,8 @@
 export type UnidadElectricidad = 'kwh' | 'mwh';
 export type CabinClass = 'economy' | 'premium';
-export type CategoriaFiltroEmision = 'TODAS' | 'ELECTRICIDAD' | 'FLOTA' | 'VUELO' | 'ENVIO';
-export type EstadoComparacion = 'dentro' | 'cerca' | 'superado' | 'sin_limite';
+export type CategoriaEmision = 'ELECTRICIDAD' | 'FLOTA' | 'VUELO' | 'ENVIO';
+export type CategoriaFiltroEmision = 'TODAS' | CategoriaEmision;
+export type EstadoComparacion = 'dentro' | 'cerca' | 'alcanzado' | 'superado' | 'sin_limite';
 
 export type UnidadPeso = 'G' | 'LB' | 'KG' | 'MT';
 // El backend serializa UnidadDistancia en minúscula (@JsonValue) para vuelo, envío y flota.
@@ -127,4 +128,27 @@ export interface ComparacionEmisionesResponse {
   readonly porcentajeConsumido: number | null;
   readonly estado: EstadoComparacion;
   readonly mensaje: string | null;
+  readonly categorias: ComparacionCategoriaEmision[];
+}
+
+export interface ComparacionCategoriaEmision {
+  readonly categoria: CategoriaEmision;
+  readonly huellaT: number;
+  readonly porcentaje: number;
+}
+
+export type CategoriaResumen = CategoriaEmision;
+
+export interface ResumenCategoriaResponse {
+  readonly categoria: CategoriaResumen;
+  readonly totalKg: number;
+  readonly porcentaje: number;
+}
+
+export interface ResumenEmisionesResponse {
+  readonly anio: number;
+  readonly mes: number | null;
+  readonly totalKg: number;
+  readonly totalT: number;
+  readonly categorias: ResumenCategoriaResponse[];
 }
