@@ -7,12 +7,12 @@
     @if (cargandoCatalogos()) {
       <p class="ch-perfil-auditor__cargando">Cargando catálogos...</p>
     } @else if (errorCatalogos()) {
-      <p class="ch-perfil-auditor__error">
+      <p class="ch-perfil-auditor__error" role="alert">
         No se pudieron cargar los catálogos. Intente recargar la página.
       </p>
     } @else {
       @if (errorCarga()) {
-        <div class="perfil-error">
+        <div class="ch-perfil-auditor__error" role="alert">
           No se pudo cargar tu perfil actual. Recarga la página antes de guardar cambios.
         </div>
       }
@@ -100,7 +100,7 @@
               size="lg"
               type="submit"
               [loading]="guardando()"
-              [disabled]="formularioInvalido() || guardando()"
+              [disabled]="formularioInvalido() || guardando() || errorCarga()"
             >
               Guardar
             </app-button>

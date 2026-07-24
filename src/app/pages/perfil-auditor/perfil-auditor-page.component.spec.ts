@@ -164,6 +164,8 @@ describe('PerfilAuditorPageComponent', () => {
     expect(component['cargandoCatalogos']()).toBe(false);
     expect(component['errorCatalogos']()).toBe(true);
     expect(component['formularioBloqueado']()).toBe(true);
+    const alerta = fixture.nativeElement.querySelector('.ch-perfil-auditor__error') as HTMLElement;
+    expect(alerta.getAttribute('role')).toBe('alert');
 
     const mensajes = toastService.toasts().map((t) => t.title);
     expect(mensajes).toContain('No se pudo cargar el catálogo. Intente recargar la página.');
@@ -221,6 +223,20 @@ describe('PerfilAuditorPageComponent', () => {
       expect(component['zonasSeleccionadas']()).toEqual([]);
       expect(component['model']().descripcionProfesional).toBe('');
       expect(component['errorCarga']()).toBe(true);
+
+      const alerta = fixture.nativeElement.querySelector(
+        '.ch-perfil-auditor__error'
+      ) as HTMLElement;
+      expect(alerta.getAttribute('role')).toBe('alert');
+
+      component['especialidadesSeleccionadas'].set(['HUELLA_CARBONO']);
+      component['zonasSeleccionadas'].set(['SAN_JOSE']);
+      fixture.detectChanges();
+
+      const botonGuardar = fixture.nativeElement.querySelector(
+        'app-button button[type="submit"]'
+      ) as HTMLButtonElement;
+      expect(botonGuardar.disabled).toBe(true);
     });
   });
 
