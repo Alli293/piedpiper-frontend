@@ -4,7 +4,8 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import * as fc from 'fast-check';
 import { environment } from '../../../environments/environment';
-import { ActualizarPerfilRequest } from '../models/perfil-auditor.model';
+import { ActualizarPerfilRequest, PerfilAuditorResponse } from '../models/perfil-auditor.model';
+import { CatalogoItem } from '../models/catalogo.model';
 import { PerfilAuditorService } from './perfil-auditor.service';
 
 describe('PerfilAuditorService', () => {
@@ -22,6 +23,30 @@ describe('PerfilAuditorService', () => {
   });
 
   afterEach(() => httpMock.verify());
+
+  describe('obtenerPerfil', () => {
+    const auditorId = 'abc-123';
+
+    it('envía GET a /api/auditores/{auditorId}/perfil', () => {
+      const mockPerfil: PerfilAuditorResponse = {
+        auditorId,
+        especialidades: ['HUELLA_CARBONO'],
+        zonasCobertura: ['SAN_JOSE'],
+        disponible: true,
+        descripcionProfesional: 'Descripción de prueba',
+        actualizadoEn: '2025-01-01T00:00:00Z',
+      };
+
+      let resultado: PerfilAuditorResponse | undefined;
+      service.obtenerPerfil(auditorId).subscribe((r) => (resultado = r));
+
+      const req = httpMock.expectOne(`${baseAuditores}/${auditorId}/perfil`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockPerfil);
+
+      expect(resultado).toEqual(mockPerfil);
+    });
+  });
 
   describe('actualizarPerfil', () => {
     const auditorId = 'abc-123';
@@ -42,7 +67,7 @@ describe('PerfilAuditorService', () => {
         actualizadoEn: '2025-01-01T00:00:00Z',
       };
 
-      let resultado: any;
+      let resultado: PerfilAuditorResponse | undefined;
       service.actualizarPerfil(auditorId, dto).subscribe((r) => (resultado = r));
 
       const req = httpMock.expectOne(`${baseAuditores}/${auditorId}/perfil`);
@@ -61,7 +86,7 @@ describe('PerfilAuditorService', () => {
         { valor: 'ENERGIA_RENOVABLE', etiqueta: 'Energia renovable' },
       ];
 
-      let resultado: any;
+      let resultado: CatalogoItem[] | undefined;
       service.obtenerEspecialidades().subscribe((r) => (resultado = r));
 
       const req = httpMock.expectOne(`${baseCatalogos}/especialidades`);
@@ -79,7 +104,7 @@ describe('PerfilAuditorService', () => {
         { valor: 'HEREDIA', etiqueta: 'Heredia' },
       ];
 
-      let resultado: any;
+      let resultado: CatalogoItem[] | undefined;
       service.obtenerZonasCobertura().subscribe((r) => (resultado = r));
 
       const req = httpMock.expectOne(`${baseCatalogos}/zonas`);

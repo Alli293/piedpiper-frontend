@@ -1,6 +1,6 @@
 .ch-perfil-auditor {
   min-height: 100%;
-  background: #f4f7f9;
+  background: var(--ch-bg-subtle);
   padding: var(--ch-space-6);
 
   &__cargando,
@@ -14,7 +14,7 @@
   &__layout {
     display: grid;
     grid-template-columns: 1fr 358px;
-    gap: 20px;
+    gap: var(--ch-space-5);
     max-width: 1100px;
 
     @media (max-width: 900px) {
@@ -26,15 +26,15 @@
   &__col-right {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: var(--ch-space-5);
   }
 
   &__card {
-    background: #ffffff;
-    border: 1px solid #d7dee3;
-    border-radius: 12px;
-    padding: 20px 22px;
-    box-shadow: 0 1px 4px rgba(14, 42, 59, 0.05);
+    background: var(--ch-bg-default);
+    border: 1px solid var(--ch-border);
+    border-radius: var(--ch-radius-lg);
+    padding: var(--ch-space-5) var(--ch-space-6);
+    box-shadow: var(--ch-shadow-sm);
   }
 
   // Header card
@@ -69,7 +69,7 @@
   &__disponibilidad {
     margin-top: var(--ch-space-4);
     padding-top: var(--ch-space-4);
-    border-top: 1px solid #d7dee3;
+    border-top: 1px solid var(--ch-border);
   }
 
   // Card titles
@@ -118,7 +118,7 @@
     padding: var(--ch-space-2) 0;
 
     &:not(:last-child) {
-      border-bottom: 1px solid #d7dee3;
+      border-bottom: 1px solid var(--ch-border);
     }
 
     dt {

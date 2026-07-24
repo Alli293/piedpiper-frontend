@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { forkJoin } from 'rxjs';
+import { forkJoin, firstValueFrom } from 'rxjs';
 import { form, FormField, schema, validate } from '@angular/forms/signals';
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -8,6 +8,7 @@ import { CheckboxComponent } from '../../shared/components/inputs/checkbox/check
 import { TextareaComponent } from '../../shared/components/inputs/textarea/textarea.component';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
+import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { PerfilAuditorService } from '../../core/perfil-auditor/perfil-auditor.service';
 import { AuthSessionService } from '../../core/auth-session.service';
@@ -35,6 +36,7 @@ const MAX_DESCRIPCION = 500;
     TextareaComponent,
     AvatarComponent,
     BadgeComponent,
+    HeadingComponent,
   ],
   templateUrl: './perfil-auditor-page.component.html',
   styleUrl: './perfil-auditor-page.component.scss',
@@ -149,7 +151,7 @@ export class PerfilAuditorPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.cargarCatalogos();
+    void this.cargarDatosIniciales();
   }
 
   protected toggleEspecialidad(valor: string): void {
@@ -180,7 +182,7 @@ export class PerfilAuditorPageComponent implements OnInit {
     return this.zonasSeleccionadas().includes(valor);
   }
 
-  protected handleSubmit(event: Event): void {
+  protected async handleSubmit(event: Event): Promise<void> {
     event.preventDefault();
     // Mark multi-select fields as touched on submit attempt
     this.especialidadesTocado.set(true);
@@ -206,16 +208,14 @@ export class PerfilAuditorPageComponent implements OnInit {
 
     this.guardando.set(true);
 
-    this.perfilAuditorService.actualizarPerfil(auditorId, dto).subscribe({
-      next: () => {
-        this.guardando.set(false);
-        this.toastService.success('Perfil actualizado correctamente.', undefined, 5000);
-      },
-      error: (err: unknown) => {
-        this.guardando.set(false);
-        this.manejarErrorGuardado(err);
-      },
-    });
+    try {
+      await firstValueFrom(this.perfilAuditorService.actualizarPerfil(auditorId, dto));
+      this.toastService.success('Perfil actualizado correctamente.', undefined, 5000);
+    } catch (err: unknown) {
+      this.manejarErrorGuardado(err);
+    } finally {
+      this.guardando.set(false);
+    }
   }
 
   private manejarErrorGuardado(error: unknown): void {
@@ -228,28 +228,48 @@ export class PerfilAuditorPageComponent implements OnInit {
     this.toastService.error('No se pudo guardar el perfil. Intente nuevamente.');
   }
 
-  private cargarCatalogos(): void {
+  private async cargarDatosIniciales(): Promise<void> {
     this.cargandoCatalogos.set(true);
     this.errorCatalogos.set(false);
 
-    forkJoin({
-      especialidades: this.perfilAuditorService.obtenerEspecialidades(),
-      zonas: this.perfilAuditorService.obtenerZonasCobertura(),
-    }).subscribe({
-      next: ({ especialidades, zonas }) => {
-        this.especialidades.set(especialidades);
-        this.zonasCobertura.set(zonas);
-        this.cargandoCatalogos.set(false);
-      },
-      error: (err: unknown) => {
-        this.cargandoCatalogos.set(false);
-        this.errorCatalogos.set(true);
-        this.mostrarErrorCatalogo(err);
-      },
-    });
+    try {
+      const { especialidades, zonas } = await firstValueFrom(
+        forkJoin({
+          especialidades: this.perfilAuditorService.obtenerEspecialidades(),
+          zonas: this.perfilAuditorService.obtenerZonasCobertura(),
+        })
+      );
+      this.especialidades.set(especialidades);
+      this.zonasCobertura.set(zonas);
+      this.cargandoCatalogos.set(false);
+
+      // After catalogs loaded, try to load existing profile
+      await this.cargarPerfilExistente();
+    } catch {
+      this.cargandoCatalogos.set(false);
+      this.errorCatalogos.set(true);
+      this.toastService.error('No se pudo cargar el catálogo. Intente recargar la página.');
+    }
   }
 
-  private mostrarErrorCatalogo(_err: unknown): void {
-    this.toastService.error('No se pudo cargar el catálogo. Intente recargar la página.');
+  private async cargarPerfilExistente(): Promise<void> {
+    const auditorId = this.authSessionService.getUserId();
+    if (!auditorId) return;
+
+    try {
+      const perfil = await firstValueFrom(this.perfilAuditorService.obtenerPerfil(auditorId));
+      this.especialidadesSeleccionadas.set(perfil.especialidades);
+      this.zonasSeleccionadas.set(perfil.zonasCobertura);
+      this.model.set({
+        descripcionProfesional: perfil.descripcionProfesional ?? '',
+        disponible: perfil.disponible,
+      });
+    } catch (err: unknown) {
+      // 404 means no profile exists yet — leave form empty (first-time setup)
+      if (err instanceof HttpErrorResponse && err.status === 404) {
+        return;
+      }
+      // Other errors are non-critical — form stays empty but user can still fill it
+    }
   }
 }

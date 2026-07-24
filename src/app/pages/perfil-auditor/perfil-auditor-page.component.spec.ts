@@ -18,10 +18,10 @@ describe('PerfilAuditorPageComponent', () => {
   let httpMock: HttpTestingController;
   let toastService: ToastService;
 
+  const mockAuditorId = '550e8400-e29b-41d4-a716-446655440000';
   const urlEspecialidades = `${environment.apiBaseUrl}/catalogos/especialidades`;
   const urlZonas = `${environment.apiBaseUrl}/catalogos/zonas`;
-
-  const mockAuditorId = '550e8400-e29b-41d4-a716-446655440000';
+  const urlPerfil = `${environment.apiBaseUrl}/auditores/${mockAuditorId}/perfil`;
 
   const mockEspecialidades = [
     { valor: 'HUELLA_CARBONO', etiqueta: 'Huella carbono' },
@@ -33,6 +33,15 @@ describe('PerfilAuditorPageComponent', () => {
     { valor: 'ALAJUELA', etiqueta: 'Alajuela' },
     { valor: 'CARTAGO', etiqueta: 'Cartago' },
   ];
+
+  const mockPerfilExistente = {
+    auditorId: mockAuditorId,
+    especialidades: ['HUELLA_CARBONO', 'ENERGIA_RENOVABLE'],
+    zonasCobertura: ['SAN_JOSE', 'CARTAGO'],
+    disponible: false,
+    descripcionProfesional: 'Auditor con 5 años de experiencia',
+    actualizadoEn: '2024-06-15T10:00:00Z',
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -64,19 +73,43 @@ describe('PerfilAuditorPageComponent', () => {
     httpMock.match(() => true);
   });
 
-  function flushCatalogosExitosamente(): void {
+  function flushCatalogos(): void {
     httpMock.expectOne(urlEspecialidades).flush(mockEspecialidades);
     httpMock.expectOne(urlZonas).flush(mockZonas);
+  }
+
+  async function flushPerfilExistente(): Promise<void> {
+    await fixture.whenStable();
+    httpMock.expectOne(urlPerfil).flush(mockPerfilExistente);
+    await fixture.whenStable();
     fixture.detectChanges();
   }
 
-  it('should create', () => {
+  async function flushPerfil404(): Promise<void> {
+    await fixture.whenStable();
+    httpMock.expectOne(urlPerfil).flush(null, { status: 404, statusText: 'Not Found' });
+    await fixture.whenStable();
     fixture.detectChanges();
-    flushCatalogosExitosamente();
+  }
+
+  async function inicializarConPerfilExistente(): Promise<void> {
+    fixture.detectChanges();
+    flushCatalogos();
+    await flushPerfilExistente();
+  }
+
+  async function inicializarSinPerfil(): Promise<void> {
+    fixture.detectChanges();
+    flushCatalogos();
+    await flushPerfil404();
+  }
+
+  it('should create', async () => {
+    await inicializarSinPerfil();
     expect(component).toBeTruthy();
   });
 
-  it('solicita catálogos de especialidades y zonas al inicializar', () => {
+  it('solicita catálogos de especialidades y zonas al inicializar', async () => {
     fixture.detectChanges();
 
     const reqEsp = httpMock.expectOne(urlEspecialidades);
@@ -87,10 +120,10 @@ describe('PerfilAuditorPageComponent', () => {
 
     reqEsp.flush(mockEspecialidades);
     reqZonas.flush(mockZonas);
-    fixture.detectChanges();
+    await flushPerfil404();
   });
 
-  it('mantiene formulario bloqueado mientras catálogos están cargando', () => {
+  it('mantiene formulario bloqueado mientras catálogos están cargando', async () => {
     // Before detectChanges, loading defaults to true
     expect(component['formularioBloqueado']()).toBe(true);
 
@@ -99,33 +132,33 @@ describe('PerfilAuditorPageComponent', () => {
     expect(component['cargandoCatalogos']()).toBe(true);
     expect(component['formularioBloqueado']()).toBe(true);
 
-    flushCatalogosExitosamente();
+    flushCatalogos();
+    await flushPerfil404();
   });
 
-  it('desbloquea formulario tras carga exitosa de catálogos', () => {
-    fixture.detectChanges();
-    flushCatalogosExitosamente();
+  it('desbloquea formulario tras carga exitosa de catálogos', async () => {
+    await inicializarSinPerfil();
 
     expect(component['cargandoCatalogos']()).toBe(false);
     expect(component['errorCatalogos']()).toBe(false);
     expect(component['formularioBloqueado']()).toBe(false);
   });
 
-  it('almacena especialidades y zonas cargadas correctamente', () => {
-    fixture.detectChanges();
-    flushCatalogosExitosamente();
+  it('almacena especialidades y zonas cargadas correctamente', async () => {
+    await inicializarSinPerfil();
 
     expect(component['especialidades']()).toEqual(mockEspecialidades);
     expect(component['zonasCobertura']()).toEqual(mockZonas);
   });
 
-  it('muestra toast de error y bloquea formulario si falla carga de especialidades', () => {
+  it('muestra toast de error y bloquea formulario si falla carga de especialidades', async () => {
     fixture.detectChanges();
 
     // When especialidades fails, forkJoin errors immediately
     httpMock
       .expectOne(urlEspecialidades)
       .flush(null, { status: 500, statusText: 'Internal Server Error' });
+    await fixture.whenStable();
     fixture.detectChanges();
 
     expect(component['cargandoCatalogos']()).toBe(false);
@@ -136,11 +169,12 @@ describe('PerfilAuditorPageComponent', () => {
     expect(mensajes).toContain('No se pudo cargar el catálogo. Intente recargar la página.');
   });
 
-  it('muestra toast de error y bloquea formulario si falla carga de zonas', () => {
+  it('muestra toast de error y bloquea formulario si falla carga de zonas', async () => {
     fixture.detectChanges();
 
     httpMock.expectOne(urlEspecialidades).flush(mockEspecialidades);
     httpMock.expectOne(urlZonas).flush(null, { status: 500, statusText: 'Internal Server Error' });
+    await fixture.whenStable();
     fixture.detectChanges();
 
     expect(component['cargandoCatalogos']()).toBe(false);
@@ -149,14 +183,51 @@ describe('PerfilAuditorPageComponent', () => {
 
     const mensajes = toastService.toasts().map((t) => t.title);
     expect(mensajes).toContain('No se pudo cargar el catálogo. Intente recargar la página.');
+  });
+
+  // --- Profile pre-fill tests ---
+
+  describe('carga de perfil existente', () => {
+    it('pre-llena el formulario con datos del perfil existente', async () => {
+      await inicializarConPerfilExistente();
+
+      expect(component['especialidadesSeleccionadas']()).toEqual([
+        'HUELLA_CARBONO',
+        'ENERGIA_RENOVABLE',
+      ]);
+      expect(component['zonasSeleccionadas']()).toEqual(['SAN_JOSE', 'CARTAGO']);
+      expect(component['model']().descripcionProfesional).toBe('Auditor con 5 años de experiencia');
+      expect(component['model']().disponible).toBe(false);
+    });
+
+    it('deja formulario vacío cuando perfil no existe (404)', async () => {
+      await inicializarSinPerfil();
+
+      expect(component['especialidadesSeleccionadas']()).toEqual([]);
+      expect(component['zonasSeleccionadas']()).toEqual([]);
+      expect(component['model']().descripcionProfesional).toBe('');
+      expect(component['model']().disponible).toBe(true);
+    });
+
+    it('deja formulario vacío cuando obtener perfil falla con error no-404', async () => {
+      fixture.detectChanges();
+      flushCatalogos();
+      await fixture.whenStable();
+      httpMock.expectOne(urlPerfil).flush(null, { status: 500, statusText: 'Server Error' });
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(component['especialidadesSeleccionadas']()).toEqual([]);
+      expect(component['zonasSeleccionadas']()).toEqual([]);
+      expect(component['model']().descripcionProfesional).toBe('');
+    });
   });
 
   // --- Form validation tests ---
 
   describe('validación de formulario', () => {
-    beforeEach(() => {
-      fixture.detectChanges();
-      flushCatalogosExitosamente();
+    beforeEach(async () => {
+      await inicializarSinPerfil();
     });
 
     it('formularioInvalido() es true cuando especialidades está vacío', () => {
@@ -216,11 +287,8 @@ describe('PerfilAuditorPageComponent', () => {
   // --- Save/spinner tests ---
 
   describe('guardado y spinner', () => {
-    const urlPerfil = `${environment.apiBaseUrl}/auditores/${mockAuditorId}/perfil`;
-
-    beforeEach(() => {
-      fixture.detectChanges();
-      flushCatalogosExitosamente();
+    beforeEach(async () => {
+      await inicializarSinPerfil();
       // Set valid form state
       component['especialidadesSeleccionadas'].set(['HUELLA_CARBONO']);
       component['zonasSeleccionadas'].set(['SAN_JOSE']);
@@ -230,10 +298,11 @@ describe('PerfilAuditorPageComponent', () => {
       });
     });
 
-    it('handleSubmit con formulario válido activa guardando y envía PUT', () => {
+    it('handleSubmit con formulario válido activa guardando y envía PUT', async () => {
       const event = new Event('submit');
 
       component['handleSubmit'](event);
+      await fixture.whenStable();
 
       expect(component['guardando']()).toBe(true);
 
@@ -254,11 +323,13 @@ describe('PerfilAuditorPageComponent', () => {
         descripcionProfesional: 'Descripción válida',
         actualizadoEn: '2024-01-01T00:00:00Z',
       });
+      await fixture.whenStable();
     });
 
-    it('en respuesta 200, guardando es false y muestra toast de éxito', () => {
+    it('en respuesta 200, guardando es false y muestra toast de éxito', async () => {
       const event = new Event('submit');
       component['handleSubmit'](event);
+      await fixture.whenStable();
 
       const req = httpMock.expectOne(urlPerfil);
       req.flush({
@@ -269,6 +340,7 @@ describe('PerfilAuditorPageComponent', () => {
         descripcionProfesional: 'Descripción válida',
         actualizadoEn: '2024-01-01T00:00:00Z',
       });
+      await fixture.whenStable();
 
       expect(component['guardando']()).toBe(false);
       const mensajes = toastService.toasts();
@@ -279,15 +351,17 @@ describe('PerfilAuditorPageComponent', () => {
       ).toBe(true);
     });
 
-    it('en respuesta 403, guardando es false y muestra toast con mensaje del backend', () => {
+    it('en respuesta 403, guardando es false y muestra toast con mensaje del backend', async () => {
       const event = new Event('submit');
       component['handleSubmit'](event);
+      await fixture.whenStable();
 
       const req = httpMock.expectOne(urlPerfil);
       req.flush(
         { message: 'No tiene permiso para editar este perfil.' },
         { status: 403, statusText: 'Forbidden' }
       );
+      await fixture.whenStable();
 
       expect(component['guardando']()).toBe(false);
       const mensajes = toastService.toasts();
@@ -298,12 +372,14 @@ describe('PerfilAuditorPageComponent', () => {
       ).toBe(true);
     });
 
-    it('en respuesta 500, guardando es false y muestra toast genérico de error', () => {
+    it('en respuesta 500, guardando es false y muestra toast genérico de error', async () => {
       const event = new Event('submit');
       component['handleSubmit'](event);
+      await fixture.whenStable();
 
       const req = httpMock.expectOne(urlPerfil);
       req.flush(null, { status: 500, statusText: 'Internal Server Error' });
+      await fixture.whenStable();
 
       expect(component['guardando']()).toBe(false);
       const mensajes = toastService.toasts();
@@ -319,9 +395,8 @@ describe('PerfilAuditorPageComponent', () => {
   // --- Error messages display tests ---
 
   describe('mensajes de error inline', () => {
-    beforeEach(() => {
-      fixture.detectChanges();
-      flushCatalogosExitosamente();
+    beforeEach(async () => {
+      await inicializarSinPerfil();
     });
 
     it('errorEspecialidades() muestra mensaje cuando se deselecciona hasta vacío', () => {

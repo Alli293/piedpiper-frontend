@@ -13,10 +13,3 @@ export interface PerfilAuditorResponse {
   descripcionProfesional: string | null;
   actualizadoEn: string;
 }
-
-export interface PerfilAuditorFormModel {
-  especialidades: string[];
-  zonasCobertura: string[];
-  disponible: boolean;
-  descripcionProfesional: string;
-}

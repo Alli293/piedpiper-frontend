@@ -10,6 +10,10 @@ export class PerfilAuditorService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/auditores`;
 
+  obtenerPerfil(auditorId: string): Observable<PerfilAuditorResponse> {
+    return this.http.get<PerfilAuditorResponse>(`${this.baseUrl}/${auditorId}/perfil`);
+  }
+
   actualizarPerfil(
     auditorId: string,
     dto: ActualizarPerfilRequest
