@@ -145,11 +145,6 @@ export class PerfilAuditorPageComponent implements OnInit {
     return name || 'Auditor';
   });
   protected readonly userEmail = computed(() => this.authSessionService.getUserEmail());
-  protected readonly memberSince = computed(() => {
-    const now = new Date();
-    return `${now.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`;
-  });
-
   ngOnInit(): void {
     void this.cargarDatosIniciales();
   }
