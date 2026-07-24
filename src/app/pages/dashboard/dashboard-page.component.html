@@ -104,13 +104,19 @@
       </article>
     </section>
 
-    <!-- PP-79: IMA -->
-    <app-ima-panel
-      [ima]="imaData()"
-      [anio]="anioSeleccionado()"
-      [mes]="mesSeleccionado()"
-      (periodoChange)="onImaPeriodoChange($event)"
-    />
+    <!-- PP-41: Evolución histórica -->
+    <article class="annual-limit-panel evolucion-panel">
+      <header class="evolucion-panel__header">
+        <app-heading level="h2" text="Evolución mensual de emisiones" />
+        <span class="evolucion-panel__rango">Ene – Dic {{ anioSeleccionado() }} · tCO₂e</span>
+      </header>
+      @if (evolucionVacia()) {
+        <p class="evolucion-panel__empty">
+          No hay emisiones registradas en {{ anioSeleccionado() }}.
+        </p>
+      }
+      <app-evolucion-chart [serie]="evolucionSerie()" [anio]="anioSeleccionado()" />
+    </article>
 
     <div class="dashboard-page__grid">
       <!-- PP-41: Evolución histórica -->

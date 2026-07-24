@@ -5,7 +5,6 @@ import {
   SidebarBottomItem,
 } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
-import { ToastHostComponent } from '../../components/toast/toast.component';
 
 export interface SidebarConfig {
   menuItems: SidebarMenuItem[];
@@ -25,7 +24,7 @@ export interface HeaderConfig {
 
 @Component({
   selector: 'app-page-layout',
-  imports: [SidebarComponent, HeaderComponent, ToastHostComponent],
+  imports: [SidebarComponent, HeaderComponent],
   templateUrl: './page-layout.component.html',
   styleUrl: './page-layout.component.scss',
   host: {

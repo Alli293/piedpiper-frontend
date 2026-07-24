@@ -63,4 +63,37 @@ describe('PerfilInicialService', () => {
     expect(recibido?.configuracionCompleta).toBe(true);
     expect(recibido?.redirect).toBe('/panel');
   });
+
+  it('reutiliza el perfil ya cargado sin repetir la petición', () => {
+    service.obtener().subscribe();
+    httpMock.expectOne(PerfilInicialService.URL).flush(perfil);
+
+    expect(service.perfil()).toEqual(perfil);
+
+    service.obtener().subscribe();
+    httpMock.expectNone(PerfilInicialService.URL);
+  });
+
+  it('limpiarCache descarta el perfil y fuerza una nueva petición para la siguiente sesión', () => {
+    service.obtener().subscribe();
+    httpMock.expectOne(PerfilInicialService.URL).flush(perfil);
+    expect(service.perfil()).toEqual(perfil);
+
+    service.limpiarCache();
+    expect(service.perfil()).toBeNull();
+
+    const otraEmpresa: PerfilInicial = {
+      ...perfil,
+      empresa: {
+        nombreEmpresa: 'Otra Empresa S.A.',
+        sectorIndustrial: null,
+        pais: 'CR',
+        cantidadEmpleados: 5,
+      },
+    };
+    service.obtener().subscribe();
+    httpMock.expectOne(PerfilInicialService.URL).flush(otraEmpresa);
+
+    expect(service.perfil()).toEqual(otraEmpresa);
+  });
 });

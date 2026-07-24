@@ -21,6 +21,7 @@ let nextId = 0;
   ],
 })
 export class TextInputComponent implements ControlValueAccessor {
+  id = input<string>();
   label = input<string>();
   value = model('');
   placeholder = input('');
@@ -31,17 +32,18 @@ export class TextInputComponent implements ControlValueAccessor {
   disabled = input(false);
   required = input(false);
 
-  protected readonly inputId = `ch-text-input-${nextId++}`;
-  protected readonly hintId = `${this.inputId}-hint`;
-  protected readonly errorId = `${this.inputId}-error`;
+  private readonly autoId = `ch-text-input-${nextId++}`;
+  protected readonly inputId = computed(() => this.id() ?? this.autoId);
+  protected readonly hintId = computed(() => `${this.inputId()}-hint`);
+  protected readonly errorId = computed(() => `${this.inputId()}-error`);
 
   protected readonly formDisabled = signal(false);
   protected readonly effectiveDisabled = computed(() => this.disabled() || this.formDisabled());
 
   protected readonly hasError = computed(() => this.error().length > 0);
   protected readonly describedBy = computed(() => {
-    if (this.hasError()) return this.errorId;
-    if (this.hint()) return this.hintId;
+    if (this.hasError()) return this.errorId();
+    if (this.hint()) return this.hintId();
     return null;
   });
 

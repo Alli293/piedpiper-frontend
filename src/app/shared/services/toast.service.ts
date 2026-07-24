@@ -18,10 +18,11 @@ export class ToastService {
 
   private nextId = 0;
 
-  show(toast: Omit<ToastMessage, 'id'>, durationMs = DEFAULT_DURATION_MS): void {
+  show(toast: Omit<ToastMessage, 'id'>, durationMs = DEFAULT_DURATION_MS): number {
     const id = this.nextId++;
     this._toasts.update((toasts) => [...toasts, { ...toast, id }]);
     setTimeout(() => this.dismiss(id), durationMs);
+    return id;
   }
 
   success(title: string, description?: string, durationMs?: number): void {

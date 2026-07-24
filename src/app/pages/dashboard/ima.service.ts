@@ -11,7 +11,8 @@ export interface ImaResponse {
   motivoParcial: string | null;
   intensidad: number | null;
   calculatedAt: string;
-  interpretacionIa: string | null;
+  interpretacion: string | null;
+  siguientePaso: string | null;
 }
 @Injectable({ providedIn: 'root' })
 export class ImaService {

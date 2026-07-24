@@ -1,0 +1,72 @@
+@use '../../../styles/mixins';
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-2);
+}
+
+.ch-toggle-switch__wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-3);
+  cursor: pointer;
+
+  &--disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.ch-toggle-switch__input {
+  @include mixins.visually-hidden;
+
+  &:focus-visible + .ch-toggle-switch__track {
+    @include mixins.focus-ring;
+  }
+}
+
+.ch-toggle-switch__track {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  width: 40px;
+  height: 22px;
+  border-radius: var(--ch-radius-pill);
+  background: var(--ch-border);
+  transition: background var(--ch-transition);
+}
+
+.ch-toggle-switch__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--ch-radius-full);
+  background: var(--ch-bg-white);
+  box-shadow: var(--ch-shadow-sm);
+  transition: transform var(--ch-transition);
+}
+
+.ch-toggle-switch__input:checked ~ .ch-toggle-switch__track {
+  background: var(--ch-green);
+}
+
+.ch-toggle-switch__input:checked ~ .ch-toggle-switch__track .ch-toggle-switch__thumb {
+  transform: translateX(18px);
+}
+
+.ch-toggle-switch__label {
+  font-family: var(--ch-font-body);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--ch-text-primary);
+}
+
+.ch-toggle-switch__error {
+  margin: 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.75rem;
+  color: var(--ch-danger);
+}

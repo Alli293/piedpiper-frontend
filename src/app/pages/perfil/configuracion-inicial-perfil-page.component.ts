@@ -8,7 +8,6 @@ import { HeadingComponent } from '../../shared/components/heading/heading.compon
 import { TextInputComponent } from '../../shared/components/inputs/text-input/text-input.component';
 import { NumberInputComponent } from '../../shared/components/inputs/number-input/number-input.component';
 import { SelectInputComponent } from '../../shared/components/inputs/select-input/select-input.component';
-import { ToastHostComponent } from '../../shared/components/toast/toast.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { fieldError } from '../../shared/utils/form-field.utils';
 import { I18nService } from '../../core/services/i18n.service';
@@ -48,7 +47,6 @@ interface PerfilInicialFormModel {
     TextInputComponent,
     NumberInputComponent,
     SelectInputComponent,
-    ToastHostComponent,
   ],
   templateUrl: './configuracion-inicial-perfil-page.component.html',
   styleUrl: './configuracion-inicial-perfil-page.component.scss',

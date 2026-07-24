@@ -28,9 +28,7 @@ import { EmisionesService } from '../emissions/emisiones.service';
 import { DashboardService } from './dashboard.service';
 import { PeriodoDashboard, ResumenHuellaDashboardResponse } from './dashboard.model';
 import { EvolucionService, PuntoMensual } from './evolucion.service';
-import { ImaService, ImaResponse } from './ima.service';
 import { EvolucionChartComponent } from './evolucion-chart.component';
-import { ImaPanelComponent } from './ima-panel.component';
 
 interface PeriodoResumenFormModel {
   anio: string;
@@ -106,7 +104,6 @@ export const DONA_CIRCUNFERENCIA = 2 * Math.PI * DONA_RADIO;
     SelectInputComponent,
     ShellLayoutComponent,
     EvolucionChartComponent,
-    ImaPanelComponent,
   ],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
@@ -115,7 +112,6 @@ export class DashboardPageComponent {
   private readonly emisionesService = inject(EmisionesService);
   private readonly dashboardService = inject(DashboardService);
   private readonly evolucionService = inject(EvolucionService);
-  private readonly imaService = inject(ImaService);
   private readonly authSession = inject(AuthSessionService);
   private readonly toastService = inject(ToastService);
 
@@ -123,9 +119,6 @@ export class DashboardPageComponent {
   private solicitudResumen = 0;
   private solicitudResumenHuella = 0;
   private comparacionSolicitudId = 0;
-
-  protected readonly mesActual = new Date().getMonth() + 1;
-  protected readonly mesSeleccionado = signal(this.mesActual);
 
   protected readonly sinEmisionesMensaje = SIN_EMISIONES_MENSAJE;
   protected readonly circunferencia = DONA_CIRCUNFERENCIA;
@@ -161,9 +154,6 @@ export class DashboardPageComponent {
   // --- PP-41: Evolución histórica ---
   protected readonly evolucionSerie = signal<PuntoMensual[]>([]);
   protected readonly evolucionVacia = signal(false);
-
-  // --- PP-79: IMA ---
-  protected readonly imaData = signal<ImaResponse | null>(null);
 
   // Deshabilita el botón de exportar mientras cualquiera de las dos cargas esté en curso.
   protected readonly cargando = computed(
@@ -245,14 +235,8 @@ export class DashboardPageComponent {
         void this.cargarComparacion(Number(anio));
         void this.cargarResumenHuella(this.periodoSeleccionado(), Number(anio));
         void this.cargarEvolucion(Number(anio));
-        void this.cargarIma(Number(anio), this.mesSeleccionado());
       });
     });
-  }
-
-  protected onImaPeriodoChange(evento: { anio: number; mes: number }): void {
-    this.mesSeleccionado.set(evento.mes);
-    void this.cargarIma(evento.anio, evento.mes);
   }
 
   protected onPeriodoChange(valor: string): void {
@@ -537,19 +521,6 @@ export class DashboardPageComponent {
     } catch (err: unknown) {
       this.toastService.error(
         apiErrorMessage(err) ?? 'No se pudo cargar la evolución histórica. Intente nuevamente.',
-        undefined,
-        5000
-      );
-    }
-  }
-
-  private async cargarIma(anio: number, mes: number): Promise<void> {
-    try {
-      const ima = await firstValueFrom(this.imaService.obtenerIma(anio, mes));
-      this.imaData.set(ima);
-    } catch (err: unknown) {
-      this.toastService.error(
-        apiErrorMessage(err) ?? 'No se pudo calcular tu IMA. Intente nuevamente.',
         undefined,
         5000
       );

@@ -15,9 +15,7 @@ import { DashboardPageComponent, SIN_EMISIONES_MENSAJE } from './dashboard-page.
 import { ResumenHuellaDashboardResponse } from './dashboard.model';
 import { DashboardService } from './dashboard.service';
 import { EvolucionService } from './evolucion.service';
-import { ImaService } from './ima.service';
 import { EvolucionChartComponent } from './evolucion-chart.component';
-import { ImaPanelComponent } from './ima-panel.component';
 import { Component, input } from '@angular/core';
 
 const ANIO_ACTUAL = new Date().getFullYear();
@@ -76,13 +74,6 @@ class StubChartComponent {
   readonly anio = input(2026);
 }
 
-@Component({ selector: 'app-ima-panel', standalone: true, template: '' })
-class StubImaPanelComponent {
-  readonly ima = input(null);
-  readonly anio = input(2026);
-  readonly mes = input(7);
-}
-
 describe('DashboardPageComponent', () => {
   let fixture: ComponentFixture<DashboardPageComponent>;
   let component: DashboardPageComponent;
@@ -95,7 +86,10 @@ describe('DashboardPageComponent', () => {
     obtenerResumenHuella: ReturnType<typeof vi.fn>;
   };
   let authSession: { getUserInitials: ReturnType<typeof vi.fn> };
-  let authService: { cerrarSesion: ReturnType<typeof vi.fn> };
+  let authService: {
+    cerrarSesion: ReturnType<typeof vi.fn>;
+    token: ReturnType<typeof signal<string | null>>;
+  };
   let toastService: { error: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
@@ -114,6 +108,7 @@ describe('DashboardPageComponent', () => {
     };
     authService = {
       cerrarSesion: vi.fn(),
+      token: signal<string | null>(null),
     };
     toastService = {
       toasts: signal([]),
@@ -130,32 +125,15 @@ describe('DashboardPageComponent', () => {
           provide: EvolucionService,
           useValue: { obtenerEvolucion: () => of({ anio: 2026, serie: [] }) },
         },
-        {
-          provide: ImaService,
-          useValue: {
-            obtenerIma: () =>
-              of({
-                cobertura: 0,
-                consistencia: 0,
-                ima: 0,
-                parcial: true,
-                motivoParcial: null,
-                puntajeIntensidadSectorial: null,
-                intensidad: null,
-                calculatedAt: '',
-                interpretacionIa: null,
-              }),
-          },
-        },
         { provide: AuthService, useValue: authService },
         { provide: AuthSessionService, useValue: authSession },
         { provide: ToastService, useValue: toastService },
       ],
     })
       .overrideComponent(DashboardPageComponent, {
-        remove: { imports: [EvolucionChartComponent, ImaPanelComponent] },
+        remove: { imports: [EvolucionChartComponent] },
         add: {
-          imports: [StubChartComponent, StubImaPanelComponent],
+          imports: [StubChartComponent],
           schemas: [CUSTOM_ELEMENTS_SCHEMA],
         },
       })
@@ -537,34 +515,6 @@ describe('DashboardPageComponent', () => {
     expect(texto).not.toContain('5.236');
     expect(texto).not.toContain('12.47');
     expect(texto).not.toContain('42');
-  });
-
-  // ---------------------------------------------------------------------------
-  // PP-41: IMA panel
-  // ---------------------------------------------------------------------------
-
-  it('persiste el mes seleccionado cuando el usuario cambia mes en IMA', async () => {
-    await createFixture();
-    const imaService = TestBed.inject(ImaService) as any;
-    const obtenerImaSpy = vi.spyOn(imaService, 'obtenerIma').mockReturnValue(
-      of({
-        cobertura: 75,
-        puntajeIntensidadSectorial: 58,
-        consistencia: 80,
-        ima: 71,
-        parcial: false,
-        motivoParcial: null,
-        intensidad: 1.5,
-        calculatedAt: '2026-03-18T00:00:00Z',
-        interpretacionIa: null,
-      })
-    );
-
-    (component as any).onImaPeriodoChange({ anio: 2026, mes: 3 });
-    await fixture.whenStable();
-
-    expect((component as any).mesSeleccionado()).toBe(3);
-    expect(obtenerImaSpy).toHaveBeenCalledWith(2026, 3);
   });
 
   // ---------------------------------------------------------------------------

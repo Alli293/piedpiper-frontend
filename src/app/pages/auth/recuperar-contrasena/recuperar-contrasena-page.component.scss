@@ -1,0 +1,45 @@
+:host {
+  display: block;
+}
+
+.recuperar-contrasena {
+  display: flex;
+  flex-direction: column;
+}
+
+.recuperar-contrasena__header {
+  margin-bottom: var(--ch-space-8);
+}
+
+.recuperar-contrasena__subtitle {
+  margin: var(--ch-space-2) 0 0;
+  color: var(--ch-text-secondary);
+  font-size: 15px;
+}
+
+.recuperar-contrasena__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-5);
+}
+
+.recuperar-contrasena__error {
+  margin: calc(-1 * var(--ch-space-2)) 0 0;
+  color: var(--ch-danger);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.recuperar-contrasena__hint {
+  margin: var(--ch-space-4) 0 0;
+  text-align: center;
+  color: var(--ch-text-muted);
+  font-size: 13px;
+}
+
+.recuperar-contrasena__volver {
+  display: block;
+  margin-top: var(--ch-space-6);
+  text-align: center;
+  font-size: 14px;
+}

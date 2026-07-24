@@ -91,8 +91,8 @@ describe('RegisterEmissionPageComponent', () => {
 
   beforeEach(async () => {
     storage = createStorageMock();
-    vi.stubGlobal('localStorage', storage);
-    vi.stubGlobal('sessionStorage', createStorageMock());
+    vi.stubGlobal('sessionStorage', storage);
+    vi.stubGlobal('localStorage', createStorageMock());
     storage.setItem('carbonhub.token', 'test-token');
     registrarElectricidad = vi.fn();
     registrarVuelo = vi.fn();

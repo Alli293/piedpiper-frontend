@@ -12,6 +12,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
   },
 })
 export class ButtonComponent {
+  id = input<string>();
   variant = input<ButtonVariant>('primary');
   size = input<ButtonSize>('md');
   disabled = input(false);
