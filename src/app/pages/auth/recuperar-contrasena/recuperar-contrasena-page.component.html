@@ -1,0 +1,49 @@
+<app-auth-layout>
+  <div class="recuperar-contrasena">
+    @if (!enviado()) {
+      <header class="recuperar-contrasena__header">
+        <app-heading level="h1" text="Recupera tu acceso" />
+        <p class="recuperar-contrasena__subtitle">
+          Introduce tu correo y te enviaremos un enlace para restablecer tu contraseña.
+        </p>
+      </header>
+
+      <form class="recuperar-contrasena__form" novalidate (submit)="handleSubmit($event)">
+        <app-text-input
+          id="txtEmail"
+          label="Correo electrónico"
+          type="email"
+          autocomplete="email"
+          placeholder="tucorreo@empresa.com"
+          [formField]="recuperarForm.email"
+          [error]="errorEmail()"
+        />
+
+        @if (error()) {
+          <p class="recuperar-contrasena__error" role="alert">{{ error() }}</p>
+        }
+
+        <app-button
+          id="btnEnviarEnlace"
+          variant="primary"
+          size="lg"
+          type="submit"
+          [loading]="submitting()"
+        >
+          Enviar enlace de recuperación →
+        </app-button>
+      </form>
+
+      <p class="recuperar-contrasena__hint">El enlace expira en 1 hora.</p>
+    } @else {
+      <header class="recuperar-contrasena__header">
+        <app-heading level="h1" text="Revisa tu correo" />
+        <p class="recuperar-contrasena__subtitle">{{ mensaje() }}</p>
+      </header>
+    }
+
+    <a class="recuperar-contrasena__volver" routerLink="/login" appLink
+      >&lt; Volver al inicio de sesión</a
+    >
+  </div>
+</app-auth-layout>

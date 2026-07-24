@@ -1,8 +1,16 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { ShellLayoutComponent } from './shell-layout.component';
 import { AuthService } from '../../../core/auth/auth.service';
 import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
+import { HeaderConfig } from '../page-layout/page-layout.component';
+
+const HEADER_CONFIG: HeaderConfig = {
+  sectionLabel: 'PANEL EMPRESARIAL',
+  pageTitle: 'Dashboard',
+  showNotificationDot: true,
+  userInitials: 'MR',
+};
 
 describe('ShellLayoutComponent', () => {
   let authServiceStub: { cerrarSesion: ReturnType<typeof vi.fn> };
@@ -12,7 +20,7 @@ describe('ShellLayoutComponent', () => {
   beforeEach(async () => {
     authServiceStub = { cerrarSesion: vi.fn() };
     sesionInactividadStub = { detener: vi.fn() };
-    routerStub = { navigateByUrl: vi.fn() };
+    routerStub = { navigateByUrl: vi.fn().mockResolvedValue(true) };
 
     await TestBed.configureTestingModule({
       imports: [ShellLayoutComponent],
@@ -24,55 +32,145 @@ describe('ShellLayoutComponent', () => {
     }).compileComponents();
   });
 
-  function createComponent() {
+  async function createFixture(
+    inputs: {
+      activeId?: string;
+      companyRole?: string;
+      settingsLabel?: string;
+      backRoute?: string;
+    } = {}
+  ): Promise<ComponentFixture<ShellLayoutComponent>> {
     const fixture = TestBed.createComponent(ShellLayoutComponent);
-    fixture.componentRef.setInput('headerConfig', {
-      sectionLabel: 'Panel',
-      pageTitle: 'Inicio',
-      showNotificationDot: false,
-      userInitials: 'CV',
-    });
+    fixture.componentRef.setInput('headerConfig', HEADER_CONFIG);
+    if (inputs.activeId !== undefined) fixture.componentRef.setInput('activeId', inputs.activeId);
+    if (inputs.companyRole !== undefined)
+      fixture.componentRef.setInput('companyRole', inputs.companyRole);
+    if (inputs.settingsLabel !== undefined)
+      fixture.componentRef.setInput('settingsLabel', inputs.settingsLabel);
+    if (inputs.backRoute !== undefined)
+      fixture.componentRef.setInput('backRoute', inputs.backRoute);
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.detectChanges();
     return fixture;
   }
 
-  function boton(
-    fixture: ReturnType<typeof createComponent>,
-    ariaLabel: string
-  ): HTMLButtonElement {
-    const element = fixture.nativeElement as HTMLElement;
-    const encontrado = Array.from(element.querySelectorAll('button')).find(
-      (b) => b.getAttribute('aria-label') === ariaLabel
+  function menuLabels(root: HTMLElement): string[] {
+    return Array.from(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item-label')).map(
+      (element) => element.textContent?.trim() ?? ''
     );
-    if (!encontrado) {
-      throw new Error(`No se encontró el botón con aria-label "${ariaLabel}"`);
-    }
-    return encontrado;
   }
 
-  it('al hacer clic en Cerrar sesión, limpia la sesión, detiene la inactividad y redirige a /login', () => {
-    const fixture = createComponent();
+  it('renderiza los 3 ítems del menú de sidebar-nav, en orden', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard' });
+    const root = fixture.nativeElement as HTMLElement;
 
-    boton(fixture, 'Cerrar sesión').click();
+    const items = root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item');
+    expect(items.length).toBe(3);
+    expect(menuLabels(root)).toEqual(['Dashboard', 'Mis Emisiones', 'Madurez ambiental']);
+  });
+
+  it('marca como activo el ítem indicado por activeId y solo ese', async () => {
+    const fixture = await createFixture({ activeId: 'emissions' });
+    const root = fixture.nativeElement as HTMLElement;
+
+    const activos = root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item--active');
+    expect(activos.length).toBe(1);
+    expect(activos[0].querySelector('.ch-sidebar__item-label')?.textContent?.trim()).toBe(
+      'Mis Emisiones'
+    );
+    expect(activos[0].getAttribute('aria-current')).toBe('page');
+  });
+
+  it('sin activeId no marca ningún ítem como activo (páginas fuera del menú, p. ej. configuración)', async () => {
+    const fixture = await createFixture({});
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item--active').length).toBe(0);
+    expect(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item').length).toBe(3);
+  });
+
+  it('usa el companyRole recibido por input', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard', companyRole: 'Auditor externo' });
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.querySelector('.ch-sidebar__company-role')?.textContent?.trim()).toBe(
+      'Auditor externo'
+    );
+  });
+
+  it('sobrescribe la etiqueta de Configuración con settingsLabel', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard', settingsLabel: 'Ajustes' });
+    const root = fixture.nativeElement as HTMLElement;
+
+    const bottomLabels = Array.from(
+      root.querySelectorAll('.ch-sidebar__bottom .ch-sidebar__item-label')
+    ).map((element) => element.textContent?.trim());
+    expect(bottomLabels).toContain('Ajustes');
+    expect(bottomLabels).not.toContain('Configuración');
+  });
+
+  it('proyecta el contenido de la página dentro del layout', async () => {
+    const fixture = TestBed.createComponent(ShellLayoutComponent);
+    fixture.componentRef.setInput('headerConfig', HEADER_CONFIG);
+
+    const projected = document.createElement('div');
+    projected.className = 'contenido-proyectado';
+    projected.textContent = 'contenido de prueba';
+    fixture.nativeElement.appendChild(projected);
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('.contenido-proyectado')?.textContent).toBe('contenido de prueba');
+  });
+
+  it('con backRoute definido, el back navega a esa ruta sin emitir backClicked', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard', backRoute: '/emisiones' });
+    const emitido: void[] = [];
+    fixture.componentInstance.backClicked.subscribe(() => emitido.push(undefined));
+
+    fixture.componentInstance['onBackClicked']();
+
+    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/emisiones');
+    expect(emitido.length).toBe(0);
+  });
+
+  it('sin backRoute, el back emite backClicked y no navega', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard' });
+    const emitido: void[] = [];
+    fixture.componentInstance.backClicked.subscribe(() => emitido.push(undefined));
+
+    fixture.componentInstance['onBackClicked']();
+
+    expect(routerStub.navigateByUrl).not.toHaveBeenCalled();
+    expect(emitido.length).toBe(1);
+  });
+
+  it('cierra sesion, detiene la inactividad y navega al login', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard' });
+
+    (fixture.componentInstance as any).onMenuItem('logout');
 
     expect(authServiceStub.cerrarSesion).toHaveBeenCalled();
     expect(sesionInactividadStub.detener).toHaveBeenCalled();
     expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/login');
   });
 
-  it('al hacer clic en Configuración, navega a /configuracion sin cerrar sesión', () => {
-    const fixture = createComponent();
+  it('navega a /configuracion sin cerrar sesión', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard' });
 
-    boton(fixture, 'Configuración').click();
+    (fixture.componentInstance as any).onMenuItem('settings');
 
     expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/configuracion');
     expect(authServiceStub.cerrarSesion).not.toHaveBeenCalled();
   });
 
-  it('al hacer clic en Madurez ambiental, navega al placeholder de benchmark', () => {
-    const fixture = createComponent();
+  it('navega al placeholder de benchmark', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard' });
 
-    boton(fixture, 'Madurez ambiental').click();
+    (fixture.componentInstance as any).onMenuItem('benchmark');
 
     expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/benchmark');
   });
