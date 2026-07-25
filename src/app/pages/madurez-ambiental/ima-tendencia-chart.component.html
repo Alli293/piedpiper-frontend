@@ -1,0 +1,62 @@
+<div class="ch-ima-tendencia">
+  @if (hayMarcadores()) {
+    <p class="ch-ima-tendencia__aviso">
+      <span aria-hidden="true">&#9873;</span>
+      Eventos anotados — pasá el cursor para ver el detalle
+    </p>
+  }
+
+  <div class="ch-ima-tendencia__grafico" #contenedor>
+    <canvas
+      baseChart
+      [data]="chartData()"
+      [options]="chartOptions()"
+      [plugins]="chartPlugins"
+      [type]="'line'"
+    ></canvas>
+
+    @for (posicion of posiciones(); track posicion.numero) {
+      @let marcador = marcadorPorNumero(posicion.numero);
+      @if (marcador) {
+        <button
+          type="button"
+          class="ch-ima-tendencia__marcador"
+          [style]="estiloMarcador(posicion)"
+          [style.background]="color(marcador.tipo)"
+          [attr.aria-label]="marcador.encabezado + ': ' + marcador.textos.join(' ')"
+          [attr.aria-describedby]="
+            marcadorActivo() === posicion.numero ? tooltipId(posicion.numero) : null
+          "
+          (mouseenter)="abrir(posicion.numero)"
+          (mouseleave)="cerrar()"
+          (focus)="abrir(posicion.numero)"
+          (blur)="cerrar()"
+        >
+          {{ posicion.numero }}
+        </button>
+      }
+    }
+
+    @if (tooltipAbierto(); as abierto) {
+      <div
+        class="ch-ima-tendencia__tooltip"
+        role="tooltip"
+        [attr.id]="tooltipId(abierto.marcador.numero)"
+        [style]="estiloTooltip(abierto.posicion)"
+      >
+        <span
+          class="ch-ima-tendencia__tooltip-numero"
+          [style.background]="color(abierto.marcador.tipo)"
+          aria-hidden="true"
+          >{{ abierto.marcador.numero }}</span
+        >
+        <div class="ch-ima-tendencia__tooltip-cuerpo">
+          <p class="ch-ima-tendencia__tooltip-mes">{{ abierto.marcador.encabezado }} · EVENTO</p>
+          @for (texto of abierto.marcador.textos; track texto) {
+            <p class="ch-ima-tendencia__tooltip-texto">{{ texto }}</p>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
