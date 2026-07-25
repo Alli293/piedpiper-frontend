@@ -157,7 +157,7 @@ export class InsigniasEcoRutaPageComponent {
   }
 
   protected planificarItinerario(): void {
-    void this.router.navigateByUrl('/ecoruta/planificar');
+    void this.router.navigateByUrl('/ecoruta/preferencias');
   }
 
   private mensajeError(err: unknown): string {

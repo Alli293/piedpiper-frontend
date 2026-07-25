@@ -1,4 +1,11 @@
-import { routes, rutasPostAutenticacion, usuarioIndividualGuard } from './app.routes';
+import {
+  guardAuditor,
+  guardEmpresa,
+  guardEmpresaAdmin,
+  routes,
+  rutasPostAutenticacion,
+  usuarioIndividualGuard,
+} from './app.routes';
 import { authGuard } from './core/auth/auth.guard';
 
 describe('app.routes', () => {
@@ -27,14 +34,8 @@ describe('app.routes', () => {
     }
   });
 
-  it('las paginas privadas generales estan protegidas con authGuard', () => {
-    const rutasPrivadas = [
-      'benchmark',
-      'configuracion',
-      'empresa/configuracion-inicial',
-      'perfil/configuracion-inicial',
-    ];
-
+  it('las páginas privadas compartidas están protegidas con authGuard', () => {
+    const rutasPrivadas = ['configuracion', 'perfil/configuracion-inicial'];
     for (const path of rutasPrivadas) {
       const ruta = routes.find((r) => r.path === path);
       expect(ruta?.canActivate).toContain(authGuard);
@@ -54,5 +55,48 @@ describe('app.routes', () => {
       const ruta = routes.find((r) => r.path === path);
       expect(ruta?.canActivate).toEqual([usuarioIndividualGuard]);
     }
+  });
+
+  it('/panel redirige a la ruta canonica empresa/panel', () => {
+    const ruta = routes.find((r) => r.path === 'panel');
+    expect(ruta?.redirectTo).toBe('empresa/panel');
+  });
+
+  it('las rutas de empresa están protegidas para administrador y usuario general', () => {
+    const rutasEmpresa = [
+      'empresa/configuracion-inicial',
+      'empresa/panel',
+      'empresa/benchmark',
+      'empresa/limites',
+      'empresa/emisiones',
+      'empresa/emisiones/registrar',
+    ];
+    for (const path of rutasEmpresa) {
+      const ruta = routes.find((r) => r.path === path);
+      expect(ruta?.canActivate).toContain(guardEmpresa);
+    }
+  });
+
+  it('empresa/invitaciones solo permite administrador de empresa', () => {
+    const ruta = routes.find((r) => r.path === 'empresa/invitaciones');
+    expect(ruta?.canActivate).toContain(guardEmpresaAdmin);
+  });
+
+  it('las rutas de auditor están protegidas para auditor certificado', () => {
+    const rutasAuditor = ['auditor/configuracion-inicial', 'auditor/panel'];
+    for (const path of rutasAuditor) {
+      const ruta = routes.find((r) => r.path === path);
+      expect(ruta?.canActivate).toContain(guardAuditor);
+    }
+  });
+
+  it('auditor/validacion-pendiente solo exige sesion iniciada, sin exigir el rol final', () => {
+    const ruta = routes.find((r) => r.path === 'auditor/validacion-pendiente');
+    expect(ruta?.canActivate).toEqual([authGuard]);
+  });
+
+  it('validacion-pendiente generico no exige sesion (se llega ahi antes de tener token)', () => {
+    const ruta = routes.find((r) => r.path === 'validacion-pendiente');
+    expect(ruta?.canActivate).toBeUndefined();
   });
 });

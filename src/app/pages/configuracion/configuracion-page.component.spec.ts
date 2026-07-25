@@ -1,11 +1,14 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { of } from 'rxjs';
 import { ConfiguracionPageComponent } from './configuracion-page.component';
 import { PreferenciasService } from '../../core/services/preferencias.service';
 import { I18nService } from '../../core/services/i18n.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { Preferencias } from '../../core/models/preferencias.model';
+import { PerfilInicialService } from '../../core/services/perfil-inicial.service';
+import { PerfilInicial } from '../../core/models/perfil-inicial.model';
 
 describe('ConfiguracionPageComponent', () => {
   let fixture: ComponentFixture<ConfiguracionPageComponent>;
@@ -18,7 +21,14 @@ describe('ConfiguracionPageComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ConfiguracionPageComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: PerfilInicialService,
+          useValue: { perfil: () => null, obtener: () => of({ empresa: null } as PerfilInicial) },
+        },
+      ],
     }).compileComponents();
 
     httpMock = TestBed.inject(HttpTestingController);
@@ -115,6 +125,18 @@ describe('ConfiguracionPageComponent', () => {
     expect(selects()[0].value).toBe('ESPANOL');
     expect(i18n.idioma()).toBe('ESPANOL');
     expect(botonGuardar().disabled).toBe(false);
+  });
+
+  it('marca Configuración como activo en la barra lateral', () => {
+    flushCargaInicial();
+
+    const root = fixture.nativeElement as HTMLElement;
+    const boton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
+      (b) => b.getAttribute('aria-label') === i18n.t('config.seccion')
+    );
+
+    expect(boton?.classList.contains('ch-sidebar__item--active')).toBe(true);
+    expect(boton?.getAttribute('aria-current')).toBe('page');
   });
 
   it('si la lectura inicial falla se mantienen los defaults Español / CRC / métrico', () => {

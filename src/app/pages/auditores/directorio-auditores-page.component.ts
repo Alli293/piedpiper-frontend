@@ -10,7 +10,6 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import { AuthSessionService } from '../../core/auth-session.service';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -97,7 +96,6 @@ interface TarjetaAuditor {
 })
 export class DirectorioAuditoresPageComponent {
   private readonly auditoresService = inject(AuditoresService);
-  private readonly authSession = inject(AuthSessionService);
   private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -132,7 +130,6 @@ export class DirectorioAuditoresPageComponent {
     sectionLabel: 'AUDITORES',
     pageTitle: 'Directorio de Auditores',
     showNotificationDot: true,
-    userInitials: this.authSession.getUserInitials(),
   }));
 
   protected readonly avisoBusqueda = computed(() =>

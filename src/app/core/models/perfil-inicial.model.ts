@@ -8,6 +8,27 @@ export type RolUsuario =
   | 'AUDITOR_CERTIFICADO'
   | 'ADMINISTRADOR_PLATAFORMA';
 
+/** Texto de rol mostrado en `ch-sidebar__company-role`. */
+export const ROL_SIDEBAR_LABEL: Record<RolUsuario, string> = {
+  USUARIO_INDIVIDUAL: 'Viajes · EcoRuta',
+  USUARIO_GENERAL: 'Empresa · Usuario',
+  ADMINISTRADOR_EMPRESA: 'Empresa · Admin',
+  AUDITOR_CERTIFICADO: 'Auditor Certificado',
+  ADMINISTRADOR_PLATAFORMA: 'Administrador',
+};
+
+/**
+ * Ruta a la que se redirige a un usuario autenticado cuando intenta acceder
+ * a una ruta protegida para la que su rol no tiene permiso (ver `rolGuard`).
+ */
+export const RUTA_INICIO_POR_ROL: Record<RolUsuario, string> = {
+  USUARIO_INDIVIDUAL: 'ecoruta/preferencias',
+  USUARIO_GENERAL: 'empresa/panel',
+  ADMINISTRADOR_EMPRESA: 'empresa/panel',
+  AUDITOR_CERTIFICADO: 'auditor/panel',
+  ADMINISTRADOR_PLATAFORMA: 'admin/panel',
+};
+
 export interface EmpresaPerfil {
   nombreEmpresa: string;
   sectorIndustrial: string | null;
@@ -17,6 +38,8 @@ export interface EmpresaPerfil {
 
 export interface PerfilInicial {
   nombreVisible: string;
+  nombre: string;
+  apellidos: string;
   preferencias: Preferencias;
   rol: RolUsuario;
   configuracionCompleta: boolean;

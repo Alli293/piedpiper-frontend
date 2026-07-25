@@ -13,22 +13,6 @@
 
   <div class="ch-emissions-list-page">
     <section class="ch-emissions-list-page__controls" aria-label="Filtros de emisiones">
-      <div class="ch-emissions-list-page__category-filters" role="group" aria-label="Categoría">
-        @for (option of categoryOptions; track option.value) {
-          <button
-            type="button"
-            class="ch-emissions-list-page__chip"
-            [class.ch-emissions-list-page__chip--active]="filtroCategoria() === option.value"
-            [attr.aria-pressed]="filtroCategoria() === option.value"
-            (click)="cambiarCategoria(option.value)"
-          >
-            <app-icon [name]="option.icon" [size]="15" />
-            <span>{{ option.label }}</span>
-            <strong>{{ registrosPorCategoria(option.value) }}</strong>
-          </button>
-        }
-      </div>
-
       <div class="ch-emissions-list-page__select-filters">
         <div class="ch-emissions-list-page__filter-select">
           <app-icon name="calendario" [size]="14" />
@@ -51,6 +35,21 @@
             (valueChange)="cambiarMes($event)"
           />
         </div>
+      </div>
+      <div class="ch-emissions-list-page__category-filters" role="group" aria-label="Categoría">
+        @for (option of categoryOptions; track option.value) {
+          <button
+            type="button"
+            class="ch-emissions-list-page__chip"
+            [class.ch-emissions-list-page__chip--active]="filtroCategoria() === option.value"
+            [attr.aria-pressed]="filtroCategoria() === option.value"
+            (click)="cambiarCategoria(option.value)"
+          >
+            <app-icon [name]="option.icon" [size]="15" />
+            <span>{{ option.label }}</span>
+            <strong>{{ registrosPorCategoria(option.value) }}</strong>
+          </button>
+        }
       </div>
     </section>
 

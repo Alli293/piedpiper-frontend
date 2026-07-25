@@ -10,6 +10,8 @@ describe('PerfilInicialService', () => {
 
   const perfil: PerfilInicial = {
     nombreVisible: 'Ana',
+    nombre: 'Ana',
+    apellidos: 'González',
     preferencias: { idioma: 'ESPANOL', moneda: 'CRC', unidades: 'METRICO' },
     rol: 'USUARIO_INDIVIDUAL',
     configuracionCompleta: false,

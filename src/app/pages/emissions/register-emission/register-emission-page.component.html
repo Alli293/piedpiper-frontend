@@ -1,4 +1,8 @@
-<app-shell-layout activeId="emissions" [headerConfig]="headerConfig()" backRoute="/emisiones">
+<app-shell-layout
+  activeId="emissions"
+  [headerConfig]="headerConfig()"
+  backRoute="/empresa/emisiones"
+>
   <div class="register-emission-page">
     <form class="register-emission-page__card" novalidate (submit)="handleSubmit($event)">
       <header class="register-emission-page__header">

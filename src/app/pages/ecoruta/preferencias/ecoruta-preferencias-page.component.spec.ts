@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideLocationMocks } from '@angular/common/testing';
 import { provideRouter, Router } from '@angular/router';
@@ -6,6 +7,8 @@ import { Subject, of, throwError } from 'rxjs';
 import { EcoRutaPreferenciasPageComponent } from './ecoruta-preferencias-page.component';
 import { EcoRutaPreferenciasService } from '../ecoruta-preferencias.service';
 import { ToastService } from '../../../shared/services/toast.service';
+import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
+import { PerfilInicial } from '../../../core/models/perfil-inicial.model';
 import { PreferenciasViajeResponse } from '../models/preferencias-viaje.model';
 
 const VALID_RESPONSE: PreferenciasViajeResponse = {
@@ -45,6 +48,13 @@ describe('EcoRutaPreferenciasPageComponent', () => {
         provideLocationMocks(),
         provideRouter([]),
         { provide: EcoRutaPreferenciasService, useValue: { obtener, guardar } },
+        {
+          provide: PerfilInicialService,
+          useValue: {
+            perfil: signal<PerfilInicial | null>(null),
+            obtener: vi.fn().mockReturnValue(of(null)),
+          },
+        },
       ],
     }).compileComponents();
 

@@ -4,6 +4,8 @@ import { of, throwError } from 'rxjs';
 import { ToastService } from '../../../shared/services/toast.service';
 import { InvitacionesPageComponent } from './invitaciones-page.component';
 import { Invitacion, InvitacionesService } from '../../../core/invitaciones/invitaciones.service';
+import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
+import { PerfilInicial } from '../../../core/models/perfil-inicial.model';
 
 describe('InvitacionesPageComponent', () => {
   let toastService: ToastService;
@@ -30,7 +32,14 @@ describe('InvitacionesPageComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [InvitacionesPageComponent],
-      providers: [ToastService, { provide: InvitacionesService, useValue: invitacionesService }],
+      providers: [
+        ToastService,
+        { provide: InvitacionesService, useValue: invitacionesService },
+        {
+          provide: PerfilInicialService,
+          useValue: { perfil: () => null, obtener: () => of({ empresa: null } as PerfilInicial) },
+        },
+      ],
     }).compileComponents();
 
     toastService = TestBed.inject(ToastService);

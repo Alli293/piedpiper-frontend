@@ -1,6 +1,6 @@
 <app-page-layout
   [sidebarConfig]="sidebarConfig()"
-  [headerConfig]="headerConfig()"
+  [headerConfig]="resolvedHeaderConfig()"
   (menuItemClicked)="onMenuItem($event)"
   (backClicked)="onBackClicked()"
 >

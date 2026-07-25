@@ -63,9 +63,9 @@ describe('DirectorioAuditoresPageComponent', () => {
         {
           provide: AuthSessionService,
           useValue: {
-            getUserInitials: vi.fn().mockReturnValue('MR'),
             getRole: vi.fn().mockReturnValue('administrador_empresa'),
             getUserName: vi.fn().mockReturnValue('Mock User'),
+            isAdministradorEmpresa: vi.fn().mockReturnValue(true),
           },
         },
         {

@@ -4,6 +4,9 @@ import { provideRouter, Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
+import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
+import { PerfilInicial } from '../../../core/models/perfil-inicial.model';
+import { ToastService } from '../../../shared/services/toast.service';
 import { EmisionesService } from '../emisiones.service';
 import { EmisionResponse } from '../models/emision.model';
 import { EmissionsListPageComponent } from './emissions-list-page.component';
@@ -81,6 +84,11 @@ describe('EmissionsListPageComponent', () => {
         {
           provide: SesionInactividadService,
           useValue: { reiniciar: vi.fn(), detener: vi.fn() },
+        },
+        { provide: ToastService, useValue: { toasts: signal([]), error: vi.fn() } as any },
+        {
+          provide: PerfilInicialService,
+          useValue: { perfil: () => null, obtener: () => of({ empresa: null } as PerfilInicial) },
         },
       ],
     }).compileComponents();
@@ -171,7 +179,7 @@ describe('EmissionsListPageComponent', () => {
 
     limitsButton?.click();
 
-    expect(navigateByUrl).toHaveBeenCalledWith('/limites');
+    expect(navigateByUrl).toHaveBeenCalledWith('/empresa/limites');
   });
 
   it('navega al dashboard desde el sidebar', async () => {
@@ -183,7 +191,7 @@ describe('EmissionsListPageComponent', () => {
 
     dashboardButton?.click();
 
-    expect(navigateByUrl).toHaveBeenCalledWith('/panel');
+    expect(navigateByUrl).toHaveBeenCalledWith('/empresa/panel');
   });
 
   it('mantiene los contadores del periodo aunque se filtre por categoria', async () => {

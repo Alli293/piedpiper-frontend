@@ -18,6 +18,7 @@ export interface SidebarBottomItem {
   label: string;
   icon: IconName;
   id: SidebarBottomItemId;
+  active?: boolean;
 }
 
 @Component({

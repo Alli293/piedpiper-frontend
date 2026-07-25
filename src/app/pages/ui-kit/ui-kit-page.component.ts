@@ -65,6 +65,7 @@ export class UiKitPageComponent {
       companyName: 'Café del Valle S.A.',
       companyRole: 'Administrador',
       companyInitials: 'CV',
+      esAdministradorEmpresa: true,
     })
   );
 

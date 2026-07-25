@@ -42,6 +42,8 @@
     <button
       type="button"
       class="ch-sidebar__item"
+      [class.ch-sidebar__item--active]="item.active"
+      [attr.aria-current]="item.active ? 'page' : null"
       [attr.aria-label]="item.label"
       [attr.title]="item.label"
       (click)="menuItemClicked.emit(item.id)"

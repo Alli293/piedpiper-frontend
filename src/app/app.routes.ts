@@ -1,8 +1,13 @@
-import { Routes } from '@angular/router';
-import { authGuard, rolGuard } from './core/auth/auth.guard';
+import { CanActivateFn, Routes } from '@angular/router';
+import { authGuard, noAuthGuard, rolGuard } from './core/auth/auth.guard';
 
 const cargarPlaceholder = () =>
   import('./pages/placeholder/placeholder-page.component').then((m) => m.PlaceholderPageComponent);
+
+export const guardEmpresa: CanActivateFn = rolGuard('ADMINISTRADOR_EMPRESA', 'USUARIO_GENERAL');
+export const guardEmpresaAdmin: CanActivateFn = rolGuard('ADMINISTRADOR_EMPRESA');
+export const guardAuditor: CanActivateFn = rolGuard('AUDITOR_CERTIFICADO');
+export const guardAdmin: CanActivateFn = rolGuard('ADMINISTRADOR_PLATAFORMA');
 
 export const rutasPostAutenticacion = [
   'auditor/configuracion-inicial',
@@ -11,9 +16,18 @@ export const rutasPostAutenticacion = [
   'admin/panel',
 ];
 
-const rutasPlaceholder = rutasPostAutenticacion.filter(
-  (path) => path !== 'emisiones' && path !== 'emisiones/registrar'
-);
+const rutasPlaceholderConGuard: Record<string, CanActivateFn[]> = {
+  'auditor/configuracion-inicial': [guardAuditor],
+  'auditor/panel': [guardAuditor],
+  'auditor/validacion-pendiente': [authGuard],
+  'admin/panel': [guardAdmin],
+};
+
+const rutasPlaceholder = rutasPostAutenticacion.map((path) => ({
+  path,
+  canActivate: rutasPlaceholderConGuard[path],
+  loadComponent: cargarPlaceholder,
+}));
 
 export const usuarioIndividualGuard = rolGuard('USUARIO_INDIVIDUAL');
 
@@ -26,6 +40,7 @@ export const routes: Routes = [
   },
   {
     path: 'login',
+    canActivate: [noAuthGuard],
     loadComponent: () =>
       import('./pages/auth/login/login-page.component').then((m) => m.LoginPageComponent),
   },
@@ -92,14 +107,8 @@ export const routes: Routes = [
     loadComponent: cargarPlaceholder,
   },
   {
-    path: 'limites',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./pages/limites/limites-page.component').then((m) => m.LimitesPageComponent),
-  },
-  {
     path: 'admin/solicitudes-auditor',
-    canActivate: [rolGuard('ADMINISTRADOR_PLATAFORMA')],
+    canActivate: [guardAdmin],
     loadComponent: () =>
       import('./pages/admin/solicitudes-auditor/solicitudes-auditor-page.component').then(
         (m) => m.SolicitudesAuditorPageComponent
@@ -123,7 +132,7 @@ export const routes: Routes = [
   },
   {
     path: 'empresa/configuracion-inicial',
-    canActivate: [authGuard],
+    canActivate: [guardEmpresa],
     loadComponent: () =>
       import('./pages/empresa/configuracion-inicial-page.component').then(
         (m) => m.ConfiguracionInicialPageComponent
@@ -131,44 +140,31 @@ export const routes: Routes = [
   },
   {
     path: 'empresa/invitaciones',
-    canActivate: [authGuard],
+    canActivate: [guardEmpresaAdmin],
     loadComponent: () =>
       import('./pages/empresa/invitaciones/invitaciones-page.component').then(
         (m) => m.InvitacionesPageComponent
       ),
   },
   {
-    path: 'perfil/configuracion-inicial',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./pages/perfil/configuracion-inicial-perfil-page.component').then(
-        (m) => m.ConfiguracionInicialPerfilPageComponent
-      ),
-  },
-  {
-    path: 'ui-kit',
-    loadComponent: () =>
-      import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),
-  },
-  {
-    path: 'panel',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./pages/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent),
-  },
-  {
     path: 'empresa/panel',
-    canActivate: [authGuard],
+    canActivate: [guardEmpresa],
     loadComponent: () =>
       import('./pages/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent),
   },
   {
-    path: 'benchmark',
-    canActivate: [authGuard],
+    path: 'empresa/benchmark',
+    canActivate: [guardEmpresa],
     loadComponent: () =>
       import('./pages/madurez-ambiental/madurez-ambiental-page.component').then(
         (m) => m.MadurezAmbientalPageComponent
       ),
+  },
+  {
+    path: 'empresa/limites',
+    canActivate: [guardEmpresa],
+    loadComponent: () =>
+      import('./pages/limites/limites-page.component').then((m) => m.LimitesPageComponent),
   },
   {
     path: 'madurez-ambiental',
@@ -201,21 +197,29 @@ export const routes: Routes = [
     canActivate: [usuarioIndividualGuard],
     loadComponent: cargarPlaceholder,
   },
-  ...rutasPlaceholder.map((path) => ({ path, loadComponent: cargarPlaceholder })),
   {
-    path: 'emisiones',
-    canActivate: [authGuard],
+    path: 'empresa/emisiones',
+    canActivate: [guardEmpresa],
     loadComponent: () =>
       import('./pages/emissions/emissions-list/emissions-list-page.component').then(
         (m) => m.EmissionsListPageComponent
       ),
   },
   {
-    path: 'emisiones/registrar',
-    canActivate: [authGuard],
+    path: 'empresa/emisiones/registrar',
+    canActivate: [guardEmpresa],
     loadComponent: () =>
       import('./pages/emissions/register-emission/register-emission-page.component').then(
         (m) => m.RegisterEmissionPageComponent
+      ),
+  },
+  ...rutasPlaceholder,
+  {
+    path: 'perfil/configuracion-inicial',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/perfil/configuracion-inicial-perfil-page.component').then(
+        (m) => m.ConfiguracionInicialPerfilPageComponent
       ),
   },
   {
@@ -225,6 +229,15 @@ export const routes: Routes = [
       import('./pages/configuracion/configuracion-page.component').then(
         (m) => m.ConfiguracionPageComponent
       ),
+  },
+  {
+    path: 'ui-kit',
+    loadComponent: () =>
+      import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),
+  },
+  {
+    path: 'panel',
+    redirectTo: 'empresa/panel',
   },
   {
     path: '**',

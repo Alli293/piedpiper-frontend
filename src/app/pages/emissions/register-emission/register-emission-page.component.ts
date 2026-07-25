@@ -452,10 +452,9 @@ export class RegisterEmissionPageComponent {
   });
 
   protected readonly headerConfig = signal<HeaderConfig>({
-    sectionLabel: 'PANEL EMPRESARIAL',
+    sectionLabel: 'Emisiones',
     pageTitle: 'Registrar emisión',
     showNotificationDot: true,
-    userInitials: 'MR',
     showBackButton: true,
   });
 

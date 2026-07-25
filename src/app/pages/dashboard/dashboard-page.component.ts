@@ -4,7 +4,6 @@ import { Component, computed, effect, inject, signal, untracked } from '@angular
 import { form, FormField, required, schema } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { AuthSessionService } from '../../core/auth-session.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
 import { HeadingComponent } from '../../shared/components/heading/heading.component';
@@ -112,7 +111,6 @@ export class DashboardPageComponent {
   private readonly emisionesService = inject(EmisionesService);
   private readonly dashboardService = inject(DashboardService);
   private readonly evolucionService = inject(EvolucionService);
-  private readonly authSession = inject(AuthSessionService);
   private readonly toastService = inject(ToastService);
 
   private readonly anioActual = new Date().getFullYear();
@@ -209,7 +207,6 @@ export class DashboardPageComponent {
     sectionLabel: 'PANEL EMPRESARIAL',
     pageTitle: 'Dashboard',
     showNotificationDot: true,
-    userInitials: this.authSession.getUserInitials(),
   }));
 
   protected readonly periodoSelectorAriaLabel = computed(

@@ -14,8 +14,7 @@
 
 .ch-emissions-list-page__controls {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: var(--ch-space-4);
   width: 100%;
 }
@@ -23,17 +22,17 @@
 .ch-emissions-list-page__category-filters,
 .ch-emissions-list-page__select-filters {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: var(--ch-space-2);
   min-width: 0;
 }
 
-.ch-emissions-list-page__category-filters {
-  flex-wrap: wrap;
+.ch-emissions-list-page__select-filters {
+  align-self: flex-end;
 }
 
-.ch-emissions-list-page__select-filters {
-  margin-left: auto;
+.ch-emissions-list-page__category-filters {
+  flex-wrap: wrap;
 }
 
 .ch-emissions-list-page__filter-select {
@@ -215,7 +214,7 @@
 
 .ch-emissions-list-page__date {
   color: var(--ch-text-secondary);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--ch-font-mono);
   white-space: nowrap;
 }
 
@@ -402,14 +401,8 @@
 }
 
 @media (max-width: 1100px) {
-  .ch-emissions-list-page__controls {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
   .ch-emissions-list-page__select-filters {
     flex-wrap: wrap;
-    margin-left: 0;
   }
 }
 

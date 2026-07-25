@@ -6,6 +6,8 @@ export type SidebarNavId =
   | 'dashboard'
   | 'emissions'
   | 'benchmark'
+  | 'colaboradores'
+  | 'settings'
   | 'ecoruta-planificar'
   | 'ecoruta-itinerarios'
   | 'ecoruta-insignias';
@@ -16,6 +18,8 @@ export interface SidebarNavItemDef {
   id: SidebarNavId;
   label: string;
   icon: IconName;
+  /** Oculta el ítem salvo que el usuario sea administrador de empresa (ver `guardEmpresaAdmin`). */
+  soloAdministrador?: boolean;
 }
 
 const SIDEBAR_NAV_ITEMS: Record<SidebarNavVariant, readonly SidebarNavItemDef[]> = {
@@ -23,6 +27,7 @@ const SIDEBAR_NAV_ITEMS: Record<SidebarNavVariant, readonly SidebarNavItemDef[]>
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
     { id: 'emissions', label: 'Mis Emisiones', icon: 'emisiones' },
     { id: 'benchmark', label: 'Madurez ambiental', icon: 'benchmark' },
+    { id: 'colaboradores', label: 'Colaboradores', icon: 'colaboradores', soloAdministrador: true },
   ],
   ecoruta: [
     { id: 'ecoruta-planificar', label: 'Planificar viaje', icon: 'viajero' },
@@ -37,7 +42,7 @@ const SIDEBAR_BOTTOM_ITEMS: readonly SidebarBottomItem[] = [
 ];
 
 export interface BuildSidebarConfigOptions {
-  /** Which nav item is highlighted as the current page. Omit if the page isn't a menu item (e.g. settings). */
+  /** Which nav item is highlighted as the current page. Omit if the page isn't in the sidebar. */
   activeId?: SidebarNavId;
   companyName: string;
   companyRole: string;
@@ -45,24 +50,26 @@ export interface BuildSidebarConfigOptions {
   /** Overrides the default settings bottom-item label. */
   settingsLabel?: string;
   variant?: SidebarNavVariant;
+  /** Debe ser `true` para ver los ítems marcados como `soloAdministrador`. */
+  esAdministradorEmpresa?: boolean;
 }
 
 export function buildSidebarConfig(options: BuildSidebarConfigOptions): SidebarConfig {
   const { activeId, companyName, companyRole, companyInitials } = options;
-  const menuItems: SidebarMenuItem[] = SIDEBAR_NAV_ITEMS[options.variant ?? 'empresa'].map(
-    (item) => ({
+  const menuItems: SidebarMenuItem[] = SIDEBAR_NAV_ITEMS[options.variant ?? 'empresa']
+    .filter((item) => !item.soloAdministrador || options.esAdministradorEmpresa)
+    .map((item) => ({
       id: item.id,
       label: item.label,
       icon: item.icon,
       active: item.id === activeId,
-    })
-  );
+    }));
 
-  const bottomItems: SidebarBottomItem[] = options.settingsLabel
-    ? SIDEBAR_BOTTOM_ITEMS.map((item) =>
-        item.id === 'settings' ? { ...item, label: options.settingsLabel as string } : item
-      )
-    : [...SIDEBAR_BOTTOM_ITEMS];
+  const bottomItems: SidebarBottomItem[] = SIDEBAR_BOTTOM_ITEMS.map((item) => ({
+    ...item,
+    label: item.id === 'settings' && options.settingsLabel ? options.settingsLabel : item.label,
+    active: item.id === activeId,
+  }));
 
   return { menuItems, bottomItems, companyName, companyRole, companyInitials };
 }

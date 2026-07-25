@@ -117,15 +117,10 @@ export class LimitesPageComponent {
     }
   ).reverse();
 
-  protected readonly companyRole = computed(() =>
-    this.isAdmin() ? 'Administrador' : 'Usuario general'
-  );
-
   protected readonly headerConfig: HeaderConfig = {
     sectionLabel: 'PANEL EMPRESARIAL',
     pageTitle: 'Límite anual de emisiones',
     showNotificationDot: true,
-    userInitials: 'CA',
     showBackButton: true,
   };
 
