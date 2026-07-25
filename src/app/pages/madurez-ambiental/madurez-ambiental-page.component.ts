@@ -83,6 +83,7 @@ export class MadurezAmbientalPageComponent implements OnInit {
   /** Guards contra respuestas fuera de orden (mismo patrón que emissions-list-page). */
   private cargaImaRequestId = 0;
   private cargaTendenciaRequestId = 0;
+  private cargaBenchmarkRequestId = 0;
 
   /** Solo hay historial si al menos un mes trae IMA de la empresa. */
   protected readonly sinHistorial = computed(
@@ -164,11 +165,14 @@ export class MadurezAmbientalPageComponent implements OnInit {
   }
 
   private async cargarBenchmark(anio: number, mes: number): Promise<void> {
+    const requestId = ++this.cargaBenchmarkRequestId;
     this.benchmarkError.set(false);
     try {
       const benchmark = await firstValueFrom(this.imaService.obtenerBenchmark(anio, mes));
+      if (requestId !== this.cargaBenchmarkRequestId) return;
       this.benchmarkData.set(benchmark);
     } catch (err: unknown) {
+      if (requestId !== this.cargaBenchmarkRequestId) return;
       this.benchmarkError.set(true);
       this.toastService.error(
         apiErrorMessage(err) ?? 'No se pudo cargar la comparación contra tu sector.',
