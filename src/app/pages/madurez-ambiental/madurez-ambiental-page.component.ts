@@ -11,8 +11,15 @@ import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.compo
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { apiErrorMessage } from '../../shared/utils/http-error.utils';
-import { ImaEvento, ImaService, ImaResponse, ImaTendenciaPunto } from '../dashboard/ima.service';
+import {
+  ImaEvento,
+  ImaService,
+  ImaResponse,
+  ImaTendenciaPunto,
+  BenchmarkSectorialResponse,
+} from '../dashboard/ima.service';
 import { ImaPanelComponent } from '../dashboard/ima-panel.component';
+import { BenchmarkPanelComponent } from '../dashboard/benchmark-panel.component';
 import { ImaTendenciaChartComponent } from './ima-tendencia-chart.component';
 
 const MESES_VENTANA_DEFECTO = 12;
@@ -34,6 +41,7 @@ const VENTANAS: SelectOption[] = [
   selector: 'app-madurez-ambiental-page',
   imports: [
     RouterLink,
+    BenchmarkPanelComponent,
     HeadingComponent,
     ImaPanelComponent,
     ImaTendenciaChartComponent,
@@ -61,6 +69,10 @@ export class MadurezAmbientalPageComponent implements OnInit {
   protected readonly cargandoIma = signal(true);
   protected readonly errorIma = signal(false);
 
+  // --- Comparación contra tu sector (benchmark) ---
+  protected readonly benchmarkData = signal<BenchmarkSectorialResponse | null>(null);
+  protected readonly benchmarkError = signal(false);
+
   // --- Evolución histórica del IMA ---
   protected readonly cargando = signal(false);
   protected readonly serie = signal<ImaTendenciaPunto[]>([]);
@@ -86,12 +98,14 @@ export class MadurezAmbientalPageComponent implements OnInit {
 
   ngOnInit(): void {
     void this.cargarIma(this.anioSeleccionado(), this.mesSeleccionado());
+    void this.cargarBenchmark(this.anioSeleccionado(), this.mesSeleccionado());
     void this.cargarTendencia(this.ventana());
   }
 
   protected onImaPeriodoChange(evento: { anio: number; mes: number }): void {
     this.mesSeleccionado.set(evento.mes);
     void this.cargarIma(evento.anio, evento.mes);
+    void this.cargarBenchmark(evento.anio, evento.mes);
   }
 
   protected onVentanaChange(valor: string): void {
@@ -146,6 +160,21 @@ export class MadurezAmbientalPageComponent implements OnInit {
       if (requestId === this.cargaTendenciaRequestId) {
         this.cargando.set(false);
       }
+    }
+  }
+
+  private async cargarBenchmark(anio: number, mes: number): Promise<void> {
+    this.benchmarkError.set(false);
+    try {
+      const benchmark = await firstValueFrom(this.imaService.obtenerBenchmark(anio, mes));
+      this.benchmarkData.set(benchmark);
+    } catch (err: unknown) {
+      this.benchmarkError.set(true);
+      this.toastService.error(
+        apiErrorMessage(err) ?? 'No se pudo cargar la comparación contra tu sector.',
+        undefined,
+        TOAST_DURACION_MS
+      );
     }
   }
 }
