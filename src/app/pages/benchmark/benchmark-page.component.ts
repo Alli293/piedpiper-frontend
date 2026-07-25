@@ -7,13 +7,20 @@ import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-la
 import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { apiErrorMessage } from '../../shared/utils/http-error.utils';
-import { ImaService, ImaResponse } from '../dashboard/ima.service';
+import { BenchmarkSectorialResponse, ImaService, ImaResponse } from '../dashboard/ima.service';
 import { ImaPanelComponent } from '../dashboard/ima-panel.component';
+import { BenchmarkPanelComponent } from '../dashboard/benchmark-panel.component';
 
 @Component({
   selector: 'app-benchmark-page',
   standalone: true,
-  imports: [RouterLink, ShellLayoutComponent, HeadingComponent, ImaPanelComponent],
+  imports: [
+    RouterLink,
+    ShellLayoutComponent,
+    HeadingComponent,
+    ImaPanelComponent,
+    BenchmarkPanelComponent,
+  ],
   templateUrl: './benchmark-page.component.html',
   styleUrl: './benchmark-page.component.scss',
 })
@@ -27,6 +34,8 @@ export class BenchmarkPageComponent implements OnInit {
   protected readonly imaData = signal<ImaResponse | null>(null);
   protected readonly cargandoIma = signal(true);
   protected readonly errorIma = signal(false);
+  protected readonly benchmarkData = signal<BenchmarkSectorialResponse | null>(null);
+  protected readonly benchmarkError = signal(false);
 
   private requestId = 0;
 
@@ -39,11 +48,13 @@ export class BenchmarkPageComponent implements OnInit {
 
   ngOnInit(): void {
     void this.cargarIma(this.anioSeleccionado(), this.mesSeleccionado());
+    void this.cargarBenchmark(this.anioSeleccionado(), this.mesSeleccionado());
   }
 
   protected onImaPeriodoChange(evento: { anio: number; mes: number }): void {
     this.mesSeleccionado.set(evento.mes);
     void this.cargarIma(evento.anio, evento.mes);
+    void this.cargarBenchmark(evento.anio, evento.mes);
   }
 
   private async cargarIma(anio: number, mes: number): Promise<void> {
@@ -69,6 +80,21 @@ export class BenchmarkPageComponent implements OnInit {
       if (currentRequest === this.requestId) {
         this.cargandoIma.set(false);
       }
+    }
+  }
+
+  private async cargarBenchmark(anio: number, mes: number): Promise<void> {
+    this.benchmarkError.set(false);
+    try {
+      const benchmark = await firstValueFrom(this.imaService.obtenerBenchmark(anio, mes));
+      this.benchmarkData.set(benchmark);
+    } catch (err: unknown) {
+      this.benchmarkError.set(true);
+      this.toastService.error(
+        apiErrorMessage(err) ?? 'No se pudo cargar la comparación contra tu sector.',
+        undefined,
+        5000
+      );
     }
   }
 }

@@ -28,9 +28,7 @@ import { EmisionesService } from '../emissions/emisiones.service';
 import { DashboardService } from './dashboard.service';
 import { PeriodoDashboard, ResumenHuellaDashboardResponse } from './dashboard.model';
 import { EvolucionService, PuntoMensual } from './evolucion.service';
-import { BenchmarkPanelComponent } from './benchmark-panel.component';
 import { EvolucionChartComponent } from './evolucion-chart.component';
-import { ImaPanelComponent } from './ima-panel.component';
 import { BenchmarkSectorialResponse, ImaResponse, ImaService } from './ima.service';
 
 interface PeriodoResumenFormModel {
@@ -96,7 +94,6 @@ export const DONA_CIRCUNFERENCIA = 2 * Math.PI * DONA_RADIO;
 @Component({
   selector: 'app-dashboard-page',
   imports: [
-    BenchmarkPanelComponent,
     ButtonComponent,
     CardStatComponent,
     DecimalPipe,
@@ -108,7 +105,6 @@ export const DONA_CIRCUNFERENCIA = 2 * Math.PI * DONA_RADIO;
     SelectInputComponent,
     ShellLayoutComponent,
     EvolucionChartComponent,
-    ImaPanelComponent,
   ],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',

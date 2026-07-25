@@ -104,16 +104,7 @@
       </article>
     </section>
 
-    <app-ima-panel
-      [ima]="imaData()"
-      [anio]="anioSeleccionado()"
-      [mes]="mesSeleccionado()"
-      (periodoChange)="onImaPeriodoChange($event)"
-    />
-
-    <app-benchmark-panel [benchmark]="benchmarkData()" [error]="benchmarkError()" />
-
-    <!-- PP-41: Evolución histórica -->
+    <!-- PP-41: Evolución mensual de emisiones -->
     <article class="annual-limit-panel evolucion-panel">
       <header class="evolucion-panel__header">
         <app-heading level="h2" text="Evolución mensual de emisiones" />
@@ -128,17 +119,6 @@
     </article>
 
     <div class="dashboard-page__grid">
-      <!-- PP-41: Evolución histórica -->
-      <article class="annual-limit-panel evolucion-panel">
-        <app-heading level="h2" text="Evolución histórica de la huella" />
-        @if (evolucionVacia()) {
-          <p class="evolucion-panel__empty">
-            No hay emisiones registradas en {{ anioSeleccionado() }}.
-          </p>
-        }
-        <app-evolucion-chart [serie]="evolucionSerie()" [anio]="anioSeleccionado()" />
-      </article>
-
       <section class="dashboard-page__card" aria-label="Desglose por categoría">
         <h2 class="dashboard-page__card-title">Desglose por categoría</h2>
 

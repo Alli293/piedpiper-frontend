@@ -91,7 +91,10 @@
       }
     }
 
-    <!-- Sección 3: Evolución histórica del IMA (futuro) -->
+    <!-- Sección 3: Comparación contra tu sector -->
+    <app-benchmark-panel [benchmark]="benchmarkData()" [error]="benchmarkError()" />
+
+    <!-- Sección 4: Evolución histórica del IMA (futuro) -->
     <!-- <section class="ima-history" aria-label="Evolución histórica del IMA">
       <app-heading level="h2" text="Evolución histórica del IMA" />
     </section> -->
