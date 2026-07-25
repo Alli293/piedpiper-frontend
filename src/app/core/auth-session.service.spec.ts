@@ -23,6 +23,19 @@ describe('AuthSessionService', () => {
     service = TestBed.inject(AuthSessionService);
   });
 
+  it('normaliza el rol del token a minúsculas', () => {
+    token.set(jwt({ rol: 'ADMINISTRADOR_EMPRESA' }));
+
+    expect(service.getRole()).toBe('administrador_empresa');
+    expect(service.isAdministradorEmpresa()).toBe(true);
+  });
+
+  it('usa el fallback de usuario general si no hay rol en el token', () => {
+    token.set(jwt({}));
+
+    expect(service.getRole()).toBe('usuario_general_empresa');
+  });
+
   it('obtiene iniciales desde nombre y apellidos del token', () => {
     token.set(jwt({ nombre: 'Ariela', apellidos: 'Jimenez' }));
 

@@ -4,7 +4,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
-import { AuthSessionService } from '../../core/auth-session.service';
+import { PerfilInicialService } from '../../core/services/perfil-inicial.service';
+import { PerfilInicial } from '../../core/models/perfil-inicial.model';
 import { ToastService } from '../../shared/services/toast.service';
 import {
   ComparacionEmisionesResponse,
@@ -115,13 +116,6 @@ describe('DashboardPageComponent', () => {
     obtenerIma: ReturnType<typeof vi.fn>;
     obtenerBenchmark: ReturnType<typeof vi.fn>;
   };
-  let authSession: {
-    getUserInitials: ReturnType<typeof vi.fn>;
-    getRole: ReturnType<typeof vi.fn>;
-    getUserName: ReturnType<typeof vi.fn>;
-    getUserEmail: ReturnType<typeof vi.fn>;
-    getUserId: ReturnType<typeof vi.fn>;
-  };
   let authService: {
     cerrarSesion: ReturnType<typeof vi.fn>;
     token: ReturnType<typeof signal<string | null>>;
@@ -156,13 +150,6 @@ describe('DashboardPageComponent', () => {
       ),
       obtenerBenchmark: vi.fn().mockReturnValue(of(BENCHMARK_BASE)),
     };
-    authSession = {
-      getUserInitials: vi.fn().mockReturnValue('AJ'),
-      getRole: vi.fn().mockReturnValue('administrador_empresa'),
-      getUserName: vi.fn().mockReturnValue('Admin Test'),
-      getUserEmail: vi.fn().mockReturnValue('admin@test.com'),
-      getUserId: vi.fn().mockReturnValue('123'),
-    };
     authService = {
       cerrarSesion: vi.fn(),
       token: signal<string | null>(null),
@@ -184,8 +171,15 @@ describe('DashboardPageComponent', () => {
         },
         { provide: ImaService, useValue: imaService },
         { provide: AuthService, useValue: authService },
-        { provide: AuthSessionService, useValue: authSession },
         { provide: ToastService, useValue: toastService },
+        {
+          provide: PerfilInicialService,
+          useValue: {
+            perfil: () => ({ nombre: 'Ariela', apellidos: 'Jimenez', empresa: null }),
+            obtener: () =>
+              of({ nombre: 'Ariela', apellidos: 'Jimenez', empresa: null } as PerfilInicial),
+          },
+        },
       ],
     })
       .overrideComponent(DashboardPageComponent, {
@@ -518,11 +512,10 @@ describe('DashboardPageComponent', () => {
     expect(link).toBeTruthy();
   });
 
-  it('usa iniciales de la sesion en el header', async () => {
+  it('usa las iniciales del perfil en el header', async () => {
     await createFixture();
     const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
 
-    expect(authSession.getUserInitials).toHaveBeenCalled();
     expect(texto).toContain('AJ');
   });
 

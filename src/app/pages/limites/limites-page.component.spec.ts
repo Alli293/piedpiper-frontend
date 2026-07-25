@@ -7,6 +7,8 @@ import { vi } from 'vitest';
 import { AuthSessionService } from '../../core/auth-session.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { SesionInactividadService } from '../../core/auth/sesion-inactividad.service';
+import { PerfilInicialService } from '../../core/services/perfil-inicial.service';
+import { PerfilInicial } from '../../core/models/perfil-inicial.model';
 import { ToastService } from '../../shared/services/toast.service';
 import { LimitesPageComponent } from './limites-page.component';
 import { LimitesService } from './limites.service';
@@ -84,6 +86,10 @@ describe('LimitesPageComponent', () => {
           provide: SesionInactividadService,
           useValue: { reiniciar: vi.fn(), detener: vi.fn() },
         },
+        {
+          provide: PerfilInicialService,
+          useValue: { perfil: () => null, obtener: () => of({ empresa: null } as PerfilInicial) },
+        },
       ],
     }).compileComponents();
 
@@ -92,6 +98,16 @@ describe('LimitesPageComponent', () => {
     component = fixture.componentInstance;
     toastService = TestBed.inject(ToastService);
     fixture.detectChanges();
+  });
+
+  it('el boton de volver navega al listado de emisiones', () => {
+    const navigateByUrl = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    const root = fixture.nativeElement as HTMLElement;
+    const botonVolver = root.querySelector<HTMLButtonElement>('.ch-header__back-button');
+
+    botonVolver?.click();
+
+    expect(navigateByUrl).toHaveBeenCalledWith('/empresa/emisiones');
   });
 
   function ultimoToast() {
@@ -109,7 +125,7 @@ describe('LimitesPageComponent', () => {
 
     root.querySelector<HTMLButtonElement>('.ch-header__back-button')?.click();
 
-    expect(navigateByUrl).toHaveBeenCalledWith('/emisiones');
+    expect(navigateByUrl).toHaveBeenCalledWith('/empresa/emisiones');
   });
 
   it('formulario invalido no llama al servicio de guardado', async () => {

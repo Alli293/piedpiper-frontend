@@ -67,7 +67,6 @@ export class ConfiguracionPageComponent implements OnInit {
     sectionLabel: this.i18n.t('config.seccion').toUpperCase(),
     pageTitle: this.i18n.t('config.titulo'),
     showNotificationDot: false,
-    userInitials: 'MR',
   }));
 
   ngOnInit(): void {

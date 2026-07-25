@@ -12,11 +12,13 @@ import { HeadingComponent } from '../../shared/components/heading/heading.compon
 import { ToastService } from '../../shared/services/toast.service';
 import { PerfilAuditorService } from '../../core/perfil-auditor/perfil-auditor.service';
 import { AuthSessionService } from '../../core/auth-session.service';
+import { PerfilInicialService } from '../../core/services/perfil-inicial.service';
 import { ActualizarPerfilRequest } from '../../core/models/perfil-auditor.model';
 import { CatalogoItem } from '../../core/models/catalogo.model';
 import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
 import { fieldError } from '../../shared/utils/form-field.utils';
 import { apiErrorMessage } from '../../shared/utils/http-error.utils';
+import { userInitialsFrom } from '../../shared/utils/initials.utils';
 
 interface PerfilAuditorFormModel {
   descripcionProfesional: string;
@@ -44,6 +46,7 @@ const MAX_DESCRIPCION = 500;
 export class PerfilAuditorPageComponent implements OnInit {
   private readonly perfilAuditorService = inject(PerfilAuditorService);
   private readonly authSessionService = inject(AuthSessionService);
+  private readonly perfilInicialService = inject(PerfilInicialService);
   private readonly toastService = inject(ToastService);
 
   protected readonly cargandoCatalogos = signal(true);
@@ -140,7 +143,11 @@ export class PerfilAuditorPageComponent implements OnInit {
   }));
 
   // Display-only signals for profile header card
-  protected readonly userInitials = computed(() => this.authSessionService.getUserInitials());
+  protected readonly userInitials = computed(() => {
+    const perfil = this.perfilInicialService.perfil();
+    if (!perfil) return '';
+    return userInitialsFrom(perfil.nombre, perfil.apellidos);
+  });
   protected readonly userName = computed(() => {
     const name = this.authSessionService.getUserName();
     return name || 'Auditor';

@@ -63,7 +63,6 @@ export class InvitacionesPageComponent {
     sectionLabel: 'PANEL EMPRESARIAL',
     pageTitle: 'Invitaciones de empresa',
     showNotificationDot: true,
-    userInitials: 'CA',
   };
 
   protected readonly invitaciones = signal<Invitacion[]>([]);

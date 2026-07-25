@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { AuthSessionService } from '../../../core/auth-session.service';
 import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
+import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
+import { ROL_SIDEBAR_LABEL } from '../../../core/models/perfil-inicial.model';
 import { SidebarBottomItemId } from '../../components/sidebar/sidebar.component';
 import { HeaderConfig, PageLayoutComponent } from '../page-layout/page-layout.component';
 import {
@@ -12,9 +14,7 @@ import {
   SidebarNavId,
   SidebarNavVariant,
 } from '../page-layout/sidebar-nav';
-
-const COMPANY_NAME = 'Café del Valle S.A.';
-const COMPANY_INITIALS = 'CV';
+import { initialsFrom, userInitialsFrom } from '../../utils/initials.utils';
 
 export type SidebarVariant = 'empresa' | 'auditor' | 'auto';
 
@@ -35,13 +35,12 @@ export class ShellLayoutComponent {
   private readonly authService = inject(AuthService);
   private readonly authSessionService = inject(AuthSessionService);
   private readonly sesionInactividadService = inject(SesionInactividadService);
+  private readonly perfilInicialService = inject(PerfilInicialService);
 
   activeId = input<SidebarNavId | AuditorSidebarNavId>();
   variant = input<SidebarNavVariant>('empresa');
   sidebarVariant = input<SidebarVariant>('auto');
-  companyName = input(COMPANY_NAME);
   companyRole = input('Empresa · Admin');
-  companyInitials = input(COMPANY_INITIALS);
   settingsLabel = input<string>();
   headerConfig = input.required<HeaderConfig>();
   /** Route the back button navigates to. Falls back to emitting `backClicked` if omitted. */
@@ -63,12 +62,28 @@ export class ShellLayoutComponent {
     return role === 'auditor_certificado' ? 'auditor' : 'empresa';
   });
 
+  private readonly companyName = computed(
+    () => this.perfilInicialService.perfil()?.empresa?.nombreEmpresa ?? ''
+  );
+
+  private readonly userInitials = computed(() => {
+    const perfil = this.perfilInicialService.perfil();
+    if (!perfil) return '';
+    return userInitialsFrom(perfil.nombre, perfil.apellidos);
+  });
+
+  private readonly resolvedCompanyRole = computed(() => {
+    const rol = this.perfilInicialService.perfil()?.rol;
+    return rol ? ROL_SIDEBAR_LABEL[rol] : this.companyRole();
+  });
+
   protected readonly sidebarConfig = computed(() => {
     if (this.resolvedVariant() === 'auditor') {
       return buildAuditorSidebarConfig({
         activeId: this.activeId() as AuditorSidebarNavId | undefined,
-        auditorName: this.authSessionService.getUserName() || 'Auditor',
-        auditorInitials: this.authSessionService.getUserInitials(),
+        auditorName:
+          this.displayName() ?? (this.perfilInicialService.perfil()?.nombreVisible || 'Auditor'),
+        auditorInitials: this.displayInitials() ?? this.userInitials(),
         settingsLabel: this.settingsLabel(),
       });
     }
@@ -76,12 +91,25 @@ export class ShellLayoutComponent {
     return buildSidebarConfig({
       activeId: this.activeId() as SidebarNavId | undefined,
       companyName: this.displayName() ?? this.companyName(),
-      companyRole: this.companyRole(),
-      companyInitials: this.displayInitials() ?? this.companyInitials(),
+      companyRole: this.resolvedCompanyRole(),
+      companyInitials:
+        this.displayInitials() ?? (this.companyName() ? initialsFrom(this.companyName()) : ''),
       settingsLabel: this.settingsLabel(),
       variant: this.variant(),
+      esAdministradorEmpresa: this.authSessionService.isAdministradorEmpresa(),
     });
   });
+
+  protected readonly resolvedHeaderConfig = computed<HeaderConfig>(() => ({
+    ...this.headerConfig(),
+    userInitials: this.userInitials(),
+  }));
+
+  constructor() {
+    if (!this.perfilInicialService.perfil()) {
+      this.perfilInicialService.obtener().subscribe({ error: () => undefined });
+    }
+  }
 
   protected onBackClicked(): void {
     const route = this.backRoute();
@@ -102,10 +130,11 @@ export class ShellLayoutComponent {
     }
 
     const rutas: Record<Exclude<ShellMenuItemId, 'logout'>, string> = {
-      benchmark: '/benchmark',
-      dashboard: '/panel',
-      emissions: '/emisiones',
-      'ecoruta-planificar': '/ecoruta/planificar',
+      benchmark: '/empresa/benchmark',
+      dashboard: '/empresa/panel',
+      emissions: '/empresa/emisiones',
+      colaboradores: '/empresa/invitaciones',
+      'ecoruta-planificar': '/ecoruta/preferencias',
       'ecoruta-itinerarios': '/ecoruta/itinerarios',
       'ecoruta-insignias': '/ecoruta/insignias',
       settings: '/configuracion',

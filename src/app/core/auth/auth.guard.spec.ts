@@ -65,14 +65,32 @@ describe('rolGuard', () => {
     expect(ejecutarGuard()).toBe(true);
   });
 
-  it('redirige a la raíz cuando el rol no coincide', () => {
+  it('redirige a la pantalla de inicio del propio rol cuando el rol no coincide', () => {
     authService.token.set('jwt-123');
     authService.rol.set('ADMINISTRADOR_EMPRESA');
 
-    expect(ejecutarGuard()).toEqual(router.parseUrl('/'));
+    expect(ejecutarGuard()).toEqual(router.parseUrl('empresa/panel'));
   });
 
   it('redirige a /login cuando no hay token', () => {
     expect(ejecutarGuard()).toEqual(router.parseUrl('/login'));
+  });
+
+  it('redirige a /login cuando el rol del token no es reconocido', () => {
+    authService.token.set('jwt-123');
+    authService.rol.set('ROL_INEXISTENTE');
+
+    expect(ejecutarGuard()).toEqual(router.parseUrl('/login'));
+  });
+
+  it('permite el acceso cuando el rol coincide con alguno de varios roles permitidos', () => {
+    authService.token.set('jwt-123');
+    authService.rol.set('USUARIO_GENERAL');
+
+    const resultado = TestBed.runInInjectionContext(() =>
+      rolGuard('ADMINISTRADOR_EMPRESA', 'USUARIO_GENERAL')({} as any, {} as any)
+    );
+
+    expect(resultado).toBe(true);
   });
 });

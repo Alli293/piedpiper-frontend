@@ -18,7 +18,7 @@ export interface HeaderConfig {
   sectionLabel: string;
   pageTitle: string;
   showNotificationDot: boolean;
-  userInitials: string;
+  userInitials?: string;
   showBackButton?: boolean;
 }
 

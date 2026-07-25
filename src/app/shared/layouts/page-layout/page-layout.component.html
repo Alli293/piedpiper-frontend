@@ -12,7 +12,7 @@
     [sectionLabel]="headerConfig().sectionLabel"
     [pageTitle]="headerConfig().pageTitle"
     [showNotificationDot]="headerConfig().showNotificationDot"
-    [userInitials]="headerConfig().userInitials"
+    [userInitials]="headerConfig().userInitials ?? ''"
     [showBackButton]="headerConfig().showBackButton ?? false"
     (notificationClicked)="notificationClicked.emit()"
     (profileClicked)="profileClicked.emit()"

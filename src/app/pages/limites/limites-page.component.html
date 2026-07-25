@@ -1,9 +1,4 @@
-<app-shell-layout
-  activeId="emissions"
-  [companyRole]="companyRole()"
-  [headerConfig]="headerConfig"
-  backRoute="/emisiones"
->
+<app-shell-layout activeId="emissions" [headerConfig]="headerConfig" backRoute="/empresa/emisiones">
   <div class="limites-page">
     @if (isAdmin()) {
       <section class="limites-editor" aria-labelledby="editor-title">

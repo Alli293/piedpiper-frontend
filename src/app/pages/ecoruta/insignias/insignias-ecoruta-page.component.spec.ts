@@ -2,9 +2,12 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { AuthSessionService } from '../../../core/auth-session.service';
 import { InsigniasEcoRutaService } from '../../../core/services/insignias-ecoruta.service';
+import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
+import { PerfilInicial } from '../../../core/models/perfil-inicial.model';
 import { ToastService } from '../../../shared/services/toast.service';
 import { InsigniasEcoRutaPageComponent } from './insignias-ecoruta-page.component';
 
@@ -22,11 +25,15 @@ describe('InsigniasEcoRutaPageComponent', () => {
         provideRouter([]),
         {
           provide: AuthSessionService,
-          useValue: { getUserInitials: () => 'MS' },
+          useValue: { getUserInitials: () => 'MS', isAdministradorEmpresa: () => false },
         },
         {
           provide: AuthService,
           useValue: { cerrarSesion: vi.fn(), token: () => null },
+        },
+        {
+          provide: PerfilInicialService,
+          useValue: { perfil: () => null, obtener: () => of({ empresa: null } as PerfilInicial) },
         },
       ],
     }).compileComponents();

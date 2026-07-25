@@ -6,6 +6,8 @@ import { of, throwError } from 'rxjs';
 import { RegisterEmissionPageComponent } from './register-emission-page.component';
 import { EmisionesService } from '../emisiones.service';
 import { ToastService } from '../../../shared/services/toast.service';
+import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
+import { PerfilInicial } from '../../../core/models/perfil-inicial.model';
 import {
   EmisionEnvioResponse,
   EmisionFlotaResponse,
@@ -115,6 +117,10 @@ describe('RegisterEmissionPageComponent', () => {
             registrarEnvio,
           },
         },
+        {
+          provide: PerfilInicialService,
+          useValue: { perfil: () => null, obtener: () => of({ empresa: null } as PerfilInicial) },
+        },
       ],
     }).compileComponents();
 
@@ -211,7 +217,7 @@ describe('RegisterEmissionPageComponent', () => {
 
     clickButton(root, 'Dashboard');
 
-    expect(TestBed.inject(Router).navigateByUrl).toHaveBeenCalledWith('/panel');
+    expect(TestBed.inject(Router).navigateByUrl).toHaveBeenCalledWith('/empresa/panel');
   });
 
   it('calls the service exactly once when the form is valid', async () => {
@@ -451,7 +457,7 @@ describe('RegisterEmissionPageComponent', () => {
         distanceUnit: 'km',
         fechaActividad: '2026-07-01',
       });
-      expect(TestBed.inject(Router).navigateByUrl).not.toHaveBeenCalledWith('/emisiones');
+      expect(TestBed.inject(Router).navigateByUrl).not.toHaveBeenCalledWith('/empresa/emisiones');
       fixture.detectChanges();
       expect(root.querySelector<HTMLTextAreaElement>('textarea')?.value).toBe('');
     });
@@ -545,7 +551,7 @@ describe('RegisterEmissionPageComponent', () => {
         transportMethod: 'TRUCK',
         fechaActividad: '2026-07-01',
       });
-      expect(TestBed.inject(Router).navigateByUrl).not.toHaveBeenCalledWith('/emisiones');
+      expect(TestBed.inject(Router).navigateByUrl).not.toHaveBeenCalledWith('/empresa/emisiones');
       fixture.detectChanges();
       expect(root.querySelector<HTMLTextAreaElement>('textarea')?.value).toBe('');
     });

@@ -91,12 +91,11 @@ export class EmissionsListPageComponent {
   protected readonly filtroAnioValue = computed(() => this.filtroAnio()?.toString() ?? '');
   protected readonly filtroMesValue = computed(() => this.filtroMes()?.toString() ?? '');
 
-  protected readonly headerConfig = signal<HeaderConfig>({
-    sectionLabel: 'PANEL EMPRESARIAL',
+  protected readonly headerConfig = computed<HeaderConfig>(() => ({
+    sectionLabel: 'Emisiones',
     pageTitle: 'Mis Emisiones',
     showNotificationDot: true,
-    userInitials: 'MR',
-  });
+  }));
 
   constructor() {
     void this.cargarRegistros();
@@ -187,11 +186,11 @@ export class EmissionsListPageComponent {
   }
 
   protected registrarEmision(): void {
-    void this.router.navigateByUrl('/emisiones/registrar');
+    void this.router.navigateByUrl('/empresa/emisiones/registrar');
   }
 
   protected verLimitesAnuales(): void {
-    void this.router.navigateByUrl('/limites');
+    void this.router.navigateByUrl('/empresa/limites');
   }
 
   protected categoriaLabel(registro: EmisionResponse): string {
