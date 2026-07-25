@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { of, tap } from 'rxjs';
+import { of, tap, throwError } from 'rxjs';
 import { ShellLayoutComponent } from './shell-layout.component';
 import { AuthService } from '../../../core/auth/auth.service';
 import { AuthSessionService } from '../../../core/auth-session.service';
@@ -9,6 +9,7 @@ import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.
 import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
 import { PerfilInicial } from '../../../core/models/perfil-inicial.model';
 import { HeaderConfig } from '../page-layout/page-layout.component';
+import { ToastService } from '../../services/toast.service';
 
 const HEADER_CONFIG: HeaderConfig = {
   sectionLabel: 'PANEL EMPRESARIAL',
@@ -40,6 +41,7 @@ describe('ShellLayoutComponent', () => {
     perfil: ReturnType<typeof signal<PerfilInicial | null>>;
     obtener: ReturnType<typeof vi.fn>;
   };
+  let toastServiceStub: { error: ReturnType<typeof vi.fn>; success: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     authServiceStub = { cerrarSesion: vi.fn() };
@@ -62,6 +64,7 @@ describe('ShellLayoutComponent', () => {
           of(PERFIL_ADMIN_EMPRESA).pipe(tap((perfil) => perfilSignal.set(perfil)))
         ),
     };
+    toastServiceStub = { error: vi.fn(), success: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [ShellLayoutComponent],
@@ -71,6 +74,7 @@ describe('ShellLayoutComponent', () => {
         { provide: Router, useValue: routerStub },
         { provide: AuthSessionService, useValue: authSessionStub },
         { provide: PerfilInicialService, useValue: perfilInicialStub },
+        { provide: ToastService, useValue: toastServiceStub },
       ],
     }).compileComponents();
   });
@@ -300,6 +304,25 @@ describe('ShellLayoutComponent', () => {
       'Café del Valle S.A.'
     );
     expect(root.querySelector('.ch-avatar__initials')?.textContent?.trim()).toBe('CA');
+  });
+
+  it('muestra iniciales de respaldo en el sidebar mientras el perfil no ha cargado', async () => {
+    perfilInicialStub.obtener.mockReturnValue(of(null as unknown as PerfilInicial));
+    const fixture = await createFixture({ activeId: 'dashboard' });
+    const root = fixture.nativeElement as HTMLElement;
+
+    const avatar = root.querySelector('.ch-sidebar__company-card .ch-avatar__initials');
+    expect(avatar?.textContent?.trim()).toBe('US');
+  });
+
+  it('muestra un toast de error cuando falla la carga del perfil inicial', async () => {
+    perfilInicialStub.obtener.mockReturnValue(throwError(() => new Error('falló')));
+
+    await createFixture({ activeId: 'dashboard' });
+
+    expect(toastServiceStub.error).toHaveBeenCalledWith(
+      'No se pudo cargar tu perfil. Algunos datos podrían no mostrarse.'
+    );
   });
 
   it('no muestra nombre de empresa cuando el usuario no pertenece a una empresa', async () => {

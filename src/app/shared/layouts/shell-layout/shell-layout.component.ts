@@ -15,6 +15,10 @@ import {
   SidebarNavVariant,
 } from '../page-layout/sidebar-nav';
 import { initialsFrom, userInitialsFrom } from '../../utils/initials.utils';
+import { ToastService } from '../../services/toast.service';
+import { apiErrorMessage } from '../../utils/http-error.utils';
+
+const ERROR_PERFIL_MENSAJE = 'No se pudo cargar tu perfil. Algunos datos podrían no mostrarse.';
 
 export type SidebarVariant = 'empresa' | 'auditor' | 'auto';
 
@@ -36,6 +40,7 @@ export class ShellLayoutComponent {
   private readonly authSessionService = inject(AuthSessionService);
   private readonly sesionInactividadService = inject(SesionInactividadService);
   private readonly perfilInicialService = inject(PerfilInicialService);
+  private readonly toastService = inject(ToastService);
 
   activeId = input<SidebarNavId | AuditorSidebarNavId>();
   variant = input<SidebarNavVariant>('empresa');
@@ -92,8 +97,7 @@ export class ShellLayoutComponent {
       activeId: this.activeId() as SidebarNavId | undefined,
       companyName: this.displayName() ?? this.companyName(),
       companyRole: this.resolvedCompanyRole(),
-      companyInitials:
-        this.displayInitials() ?? (this.companyName() ? initialsFrom(this.companyName()) : ''),
+      companyInitials: this.displayInitials() ?? initialsFrom(this.companyName()),
       settingsLabel: this.settingsLabel(),
       variant: this.variant(),
       esAdministradorEmpresa: this.authSessionService.isAdministradorEmpresa(),
@@ -107,7 +111,10 @@ export class ShellLayoutComponent {
 
   constructor() {
     if (!this.perfilInicialService.perfil()) {
-      this.perfilInicialService.obtener().subscribe({ error: () => undefined });
+      this.perfilInicialService.obtener().subscribe({
+        error: (err: unknown) =>
+          this.toastService.error(apiErrorMessage(err) ?? ERROR_PERFIL_MENSAJE),
+      });
     }
   }
 
