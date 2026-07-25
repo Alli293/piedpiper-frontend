@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { signal } from '@angular/core';
-import { authGuard, rolGuard } from './auth.guard';
+import { authGuard, noAuthGuard, rolGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 
 describe('authGuard', () => {
@@ -92,5 +92,45 @@ describe('rolGuard', () => {
     );
 
     expect(resultado).toBe(true);
+  });
+});
+
+describe('noAuthGuard', () => {
+  let authService: {
+    token: ReturnType<typeof signal<string | null>>;
+    rol: ReturnType<typeof signal<string | null>>;
+  };
+  let router: Router;
+
+  beforeEach(() => {
+    authService = { token: signal<string | null>(null), rol: signal<string | null>(null) };
+
+    TestBed.configureTestingModule({
+      providers: [provideRouter([]), { provide: AuthService, useValue: authService }],
+    });
+
+    router = TestBed.inject(Router);
+  });
+
+  function ejecutarGuard() {
+    return TestBed.runInInjectionContext(() => noAuthGuard({} as any, {} as any));
+  }
+
+  it('permite el acceso cuando no hay token', () => {
+    expect(ejecutarGuard()).toBe(true);
+  });
+
+  it('redirige a la pantalla de inicio del rol cuando ya hay una sesión válida', () => {
+    authService.token.set('jwt-123');
+    authService.rol.set('ADMINISTRADOR_EMPRESA');
+
+    expect(ejecutarGuard()).toEqual(router.parseUrl('empresa/panel'));
+  });
+
+  it('redirige a la raíz cuando hay token pero el rol no es reconocido', () => {
+    authService.token.set('jwt-123');
+    authService.rol.set('ROL_INEXISTENTE');
+
+    expect(ejecutarGuard()).toEqual(router.parseUrl('/'));
   });
 });

@@ -1,5 +1,5 @@
 import { CanActivateFn, Routes } from '@angular/router';
-import { authGuard, rolGuard } from './core/auth/auth.guard';
+import { authGuard, noAuthGuard, rolGuard } from './core/auth/auth.guard';
 
 const cargarPlaceholder = () =>
   import('./pages/placeholder/placeholder-page.component').then((m) => m.PlaceholderPageComponent);
@@ -40,6 +40,7 @@ export const routes: Routes = [
   },
   {
     path: 'login',
+    canActivate: [noAuthGuard],
     loadComponent: () =>
       import('./pages/auth/login/login-page.component').then((m) => m.LoginPageComponent),
   },

@@ -14,6 +14,22 @@ export const authGuard: CanActivateFn = () => {
   return router.parseUrl('/login');
 };
 
+// Evita que una sesión ya iniciada vuelva a ver el login (bookmark, botón
+// atrás, enlace viejo): se redirige a su pantalla de inicio en vez de
+// cerrarle la sesión, para no destruir un token todavía válido.
+export const noAuthGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+  const rol = authService.rol();
+
+  if (!authService.token()) {
+    return true;
+  }
+
+  const rutaInicio = rol && esRolConocido(rol) ? RUTA_INICIO_POR_ROL[rol] : '/';
+  return router.parseUrl(rutaInicio);
+};
+
 export const rolGuard = (...rolesPermitidos: RolUsuario[]): CanActivateFn => {
   return () => {
     const authService = inject(AuthService);
