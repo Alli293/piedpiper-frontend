@@ -575,43 +575,6 @@ describe('DashboardPageComponent', () => {
     expect(texto).not.toContain('42');
   });
 
-  it('carga el IMA y el benchmark con el periodo actual por defecto', async () => {
-    await createFixture();
-
-    expect(imaService.obtenerIma).toHaveBeenCalledWith(ANIO_ACTUAL, new Date().getMonth() + 1);
-    expect(imaService.obtenerBenchmark).toHaveBeenCalledWith(
-      ANIO_ACTUAL,
-      new Date().getMonth() + 1
-    );
-    expect((component as any).benchmarkData()).toEqual(BENCHMARK_BASE);
-    expect((component as any).benchmarkError()).toBe(false);
-  });
-
-  it('recarga el IMA y el benchmark cuando cambia su periodo', async () => {
-    await createFixture();
-
-    (component as any).onImaPeriodoChange({ anio: 2026, mes: 3 });
-    await fixture.whenStable();
-
-    expect((component as any).mesSeleccionado()).toBe(3);
-    expect(imaService.obtenerIma).toHaveBeenLastCalledWith(2026, 3);
-    expect(imaService.obtenerBenchmark).toHaveBeenLastCalledWith(2026, 3);
-  });
-
-  it('usa el mensaje de la API cuando falla el benchmark', async () => {
-    await createFixture();
-    imaService.obtenerBenchmark.mockReturnValueOnce(
-      throwError(
-        () => new HttpErrorResponse({ status: 500, error: { message: 'Sector no encontrado.' } })
-      )
-    );
-
-    await (component as any).cargarBenchmark(2026, 7);
-
-    expect((component as any).benchmarkError()).toBe(true);
-    expect(toastService.error).toHaveBeenCalledWith('Sector no encontrado.', undefined, 5000);
-  });
-
   // ---------------------------------------------------------------------------
   // Desglose por categoría (PP-39, dona)
   // ---------------------------------------------------------------------------

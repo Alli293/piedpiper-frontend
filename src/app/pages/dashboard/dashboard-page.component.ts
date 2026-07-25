@@ -29,7 +29,6 @@ import { DashboardService } from './dashboard.service';
 import { PeriodoDashboard, ResumenHuellaDashboardResponse } from './dashboard.model';
 import { EvolucionService, PuntoMensual } from './evolucion.service';
 import { EvolucionChartComponent } from './evolucion-chart.component';
-import { BenchmarkSectorialResponse, ImaResponse, ImaService } from './ima.service';
 
 interface PeriodoResumenFormModel {
   anio: string;
@@ -113,7 +112,6 @@ export class DashboardPageComponent {
   private readonly emisionesService = inject(EmisionesService);
   private readonly dashboardService = inject(DashboardService);
   private readonly evolucionService = inject(EvolucionService);
-  private readonly imaService = inject(ImaService);
   private readonly authSession = inject(AuthSessionService);
   private readonly toastService = inject(ToastService);
 
@@ -121,9 +119,6 @@ export class DashboardPageComponent {
   private solicitudResumen = 0;
   private solicitudResumenHuella = 0;
   private comparacionSolicitudId = 0;
-
-  protected readonly mesActual = new Date().getMonth() + 1;
-  protected readonly mesSeleccionado = signal(this.mesActual);
 
   protected readonly sinEmisionesMensaje = SIN_EMISIONES_MENSAJE;
   protected readonly circunferencia = DONA_CIRCUNFERENCIA;
@@ -159,10 +154,6 @@ export class DashboardPageComponent {
   // --- PP-41: Evolución histórica ---
   protected readonly evolucionSerie = signal<PuntoMensual[]>([]);
   protected readonly evolucionVacia = signal(false);
-
-  protected readonly imaData = signal<ImaResponse | null>(null);
-  protected readonly benchmarkData = signal<BenchmarkSectorialResponse | null>(null);
-  protected readonly benchmarkError = signal(false);
 
   // Deshabilita el botón de exportar mientras cualquiera de las dos cargas esté en curso.
   protected readonly cargando = computed(
@@ -244,8 +235,6 @@ export class DashboardPageComponent {
         void this.cargarComparacion(Number(anio));
         void this.cargarResumenHuella(this.periodoSeleccionado(), Number(anio));
         void this.cargarEvolucion(Number(anio));
-        void this.cargarIma(Number(anio), this.mesSeleccionado());
-        void this.cargarBenchmark(Number(anio), this.mesSeleccionado());
       });
     });
   }
@@ -254,12 +243,6 @@ export class DashboardPageComponent {
     const periodo = this.normalizarPeriodo(valor);
     this.periodoSeleccionado.set(periodo);
     void this.cargarResumenHuella(periodo, this.anioSeleccionado());
-  }
-
-  protected onImaPeriodoChange(evento: { anio: number; mes: number }): void {
-    this.mesSeleccionado.set(evento.mes);
-    void this.cargarIma(evento.anio, evento.mes);
-    void this.cargarBenchmark(evento.anio, evento.mes);
   }
 
   private async cargarResumen(anio: number, mes?: number): Promise<void> {
@@ -538,34 +521,6 @@ export class DashboardPageComponent {
     } catch (err: unknown) {
       this.toastService.error(
         apiErrorMessage(err) ?? 'No se pudo cargar la evolución histórica. Intente nuevamente.',
-        undefined,
-        5000
-      );
-    }
-  }
-
-  private async cargarIma(anio: number, mes: number): Promise<void> {
-    try {
-      const ima = await firstValueFrom(this.imaService.obtenerIma(anio, mes));
-      this.imaData.set(ima);
-    } catch (err: unknown) {
-      this.toastService.error(
-        apiErrorMessage(err) ?? 'No se pudo calcular tu IMA. Intente nuevamente.',
-        undefined,
-        5000
-      );
-    }
-  }
-
-  private async cargarBenchmark(anio: number, mes: number): Promise<void> {
-    this.benchmarkError.set(false);
-    try {
-      const benchmark = await firstValueFrom(this.imaService.obtenerBenchmark(anio, mes));
-      this.benchmarkData.set(benchmark);
-    } catch (err: unknown) {
-      this.benchmarkError.set(true);
-      this.toastService.error(
-        apiErrorMessage(err) ?? 'No se pudo cargar el benchmark sectorial. Intente nuevamente.',
         undefined,
         5000
       );
