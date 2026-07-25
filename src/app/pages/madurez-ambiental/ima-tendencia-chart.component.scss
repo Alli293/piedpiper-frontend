@@ -1,5 +1,103 @@
-.ch-ima-tendencia-chart {
+.ch-ima-tendencia {
   position: relative;
-  width: 100%;
-  height: 320px;
+
+  &__aviso {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    margin: 0 0 4px;
+    font-family: var(--ch-font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ch-text-secondary);
+
+    span {
+      color: var(--ch-green);
+    }
+  }
+
+  &__grafico {
+    position: relative;
+    width: 100%;
+    height: 320px;
+  }
+
+  &__marcador {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 2px solid var(--ch-bg-white);
+    border-radius: 50%;
+    font-family: var(--ch-font-body);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ch-text-on-dark);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+      transform: scale(1.12);
+      outline: none;
+    }
+  }
+
+  &__tooltip {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    gap: 10px;
+    width: min(280px, calc(100% - 20px));
+    padding: 12px 14px;
+    transform: translateX(-50%);
+    background: #0e2a3b;
+    border-radius: 12px;
+    box-shadow: var(--ch-shadow-sm);
+    pointer-events: none;
+  }
+
+  &__tooltip-numero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-family: var(--ch-font-body);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ch-text-on-dark);
+  }
+
+  &__tooltip-cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__tooltip-mes {
+    margin: 0;
+    font-family: var(--ch-font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--ch-green-light);
+  }
+
+  &__tooltip-texto {
+    margin: 0;
+    font-family: var(--ch-font-body);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 18px;
+    color: var(--ch-text-on-dark);
+  }
 }

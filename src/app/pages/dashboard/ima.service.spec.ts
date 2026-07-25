@@ -97,14 +97,14 @@ describe('ImaService', () => {
     service.obtenerTendencia(12).subscribe();
     const req = httpMock.expectOne(`${environment.apiBaseUrl}/ima/tendencia?mesesAtras=12`);
     expect(req.request.method).toBe('GET');
-    req.flush({ mesesAtras: 12, serie: [], sinDatosSectoriales: false });
+    req.flush({ mesesAtras: 12, serie: [], sinDatosSectoriales: false, eventos: [] });
   });
 
   it('envia la ventana solicitada cuando no es la de por defecto', () => {
     service.obtenerTendencia(6).subscribe();
     const req = httpMock.expectOne(`${environment.apiBaseUrl}/ima/tendencia?mesesAtras=6`);
     expect(req.request.params.get('mesesAtras')).toBe('6');
-    req.flush({ mesesAtras: 6, serie: [], sinDatosSectoriales: false });
+    req.flush({ mesesAtras: 6, serie: [], sinDatosSectoriales: false, eventos: [] });
   });
 
   it('conserva los puntos nulos de la serie sin convertirlos en ceros', () => {
@@ -122,11 +122,37 @@ describe('ImaService', () => {
         { mes: '2026-06', imaEmpresa: 71, imaPromedioSector: null },
       ],
       sinDatosSectoriales: false,
+      eventos: [],
     });
 
     expect(result?.serie[0].imaEmpresa).toBeNull();
     expect(result?.serie[1].imaPromedioSector).toBe(63.5);
     expect(result?.serie[2].imaPromedioSector).toBeNull();
+  });
+
+  it('lee el arreglo de eventos anotados de la respuesta', () => {
+    let result: ImaTendenciaResponse | undefined;
+    service.obtenerTendencia(12).subscribe((resp) => {
+      result = resp;
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/ima/tendencia?mesesAtras=12`);
+    req.flush({
+      mesesAtras: 12,
+      serie: [{ mes: '2026-06', imaEmpresa: 71, imaPromedioSector: 64 }],
+      sinDatosSectoriales: false,
+      eventos: [
+        {
+          mes: '2026-06',
+          tipo: 'CRUCE_SECTOR',
+          texto: 'En junio 2026 tu IMA superó el promedio de tu sector.',
+        },
+      ],
+    });
+
+    expect(result?.eventos).toHaveLength(1);
+    expect(result?.eventos[0].tipo).toBe('CRUCE_SECTOR');
+    expect(result?.eventos[0].mes).toBe('2026-06');
   });
 
   it('consulta el benchmark sectorial con anio y mes como query params', () => {

@@ -107,7 +107,9 @@
         </span>
         <div class="ch-madurez-card__titles">
           <app-heading level="h3" text="Evolución histórica del IMA" />
-          <p class="ch-madurez-card__subtitle">IMA de tu empresa vs. promedio del sector.</p>
+          <p class="ch-madurez-card__subtitle">
+            IMA de tu empresa vs. promedio del sector, con eventos anotados.
+          </p>
         </div>
         <app-select-input
           class="ch-madurez-card__ventana"
@@ -115,7 +117,7 @@
           [value]="String(ventana())"
           [disabled]="cargando()"
           placeholder="Ventana"
-          aria-label="Seleccionar ventana de meses"
+          ariaLabel="Seleccionar ventana de meses"
           (valueChange)="onVentanaChange($event)"
         />
       </header>
@@ -125,7 +127,7 @@
       } @else if (sinHistorial()) {
         <p class="ch-madurez-card__estado">{{ sinHistorialMensaje }}</p>
       } @else {
-        <app-ima-tendencia-chart [serie]="serie()" />
+        <app-ima-tendencia-chart [serie]="serie()" [eventos]="eventos()" />
 
         @if (sinDatosSectoriales()) {
           <p class="ch-madurez-card__aviso">{{ sinSectorMensaje }}</p>

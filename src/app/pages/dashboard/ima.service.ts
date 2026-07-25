@@ -22,10 +22,20 @@ export interface ImaTendenciaPunto {
   imaPromedioSector: number | null;
 }
 
+export type TipoEventoIma = 'CRUCE_SECTOR' | 'MAYOR_VARIACION' | 'HUECO_DATOS' | 'NUEVA_CATEGORIA';
+
+/** Evento anotado sobre la serie, calculado por el backend. */
+export interface ImaEvento {
+  mes: string;
+  tipo: TipoEventoIma;
+  texto: string;
+}
+
 export interface ImaTendenciaResponse {
   mesesAtras: number;
   serie: ImaTendenciaPunto[];
   sinDatosSectoriales: boolean;
+  eventos: ImaEvento[];
 }
 
 export type PosicionBenchmark = 'POR_ENCIMA' | 'EN_LINEA' | 'POR_DEBAJO';

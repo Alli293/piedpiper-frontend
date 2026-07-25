@@ -8,6 +8,7 @@ import { SesionInactividadService } from '../../core/auth/sesion-inactividad.ser
 import { AuthSessionService } from '../../core/auth-session.service';
 import { ToastService } from '../../shared/services/toast.service';
 import {
+  ImaEvento,
   ImaService,
   ImaResponse,
   ImaTendenciaPunto,
@@ -24,6 +25,7 @@ import {
 @Component({ selector: 'app-ima-tendencia-chart', template: '' })
 class StubTendenciaChartComponent {
   readonly serie = input<ImaTendenciaPunto[]>([]);
+  readonly eventos = input<ImaEvento[]>([]);
 }
 
 const ANIO_ACTUAL = new Date().getFullYear();
@@ -74,7 +76,7 @@ describe('MadurezAmbientalPageComponent', () => {
   const respuesta = (
     serie: ImaTendenciaPunto[],
     sinDatosSectoriales = false
-  ): ImaTendenciaResponse => ({ mesesAtras: 12, serie, sinDatosSectoriales });
+  ): ImaTendenciaResponse => ({ mesesAtras: 12, serie, sinDatosSectoriales, eventos: [] });
 
   const html = () => (fixture.nativeElement as HTMLElement).textContent ?? '';
   const el = () => fixture.nativeElement as HTMLElement;

@@ -11,7 +11,7 @@ import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.compo
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { apiErrorMessage } from '../../shared/utils/http-error.utils';
-import { ImaService, ImaResponse, ImaTendenciaPunto } from '../dashboard/ima.service';
+import { ImaEvento, ImaService, ImaResponse, ImaTendenciaPunto } from '../dashboard/ima.service';
 import { ImaPanelComponent } from '../dashboard/ima-panel.component';
 import { ImaTendenciaChartComponent } from './ima-tendencia-chart.component';
 
@@ -64,6 +64,7 @@ export class MadurezAmbientalPageComponent implements OnInit {
   // --- Evolución histórica del IMA ---
   protected readonly cargando = signal(false);
   protected readonly serie = signal<ImaTendenciaPunto[]>([]);
+  protected readonly eventos = signal<ImaEvento[]>([]);
   protected readonly sinDatosSectoriales = signal(false);
   protected readonly ventana = signal(MESES_VENTANA_DEFECTO);
 
@@ -132,11 +133,10 @@ export class MadurezAmbientalPageComponent implements OnInit {
       const respuesta = await firstValueFrom(this.imaService.obtenerTendencia(mesesAtras));
       if (requestId !== this.cargaTendenciaRequestId) return;
       this.serie.set(respuesta.serie);
+      this.eventos.set(respuesta.eventos ?? []);
       this.sinDatosSectoriales.set(respuesta.sinDatosSectoriales);
     } catch (err: unknown) {
       if (requestId !== this.cargaTendenciaRequestId) return;
-      this.serie.set([]);
-      this.sinDatosSectoriales.set(false);
       this.toastService.error(
         apiErrorMessage(err) ?? ERROR_TENDENCIA_MENSAJE,
         undefined,
