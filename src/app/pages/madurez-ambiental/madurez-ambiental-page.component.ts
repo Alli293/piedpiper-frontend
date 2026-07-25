@@ -28,6 +28,8 @@ const TOAST_DURACION_MS = 5000;
 export const ERROR_IMA_MENSAJE = 'No se pudo calcular tu IMA. Intente nuevamente.';
 export const ERROR_TENDENCIA_MENSAJE =
   'No se pudo cargar la tendencia del IMA. Intente nuevamente.';
+export const ERROR_BENCHMARK_MENSAJE =
+  'No se pudo cargar la comparación contra tu sector. Intente nuevamente.';
 export const SIN_HISTORIAL_MENSAJE = 'Aún no hay historial de IMA para mostrar.';
 export const SIN_SECTOR_MENSAJE = 'Sin datos sectoriales suficientes para comparar.';
 
@@ -175,7 +177,7 @@ export class MadurezAmbientalPageComponent implements OnInit {
       if (requestId !== this.cargaBenchmarkRequestId) return;
       this.benchmarkError.set(true);
       this.toastService.error(
-        apiErrorMessage(err) ?? 'No se pudo cargar la comparación contra tu sector.',
+        apiErrorMessage(err) ?? ERROR_BENCHMARK_MENSAJE,
         undefined,
         TOAST_DURACION_MS
       );

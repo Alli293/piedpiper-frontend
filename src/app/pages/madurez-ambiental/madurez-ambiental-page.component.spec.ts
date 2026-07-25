@@ -16,6 +16,7 @@ import {
 } from '../dashboard/ima.service';
 import { ImaTendenciaChartComponent } from './ima-tendencia-chart.component';
 import {
+  ERROR_BENCHMARK_MENSAJE,
   ERROR_TENDENCIA_MENSAJE,
   MadurezAmbientalPageComponent,
   SIN_HISTORIAL_MENSAJE,
@@ -340,5 +341,14 @@ describe('MadurezAmbientalPageComponent', () => {
 
     expect((fixture.componentInstance as any).benchmarkError()).toBe(true);
     expect(toastService.error).toHaveBeenCalledWith('Sector no encontrado.', undefined, 5000);
+  });
+
+  it('usa el mensaje de respaldo cuando el error del benchmark no tiene detalle', async () => {
+    imaService.obtenerBenchmark.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 }))
+    );
+    await crearComponente();
+
+    expect(toastService.error).toHaveBeenCalledWith(ERROR_BENCHMARK_MENSAJE, undefined, 5000);
   });
 });
