@@ -89,7 +89,10 @@
       }
     }
 
-    <!-- Sección 3: Evolución histórica del IMA -->
+    <!-- Sección 3: Comparación contra tu sector -->
+    <app-benchmark-panel [benchmark]="benchmarkData()" [error]="benchmarkError()" />
+
+    <!-- Sección 4: Evolución histórica del IMA -->
     <article class="ch-madurez-card" aria-label="Evolución histórica del IMA">
       <header class="ch-madurez-card__header">
         <span class="ch-madurez-card__icon" aria-hidden="true">

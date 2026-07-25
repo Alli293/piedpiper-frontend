@@ -16,6 +16,7 @@ import {
 } from '../dashboard/ima.service';
 import { ImaTendenciaChartComponent } from './ima-tendencia-chart.component';
 import {
+  ERROR_BENCHMARK_MENSAJE,
   ERROR_TENDENCIA_MENSAJE,
   MadurezAmbientalPageComponent,
   SIN_HISTORIAL_MENSAJE,
@@ -70,6 +71,7 @@ describe('MadurezAmbientalPageComponent', () => {
   let imaService: {
     obtenerIma: ReturnType<typeof vi.fn>;
     obtenerTendencia: ReturnType<typeof vi.fn>;
+    obtenerBenchmark: ReturnType<typeof vi.fn>;
   };
   let toastService: { error: ReturnType<typeof vi.fn> };
 
@@ -119,6 +121,21 @@ describe('MadurezAmbientalPageComponent', () => {
     imaService = {
       obtenerIma: vi.fn().mockReturnValue(of(imaCompleto())),
       obtenerTendencia: vi.fn().mockReturnValue(of(respuesta(SERIE_CON_DATOS))),
+      obtenerBenchmark: vi.fn().mockReturnValue(
+        of({
+          benchmarkDisponible: true,
+          cantidadEmpresas: 28,
+          imaParcial: false,
+          ima: { valorEmpresa: 71, promedioSector: 64, posicion: 'POR_ENCIMA' },
+          cobertura: { valorEmpresa: 75, promedioSector: 70, posicion: 'POR_ENCIMA' },
+          puntajeIntensidadSectorial: {
+            valorEmpresa: 58,
+            promedioSector: 62,
+            posicion: 'POR_DEBAJO',
+          },
+          consistencia: { valorEmpresa: 80, promedioSector: 60, posicion: 'POR_ENCIMA' },
+        })
+      ),
     };
     toastService = { toasts: signal([]), error: vi.fn() } as never;
   });
@@ -292,5 +309,46 @@ describe('MadurezAmbientalPageComponent', () => {
     await crearComponente();
 
     expect(toastService.error).toHaveBeenCalledWith(ERROR_TENDENCIA_MENSAJE, undefined, 5000);
+  });
+
+  // --- Comparación contra tu sector (benchmark) ---
+
+  it('carga el benchmark con el periodo actual al inicializar', async () => {
+    await crearComponente();
+
+    expect(imaService.obtenerBenchmark).toHaveBeenCalledWith(ANIO_ACTUAL, MES_ACTUAL);
+    expect((fixture.componentInstance as any).benchmarkData()).toBeTruthy();
+    expect((fixture.componentInstance as any).benchmarkError()).toBe(false);
+  });
+
+  it('recarga el benchmark cuando cambia el periodo del IMA', async () => {
+    await crearComponente();
+    imaService.obtenerBenchmark.mockClear();
+
+    (fixture.componentInstance as any).onImaPeriodoChange({ anio: 2026, mes: 3 });
+    await fixture.whenStable();
+
+    expect(imaService.obtenerBenchmark).toHaveBeenCalledWith(2026, 3);
+  });
+
+  it('muestra toast y activa error cuando falla el benchmark', async () => {
+    imaService.obtenerBenchmark.mockReturnValue(
+      throwError(
+        () => new HttpErrorResponse({ status: 500, error: { message: 'Sector no encontrado.' } })
+      )
+    );
+    await crearComponente();
+
+    expect((fixture.componentInstance as any).benchmarkError()).toBe(true);
+    expect(toastService.error).toHaveBeenCalledWith('Sector no encontrado.', undefined, 5000);
+  });
+
+  it('usa el mensaje de respaldo cuando el error del benchmark no tiene detalle', async () => {
+    imaService.obtenerBenchmark.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 }))
+    );
+    await crearComponente();
+
+    expect(toastService.error).toHaveBeenCalledWith(ERROR_BENCHMARK_MENSAJE, undefined, 5000);
   });
 });
