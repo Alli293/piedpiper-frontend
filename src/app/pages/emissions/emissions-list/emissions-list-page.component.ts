@@ -9,6 +9,7 @@ import {
   SelectInputComponent,
   SelectOption,
 } from '../../../shared/components/inputs/select-input/select-input.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -52,6 +53,7 @@ const MONTH_OPTIONS: SelectOption[] = [
     ButtonComponent,
     HeadingComponent,
     IconComponent,
+    ModalComponent,
     SelectInputComponent,
     ShellLayoutComponent,
   ],
@@ -148,13 +150,6 @@ export class EmissionsListPageComponent {
   protected cambiarMes(value: string): void {
     this.filtroMes.set(value ? Number(value) : null);
     void this.cargarRegistros();
-  }
-
-  protected alPresionarTeclaModal(event: KeyboardEvent): void {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      this.cancelarEliminar();
-    }
   }
 
   protected solicitarEliminar(registro: EmisionResponse): void {

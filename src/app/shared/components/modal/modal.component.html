@@ -1,0 +1,14 @@
+<div class="ch-modal__backdrop" role="presentation" (click)="onBackdropClick()">
+  <div
+    #dialog
+    class="ch-modal ch-modal--{{ size() }}"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="label()"
+    tabindex="-1"
+    (click)="$event.stopPropagation()"
+    (keydown)="onKeydown($event)"
+  >
+    <ng-content />
+  </div>
+</div>

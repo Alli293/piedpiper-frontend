@@ -1,15 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import {
-  Component,
-  DestroyRef,
-  ElementRef,
-  computed,
-  effect,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormField, form, schema, submit, validate } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
@@ -17,6 +8,7 @@ import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/b
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -46,6 +38,7 @@ const ESTADOS: Record<EstadoInvitacion, { etiqueta: string; variante: BadgeVaria
     BadgeComponent,
     ButtonComponent,
     HeadingComponent,
+    ModalComponent,
     ShellLayoutComponent,
     TextInputComponent,
     DatePipe,
@@ -89,13 +82,8 @@ export class InvitacionesPageComponent {
   protected readonly emailError = computed(() => fieldError(this.invitacionForm.email()));
   protected readonly enviando = computed(() => this.invitacionForm().submitting());
 
-  private readonly modal = viewChild<ElementRef<HTMLElement>>('modalRevocar');
-
   constructor() {
     this.cargarInvitaciones();
-    effect(() => {
-      this.modal()?.nativeElement.focus();
-    });
   }
 
   protected etiqueta(estado: EstadoInvitacion): string {
@@ -118,17 +106,6 @@ export class InvitacionesPageComponent {
   protected cerrarRevocacion(): void {
     if (!this.revocando()) {
       this.invitacionARevocar.set(null);
-    }
-  }
-
-  protected alPresionarTeclaModal(event: KeyboardEvent): void {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      this.cerrarRevocacion();
-      return;
-    }
-    if (event.key === 'Tab') {
-      this.atraparFoco(event);
     }
   }
 
@@ -183,28 +160,6 @@ export class InvitacionesPageComponent {
       },
       onInvalid: (field) => field().markAsTouched(),
     });
-  }
-
-  private atraparFoco(event: KeyboardEvent): void {
-    const modal = this.modal()?.nativeElement;
-    if (!modal) {
-      return;
-    }
-    const focusables = modal.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    if (focusables.length === 0) {
-      return;
-    }
-    const primero = focusables[0];
-    const ultimo = focusables[focusables.length - 1];
-    if (event.shiftKey && document.activeElement === primero) {
-      event.preventDefault();
-      ultimo.focus();
-    } else if (!event.shiftKey && document.activeElement === ultimo) {
-      event.preventDefault();
-      primero.focus();
-    }
   }
 
   private cargarInvitaciones(): void {

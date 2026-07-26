@@ -135,79 +135,52 @@
   </div>
 
   @if (confirmTarget(); as registro) {
-    <div
-      class="ch-emissions-list-page__modal-backdrop"
-      role="presentation"
-      (click)="cancelarEliminar()"
-    >
-      <section
-        class="ch-emissions-list-page__modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="delete-title"
-        tabindex="-1"
-        (click)="$event.stopPropagation()"
-        (keydown)="alPresionarTeclaModal($event)"
-      >
-        <div class="ch-emissions-list-page__modal-icon" aria-hidden="true">
-          <app-icon name="delete" [size]="18" />
-        </div>
-        <div class="ch-emissions-list-page__modal-copy">
-          <app-heading
-            id="delete-title"
-            level="h2"
-            appearance="h4"
-            text="¿Eliminar este registro?"
-          />
-          <p>
-            Esta acción no se puede deshacer. El registro se descontará de tu huella de carbono.
-          </p>
-        </div>
-        <article class="ch-emissions-list-page__modal-record">
+    <app-modal label="¿Eliminar este registro?" (close)="cancelarEliminar()">
+      <div class="ch-emissions-list-page__modal-icon" aria-hidden="true">
+        <app-icon name="delete" [size]="18" />
+      </div>
+      <div class="ch-emissions-list-page__modal-copy">
+        <app-heading level="h2" appearance="h4" text="¿Eliminar este registro?" />
+        <p>Esta acción no se puede deshacer. El registro se descontará de tu huella de carbono.</p>
+      </div>
+      <article class="ch-emissions-list-page__modal-record">
+        <span
+          class="ch-emissions-list-page__modal-record-icon"
+          [class.ch-emissions-list-page__modal-record-icon--electricidad]="
+            registro.categoria === 'ELECTRICIDAD'
+          "
+          [class.ch-emissions-list-page__modal-record-icon--flota]="registro.categoria === 'FLOTA'"
+          [class.ch-emissions-list-page__modal-record-icon--vuelo]="registro.categoria === 'VUELO'"
+          [class.ch-emissions-list-page__modal-record-icon--envio]="registro.categoria === 'ENVIO'"
+          aria-hidden="true"
+        >
+          <app-icon [name]="categoriaIcon(registro)" [size]="15" />
+        </span>
+        <div class="ch-emissions-list-page__modal-record-copy">
+          <strong>{{ detallePrincipal(registro) }}</strong>
           <span
-            class="ch-emissions-list-page__modal-record-icon"
-            [class.ch-emissions-list-page__modal-record-icon--electricidad]="
-              registro.categoria === 'ELECTRICIDAD'
-            "
-            [class.ch-emissions-list-page__modal-record-icon--flota]="
-              registro.categoria === 'FLOTA'
-            "
-            [class.ch-emissions-list-page__modal-record-icon--vuelo]="
-              registro.categoria === 'VUELO'
-            "
-            [class.ch-emissions-list-page__modal-record-icon--envio]="
-              registro.categoria === 'ENVIO'
-            "
-            aria-hidden="true"
+            >{{ categoriaLabel(registro) }} · {{ formatFecha(registro.fechaActividad) }} ·
+            {{ detalleSecundario(registro) }}</span
           >
-            <app-icon [name]="categoriaIcon(registro)" [size]="15" />
-          </span>
-          <div class="ch-emissions-list-page__modal-record-copy">
-            <strong>{{ detallePrincipal(registro) }}</strong>
-            <span
-              >{{ categoriaLabel(registro) }} · {{ formatFecha(registro.fechaActividad) }} ·
-              {{ detalleSecundario(registro) }}</span
-            >
-          </div>
-          <div class="ch-emissions-list-page__modal-record-carbon">
-            <strong>{{ formatCarbonKg(registro.carbonKg) }}</strong>
-            <span>kg CO2e</span>
-          </div>
-        </article>
-        <div class="ch-emissions-list-page__modal-actions">
-          <app-button type="button" variant="secondary" (click)="cancelarEliminar()">
-            Cancelar
-          </app-button>
-          <app-button
-            type="button"
-            variant="danger"
-            [loading]="deletingId() === registro.id"
-            (click)="confirmarEliminar()"
-          >
-            Eliminar
-          </app-button>
         </div>
-      </section>
-    </div>
+        <div class="ch-emissions-list-page__modal-record-carbon">
+          <strong>{{ formatCarbonKg(registro.carbonKg) }}</strong>
+          <span>kg CO2e</span>
+        </div>
+      </article>
+      <div class="ch-emissions-list-page__modal-actions">
+        <app-button type="button" variant="secondary" (click)="cancelarEliminar()">
+          Cancelar
+        </app-button>
+        <app-button
+          type="button"
+          variant="danger"
+          [loading]="deletingId() === registro.id"
+          (click)="confirmarEliminar()"
+        >
+          Eliminar
+        </app-button>
+      </div>
+    </app-modal>
   }
 </app-shell-layout>

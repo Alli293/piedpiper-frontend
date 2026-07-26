@@ -76,32 +76,21 @@
     </section>
 
     @if (invitacionARevocar(); as invitacion) {
-      <div class="invitaciones__overlay" (click)="cerrarRevocacion()">
-        <div
-          #modalRevocar
-          class="invitaciones__modal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="revocar-titulo"
-          tabindex="-1"
-          (click)="$event.stopPropagation()"
-          (keydown)="alPresionarTeclaModal($event)"
-        >
-          <h3 class="invitaciones__modal-title" id="revocar-titulo">Revocar invitación</h3>
-          <p class="invitaciones__modal-text">
-            La invitación a <strong>{{ invitacion.email }}</strong> dejará de ser válida y esa
-            persona no podrá registrarse con este enlace. ¿Deseas continuar?
-          </p>
-          <div class="invitaciones__modal-actions">
-            <app-button variant="secondary" [disabled]="revocando()" (click)="cerrarRevocacion()">
-              Cancelar
-            </app-button>
-            <app-button variant="danger" [loading]="revocando()" (click)="confirmarRevocacion()">
-              Revocar invitación
-            </app-button>
-          </div>
+      <app-modal label="Revocar invitación" (close)="cerrarRevocacion()">
+        <h3 class="invitaciones__modal-title">Revocar invitación</h3>
+        <p class="invitaciones__modal-text">
+          La invitación a <strong>{{ invitacion.email }}</strong> dejará de ser válida y esa persona
+          no podrá registrarse con este enlace. ¿Deseas continuar?
+        </p>
+        <div class="invitaciones__modal-actions">
+          <app-button variant="secondary" [disabled]="revocando()" (click)="cerrarRevocacion()">
+            Cancelar
+          </app-button>
+          <app-button variant="danger" [loading]="revocando()" (click)="confirmarRevocacion()">
+            Revocar invitación
+          </app-button>
         </div>
-      </div>
+      </app-modal>
     }
   </main>
 </app-shell-layout>
