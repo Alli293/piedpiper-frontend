@@ -1,3 +1,5 @@
+@use '../landing.shared';
+
 .steps {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -31,7 +33,7 @@
   align-items: center;
   justify-content: center;
   color: var(--mint);
-  margin-bottom: 20px;
+  margin-bottom: var(--ch-space-5);
 }
 .step-ic .landing-icon {
   font-size: 28px;
@@ -42,7 +44,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--mint);
-  margin-bottom: 8px;
+  margin-bottom: var(--ch-space-2);
 }
 .step-t {
   font-family: var(--display);

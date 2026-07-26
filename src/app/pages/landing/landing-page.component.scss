@@ -1,3 +1,5 @@
+@use 'landing.shared';
+
 :host {
   --green: var(--ch-green);
   --green-dark: var(--ch-green-dark);
@@ -63,7 +65,7 @@
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: var(--ch-space-5);
 }
 .nav-signin {
   font-size: 14px;
@@ -112,7 +114,7 @@
 .hero-eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--ch-space-2);
   height: 32px;
   padding: 0 15px;
   border-radius: 16px;
@@ -124,7 +126,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--mint);
-  margin-bottom: 24px;
+  margin-bottom: var(--ch-space-6);
 }
 .hero-eyebrow .landing-icon {
   font-size: 15px;
@@ -162,7 +164,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 32px;
+  margin-bottom: var(--ch-space-8);
 }
 .hero-trust {
   display: flex;
@@ -173,14 +175,14 @@
 .trust-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--ch-space-2);
   font-size: 12.5px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.7);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 9px;
-  padding: 8px 13px;
+  padding: var(--ch-space-2) 13px;
 }
 .trust-item .landing-icon {
   font-size: 16px;
@@ -212,8 +214,8 @@
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  padding-top: var(--ch-space-5);
+  padding-bottom: var(--ch-space-5);
 }
 .cat-strip-lbl {
   font-family: var(--mono);
@@ -221,7 +223,7 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.4);
-  margin-right: 8px;
+  margin-right: var(--ch-space-2);
 }
 .cat-pill {
   display: flex;
@@ -248,7 +250,7 @@
 .foot-top {
   display: grid;
   grid-template-columns: 1.6fr 1fr 1fr 1fr;
-  gap: 40px;
+  gap: var(--ch-space-10);
   padding-bottom: 36px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -262,7 +264,7 @@
 .foot-cr {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--ch-space-2);
   margin-top: 18px;
   height: 32px;
   padding: 0 14px;
@@ -301,7 +303,7 @@
   font-family: var(--sans);
   font-size: 13.5px;
   color: rgba(255, 255, 255, 0.72);
-  margin-bottom: 12px;
+  margin-bottom: var(--ch-space-3);
   cursor: pointer;
   background: none;
   border: none;
@@ -347,7 +349,7 @@
 @media (max-width: 1024px) {
   .hero .wrap {
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: var(--ch-space-8);
   }
   .hero-art {
     max-width: 420px;
@@ -364,7 +366,7 @@
     display: none;
   }
   .hero {
-    padding: 52px 0 64px;
+    padding: 52px 0 var(--ch-space-16);
   }
   .hero h1 {
     font-size: 38px;
