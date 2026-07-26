@@ -19,20 +19,12 @@
   width: 100%;
 }
 
-.ch-emissions-list-page__category-filters,
 .ch-emissions-list-page__select-filters {
   display: flex;
   align-items: flex-end;
+  align-self: flex-end;
   gap: var(--ch-space-2);
   min-width: 0;
-}
-
-.ch-emissions-list-page__select-filters {
-  align-self: flex-end;
-}
-
-.ch-emissions-list-page__category-filters {
-  flex-wrap: wrap;
 }
 
 .ch-emissions-list-page__filter-select {
@@ -50,50 +42,11 @@
   pointer-events: none;
 }
 
-.ch-emissions-list-page__chip,
 .ch-emissions-list-page__delete {
   border: 1px solid var(--ch-border);
   background: var(--ch-bg-white);
   color: var(--ch-text-primary);
   font: inherit;
-}
-
-.ch-emissions-list-page__chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 36px;
-  padding: 0 13px;
-  border-radius: var(--ch-radius-pill);
-  color: var(--ch-text-secondary);
-  cursor: pointer;
-}
-
-.ch-emissions-list-page__chip app-icon {
-  color: #64748b;
-}
-
-.ch-emissions-list-page__chip strong {
-  display: inline-grid;
-  place-items: center;
-  min-width: 25px;
-  min-height: 20px;
-  padding: 0 7px;
-  border-radius: var(--ch-radius-pill);
-  background: #eef3f0;
-  color: var(--ch-green-dark);
-  font-family: var(--ch-font-heading);
-  font-size: 0.74rem;
-}
-
-.ch-emissions-list-page__chip--active {
-  border-color: var(--ch-green);
-  background: var(--ch-green-soft);
-  color: var(--ch-green-dark);
-}
-
-.ch-emissions-list-page__chip--active app-icon {
-  color: var(--ch-green-dark);
 }
 
 .ch-emissions-list-page__select {

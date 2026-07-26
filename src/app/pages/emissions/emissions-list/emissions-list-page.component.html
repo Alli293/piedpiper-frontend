@@ -36,21 +36,12 @@
           />
         </div>
       </div>
-      <div class="ch-emissions-list-page__category-filters" role="group" aria-label="Categoría">
-        @for (option of categoryOptions; track option.value) {
-          <button
-            type="button"
-            class="ch-emissions-list-page__chip"
-            [class.ch-emissions-list-page__chip--active]="filtroCategoria() === option.value"
-            [attr.aria-pressed]="filtroCategoria() === option.value"
-            (click)="cambiarCategoria(option.value)"
-          >
-            <app-icon [name]="option.icon" [size]="15" />
-            <span>{{ option.label }}</span>
-            <strong>{{ registrosPorCategoria(option.value) }}</strong>
-          </button>
-        }
-      </div>
+      <app-filter-chips
+        ariaLabel="Categoría"
+        [chips]="chipsCategoria()"
+        [activeId]="filtroCategoria()"
+        (chipSelected)="cambiarCategoria($event)"
+      />
     </section>
 
     <section class="ch-emissions-list-page__table-panel" aria-labelledby="emissions-table-title">

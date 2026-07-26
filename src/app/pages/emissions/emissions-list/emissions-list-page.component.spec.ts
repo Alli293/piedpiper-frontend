@@ -201,7 +201,7 @@ describe('EmissionsListPageComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     const vuelosChip = Array.from(
-      root.querySelectorAll<HTMLButtonElement>('.ch-emissions-list-page__chip')
+      root.querySelectorAll<HTMLButtonElement>('.ch-filter-chips__item')
     ).find((button) => button.textContent?.includes('Vuelos'));
     vuelosChip?.click();
     fixture.detectChanges();
@@ -231,7 +231,7 @@ describe('EmissionsListPageComponent', () => {
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
     const flotaChip = Array.from(
-      root.querySelectorAll<HTMLButtonElement>('.ch-emissions-list-page__chip')
+      root.querySelectorAll<HTMLButtonElement>('.ch-filter-chips__item')
     ).find((button) => button.textContent?.includes('Flota'));
 
     flotaChip?.click();
@@ -260,7 +260,7 @@ describe('EmissionsListPageComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     const flotaChip = Array.from(
-      root.querySelectorAll<HTMLButtonElement>('.ch-emissions-list-page__chip')
+      root.querySelectorAll<HTMLButtonElement>('.ch-filter-chips__item')
     ).find((button) => button.textContent?.includes('Flota'));
     flotaChip?.click();
     fixture.detectChanges();

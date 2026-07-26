@@ -99,4 +99,10 @@ describe('app.routes', () => {
     const ruta = routes.find((r) => r.path === 'validacion-pendiente');
     expect(ruta?.canActivate).toBeUndefined();
   });
+
+  it('la ruta publica de certificaciones no exige sesion', () => {
+    const ruta = routes.find((r) => r.path === 'empresa/:slug/reputacion/certificaciones');
+    expect(ruta).toBeDefined();
+    expect(ruta?.canActivate).toBeUndefined();
+  });
 });

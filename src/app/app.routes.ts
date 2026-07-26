@@ -198,6 +198,13 @@ export const routes: Routes = [
     loadComponent: cargarPlaceholder,
   },
   {
+    path: 'empresa/:slug/reputacion/certificaciones',
+    loadComponent: () =>
+      import('./pages/perfil-publico/certificaciones/certificaciones-publicas-page.component').then(
+        (m) => m.CertificacionesPublicasPageComponent
+      ),
+  },
+  {
     path: 'empresa/emisiones',
     canActivate: [guardEmpresa],
     loadComponent: () =>
