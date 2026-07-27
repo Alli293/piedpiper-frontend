@@ -12,7 +12,7 @@ import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import { inicialesDe } from '../../../shared/utils/iniciales.utils';
 import { AuditorResumen } from '../../auditores/auditor.model';
 import { AuditoresService } from '../../auditores/auditores.service';
-import { OrigenAsignacion } from '../auditoria.model';
+import { OrigenAsignacion, OrigenAsignacionRequest } from '../auditoria.model';
 import { AuditoriasService } from '../auditorias.service';
 
 const TOTAL_ESTRELLAS = 5;
@@ -66,6 +66,8 @@ export class AsignarAuditorPageComponent implements OnInit {
   protected readonly seleccionadoId = signal<string | null>(null);
   protected readonly asignacion = signal<AsignacionPendiente | null>(null);
   protected readonly errorAsignacion = signal<string | null>(null);
+  /** Estado terminal: la solicitud no existe o es de otra empresa, así que no hay nada que asignar. */
+  protected readonly errorSolicitud = signal<string | null>(null);
 
   private readonly etiquetasEspecialidad = signal(new Map<string, string>());
 
@@ -113,7 +115,7 @@ export class AsignarAuditorPageComponent implements OnInit {
   /**
    * Rehidrata la asignación ya registrada para que, al recargar la pantalla, los botones de
    * selección sigan ocultos mientras la solicitud tenga un auditor pendiente de responder.
-   * Un fallo acá no bloquea la pantalla: se sigue pudiendo asignar y el backend valida igual.
+   * Un 404 o un 403 son terminales: no hay solicitud que asignar, así que la pantalla se corta.
    */
   private async cargarAsignacionExistente(): Promise<void> {
     try {
@@ -125,10 +127,15 @@ export class AsignarAuditorPageComponent implements OnInit {
         nombre: auditor.nombre,
         iniciales: inicialesDe(auditor.nombre),
         fotoPerfil: '',
-        origen: solicitud.origenAsignacion ?? 'manual',
+        origen: solicitud.origenAsignacion ?? 'MANUAL',
       });
-    } catch {
-      // La solicitud no se pudo consultar; la pantalla queda utilizable para asignar.
+    } catch (err: unknown) {
+      if (err instanceof HttpErrorResponse && (err.status === 404 || err.status === 403)) {
+        this.errorSolicitud.set(mensajeDeError(err));
+        return;
+      }
+      // Cualquier otro fallo (red, 500) no bloquea: la pantalla queda utilizable para asignar
+      // y el backend vuelve a validar al recibir la asignación.
     }
   }
 
@@ -152,7 +159,7 @@ export class AsignarAuditorPageComponent implements OnInit {
     void this.cargarAuditores();
   }
 
-  private async enviarAsignacion(origenAsignacion: OrigenAsignacion): Promise<void> {
+  private async enviarAsignacion(origenAsignacion: OrigenAsignacionRequest): Promise<void> {
     const auditor = this.auditorSeleccionado();
     if (auditor === null || this.enviando() || this.hayAsignacion()) return;
 
@@ -170,13 +177,18 @@ export class AsignarAuditorPageComponent implements OnInit {
         nombre,
         iniciales: inicialesDe(nombre),
         fotoPerfil: auditor.fotoPerfil ?? '',
-        origen: solicitud?.origenAsignacion ?? origenAsignacion,
+        origen: solicitud?.origenAsignacion ?? 'MANUAL',
       });
       this.toastService.success(mensajeSolicitudEnviada(nombre), undefined, DURACION_TOAST_MS);
     } catch (err: unknown) {
       const mensaje = mensajeDeError(err);
       this.errorAsignacion.set(mensaje);
       this.toastService.error(mensaje, undefined, DURACION_TOAST_MS);
+      // El 409 solo ocurre si la solicitud ya tiene otro auditor: elegir uno distinto volvería a
+      // fallar, así que se relee la solicitud para mostrar la asignación real.
+      if (err instanceof HttpErrorResponse && err.status === 409) {
+        await this.cargarAsignacionExistente();
+      }
     } finally {
       this.enviando.set(false);
     }

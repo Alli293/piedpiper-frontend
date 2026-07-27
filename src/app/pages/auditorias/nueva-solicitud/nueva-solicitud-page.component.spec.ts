@@ -27,7 +27,7 @@ describe('NuevaSolicitudPageComponent', () => {
     periodoInicio: '2024-01-01',
     periodoFin: '2024-06-30',
     descripcionSolicitud: null,
-    estado: 'PENDIENTE_ASIGNACION',
+    estado: 'SOLICITUD_ENVIADA',
     fechaCreacion: '2024-07-01T10:00:00Z',
     documentos: [{ id: 'doc-1', nombreArchivo: 'respaldo.pdf', tamanioBytes: 1024 }],
   };
@@ -46,14 +46,15 @@ describe('NuevaSolicitudPageComponent', () => {
   }
 
   function pdf(nombre: string): File {
-    return new File(['contenido'], nombre, { type: 'application/pdf' });
+    return new File(['%PDF-1.7 contenido'], nombre, { type: 'application/pdf' });
   }
 
-  function adjuntar(...archivos: File[]): void {
+  async function adjuntar(...archivos: File[]): Promise<void> {
     const zona = raiz().querySelector<HTMLButtonElement>('.ch-file-drop__zone');
     const evento = new Event('drop');
     Object.defineProperty(evento, 'dataTransfer', { value: { files: archivos } });
     zona?.dispatchEvent(evento);
+    await fixture.whenStable();
     fixture.detectChanges();
   }
 
@@ -114,30 +115,30 @@ describe('NuevaSolicitudPageComponent', () => {
     fixture.detectChanges();
   });
 
-  it('deshabilita el boton mientras no haya documentos adjuntos', () => {
+  it('deshabilita el boton mientras no haya documentos adjuntos', async () => {
     completarPeriodo();
 
     expect(botonEnviar()?.disabled).toBe(true);
 
-    adjuntar(pdf('respaldo.pdf'));
+    await adjuntar(pdf('respaldo.pdf'));
 
     expect(botonEnviar()?.disabled).toBe(false);
   });
 
-  it('no habilita el envio cuando el periodo excede 12 meses', () => {
+  it('no habilita el envio cuando el periodo excede 12 meses', async () => {
     interno().model.update((m) => ({
       ...m,
       periodoInicio: new Date(Date.UTC(2023, 0, 1)),
       periodoFin: new Date(Date.UTC(2024, 6, 1)),
     }));
-    adjuntar(pdf('respaldo.pdf'));
+    await adjuntar(pdf('respaldo.pdf'));
 
     expect(botonEnviar()?.disabled).toBe(true);
   });
 
   it('envia el periodo en formato ISO junto con los documentos adjuntos', async () => {
     completarPeriodo();
-    adjuntar(pdf('respaldo.pdf'), pdf('anexo.pdf'));
+    await adjuntar(pdf('respaldo.pdf'), pdf('anexo.pdf'));
 
     await enviar();
 
@@ -156,7 +157,7 @@ describe('NuevaSolicitudPageComponent', () => {
 
   it('navega a la pantalla de asignacion de auditor tras crear la solicitud', async () => {
     completarPeriodo();
-    adjuntar(pdf('respaldo.pdf'));
+    await adjuntar(pdf('respaldo.pdf'));
 
     await enviar();
 
@@ -176,7 +177,7 @@ describe('NuevaSolicitudPageComponent', () => {
     );
     completarPeriodo();
     interno().model.update((m) => ({ ...m, descripcionSolicitud: 'Revisión anual' }));
-    adjuntar(pdf('respaldo.pdf'));
+    await adjuntar(pdf('respaldo.pdf'));
 
     await enviar();
 
@@ -199,7 +200,7 @@ describe('NuevaSolicitudPageComponent', () => {
       )
     );
     completarPeriodo();
-    adjuntar(pdf('respaldo.pdf'));
+    await adjuntar(pdf('respaldo.pdf'));
 
     await enviar();
 

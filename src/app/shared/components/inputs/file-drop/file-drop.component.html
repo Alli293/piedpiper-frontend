@@ -2,6 +2,7 @@
   <span class="ch-file-drop__label" [id]="zonaId + '-label'">{{ label() }}</span>
 }
 <button
+  #zona
   type="button"
   class="ch-file-drop__zone"
   [class.ch-file-drop__zone--activa]="arrastrando()"
@@ -35,22 +36,26 @@
 @if (mensajeError()) {
   <p class="ch-file-drop__error" role="alert" [id]="errorId">{{ mensajeError() }}</p>
 }
-@if (vistas().length > 0) {
-  <ul class="ch-file-drop__list" [id]="listaId">
-    @for (vista of vistas(); track vista.clave) {
-      <li class="ch-file-drop__item">
-        <span class="ch-file-drop__item-name">{{ vista.nombre }}</span>
-        <span class="ch-file-drop__item-size">{{ vista.tamanio }}</span>
-        <button
-          type="button"
-          class="ch-file-drop__remove"
-          [disabled]="disabled()"
-          [attr.aria-label]="'Eliminar ' + vista.nombre"
-          (click)="eliminar($index)"
-        >
-          <app-icon name="cerrar" [size]="16" />
-        </button>
-      </li>
-    }
-  </ul>
-}
+<ul
+  class="ch-file-drop__list"
+  [class.ch-file-drop__list--vacia]="vistas().length === 0"
+  [id]="listaId"
+  aria-live="polite"
+>
+  @for (vista of vistas(); track vista.clave) {
+    <li class="ch-file-drop__item">
+      <span class="ch-file-drop__item-name">{{ vista.nombre }}</span>
+      <span class="ch-file-drop__item-size">{{ vista.tamanio }}</span>
+      <button
+        #remover
+        type="button"
+        class="ch-file-drop__remove"
+        [disabled]="disabled()"
+        [attr.aria-label]="'Eliminar ' + vista.nombre"
+        (click)="eliminar($index)"
+      >
+        <app-icon name="cerrar" [size]="16" />
+      </button>
+    </li>
+  }
+</ul>

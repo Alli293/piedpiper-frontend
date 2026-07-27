@@ -75,6 +75,10 @@
     gap: var(--ch-space-3);
     color: var(--ch-text-primary);
   }
+
+  &--terminal {
+    color: var(--ch-danger);
+  }
 }
 
 .ch-asignar__grid {

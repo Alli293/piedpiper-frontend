@@ -1,5 +1,8 @@
 export type TipoCertificacion = 'INICIAL' | 'RENOVACION';
 
+export type EstadoSolicitudAuditoria =
+  'SOLICITUD_ENVIADA' | 'OBSERVACIONES_PENDIENTES' | 'CERTIFICACION_EMITIDA';
+
 export interface NuevaSolicitudAuditoriaRequest {
   periodoInicio: string;
   periodoFin: string;
@@ -18,16 +21,20 @@ export interface SolicitudAuditoria {
   periodoInicio: string;
   periodoFin: string;
   descripcionSolicitud: string | null;
-  estado: string;
+  estado: EstadoSolicitudAuditoria;
   fechaCreacion: string;
   documentos: DocumentoSolicitudAuditoria[];
 }
 
-export type OrigenAsignacion = 'manual' | 'recomendacion_ia';
+/** Valores que acepta el backend en el cuerpo del POST: su conversión es case-insensitive. */
+export type OrigenAsignacionRequest = 'manual' | 'recomendacion_ia';
+
+/** Valores que devuelve el backend: Jackson serializa el enum en mayúsculas. */
+export type OrigenAsignacion = 'MANUAL' | 'RECOMENDACION_IA';
 
 export interface AsignarAuditorRequest {
   idAuditor: string;
-  origenAsignacion: OrigenAsignacion;
+  origenAsignacion: OrigenAsignacionRequest;
 }
 
 /** Datos del auditor que devuelve el backend anidados en la solicitud. No incluye foto: el perfil

@@ -63,11 +63,11 @@ describe('AsignarAuditorPageComponent', () => {
     periodoInicio: '2024-01-01',
     periodoFin: '2024-06-30',
     descripcionSolicitud: null,
-    estado: 'PENDIENTE_ASIGNACION',
+    estado: 'SOLICITUD_ENVIADA',
     fechaCreacion: '2024-07-01T10:00:00Z',
     documentos: [],
     auditor: { id: 'aud-1', nombre: 'Ana Mora' },
-    origenAsignacion: 'manual',
+    origenAsignacion: 'MANUAL',
     fechaAsignacion: '2024-07-02T09:00:00Z',
   };
 
@@ -237,8 +237,19 @@ describe('AsignarAuditorPageComponent', () => {
     expect(pendienteUi?.textContent).toContain('Ana Mora');
   });
 
-  it('muestra el mensaje del backend ante un 409 y permite reintentar con otro auditor', async () => {
-    auditoriasService.asignarAuditor.mockReturnValueOnce(
+  it('reenvia la etiqueta accesible al boton interno de asignar', async () => {
+    await montar();
+
+    expect(botonAsignar()?.getAttribute('aria-label')).toBe('Seleccione un auditor para asignarlo');
+
+    botonesSeleccionar()[0].click();
+    await estabilizar();
+
+    expect(botonAsignar()?.getAttribute('aria-label')).toBe('Asignar a Ana Mora');
+  });
+
+  it('ante un 409 muestra el mensaje del backend y pasa a mostrar la asignacion existente', async () => {
+    auditoriasService.asignarAuditor.mockReturnValue(
       throwError(
         () =>
           new HttpErrorResponse({
@@ -247,6 +258,11 @@ describe('AsignarAuditorPageComponent', () => {
           })
       )
     );
+    auditoriasService.obtenerSolicitud
+      .mockReturnValueOnce(of({ ...solicitudAsignada, auditor: null }))
+      .mockReturnValue(
+        of({ ...solicitudAsignada, auditor: { id: 'aud-9', nombre: 'Carla Rojas' } })
+      );
     await montar();
 
     botonesSeleccionar()[0].click();
@@ -260,19 +276,13 @@ describe('AsignarAuditorPageComponent', () => {
       'Ya existe una solicitud de revisión pendiente con otro auditor.'
     );
     expect(ultimoToast().variant).toBe('error');
-    expect(botonesSeleccionar().length).toBe(2);
 
-    botonesSeleccionar()[1].click();
-    await estabilizar();
-    botonAsignar()?.click();
-    await estabilizar();
-
-    expect(auditoriasService.asignarAuditor).toHaveBeenLastCalledWith('sol-1', {
-      idAuditor: 'aud-2',
-      origenAsignacion: 'manual',
-    });
+    expect(auditoriasService.obtenerSolicitud).toHaveBeenCalledTimes(2);
+    expect(raiz().querySelector('.ch-asignar__pendiente')?.textContent).toContain('Carla Rojas');
     expect(botonesSeleccionar().length).toBe(0);
+    expect(botonAsignar()).toBeNull();
   });
+
   it('si la solicitud ya tiene un auditor asignado rehidrata el estado y no ofrece seleccionar', async () => {
     auditoriasService.obtenerSolicitud.mockReturnValue(of(solicitudAsignada));
 
@@ -291,5 +301,35 @@ describe('AsignarAuditorPageComponent', () => {
     await montar();
 
     expect(botonesSeleccionar().length).toBe(2);
+  });
+
+  it('corta la pantalla cuando la solicitud no existe', async () => {
+    auditoriasService.obtenerSolicitud.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 404 }))
+    );
+
+    await montar();
+
+    const alerta = raiz().querySelector('.ch-asignar__estado--terminal');
+    expect(alerta?.getAttribute('role')).toBe('alert');
+    expect(alerta?.textContent?.trim()).toBe('La solicitud de auditoría no existe.');
+    expect(botonesSeleccionar().length).toBe(0);
+    expect(botonAsignar()).toBeNull();
+  });
+
+  it('corta la pantalla cuando la solicitud es de otra empresa', async () => {
+    auditoriasService.obtenerSolicitud.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 403 }))
+    );
+
+    await montar();
+
+    const alerta = raiz().querySelector('.ch-asignar__estado--terminal');
+    expect(alerta?.getAttribute('role')).toBe('alert');
+    expect(alerta?.textContent?.trim()).toBe(
+      'No tiene permiso para asignar un auditor a esta solicitud.'
+    );
+    expect(botonesSeleccionar().length).toBe(0);
+    expect(botonAsignar()).toBeNull();
   });
 });

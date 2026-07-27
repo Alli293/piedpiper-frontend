@@ -19,6 +19,8 @@ export class ButtonComponent {
   disabled = input(false);
   loading = input(false);
   type = input<'button' | 'submit' | 'reset'>('button');
+  /** Se reenvía al <button> interno: el host es un custom element sin rol y el lector lo ignora. */
+  ariaLabel = input<string>();
 
   protected readonly hostClass = computed(
     () => `ch-button ch-button--${this.variant()} ch-button--${this.size()}`
