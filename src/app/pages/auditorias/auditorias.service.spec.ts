@@ -59,4 +59,25 @@ describe('AuditoriasService', () => {
 
     req.flush({ id: 'sol-2', documentos: [] });
   });
+
+  it('asigna el auditor con POST al endpoint de la solicitud', () => {
+    service.asignarAuditor('sol-9', { idAuditor: 'aud-1', origenAsignacion: 'manual' }).subscribe();
+
+    const req = httpMock.expectOne(`${baseUrl}/sol-9/auditor`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ idAuditor: 'aud-1', origenAsignacion: 'manual' });
+
+    req.flush({ id: 'sol-9', documentos: [], auditor: { id: 'aud-1', nombre: 'Ana Mora' } });
+  });
+
+  it('admite el origen de recomendacion de IA en el cuerpo', () => {
+    service
+      .asignarAuditor('sol-9', { idAuditor: 'aud-2', origenAsignacion: 'recomendacion_ia' })
+      .subscribe();
+
+    const req = httpMock.expectOne(`${baseUrl}/sol-9/auditor`);
+    expect(req.request.body).toEqual({ idAuditor: 'aud-2', origenAsignacion: 'recomendacion_ia' });
+
+    req.flush({ id: 'sol-9', documentos: [] });
+  });
 });

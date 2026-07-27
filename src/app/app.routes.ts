@@ -222,10 +222,12 @@ export const routes: Routes = [
       ),
   },
   {
-    // Pantalla de asignación de auditor (PP-45): placeholder hasta que exista la página real.
     path: 'empresa/auditorias/:id/auditor',
     canActivate: [guardEmpresaAdmin],
-    loadComponent: cargarPlaceholder,
+    loadComponent: () =>
+      import('./pages/auditorias/asignar-auditor/asignar-auditor-page.component').then(
+        (m) => m.AsignarAuditorPageComponent
+      ),
   },
   ...rutasPlaceholder,
   {
