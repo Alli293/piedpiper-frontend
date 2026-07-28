@@ -76,8 +76,8 @@
     </section>
 
     @if (invitacionARevocar(); as invitacion) {
-      <app-modal label="Revocar invitación" (close)="cerrarRevocacion()">
-        <h3 class="invitaciones__modal-title">Revocar invitación</h3>
+      <app-modal labelledBy="revocar-invitacion-title" (close)="cerrarRevocacion()">
+        <h3 id="revocar-invitacion-title" class="invitaciones__modal-title">Revocar invitación</h3>
         <p class="invitaciones__modal-text">
           La invitación a <strong>{{ invitacion.email }}</strong> dejará de ser válida y esa persona
           no podrá registrarse con este enlace. ¿Deseas continuar?

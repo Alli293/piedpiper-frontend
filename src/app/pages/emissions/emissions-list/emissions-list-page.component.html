@@ -135,12 +135,17 @@
   </div>
 
   @if (confirmTarget(); as registro) {
-    <app-modal label="¿Eliminar este registro?" (close)="cancelarEliminar()">
+    <app-modal labelledBy="eliminar-registro-title" (close)="cancelarEliminar()">
       <div class="ch-emissions-list-page__modal-icon" aria-hidden="true">
         <app-icon name="delete" [size]="18" />
       </div>
       <div class="ch-emissions-list-page__modal-copy">
-        <app-heading level="h2" appearance="h4" text="¿Eliminar este registro?" />
+        <app-heading
+          id="eliminar-registro-title"
+          level="h2"
+          appearance="h4"
+          text="¿Eliminar este registro?"
+        />
         <p>Esta acción no se puede deshacer. El registro se descontará de tu huella de carbono.</p>
       </div>
       <article class="ch-emissions-list-page__modal-record">

@@ -71,8 +71,8 @@
   }
 
   @if (solicitudEnRevision(); as solicitud) {
-    <app-modal label="Revisar solicitud" size="md" (close)="cerrarRevision()">
-      <h2 class="solicitudes__modal-title">Revisar solicitud</h2>
+    <app-modal labelledBy="revisar-solicitud-title" size="md" (close)="cerrarRevision()">
+      <h2 id="revisar-solicitud-title" class="solicitudes__modal-title">Revisar solicitud</h2>
 
       <dl class="solicitudes__datos">
         <div class="solicitudes__dato">

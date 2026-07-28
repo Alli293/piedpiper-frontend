@@ -1,26 +1,61 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ModalComponent } from './modal.component';
 
 @Component({
   imports: [ModalComponent],
   template: `
-    <app-modal label="Confirmar acción" (close)="onClose()">
-      <p>Contenido de prueba</p>
-      <button type="button">Primero</button>
-      <button type="button">Último</button>
-    </app-modal>
+    @if (abierto()) {
+      <app-modal label="Confirmar acción" (close)="onClose()">
+        <p>Contenido de prueba</p>
+        <button type="button">Primero</button>
+        <button type="button">Último</button>
+      </app-modal>
+    }
   `,
 })
 class HostComponent {
   cerrado = 0;
+  readonly abierto = signal(true);
 
   onClose(): void {
     this.cerrado++;
   }
 }
 
+@Component({
+  imports: [ModalComponent],
+  template: `
+    <h2 id="titulo-modal">Confirmar acción</h2>
+    <app-modal labelledBy="titulo-modal" (close)="onClose()">
+      <p>Contenido de prueba</p>
+    </app-modal>
+  `,
+})
+class HostConLabelledByComponent {
+  onClose(): void {}
+}
+
+@Component({
+  imports: [ModalComponent],
+  template: `
+    <button type="button" (click)="abierto.set(true)">Abrir</button>
+    @if (abierto()) {
+      <app-modal label="Confirmar acción" (close)="abierto.set(false)">
+        <p>Contenido de prueba</p>
+      </app-modal>
+    }
+  `,
+})
+class HostConDisparadorComponent {
+  readonly abierto = signal(false);
+}
+
 describe('ModalComponent', () => {
+  afterEach(() => {
+    document.body.style.overflow = '';
+  });
+
   async function createFixture() {
     const fixture = TestBed.configureTestingModule({
       imports: [HostComponent],
@@ -105,5 +140,51 @@ describe('ModalComponent', () => {
 
     expect(event.defaultPrevented).toBe(true);
     expect(document.activeElement).toBe(ultimo);
+  });
+
+  it('usa aria-labelledby y omite aria-label cuando se provee labelledBy', async () => {
+    const fixture = TestBed.configureTestingModule({
+      imports: [HostConLabelledByComponent],
+    }).createComponent(HostConLabelledByComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const dialog: HTMLElement = fixture.nativeElement.querySelector('[role="dialog"]');
+    expect(dialog.getAttribute('aria-labelledby')).toBe('titulo-modal');
+    expect(dialog.getAttribute('aria-label')).toBeNull();
+  });
+
+  it('bloquea el scroll del body mientras está abierto y lo restaura al cerrarse', async () => {
+    const fixture = await createFixture();
+    expect(document.body.style.overflow).toBe('hidden');
+
+    fixture.componentInstance.abierto.set(false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(document.body.style.overflow).toBe('');
+  });
+
+  it('devuelve el foco al disparador al cerrarse', async () => {
+    const fixture = TestBed.configureTestingModule({
+      imports: [HostConDisparadorComponent],
+    }).createComponent(HostConDisparadorComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const disparador: HTMLElement = fixture.nativeElement.querySelector('button');
+    disparador.focus();
+    disparador.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const dialog: HTMLElement = fixture.nativeElement.querySelector('[role="dialog"]');
+    expect(document.activeElement).toBe(dialog);
+
+    dialog.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(disparador);
   });
 });

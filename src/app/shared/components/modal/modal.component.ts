@@ -1,4 +1,13 @@
-import { Component, ElementRef, effect, input, output, viewChild } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  effect,
+  inject,
+  input,
+  output,
+  viewChild,
+} from '@angular/core';
 
 export type ModalSize = 'sm' | 'md';
 
@@ -8,16 +17,26 @@ export type ModalSize = 'sm' | 'md';
   styleUrl: './modal.component.scss',
 })
 export class ModalComponent {
-  readonly label = input.required<string>();
+  readonly label = input<string>();
+  readonly labelledBy = input<string>();
   readonly size = input<ModalSize>('sm');
 
   readonly close = output<void>();
 
   private readonly dialog = viewChild.required<ElementRef<HTMLElement>>('dialog');
+  private readonly triggerElement =
+    document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  private readonly previousBodyOverflow = document.body.style.overflow;
 
   constructor() {
     effect(() => {
       this.dialog().nativeElement.focus();
+    });
+
+    document.body.style.overflow = 'hidden';
+    inject(DestroyRef).onDestroy(() => {
+      document.body.style.overflow = this.previousBodyOverflow;
+      this.triggerElement?.focus();
     });
   }
 
