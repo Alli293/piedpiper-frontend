@@ -31,3 +31,23 @@ function primeraLetra(value: string): string {
   const primeraPalabra = value?.trim().split(/\s+/)[0] ?? '';
   return primeraPalabra ? primeraPalabra[0].toUpperCase() : '';
 }
+
+/**
+ * Primera letra del nombre + primera letra del primer apellido a partir de
+ * un nombre completo en un solo string (convención CR: nombre(s) seguido de
+ * dos apellidos). Con 3+ palabras asume que las últimas dos son los
+ * apellidos y usa la primera de esas dos como "primer apellido", ignorando
+ * segundos nombres — p. ej. "Juan Carlos Pérez Mora" da "JP", no "JC" ni
+ * "JM". Con 2 palabras las trata como nombre + apellido único. Con 1 sola
+ * palabra usa sus dos primeras letras, igual que `initialsFrom`.
+ */
+export function initialsFromNombreCompleto(nombreCompleto: string): string {
+  const palabras = nombreCompleto?.trim().split(/\s+/).filter(Boolean) ?? [];
+  if (palabras.length === 0) return 'US';
+  if (palabras.length === 1) {
+    return `${palabras[0][0]}${palabras[0][1] ?? ''}`.toUpperCase();
+  }
+
+  const indicePrimerApellido = Math.max(1, palabras.length - 2);
+  return `${palabras[0][0]}${palabras[indicePrimerApellido][0]}`.toUpperCase();
+}
