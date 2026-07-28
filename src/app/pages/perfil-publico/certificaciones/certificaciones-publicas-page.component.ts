@@ -22,11 +22,10 @@ export const MENSAJE_NO_ENCONTRADO = 'El perfil que buscas no existe o ya no est
 export const MENSAJE_ERROR_CERTIFICACIONES =
   'No fue posible cargar las certificaciones en este momento.';
 
-// VENCIDA / REVOCADA se agregan aqui cuando el backend modele esos estados;
-// hoy `estado` solo puede ser 'ACTIVA', asi que cualquier otro valor cae en
-// el fallback neutral de etiqueta()/variante().
 const ESTADOS: Record<string, { etiqueta: string; variante: BadgeVariant }> = {
   ACTIVA: { etiqueta: 'Vigente', variante: 'success' },
+  VENCIDA: { etiqueta: 'Vencida', variante: 'warning' },
+  REVOCADA: { etiqueta: 'Revocada', variante: 'danger' },
 };
 
 @Component({

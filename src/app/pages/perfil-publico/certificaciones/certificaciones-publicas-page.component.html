@@ -20,7 +20,7 @@
         <p>Cargando certificaciones...</p>
       </section>
     } @else if (noEncontrado()) {
-      <section class="ch-certificaciones-publicas__estado">
+      <section class="ch-certificaciones-publicas__estado" role="alert">
         <app-icon name="warning" [size]="32" />
         <app-heading level="h1" text="Perfil no disponible" />
         <p>{{ noEncontradoMensaje }}</p>
@@ -36,7 +36,7 @@
         <span class="ch-certificaciones-publicas__vacio-icono" aria-hidden="true">
           <app-icon name="certificaciones" [size]="34" />
         </span>
-        <app-heading level="h2" text="Sin certificaciones registradas" />
+        <app-heading level="h1" text="Sin certificaciones registradas" />
         <p>
           Esta empresa aún no tiene certificaciones registradas. Cuando obtenga y verifique su
           primera certificación con un auditor en CarbonHub, aparecerá aquí.

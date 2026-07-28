@@ -78,6 +78,18 @@ describe('CertificacionesPublicasPageComponent', () => {
     expect(nombres).toEqual(['Carbono Neutral', 'Inventario GEI']);
   });
 
+  it('mientras carga muestra el estado de carga con role="status"', () => {
+    listarCertificaciones.mockReturnValue(of([CERT_VIGENTE]));
+    const fixture = TestBed.createComponent(CertificacionesPublicasPageComponent);
+    fixture.componentRef.setInput('slug', 'cafe-del-valle');
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.textContent).toContain('Cargando certificaciones...');
+    expect(root.querySelector('[role="status"]')).not.toBeNull();
+    expect(root.querySelector('table')).toBeNull();
+  });
+
   it('ACTIVA se muestra como Vigente con variante success', async () => {
     listarCertificaciones.mockReturnValue(of([CERT_VIGENTE]));
     const fixture = await crearFixture();
@@ -86,6 +98,26 @@ describe('CertificacionesPublicasPageComponent', () => {
     const badge = root.querySelector('app-badge');
     expect(badge?.className).toContain('ch-badge--success');
     expect(badge?.textContent?.trim()).toBe('Vigente');
+  });
+
+  it('VENCIDA se muestra como Vencida con variante warning', async () => {
+    listarCertificaciones.mockReturnValue(of([{ ...CERT_VIGENTE, estado: 'VENCIDA' }]));
+    const fixture = await crearFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    const badge = root.querySelector('app-badge');
+    expect(badge?.className).toContain('ch-badge--warning');
+    expect(badge?.textContent?.trim()).toBe('Vencida');
+  });
+
+  it('REVOCADA se muestra como Revocada con variante danger', async () => {
+    listarCertificaciones.mockReturnValue(of([{ ...CERT_VIGENTE, estado: 'REVOCADA' }]));
+    const fixture = await crearFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    const badge = root.querySelector('app-badge');
+    expect(badge?.className).toContain('ch-badge--danger');
+    expect(badge?.textContent?.trim()).toBe('Revocada');
   });
 
   it('un estado desconocido se muestra como No disponible con variante neutral', async () => {
