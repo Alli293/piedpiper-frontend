@@ -271,3 +271,83 @@
     @include mixins.focus-ring;
   }
 }
+
+// === Tab navigation ===
+.perfil-publico__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ch-space-2);
+  margin-top: var(--ch-space-6);
+  padding-bottom: var(--ch-space-4);
+  border-bottom: 1px solid var(--ch-border);
+}
+
+.perfil-publico__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+  height: 36px;
+  padding: 0 var(--ch-space-4);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-pill);
+  background: var(--ch-bg-white);
+  color: var(--ch-text-secondary);
+  font-family: var(--ch-font-body);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition:
+    background-color var(--ch-transition),
+    border-color var(--ch-transition),
+    color var(--ch-transition);
+
+  &:hover:not(.perfil-publico__tab--active) {
+    border-color: var(--ch-text-muted);
+    color: var(--ch-text-primary);
+  }
+
+  &:focus-visible {
+    @include mixins.focus-ring;
+  }
+
+  &--active {
+    border-color: var(--ch-green);
+    background: var(--ch-green-soft);
+    color: var(--ch-green-dark);
+    cursor: default;
+  }
+}
+
+// === Tab content ===
+.perfil-publico__tab-content {
+  margin-top: var(--ch-space-6);
+}
+
+// === Placeholder sections (Insignias, Evolución) ===
+.perfil-publico__seccion-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--ch-space-10) var(--ch-space-4);
+  color: var(--ch-text-muted);
+  border: 1px dashed var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-main);
+}
+
+.perfil-publico__seccion-placeholder-text {
+  font-family: var(--ch-font-heading);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ch-text-secondary);
+  margin: var(--ch-space-4) 0 var(--ch-space-1);
+}
+
+.perfil-publico__seccion-placeholder-desc {
+  font-family: var(--ch-font-body);
+  font-size: 0.875rem;
+  color: var(--ch-text-muted);
+  margin: 0;
+}

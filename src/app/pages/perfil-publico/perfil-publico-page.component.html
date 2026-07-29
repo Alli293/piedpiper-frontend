@@ -69,6 +69,67 @@
           <span class="perfil-publico__stat-label">Insignias activas</span>
         </div>
       </section>
+
+      <!-- Tab navigation -->
+      <nav class="perfil-publico__tabs" aria-label="Secciones del perfil">
+        <button
+          type="button"
+          class="perfil-publico__tab"
+          [class.perfil-publico__tab--active]="seccionActiva() === 'certificaciones'"
+          [attr.aria-pressed]="seccionActiva() === 'certificaciones'"
+          (click)="cambiarSeccion('certificaciones')"
+        >
+          <app-icon name="certificaciones" [size]="16" aria-hidden="true" />
+          Historial de Certificaciones
+        </button>
+        <button
+          type="button"
+          class="perfil-publico__tab"
+          [class.perfil-publico__tab--active]="seccionActiva() === 'insignias'"
+          [attr.aria-pressed]="seccionActiva() === 'insignias'"
+          (click)="cambiarSeccion('insignias')"
+        >
+          <app-icon name="insignias" [size]="16" aria-hidden="true" />
+          Insignias
+        </button>
+        <button
+          type="button"
+          class="perfil-publico__tab"
+          [class.perfil-publico__tab--active]="seccionActiva() === 'evolucion'"
+          [attr.aria-pressed]="seccionActiva() === 'evolucion'"
+          (click)="cambiarSeccion('evolucion')"
+        >
+          <app-icon name="emisiones" [size]="16" aria-hidden="true" />
+          Evolución de Huella
+        </button>
+      </nav>
+
+      <!-- Tab content -->
+      <section class="perfil-publico__tab-content" aria-live="polite">
+        @switch (seccionActiva()) {
+          @case ('certificaciones') {
+            <app-certificaciones-publicas-page [slug]="slug" />
+          }
+          @case ('insignias') {
+            <div class="perfil-publico__seccion-placeholder">
+              <app-icon name="insignias" [size]="48" aria-hidden="true" />
+              <p class="perfil-publico__seccion-placeholder-text">Próximamente</p>
+              <p class="perfil-publico__seccion-placeholder-desc">
+                La sección de insignias estará disponible pronto.
+              </p>
+            </div>
+          }
+          @case ('evolucion') {
+            <div class="perfil-publico__seccion-placeholder">
+              <app-icon name="emisiones" [size]="48" aria-hidden="true" />
+              <p class="perfil-publico__seccion-placeholder-text">Próximamente</p>
+              <p class="perfil-publico__seccion-placeholder-desc">
+                La sección de evolución de huella estará disponible pronto.
+              </p>
+            </div>
+          }
+        }
+      </section>
     </article>
   }
   @case ('error404') {

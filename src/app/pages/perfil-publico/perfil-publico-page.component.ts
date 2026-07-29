@@ -3,8 +3,11 @@ import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
+import { CertificacionesPublicasPageComponent } from './certificaciones/certificaciones-publicas-page.component';
 import { PerfilPublicoDTO } from './perfil-publico.models';
 import { PerfilPublicoService } from './perfil-publico.service';
+
+export type SeccionActiva = 'certificaciones' | 'insignias' | 'evolucion';
 
 interface NivelConfig {
   clase: string;
@@ -24,7 +27,7 @@ const NIVEL_MAP: Record<string, NivelConfig> = {
   standalone: true,
   templateUrl: './perfil-publico-page.component.html',
   styleUrl: './perfil-publico-page.component.scss',
-  imports: [IconComponent],
+  imports: [IconComponent, CertificacionesPublicasPageComponent],
 })
 export class PerfilPublicoPageComponent {
   private readonly route = inject(ActivatedRoute);
@@ -33,13 +36,22 @@ export class PerfilPublicoPageComponent {
   protected estado = signal<'cargando' | 'exito' | 'error404' | 'error500'>('cargando');
   protected perfil = signal<PerfilPublicoDTO | null>(null);
   protected mensajeError = signal<string>('');
+  protected seccionActiva = signal<SeccionActiva>('certificaciones');
+
+  protected get slug(): string {
+    return this.route.snapshot.paramMap.get('slug') ?? '';
+  }
 
   constructor() {
     this.cargar();
   }
 
+  protected cambiarSeccion(seccion: SeccionActiva): void {
+    this.seccionActiva.set(seccion);
+  }
+
   protected cargar(): void {
-    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
+    const slug = this.slug;
     this.estado.set('cargando');
 
     this.perfilService.obtenerPerfil(slug).subscribe({
