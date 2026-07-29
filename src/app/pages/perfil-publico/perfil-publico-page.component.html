@@ -1,0 +1,24 @@
+<!-- Template placeholder — detailed layout in task 6.2 -->
+@switch (estado()) {
+  @case ('cargando') {
+    <div class="perfil-publico__loading">
+      <span class="spinner"></span>
+    </div>
+  }
+  @case ('exito') {
+    <div class="perfil-publico__content">
+      <p>{{ perfil()?.nombreEmpresa }}</p>
+    </div>
+  }
+  @case ('error404') {
+    <div class="perfil-publico__error-404">
+      <p>{{ mensajeError() }}</p>
+    </div>
+  }
+  @case ('error500') {
+    <div class="perfil-publico__error-500">
+      <p>{{ mensajeError() }}</p>
+      <button (click)="reintentar()">Reintentar</button>
+    </div>
+  }
+}
