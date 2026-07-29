@@ -2,15 +2,29 @@ import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
+import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
 import { PerfilPublicoDTO } from './perfil-publico.models';
 import { PerfilPublicoService } from './perfil-publico.service';
+
+interface NivelConfig {
+  clase: string;
+  icono: IconName;
+}
+
+const NIVEL_MAP: Record<string, NivelConfig> = {
+  'Sin nivel': { clase: 'nivel--sin-nivel', icono: 'leaf-off' },
+  Bronce: { clase: 'nivel--bronce', icono: 'medal-bronze' },
+  Plata: { clase: 'nivel--plata', icono: 'medal-silver' },
+  Oro: { clase: 'nivel--oro', icono: 'medal-gold' },
+  Platino: { clase: 'nivel--platino', icono: 'medal-platinum' },
+};
 
 @Component({
   selector: 'app-perfil-publico-page',
   standalone: true,
   templateUrl: './perfil-publico-page.component.html',
   styleUrl: './perfil-publico-page.component.scss',
-  imports: [],
+  imports: [IconComponent],
 })
 export class PerfilPublicoPageComponent {
   private readonly route = inject(ActivatedRoute);
@@ -49,5 +63,32 @@ export class PerfilPublicoPageComponent {
 
   protected reintentar(): void {
     this.cargar();
+  }
+
+  protected getNivelConfig(): NivelConfig {
+    const nivel = this.perfil()?.nivelEcologico ?? 'Sin nivel';
+    return NIVEL_MAP[nivel] ?? NIVEL_MAP['Sin nivel'];
+  }
+
+  protected formatFecha(fecha: string | null | undefined): string {
+    if (!fecha) return '';
+    const date = new Date(fecha);
+    return new Intl.DateTimeFormat('es-CR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    }).format(date);
+  }
+
+  protected formatNumero(value: number | undefined): string {
+    if (value === undefined || value === null) return '0';
+    return new Intl.NumberFormat('es-CR').format(value);
+  }
+
+  protected get esSinNivel(): boolean {
+    return this.perfil()?.nivelEcologico === 'Sin nivel';
   }
 }

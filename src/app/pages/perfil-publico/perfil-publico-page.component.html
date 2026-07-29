@@ -1,24 +1,87 @@
-<!-- Template placeholder — detailed layout in task 6.2 -->
 @switch (estado()) {
   @case ('cargando') {
-    <div class="perfil-publico__loading">
-      <span class="spinner"></span>
+    <div class="perfil-publico__loading" aria-live="polite" aria-label="Cargando perfil">
+      <span class="perfil-publico__spinner" aria-hidden="true"></span>
+      <p class="perfil-publico__loading-text">Cargando perfil…</p>
     </div>
   }
   @case ('exito') {
-    <div class="perfil-publico__content">
-      <p>{{ perfil()?.nombreEmpresa }}</p>
-    </div>
+    <article class="perfil-publico">
+      <header class="perfil-publico__header">
+        <div class="perfil-publico__logo-wrapper">
+          @if (perfil()?.logoUrl) {
+            <img
+              class="perfil-publico__logo"
+              [src]="perfil()!.logoUrl"
+              [alt]="'Logo de ' + perfil()!.nombreEmpresa"
+            />
+          } @else {
+            <div class="perfil-publico__logo-placeholder" aria-hidden="true">
+              <app-icon name="empresa" [size]="40" />
+            </div>
+          }
+        </div>
+
+        <div class="perfil-publico__info">
+          <h1 class="perfil-publico__nombre">{{ perfil()?.nombreEmpresa }}</h1>
+          <p class="perfil-publico__meta">
+            <span class="perfil-publico__sector">{{ perfil()?.sectorIndustrial }}</span>
+            <span class="perfil-publico__separador" aria-hidden="true">·</span>
+            <span class="perfil-publico__pais">{{ perfil()?.pais }}</span>
+          </p>
+        </div>
+      </header>
+
+      <section
+        class="perfil-publico__nivel"
+        [class.nivel--sin-nivel]="perfil()?.nivelEcologico === 'Sin nivel'"
+        [class.nivel--bronce]="perfil()?.nivelEcologico === 'Bronce'"
+        [class.nivel--plata]="perfil()?.nivelEcologico === 'Plata'"
+        [class.nivel--oro]="perfil()?.nivelEcologico === 'Oro'"
+        [class.nivel--platino]="perfil()?.nivelEcologico === 'Platino'"
+        aria-label="Nivel ecológico"
+      >
+        <div class="perfil-publico__nivel-badge">
+          <app-icon [name]="getNivelConfig().icono" [size]="24" aria-hidden="true" />
+          <span class="perfil-publico__nivel-label">{{ perfil()?.nivelEcologico }}</span>
+        </div>
+
+        @if (perfil()?.fechaActualizacionNivel) {
+          <p class="perfil-publico__nivel-fecha">
+            Actualizado: {{ formatFecha(perfil()!.fechaActualizacionNivel) }}
+          </p>
+        }
+
+        @if (esSinNivel) {
+          <p class="perfil-publico__nivel-mensaje">
+            Esta empresa aún no cuenta con certificaciones vigentes.
+          </p>
+        }
+      </section>
+
+      <section class="perfil-publico__resumen" aria-label="Resumen de reputación">
+        <div class="perfil-publico__stat">
+          <span class="perfil-publico__stat-value">{{ formatNumero(perfil()?.certificacionesVigentes) }}</span>
+          <span class="perfil-publico__stat-label">Certificaciones vigentes</span>
+        </div>
+        <div class="perfil-publico__stat">
+          <span class="perfil-publico__stat-value">{{ formatNumero(perfil()?.insigniasActivas) }}</span>
+          <span class="perfil-publico__stat-label">Insignias activas</span>
+        </div>
+      </section>
+    </article>
   }
   @case ('error404') {
-    <div class="perfil-publico__error-404">
-      <p>{{ mensajeError() }}</p>
+    <div class="perfil-publico__error perfil-publico__error--404" role="alert">
+      <app-icon name="page-not-found" [size]="64" aria-hidden="true" />
+      <p class="perfil-publico__error-msg">{{ mensajeError() }}</p>
     </div>
   }
   @case ('error500') {
-    <div class="perfil-publico__error-500">
-      <p>{{ mensajeError() }}</p>
-      <button (click)="reintentar()">Reintentar</button>
+    <div class="perfil-publico__error perfil-publico__error--500" role="alert">
+      <app-icon name="error" [size]="64" aria-hidden="true" />
+      <p class="perfil-publico__error-msg">{{ mensajeError() }}</p>
+      <button class="perfil-publico__reintentar" (click)="reintentar()">Reintentar</button>
     </div>
   }
 }
