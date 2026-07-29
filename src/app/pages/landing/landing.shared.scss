@@ -1,10 +1,4 @@
 app-landing-page {
-  & *,
-  & *::before,
-  & *::after {
-    box-sizing: border-box;
-  }
-
   .wrap {
     max-width: 1440px;
     margin: 0 auto;
@@ -102,7 +96,7 @@ app-landing-page {
     display: inline-flex;
     align-items: center;
     gap: 9px;
-    margin-bottom: 16px;
+    margin-bottom: var(--ch-space-4);
     background: var(--green-soft);
     padding: 6px 14px;
     border-radius: 14px;
@@ -119,7 +113,7 @@ app-landing-page {
     color: var(--navy);
     letter-spacing: -0.025em;
     line-height: 1.12;
-    margin-bottom: 16px;
+    margin-bottom: var(--ch-space-4);
   }
   .sec-title.on-dark {
     color: #fff;

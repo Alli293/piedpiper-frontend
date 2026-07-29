@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 import { LogoComponent } from '../../shared/components/logo/logo.component';
 import { LandingComoFuncionaComponent } from './sections/landing-como-funciona.component';
 import { LandingCtaComponent } from './sections/landing-cta.component';
@@ -11,6 +12,7 @@ import { LandingParaQuienComponent } from './sections/landing-para-quien.compone
   selector: 'app-landing-page',
   imports: [
     RouterLink,
+    IconComponent,
     LogoComponent,
     LandingParaQuienComponent,
     LandingComoFuncionaComponent,

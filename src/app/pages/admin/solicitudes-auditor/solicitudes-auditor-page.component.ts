@@ -1,15 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import {
-  Component,
-  DestroyRef,
-  ElementRef,
-  computed,
-  effect,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormField, form, required, schema, submit, validate } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
@@ -17,6 +8,7 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 import { RadioGroupFieldComponent } from '../../../shared/components/inputs/radio-group-field/radio-group-field.component';
 import { SelectOption } from '../../../shared/components/inputs/select-input/select-input.component';
 import { TextareaComponent } from '../../../shared/components/inputs/textarea/textarea.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { ToastService } from '../../../shared/services/toast.service';
 import { fieldError } from '../../../shared/utils/form-field.utils';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
@@ -38,7 +30,14 @@ const MOTIVO_MAX = 500;
 
 @Component({
   selector: 'app-solicitudes-auditor-page',
-  imports: [ButtonComponent, RadioGroupFieldComponent, TextareaComponent, DatePipe, FormField],
+  imports: [
+    ButtonComponent,
+    ModalComponent,
+    RadioGroupFieldComponent,
+    TextareaComponent,
+    DatePipe,
+    FormField,
+  ],
   templateUrl: './solicitudes-auditor-page.component.html',
   styleUrl: './solicitudes-auditor-page.component.scss',
 })
@@ -89,13 +88,8 @@ export class SolicitudesAuditorPageComponent {
     () => this.decisionForm().valid() && !this.enviando()
   );
 
-  private readonly modal = viewChild<ElementRef<HTMLElement>>('modalRevision');
-
   constructor() {
     this.cargar(0);
-    effect(() => {
-      this.modal()?.nativeElement.focus();
-    });
   }
 
   protected cargar(numeroPagina: number): void {
@@ -129,17 +123,6 @@ export class SolicitudesAuditorPageComponent {
   protected cerrarRevision(): void {
     if (!this.enviando()) {
       this.solicitudEnRevision.set(null);
-    }
-  }
-
-  protected alPresionarTeclaModal(event: KeyboardEvent): void {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      this.cerrarRevision();
-      return;
-    }
-    if (event.key === 'Tab') {
-      this.atraparFoco(event);
     }
   }
 
@@ -187,28 +170,6 @@ export class SolicitudesAuditorPageComponent {
       },
       onInvalid: (field) => field().markAsTouched(),
     });
-  }
-
-  private atraparFoco(event: KeyboardEvent): void {
-    const modal = this.modal()?.nativeElement;
-    if (!modal) {
-      return;
-    }
-    const focusables = modal.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    if (focusables.length === 0) {
-      return;
-    }
-    const primero = focusables[0];
-    const ultimo = focusables[focusables.length - 1];
-    if (event.shiftKey && document.activeElement === primero) {
-      event.preventDefault();
-      ultimo.focus();
-    } else if (!event.shiftKey && document.activeElement === ultimo) {
-      event.preventDefault();
-      primero.focus();
-    }
   }
 
   private paginaTrasResolver(): number {
