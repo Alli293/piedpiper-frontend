@@ -1,3 +1,14 @@
+export interface PerfilPublicoDTO {
+  nombreEmpresa: string;
+  logoUrl: string | null;
+  sectorIndustrial: string;
+  pais: string;
+  nivelEcologico: string;
+  fechaActualizacionNivel: string | null; // ISO 8601 UTC
+  certificacionesVigentes: number;
+  insigniasActivas: number;
+}
+
 export interface CertificacionPublica {
   id: string;
   tipo: string;
