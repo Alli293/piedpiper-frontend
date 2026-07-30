@@ -104,56 +104,6 @@
       </article>
     </section>
 
-    <section class="annual-limit-panel dashboard-badges" aria-label="Insignias empresariales">
-      <header class="dashboard-badges__header">
-        <div>
-          <app-heading level="h2" text="Insignias empresariales" />
-          <p>Reconocimientos automáticos por certificaciones activas y requisitos verificados.</p>
-        </div>
-        <app-badge variant="success" icon="success">Verificables</app-badge>
-      </header>
-
-      @if (cargandoInsignias()) {
-        <p class="dashboard-badges__state">Cargando insignias...</p>
-      } @else if (insigniasError(); as error) {
-        <p class="dashboard-badges__state dashboard-badges__state--error" role="alert">
-          {{ error }}
-        </p>
-      } @else if (insigniasVisibles().length > 0) {
-        <ul class="dashboard-badges__grid">
-          @for (
-            insignia of insigniasVisibles();
-            track insignia.idInsignia + '-' + insignia.nivelInsignia
-          ) {
-            <li class="dashboard-badges__item">
-              <span
-                class="dashboard-badges__icon"
-                [class]="'dashboard-badges__icon--' + insignia.nivelInsignia"
-                aria-hidden="true"
-              >
-                <app-icon name="insignias" [size]="18" />
-              </span>
-              <div class="dashboard-badges__content">
-                <div class="dashboard-badges__title-row">
-                  <strong>{{ insignia.nombre }}</strong>
-                  <app-badge [variant]="nivelInsigniaVariant(insignia.nivelInsignia)">
-                    {{ nivelInsigniaLabel(insignia.nivelInsignia) }}
-                  </app-badge>
-                </div>
-                <p>{{ insignia.descripcion }}</p>
-                <span> Obtenida el {{ insignia.fechaObtencion | date: 'dd/MM/yyyy' }} </span>
-              </div>
-            </li>
-          }
-        </ul>
-      } @else {
-        <div class="dashboard-badges__empty">
-          <app-icon name="insignias" [size]="24" />
-          <p>Aún no hay insignias empresariales activas.</p>
-        </div>
-      }
-    </section>
-
     <div class="dashboard-page__grid">
       <!-- PP-41: Evolución mensual de emisiones -->
       <article class="annual-limit-panel evolucion-panel">
