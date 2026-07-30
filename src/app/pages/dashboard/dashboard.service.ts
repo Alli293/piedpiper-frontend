@@ -3,11 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ComparacionEmisionesResponse } from '../emissions/models/emision.model';
-import {
-  InsigniaEmpresa,
-  PeriodoDashboard,
-  ResumenHuellaDashboardResponse,
-} from './dashboard.model';
+import { PeriodoDashboard, ResumenHuellaDashboardResponse } from './dashboard.model';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
@@ -30,10 +26,6 @@ export class DashboardService {
     return this.http.get<ComparacionEmisionesResponse>(`${this.emisionesBaseUrl}/comparacion`, {
       params,
     });
-  }
-
-  listarInsignias(): Observable<InsigniaEmpresa[]> {
-    return this.http.get<InsigniaEmpresa[]>(`${this.dashboardBaseUrl}/insignias`);
   }
 
   exportarReportePdf(anio: number, mes?: number): Observable<Blob> {

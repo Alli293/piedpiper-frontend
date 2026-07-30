@@ -47,4 +47,25 @@ describe('EmpresaService', () => {
 
     expect(recibida).toEqual(respuesta);
   });
+
+  it('lista las insignias empresariales de la cuenta autenticada', () => {
+    const respuestaInsignias = [
+      {
+        idInsignia: 1,
+        nivelInsignia: 'bronce' as const,
+        nombre: 'Carbono Neutral',
+        descripcion: 'Primera insignia empresarial.',
+        fechaObtencion: '2026-01-15T00:00:00Z',
+      },
+    ];
+    let recibida;
+
+    service.listarInsignias().subscribe((r) => (recibida = r));
+
+    const req = httpMock.expectOne(`${base}/insignias`);
+    expect(req.request.method).toBe('GET');
+    req.flush(respuestaInsignias);
+
+    expect(recibida).toEqual(respuestaInsignias);
+  });
 });

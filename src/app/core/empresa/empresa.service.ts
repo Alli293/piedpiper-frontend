@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import {
   ConfiguracionInicialEmpresaRequest,
   ConfiguracionInicialEmpresaResponse,
+  InsigniaEmpresa,
 } from './empresa.models';
 
 @Injectable({ providedIn: 'root' })
@@ -19,5 +20,9 @@ export class EmpresaService {
       `${this.baseUrl}/configuracion-inicial`,
       datos
     );
+  }
+
+  listarInsignias(): Observable<InsigniaEmpresa[]> {
+    return this.http.get<InsigniaEmpresa[]>(`${this.baseUrl}/insignias`);
   }
 }
