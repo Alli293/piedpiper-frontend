@@ -6,6 +6,7 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { InsigniasEmpresaListComponent } from '../../../shared/components/insignias-empresa/insignias-empresa-list.component';
+import { StateHeaderComponent } from '../../../shared/components/state-header/state-header.component';
 import { StateLayoutComponent } from '../../../shared/layouts/state-layout/state-layout.component';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import { InsigniaEmpresa } from '../perfil-publico.models';
@@ -21,6 +22,7 @@ const MENSAJE_ERROR = 'No fue posible cargar las insignias en este momento.';
     HeadingComponent,
     IconComponent,
     InsigniasEmpresaListComponent,
+    StateHeaderComponent,
     StateLayoutComponent,
   ],
   templateUrl: './insignias-publicas-page.component.html',

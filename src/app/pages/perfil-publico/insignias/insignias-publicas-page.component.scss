@@ -1,5 +1,5 @@
 .ch-insignias-publicas {
-  min-height: 100vh;
+  min-height: calc(100vh - 60px);
   padding: var(--ch-space-6);
   background: var(--ch-bg-main);
 }
