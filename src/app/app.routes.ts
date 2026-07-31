@@ -161,6 +161,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'empresa/certificaciones',
+    canActivate: [guardEmpresa],
+    loadComponent: () =>
+      import('./pages/certificaciones/certificaciones-page.component').then(
+        (m) => m.CertificacionesPageComponent
+      ),
+  },
+  {
     path: 'empresa/limites',
     canActivate: [guardEmpresa],
     loadComponent: () =>

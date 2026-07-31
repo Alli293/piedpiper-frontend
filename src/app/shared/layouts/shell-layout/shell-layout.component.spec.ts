@@ -116,15 +116,16 @@ describe('ShellLayoutComponent', () => {
     );
   }
 
-  it('renderiza los 4 ítems del menú de sidebar-nav, en orden', async () => {
+  it('renderiza los 5 ítems del menú de sidebar-nav, en orden', async () => {
     const fixture = await createFixture({ activeId: 'dashboard' });
     const root = fixture.nativeElement as HTMLElement;
 
     const items = root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item');
-    expect(items.length).toBe(4);
+    expect(items.length).toBe(5);
     expect(menuLabels(root)).toEqual([
       'Dashboard',
       'Mis Emisiones',
+      'Certificaciones',
       'Madurez ambiental',
       'Colaboradores',
     ]);
@@ -136,8 +137,13 @@ describe('ShellLayoutComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     const items = root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item');
-    expect(items.length).toBe(3);
-    expect(menuLabels(root)).toEqual(['Dashboard', 'Mis Emisiones', 'Madurez ambiental']);
+    expect(items.length).toBe(4);
+    expect(menuLabels(root)).toEqual([
+      'Dashboard',
+      'Mis Emisiones',
+      'Certificaciones',
+      'Madurez ambiental',
+    ]);
   });
 
   it('marca como activo el ítem indicado por activeId y solo ese', async () => {
@@ -157,7 +163,7 @@ describe('ShellLayoutComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item--active').length).toBe(0);
-    expect(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item').length).toBe(4);
+    expect(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item').length).toBe(5);
   });
 
   it('renderiza navegación EcoRuta cuando recibe la variante ecoruta', async () => {
@@ -270,6 +276,14 @@ describe('ShellLayoutComponent', () => {
     (fixture.componentInstance as any).onMenuItem('benchmark');
 
     expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/empresa/benchmark');
+  });
+
+  it('navega a certificaciones de empresa', async () => {
+    const fixture = await createFixture({ activeId: 'dashboard' });
+
+    (fixture.componentInstance as any).onMenuItem('certificaciones');
+
+    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/empresa/certificaciones');
   });
 
   it('navega al listado de emisiones de empresa al abrir mis emisiones', async () => {

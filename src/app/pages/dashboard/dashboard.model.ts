@@ -6,3 +6,10 @@ export interface ResumenHuellaDashboardResponse {
   readonly variacionPorcentual: number | null;
   readonly tieneDatos: boolean;
 }
+
+/** Conteos del bloque "Estado de certificaciones" (PP-74). Mutuamente excluyentes. */
+export interface ResumenCertificacionesDashboardResponse {
+  readonly activas: number;
+  readonly proximasAVencer: number;
+  readonly vencidas: number;
+}
