@@ -126,7 +126,10 @@
                     <app-icon name="insignias" [size]="13" aria-hidden="true" />
                     Insignia
                   </dt>
-                  <dd>{{ insignia.nombre }}</dd>
+                  <dd>
+                    <strong>{{ insignia.nombre }}</strong>
+                    <span>Nivel {{ nivelLabel(insignia.nivelInsignia) }}</span>
+                  </dd>
                 </div>
                 <div>
                   <dt>
@@ -145,6 +148,13 @@
                   </dt>
                   <dd>{{ insignia.fechaObtencion | date: 'dd/MM/yyyy' }}</dd>
                 </div>
+                <div>
+                  <dt>
+                    <app-icon name="success" [size]="13" aria-hidden="true" />
+                    Criterios
+                  </dt>
+                  <dd>{{ criterios(insignia) }}</dd>
+                </div>
               </dl>
 
               <section
@@ -156,14 +166,36 @@
                     <app-icon name="success" [size]="18" />
                   </span>
                   <div>
-                    <strong>Reconocimiento verificable</strong>
-                    <small>Requisitos validados por CarbonHub</small>
+                    <strong>Credencial verificable</strong>
+                    <small>Estandar OpenBadges 3.0</small>
                   </div>
                 </div>
                 <p>
                   Esta insignia fue otorgada automáticamente porque la empresa cumplió los
                   requisitos configurados en la plataforma.
                 </p>
+                @if (insignia.urlVerificacionPublica) {
+                  <div class="ch-insignias-empresa__acciones">
+                    @if (accionesPrivadas() && insignia.idInsigniaEmpresa) {
+                      <app-button variant="secondary" (click)="descargarJsonLd.emit(insignia)">
+                        <app-icon name="descargar" [size]="16" />
+                        <span>Descargar JSON-LD</span>
+                      </app-button>
+                    }
+
+                    @if (accionesPrivadas() && insignia.urlLinkedIn) {
+                      <app-button variant="secondary" (click)="compartirLinkedIn.emit(insignia)">
+                        <app-icon name="perfil-publico" [size]="16" />
+                        <span>Compartir en LinkedIn</span>
+                      </app-button>
+                    }
+
+                    <app-button variant="primary" (click)="verificarOpenBadges.emit(insignia)">
+                      <app-icon name="ver" [size]="16" />
+                      <span>Verificar con OpenBadges 3.0</span>
+                    </app-button>
+                  </div>
+                }
                 <small class="ch-insignias-empresa__verificacion-nota">
                   Detección automática - niveles progresivos
                 </small>

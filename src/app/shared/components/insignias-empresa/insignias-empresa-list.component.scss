@@ -424,6 +424,15 @@
   line-height: 1.55;
 }
 
+.ch-insignias-empresa__acciones {
+  display: grid;
+  gap: var(--ch-space-2);
+}
+
+.ch-insignias-empresa__acciones app-button {
+  width: 100%;
+}
+
 .ch-insignias-empresa__verificacion-nota {
   color: var(--ch-text-secondary);
   text-transform: none;

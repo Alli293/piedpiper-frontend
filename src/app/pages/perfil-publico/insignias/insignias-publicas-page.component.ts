@@ -55,6 +55,12 @@ export class InsigniasPublicasPageComponent implements OnInit {
     this.location.back();
   }
 
+  protected verificarOpenBadges(insignia: InsigniaEmpresa): void {
+    if (insignia.urlVerificacionPublica) {
+      window.open(insignia.urlVerificacionPublica, '_blank', 'noopener');
+    }
+  }
+
   private async cargarInsignias(): Promise<void> {
     const requestId = ++this.cargaRequestId;
     this.cargando.set(true);

@@ -42,6 +42,7 @@
         titulo="Insignias activas"
         descripcion="Reconocimientos vigentes emitidos como credenciales verificables. Cualquier persona puede comprobar su autenticidad de forma independiente."
         [insignias]="insignias()"
+        (verificarOpenBadges)="verificarOpenBadges($event)"
       />
     </div>
   </main>

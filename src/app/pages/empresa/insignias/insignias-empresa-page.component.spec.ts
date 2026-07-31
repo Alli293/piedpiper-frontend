@@ -13,11 +13,18 @@ import { ToastService } from '../../../shared/services/toast.service';
 import { InsigniasEmpresaPageComponent } from './insignias-empresa-page.component';
 
 const INSIGNIA = {
+  idInsigniaEmpresa: '11111111-1111-1111-1111-111111111111',
   idInsignia: 1,
   nivelInsignia: 'bronce' as const,
   nombre: 'Carbono Neutral',
   descripcion: 'Insignia activa verificable.',
   fechaObtencion: '2026-01-15T00:00:00Z',
+  criteriosObtencion: 'Debe mantener certificaciones activas.',
+  emisor: 'CarbonHub',
+  receptor: 'Cafe del Valle S.A.',
+  urlVerificacionPublica:
+    'https://carbonhub.test/api/insignias/11111111-1111-1111-1111-111111111111/verificacion',
+  urlLinkedIn: 'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME',
 };
 
 const PERFIL = {
@@ -28,11 +35,19 @@ const PERFIL = {
 } as PerfilInicial;
 
 describe('InsigniasEmpresaPageComponent', () => {
-  let empresaService: { listarInsignias: ReturnType<typeof vi.fn> };
+  let empresaService: {
+    listarInsignias: ReturnType<typeof vi.fn>;
+    descargarInsigniaJsonLd: ReturnType<typeof vi.fn>;
+  };
   let toastService: { error: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    empresaService = { listarInsignias: vi.fn().mockReturnValue(of([INSIGNIA])) };
+    empresaService = {
+      listarInsignias: vi.fn().mockReturnValue(of([INSIGNIA])),
+      descargarInsigniaJsonLd: vi.fn().mockReturnValue(
+        of(new Blob(['{}'], { type: 'application/ld+json' }))
+      ),
+    };
     toastService = { error: vi.fn() };
 
     await TestBed.configureTestingModule({
@@ -95,5 +110,54 @@ describe('InsigniasEmpresaPageComponent', () => {
 
     expect(root.textContent).toContain('No se pudieron cargar las insignias empresariales.');
     expect(toastService.error).toHaveBeenCalledWith('No tienes permiso para ver estas insignias.');
+  });
+
+  it('descarga el JSON-LD desde el boton de detalle', async () => {
+    const fixture = await crear();
+    const root = fixture.nativeElement as HTMLElement;
+    const createObjectURL = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:insignia');
+    const revokeObjectURL = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+    const click = vi.fn();
+    const createElement = vi.spyOn(document, 'createElement').mockReturnValue({
+      href: '',
+      download: '',
+      click,
+    } as unknown as HTMLAnchorElement);
+    const boton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find((b) =>
+      b.textContent?.includes('Descargar JSON-LD')
+    );
+
+    boton?.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(empresaService.descargarInsigniaJsonLd).toHaveBeenCalledWith(
+      INSIGNIA.idInsigniaEmpresa
+    );
+    expect(createObjectURL).toHaveBeenCalled();
+    expect(click).toHaveBeenCalled();
+
+    createElement.mockRestore();
+    createObjectURL.mockRestore();
+    revokeObjectURL.mockRestore();
+  });
+
+  it('abre LinkedIn y la verificacion OpenBadges en nueva pestana', async () => {
+    const open = vi.spyOn(window, 'open').mockImplementation(() => null);
+    const fixture = await crear();
+    const root = fixture.nativeElement as HTMLElement;
+    const botones = Array.from(root.querySelectorAll<HTMLButtonElement>('button'));
+
+    botones.find((b) => b.textContent?.includes('Compartir en LinkedIn'))?.click();
+    botones.find((b) => b.textContent?.includes('Verificar con OpenBadges 3.0'))?.click();
+
+    expect(open).toHaveBeenCalledWith(INSIGNIA.urlLinkedIn, '_blank', 'noopener');
+    expect(open).toHaveBeenCalledWith(
+      INSIGNIA.urlVerificacionPublica,
+      '_blank',
+      'noopener'
+    );
+
+    open.mockRestore();
   });
 });
