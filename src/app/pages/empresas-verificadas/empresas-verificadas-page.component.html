@@ -62,6 +62,13 @@
     }
   </section>
 
+  <!-- Error message -->
+  @if (error()) {
+    <p class="ch-empresas-verificadas__error-msg" role="alert">
+      {{ error() }}
+    </p>
+  }
+
   <!-- Results grid -->
   @if (resultados().length > 0) {
     <section class="ch-empresas-verificadas__results" aria-label="Resultados de búsqueda">

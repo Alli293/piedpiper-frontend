@@ -342,6 +342,19 @@
   padding: 0 var(--ch-space-4);
 }
 
+// === Error message ===
+.ch-empresas-verificadas__error-msg {
+  text-align: center;
+  font-family: var(--ch-font-body);
+  font-size: 0.875rem;
+  color: var(--ch-warning-dark);
+  background: var(--ch-warning-bg);
+  margin: var(--ch-space-4) auto;
+  padding: var(--ch-space-3) var(--ch-space-4);
+  border-radius: var(--ch-radius-md);
+  max-width: 640px;
+}
+
 // === Intro section ===
 .ch-empresas-verificadas__intro {
   max-width: 1080px;
