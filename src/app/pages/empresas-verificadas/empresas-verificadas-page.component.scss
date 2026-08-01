@@ -149,9 +149,10 @@
 
 // === Search ===
 .ch-empresas-verificadas__search {
-  max-width: 640px;
+  width: 100%;
+  max-width: 720px;
   margin: calc(-1 * var(--ch-space-5)) auto 0;
-  padding: 0 var(--ch-space-4);
+  padding: 0 var(--ch-space-6);
   position: relative;
   z-index: 1;
 }
