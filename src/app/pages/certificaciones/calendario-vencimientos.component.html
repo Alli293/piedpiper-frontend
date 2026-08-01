@@ -1,0 +1,107 @@
+<article class="ch-calendario" aria-label="Calendario de vencimientos">
+  <header class="ch-calendario__header">
+    <span class="ch-calendario__icon">
+      <app-icon name="calendario" [size]="18" />
+    </span>
+    <app-heading level="h3" text="Calendario de vencimientos" />
+  </header>
+
+  @if (loading()) {
+    <p class="ch-calendario__loading">Cargando calendario...</p>
+  } @else if (error()) {
+    <p class="ch-calendario__error" role="alert">{{ errorMensaje() }}</p>
+  } @else {
+    <div class="ch-calendario__nav">
+      <app-heading level="h4" [text]="tituloMes()" />
+      <div class="ch-calendario__nav-buttons">
+        <button
+          type="button"
+          class="ch-calendario__nav-button"
+          aria-label="Mes anterior"
+          (click)="mesAnterior()"
+        >
+          ‹
+        </button>
+        <button
+          type="button"
+          class="ch-calendario__nav-button"
+          aria-label="Mes siguiente"
+          (click)="mesSiguiente()"
+        >
+          ›
+        </button>
+      </div>
+    </div>
+
+    <div class="ch-calendario__grid" role="grid">
+      <div class="ch-calendario__weekday-row" role="row">
+        @for (letra of diasSemana; track $index) {
+          <span class="ch-calendario__weekday" role="columnheader">{{ letra }}</span>
+        }
+      </div>
+
+      @for (semana of semanas(); track $index) {
+        <div class="ch-calendario__week-row" role="row">
+          @for (dia of semana; track dia.fecha) {
+            <button
+              type="button"
+              class="ch-calendario__day"
+              [class.ch-calendario__day--fuera-de-mes]="dia.fueraDeMes"
+              [class.ch-calendario__day--hoy]="dia.esHoy"
+              [class.ch-calendario__day--con-vencimiento]="dia.vencimientos.length > 0"
+              [class.ch-calendario__day--seleccionado]="fechaSeleccionada() === dia.fecha"
+              [class.ch-calendario__day--urgencia-90]="urgenciaDelDia(dia) === '90_dias'"
+              [class.ch-calendario__day--urgencia-30]="urgenciaDelDia(dia) === '30_dias'"
+              [class.ch-calendario__day--urgencia-7]="urgenciaDelDia(dia) === '7_dias'"
+              [disabled]="dia.fueraDeMes || dia.vencimientos.length === 0"
+              [attr.aria-pressed]="
+                dia.vencimientos.length > 0 ? fechaSeleccionada() === dia.fecha : null
+              "
+              [attr.aria-label]="
+                dia.vencimientos.length > 0
+                  ? dia.dia + ': ' + dia.vencimientos.length + ' certificación(es) vencen este día'
+                  : null
+              "
+              (click)="seleccionarDia(dia)"
+            >
+              <span class="ch-calendario__day-number">{{ dia.dia }}</span>
+              @if (dia.vencimientos.length > 0) {
+                <span class="ch-calendario__day-dot" aria-hidden="true"></span>
+              }
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    @if (diaSeleccionado(); as dia) {
+      <div
+        class="ch-calendario__detalle"
+        role="region"
+        [attr.aria-label]="'Vencimientos del ' + fechaLegible(dia.fecha)"
+      >
+        <p class="ch-calendario__detalle-fecha">{{ fechaLegible(dia.fecha) }}</p>
+        <ul class="ch-calendario__detalle-lista">
+          @for (vencimiento of dia.vencimientos; track vencimiento.id) {
+            <li class="ch-calendario__detalle-item">{{ vencimiento.nombre }}</li>
+          }
+        </ul>
+      </div>
+    }
+
+    <div class="ch-calendario__leyenda">
+      <span class="ch-calendario__leyenda-item">
+        <span class="ch-calendario__leyenda-dot ch-calendario__leyenda-dot--90"></span>
+        90 días
+      </span>
+      <span class="ch-calendario__leyenda-item">
+        <span class="ch-calendario__leyenda-dot ch-calendario__leyenda-dot--30"></span>
+        30 días
+      </span>
+      <span class="ch-calendario__leyenda-item">
+        <span class="ch-calendario__leyenda-dot ch-calendario__leyenda-dot--7"></span>
+        7 días o menos
+      </span>
+    </div>
+  }
+</article>

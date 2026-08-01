@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ComparacionEmisionesResponse } from '../emissions/models/emision.model';
 import {
+  CalendarioVencimientosResponse,
   PeriodoDashboard,
   ResumenCertificacionesDashboardResponse,
   ResumenHuellaDashboardResponse,
@@ -30,6 +31,14 @@ export class DashboardService {
     return this.http.get<ResumenCertificacionesDashboardResponse>(
       `${this.dashboardBaseUrl}/certificaciones`
     );
+  }
+
+  /** Calendario de vencimientos (PP-77). `mes` en formato 'YYYY-MM'. */
+  obtenerCalendarioVencimientos(mes: string): Observable<CalendarioVencimientosResponse> {
+    const params = new HttpParams().set('mes', mes);
+    return this.http.get<CalendarioVencimientosResponse>(`${this.dashboardBaseUrl}/calendario`, {
+      params,
+    });
   }
 
   obtenerComparacion(anio: number): Observable<ComparacionEmisionesResponse> {
