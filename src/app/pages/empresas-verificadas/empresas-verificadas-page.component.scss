@@ -2,8 +2,10 @@
 
 // === Header ===
 .ch-empresas-verificadas__header {
-  background: var(--ch-dark);
+  background: transparent;
   padding: 0 var(--ch-space-4);
+  position: relative;
+  z-index: 2;
 }
 
 .ch-empresas-verificadas__header-wrap {
@@ -92,13 +94,30 @@
 }
 
 .ch-empresas-verificadas {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background: var(--ch-bg-main);
 }
 
+// === Hero Area (header + hero combined gradient) ===
+.ch-empresas-verificadas__hero-area {
+  background:
+    radial-gradient(
+      900px 600px at 78% 18%,
+      color-mix(in srgb, var(--ch-green) 42%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      680px 520px at 8% 92%,
+      color-mix(in srgb, var(--ch-blue-mid) 16%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(165deg, var(--ch-dark) 0%, var(--ch-green-dark) 100%);
+}
+
 // === Hero ===
 .ch-empresas-verificadas__hero {
-  background: var(--ch-green-dark);
   padding: var(--ch-space-10) var(--ch-space-4) var(--ch-space-8);
   text-align: center;
 }
@@ -369,7 +388,7 @@
 // === Footer ===
 .ch-empresas-verificadas__footer {
   background: var(--ch-dark);
-  margin-top: var(--ch-space-10);
+  margin-top: auto;
   padding: var(--ch-space-10) var(--ch-space-4) var(--ch-space-6);
 }
 

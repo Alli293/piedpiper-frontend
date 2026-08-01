@@ -1,41 +1,44 @@
 <div class="ch-empresas-verificadas">
-  <!-- Header nav (same as landing) -->
-  <header class="ch-empresas-verificadas__header">
-    <div class="ch-empresas-verificadas__header-wrap">
-      <a class="ch-empresas-verificadas__brand" routerLink="/" aria-label="CarbonHub — inicio">
-        <app-logo variant="on-dark" [iconSize]="28" textSize="17px" gap="9px" />
-      </a>
-      <nav class="ch-empresas-verificadas__header-nav" aria-label="Secciones">
-        <a class="ch-empresas-verificadas__header-link" routerLink="/">Para empresas</a>
-        <a class="ch-empresas-verificadas__header-link" routerLink="/">Auditores</a>
-        <a class="ch-empresas-verificadas__header-link" routerLink="/">EcoRuta</a>
-        <a
-          class="ch-empresas-verificadas__header-link ch-empresas-verificadas__header-link--active"
-          routerLink="/empresas-verificadas"
-          >Empresas verificadas</a
-        >
-      </nav>
-      <div class="ch-empresas-verificadas__header-right">
-        <a class="ch-empresas-verificadas__header-signin" routerLink="/login">
-          <app-icon name="login" [size]="16" /> Iniciar sesión
+  <!-- Header + Hero with gradient background -->
+  <div class="ch-empresas-verificadas__hero-area">
+    <!-- Header nav -->
+    <header class="ch-empresas-verificadas__header">
+      <div class="ch-empresas-verificadas__header-wrap">
+        <a class="ch-empresas-verificadas__brand" routerLink="/" aria-label="CarbonHub — inicio">
+          <app-logo variant="on-dark" [iconSize]="28" textSize="17px" gap="9px" />
         </a>
-        <a class="ch-empresas-verificadas__header-register" routerLink="/registro/empresa">
-          <app-icon name="empresa" [size]="16" /> Registrar mi empresa
-        </a>
+        <nav class="ch-empresas-verificadas__header-nav" aria-label="Secciones">
+          <a class="ch-empresas-verificadas__header-link" routerLink="/">Para empresas</a>
+          <a class="ch-empresas-verificadas__header-link" routerLink="/">Auditores</a>
+          <a class="ch-empresas-verificadas__header-link" routerLink="/">EcoRuta</a>
+          <a
+            class="ch-empresas-verificadas__header-link ch-empresas-verificadas__header-link--active"
+            routerLink="/empresas-verificadas"
+            >Empresas verificadas</a
+          >
+        </nav>
+        <div class="ch-empresas-verificadas__header-right">
+          <a class="ch-empresas-verificadas__header-signin" routerLink="/login">
+            <app-icon name="login" [size]="16" /> Iniciar sesión
+          </a>
+          <a class="ch-empresas-verificadas__header-register" routerLink="/registro/empresa">
+            <app-icon name="empresa" [size]="16" /> Registrar mi empresa
+          </a>
+        </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- Hero section -->
-  <section class="ch-empresas-verificadas__hero">
-    <div class="ch-empresas-verificadas__hero-content">
-      <h1 class="ch-empresas-verificadas__title">Empresas verificadas</h1>
-      <p class="ch-empresas-verificadas__subtitle">
-        Explorá el catálogo de empresas con reputación ecológica verificada en CarbonHub. Buscá por
-        nombre y conocé su nivel de compromiso ambiental.
-      </p>
-    </div>
-  </section>
+    <!-- Hero section -->
+    <section class="ch-empresas-verificadas__hero">
+      <div class="ch-empresas-verificadas__hero-content">
+        <h1 class="ch-empresas-verificadas__title">Empresas verificadas</h1>
+        <p class="ch-empresas-verificadas__subtitle">
+          Explorá el catálogo de empresas con reputación ecológica verificada en CarbonHub. Buscá
+          por nombre y conocé su nivel de compromiso ambiental.
+        </p>
+      </div>
+    </section>
+  </div>
 
   <!-- Search section -->
   <section class="ch-empresas-verificadas__search" aria-label="Búsqueda de empresas">
