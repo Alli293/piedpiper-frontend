@@ -81,6 +81,33 @@ describe('FileDropComponent', () => {
     expect(mensajeError()).toBe('El archivo no puede superar 15 MB.');
   });
 
+  it('muestra todos los motivos cuando un lote se rechaza por razones distintas', () => {
+    const noPdf = new File(['x'], 'notas.txt', { type: 'text/plain' });
+
+    soltar(noPdf, crearPdf('grande.pdf', 16 * 1024 * 1024));
+
+    expect(nombresListados()).toEqual([]);
+    expect(mensajeError()).toContain('Solo se aceptan archivos en formato PDF.');
+    expect(mensajeError()).toContain('El archivo no puede superar 15 MB.');
+  });
+
+  it('no repite el mismo motivo aunque varios archivos fallen igual', () => {
+    soltar(crearPdf('a.pdf', 16 * 1024 * 1024), crearPdf('b.pdf', 20 * 1024 * 1024));
+
+    expect(mensajeError()).toBe('El archivo no puede superar 15 MB.');
+  });
+
+  it('la clave de seguimiento no depende de la posicion en la lista', () => {
+    soltar(crearPdf('primero.pdf'), crearPdf('segundo.pdf'), crearPdf('tercero.pdf'));
+    const clavesAntes = fixture.componentInstance['vistas']().map((vista) => vista.clave);
+
+    raiz().querySelector<HTMLButtonElement>('button[aria-label="Eliminar primero.pdf"]')?.click();
+    fixture.detectChanges();
+
+    const clavesDespues = fixture.componentInstance['vistas']().map((vista) => vista.clave);
+    expect(clavesDespues).toEqual(clavesAntes.slice(1));
+  });
+
   it('muestra el tamanio formateado de cada archivo', () => {
     soltar(crearPdf('reporte.pdf', 2 * 1024 * 1024));
 

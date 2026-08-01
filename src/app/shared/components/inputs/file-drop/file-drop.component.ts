@@ -92,9 +92,12 @@ export class FileDropComponent {
   );
 
   protected readonly vistas = computed<ArchivoVista[]>(() =>
-    this.archivos().map((archivo, indice) => ({
+    this.archivos().map((archivo) => ({
       archivo,
-      clave: `${indice}-${archivo.name}-${archivo.size}`,
+      // Sin el índice a propósito: si va en la clave, al eliminar un archivo del medio cambian
+      // las claves de todos los siguientes y Angular destruye y recrea esos nodos en vez de
+      // reutilizarlos, con el parpadeo y la pérdida de foco que eso implica.
+      clave: `${archivo.name}-${archivo.size}-${archivo.lastModified}`,
       nombre: archivo.name,
       tamanio: formatearTamanio(archivo.size),
     }))
@@ -139,30 +142,39 @@ export class FileDropComponent {
     if (entrantes.length === 0) return;
 
     const aceptados: File[] = [];
-    let error = '';
+    // Un Set y no una variable: al soltar varios archivos que fallan por motivos distintos, una
+    // sola variable se pisa en cada vuelta y el usuario ve solo el último motivo, sin enterarse
+    // de los otros. Se muestran todos los motivos distintos, sin repetirlos.
+    const errores = new Set<string>();
     let disponibles = this.maxArchivos() - this.archivos().length;
 
     for (const archivo of entrantes) {
       if (!this.formatoValido(archivo)) {
-        error = MENSAJE_FORMATO_INVALIDO;
-        this.rechazado.emit({ nombre: archivo.name, motivo: 'formato', mensaje: error });
+        errores.add(MENSAJE_FORMATO_INVALIDO);
+        this.rechazado.emit({
+          nombre: archivo.name,
+          motivo: 'formato',
+          mensaje: MENSAJE_FORMATO_INVALIDO,
+        });
         continue;
       }
       if (archivo.size > this.maxTamanioBytes()) {
-        error = mensajeTamanioMaximo(this.maxTamanioBytes());
-        this.rechazado.emit({ nombre: archivo.name, motivo: 'tamanio', mensaje: error });
+        const mensaje = mensajeTamanioMaximo(this.maxTamanioBytes());
+        errores.add(mensaje);
+        this.rechazado.emit({ nombre: archivo.name, motivo: 'tamanio', mensaje });
         continue;
       }
       if (disponibles <= 0) {
-        error = mensajeMaximoArchivos(this.maxArchivos());
-        this.rechazado.emit({ nombre: archivo.name, motivo: 'cantidad', mensaje: error });
+        const mensaje = mensajeMaximoArchivos(this.maxArchivos());
+        errores.add(mensaje);
+        this.rechazado.emit({ nombre: archivo.name, motivo: 'cantidad', mensaje });
         continue;
       }
       aceptados.push(archivo);
       disponibles -= 1;
     }
 
-    this.errorInterno.set(error);
+    this.errorInterno.set([...errores].join(' '));
     if (aceptados.length > 0) {
       this.archivos.update((archivos) => [...archivos, ...aceptados]);
     }
