@@ -14,8 +14,8 @@ export interface ResumenCertificacionesDashboardResponse {
   readonly vencidas: number;
 }
 
-/** Mismos códigos que TipoAlerta en el backend (PP-70): '90_dias' | '30_dias' | '7_dias'. */
-export type UrgenciaVencimiento = '90_dias' | '30_dias' | '7_dias';
+/** Mismos códigos que TipoAlerta en el backend (PP-70), más 'vencida' para fechas ya pasadas. */
+export type UrgenciaVencimiento = '90_dias' | '30_dias' | '7_dias' | 'vencida';
 
 export interface CertificacionVencimiento {
   readonly id: string;

@@ -20,7 +20,7 @@ const DIAS_SEMANA = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 // Del más al menos urgente: si un día tiene vencimientos con distinta urgencia
 // (posible solo si dos certificaciones vencen el mismo día, cosa infrecuente
 // pero no imposible), el punto del día se pinta con la más urgente.
-const ORDEN_URGENCIA: UrgenciaVencimiento[] = ['7_dias', '30_dias', '90_dias'];
+const ORDEN_URGENCIA: UrgenciaVencimiento[] = ['vencida', '7_dias', '30_dias', '90_dias'];
 
 const ERROR_POR_DEFECTO = 'No fue posible cargar esta sección. Intenta recargar la página.';
 
