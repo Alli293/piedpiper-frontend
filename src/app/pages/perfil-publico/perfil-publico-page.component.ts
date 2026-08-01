@@ -1,34 +1,34 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Meta, Title } from '@angular/platform-browser';
 
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
-import { CertificacionesPublicasPageComponent } from './certificaciones/certificaciones-publicas-page.component';
-import { PerfilPublicoDTO } from './perfil-publico.models';
+import { CertificacionPublica, InsigniaEmpresa, PerfilPublicoDTO } from './perfil-publico.models';
 import { PerfilPublicoService } from './perfil-publico.service';
-
-export type SeccionActiva = 'certificaciones' | 'insignias' | 'evolucion';
 
 interface NivelConfig {
   clase: string;
   icono: IconName;
+  color: string;
 }
 
 const NIVEL_MAP: Record<string, NivelConfig> = {
-  'Sin nivel': { clase: 'nivel--sin-nivel', icono: 'leaf-off' },
-  Bronce: { clase: 'nivel--bronce', icono: 'medal-bronze' },
-  Plata: { clase: 'nivel--plata', icono: 'medal-silver' },
-  Oro: { clase: 'nivel--oro', icono: 'medal-gold' },
-  Platino: { clase: 'nivel--platino', icono: 'medal-platinum' },
+  'Sin nivel': { clase: 'sin-nivel', icono: 'leaf-off', color: '#6b7280' },
+  Bronce: { clase: 'bronce', icono: 'medal-bronze', color: '#cd7f32' },
+  Plata: { clase: 'plata', icono: 'medal-silver', color: '#9ca3af' },
+  Oro: { clase: 'oro', icono: 'medal-gold', color: '#d4a017' },
+  Platino: { clase: 'platino', icono: 'medal-platinum', color: '#2ba6de' },
 };
+
+const NIVELES_ORDEN = ['Bronce', 'Plata', 'Oro', 'Platino'];
 
 @Component({
   selector: 'app-perfil-publico-page',
   standalone: true,
   templateUrl: './perfil-publico-page.component.html',
   styleUrl: './perfil-publico-page.component.scss',
-  imports: [IconComponent, RouterLink, CertificacionesPublicasPageComponent],
+  imports: [IconComponent],
 })
 export class PerfilPublicoPageComponent {
   private readonly route = inject(ActivatedRoute);
@@ -39,8 +39,11 @@ export class PerfilPublicoPageComponent {
 
   protected estado = signal<'cargando' | 'exito' | 'error404' | 'error500'>('cargando');
   protected perfil = signal<PerfilPublicoDTO | null>(null);
+  protected certificaciones = signal<CertificacionPublica[]>([]);
+  protected insignias = signal<InsigniaEmpresa[]>([]);
   protected mensajeError = signal<string>('');
-  protected seccionActiva = signal<SeccionActiva>('certificaciones');
+
+  protected readonly nivelesOrden = NIVELES_ORDEN;
 
   protected get slug(): string {
     return this.route.snapshot.paramMap.get('slug') ?? '';
@@ -49,10 +52,6 @@ export class PerfilPublicoPageComponent {
   constructor() {
     this.cargar();
     this.destroyRef.onDestroy(() => this.limpiarMetaTags());
-  }
-
-  protected cambiarSeccion(seccion: SeccionActiva): void {
-    this.seccionActiva.set(seccion);
   }
 
   protected cargar(): void {
@@ -64,6 +63,8 @@ export class PerfilPublicoPageComponent {
         this.perfil.set(dto);
         this.estado.set('exito');
         this.actualizarMetaTags(dto, slug);
+        this.cargarCertificaciones(slug);
+        this.cargarInsignias(slug);
       },
       error: (err: unknown) => {
         if (err instanceof HttpErrorResponse && err.status === 404) {
@@ -79,6 +80,20 @@ export class PerfilPublicoPageComponent {
     });
   }
 
+  private cargarCertificaciones(slug: string): void {
+    this.perfilService.listarCertificaciones(slug).subscribe({
+      next: (certs) => this.certificaciones.set(certs),
+      error: () => this.certificaciones.set([]),
+    });
+  }
+
+  private cargarInsignias(slug: string): void {
+    this.perfilService.listarInsignias(slug).subscribe({
+      next: (ins) => this.insignias.set(ins),
+      error: () => this.insignias.set([]),
+    });
+  }
+
   protected reintentar(): void {
     this.cargar();
   }
@@ -88,16 +103,29 @@ export class PerfilPublicoPageComponent {
     return NIVEL_MAP[nivel] ?? NIVEL_MAP['Sin nivel'];
   }
 
-  protected formatFecha(fecha: string | null | undefined): string {
+  protected getNivelIndex(): number {
+    const nivel = this.perfil()?.nivelEcologico ?? 'Sin nivel';
+    const idx = NIVELES_ORDEN.indexOf(nivel);
+    return idx >= 0 ? idx : -1;
+  }
+
+  protected formatFechaActualizacion(fecha: string | null | undefined): string {
+    if (!fecha) return '';
+    const date = new Date(fecha);
+    return new Intl.DateTimeFormat('es-CR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(date);
+  }
+
+  protected formatFechaCorta(fecha: string | null | undefined): string {
     if (!fecha) return '';
     const date = new Date(fecha);
     return new Intl.DateTimeFormat('es-CR', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
     }).format(date);
   }
 
@@ -106,8 +134,36 @@ export class PerfilPublicoPageComponent {
     return new Intl.NumberFormat('es-CR').format(value);
   }
 
-  protected get esSinNivel(): boolean {
-    return this.perfil()?.nivelEcologico === 'Sin nivel';
+  protected getEstadoBadgeClass(estado: string): string {
+    switch (estado) {
+      case 'ACTIVA':
+        return 'badge--vigente';
+      case 'VENCIDA':
+        return 'badge--vencida';
+      case 'REVOCADA':
+        return 'badge--revocada';
+      default:
+        return 'badge--neutral';
+    }
+  }
+
+  protected getEstadoLabel(estado: string): string {
+    switch (estado) {
+      case 'ACTIVA':
+        return 'VIGENTE';
+      case 'VENCIDA':
+        return 'VENCIDA';
+      case 'REVOCADA':
+        return 'REVOCADA';
+      default:
+        return estado;
+    }
+  }
+
+  protected getAnioVigencia(): string {
+    const fecha = this.perfil()?.fechaActualizacionNivel;
+    if (!fecha) return new Date().getFullYear().toString();
+    return new Date(fecha).getFullYear().toString();
   }
 
   private actualizarMetaTags(dto: PerfilPublicoDTO, slug: string): void {
