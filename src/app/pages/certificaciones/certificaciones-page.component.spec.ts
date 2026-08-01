@@ -29,10 +29,23 @@ describe('CertificacionesPageComponent', () => {
     vencidas: 1,
   };
 
+  // El componente pide el calendario del mes actual REAL (usa `new Date()`), así
+  // que el mock tiene que calzar con eso en vez de una fecha fija — de lo
+  // contrario el test pasa solo por coincidencia en la máquina/fecha donde se
+  // corra (fue justo lo que rompió en CI).
+  function mesActualIso(): string {
+    const hoy = new Date();
+    const mes = hoy.getMonth() + 1;
+    return `${hoy.getFullYear()}-${mes < 10 ? `0${mes}` : mes}`;
+  }
+
+  const MES_ACTUAL = mesActualIso();
+  const FECHA_CON_VENCIMIENTO = `${MES_ACTUAL}-15`;
+
   const CALENDARIO: CalendarioVencimientosResponse = {
-    mesVisualizado: '2026-07',
+    mesVisualizado: MES_ACTUAL,
     vencimientosPorFecha: {
-      '2026-07-18': [{ id: 'c1', nombre: 'Carbono Neutral', urgencia: '30_dias' }],
+      [FECHA_CON_VENCIMIENTO]: [{ id: 'c1', nombre: 'Carbono Neutral', urgencia: '30_dias' }],
     },
   };
 
