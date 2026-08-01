@@ -60,12 +60,12 @@
   }
 
   <!-- No results -->
-  @if (buscado() && resultados().length === 0 && !cargando() && termino().length >= 3) {
+  @if (buscado() && resultados().length === 0 && !cargando()) {
     <p class="ch-empresas-verificadas__empty" role="status">No se encontraron empresas.</p>
   }
 
   <!-- Introductory section -->
-  @if (!buscado() || termino().length < 3) {
+  @if (resultados().length === 0 && !cargando() && !buscado()) {
     <section class="ch-empresas-verificadas__intro">
       <div class="ch-empresas-verificadas__intro-grid">
         <div class="ch-empresas-verificadas__intro-card">
