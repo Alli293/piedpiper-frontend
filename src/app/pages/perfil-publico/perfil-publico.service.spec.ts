@@ -1,6 +1,7 @@
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import * as fc from 'fast-check';
 import { environment } from '../../../environments/environment';
 import { CertificacionPublica, InsigniaEmpresa, PerfilPublicoDTO } from './perfil-publico.models';
 import { PerfilPublicoService } from './perfil-publico.service';
@@ -181,6 +182,57 @@ describe('PerfilPublicoService', () => {
 
       expect(error).toBeInstanceOf(HttpErrorResponse);
       expect((error as HttpErrorResponse).status).toBe(404);
+    });
+  });
+
+  describe('Property tests (fast-check)', () => {
+    /**
+     * Property 11: Slug vacío no genera petición HTTP
+     * Para cualquier cadena vacía o compuesta exclusivamente de caracteres de espacio en blanco,
+     * el servicio frontend emite un error síncrono a través del Observable sin realizar petición HTTP.
+     *
+     * Validates: Requirements 7.4
+     */
+    it('Property 11: Slug vacío no genera petición HTTP', () => {
+      fc.assert(
+        fc.property(
+          fc.constantFrom('', ' ', '  ', '\t', '\n', '   \t\n  '),
+          (emptySlug) => {
+            let error: unknown;
+            service.obtenerPerfil(emptySlug).subscribe({
+              error: (err) => (error = err),
+            });
+            httpMock.expectNone(() => true);
+            expect(error).toBeInstanceOf(Error);
+            expect((error as Error).message).toBe('El slug no puede estar vacío.');
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    /**
+     * Property 12: Propagación transparente de errores HTTP
+     * Para cualquier código de error HTTP (4xx o 5xx) retornado por el backend,
+     * el servicio propaga el error como HttpErrorResponse sin transformar.
+     *
+     * Validates: Requirements 7.3
+     */
+    it('Property 12: Propagación transparente de errores HTTP', () => {
+      fc.assert(
+        fc.property(fc.integer({ min: 400, max: 599 }), (statusCode) => {
+          let error: unknown;
+          service.obtenerPerfil('valid-slug').subscribe({
+            error: (err) => (error = err),
+          });
+          httpMock
+            .expectOne(`${baseUrl}/valid-slug`)
+            .flush({ mensaje: 'Error test' }, { status: statusCode, statusText: 'Error' });
+          expect(error).toBeInstanceOf(HttpErrorResponse);
+          expect((error as HttpErrorResponse).status).toBe(statusCode);
+        }),
+        { numRuns: 100 }
+      );
     });
   });
 });
