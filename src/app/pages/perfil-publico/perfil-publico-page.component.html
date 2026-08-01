@@ -103,7 +103,9 @@
           <div class="pub-card__stat">
             <app-icon name="certificaciones" [size]="20" aria-hidden="true" />
             <span class="pub-card__stat-label">Certificaciones vigentes:</span>
-            <span class="pub-card__stat-value">{{ formatNumero(perfil()?.certificacionesVigentes) }}</span>
+            <span class="pub-card__stat-value">{{
+              formatNumero(perfil()?.certificacionesVigentes)
+            }}</span>
           </div>
           <div class="pub-card__stat">
             <app-icon name="insignias" [size]="20" aria-hidden="true" />
@@ -142,7 +144,10 @@
                       <span>{{ cert.nombreCertificacion }}</span>
                     </td>
                     <td>{{ cert.tipo }}</td>
-                    <td>{{ formatFechaCorta(cert.fechaEmision) }} — {{ formatFechaCorta(cert.fechaVencimiento) }}</td>
+                    <td>
+                      {{ formatFechaCorta(cert.fechaEmision) }} —
+                      {{ formatFechaCorta(cert.fechaVencimiento) }}
+                    </td>
                     <td>
                       <span class="pub-badge" [class]="getEstadoBadgeClass(cert.estado)">
                         {{ getEstadoLabel(cert.estado) }}
@@ -184,7 +189,9 @@
                   <app-icon name="insignias" [size]="20" aria-hidden="true" />
                 </div>
                 <span class="pub-insignia-card__name">{{ ins.nombre }}</span>
-                <span class="pub-insignia-card__date">{{ formatFechaCorta(ins.fechaObtencion) }}</span>
+                <span class="pub-insignia-card__date">{{
+                  formatFechaCorta(ins.fechaObtencion)
+                }}</span>
               </div>
             }
           </div>
@@ -200,7 +207,9 @@
       <section class="pub-section" aria-labelledby="evolucion-title">
         <div class="pub-section__header">
           <div>
-            <h2 class="pub-section__title" id="evolucion-title">Evolución de la huella de carbono</h2>
+            <h2 class="pub-section__title" id="evolucion-title">
+              Evolución de la huella de carbono
+            </h2>
           </div>
         </div>
 
@@ -213,7 +222,12 @@
             <div class="pub-chart-placeholder__filters">
               <button class="pub-chart-placeholder__filter" type="button">1A</button>
               <button class="pub-chart-placeholder__filter" type="button">3A</button>
-              <button class="pub-chart-placeholder__filter pub-chart-placeholder__filter--active" type="button">5A</button>
+              <button
+                class="pub-chart-placeholder__filter pub-chart-placeholder__filter--active"
+                type="button"
+              >
+                5A
+              </button>
               <button class="pub-chart-placeholder__filter" type="button">Todo</button>
             </div>
           </div>

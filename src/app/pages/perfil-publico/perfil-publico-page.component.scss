@@ -123,7 +123,7 @@
   background: var(--ch-bg-white);
   border-radius: var(--ch-radius-lg);
   border: 1px solid var(--ch-border);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--ch-shadow-sm);
   padding: var(--ch-space-6);
   margin-bottom: var(--ch-space-6);
 
@@ -253,28 +253,50 @@
   text-align: center;
 
   &--sin-nivel {
-    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-    color: #6b7280;
+    background: linear-gradient(
+      135deg,
+      var(--ch-nivel-sin-bg-from) 0%,
+      var(--ch-nivel-sin-bg-to) 100%
+    );
+    color: var(--ch-nivel-sin-text);
   }
 
   &--bronce {
-    background: linear-gradient(135deg, #fef3c7 0%, #f59e0b33 100%);
-    color: #92400e;
+    background: linear-gradient(
+      135deg,
+      var(--ch-nivel-bronce-bg-from) 0%,
+      var(--ch-nivel-bronce-bg-to) 100%
+    );
+    color: var(--ch-nivel-bronce-text);
   }
 
   &--plata {
-    background: linear-gradient(135deg, #f3f4f6 0%, #d1d5db 100%);
-    color: #374151;
+    background: linear-gradient(
+      135deg,
+      var(--ch-nivel-plata-bg-from) 0%,
+      var(--ch-nivel-plata-bg-to) 100%
+    );
+    color: var(--ch-nivel-plata-text);
   }
 
   &--oro {
-    background: linear-gradient(135deg, #fef9c3 0%, #fbbf24 40%, #d97706 100%);
-    color: #78350f;
+    background: linear-gradient(
+      135deg,
+      var(--ch-nivel-oro-bg-from) 0%,
+      var(--ch-nivel-oro-bg-mid) 40%,
+      var(--ch-nivel-oro-bg-to) 100%
+    );
+    color: var(--ch-nivel-oro-text);
   }
 
   &--platino {
-    background: linear-gradient(135deg, #ecfdf5 0%, #6ee7b7 40%, #059669 100%);
-    color: #064e3b;
+    background: linear-gradient(
+      135deg,
+      var(--ch-nivel-platino-bg-from) 0%,
+      var(--ch-nivel-platino-bg-mid) 40%,
+      var(--ch-nivel-platino-bg-to) 100%
+    );
+    color: var(--ch-nivel-platino-text);
   }
 
   &__label {
@@ -313,7 +335,7 @@
     justify-content: space-between;
     gap: var(--ch-space-1);
     padding-top: var(--ch-space-2);
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-top: 1px solid color-mix(in srgb, currentColor 15%, transparent);
   }
 
   &__step {
@@ -328,7 +350,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.15);
+    background: color-mix(in srgb, currentColor 20%, transparent);
     transition: background-color 0.2s;
 
     .pub-nivel__step--active & {
@@ -338,7 +360,7 @@
     .pub-nivel__step--current & {
       width: 10px;
       height: 10px;
-      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--ch-bg-white) 60%, transparent);
     }
   }
 
@@ -501,8 +523,8 @@
   }
 
   &.badge--revocada {
-    background: color-mix(in srgb, #ef4444 12%, transparent);
-    color: #b91c1c;
+    background: color-mix(in srgb, var(--ch-badge-revocada-accent) 12%, transparent);
+    color: var(--ch-badge-revocada-text);
   }
 
   &.badge--neutral {
@@ -534,7 +556,7 @@
   transition: box-shadow var(--ch-transition);
 
   &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--ch-shadow-md);
   }
 
   &__icon {
@@ -547,18 +569,18 @@
     margin-bottom: var(--ch-space-2);
 
     &--bronce {
-      background: color-mix(in srgb, #cd7f32 15%, transparent);
-      color: #cd7f32;
+      background: color-mix(in srgb, var(--ch-nivel-bronce-accent) 15%, transparent);
+      color: var(--ch-nivel-bronce-accent);
     }
 
     &--plata {
-      background: color-mix(in srgb, #9ca3af 15%, transparent);
-      color: #6b7280;
+      background: color-mix(in srgb, var(--ch-nivel-plata-accent) 15%, transparent);
+      color: var(--ch-nivel-sin-text);
     }
 
     &--oro {
-      background: color-mix(in srgb, #d4a017 15%, transparent);
-      color: #d4a017;
+      background: color-mix(in srgb, var(--ch-nivel-oro-accent) 15%, transparent);
+      color: var(--ch-nivel-oro-accent);
     }
   }
 
