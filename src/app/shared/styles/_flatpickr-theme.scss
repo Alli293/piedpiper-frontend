@@ -1,0 +1,84 @@
+// Reskin de flatpickr con los tokens `--ch-*` del proyecto. Necesario como
+// hoja global (no un .scss de componente): la popup del calendario
+// (`.flatpickr-calendar`) se inyecta como hijo directo de <body>, fuera del
+// árbol de vista de `DateInputComponent`, así que `::ng-deep` no llega ahí.
+
+.flatpickr-calendar {
+  font-family: var(--ch-font-body);
+  border-radius: var(--ch-radius-lg);
+  border: 1px solid var(--ch-border);
+  box-shadow: var(--ch-shadow-md);
+
+  &.arrowTop::before,
+  &.arrowTop::after {
+    border-bottom-color: var(--ch-border);
+  }
+}
+
+.flatpickr-months {
+  padding: var(--ch-space-3) var(--ch-space-3) 0;
+
+  .flatpickr-month {
+    color: var(--ch-text-primary);
+  }
+
+  .flatpickr-current-month {
+    font-family: var(--ch-font-heading);
+    font-weight: 700;
+  }
+
+  .flatpickr-prev-month,
+  .flatpickr-next-month {
+    color: var(--ch-text-secondary);
+
+    &:hover {
+      color: var(--ch-text-primary);
+    }
+
+    svg {
+      fill: currentColor;
+    }
+  }
+}
+
+.flatpickr-weekdays {
+  .flatpickr-weekday {
+    color: var(--ch-text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+  }
+}
+
+.flatpickr-day {
+  border-radius: var(--ch-radius-sm);
+  color: var(--ch-text-primary);
+
+  &:hover {
+    background: var(--ch-green-soft);
+    border-color: var(--ch-green-soft);
+  }
+
+  &.today {
+    border-color: var(--ch-green);
+  }
+
+  &.selected,
+  &.selected:hover {
+    background: var(--ch-green);
+    border-color: var(--ch-green);
+    color: var(--ch-text-on-dark);
+  }
+
+  &.flatpickr-disabled,
+  &.flatpickr-disabled:hover,
+  &.prevMonthDay,
+  &.nextMonthDay {
+    color: var(--ch-text-muted);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ch-border-focus);
+    outline-offset: 1px;
+  }
+}
