@@ -109,7 +109,10 @@ describe('PerfilPublicoService', () => {
       httpMock
         .expectOne(`${baseUrl}/cafe-del-valle`)
         .flush(
-          { mensaje: 'No fue posible cargar el perfil en este momento. Intenta nuevamente más tarde.' },
+          {
+            mensaje:
+              'No fue posible cargar el perfil en este momento. Intenta nuevamente más tarde.',
+          },
           { status: 500, statusText: 'Internal Server Error' }
         );
 
@@ -195,18 +198,15 @@ describe('PerfilPublicoService', () => {
      */
     it('Property 11: Slug vacío no genera petición HTTP', () => {
       fc.assert(
-        fc.property(
-          fc.constantFrom('', ' ', '  ', '\t', '\n', '   \t\n  '),
-          (emptySlug) => {
-            let error: unknown;
-            service.obtenerPerfil(emptySlug).subscribe({
-              error: (err) => (error = err),
-            });
-            httpMock.expectNone(() => true);
-            expect(error).toBeInstanceOf(Error);
-            expect((error as Error).message).toBe('El slug no puede estar vacío.');
-          }
-        ),
+        fc.property(fc.constantFrom('', ' ', '  ', '\t', '\n', '   \t\n  '), (emptySlug) => {
+          let error: unknown;
+          service.obtenerPerfil(emptySlug).subscribe({
+            error: (err) => (error = err),
+          });
+          httpMock.expectNone(() => true);
+          expect(error).toBeInstanceOf(Error);
+          expect((error as Error).message).toBe('El slug no puede estar vacío.');
+        }),
         { numRuns: 100 }
       );
     });

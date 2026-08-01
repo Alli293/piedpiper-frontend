@@ -64,11 +64,15 @@
       <section class="perfil-publico__resumen" aria-label="Resumen de reputación">
         <h2 class="perfil-publico__section-title">Resumen</h2>
         <div class="perfil-publico__stat">
-          <span class="perfil-publico__stat-value">{{ formatNumero(perfil()?.certificacionesVigentes) }}</span>
+          <span class="perfil-publico__stat-value">{{
+            formatNumero(perfil()?.certificacionesVigentes)
+          }}</span>
           <span class="perfil-publico__stat-label">Certificaciones vigentes</span>
         </div>
         <div class="perfil-publico__stat">
-          <span class="perfil-publico__stat-value">{{ formatNumero(perfil()?.insigniasActivas) }}</span>
+          <span class="perfil-publico__stat-value">{{
+            formatNumero(perfil()?.insigniasActivas)
+          }}</span>
           <span class="perfil-publico__stat-label">Insignias activas</span>
         </div>
       </section>

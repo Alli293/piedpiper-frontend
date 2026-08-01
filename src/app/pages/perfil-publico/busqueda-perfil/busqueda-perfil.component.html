@@ -21,7 +21,10 @@
     <ul class="busqueda-perfil__resultados" role="listbox">
       @for (resultado of resultados(); track resultado.slug) {
         <li class="busqueda-perfil__item" role="option" (click)="seleccionar(resultado)">
-          <span class="busqueda-perfil__nombre" [innerHTML]="highlight(resultado.nombreEmpresa)"></span>
+          <span
+            class="busqueda-perfil__nombre"
+            [innerHTML]="highlight(resultado.nombreEmpresa)"
+          ></span>
           <span class="busqueda-perfil__detalle">
             <span class="busqueda-perfil__sector">{{ resultado.sectorIndustrial }}</span>
             <span class="busqueda-perfil__separador" aria-hidden="true">·</span>

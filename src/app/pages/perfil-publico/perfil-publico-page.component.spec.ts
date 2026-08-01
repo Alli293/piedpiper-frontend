@@ -74,7 +74,11 @@ describe('PerfilPublicoPageComponent', () => {
           imports: [IconComponent, BusquedaPerfilComponent, CertificacionesPublicasPageComponent],
         },
         add: {
-          imports: [IconStubComponent, BusquedaPerfilStubComponent, CertificacionesPublicasStubComponent],
+          imports: [
+            IconStubComponent,
+            BusquedaPerfilStubComponent,
+            CertificacionesPublicasStubComponent,
+          ],
         },
       })
       .compileComponents();
@@ -134,12 +138,21 @@ describe('PerfilPublicoPageComponent', () => {
 
             // Should contain Spanish month abbreviation (short month names in es-CR)
             const spanishMonths = [
-              'ene', 'feb', 'mar', 'abr', 'may', 'jun',
-              'jul', 'ago', 'sept', 'sep', 'oct', 'nov', 'dic',
+              'ene',
+              'feb',
+              'mar',
+              'abr',
+              'may',
+              'jun',
+              'jul',
+              'ago',
+              'sept',
+              'sep',
+              'oct',
+              'nov',
+              'dic',
             ];
-            const containsMonth = spanishMonths.some((m) =>
-              result.toLowerCase().includes(m)
-            );
+            const containsMonth = spanishMonths.some((m) => result.toLowerCase().includes(m));
             expect(containsMonth).toBe(true);
 
             // Should contain year (4 digits)
@@ -147,7 +160,8 @@ describe('PerfilPublicoPageComponent', () => {
             expect(yearMatch).not.toBeNull();
 
             // Should contain time portion with a.m. or p.m.
-            const hasAmPm = /[ap]\.\s?m\./.test(result) || /[AP]M/.test(result) || /[ap]\.?\s?m\.?/.test(result);
+            const hasAmPm =
+              /[ap]\.\s?m\./.test(result) || /[AP]M/.test(result) || /[ap]\.?\s?m\.?/.test(result);
             expect(hasAmPm).toBe(true);
           }
         ),
@@ -167,24 +181,21 @@ describe('PerfilPublicoPageComponent', () => {
       httpMock.expectOne(`${baseUrl}/eco-tech`).flush(PERFIL_MOCK);
 
       fc.assert(
-        fc.property(
-          fc.integer({ min: 1000, max: 9999999 }),
-          (num) => {
-            const result = component['formatNumero'](num);
+        fc.property(fc.integer({ min: 1000, max: 9999999 }), (num) => {
+          const result = component['formatNumero'](num);
 
-            // The result should not be empty
-            expect(result.length).toBeGreaterThan(0);
+          // The result should not be empty
+          expect(result.length).toBeGreaterThan(0);
 
-            // Remove all non-digit characters to verify the digits are preserved
-            const digitsOnly = result.replace(/\D/g, '');
-            expect(digitsOnly).toBe(num.toString());
+          // Remove all non-digit characters to verify the digits are preserved
+          const digitsOnly = result.replace(/\D/g, '');
+          expect(digitsOnly).toBe(num.toString());
 
-            // For numbers >= 1000, there should be a separator character
-            // es-CR uses thin space (U+202F), non-breaking space (U+00A0), regular space, or period
-            // The formatted string should be longer than the raw digits (due to separators)
-            expect(result.length).toBeGreaterThan(digitsOnly.length);
-          }
-        ),
+          // For numbers >= 1000, there should be a separator character
+          // es-CR uses thin space (U+202F), non-breaking space (U+00A0), regular space, or period
+          // The formatted string should be longer than the raw digits (due to separators)
+          expect(result.length).toBeGreaterThan(digitsOnly.length);
+        }),
         { numRuns: 100 }
       );
     });

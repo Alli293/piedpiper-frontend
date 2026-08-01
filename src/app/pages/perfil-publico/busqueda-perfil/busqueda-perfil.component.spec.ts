@@ -16,8 +16,18 @@ describe('BusquedaPerfilComponent', () => {
   const baseUrl = `${environment.apiBaseUrl}/perfil-publico`;
 
   const mockResultados: BusquedaPerfilPublicoDTO[] = [
-    { nombreEmpresa: 'EcoTech Solutions', slug: 'ecotech-solutions', sectorIndustrial: 'Tecnología', nivelEcologico: 'Oro' },
-    { nombreEmpresa: 'EcoVerde SA', slug: 'ecoverde-sa', sectorIndustrial: 'Agricultura', nivelEcologico: 'Plata' },
+    {
+      nombreEmpresa: 'EcoTech Solutions',
+      slug: 'ecotech-solutions',
+      sectorIndustrial: 'Tecnología',
+      nivelEcologico: 'Oro',
+    },
+    {
+      nombreEmpresa: 'EcoVerde SA',
+      slug: 'ecoverde-sa',
+      sectorIndustrial: 'Agricultura',
+      nivelEcologico: 'Plata',
+    },
   ];
 
   const mockPageResponse: PageResponse<BusquedaPerfilPublicoDTO> = {
@@ -41,11 +51,7 @@ describe('BusquedaPerfilComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [BusquedaPerfilComponent],
-      providers: [
-        PerfilPublicoService,
-        provideHttpClient(),
-        provideHttpClientTesting(),
-      ],
+      providers: [PerfilPublicoService, provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(BusquedaPerfilComponent);
@@ -159,7 +165,9 @@ describe('BusquedaPerfilComponent', () => {
       req.flush(mockPageResponse);
       fixture.detectChanges();
 
-      const firstItem = fixture.nativeElement.querySelector('.busqueda-perfil__item') as HTMLElement;
+      const firstItem = fixture.nativeElement.querySelector(
+        '.busqueda-perfil__item'
+      ) as HTMLElement;
       firstItem.click();
 
       expect(navigateSpy).toHaveBeenCalledWith(['/empresa', 'ecotech-solutions', 'reputacion']);
@@ -176,7 +184,9 @@ describe('BusquedaPerfilComponent', () => {
       req.flush(emptyPageResponse);
       fixture.detectChanges();
 
-      const emptyMsg = fixture.nativeElement.querySelector('.busqueda-perfil__empty') as HTMLElement;
+      const emptyMsg = fixture.nativeElement.querySelector(
+        '.busqueda-perfil__empty'
+      ) as HTMLElement;
       expect(emptyMsg).not.toBeNull();
       expect(emptyMsg.textContent).toContain('No se encontraron empresas.');
     });

@@ -28,12 +28,18 @@ export class PerfilPublicoService {
     );
   }
 
-  buscarEmpresas(nombre: string, page = 0, size = 10): Observable<PageResponse<BusquedaPerfilPublicoDTO>> {
+  buscarEmpresas(
+    nombre: string,
+    page = 0,
+    size = 10
+  ): Observable<PageResponse<BusquedaPerfilPublicoDTO>> {
     const params = new HttpParams()
       .set('nombre', nombre)
       .set('page', page.toString())
       .set('size', size.toString());
-    return this.http.get<PageResponse<BusquedaPerfilPublicoDTO>>(`${this.baseUrl}/buscar`, { params });
+    return this.http.get<PageResponse<BusquedaPerfilPublicoDTO>>(`${this.baseUrl}/buscar`, {
+      params,
+    });
   }
 
   listarInsignias(slug: string): Observable<InsigniaEmpresa[]> {
