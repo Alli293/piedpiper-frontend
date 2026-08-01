@@ -1,0 +1,34 @@
+<section class="busqueda-perfil" aria-label="Búsqueda de empresas">
+  <div class="busqueda-perfil__input-wrapper">
+    <input
+      type="text"
+      class="busqueda-perfil__input"
+      placeholder="Buscar empresa por nombre..."
+      [value]="termino()"
+      (input)="onInput($event)"
+      aria-label="Buscar empresa por nombre"
+    />
+    @if (cargando()) {
+      <span class="busqueda-perfil__spinner" aria-hidden="true"></span>
+    }
+  </div>
+
+  @if (buscado() && resultados().length === 0 && !cargando()) {
+    <p class="busqueda-perfil__empty" role="status">No se encontraron empresas.</p>
+  }
+
+  @if (resultados().length > 0) {
+    <ul class="busqueda-perfil__resultados" role="listbox">
+      @for (resultado of resultados(); track resultado.slug) {
+        <li class="busqueda-perfil__item" role="option" (click)="seleccionar(resultado)">
+          <span class="busqueda-perfil__nombre" [innerHTML]="highlight(resultado.nombreEmpresa)"></span>
+          <span class="busqueda-perfil__detalle">
+            <span class="busqueda-perfil__sector">{{ resultado.sectorIndustrial }}</span>
+            <span class="busqueda-perfil__separador" aria-hidden="true">·</span>
+            <span class="busqueda-perfil__nivel">{{ resultado.nivelEcologico }}</span>
+          </span>
+        </li>
+      }
+    </ul>
+  }
+</section>

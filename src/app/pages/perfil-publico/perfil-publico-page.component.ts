@@ -4,6 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Meta, Title } from '@angular/platform-browser';
 
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
+import { BusquedaPerfilComponent } from './busqueda-perfil/busqueda-perfil.component';
 import { CertificacionesPublicasPageComponent } from './certificaciones/certificaciones-publicas-page.component';
 import { PerfilPublicoDTO } from './perfil-publico.models';
 import { PerfilPublicoService } from './perfil-publico.service';
@@ -28,7 +29,7 @@ const NIVEL_MAP: Record<string, NivelConfig> = {
   standalone: true,
   templateUrl: './perfil-publico-page.component.html',
   styleUrl: './perfil-publico-page.component.scss',
-  imports: [IconComponent, CertificacionesPublicasPageComponent],
+  imports: [IconComponent, BusquedaPerfilComponent, CertificacionesPublicasPageComponent],
 })
 export class PerfilPublicoPageComponent {
   private readonly route = inject(ActivatedRoute);
