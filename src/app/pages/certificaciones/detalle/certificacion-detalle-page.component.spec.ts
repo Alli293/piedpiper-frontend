@@ -122,6 +122,10 @@ describe('CertificacionDetallePageComponent', () => {
     expect(params.get('name')).toBe('Carbono Neutral');
     expect(params.get('organizationName')).toBe('CarbonHub');
     expect(params.get('certUrl')).toBe(CERTIFICACION_BASE.urlVerificacion);
+    expect(params.get('issueYear')).toBe('2026');
+    expect(params.get('issueMonth')).toBe('1');
+    expect(params.get('expirationYear')).toBe('2027');
+    expect(params.get('expirationMonth')).toBe('1');
 
     openSpy.mockRestore();
   });
@@ -134,5 +138,9 @@ describe('CertificacionDetallePageComponent', () => {
     expect(params.get('name')).toBe('Carbono Neutral');
     expect(params.get('organizationName')).toBe('CarbonHub');
     expect(params.get('certUrl')).toBe(CERTIFICACION_BASE.urlVerificacion);
+    expect(params.get('issueYear')).toBe('2026');
+    expect(params.get('issueMonth')).toBe('1');
+    expect(params.get('expirationYear')).toBe('2027');
+    expect(params.get('expirationMonth')).toBe('1');
   });
 });

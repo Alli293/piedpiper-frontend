@@ -83,11 +83,17 @@ export class CertificacionDetallePageComponent implements OnInit {
   }
 
   protected buildLinkedInShareUrl(cert: Certificacion): string {
+    const emision = new Date(cert.fechaEmision);
+    const vencimiento = new Date(cert.fechaVencimiento);
     const params = new URLSearchParams({
       startTask: 'CERTIFICATION_NAME',
       name: cert.nombreCertificacion,
       organizationName: ORGANIZATION_NAME,
       certUrl: cert.urlVerificacion,
+      issueYear: `${emision.getUTCFullYear()}`,
+      issueMonth: `${emision.getUTCMonth() + 1}`,
+      expirationYear: `${vencimiento.getUTCFullYear()}`,
+      expirationMonth: `${vencimiento.getUTCMonth() + 1}`,
     });
     return `https://www.linkedin.com/profile/add?${params.toString()}`;
   }
