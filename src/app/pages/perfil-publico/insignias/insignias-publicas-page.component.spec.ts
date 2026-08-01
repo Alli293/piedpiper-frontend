@@ -63,7 +63,7 @@ describe('InsigniasPublicasPageComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.textContent).toContain('El perfil que buscas no existe');
-    expect(root.querySelector('.ch-insignias-empresa__card')).toBeNull();
+    expect(root.querySelector('.ch-ie__card')).toBeNull();
   });
 
   it('un error de servidor permite reintentar la consulta', async () => {
