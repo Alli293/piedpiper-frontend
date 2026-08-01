@@ -50,6 +50,8 @@ export class ItinerarioGeneradoPageComponent {
   protected readonly errorCarga = signal(false);
   protected readonly itinerario = signal<Itinerario | null>(null);
 
+  private cargaRequestId = 0;
+
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'ECORUTA / ITINERARIO',
     pageTitle: this.itinerario()
@@ -65,7 +67,7 @@ export class ItinerarioGeneradoPageComponent {
     if (score >= 80) return { texto: 'Excelente', variant: 'success' };
     if (score >= 60) return { texto: 'Buena', variant: 'info' };
     if (score >= 40) return { texto: 'Moderada', variant: 'warning' };
-    return { texto: 'Reprobable', variant: 'danger' };
+    return { texto: 'Mejorable', variant: 'danger' };
   });
 
   protected readonly donutDasharray = computed(() => {
@@ -87,16 +89,21 @@ export class ItinerarioGeneradoPageComponent {
       return;
     }
 
+    const requestId = ++this.cargaRequestId;
     this.cargando.set(true);
     this.errorCarga.set(false);
     try {
       const itinerario = await firstValueFrom(this.itinerariosService.obtener(id));
+      if (requestId !== this.cargaRequestId) return;
       this.itinerario.set(this.ordenar(itinerario));
     } catch (err: unknown) {
+      if (requestId !== this.cargaRequestId) return;
       this.errorCarga.set(true);
       this.toastService.error(this.mensajeError(err));
     } finally {
-      this.cargando.set(false);
+      if (requestId === this.cargaRequestId) {
+        this.cargando.set(false);
+      }
     }
   }
 
