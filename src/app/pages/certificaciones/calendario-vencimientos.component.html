@@ -52,7 +52,9 @@
               [class.ch-calendario__day--seleccionado]="fechaSeleccionada() === dia.fecha"
               [class.ch-calendario__day--urgencia-90]="urgenciaDelDia(dia) === '90_dias'"
               [class.ch-calendario__day--urgencia-30]="urgenciaDelDia(dia) === '30_dias'"
-              [class.ch-calendario__day--urgencia-7]="urgenciaDelDia(dia) === '7_dias'"
+              [class.ch-calendario__day--urgencia-7]="
+                urgenciaDelDia(dia) === '7_dias' || urgenciaDelDia(dia) === 'vencida'
+              "
               [disabled]="dia.fueraDeMes || dia.vencimientos.length === 0"
               [attr.aria-pressed]="
                 dia.vencimientos.length > 0 ? fechaSeleccionada() === dia.fecha : null
