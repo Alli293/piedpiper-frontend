@@ -4,6 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Meta, Title } from '@angular/platform-browser';
 
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
+import { LogoComponent } from '../../shared/components/logo/logo.component';
 import { CertificacionPublica, InsigniaEmpresa, PerfilPublicoDTO } from './perfil-publico.models';
 import { PerfilPublicoService } from './perfil-publico.service';
 
@@ -28,7 +29,7 @@ const NIVELES_ORDEN = ['Bronce', 'Plata', 'Oro', 'Platino'];
   standalone: true,
   templateUrl: './perfil-publico-page.component.html',
   styleUrl: './perfil-publico-page.component.scss',
-  imports: [IconComponent],
+  imports: [IconComponent, LogoComponent],
 })
 export class PerfilPublicoPageComponent {
   private readonly route = inject(ActivatedRoute);
