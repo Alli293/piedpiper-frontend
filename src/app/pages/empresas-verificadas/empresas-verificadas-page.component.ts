@@ -49,19 +49,6 @@ export class EmpresasVerificadasPageComponent implements OnDestroy {
       });
   }
 
-  private cargarCatalogo(): void {
-    this.cargando.set(true);
-    this.perfilService.buscarEmpresas('', 0, 12).subscribe((page) => {
-      this.resultados.set(page.content);
-      this.cargando.set(false);
-    });
-  }
-        if (this.termino().length >= 3) {
-          this.buscado.set(true);
-        }
-      });
-  }
-
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     this.searchSubject.complete();
@@ -86,5 +73,18 @@ export class EmpresasVerificadasPageComponent implements OnDestroy {
       Platino: 'platino',
     };
     return mapa[nivel] ?? 'sin-nivel';
+  }
+
+  private cargarCatalogo(): void {
+    this.cargando.set(true);
+    this.perfilService.buscarEmpresas('', 0, 12).subscribe({
+      next: (page) => {
+        this.resultados.set(page.content);
+        this.cargando.set(false);
+      },
+      error: () => {
+        this.cargando.set(false);
+      },
+    });
   }
 }

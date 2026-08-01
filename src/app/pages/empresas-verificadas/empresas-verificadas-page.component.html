@@ -64,8 +64,8 @@
     <p class="ch-empresas-verificadas__empty" role="status">No se encontraron empresas.</p>
   }
 
-  <!-- Introductory section -->
-  @if (resultados().length === 0 && !cargando() && !buscado()) {
+  <!-- Introductory section (only when no results loaded yet) -->
+  @if (resultados().length === 0 && !cargando()) {
     <section class="ch-empresas-verificadas__intro">
       <div class="ch-empresas-verificadas__intro-grid">
         <div class="ch-empresas-verificadas__intro-card">
