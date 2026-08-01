@@ -10,6 +10,7 @@ import { ToastService } from '../../../shared/services/toast.service';
 import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
 import { PerfilInicial } from '../../../core/models/perfil-inicial.model';
 import { PreferenciasViajeResponse } from '../models/preferencias-viaje.model';
+import { seleccionarFechaDeInput } from '../../../shared/components/inputs/date-input/date-input.testing';
 
 const VALID_RESPONSE: PreferenciasViajeResponse = {
   id: '1',
@@ -96,8 +97,9 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     input.dispatchEvent(new Event('change'));
   }
 
-  function fillValidForm(root: HTMLElement): void {
-    setInputValue(root, 'app-date-input input', '2026-08-01');
+  function fillValidForm(fixture: ReturnType<typeof createFixture>): void {
+    const root = fixture.nativeElement as HTMLElement;
+    seleccionarFechaDeInput(fixture, new Date(Date.UTC(2026, 7, 1)));
     setInputValue(root, 'app-number-input input', '5');
     clickChipInGroup(root, 0, 'Familia');
     clickChipInGroup(root, 1, 'Naturaleza');
@@ -117,7 +119,7 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
 
-    expect(root.querySelector<HTMLInputElement>('app-date-input input')?.value).toBe('2026-08-01');
+    expect(root.querySelector<HTMLInputElement>('app-date-input input')?.value).toBe('01/08/2026');
     expect(root.querySelector<HTMLInputElement>('app-number-input input')?.value).toBe('5');
 
     const familiaChip = Array.from(
@@ -137,7 +139,7 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    setInputValue(root, 'app-date-input input', '2026-08-01');
+    seleccionarFechaDeInput(fixture, new Date(Date.UTC(2026, 7, 1)));
     setInputValue(root, 'app-number-input input', '5');
     clickChipInGroup(root, 0, 'Familia');
 
@@ -152,7 +154,7 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    fillValidForm(root);
+    fillValidForm(fixture);
     await submitForm(fixture);
 
     expect(guardar).toHaveBeenCalledTimes(1);
@@ -223,7 +225,7 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    fillValidForm(root);
+    fillValidForm(fixture);
     await submitForm(fixture);
 
     expect(toastError).toHaveBeenCalledWith('Selecciona el tipo de viaje.');
