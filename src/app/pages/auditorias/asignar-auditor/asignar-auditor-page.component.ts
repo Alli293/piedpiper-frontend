@@ -188,6 +188,12 @@ export class AsignarAuditorPageComponent implements OnInit {
       // fallar, así que se relee la solicitud para mostrar la asignación real.
       if (err instanceof HttpErrorResponse && err.status === 409) {
         await this.cargarAsignacionExistente();
+        // Con la asignación real en pantalla, la alerta roja sobra y además se contradice con
+        // ella. No se puede limpiar en `seleccionar()` porque ese método corta apenas hay una
+        // asignación, así que quedaría visible para siempre. El toast ya avisó del conflicto.
+        if (this.hayAsignacion()) {
+          this.errorAsignacion.set(null);
+        }
       }
     } finally {
       this.enviando.set(false);
@@ -250,7 +256,7 @@ export class AsignarAuditorPageComponent implements OnInit {
   }
 }
 
-export function mensajeSolicitudEnviada(nombreAuditor: string): string {
+function mensajeSolicitudEnviada(nombreAuditor: string): string {
   return `Solicitud enviada a ${nombreAuditor}. Te notificaremos cuando responda.`;
 }
 

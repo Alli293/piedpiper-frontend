@@ -248,7 +248,7 @@ describe('AsignarAuditorPageComponent', () => {
     expect(botonAsignar()?.getAttribute('aria-label')).toBe('Asignar a Ana Mora');
   });
 
-  it('ante un 409 muestra el mensaje del backend y pasa a mostrar la asignacion existente', async () => {
+  it('ante un 409 avisa por toast y deja en pantalla solo la asignacion real', async () => {
     auditoriasService.asignarAuditor.mockReturnValue(
       throwError(
         () =>
@@ -270,12 +270,14 @@ describe('AsignarAuditorPageComponent', () => {
     botonAsignar()?.click();
     await estabilizar();
 
-    const alerta = raiz().querySelector('.ch-asignar__error');
-    expect(alerta?.getAttribute('role')).toBe('alert');
-    expect(alerta?.textContent?.trim()).toBe(
+    // El aviso del conflicto va por toast. La alerta roja se limpia al rehidratar: dejarla
+    // visible junto al panel de asignación pendiente se contradice, y como `seleccionar()` corta
+    // apenas hay asignación, nunca se podría limpiar después.
+    expect(ultimoToast().variant).toBe('error');
+    expect(ultimoToast().title).toBe(
       'Ya existe una solicitud de revisión pendiente con otro auditor.'
     );
-    expect(ultimoToast().variant).toBe('error');
+    expect(raiz().querySelector('.ch-asignar__error')).toBeNull();
 
     expect(auditoriasService.obtenerSolicitud).toHaveBeenCalledTimes(2);
     expect(raiz().querySelector('.ch-asignar__pendiente')?.textContent).toContain('Carla Rojas');

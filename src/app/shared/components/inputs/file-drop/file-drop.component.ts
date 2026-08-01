@@ -166,13 +166,16 @@ export class FileDropComponent {
     if (entrantes.length === 0) return;
 
     const aceptados: File[] = [];
-    let error = '';
+    // Un Set y no una variable: al soltar varios archivos que fallan por motivos distintos, una
+    // sola variable se pisa en cada vuelta y el usuario ve solo el último motivo, sin enterarse
+    // de los otros. Se muestran todos los motivos distintos, sin repetirlos.
+    const errores = new Set<string>();
     let disponibles = this.maxArchivos() - this.archivos().length;
 
     for (const archivo of entrantes) {
       const rechazo = await this.rechazoDe(archivo, disponibles);
       if (rechazo !== null) {
-        error = error || rechazo.mensaje;
+        errores.add(rechazo.mensaje);
         this.rechazado.emit({ nombre: archivo.name, ...rechazo });
         continue;
       }
@@ -180,7 +183,7 @@ export class FileDropComponent {
       disponibles -= 1;
     }
 
-    this.errorInterno.set(error);
+    this.errorInterno.set([...errores].join(' '));
     if (aceptados.length > 0) {
       this.archivos.update((archivos) => [...archivos, ...aceptados]);
     }

@@ -104,12 +104,31 @@ describe('FileDropComponent', () => {
     expect(mensajeError()).toBe('El archivo no puede superar 15 MB.');
   });
 
-  it('conserva el primer motivo cuando se rechazan archivos por causas distintas', async () => {
+  it('muestra todos los motivos cuando un lote se rechaza por razones distintas', async () => {
     const texto = new File(['x'], 'notas.txt', { type: 'text/plain' });
 
     await soltar(texto, crearPdf('grande.pdf', 16 * 1024 * 1024));
 
-    expect(mensajeError()).toBe('Solo se aceptan archivos en formato PDF.');
+    expect(nombresListados()).toEqual([]);
+    expect(mensajeError()).toContain('Solo se aceptan archivos en formato PDF.');
+    expect(mensajeError()).toContain('El archivo no puede superar 15 MB.');
+  });
+
+  it('no repite el mismo motivo aunque varios archivos fallen igual', async () => {
+    await soltar(crearPdf('a.pdf', 16 * 1024 * 1024), crearPdf('b.pdf', 20 * 1024 * 1024));
+
+    expect(mensajeError()).toBe('El archivo no puede superar 15 MB.');
+  });
+
+  it('la clave de seguimiento no cambia al eliminar un archivo del medio', async () => {
+    await soltar(crearPdf('primero.pdf'), crearPdf('segundo.pdf'), crearPdf('tercero.pdf'));
+    const clavesAntes = fixture.componentInstance['vistas']().map((vista) => vista.clave);
+
+    botonEliminar('primero.pdf')?.click();
+    fixture.detectChanges();
+
+    const clavesDespues = fixture.componentInstance['vistas']().map((vista) => vista.clave);
+    expect(clavesDespues).toEqual(clavesAntes.slice(1));
   });
 
   it('muestra el tamanio formateado de cada archivo', async () => {

@@ -12,7 +12,7 @@
       <p class="ch-asignar__estado ch-asignar__estado--terminal" role="alert">{{ mensaje }}</p>
     } @else {
       @if (asignacion(); as pendiente) {
-        <div class="ch-asignar__pendiente" role="status">
+        <div class="ch-asignar__pendiente" role="status" aria-live="polite">
           <app-avatar
             size="md"
             [initials]="pendiente.iniciales"
@@ -83,8 +83,11 @@
                 </div>
               }
 
-              <span class="ch-auditor-opcion__disponible ch-auditor-opcion__disponible--activo">
-                Disponible
+              <span
+                class="ch-auditor-opcion__disponible"
+                [class.ch-auditor-opcion__disponible--activo]="tarjeta.auditor.disponible"
+              >
+                {{ tarjeta.auditor.disponible ? 'Disponible' : 'No disponible' }}
               </span>
 
               @if (!hayAsignacion()) {
