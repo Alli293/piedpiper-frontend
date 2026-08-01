@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, input, signal } from '@angular/core';
 import { InsigniaEmpresa, NivelInsigniaEmpresa } from '../../../core/empresa/empresa.models';
-import { BadgeComponent, BadgeVariant } from '../badge/badge.component';
+import { BadgeComponent } from '../badge/badge.component';
 import { HeadingComponent } from '../heading/heading.component';
 import { IconComponent } from '../icon/icon.component';
 
@@ -46,28 +46,13 @@ export class InsigniasEmpresaListComponent {
     return labels[nivel];
   }
 
-  protected nivelVariant(nivel: NivelInsigniaEmpresa): BadgeVariant {
-    const variants: Record<NivelInsigniaEmpresa, BadgeVariant> = {
-      bronce: 'warning',
-      plata: 'info',
-      oro: 'success',
-    };
-    return variants[nivel];
-  }
-
   protected readonly cantidadActivas = computed(() => this.insigniasOrdenadas().length);
 
   protected llave(insignia: InsigniaEmpresa): string {
     return `${insignia.idInsignia}-${insignia.nivelInsignia}`;
   }
 
-  protected emisor(insignia: InsigniaEmpresa): string {
-    const nombre = insignia.nombre.toLowerCase();
-    if (nombre.includes('carbono neutral')) return 'DCC / MINAE via CarbonHub';
-    if (nombre.includes('energia')) return 'ICE / CarbonHub';
-    if (nombre.includes('reforestacion')) return 'FONAFIFO / CarbonHub';
-    if (nombre.includes('residuos')) return 'MINAE / CarbonHub';
-    if (nombre.includes('reporte')) return 'CarbonHub / Auditoria';
+  protected emisor(): string {
     return 'CarbonHub';
   }
 }

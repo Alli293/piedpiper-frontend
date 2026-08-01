@@ -75,7 +75,7 @@
 
                 <span class="ch-insignias-empresa__card-copy">
                   <strong>{{ insignia.nombre }}</strong>
-                  <span>{{ emisor(insignia) }}</span>
+                  <span>{{ emisor() }}</span>
                   <small>
                     <app-icon name="calendario" [size]="12" aria-hidden="true" />
                     {{ insignia.fechaObtencion | date: 'dd/MM/yyyy' }}
@@ -134,8 +134,7 @@
                     Emisor
                   </dt>
                   <dd>
-                    <strong>{{ emisor(insignia) }}</strong>
-                    <span>via CarbonHub</span>
+                    <strong>{{ emisor() }}</strong>
                   </dd>
                 </div>
                 <div>
