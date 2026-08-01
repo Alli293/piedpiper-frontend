@@ -4,6 +4,7 @@ import { Component, computed, effect, inject, signal, untracked } from '@angular
 import { form, FormField, required, schema } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { AuthSessionService } from '../../core/auth-session.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
 import { HeadingComponent } from '../../shared/components/heading/heading.component';
@@ -167,7 +168,6 @@ export class DashboardPageComponent {
   );
 
   protected readonly periodos = PERIODOS_DASHBOARD;
-
   protected readonly anioSeleccionado = computed(() => Number(this.periodoForm.anio().value()));
   protected readonly periodoSeleccionadoValue = computed(() => this.periodoSeleccionado());
 

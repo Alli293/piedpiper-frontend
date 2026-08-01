@@ -2,7 +2,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { BusquedaPerfilPublicoDTO, CertificacionPublica, PageResponse, PerfilPublicoDTO } from './perfil-publico.models';
+import {
+  BusquedaPerfilPublicoDTO,
+  CertificacionPublica,
+  InsigniaEmpresa,
+  PageResponse,
+  PerfilPublicoDTO,
+} from './perfil-publico.models';
 
 @Injectable({ providedIn: 'root' })
 export class PerfilPublicoService {
@@ -28,5 +34,11 @@ export class PerfilPublicoService {
       .set('page', page.toString())
       .set('size', size.toString());
     return this.http.get<PageResponse<BusquedaPerfilPublicoDTO>>(`${this.baseUrl}/buscar`, { params });
+  }
+
+  listarInsignias(slug: string): Observable<InsigniaEmpresa[]> {
+    return this.http.get<InsigniaEmpresa[]>(
+      `${this.baseUrl}/${encodeURIComponent(slug)}/insignias`
+    );
   }
 }

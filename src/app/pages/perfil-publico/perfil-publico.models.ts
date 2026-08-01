@@ -35,3 +35,5 @@ export interface PageResponse<T> {
   number: number;
   size: number;
 }
+
+export type { InsigniaEmpresa, NivelInsigniaEmpresa } from '../../core/empresa/empresa.models';

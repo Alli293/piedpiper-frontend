@@ -17,3 +17,13 @@ export interface ConfiguracionInicialEmpresaResponse {
   documentosPendientes: boolean;
   recienCreada: boolean;
 }
+
+export type NivelInsigniaEmpresa = 'bronce' | 'plata' | 'oro';
+
+export interface InsigniaEmpresa {
+  readonly idInsignia: number;
+  readonly nivelInsignia: NivelInsigniaEmpresa;
+  readonly nombre: string;
+  readonly descripcion: string;
+  readonly fechaObtencion: string;
+}

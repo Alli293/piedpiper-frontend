@@ -14,6 +14,7 @@ describe('buildSidebarConfig', () => {
       'dashboard',
       'emissions',
       'benchmark',
+      'insignias-empresa',
     ]);
   });
 
