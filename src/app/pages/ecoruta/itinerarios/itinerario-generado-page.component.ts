@@ -137,11 +137,7 @@ export class ItinerarioGeneradoPageComponent {
     if (err instanceof HttpErrorResponse && err.status === 403) {
       this.toastService.error(ERROR_ACCESO_DENEGADO, undefined, TOAST_DURATION_MS);
     } else if (err instanceof HttpErrorResponse && err.status >= 500) {
-      this.toastService.error(
-        apiErrorMessage(err) ?? ERROR_CARGA,
-        undefined,
-        TOAST_DURATION_MS
-      );
+      this.toastService.error(apiErrorMessage(err) ?? ERROR_CARGA, undefined, TOAST_DURATION_MS);
     } else {
       this.toastService.error(this.mensajeError(err));
     }

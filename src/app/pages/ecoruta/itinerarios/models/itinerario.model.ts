@@ -1,7 +1,4 @@
-import {
-  CertificacionActiva,
-  PuntuacionAmbientalResponse,
-} from './puntuacion-ambiental.model';
+import { CertificacionActiva, PuntuacionAmbientalResponse } from './puntuacion-ambiental.model';
 
 export interface ItinerarioActividad {
   nombre: string;
