@@ -13,8 +13,10 @@ import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell
 import { ToastService } from '../../../shared/services/toast.service';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import { PROVINCIA_OPTIONS } from '../models/preferencias-viaje.model';
+import { CertificacionesDetalleComponent } from './certificaciones-detalle/certificaciones-detalle.component';
 import { EcoRutaItinerariosService } from './ecoruta-itinerarios.service';
 import { Itinerario, ItinerarioActividad, ItinerarioDia } from './models/itinerario.model';
+import { PuntuacionAmbientalBadgeComponent } from './puntuacion-ambiental-badge/puntuacion-ambiental-badge.component';
 import { RefinamientoChatComponent } from './refinamiento-chat/refinamiento-chat.component';
 import { derivarEtiquetaRuta } from './utils/ruta-diaria.utils';
 
@@ -24,15 +26,19 @@ interface BandaEcoScore {
 }
 
 const ERROR_CARGA = 'No se pudo cargar el itinerario. Intenta nuevamente.';
+const ERROR_ACCESO_DENEGADO = 'No tienes permiso para acceder a este itinerario.';
+const TOAST_DURATION_MS = 5000;
 
 @Component({
   selector: 'app-itinerario-generado-page',
   imports: [
     BadgeComponent,
     ButtonComponent,
+    CertificacionesDetalleComponent,
     DatePipe,
     HeadingComponent,
     IconComponent,
+    PuntuacionAmbientalBadgeComponent,
     RefinamientoChatComponent,
     ShellLayoutComponent,
   ],
@@ -94,7 +100,7 @@ export class ItinerarioGeneradoPageComponent {
       this.itinerario.set(this.ordenar(itinerario));
     } catch (err: unknown) {
       this.errorCarga.set(true);
-      this.toastService.error(this.mensajeError(err));
+      this.mostrarToastError(err);
     } finally {
       this.cargando.set(false);
     }
@@ -125,6 +131,20 @@ export class ItinerarioGeneradoPageComponent {
         ),
       }));
     return { ...itinerario, dias };
+  }
+
+  private mostrarToastError(err: unknown): void {
+    if (err instanceof HttpErrorResponse && err.status === 403) {
+      this.toastService.error(ERROR_ACCESO_DENEGADO, undefined, TOAST_DURATION_MS);
+    } else if (err instanceof HttpErrorResponse && err.status >= 500) {
+      this.toastService.error(
+        apiErrorMessage(err) ?? ERROR_CARGA,
+        undefined,
+        TOAST_DURATION_MS
+      );
+    } else {
+      this.toastService.error(this.mensajeError(err));
+    }
   }
 
   private mensajeError(err: unknown): string {
