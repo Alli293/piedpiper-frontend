@@ -260,6 +260,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'empresas-verificadas',
+    loadComponent: () =>
+      import('./pages/empresas-verificadas/empresas-verificadas-page.component').then(
+        (m) => m.EmpresasVerificadasPageComponent
+      ),
+  },
+  {
     path: 'ui-kit',
     loadComponent: () =>
       import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),

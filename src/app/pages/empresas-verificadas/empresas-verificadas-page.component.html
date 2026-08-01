@@ -1,0 +1,95 @@
+<div class="ch-empresas-verificadas">
+  <!-- Hero section -->
+  <section class="ch-empresas-verificadas__hero">
+    <div class="ch-empresas-verificadas__hero-content">
+      <h1 class="ch-empresas-verificadas__title">Empresas verificadas</h1>
+      <p class="ch-empresas-verificadas__subtitle">
+        Explorá el catálogo de empresas con reputación ecológica verificada en CarbonHub.
+        Buscá por nombre y conocé su nivel de compromiso ambiental.
+      </p>
+    </div>
+  </section>
+
+  <!-- Search section -->
+  <section class="ch-empresas-verificadas__search" aria-label="Búsqueda de empresas">
+    <div class="ch-empresas-verificadas__search-wrapper">
+      <input
+        type="text"
+        class="ch-empresas-verificadas__input"
+        placeholder="Buscar empresa por nombre..."
+        [value]="termino()"
+        (input)="onInput($event)"
+        aria-label="Buscar empresa por nombre"
+      />
+      @if (cargando()) {
+        <span class="ch-empresas-verificadas__spinner" aria-hidden="true"></span>
+      }
+    </div>
+    @if (!buscado() && resultados().length === 0) {
+      <p class="ch-empresas-verificadas__hint">
+        Busca una empresa por nombre para encontrar su perfil de reputación ecológica.
+      </p>
+    }
+  </section>
+
+  <!-- Results grid -->
+  @if (resultados().length > 0) {
+    <section class="ch-empresas-verificadas__results" aria-label="Resultados de búsqueda">
+      <div class="ch-empresas-verificadas__grid">
+        @for (empresa of resultados(); track empresa.slug) {
+          <article class="ch-empresas-verificadas__card">
+            <div class="ch-empresas-verificadas__card-body">
+              <h2 class="ch-empresas-verificadas__card-nombre">{{ empresa.nombreEmpresa }}</h2>
+              <p class="ch-empresas-verificadas__card-sector">{{ empresa.sectorIndustrial }}</p>
+              <span
+                class="ch-empresas-verificadas__badge ch-empresas-verificadas__badge--{{ getNivelClase(empresa.nivelEcologico) }}"
+              >
+                {{ empresa.nivelEcologico }}
+              </span>
+            </div>
+            <a
+              class="ch-empresas-verificadas__card-link"
+              [routerLink]="['/empresa', empresa.slug, 'reputacion']"
+            >
+              Ver perfil →
+            </a>
+          </article>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- No results -->
+  @if (buscado() && resultados().length === 0 && !cargando() && termino().length >= 3) {
+    <p class="ch-empresas-verificadas__empty" role="status">No se encontraron empresas.</p>
+  }
+
+  <!-- Introductory section -->
+  @if (!buscado() || termino().length < 3) {
+    <section class="ch-empresas-verificadas__intro">
+      <div class="ch-empresas-verificadas__intro-grid">
+        <div class="ch-empresas-verificadas__intro-card">
+          <h3 class="ch-empresas-verificadas__intro-title">¿Qué es una empresa verificada?</h3>
+          <p class="ch-empresas-verificadas__intro-text">
+            Son organizaciones que han registrado y certificado su huella de carbono a través de
+            CarbonHub, con auditorías realizadas por profesionales certificados.
+          </p>
+        </div>
+        <div class="ch-empresas-verificadas__intro-card">
+          <h3 class="ch-empresas-verificadas__intro-title">Niveles ecológicos</h3>
+          <p class="ch-empresas-verificadas__intro-text">
+            Cada empresa obtiene un nivel (Bronce, Plata, Oro o Platino) según su compromiso con
+            la reducción de emisiones y sus certificaciones vigentes.
+          </p>
+        </div>
+        <div class="ch-empresas-verificadas__intro-card">
+          <h3 class="ch-empresas-verificadas__intro-title">Transparencia ambiental</h3>
+          <p class="ch-empresas-verificadas__intro-text">
+            Los perfiles públicos permiten a consumidores, inversionistas y aliados conocer el
+            desempeño ambiental real de cada empresa.
+          </p>
+        </div>
+      </div>
+    </section>
+  }
+</div>

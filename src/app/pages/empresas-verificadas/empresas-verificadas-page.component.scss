@@ -1,0 +1,276 @@
+@use '../../shared/styles/mixins';
+
+.ch-empresas-verificadas {
+  min-height: 100vh;
+  background: var(--ch-bg-main);
+}
+
+// === Hero ===
+.ch-empresas-verificadas__hero {
+  background: var(--ch-green-dark, #14603f);
+  padding: var(--ch-space-10) var(--ch-space-4) var(--ch-space-8);
+  text-align: center;
+}
+
+.ch-empresas-verificadas__hero-content {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.ch-empresas-verificadas__title {
+  font-family: var(--ch-font-heading);
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 var(--ch-space-3);
+
+  @include mixins.desktop-up {
+    font-size: 2.5rem;
+  }
+}
+
+.ch-empresas-verificadas__subtitle {
+  font-family: var(--ch-font-body);
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+  margin: 0;
+}
+
+// === Search ===
+.ch-empresas-verificadas__search {
+  max-width: 560px;
+  margin: calc(-1 * var(--ch-space-5)) auto 0;
+  padding: 0 var(--ch-space-4);
+  position: relative;
+  z-index: 1;
+}
+
+.ch-empresas-verificadas__search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ch-empresas-verificadas__input {
+  width: 100%;
+  height: 52px;
+  padding: 0 var(--ch-space-5);
+  font-family: var(--ch-font-body);
+  font-size: 1rem;
+  color: var(--ch-text-primary);
+  background: var(--ch-bg-white);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-lg, 12px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: border-color var(--ch-transition);
+
+  &::placeholder {
+    color: var(--ch-text-muted);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--ch-green);
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.08),
+      0 0 0 3px color-mix(in srgb, var(--ch-blue-mid) 15%, transparent);
+  }
+}
+
+.ch-empresas-verificadas__spinner {
+  position: absolute;
+  right: var(--ch-space-4);
+  display: block;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--ch-border);
+  border-top-color: var(--ch-green);
+  border-radius: 50%;
+  animation: ev-spin 0.7s linear infinite;
+}
+
+@keyframes ev-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ch-empresas-verificadas__hint {
+  text-align: center;
+  font-family: var(--ch-font-body);
+  font-size: 0.875rem;
+  color: var(--ch-text-muted);
+  margin: var(--ch-space-4) 0 0;
+}
+
+// === Results grid ===
+.ch-empresas-verificadas__results {
+  max-width: 1080px;
+  margin: var(--ch-space-8) auto 0;
+  padding: 0 var(--ch-space-4);
+}
+
+.ch-empresas-verificadas__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ch-space-4);
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include mixins.desktop-up {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// === Card ===
+.ch-empresas-verificadas__card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--ch-bg-white);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  padding: var(--ch-space-5);
+  transition:
+    box-shadow var(--ch-transition),
+    transform var(--ch-transition);
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+}
+
+.ch-empresas-verificadas__card-body {
+  flex: 1;
+}
+
+.ch-empresas-verificadas__card-nombre {
+  font-family: var(--ch-font-heading);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--ch-text-primary);
+  margin: 0 0 var(--ch-space-1);
+}
+
+.ch-empresas-verificadas__card-sector {
+  font-family: var(--ch-font-body);
+  font-size: 0.8125rem;
+  color: var(--ch-text-secondary);
+  margin: 0 0 var(--ch-space-3);
+}
+
+// === Badge ===
+.ch-empresas-verificadas__badge {
+  display: inline-block;
+  font-family: var(--ch-font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: var(--ch-space-1) var(--ch-space-2);
+  border-radius: var(--ch-radius-sm, 4px);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+
+  &--sin-nivel {
+    background: var(--ch-bg-muted, #f0f0f0);
+    color: var(--ch-text-muted);
+  }
+
+  &--bronce {
+    background: #fef3e2;
+    color: #92400e;
+  }
+
+  &--plata {
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  &--oro {
+    background: #fef9c3;
+    color: #854d0e;
+  }
+
+  &--platino {
+    background: #ede9fe;
+    color: #5b21b6;
+  }
+}
+
+// === Card link ===
+.ch-empresas-verificadas__card-link {
+  display: inline-block;
+  margin-top: var(--ch-space-4);
+  font-family: var(--ch-font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ch-green);
+  text-decoration: none;
+  transition: color var(--ch-transition);
+
+  &:hover {
+    color: var(--ch-green-dark, #14603f);
+  }
+
+  &:focus-visible {
+    @include mixins.focus-ring;
+    border-radius: var(--ch-radius-sm, 4px);
+  }
+}
+
+// === Empty state ===
+.ch-empresas-verificadas__empty {
+  text-align: center;
+  font-family: var(--ch-font-body);
+  font-size: 0.9375rem;
+  color: var(--ch-text-muted);
+  margin: var(--ch-space-8) auto;
+  padding: 0 var(--ch-space-4);
+}
+
+// === Intro section ===
+.ch-empresas-verificadas__intro {
+  max-width: 1080px;
+  margin: var(--ch-space-10) auto;
+  padding: 0 var(--ch-space-4);
+}
+
+.ch-empresas-verificadas__intro-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ch-space-4);
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include mixins.desktop-up {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.ch-empresas-verificadas__intro-card {
+  background: var(--ch-bg-white);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  padding: var(--ch-space-5);
+}
+
+.ch-empresas-verificadas__intro-title {
+  font-family: var(--ch-font-heading);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ch-text-primary);
+  margin: 0 0 var(--ch-space-2);
+}
+
+.ch-empresas-verificadas__intro-text {
+  font-family: var(--ch-font-body);
+  font-size: 0.8125rem;
+  color: var(--ch-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
