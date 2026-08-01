@@ -106,15 +106,12 @@ describe('PerfilPublicoService', () => {
         error: (err) => (error = err),
       });
 
-      httpMock
-        .expectOne(`${baseUrl}/cafe-del-valle`)
-        .flush(
-          {
-            mensaje:
-              'No fue posible cargar el perfil en este momento. Intenta nuevamente más tarde.',
-          },
-          { status: 500, statusText: 'Internal Server Error' }
-        );
+      httpMock.expectOne(`${baseUrl}/cafe-del-valle`).flush(
+        {
+          mensaje: 'No fue posible cargar el perfil en este momento. Intenta nuevamente más tarde.',
+        },
+        { status: 500, statusText: 'Internal Server Error' }
+      );
 
       expect(error).toBeInstanceOf(HttpErrorResponse);
       expect((error as HttpErrorResponse).status).toBe(500);
