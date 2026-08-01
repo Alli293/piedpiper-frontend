@@ -20,3 +20,18 @@ export interface CertificacionPublica {
   // en el estado neutral por defecto, no en un error de tipos.
   estado: string;
 }
+
+export interface BusquedaPerfilPublicoDTO {
+  nombreEmpresa: string;
+  slug: string;
+  sectorIndustrial: string;
+  nivelEcologico: string;
+}
+
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}

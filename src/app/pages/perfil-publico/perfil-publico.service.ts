@@ -1,8 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CertificacionPublica, PerfilPublicoDTO } from './perfil-publico.models';
+import { BusquedaPerfilPublicoDTO, CertificacionPublica, PageResponse, PerfilPublicoDTO } from './perfil-publico.models';
 
 @Injectable({ providedIn: 'root' })
 export class PerfilPublicoService {
@@ -20,5 +20,13 @@ export class PerfilPublicoService {
     return this.http.get<CertificacionPublica[]>(
       `${this.baseUrl}/${encodeURIComponent(slug)}/certificaciones`
     );
+  }
+
+  buscarEmpresas(nombre: string, page = 0, size = 10): Observable<PageResponse<BusquedaPerfilPublicoDTO>> {
+    const params = new HttpParams()
+      .set('nombre', nombre)
+      .set('page', page.toString())
+      .set('size', size.toString());
+    return this.http.get<PageResponse<BusquedaPerfilPublicoDTO>>(`${this.baseUrl}/buscar`, { params });
   }
 }
