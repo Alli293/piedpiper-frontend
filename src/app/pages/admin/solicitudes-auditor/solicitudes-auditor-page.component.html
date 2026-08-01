@@ -71,72 +71,61 @@
   }
 
   @if (solicitudEnRevision(); as solicitud) {
-    <div class="solicitudes__overlay" (click)="cerrarRevision()">
-      <div
-        #modalRevision
-        class="solicitudes__modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="revision-titulo"
-        tabindex="-1"
-        (click)="$event.stopPropagation()"
-        (keydown)="alPresionarTeclaModal($event)"
-      >
-        <h2 class="solicitudes__modal-title" id="revision-titulo">Revisar solicitud</h2>
+    <app-modal labelledBy="revisar-solicitud-title" size="md" (close)="cerrarRevision()">
+      <h2 id="revisar-solicitud-title" class="solicitudes__modal-title">Revisar solicitud</h2>
 
-        <dl class="solicitudes__datos">
-          <div class="solicitudes__dato">
-            <dt>Auditor</dt>
-            <dd>{{ solicitud.nombreAuditor }}</dd>
-          </div>
-          <div class="solicitudes__dato">
-            <dt>Correo</dt>
-            <dd>{{ solicitud.email }}</dd>
-          </div>
-          <div class="solicitudes__dato">
-            <dt>Fecha de solicitud</dt>
-            <dd>{{ solicitud.fechaSolicitud | date: 'dd/MM/yyyy HH:mm' }}</dd>
-          </div>
-        </dl>
+      <dl class="solicitudes__datos">
+        <div class="solicitudes__dato">
+          <dt>Auditor</dt>
+          <dd>{{ solicitud.nombreAuditor }}</dd>
+        </div>
+        <div class="solicitudes__dato">
+          <dt>Correo</dt>
+          <dd>{{ solicitud.email }}</dd>
+        </div>
+        <div class="solicitudes__dato">
+          <dt>Fecha de solicitud</dt>
+          <dd>{{ solicitud.fechaSolicitud | date: 'dd/MM/yyyy HH:mm' }}</dd>
+        </div>
+      </dl>
 
-        <form novalidate (submit)="handleSubmit($event)">
-          <app-radio-group-field
-            label="Decisión"
-            [options]="decisionOptions"
-            [formField]="decisionForm.decision"
-            [disabled]="enviando()"
+      <form class="solicitudes__form" novalidate (submit)="handleSubmit($event)">
+        <app-radio-group-field
+          label="Decisión"
+          [options]="decisionOptions"
+          [formField]="decisionForm.decision"
+          [disabled]="enviando()"
+        />
+
+        @if (esRechazo()) {
+          <app-textarea
+            label="Motivo del rechazo"
+            placeholder="Explica por qué se rechaza esta solicitud (mínimo 10 caracteres)"
+            [rows]="3"
+            [formField]="decisionForm.motivo"
+            [error]="errorMotivo()"
           />
+        }
 
-          @if (esRechazo()) {
-            <app-textarea
-              label="Motivo del rechazo"
-              placeholder="Explica por qué se rechaza esta solicitud (mínimo 10 caracteres)"
-              [rows]="3"
-              [formField]="decisionForm.motivo"
-              [error]="errorMotivo()"
-            />
-          }
-
-          <div class="solicitudes__modal-actions">
-            <app-button
-              variant="secondary"
-              type="button"
-              [disabled]="enviando()"
-              (click)="cerrarRevision()"
-            >
-              Cancelar
-            </app-button>
-            <app-button
-              variant="primary"
-              type="submit"
-              [disabled]="!puedeConfirmar()"
-              [loading]="enviando()"
-            >
-              Confirmar decisión
-            </app-button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div class="solicitudes__modal-actions">
+          <app-button
+            variant="secondary"
+            type="button"
+            [disabled]="enviando()"
+            (click)="cerrarRevision()"
+          >
+            Cancelar
+          </app-button>
+          <app-button
+            variant="primary"
+            type="submit"
+            [disabled]="!puedeConfirmar()"
+            [loading]="enviando()"
+          >
+            Confirmar decisión
+          </app-button>
+        </div>
+      </form>
+    </app-modal>
   }
 </main>

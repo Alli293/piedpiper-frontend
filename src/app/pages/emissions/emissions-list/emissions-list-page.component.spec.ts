@@ -147,10 +147,10 @@ describe('EmissionsListPageComponent', () => {
     root.querySelector<HTMLButtonElement>('.ch-emissions-list-page__delete')?.click();
     fixture.detectChanges();
 
-    root.querySelector<HTMLElement>('.ch-emissions-list-page__modal-backdrop')?.click();
+    root.querySelector<HTMLElement>('.ch-modal__backdrop')?.click();
     fixture.detectChanges();
 
-    expect(root.querySelector('.ch-emissions-list-page__modal')).toBeNull();
+    expect(root.querySelector('[role="dialog"]')).toBeNull();
     expect(eliminarEmision).not.toHaveBeenCalled();
   });
 
@@ -162,11 +162,11 @@ describe('EmissionsListPageComponent', () => {
     fixture.detectChanges();
 
     root
-      .querySelector<HTMLElement>('.ch-emissions-list-page__modal')
+      .querySelector<HTMLElement>('[role="dialog"]')
       ?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     fixture.detectChanges();
 
-    expect(root.querySelector('.ch-emissions-list-page__modal')).toBeNull();
+    expect(root.querySelector('[role="dialog"]')).toBeNull();
     expect(eliminarEmision).not.toHaveBeenCalled();
   });
 

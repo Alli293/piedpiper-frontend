@@ -1,10 +1,11 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-landing-cta',
-  imports: [RouterLink],
+  imports: [RouterLink, IconComponent],
   templateUrl: './landing-cta.component.html',
   styleUrl: './landing-cta.component.scss',
 })

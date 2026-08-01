@@ -81,25 +81,6 @@
   text-align: right;
 }
 
-.invitaciones__overlay {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--ch-space-5);
-  background: var(--ch-overlay-scrim);
-  z-index: var(--ch-z-overlay);
-}
-
-.invitaciones__modal {
-  width: 100%;
-  max-width: 420px;
-  padding: var(--ch-space-6);
-  background: var(--ch-bg-white);
-  border-radius: var(--ch-radius-lg);
-}
-
 .invitaciones__modal-title {
   margin: 0 0 var(--ch-space-3);
   font-family: var(--ch-font-heading);

@@ -25,7 +25,7 @@ import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.compo
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { apiErrorMessage } from '../../shared/utils/http-error.utils';
-import { inicialesDe } from '../../shared/utils/iniciales.utils';
+import { initialsFromNombreCompleto } from '../../shared/utils/initials.utils';
 import { AuditoresService } from './auditores.service';
 import {
   AuditorResumen,
@@ -408,7 +408,7 @@ export class DirectorioAuditoresPageComponent {
       auditor.aniosExperiencia !== null ? `${auditor.aniosExperiencia} años exp.` : null;
     return {
       auditor,
-      iniciales: inicialesDe(auditor.nombre),
+      iniciales: initialsFromNombreCompleto(auditor.nombre),
       estrellas: Array.from({ length: TOTAL_ESTRELLAS }, (_, indice) => indice < redondeada),
       ubicacion: [provincia, experiencia]
         .filter((parte): parte is string => parte !== null)

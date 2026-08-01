@@ -224,28 +224,6 @@
   text-align: center;
 }
 
-.ch-emissions-list-page__modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  display: grid;
-  place-items: center;
-  padding: var(--ch-space-4);
-  background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(2px);
-}
-
-.ch-emissions-list-page__modal {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ch-space-4);
-  width: min(420px, 100%);
-  padding: var(--ch-space-6);
-  border-radius: var(--ch-radius-md);
-  background: var(--ch-bg-white);
-  box-shadow: var(--ch-shadow-lg);
-}
-
 .ch-emissions-list-page__modal-icon {
   display: grid;
   place-items: center;

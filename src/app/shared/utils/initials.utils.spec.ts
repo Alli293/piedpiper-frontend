@@ -1,4 +1,4 @@
-import { initialsFrom, userInitialsFrom } from './initials.utils';
+import { initialsFrom, initialsFromNombreCompleto, userInitialsFrom } from './initials.utils';
 
 describe('initialsFrom', () => {
   it('toma la primera letra de la primera y la última palabra', () => {
@@ -49,5 +49,47 @@ describe('userInitialsFrom', () => {
 
   it('ignora espacios en blanco alrededor del nombre', () => {
     expect(userInitialsFrom('  Carolina  ', '  Vindas  ')).toBe('CV');
+  });
+});
+
+describe('initialsFromNombreCompleto', () => {
+  it('con nombre y dos apellidos, ignora el segundo nombre', () => {
+    expect(initialsFromNombreCompleto('Juan Carlos Pérez Mora')).toBe('JP');
+  });
+
+  it('con un nombre y dos apellidos', () => {
+    expect(initialsFromNombreCompleto('Juan Pérez Mora')).toBe('JP');
+  });
+
+  it('con nombre y un solo apellido', () => {
+    expect(initialsFromNombreCompleto('Juan Pérez')).toBe('JP');
+  });
+
+  it('con una sola palabra toma sus dos primeras letras', () => {
+    expect(initialsFromNombreCompleto('Juan')).toBe('JU');
+  });
+
+  it('con una sola palabra de una letra no revienta', () => {
+    expect(initialsFromNombreCompleto('J')).toBe('J');
+  });
+
+  it('retorna US para un valor vacío', () => {
+    expect(initialsFromNombreCompleto('')).toBe('US');
+  });
+
+  it('retorna US cuando el valor solo tiene espacios', () => {
+    expect(initialsFromNombreCompleto('   ')).toBe('US');
+  });
+
+  it('ignora espacios repetidos y a los extremos', () => {
+    expect(initialsFromNombreCompleto('  Juan   Carlos  Pérez   Mora  ')).toBe('JP');
+  });
+
+  it('conserva acentos y los pasa a mayúscula', () => {
+    expect(initialsFromNombreCompleto('ana gómez')).toBe('AG');
+  });
+
+  it('con tres nombres y dos apellidos sigue tomando el primer nombre y el primer apellido', () => {
+    expect(initialsFromNombreCompleto('María José del Carmen Solís Vega')).toBe('MS');
   });
 });
