@@ -1,5 +1,96 @@
 @use '../../shared/styles/mixins';
 
+// === Header ===
+.ch-empresas-verificadas__header {
+  background: var(--ch-dark, #1a2332);
+  padding: 0 var(--ch-space-4);
+}
+
+.ch-empresas-verificadas__header-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 56px;
+  gap: var(--ch-space-4);
+}
+
+.ch-empresas-verificadas__brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.ch-empresas-verificadas__header-nav {
+  display: none;
+  align-items: center;
+  gap: var(--ch-space-4);
+
+  @include mixins.desktop-up {
+    display: flex;
+  }
+}
+
+.ch-empresas-verificadas__header-link {
+  font-family: var(--ch-font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color var(--ch-transition);
+
+  &:hover {
+    color: #fff;
+  }
+
+  &--active {
+    color: #fff;
+    font-weight: 600;
+  }
+}
+
+.ch-empresas-verificadas__header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-3);
+}
+
+.ch-empresas-verificadas__header-signin {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-1);
+  font-family: var(--ch-font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  transition: color var(--ch-transition);
+
+  &:hover {
+    color: #fff;
+  }
+}
+
+.ch-empresas-verificadas__header-register {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-1);
+  font-family: var(--ch-font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ch-text-on-dark);
+  background: var(--ch-green);
+  padding: var(--ch-space-2) var(--ch-space-3);
+  border-radius: var(--ch-radius-md);
+  text-decoration: none;
+  transition: background-color var(--ch-transition);
+
+  &:hover {
+    background: var(--ch-green-dark);
+  }
+}
+
 .ch-empresas-verificadas {
   min-height: 100vh;
   background: var(--ch-bg-main);

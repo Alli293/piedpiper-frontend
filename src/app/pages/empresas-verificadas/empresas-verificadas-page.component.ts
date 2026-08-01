@@ -6,13 +6,15 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 import { BusquedaPerfilPublicoDTO, PageResponse } from '../perfil-publico/perfil-publico.models';
 import { PerfilPublicoService } from '../perfil-publico/perfil-publico.service';
+import { IconComponent } from '../../shared/components/icon/icon.component';
+import { LogoComponent } from '../../shared/components/logo/logo.component';
 
 @Component({
   selector: 'app-empresas-verificadas-page',
   standalone: true,
   templateUrl: './empresas-verificadas-page.component.html',
   styleUrl: './empresas-verificadas-page.component.scss',
-  imports: [RouterLink],
+  imports: [RouterLink, IconComponent, LogoComponent],
 })
 export class EmpresasVerificadasPageComponent implements OnDestroy {
   private readonly perfilService = inject(PerfilPublicoService);

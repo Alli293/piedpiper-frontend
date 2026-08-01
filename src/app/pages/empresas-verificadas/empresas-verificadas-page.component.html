@@ -1,4 +1,27 @@
 <div class="ch-empresas-verificadas">
+  <!-- Header nav (same as landing) -->
+  <header class="ch-empresas-verificadas__header">
+    <div class="ch-empresas-verificadas__header-wrap">
+      <a class="ch-empresas-verificadas__brand" routerLink="/" aria-label="CarbonHub — inicio">
+        <app-logo variant="on-dark" [iconSize]="28" textSize="17px" gap="9px" />
+      </a>
+      <nav class="ch-empresas-verificadas__header-nav" aria-label="Secciones">
+        <a class="ch-empresas-verificadas__header-link" routerLink="/">Para empresas</a>
+        <a class="ch-empresas-verificadas__header-link" routerLink="/">Auditores</a>
+        <a class="ch-empresas-verificadas__header-link" routerLink="/">EcoRuta</a>
+        <a class="ch-empresas-verificadas__header-link ch-empresas-verificadas__header-link--active" routerLink="/empresas-verificadas">Empresas verificadas</a>
+      </nav>
+      <div class="ch-empresas-verificadas__header-right">
+        <a class="ch-empresas-verificadas__header-signin" routerLink="/login">
+          <app-icon name="login" [size]="16" /> Iniciar sesión
+        </a>
+        <a class="ch-empresas-verificadas__header-register" routerLink="/registro/empresa">
+          <app-icon name="empresa" [size]="16" /> Registrar mi empresa
+        </a>
+      </div>
+    </div>
+  </header>
+
   <!-- Hero section -->
   <section class="ch-empresas-verificadas__hero">
     <div class="ch-empresas-verificadas__hero-content">
