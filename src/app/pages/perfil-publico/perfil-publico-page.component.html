@@ -60,6 +60,7 @@
       </section>
 
       <section class="perfil-publico__resumen" aria-label="Resumen de reputación">
+        <h2 class="perfil-publico__section-title">Resumen</h2>
         <div class="perfil-publico__stat">
           <span class="perfil-publico__stat-value">{{ formatNumero(perfil()?.certificacionesVigentes) }}</span>
           <span class="perfil-publico__stat-label">Certificaciones vigentes</span>
@@ -108,9 +109,11 @@
       <section class="perfil-publico__tab-content" aria-live="polite">
         @switch (seccionActiva()) {
           @case ('certificaciones') {
+            <h2 class="perfil-publico__section-title">Historial de Certificaciones</h2>
             <app-certificaciones-publicas-page [slug]="slug" />
           }
           @case ('insignias') {
+            <h2 class="perfil-publico__section-title">Insignias</h2>
             <div class="perfil-publico__seccion-placeholder">
               <app-icon name="insignias" [size]="48" aria-hidden="true" />
               <p class="perfil-publico__seccion-placeholder-text">Próximamente</p>
@@ -120,6 +123,7 @@
             </div>
           }
           @case ('evolucion') {
+            <h2 class="perfil-publico__section-title">Evolución de Huella</h2>
             <div class="perfil-publico__seccion-placeholder">
               <app-icon name="emisiones" [size]="48" aria-hidden="true" />
               <p class="perfil-publico__seccion-placeholder-text">Próximamente</p>

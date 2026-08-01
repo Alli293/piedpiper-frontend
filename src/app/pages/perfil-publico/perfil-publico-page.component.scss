@@ -200,6 +200,15 @@
   gap: var(--ch-space-4);
 }
 
+.perfil-publico__section-title {
+  font-family: var(--ch-font-heading);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--ch-text-primary);
+  margin: 0 0 var(--ch-space-4);
+  grid-column: 1 / -1;
+}
+
 .perfil-publico__stat {
   display: flex;
   flex-direction: column;

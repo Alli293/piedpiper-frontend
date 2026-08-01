@@ -1,6 +1,7 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Meta, Title } from '@angular/platform-browser';
 
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
 import { CertificacionesPublicasPageComponent } from './certificaciones/certificaciones-publicas-page.component';
@@ -32,6 +33,9 @@ const NIVEL_MAP: Record<string, NivelConfig> = {
 export class PerfilPublicoPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly perfilService = inject(PerfilPublicoService);
+  private readonly meta = inject(Meta);
+  private readonly titleService = inject(Title);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected estado = signal<'cargando' | 'exito' | 'error404' | 'error500'>('cargando');
   protected perfil = signal<PerfilPublicoDTO | null>(null);
@@ -44,6 +48,7 @@ export class PerfilPublicoPageComponent {
 
   constructor() {
     this.cargar();
+    this.destroyRef.onDestroy(() => this.limpiarMetaTags());
   }
 
   protected cambiarSeccion(seccion: SeccionActiva): void {
@@ -58,6 +63,7 @@ export class PerfilPublicoPageComponent {
       next: (dto) => {
         this.perfil.set(dto);
         this.estado.set('exito');
+        this.actualizarMetaTags(dto, slug);
       },
       error: (err: unknown) => {
         if (err instanceof HttpErrorResponse && err.status === 404) {
@@ -102,5 +108,29 @@ export class PerfilPublicoPageComponent {
 
   protected get esSinNivel(): boolean {
     return this.perfil()?.nivelEcologico === 'Sin nivel';
+  }
+
+  private actualizarMetaTags(dto: PerfilPublicoDTO, slug: string): void {
+    this.titleService.setTitle(`${dto.nombreEmpresa} — Reputación Ecológica | CarbonHub`);
+    this.meta.updateTag({ property: 'og:title', content: dto.nombreEmpresa });
+    this.meta.updateTag({
+      property: 'og:description',
+      content: `Perfil de reputación ecológica de ${dto.nombreEmpresa} — Nivel ${dto.nivelEcologico}`,
+    });
+    this.meta.updateTag({
+      property: 'og:image',
+      content: dto.logoUrl ?? '/assets/images/default-og-image.png',
+    });
+    this.meta.updateTag({
+      property: 'og:url',
+      content: `/empresa/${slug}/reputacion`,
+    });
+  }
+
+  private limpiarMetaTags(): void {
+    this.meta.removeTag("property='og:title'");
+    this.meta.removeTag("property='og:description'");
+    this.meta.removeTag("property='og:image'");
+    this.meta.removeTag("property='og:url'");
   }
 }
