@@ -41,7 +41,11 @@
       <app-insignias-empresa-list
         titulo="Insignias activas"
         descripcion="Reconocimientos vigentes emitidos como credenciales verificables. Cualquier persona puede comprobar su autenticidad de forma independiente."
+        [accionesPrivadas]="true"
         [insignias]="insignias()"
+        (descargarJsonLd)="descargarJsonLd($event)"
+        (descargarJwt)="descargarJwt($event)"
+        (compartirLinkedIn)="compartirLinkedIn($event)"
         (verificarOpenBadges)="verificarOpenBadges($event)"
       />
     </div>

@@ -58,7 +58,7 @@ describe('InsigniasEmpresaListComponent', () => {
     expect(tarjetas[0].textContent).toContain('Energia renovable');
     expect(tarjetas[1].textContent).toContain('Carbono Neutral');
     expect(root.textContent).toContain('OpenBadges 3.0');
-    expect(root.textContent).toContain('ICE / CarbonHub');
+    expect(root.textContent).toContain('CarbonHub');
   });
 
   it('muestra el detalle de la insignia seleccionada', () => {
@@ -73,7 +73,8 @@ describe('InsigniasEmpresaListComponent', () => {
 
     const detalle = root.querySelector('.ch-insignias-empresa__detalle') as HTMLElement;
     expect(detalle.textContent).toContain('Carbono Neutral');
-    expect(detalle.textContent).toContain('DCC / MINAE via CarbonHub');
+    expect(detalle.textContent).toContain('CarbonHub');
+    expect(detalle.textContent).not.toContain('via CarbonHub');
   });
 
   it('muestra estado vacio cuando no hay insignias activas', () => {

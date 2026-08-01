@@ -66,6 +66,40 @@ describe('PerfilPublicoService', () => {
     expect(resultado).toEqual([insignia]);
   });
 
+  it('descarga una insignia publica como blob JSON-LD', () => {
+    const urlVerificacion =
+      'https://carbonhub.test/api/insignias/11111111-1111-1111-1111-111111111111/verificacion';
+    let recibida: Blob | undefined;
+
+    service.descargarInsigniaJsonLd(urlVerificacion).subscribe((valor) => (recibida = valor));
+
+    const req = httpMock.expectOne(urlVerificacion);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.responseType).toBe('blob');
+
+    const blob = new Blob(['{}'], { type: 'application/ld+json' });
+    req.flush(blob);
+
+    expect(recibida).toBe(blob);
+  });
+
+  it('descarga una insignia publica como blob JWT verificable', () => {
+    const urlJwt =
+      'https://carbonhub.test/api/insignias/11111111-1111-1111-1111-111111111111/verificacion.jwt';
+    let recibida: Blob | undefined;
+
+    service.descargarInsigniaJwt(urlJwt).subscribe((valor) => (recibida = valor));
+
+    const req = httpMock.expectOne(urlJwt);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.responseType).toBe('blob');
+
+    const blob = new Blob(['header.payload.signature'], { type: 'application/vc+ld+json+jwt' });
+    req.flush(blob);
+
+    expect(recibida).toBe(blob);
+  });
+
   it('propaga un 404 al llamador en vez de silenciarlo', () => {
     let error: unknown;
     service.listarCertificaciones('no-existe').subscribe({

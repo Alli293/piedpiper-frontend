@@ -189,6 +189,37 @@
     var(--ch-shadow-sm);
 }
 
+.ch-insignias-empresa__card-status {
+  position: absolute;
+  top: var(--ch-space-3);
+  right: var(--ch-space-3);
+  z-index: 2;
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--ch-green) 42%, var(--ch-border));
+  border-radius: var(--ch-radius-full);
+  background: var(--ch-green);
+  color: var(--ch-bg-white);
+  box-shadow: var(--ch-shadow-sm);
+}
+
+.ch-insignias-empresa__card-status--link {
+  border-color: var(--ch-border);
+  background: color-mix(in srgb, var(--ch-bg-main) 54%, var(--ch-bg-white));
+  color: var(--ch-text-secondary);
+  cursor: pointer;
+}
+
+.ch-insignias-empresa__card-status--link:hover,
+.ch-insignias-empresa__card-status--link:focus-visible {
+  border-color: var(--ch-green);
+  color: var(--ch-green);
+  outline: 0;
+}
+
 .ch-insignias-empresa__card-main {
   display: flex;
   width: 100%;
@@ -424,18 +455,18 @@
   line-height: 1.55;
 }
 
-.ch-insignias-empresa__acciones {
+.ch-insignias-empresa__verificacion-nota {
+  color: var(--ch-text-secondary);
+  text-transform: none;
+}
+
+.ch-insignias-empresa__acciones-secundarias {
   display: grid;
   gap: var(--ch-space-2);
 }
 
-.ch-insignias-empresa__acciones app-button {
+.ch-insignias-empresa__acciones-secundarias app-button {
   width: 100%;
-}
-
-.ch-insignias-empresa__verificacion-nota {
-  color: var(--ch-text-secondary);
-  text-transform: none;
 }
 
 @media (max-width: 1180px) {

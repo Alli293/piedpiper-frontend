@@ -31,5 +31,6 @@ export interface InsigniaEmpresa {
   readonly emisor?: string;
   readonly receptor?: string;
   readonly urlVerificacionPublica?: string;
+  readonly urlVerificacionJwt?: string;
   readonly urlLinkedIn?: string;
 }

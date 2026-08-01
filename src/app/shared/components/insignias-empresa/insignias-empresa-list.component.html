@@ -48,11 +48,28 @@
           @for (insignia of insigniasOrdenadas(); track llave(insignia)) {
             <article
               class="ch-insignias-empresa__card"
-              [class.ch-insignias-empresa__card--activa]="
-                insigniaSeleccionada()?.idInsignia === insignia.idInsignia &&
-                insigniaSeleccionada()?.nivelInsignia === insignia.nivelInsignia
-              "
+              [class.ch-insignias-empresa__card--activa]="esSeleccionada(insignia)"
             >
+              @if (esSeleccionada(insignia)) {
+                <span
+                  class="ch-insignias-empresa__card-status"
+                  aria-label="Insignia seleccionada"
+                  title="Insignia seleccionada"
+                >
+                  <app-icon name="success" [size]="16" />
+                </span>
+              } @else if (insignia.urlVerificacionPublica) {
+                <button
+                  type="button"
+                  class="ch-insignias-empresa__card-status ch-insignias-empresa__card-status--link"
+                  aria-label="Verificar con OpenBadges 3.0"
+                  title="Verificar con OpenBadges 3.0"
+                  (click)="verificarOpenBadges.emit(insignia); $event.stopPropagation()"
+                >
+                  <app-icon name="ver" [size]="16" />
+                </button>
+              }
+
               <button
                 type="button"
                 class="ch-insignias-empresa__card-main"
@@ -138,7 +155,6 @@
                   </dt>
                   <dd>
                     <strong>{{ emisor(insignia) }}</strong>
-                    <span>via CarbonHub</span>
                   </dd>
                 </div>
                 <div>
@@ -175,25 +191,32 @@
                   requisitos configurados en la plataforma.
                 </p>
                 @if (insignia.urlVerificacionPublica) {
-                  <div class="ch-insignias-empresa__acciones">
-                    @if (accionesPrivadas() && insignia.idInsigniaEmpresa) {
-                      <app-button variant="secondary" (click)="descargarJsonLd.emit(insignia)">
+                  <app-button variant="primary" (click)="verificarOpenBadges.emit(insignia)">
+                    <app-icon name="ver" [size]="16" />
+                    <span>Verificar con OpenBadges 3.0</span>
+                  </app-button>
+                }
+
+                @if (
+                  accionesPrivadas() &&
+                  (insignia.idInsigniaEmpresa ||
+                    insignia.urlLinkedIn ||
+                    insignia.urlVerificacionPublica)
+                ) {
+                  <div class="ch-insignias-empresa__acciones-secundarias">
+                    @if (insignia.urlVerificacionJwt || insignia.urlVerificacionPublica) {
+                      <app-button variant="secondary" (click)="descargarJwt.emit(insignia)">
                         <app-icon name="descargar" [size]="16" />
-                        <span>Descargar JSON-LD</span>
+                        <span>Descargar .JWT</span>
                       </app-button>
                     }
 
-                    @if (accionesPrivadas() && insignia.urlLinkedIn) {
+                    @if (insignia.urlLinkedIn || insignia.urlVerificacionPublica) {
                       <app-button variant="secondary" (click)="compartirLinkedIn.emit(insignia)">
                         <app-icon name="perfil-publico" [size]="16" />
                         <span>Compartir en LinkedIn</span>
                       </app-button>
                     }
-
-                    <app-button variant="primary" (click)="verificarOpenBadges.emit(insignia)">
-                      <app-icon name="ver" [size]="16" />
-                      <span>Verificar con OpenBadges 3.0</span>
-                    </app-button>
                   </div>
                 }
                 <small class="ch-insignias-empresa__verificacion-nota">

@@ -31,4 +31,8 @@ export class EmpresaService {
       responseType: 'blob',
     });
   }
+
+  descargarInsigniaJwt(urlVerificacionJwt: string): Observable<Blob> {
+    return this.http.get(urlVerificacionJwt, { responseType: 'blob' });
+  }
 }

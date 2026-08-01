@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, input, output, signal } from '@angular/core';
 import { InsigniaEmpresa, NivelInsigniaEmpresa } from '../../../core/empresa/empresa.models';
-import { BadgeComponent, BadgeVariant } from '../badge/badge.component';
+import { BadgeComponent } from '../badge/badge.component';
 import { ButtonComponent } from '../button/button.component';
 import { HeadingComponent } from '../heading/heading.component';
 import { IconComponent } from '../icon/icon.component';
@@ -22,6 +22,7 @@ export class InsigniasEmpresaListComponent {
   accionesPrivadas = input(false);
 
   descargarJsonLd = output<InsigniaEmpresa>();
+  descargarJwt = output<InsigniaEmpresa>();
   compartirLinkedIn = output<InsigniaEmpresa>();
   verificarOpenBadges = output<InsigniaEmpresa>();
 
@@ -43,6 +44,13 @@ export class InsigniasEmpresaListComponent {
     this.seleccion.set(this.llave(insignia));
   }
 
+  protected esSeleccionada(insignia: InsigniaEmpresa): boolean {
+    return (
+      this.insigniaSeleccionada()?.idInsignia === insignia.idInsignia &&
+      this.insigniaSeleccionada()?.nivelInsignia === insignia.nivelInsignia
+    );
+  }
+
   protected nivelLabel(nivel: NivelInsigniaEmpresa): string {
     const labels: Record<NivelInsigniaEmpresa, string> = {
       bronce: 'Bronce',
@@ -52,15 +60,6 @@ export class InsigniasEmpresaListComponent {
     return labels[nivel];
   }
 
-  protected nivelVariant(nivel: NivelInsigniaEmpresa): BadgeVariant {
-    const variants: Record<NivelInsigniaEmpresa, BadgeVariant> = {
-      bronce: 'warning',
-      plata: 'info',
-      oro: 'success',
-    };
-    return variants[nivel];
-  }
-
   protected readonly cantidadActivas = computed(() => this.insigniasOrdenadas().length);
 
   protected llave(insignia: InsigniaEmpresa): string {
@@ -68,14 +67,7 @@ export class InsigniasEmpresaListComponent {
   }
 
   protected emisor(insignia: InsigniaEmpresa): string {
-    if (insignia.emisor) return insignia.emisor;
-    const nombre = insignia.nombre.toLowerCase();
-    if (nombre.includes('carbono neutral')) return 'DCC / MINAE via CarbonHub';
-    if (nombre.includes('energia')) return 'ICE / CarbonHub';
-    if (nombre.includes('reforestacion')) return 'FONAFIFO / CarbonHub';
-    if (nombre.includes('residuos')) return 'MINAE / CarbonHub';
-    if (nombre.includes('reporte')) return 'CarbonHub / Auditoria';
-    return 'CarbonHub';
+    return insignia.emisor ?? 'CarbonHub';
   }
 
   protected criterios(insignia: InsigniaEmpresa): string {

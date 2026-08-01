@@ -24,6 +24,8 @@ const INSIGNIA = {
   receptor: 'Cafe del Valle S.A.',
   urlVerificacionPublica:
     'https://carbonhub.test/api/insignias/11111111-1111-1111-1111-111111111111/verificacion',
+  urlVerificacionJwt:
+    'https://carbonhub.test/api/insignias/11111111-1111-1111-1111-111111111111/verificacion.jwt',
   urlLinkedIn: 'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME',
 };
 
@@ -38,15 +40,21 @@ describe('InsigniasEmpresaPageComponent', () => {
   let empresaService: {
     listarInsignias: ReturnType<typeof vi.fn>;
     descargarInsigniaJsonLd: ReturnType<typeof vi.fn>;
+    descargarInsigniaJwt: ReturnType<typeof vi.fn>;
   };
   let toastService: { error: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     empresaService = {
       listarInsignias: vi.fn().mockReturnValue(of([INSIGNIA])),
-      descargarInsigniaJsonLd: vi.fn().mockReturnValue(
-        of(new Blob(['{}'], { type: 'application/ld+json' }))
-      ),
+      descargarInsigniaJsonLd: vi
+        .fn()
+        .mockReturnValue(of(new Blob(['{}'], { type: 'application/ld+json' }))),
+      descargarInsigniaJwt: vi
+        .fn()
+        .mockReturnValue(
+          of(new Blob(['header.payload.signature'], { type: 'application/vc+ld+json+jwt' }))
+        ),
     };
     toastService = { error: vi.fn() };
 
@@ -112,34 +120,34 @@ describe('InsigniasEmpresaPageComponent', () => {
     expect(toastService.error).toHaveBeenCalledWith('No tienes permiso para ver estas insignias.');
   });
 
-  it('descarga el JSON-LD desde el boton de detalle', async () => {
+  it('no muestra el boton de descarga JSON-LD en el detalle', async () => {
     const fixture = await crear();
     const root = fixture.nativeElement as HTMLElement;
-    const createObjectURL = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:insignia');
-    const revokeObjectURL = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
-    const click = vi.fn();
-    const createElement = vi.spyOn(document, 'createElement').mockReturnValue({
-      href: '',
-      download: '',
-      click,
-    } as unknown as HTMLAnchorElement);
     const boton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find((b) =>
       b.textContent?.includes('Descargar JSON-LD')
+    );
+
+    expect(boton).toBeUndefined();
+    expect(empresaService.descargarInsigniaJsonLd).not.toHaveBeenCalled();
+  });
+
+  it('descarga el JWT real desde el boton de detalle', async () => {
+    const fixture = await crear();
+    const root = fixture.nativeElement as HTMLElement;
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => undefined);
+    const boton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find((b) =>
+      b.textContent?.includes('Descargar .JWT')
     );
 
     boton?.click();
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(empresaService.descargarInsigniaJsonLd).toHaveBeenCalledWith(
-      INSIGNIA.idInsigniaEmpresa
-    );
-    expect(createObjectURL).toHaveBeenCalled();
+    expect(empresaService.descargarInsigniaJwt).toHaveBeenCalledWith(INSIGNIA.urlVerificacionJwt);
     expect(click).toHaveBeenCalled();
-
-    createElement.mockRestore();
-    createObjectURL.mockRestore();
-    revokeObjectURL.mockRestore();
+    click.mockRestore();
   });
 
   it('abre LinkedIn y la verificacion OpenBadges en nueva pestana', async () => {
@@ -147,16 +155,15 @@ describe('InsigniasEmpresaPageComponent', () => {
     const fixture = await crear();
     const root = fixture.nativeElement as HTMLElement;
     const botones = Array.from(root.querySelectorAll<HTMLButtonElement>('button'));
+    const urlValidador = `https://certlister.com/ob3-validator/?url=${encodeURIComponent(
+      INSIGNIA.urlVerificacionJwt
+    )}`;
 
     botones.find((b) => b.textContent?.includes('Compartir en LinkedIn'))?.click();
     botones.find((b) => b.textContent?.includes('Verificar con OpenBadges 3.0'))?.click();
 
     expect(open).toHaveBeenCalledWith(INSIGNIA.urlLinkedIn, '_blank', 'noopener');
-    expect(open).toHaveBeenCalledWith(
-      INSIGNIA.urlVerificacionPublica,
-      '_blank',
-      'noopener'
-    );
+    expect(open).toHaveBeenCalledWith(urlValidador, '_blank', 'noopener');
 
     open.mockRestore();
   });
