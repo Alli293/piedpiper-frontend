@@ -164,15 +164,15 @@
 
 .ch-empresas-verificadas__input {
   width: 100%;
-  height: 52px;
-  padding: 0 var(--ch-space-5);
+  height: 48px;
+  padding: 0 var(--ch-space-4);
   font-family: var(--ch-font-body);
-  font-size: 1rem;
+  font-size: 0.9375rem;
   color: var(--ch-text-primary);
   background: var(--ch-bg-white);
   border: 1px solid var(--ch-border);
-  border-radius: var(--ch-radius-lg);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-radius: var(--ch-radius-md);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--ch-dark) 8%, transparent);
   transition: border-color var(--ch-transition);
 
   &::placeholder {
@@ -183,7 +183,7 @@
     outline: none;
     border-color: var(--ch-green);
     box-shadow:
-      0 4px 16px rgba(0, 0, 0, 0.08),
+      0 4px 16px color-mix(in srgb, var(--ch-dark) 8%, transparent),
       0 0 0 3px color-mix(in srgb, var(--ch-blue-mid) 15%, transparent);
   }
 }
