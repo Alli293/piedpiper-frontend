@@ -14,7 +14,8 @@ import { ToastService } from '../../../shared/services/toast.service';
 import { apiErrorMessage, apiErrorMessageAsync } from '../../../shared/utils/http-error.utils';
 
 const ERROR_CARGA_MENSAJE = 'No fue posible cargar esta sección. Intenta recargar la página.';
-const ERROR_DESCARGA_MENSAJE = 'No fue posible descargar la certificación. Intenta nuevamente.';
+const ERROR_DESCARGA_MENSAJE =
+  'No fue posible descargar el archivo de verificación. Intenta nuevamente.';
 const ORGANIZATION_NAME = 'CarbonHub';
 
 @Component({
@@ -61,11 +62,13 @@ export class CertificacionDetallePageComponent implements OnInit {
     return this.certificacion()?.vigente ? 'success' : 'warning';
   }
 
-  protected async descargarJsonLd(): Promise<void> {
+  protected async descargarVerificacionJwt(): Promise<void> {
     this.descargando.set(true);
     try {
-      const blob = await firstValueFrom(this.certificacionesService.descargarJsonLd(this.id()));
-      this.descargarBlob(blob, `certificacion-${this.id()}.jsonld`);
+      const blob = await firstValueFrom(
+        this.certificacionesService.descargarVerificacionJwt(this.id())
+      );
+      this.descargarBlob(blob, `certificacion-${this.id()}.jwt`);
     } catch (error: unknown) {
       this.toastService.error((await apiErrorMessageAsync(error)) ?? ERROR_DESCARGA_MENSAJE);
     } finally {

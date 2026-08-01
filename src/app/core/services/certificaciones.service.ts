@@ -17,8 +17,8 @@ export class CertificacionesService {
     return this.http.get<Certificacion>(`${this.baseUrl}/${encodeURIComponent(id)}`);
   }
 
-  descargarJsonLd(id: string): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/${encodeURIComponent(id)}/jsonld`, {
+  descargarVerificacionJwt(id: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${encodeURIComponent(id)}/verificacion.jwt`, {
       responseType: 'blob',
     });
   }

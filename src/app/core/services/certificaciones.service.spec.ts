@@ -72,14 +72,14 @@ describe('CertificacionesService', () => {
     req.flush(respuesta);
   });
 
-  it('descarga el JSON-LD de una certificacion como blob', () => {
-    const blob = new Blob(['{}'], { type: 'application/vc+ld+json' });
+  it('descarga la verificacion VC-JWT de una certificacion como blob', () => {
+    const blob = new Blob(['header.payload.signature'], { type: 'application/jwt' });
 
-    service.descargarJsonLd('1').subscribe((resultado) => {
+    service.descargarVerificacionJwt('1').subscribe((resultado) => {
       expect(resultado).toEqual(blob);
     });
 
-    const req = httpMock.expectOne(`${baseUrl}/1/jsonld`);
+    const req = httpMock.expectOne(`${baseUrl}/1/verificacion.jwt`);
     expect(req.request.method).toBe('GET');
     expect(req.request.responseType).toBe('blob');
     req.flush(blob);

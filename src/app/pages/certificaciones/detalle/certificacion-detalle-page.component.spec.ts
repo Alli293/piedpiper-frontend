@@ -30,16 +30,16 @@ describe('CertificacionDetallePageComponent', () => {
   let component: CertificacionDetallePageComponent;
   let certificacionesService: {
     obtener: ReturnType<typeof vi.fn>;
-    descargarJsonLd: ReturnType<typeof vi.fn>;
+    descargarVerificacionJwt: ReturnType<typeof vi.fn>;
   };
   let toastService: { error: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     certificacionesService = {
       obtener: vi.fn().mockReturnValue(of(CERTIFICACION_BASE)),
-      descargarJsonLd: vi
+      descargarVerificacionJwt: vi
         .fn()
-        .mockReturnValue(of(new Blob(['{}'], { type: 'application/vc+ld+json' }))),
+        .mockReturnValue(of(new Blob(['header.payload.signature'], { type: 'application/jwt' }))),
     };
     toastService = { error: vi.fn() };
 
@@ -91,14 +91,14 @@ describe('CertificacionDetallePageComponent', () => {
     expect(toastService.error).toHaveBeenCalled();
   });
 
-  it('descargar JSON-LD dispara la descarga del blob devuelto por el servicio', async () => {
+  it('descargar credencial dispara la descarga del blob devuelto por el servicio', async () => {
     const createObjectURLSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-url');
     const revokeObjectURLSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
     const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
-    await (component as any).descargarJsonLd();
+    await (component as any).descargarVerificacionJwt();
 
-    expect(certificacionesService.descargarJsonLd).toHaveBeenCalledWith('cert-1');
+    expect(certificacionesService.descargarVerificacionJwt).toHaveBeenCalledWith('cert-1');
     expect(createObjectURLSpy).toHaveBeenCalled();
     expect(clickSpy).toHaveBeenCalled();
     expect(revokeObjectURLSpy).toHaveBeenCalledWith('blob:mock-url');

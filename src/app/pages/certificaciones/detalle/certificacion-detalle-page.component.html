@@ -9,10 +9,14 @@
         variant="secondary"
         size="sm"
         [loading]="descargando()"
-        (click)="descargarJsonLd()"
+        (click)="descargarVerificacionJwt()"
       >
         <app-icon name="descargar" [size]="14" />
-        <span>Descargar JSON-LD</span>
+        <span>Descargar credencial (JWT)</span>
+      </app-button>
+      <app-button variant="secondary" size="sm" [disabled]="true">
+        <app-icon name="success" [size]="14" />
+        <span>Verificar certificación</span>
       </app-button>
       <app-button variant="primary" size="sm" (click)="compartirEnLinkedIn()">
         <app-icon name="linkedin" [size]="14" />
