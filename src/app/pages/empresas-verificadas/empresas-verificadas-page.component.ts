@@ -42,7 +42,7 @@ export class EmpresasVerificadasPageComponent implements OnDestroy {
         switchMap((term) => {
           this.cargando.set(true);
           return this.perfilService.buscarEmpresas(term, 0, 12);
-        }),
+        })
       )
       .subscribe((page) => {
         this.resultados.set(page.content);

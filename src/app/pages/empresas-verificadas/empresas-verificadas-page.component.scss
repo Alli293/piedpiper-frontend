@@ -2,7 +2,7 @@
 
 // === Header ===
 .ch-empresas-verificadas__header {
-  background: var(--ch-dark, #1a2332);
+  background: var(--ch-dark);
   padding: 0 var(--ch-space-4);
 }
 
@@ -36,16 +36,16 @@
   font-family: var(--ch-font-body);
   font-size: 0.8125rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--ch-text-on-dark-muted);
   text-decoration: none;
   transition: color var(--ch-transition);
 
   &:hover {
-    color: #fff;
+    color: var(--ch-text-on-dark);
   }
 
   &--active {
-    color: #fff;
+    color: var(--ch-text-on-dark);
     font-weight: 600;
   }
 }
@@ -63,12 +63,12 @@
   font-family: var(--ch-font-body);
   font-size: 0.8125rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--ch-text-on-dark);
   text-decoration: none;
   transition: color var(--ch-transition);
 
   &:hover {
-    color: #fff;
+    color: var(--ch-text-on-dark);
   }
 }
 
@@ -98,7 +98,7 @@
 
 // === Hero ===
 .ch-empresas-verificadas__hero {
-  background: var(--ch-green-dark, #14603f);
+  background: var(--ch-green-dark);
   padding: var(--ch-space-10) var(--ch-space-4) var(--ch-space-8);
   text-align: center;
 }
@@ -112,7 +112,7 @@
   font-family: var(--ch-font-heading);
   font-size: 2rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--ch-text-on-dark);
   margin: 0 0 var(--ch-space-3);
 
   @include mixins.desktop-up {
@@ -123,7 +123,7 @@
 .ch-empresas-verificadas__subtitle {
   font-family: var(--ch-font-body);
   font-size: 1rem;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--ch-text-on-dark);
   line-height: 1.6;
   margin: 0;
 }
@@ -152,7 +152,7 @@
   color: var(--ch-text-primary);
   background: var(--ch-bg-white);
   border: 1px solid var(--ch-border);
-  border-radius: var(--ch-radius-lg, 12px);
+  border-radius: var(--ch-radius-lg);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   transition: border-color var(--ch-transition);
 
@@ -230,7 +230,7 @@
     transform var(--ch-transition);
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--ch-shadow-md);
     transform: translateY(-2px);
   }
 }
@@ -261,33 +261,33 @@
   font-size: 0.75rem;
   font-weight: 600;
   padding: var(--ch-space-1) var(--ch-space-2);
-  border-radius: var(--ch-radius-sm, 4px);
+  border-radius: var(--ch-radius-sm);
   text-transform: uppercase;
   letter-spacing: 0.025em;
 
   &--sin-nivel {
-    background: var(--ch-bg-muted, #f0f0f0);
+    background: color-mix(in srgb, var(--ch-text-muted) 15%, transparent);
     color: var(--ch-text-muted);
   }
 
   &--bronce {
-    background: #fef3e2;
-    color: #92400e;
+    background: color-mix(in srgb, var(--ch-warning-dark) 10%, transparent);
+    color: var(--ch-warning-dark);
   }
 
   &--plata {
-    background: #f1f5f9;
-    color: #475569;
+    background: color-mix(in srgb, var(--ch-text-secondary) 12%, transparent);
+    color: var(--ch-text-secondary);
   }
 
   &--oro {
-    background: #fef9c3;
-    color: #854d0e;
+    background: color-mix(in srgb, var(--ch-warning) 12%, transparent);
+    color: var(--ch-warning-dark);
   }
 
   &--platino {
-    background: #ede9fe;
-    color: #5b21b6;
+    background: color-mix(in srgb, var(--ch-green) 10%, transparent);
+    color: var(--ch-green-dark);
   }
 }
 
@@ -303,12 +303,12 @@
   transition: color var(--ch-transition);
 
   &:hover {
-    color: var(--ch-green-dark, #14603f);
+    color: var(--ch-green-dark);
   }
 
   &:focus-visible {
     @include mixins.focus-ring;
-    border-radius: var(--ch-radius-sm, 4px);
+    border-radius: var(--ch-radius-sm);
   }
 }
 

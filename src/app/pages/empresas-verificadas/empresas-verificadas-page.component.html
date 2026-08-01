@@ -9,7 +9,11 @@
         <a class="ch-empresas-verificadas__header-link" routerLink="/">Para empresas</a>
         <a class="ch-empresas-verificadas__header-link" routerLink="/">Auditores</a>
         <a class="ch-empresas-verificadas__header-link" routerLink="/">EcoRuta</a>
-        <a class="ch-empresas-verificadas__header-link ch-empresas-verificadas__header-link--active" routerLink="/empresas-verificadas">Empresas verificadas</a>
+        <a
+          class="ch-empresas-verificadas__header-link ch-empresas-verificadas__header-link--active"
+          routerLink="/empresas-verificadas"
+          >Empresas verificadas</a
+        >
       </nav>
       <div class="ch-empresas-verificadas__header-right">
         <a class="ch-empresas-verificadas__header-signin" routerLink="/login">
@@ -27,8 +31,8 @@
     <div class="ch-empresas-verificadas__hero-content">
       <h1 class="ch-empresas-verificadas__title">Empresas verificadas</h1>
       <p class="ch-empresas-verificadas__subtitle">
-        Explorá el catálogo de empresas con reputación ecológica verificada en CarbonHub.
-        Buscá por nombre y conocé su nivel de compromiso ambiental.
+        Explorá el catálogo de empresas con reputación ecológica verificada en CarbonHub. Buscá por
+        nombre y conocé su nivel de compromiso ambiental.
       </p>
     </div>
   </section>
@@ -65,7 +69,9 @@
               <h2 class="ch-empresas-verificadas__card-nombre">{{ empresa.nombreEmpresa }}</h2>
               <p class="ch-empresas-verificadas__card-sector">{{ empresa.sectorIndustrial }}</p>
               <span
-                class="ch-empresas-verificadas__badge ch-empresas-verificadas__badge--{{ getNivelClase(empresa.nivelEcologico) }}"
+                class="ch-empresas-verificadas__badge ch-empresas-verificadas__badge--{{
+                  getNivelClase(empresa.nivelEcologico)
+                }}"
               >
                 {{ empresa.nivelEcologico }}
               </span>
@@ -101,8 +107,8 @@
         <div class="ch-empresas-verificadas__intro-card">
           <h3 class="ch-empresas-verificadas__intro-title">Niveles ecológicos</h3>
           <p class="ch-empresas-verificadas__intro-text">
-            Cada empresa obtiene un nivel (Bronce, Plata, Oro o Platino) según su compromiso con
-            la reducción de emisiones y sus certificaciones vigentes.
+            Cada empresa obtiene un nivel (Bronce, Plata, Oro o Platino) según su compromiso con la
+            reducción de emisiones y sus certificaciones vigentes.
           </p>
         </div>
         <div class="ch-empresas-verificadas__intro-card">
