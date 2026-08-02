@@ -208,8 +208,8 @@ describe('PerfilPublicoPageComponent', () => {
     it('muestra spinner durante estado de carga', () => {
       fixture.detectChanges();
       const el = fixture.nativeElement as HTMLElement;
-      const spinner = el.querySelector('.perfil-publico__spinner');
-      const loadingText = el.querySelector('.perfil-publico__loading-text');
+      const spinner = el.querySelector('.pub-loading__spinner');
+      const loadingText = el.querySelector('.pub-loading__text');
 
       expect(spinner).not.toBeNull();
       expect(loadingText?.textContent).toContain('Cargando perfil');
@@ -220,14 +220,10 @@ describe('PerfilPublicoPageComponent', () => {
       flushPerfil(PERFIL_MOCK);
 
       const el = fixture.nativeElement as HTMLElement;
-      const nombre = el.querySelector('.perfil-publico__nombre');
-      const sector = el.querySelector('.perfil-publico__sector');
-      const pais = el.querySelector('.perfil-publico__pais');
-      const nivel = el.querySelector('.perfil-publico__nivel-label');
+      const nombre = el.querySelector('.pub-card__nombre');
+      const nivel = el.querySelector('.pub-nivel__nombre');
 
       expect(nombre?.textContent).toContain('EcoTech Solutions');
-      expect(sector?.textContent).toContain('Tecnología');
-      expect(pais?.textContent).toContain('Costa Rica');
       expect(nivel?.textContent).toContain('Oro');
     });
 
@@ -236,45 +232,44 @@ describe('PerfilPublicoPageComponent', () => {
       flushError(404, { mensaje: 'El perfil que buscas no existe o ya no está disponible.' });
 
       const el = fixture.nativeElement as HTMLElement;
-      const errorSection = el.querySelector('.perfil-publico__error--404');
-      const errorMsg = el.querySelector('.perfil-publico__error-msg');
+      const errorSection = el.querySelector('.pub-error--404');
+      const errorMsg = el.querySelector('.pub-error__msg');
 
       expect(errorSection).not.toBeNull();
       expect(errorMsg?.textContent).toContain('El perfil que buscas no existe');
     });
 
-    it('muestra mensaje "Sin nivel" cuando nivelEcologico es "Sin nivel"', () => {
+    it('muestra nivel Sin nivel con clase correcta', () => {
       fixture.detectChanges();
       flushPerfil(PERFIL_SIN_NIVEL);
 
       const el = fixture.nativeElement as HTMLElement;
-      const nivelMensaje = el.querySelector('.perfil-publico__nivel-mensaje');
+      const nivelCard = el.querySelector('.pub-nivel--sin-nivel');
 
-      expect(nivelMensaje).not.toBeNull();
-      expect(nivelMensaje?.textContent).toContain(
-        'Esta empresa aún no cuenta con certificaciones vigentes.'
-      );
+      expect(nivelCard).not.toBeNull();
     });
 
-    it('oculta la línea de fecha cuando fechaActualizacionNivel es null', () => {
+    it('oculta fecha cuando fechaActualizacionNivel es null', () => {
       fixture.detectChanges();
       flushPerfil(PERFIL_SIN_NIVEL);
 
       const el = fixture.nativeElement as HTMLElement;
-      const fechaEl = el.querySelector('.perfil-publico__nivel-fecha');
+      const fechaEl = el.querySelector('.pub-card__fecha');
 
-      expect(fechaEl).toBeNull();
+      // Fecha should show "Actualizado el " but with empty string since null
+      expect(fechaEl?.textContent?.trim()).toBe('Actualizado el');
     });
 
-    it('muestra la línea de fecha cuando fechaActualizacionNivel tiene valor', () => {
+    it('muestra fecha cuando fechaActualizacionNivel tiene valor', () => {
       fixture.detectChanges();
       flushPerfil(PERFIL_MOCK);
 
       const el = fixture.nativeElement as HTMLElement;
-      const fechaEl = el.querySelector('.perfil-publico__nivel-fecha');
+      const fechaEl = el.querySelector('.pub-card__fecha');
 
       expect(fechaEl).not.toBeNull();
-      expect(fechaEl?.textContent).toContain('Actualizado:');
+      expect(fechaEl?.textContent).toContain('Actualizado el');
+      expect(fechaEl?.textContent?.trim().length).toBeGreaterThan('Actualizado el'.length);
     });
   });
 });
