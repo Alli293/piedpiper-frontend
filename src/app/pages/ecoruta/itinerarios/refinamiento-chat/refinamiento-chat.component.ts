@@ -20,7 +20,8 @@ export class RefinamientoChatComponent {
     const itinerario = this.itinerario();
     const dias = itinerario.cantidadDias;
     const score = itinerario.puntuacionAmbientalPreliminar;
-    const scoreTexto = score !== null ? ` con un EcoScore de ${Math.round(score)}` : '';
+    const scoreTexto =
+      score !== null && score !== undefined ? ` con un EcoScore de ${Math.round(score)}` : '';
     return `Tu itinerario de ${dias} día${dias === 1 ? '' : 's'} está listo${scoreTexto}. ¿Querés ajustar algo?`;
   });
 }
