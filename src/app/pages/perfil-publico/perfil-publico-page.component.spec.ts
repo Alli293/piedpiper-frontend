@@ -9,8 +9,7 @@ import { PerfilPublicoPageComponent } from './perfil-publico-page.component';
 import { PerfilPublicoService } from './perfil-publico.service';
 import { PerfilPublicoDTO } from './perfil-publico.models';
 import { IconComponent } from '../../shared/components/icon/icon.component';
-import { BusquedaPerfilComponent } from './busqueda-perfil/busqueda-perfil.component';
-import { CertificacionesPublicasPageComponent } from './certificaciones/certificaciones-publicas-page.component';
+import { LogoComponent } from '../../shared/components/logo/logo.component';
 import { environment } from '../../../environments/environment';
 
 // --- Stub components to avoid importing real child components with complex deps ---
@@ -20,12 +19,12 @@ class IconStubComponent {
   size = input(16);
 }
 
-@Component({ selector: 'app-busqueda-perfil', template: '', standalone: true })
-class BusquedaPerfilStubComponent {}
-
-@Component({ selector: 'app-certificaciones-publicas-page', template: '', standalone: true })
-class CertificacionesPublicasStubComponent {
-  slug = input.required<string>();
+@Component({ selector: 'app-logo', template: '', standalone: true })
+class LogoStubComponent {
+  variant = input('on-light');
+  iconSize = input(24);
+  textSize = input('18px');
+  gap = input('9px');
 }
 
 // --- Test data ---
@@ -71,14 +70,10 @@ describe('PerfilPublicoPageComponent', () => {
     })
       .overrideComponent(PerfilPublicoPageComponent, {
         remove: {
-          imports: [IconComponent, BusquedaPerfilComponent, CertificacionesPublicasPageComponent],
+          imports: [IconComponent, LogoComponent],
         },
         add: {
-          imports: [
-            IconStubComponent,
-            BusquedaPerfilStubComponent,
-            CertificacionesPublicasStubComponent,
-          ],
+          imports: [IconStubComponent, LogoStubComponent],
         },
       })
       .compileComponents();
@@ -90,12 +85,16 @@ describe('PerfilPublicoPageComponent', () => {
   });
 
   afterEach(() => {
-    httpMock.match(() => true);
+    httpMock.match(() => true); // flush any outstanding requests
   });
 
   function flushPerfil(dto: PerfilPublicoDTO): void {
     const req = httpMock.expectOne(`${baseUrl}/eco-tech`);
     req.flush(dto);
+    fixture.detectChanges();
+    // Also flush the subsequent certificaciones and insignias requests
+    httpMock.match(`${baseUrl}/eco-tech/certificaciones`).forEach((r) => r.flush([]));
+    httpMock.match(`${baseUrl}/eco-tech/insignias`).forEach((r) => r.flush([]));
     fixture.detectChanges();
   }
 
@@ -117,8 +116,8 @@ describe('PerfilPublicoPageComponent', () => {
      *
      * Validates: Requirements 4.3, 8.1
      */
-    it('Property 9: formatFecha produce formato es-CR para cualquier fecha válida', () => {
-      // Create component instance to access formatFecha
+    it('Property 9: formatFechaCorta produce formato es-CR para cualquier fecha válida', () => {
+      // Create component instance to access formatFechaCorta
       fixture.detectChanges();
       httpMock.expectOne(`${baseUrl}/eco-tech`).flush(PERFIL_MOCK);
 
@@ -127,7 +126,7 @@ describe('PerfilPublicoPageComponent', () => {
           fc.date({ min: new Date('2000-01-01'), max: new Date('2099-12-31') }),
           (randomDate) => {
             const isoStr = randomDate.toISOString();
-            const result = component['formatFecha'](isoStr);
+            const result = component['formatFechaCorta'](isoStr);
 
             // Must not be empty
             expect(result.length).toBeGreaterThan(0);
