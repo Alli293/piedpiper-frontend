@@ -4,6 +4,7 @@ export interface PuntuacionAmbientalResponse {
   componenteIma: number;
   componenteBenchmark: number;
   cantidadCertificacionesActivas: number;
+  estimado: boolean;
 }
 
 export interface CertificacionActiva {
