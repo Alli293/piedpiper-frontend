@@ -80,6 +80,7 @@ describe('PuntuacionAmbientalBadgeComponent', () => {
       componenteIma: total * 0.3,
       componenteBenchmark: total * 0.2,
       cantidadCertificacionesActivas: 3,
+      estimado: false,
     };
   }
 });
