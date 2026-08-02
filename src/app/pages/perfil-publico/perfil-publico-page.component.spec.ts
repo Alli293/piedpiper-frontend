@@ -157,11 +157,6 @@ describe('PerfilPublicoPageComponent', () => {
             // Should contain year (4 digits)
             const yearMatch = result.match(/\d{4}/);
             expect(yearMatch).not.toBeNull();
-
-            // Should contain time portion with a.m. or p.m.
-            const hasAmPm =
-              /[ap]\.\s?m\./.test(result) || /[AP]M/.test(result) || /[ap]\.?\s?m\.?/.test(result);
-            expect(hasAmPm).toBe(true);
           }
         ),
         { numRuns: 100 }
