@@ -2,7 +2,7 @@ import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../environments/environment';
-import { CertificacionPublica } from './perfil-publico.models';
+import { CertificacionPublica, InsigniaEmpresa } from './perfil-publico.models';
 import { PerfilPublicoService } from './perfil-publico.service';
 
 describe('PerfilPublicoService', () => {
@@ -17,6 +17,14 @@ describe('PerfilPublicoService', () => {
     fechaEmision: '2026-01-15T00:00:00Z',
     fechaVencimiento: '2027-01-15',
     estado: 'ACTIVA',
+  };
+
+  const insignia: InsigniaEmpresa = {
+    idInsignia: 1,
+    nivelInsignia: 'bronce',
+    nombre: 'Carbono Neutral',
+    descripcion: 'Primera insignia empresarial.',
+    fechaObtencion: '2026-01-15T00:00:00Z',
   };
 
   beforeEach(() => {
@@ -45,6 +53,17 @@ describe('PerfilPublicoService', () => {
 
     const req = httpMock.expectOne(`${baseUrl}/empresa%20con%20espacio/certificaciones`);
     req.flush([]);
+  });
+
+  it('hace GET a /api/perfil-publico/{slug}/insignias y mapea el arreglo', () => {
+    let resultado: InsigniaEmpresa[] | undefined;
+    service.listarInsignias('cafe-del-valle').subscribe((valor) => (resultado = valor));
+
+    const req = httpMock.expectOne(`${baseUrl}/cafe-del-valle/insignias`);
+    expect(req.request.method).toBe('GET');
+    req.flush([insignia]);
+
+    expect(resultado).toEqual([insignia]);
   });
 
   it('propaga un 404 al llamador en vez de silenciarlo', () => {
