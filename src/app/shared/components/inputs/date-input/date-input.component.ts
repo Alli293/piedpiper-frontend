@@ -109,6 +109,19 @@ export class DateInputComponent implements ControlValueAccessor, AfterViewInit, 
       locale: Spanish,
       dateFormat: 'd/m/Y',
       allowInput: false,
+      // Signal Forms mapea automáticamente minDate()/maxDate() del schema a
+      // los inputs `min`/`max` de este componente (ver
+      // FIELD_STATE_KEY_TO_CONTROL_BINDING en @angular/forms/signals) — no
+      // hace falta bindearlos a mano en el template. Pero eso significa que
+      // un valor precargado (p. ej. un borrador viejo con una fecha que ya
+      // quedó fuera de rango) puede llegar por fuera del min/max vigente.
+      // Sin `allowInvalidPreload`, flatpickr descarta en silencio cualquier
+      // fecha fuera de rango — tanto en `defaultDate` como en `setDate()`
+      // posteriores — y el campo queda vacío en vez de mostrar el valor
+      // inválido con su mensaje de error. `minDate`/`maxDate` siguen
+      // restringiendo qué días puede *elegir* el usuario en el calendario;
+      // esto solo evita que se pise un valor ya cargado.
+      allowInvalidPreload: true,
       clickOpens: !this.effectiveDisabled(),
       defaultDate: valorInicial ? aFechaLocal(valorInicial) : undefined,
       maxDate: this.max() ? aFechaLocal(this.max()!) : undefined,
@@ -128,6 +141,7 @@ export class DateInputComponent implements ControlValueAccessor, AfterViewInit, 
 
   writeValue(value: Date | null): void {
     this.value.set(value ?? null);
+    this.picker?.setDate(value ? aFechaLocal(value) : [], false);
   }
 
   registerOnChange(fn: (value: Date | null) => void): void {
