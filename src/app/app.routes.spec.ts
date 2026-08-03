@@ -67,6 +67,7 @@ describe('app.routes', () => {
       'empresa/configuracion-inicial',
       'empresa/panel',
       'empresa/benchmark',
+      'empresa/certificaciones',
       'empresa/limites',
       'empresa/emisiones',
       'empresa/emisiones/registrar',

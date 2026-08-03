@@ -1,0 +1,13 @@
+<app-shell-layout activeId="certificaciones" [headerConfig]="headerConfig()">
+  <section class="ch-certificaciones" aria-label="Certificaciones">
+    <app-estado-certificaciones-panel
+      [resumen]="resumen()"
+      [loading]="cargandoResumen()"
+      [error]="resumenError()"
+    />
+
+    <p class="ch-certificaciones__placeholder">
+      Próximamente: listado completo de certificaciones con filtros por estado.
+    </p>
+  </section>
+</app-shell-layout>

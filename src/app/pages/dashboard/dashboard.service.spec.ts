@@ -52,4 +52,17 @@ describe('DashboardService', () => {
       tieneDatos: true,
     });
   });
+
+  it('consulta el resumen de certificaciones del dashboard', () => {
+    service.obtenerResumenCertificaciones().subscribe((resumen) => {
+      expect(resumen.activas).toBe(5);
+      expect(resumen.proximasAVencer).toBe(3);
+      expect(resumen.vencidas).toBe(1);
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/dashboard/certificaciones`);
+    expect(req.request.method).toBe('GET');
+
+    req.flush({ activas: 5, proximasAVencer: 3, vencidas: 1 });
+  });
 });

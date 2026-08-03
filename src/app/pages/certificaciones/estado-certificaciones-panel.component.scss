@@ -1,0 +1,129 @@
+.ch-estado-cert {
+  background: var(--ch-bg-white);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-lg);
+  padding: var(--ch-space-6);
+  box-shadow: var(--ch-shadow-sm);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: var(--ch-space-5);
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    flex-shrink: 0;
+    background: var(--ch-green-soft);
+    color: var(--ch-green-dark);
+  }
+
+  &__ver-todas {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  &__loading,
+  &__error {
+    font-family: var(--ch-font-body);
+    font-size: 13px;
+    color: var(--ch-text-secondary);
+    margin: 0;
+  }
+
+  &__error {
+    color: var(--ch-danger);
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--ch-space-4);
+
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ch-space-2);
+    padding: var(--ch-space-4);
+    border: 1px solid var(--ch-border);
+    border-radius: var(--ch-radius-md);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--ch-text-secondary);
+    }
+
+    &--success {
+      .ch-estado-cert__card-icon {
+        background: var(--ch-green-soft);
+        color: var(--ch-green-dark);
+      }
+    }
+
+    &--warning {
+      background: var(--ch-warning-bg);
+      border-color: var(--ch-warning);
+
+      .ch-estado-cert__card-icon {
+        background: var(--ch-bg-white);
+        color: var(--ch-warning-dark);
+      }
+    }
+
+    &--danger {
+      .ch-estado-cert__card-icon {
+        background: var(--ch-danger-bg);
+        color: var(--ch-danger);
+      }
+    }
+  }
+
+  &__card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+
+  &__card-arrow {
+    color: var(--ch-text-secondary);
+    font-size: 14px;
+  }
+
+  &__card-value {
+    font-family: var(--ch-font-heading);
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--ch-text-primary);
+  }
+
+  &__card-label {
+    font-family: var(--ch-font-body);
+    font-size: 13px;
+    color: var(--ch-text-secondary);
+  }
+}
