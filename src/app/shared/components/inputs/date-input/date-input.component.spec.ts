@@ -40,6 +40,31 @@ describe('DateInputComponent', () => {
     return fixture.nativeElement.querySelector('input');
   }
 
+  function abrirCalendario(fixture: ReturnType<typeof createFixture>): void {
+    const boton: HTMLButtonElement = fixture.nativeElement.querySelector('.ch-date-input__icon');
+    boton.click();
+  }
+
+  function calendario(): HTMLElement | null {
+    return document.querySelector('.flatpickr-calendar');
+  }
+
+  function elegirDia(numeroDia: number): void {
+    const dias = Array.from(
+      document.querySelectorAll<HTMLSpanElement>(
+        '.flatpickr-day:not(.prevMonthDay):not(.nextMonthDay)'
+      )
+    );
+    const dia = dias.find((el) => el.textContent?.trim() === String(numeroDia));
+    dia?.click();
+  }
+
+  afterEach(() => {
+    // flatpickr inyecta su popup como hijo de <body>; limpiarlo entre tests
+    // para que no se acumulen ni interfieran con el siguiente `elegirDia`.
+    document.querySelectorAll('.flatpickr-calendar').forEach((el) => el.remove());
+  });
+
   it('renderiza la etiqueta asociada al campo', () => {
     const fixture = createFixture({ label: 'Fecha de actividad' });
 
@@ -48,46 +73,63 @@ describe('DateInputComponent', () => {
     expect(label.getAttribute('for')).toBe(campo(fixture).id);
   });
 
-  it('muestra value() formateado como yyyy-MM-dd', () => {
+  it('el campo es de solo lectura: la fecha se elige únicamente desde el calendario', () => {
+    const fixture = createFixture();
+
+    expect(campo(fixture).readOnly).toBe(true);
+  });
+
+  it('muestra value() formateado como dd/mm/aaaa', () => {
     const fixture = createFixture();
     fixture.debugElement.children[0].componentInstance.writeValue(new Date(Date.UTC(2026, 6, 5)));
     fixture.detectChanges();
 
-    expect(campo(fixture).value).toBe('2026-07-05');
+    expect(campo(fixture).value).toBe('05/07/2026');
   });
 
-  it('aplica max() y min() como atributos yyyy-MM-dd', () => {
-    const fixture = createFixture({
-      max: new Date(Date.UTC(2026, 11, 31)),
-      min: new Date(Date.UTC(2026, 0, 1)),
-    });
+  it('abre el calendario de flatpickr al hacer click en el ícono', () => {
+    const fixture = createFixture();
 
-    expect(campo(fixture).max).toBe('2026-12-31');
-    expect(campo(fixture).min).toBe('2026-01-01');
+    abrirCalendario(fixture);
+
+    expect(calendario()).toBeTruthy();
   });
 
-  it('notifica al ControlValueAccessor cuando el usuario elige una fecha', () => {
+  it('no abre el calendario cuando el campo está deshabilitado', () => {
+    const fixture = createFixture({ disabled: true });
+
+    abrirCalendario(fixture);
+
+    expect(calendario()?.classList.contains('open')).toBeFalsy();
+  });
+
+  it('notifica al ControlValueAccessor y actualiza el campo al elegir un día', () => {
     const fixture = createFixture();
     const cambios: (Date | null)[] = [];
     fixture.debugElement.children[0].componentInstance.registerOnChange((valor: Date | null) =>
       cambios.push(valor)
     );
+    fixture.debugElement.children[0].componentInstance.writeValue(new Date(Date.UTC(2026, 2, 1)));
+    fixture.detectChanges();
 
-    const input = campo(fixture);
-    input.value = '2026-03-15';
-    input.dispatchEvent(new Event('input'));
+    abrirCalendario(fixture);
+    elegirDia(15);
     fixture.detectChanges();
 
     expect(cambios.length).toBe(1);
     expect(cambios[0]?.toISOString().slice(0, 10)).toBe('2026-03-15');
+    expect(campo(fixture).value).toBe('15/03/2026');
   });
 
-  it('notifica al ControlValueAccessor cuando el campo pierde el foco', () => {
+  it('notifica al ControlValueAccessor que el campo fue tocado al cerrar el calendario', () => {
     const fixture = createFixture();
     let tocado = false;
     fixture.debugElement.children[0].componentInstance.registerOnTouched(() => (tocado = true));
+    fixture.debugElement.children[0].componentInstance.writeValue(new Date(Date.UTC(2026, 2, 1)));
+    fixture.detectChanges();
 
-    campo(fixture).dispatchEvent(new Event('blur'));
+    abrirCalendario(fixture);
+    elegirDia(10);
 
     expect(tocado).toBe(true);
   });

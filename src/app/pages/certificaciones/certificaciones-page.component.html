@@ -6,6 +6,14 @@
       [error]="resumenError()"
     />
 
+    <app-calendario-vencimientos
+      [mes]="mesCalendario()"
+      [calendario]="calendario()"
+      [loading]="cargandoCalendario()"
+      [error]="calendarioError()"
+      (mesChange)="onMesCalendarioChange($event)"
+    />
+
     <p class="ch-certificaciones__placeholder">
       Próximamente: listado completo de certificaciones con filtros por estado.
     </p>
