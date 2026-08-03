@@ -52,4 +52,35 @@ describe('DashboardService', () => {
       tieneDatos: true,
     });
   });
+
+  it('consulta el resumen de certificaciones del dashboard', () => {
+    service.obtenerResumenCertificaciones().subscribe((resumen) => {
+      expect(resumen.activas).toBe(5);
+      expect(resumen.proximasAVencer).toBe(3);
+      expect(resumen.vencidas).toBe(1);
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/dashboard/certificaciones`);
+    expect(req.request.method).toBe('GET');
+
+    req.flush({ activas: 5, proximasAVencer: 3, vencidas: 1 });
+  });
+
+  it('consulta el calendario de vencimientos con el mes como query param', () => {
+    service.obtenerCalendarioVencimientos('2026-07').subscribe((calendario) => {
+      expect(calendario.mesVisualizado).toBe('2026-07');
+      expect(calendario.vencimientosPorFecha['2026-07-18']).toHaveLength(1);
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/dashboard/calendario?mes=2026-07`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('mes')).toBe('2026-07');
+
+    req.flush({
+      mesVisualizado: '2026-07',
+      vencimientosPorFecha: {
+        '2026-07-18': [{ id: 'abc', nombre: 'Carbono Neutral', urgencia: '30_dias' }],
+      },
+    });
+  });
 });

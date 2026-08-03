@@ -109,6 +109,7 @@ describe('ButtonComponent', () => {
     expect(boton.id).toBe('btn-guardar');
     expect(host.hasAttribute('id')).toBe(false);
   });
+
   it('reenvia ariaLabel() al boton interno, no al host', () => {
     const fixture = createFixture({ ariaLabel: 'Asignar a Ana Mora' });
 

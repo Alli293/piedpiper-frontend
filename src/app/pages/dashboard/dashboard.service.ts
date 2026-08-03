@@ -3,7 +3,12 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ComparacionEmisionesResponse } from '../emissions/models/emision.model';
-import { PeriodoDashboard, ResumenHuellaDashboardResponse } from './dashboard.model';
+import {
+  CalendarioVencimientosResponse,
+  PeriodoDashboard,
+  ResumenCertificacionesDashboardResponse,
+  ResumenHuellaDashboardResponse,
+} from './dashboard.model';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
@@ -17,6 +22,21 @@ export class DashboardService {
   ): Observable<ResumenHuellaDashboardResponse> {
     const params = new HttpParams().set('periodo', periodo).set('anio', anio);
     return this.http.get<ResumenHuellaDashboardResponse>(`${this.dashboardBaseUrl}/huella`, {
+      params,
+    });
+  }
+
+  /** Conteos del bloque "Estado de certificaciones" (PP-74). */
+  obtenerResumenCertificaciones(): Observable<ResumenCertificacionesDashboardResponse> {
+    return this.http.get<ResumenCertificacionesDashboardResponse>(
+      `${this.dashboardBaseUrl}/certificaciones`
+    );
+  }
+
+  /** Calendario de vencimientos (PP-77). `mes` en formato 'YYYY-MM'. */
+  obtenerCalendarioVencimientos(mes: string): Observable<CalendarioVencimientosResponse> {
+    const params = new HttpParams().set('mes', mes);
+    return this.http.get<CalendarioVencimientosResponse>(`${this.dashboardBaseUrl}/calendario`, {
       params,
     });
   }

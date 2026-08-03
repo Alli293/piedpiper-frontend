@@ -3,12 +3,17 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import {
+  FilterChip,
+  FilterChipsComponent,
+} from '../../../shared/components/filter-chips/filter-chips.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import {
   SelectInputComponent,
   SelectOption,
 } from '../../../shared/components/inputs/select-input/select-input.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -50,8 +55,10 @@ const MONTH_OPTIONS: SelectOption[] = [
   selector: 'app-emissions-list-page',
   imports: [
     ButtonComponent,
+    FilterChipsComponent,
     HeadingComponent,
     IconComponent,
+    ModalComponent,
     SelectInputComponent,
     ShellLayoutComponent,
   ],
@@ -90,6 +97,15 @@ export class EmissionsListPageComponent {
   });
   protected readonly filtroAnioValue = computed(() => this.filtroAnio()?.toString() ?? '');
   protected readonly filtroMesValue = computed(() => this.filtroMes()?.toString() ?? '');
+
+  protected readonly chipsCategoria = computed<FilterChip[]>(() =>
+    CATEGORY_OPTIONS.map((option) => ({
+      id: option.value,
+      label: option.label,
+      icon: option.icon,
+      count: this.registrosPorCategoria(option.value),
+    }))
+  );
 
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'Emisiones',
@@ -148,13 +164,6 @@ export class EmissionsListPageComponent {
   protected cambiarMes(value: string): void {
     this.filtroMes.set(value ? Number(value) : null);
     void this.cargarRegistros();
-  }
-
-  protected alPresionarTeclaModal(event: KeyboardEvent): void {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      this.cancelarEliminar();
-    }
   }
 
   protected solicitarEliminar(registro: EmisionResponse): void {

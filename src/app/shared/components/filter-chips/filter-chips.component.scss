@@ -1,0 +1,54 @@
+@use '../../styles/mixins';
+
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ch-space-2);
+  --ch-filter-chips-count-bg: #eef3f0;
+}
+
+.ch-filter-chips__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-pill);
+  background: var(--ch-bg-white);
+  color: var(--ch-text-secondary);
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    @include mixins.focus-ring;
+  }
+}
+
+.ch-filter-chips__item app-icon {
+  color: var(--ch-text-secondary);
+}
+
+.ch-filter-chips__item strong {
+  display: inline-grid;
+  place-items: center;
+  min-width: 25px;
+  min-height: 20px;
+  padding: 0 7px;
+  border-radius: var(--ch-radius-pill);
+  background: var(--ch-filter-chips-count-bg);
+  color: var(--ch-green-dark);
+  font-family: var(--ch-font-heading);
+  font-size: 0.74rem;
+}
+
+.ch-filter-chips__item--active {
+  border-color: var(--ch-green);
+  background: var(--ch-green-soft);
+  color: var(--ch-green-dark);
+}
+
+.ch-filter-chips__item--active app-icon {
+  color: var(--ch-green-dark);
+}

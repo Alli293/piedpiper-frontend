@@ -1,0 +1,17 @@
+@for (chip of chips(); track chip.id) {
+  <button
+    type="button"
+    class="ch-filter-chips__item"
+    [class.ch-filter-chips__item--active]="chip.id === activeId()"
+    [attr.aria-pressed]="chip.id === activeId()"
+    (click)="select(chip)"
+  >
+    @if (chip.icon) {
+      <app-icon [name]="chip.icon" [size]="15" />
+    }
+    <span>{{ chip.label }}</span>
+    @if (chip.count !== undefined) {
+      <strong>{{ chip.count }}</strong>
+    }
+  </button>
+}

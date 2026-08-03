@@ -101,6 +101,9 @@ describe('Propiedad 8: cardinalidad de especialidades bloquea el envío', () => 
       fc.shuffledSubarray(catalogoZonasValores, { minLength: size, maxLength: size })
     );
 
+  // Each run creates a full TestBed component; under CI load 100 runs can approach
+  // the default 5000ms timeout, and a synchronous overrun races Vitest's timeout
+  // reporting. A generous explicit timeout keeps this outside that race window.
   it('formularioInvalido() es true cuando especialidades tiene 0 items (con otros campos válidos)', () => {
     fc.assert(
       fc.property(validZonas, validDescripcion, (zonas, descripcion) => {
@@ -117,7 +120,7 @@ describe('Propiedad 8: cardinalidad de especialidades bloquea el envío', () => 
       }),
       { numRuns: 100 }
     );
-  });
+  }, 20000);
 
   it('formularioInvalido() es true cuando especialidades tiene más de 8 items (con otros campos válidos)', () => {
     fc.assert(
@@ -140,7 +143,7 @@ describe('Propiedad 8: cardinalidad de especialidades bloquea el envío', () => 
       ),
       { numRuns: 100 }
     );
-  });
+  }, 20000);
 
   it('formularioInvalido() es false cuando especialidades tiene 1-8 items válidos (con otros campos válidos)', () => {
     fc.assert(
@@ -163,7 +166,7 @@ describe('Propiedad 8: cardinalidad de especialidades bloquea el envío', () => 
       ),
       { numRuns: 100 }
     );
-  });
+  }, 20000);
 });
 
 /**
@@ -236,7 +239,7 @@ describe('Property 9: Frontend description length blocks submission', () => {
       }),
       { numRuns: 100 }
     );
-  });
+  }, 20000);
 
   it('formularioInvalido() returns false for any description with length <= 500 (with other fields valid)', () => {
     fc.assert(
@@ -257,5 +260,5 @@ describe('Property 9: Frontend description length blocks submission', () => {
       }),
       { numRuns: 100 }
     );
-  });
+  }, 20000);
 });

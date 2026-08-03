@@ -161,6 +161,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'empresa/certificaciones',
+    canActivate: [guardEmpresa],
+    loadComponent: () =>
+      import('./pages/certificaciones/certificaciones-page.component').then(
+        (m) => m.CertificacionesPageComponent
+      ),
+  },
+  {
     path: 'empresa/limites',
     canActivate: [guardEmpresa],
     loadComponent: () =>
@@ -196,6 +204,13 @@ export const routes: Routes = [
     path: 'ecoruta/itinerarios',
     canActivate: [usuarioIndividualGuard],
     loadComponent: cargarPlaceholder,
+  },
+  {
+    path: 'empresa/:slug/reputacion/certificaciones',
+    loadComponent: () =>
+      import('./pages/perfil-publico/certificaciones/certificaciones-publicas-page.component').then(
+        (m) => m.CertificacionesPublicasPageComponent
+      ),
   },
   {
     path: 'empresa/emisiones',

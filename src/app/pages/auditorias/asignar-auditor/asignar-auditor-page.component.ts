@@ -9,7 +9,7 @@ import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.co
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
-import { inicialesDe } from '../../../shared/utils/iniciales.utils';
+import { initialsFromNombreCompleto } from '../../../shared/utils/initials.utils';
 import { AuditorResumen } from '../../auditores/auditor.model';
 import { AuditoresService } from '../../auditores/auditores.service';
 import { OrigenAsignacion, OrigenAsignacionRequest } from '../auditoria.model';
@@ -125,7 +125,7 @@ export class AsignarAuditorPageComponent implements OnInit {
 
       this.asignacion.set({
         nombre: auditor.nombre,
-        iniciales: inicialesDe(auditor.nombre),
+        iniciales: initialsFromNombreCompleto(auditor.nombre),
         fotoPerfil: '',
         origen: solicitud.origenAsignacion ?? 'MANUAL',
       });
@@ -175,7 +175,7 @@ export class AsignarAuditorPageComponent implements OnInit {
       const nombre = solicitud?.auditor?.nombre ?? auditor.nombre;
       this.asignacion.set({
         nombre,
-        iniciales: inicialesDe(nombre),
+        iniciales: initialsFromNombreCompleto(nombre),
         fotoPerfil: auditor.fotoPerfil ?? '',
         origen: solicitud?.origenAsignacion ?? 'MANUAL',
       });
@@ -247,7 +247,7 @@ export class AsignarAuditorPageComponent implements OnInit {
       auditor.calificacionPromedio === null ? 0 : Math.round(auditor.calificacionPromedio);
     return {
       auditor,
-      iniciales: inicialesDe(auditor.nombre),
+      iniciales: initialsFromNombreCompleto(auditor.nombre),
       estrellas: Array.from({ length: TOTAL_ESTRELLAS }, (_, indice) => indice < redondeada),
       etiquetas: auditor.especialidadesPrincipales.map(
         (clave) => this.etiquetasEspecialidad().get(clave) ?? clave
