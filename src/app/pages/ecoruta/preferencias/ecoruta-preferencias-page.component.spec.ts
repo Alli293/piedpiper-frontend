@@ -10,11 +10,34 @@ import { ToastService } from '../../../shared/services/toast.service';
 import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
 import { PerfilInicial } from '../../../core/models/perfil-inicial.model';
 import { PreferenciasViajeResponse } from '../models/preferencias-viaje.model';
+import { EcoRutaItinerariosService } from '../itinerarios/ecoruta-itinerarios.service';
+import { Itinerario } from '../itinerarios/models/itinerario.model';
+import { toIsoDateString } from '../../../shared/utils/date.utils';
+
+// Fecha relativa (no un literal fijo): el formulario exige minDate >= hoy, así que un
+// string hardcodeado queda inválido apenas pasa esa fecha en el calendario real.
+const UNA_SEMANA_DESPUES = new Date();
+UNA_SEMANA_DESPUES.setUTCDate(UNA_SEMANA_DESPUES.getUTCDate() + 7);
+const FECHA_INICIO = toIsoDateString(UNA_SEMANA_DESPUES);
+
+const ITINERARIO_GENERADO: Itinerario = {
+  id: 'itinerario-1',
+  cantidadDias: 5,
+  fechaInicio: FECHA_INICIO,
+  tipoViaje: 'FAMILIA',
+  estado: 'GENERADO',
+  version: 1,
+  puntuacionAmbientalPreliminar: 80,
+  fechaGeneracion: '2026-08-01T00:00:00.000Z',
+  generadoParcial: false,
+  mensajeParcial: null,
+  dias: [],
+};
 
 const VALID_RESPONSE: PreferenciasViajeResponse = {
   id: '1',
   cantidadDias: 5,
-  fechaInicio: '2026-08-01',
+  fechaInicio: FECHA_INICIO,
   tipoViaje: 'FAMILIA',
   presupuesto: 'MODERADO',
   intereses: ['NATURALEZA', 'AVENTURA'],
@@ -30,6 +53,7 @@ const VALID_RESPONSE: PreferenciasViajeResponse = {
 describe('EcoRutaPreferenciasPageComponent', () => {
   let obtener: ReturnType<typeof vi.fn>;
   let guardar: ReturnType<typeof vi.fn>;
+  let generar: ReturnType<typeof vi.fn>;
   let storage: Storage;
   let toastError: ReturnType<typeof vi.spyOn>;
 
@@ -41,6 +65,7 @@ describe('EcoRutaPreferenciasPageComponent', () => {
 
     obtener = vi.fn().mockReturnValue(throwError(() => new HttpErrorResponse({ status: 404 })));
     guardar = vi.fn();
+    generar = vi.fn().mockReturnValue(of(ITINERARIO_GENERADO));
 
     await TestBed.configureTestingModule({
       imports: [EcoRutaPreferenciasPageComponent],
@@ -48,6 +73,7 @@ describe('EcoRutaPreferenciasPageComponent', () => {
         provideLocationMocks(),
         provideRouter([]),
         { provide: EcoRutaPreferenciasService, useValue: { obtener, guardar } },
+        { provide: EcoRutaItinerariosService, useValue: { generar } },
         {
           provide: PerfilInicialService,
           useValue: {
@@ -97,7 +123,7 @@ describe('EcoRutaPreferenciasPageComponent', () => {
   }
 
   function fillValidForm(root: HTMLElement): void {
-    setInputValue(root, 'app-date-input input', '2026-08-01');
+    setInputValue(root, 'app-date-input input', FECHA_INICIO);
     setInputValue(root, 'app-number-input input', '5');
     clickChipInGroup(root, 0, 'Familia');
     clickChipInGroup(root, 1, 'Naturaleza');
@@ -117,7 +143,7 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
 
-    expect(root.querySelector<HTMLInputElement>('app-date-input input')?.value).toBe('2026-08-01');
+    expect(root.querySelector<HTMLInputElement>('app-date-input input')?.value).toBe(FECHA_INICIO);
     expect(root.querySelector<HTMLInputElement>('app-number-input input')?.value).toBe('5');
 
     const familiaChip = Array.from(
@@ -137,7 +163,7 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    setInputValue(root, 'app-date-input input', '2026-08-01');
+    setInputValue(root, 'app-date-input input', FECHA_INICIO);
     setInputValue(root, 'app-number-input input', '5');
     clickChipInGroup(root, 0, 'Familia');
 
@@ -158,7 +184,7 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     expect(guardar).toHaveBeenCalledTimes(1);
     expect(guardar).toHaveBeenCalledWith({
       cantidadDias: 5,
-      fechaInicio: '2026-08-01',
+      fechaInicio: FECHA_INICIO,
       tipoViaje: 'FAMILIA',
       presupuesto: null,
       intereses: ['NATURALEZA'],
