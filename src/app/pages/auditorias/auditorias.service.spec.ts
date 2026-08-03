@@ -59,4 +59,43 @@ describe('AuditoriasService', () => {
 
     req.flush({ id: 'sol-2', documentos: [] });
   });
+
+  it('consulta la solicitud con GET al endpoint de la solicitud', () => {
+    service.obtenerSolicitud('sol-9').subscribe();
+
+    const req = httpMock.expectOne(`${baseUrl}/sol-9`);
+    expect(req.request.method).toBe('GET');
+
+    req.flush({
+      id: 'sol-9',
+      documentos: [],
+      auditor: { id: 'aud-1', nombre: 'Ana Mora' },
+      origenAsignacion: 'MANUAL',
+    });
+  });
+
+  it('asigna el auditor con POST al endpoint de la solicitud', () => {
+    service.asignarAuditor('sol-9', { idAuditor: 'aud-1', origenAsignacion: 'manual' }).subscribe();
+
+    const req = httpMock.expectOne(`${baseUrl}/sol-9/auditor`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ idAuditor: 'aud-1', origenAsignacion: 'manual' });
+
+    req.flush({ id: 'sol-9', documentos: [], auditor: { id: 'aud-1', nombre: 'Ana Mora' } });
+  });
+
+  /**
+   * Contrato del servicio, no de la pantalla: hoy la UI siempre envía `manual`, pero el endpoint
+   * acepta ambos orígenes y este test fija que el valor viaja tal cual en el cuerpo.
+   */
+  it('serializa el origen recomendacion_ia tal cual en el cuerpo del POST', () => {
+    service
+      .asignarAuditor('sol-9', { idAuditor: 'aud-2', origenAsignacion: 'recomendacion_ia' })
+      .subscribe();
+
+    const req = httpMock.expectOne(`${baseUrl}/sol-9/auditor`);
+    expect(req.request.body).toEqual({ idAuditor: 'aud-2', origenAsignacion: 'recomendacion_ia' });
+
+    req.flush({ id: 'sol-9', documentos: [] });
+  });
 });

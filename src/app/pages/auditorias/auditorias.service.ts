@@ -2,7 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { NuevaSolicitudAuditoriaRequest, SolicitudAuditoria } from './auditoria.model';
+import {
+  AsignarAuditorRequest,
+  NuevaSolicitudAuditoriaRequest,
+  SolicitudAuditoria,
+  SolicitudAuditoriaAsignada,
+} from './auditoria.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuditoriasService {
@@ -20,5 +25,19 @@ export class AuditoriasService {
     }
 
     return this.http.post<SolicitudAuditoria>(this.baseUrl, formData);
+  }
+
+  obtenerSolicitud(idSolicitud: string): Observable<SolicitudAuditoriaAsignada> {
+    return this.http.get<SolicitudAuditoriaAsignada>(`${this.baseUrl}/${idSolicitud}`);
+  }
+
+  asignarAuditor(
+    idSolicitud: string,
+    request: AsignarAuditorRequest
+  ): Observable<SolicitudAuditoriaAsignada> {
+    return this.http.post<SolicitudAuditoriaAsignada>(
+      `${this.baseUrl}/${idSolicitud}/auditor`,
+      request
+    );
   }
 }

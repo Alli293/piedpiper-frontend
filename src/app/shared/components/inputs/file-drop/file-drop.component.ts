@@ -7,6 +7,7 @@ import {
   output,
   signal,
   viewChild,
+  viewChildren,
 } from '@angular/core';
 import { IconComponent } from '../../icon/icon.component';
 
@@ -19,6 +20,9 @@ export interface ArchivoRechazado {
 }
 
 export const MENSAJE_FORMATO_INVALIDO = 'Solo se aceptan archivos en formato PDF.';
+
+/** Firma `%PDF-`: el backend rechaza la solicitud completa si un documento no empieza con ella. */
+const FIRMA_PDF = [0x25, 0x50, 0x44, 0x46, 0x2d];
 
 export function mensajeMaximoArchivos(maximo: number): string {
   return `Puedes adjuntar un máximo de ${maximo} documentos.`;
@@ -46,6 +50,11 @@ interface ArchivoVista {
   tamanio: string;
 }
 
+interface Rechazo {
+  motivo: MotivoRechazo;
+  mensaje: string;
+}
+
 let nextId = 0;
 
 @Component({
@@ -70,6 +79,8 @@ export class FileDropComponent {
   rechazado = output<ArchivoRechazado>();
 
   private readonly campo = viewChild<ElementRef<HTMLInputElement>>('campo');
+  private readonly zona = viewChild<ElementRef<HTMLButtonElement>>('zona');
+  private readonly botonesEliminar = viewChildren<ElementRef<HTMLButtonElement>>('remover');
 
   protected readonly zonaId = `ch-file-drop-${nextId++}`;
   protected readonly hintId = `${this.zonaId}-hint`;
@@ -78,6 +89,10 @@ export class FileDropComponent {
 
   protected readonly arrastrando = signal(false);
   private readonly errorInterno = signal('');
+
+  /** Clave estable por archivo: evita recrear la lista al eliminar uno del medio. */
+  private readonly claves = new WeakMap<File, string>();
+  private siguienteClave = 0;
 
   protected readonly mensajeError = computed(() => this.error() || this.errorInterno());
 
@@ -94,10 +109,7 @@ export class FileDropComponent {
   protected readonly vistas = computed<ArchivoVista[]>(() =>
     this.archivos().map((archivo) => ({
       archivo,
-      // Sin el índice a propósito: si va en la clave, al eliminar un archivo del medio cambian
-      // las claves de todos los siguientes y Angular destruye y recrea esos nodos en vez de
-      // reutilizarlos, con el parpadeo y la pérdida de foco que eso implica.
-      clave: `${archivo.name}-${archivo.size}-${archivo.lastModified}`,
+      clave: this.claveDe(archivo),
       nombre: archivo.name,
       tamanio: formatearTamanio(archivo.size),
     }))
@@ -110,8 +122,9 @@ export class FileDropComponent {
 
   protected onSeleccion(event: Event): void {
     const campo = event.target as HTMLInputElement;
-    this.agregar(Array.from(campo.files ?? []));
+    const entrantes = Array.from(campo.files ?? []);
     campo.value = '';
+    void this.agregar(entrantes);
   }
 
   protected onDragOver(event: DragEvent): void {
@@ -128,17 +141,28 @@ export class FileDropComponent {
     event.preventDefault();
     this.arrastrando.set(false);
     if (this.disabled()) return;
-    this.agregar(Array.from(event.dataTransfer?.files ?? []));
+    void this.agregar(Array.from(event.dataTransfer?.files ?? []));
   }
 
   protected eliminar(indice: number): void {
     if (this.disabled()) return;
     this.errorInterno.set('');
+    this.moverFoco(indice);
     this.archivos.update((archivos) => archivos.filter((_, posicion) => posicion !== indice));
   }
 
+  /**
+   * El botón pulsado se destruye al eliminar el archivo y el foco caería en el body. Se mueve
+   * antes de actualizar la lista: los botones vecinos sobreviven al re-render por su clave.
+   */
+  private moverFoco(indice: number): void {
+    const botones = this.botonesEliminar();
+    const destino = botones[indice + 1] ?? botones[indice - 1] ?? this.zona();
+    destino?.nativeElement.focus();
+  }
+
   /** Acumula los archivos válidos sobre los ya seleccionados; nunca los reemplaza. */
-  agregar(entrantes: File[]): void {
+  async agregar(entrantes: File[]): Promise<void> {
     if (entrantes.length === 0) return;
 
     const aceptados: File[] = [];
@@ -149,25 +173,10 @@ export class FileDropComponent {
     let disponibles = this.maxArchivos() - this.archivos().length;
 
     for (const archivo of entrantes) {
-      if (!this.formatoValido(archivo)) {
-        errores.add(MENSAJE_FORMATO_INVALIDO);
-        this.rechazado.emit({
-          nombre: archivo.name,
-          motivo: 'formato',
-          mensaje: MENSAJE_FORMATO_INVALIDO,
-        });
-        continue;
-      }
-      if (archivo.size > this.maxTamanioBytes()) {
-        const mensaje = mensajeTamanioMaximo(this.maxTamanioBytes());
-        errores.add(mensaje);
-        this.rechazado.emit({ nombre: archivo.name, motivo: 'tamanio', mensaje });
-        continue;
-      }
-      if (disponibles <= 0) {
-        const mensaje = mensajeMaximoArchivos(this.maxArchivos());
-        errores.add(mensaje);
-        this.rechazado.emit({ nombre: archivo.name, motivo: 'cantidad', mensaje });
+      const rechazo = await this.rechazoDe(archivo, disponibles);
+      if (rechazo !== null) {
+        errores.add(rechazo.mensaje);
+        this.rechazado.emit({ nombre: archivo.name, ...rechazo });
         continue;
       }
       aceptados.push(archivo);
@@ -180,19 +189,51 @@ export class FileDropComponent {
     }
   }
 
-  private formatoValido(archivo: File): boolean {
+  private async rechazoDe(archivo: File, disponibles: number): Promise<Rechazo | null> {
+    if (!(await this.formatoValido(archivo))) {
+      return { motivo: 'formato', mensaje: MENSAJE_FORMATO_INVALIDO };
+    }
+    if (archivo.size > this.maxTamanioBytes()) {
+      return { motivo: 'tamanio', mensaje: mensajeTamanioMaximo(this.maxTamanioBytes()) };
+    }
+    if (disponibles <= 0) {
+      return { motivo: 'cantidad', mensaje: mensajeMaximoArchivos(this.maxArchivos()) };
+    }
+    return null;
+  }
+
+  private async formatoValido(archivo: File): Promise<boolean> {
     const accept = this.accept().trim();
     if (!accept) return true;
 
     const nombre = archivo.name.toLowerCase();
-    return accept.split(',').some((patron) => {
+    const coincide = accept.split(',').some((patron) => {
       const esperado = patron.trim().toLowerCase();
       if (!esperado) return false;
       if (esperado.startsWith('.')) return nombre.endsWith(esperado);
       if (esperado.endsWith('/*')) return archivo.type.startsWith(esperado.slice(0, -1));
-      if (esperado === 'application/pdf')
-        return archivo.type === esperado || nombre.endsWith('.pdf');
+      if (esperado === 'application/pdf') {
+        return archivo.type === esperado && nombre.endsWith('.pdf');
+      }
       return archivo.type === esperado;
     });
+
+    return coincide && (await this.firmaValida(archivo, nombre));
+  }
+
+  /** Un .txt renombrado a .pdf llega con content-type válido: solo los bytes lo delatan. */
+  private async firmaValida(archivo: File, nombre: string): Promise<boolean> {
+    if (!nombre.endsWith('.pdf')) return true;
+    const cabecera = new Uint8Array(await archivo.slice(0, FIRMA_PDF.length).arrayBuffer());
+    return FIRMA_PDF.every((byte, indice) => cabecera[indice] === byte);
+  }
+
+  private claveDe(archivo: File): string {
+    const existente = this.claves.get(archivo);
+    if (existente !== undefined) return existente;
+
+    const clave = `${this.zonaId}-${this.siguienteClave++}`;
+    this.claves.set(archivo, clave);
+    return clave;
   }
 }
