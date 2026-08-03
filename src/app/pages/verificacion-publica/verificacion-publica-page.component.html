@@ -1,0 +1,107 @@
+<app-state-layout>
+  <div class="ch-verificacion-publica">
+    @if (cargando()) {
+      <section class="ch-verificacion-publica__estado" role="status">
+        <span class="ch-verificacion-publica__loader" aria-hidden="true"></span>
+        <p>Verificando credencial...</p>
+      </section>
+    } @else if (noEncontrado()) {
+      <app-card class="ch-verificacion-publica__estado">
+        <app-icon name="warning" [size]="32" />
+        <app-heading level="h1" text="Credencial no encontrada" />
+        <p>
+          El código ingresado no corresponde a ninguna credencial de CarbonHub. Verifica que esté
+          escrito correctamente.
+        </p>
+        <app-button variant="secondary" size="sm" (click)="verificarOtra()">
+          Verificar otro código
+        </app-button>
+      </app-card>
+    } @else if (error()) {
+      <app-card class="ch-verificacion-publica__estado" role="alert">
+        <app-icon name="danger" [size]="32" />
+        <p>No fue posible verificar esta credencial en este momento.</p>
+        <app-button variant="secondary" size="sm" (click)="reintentar()">Reintentar</app-button>
+      </app-card>
+    } @else if (resultado(); as r) {
+      <app-card class="ch-verificacion-publica__resultado">
+        <div class="ch-verificacion-publica__badge">
+          @if (obtenerRutaBadge(r.tipo); as badgeUrl) {
+            @if (!badgeCaido()) {
+              <img [src]="badgeUrl" [alt]="r.nombreCertificacion" (error)="onBadgeError()" />
+            } @else {
+              <app-icon name="insignias" [size]="48" />
+            }
+          } @else {
+            <app-icon name="insignias" [size]="48" />
+          }
+        </div>
+
+        <app-badge [variant]="varianteEstado(r.estado)" [icon]="iconoEstado(r.estado)">
+          {{ etiquetaEstado(r.estado) }}
+        </app-badge>
+
+        <app-heading level="h1" [text]="r.nombreCertificacion" />
+        <p class="ch-verificacion-publica__empresa">{{ r.empresa }}</p>
+
+        <dl class="ch-verificacion-publica__detalle">
+          <div>
+            <dt>Entidad certificadora</dt>
+            <dd>{{ r.entidadCertificadora }}</dd>
+          </div>
+          <div>
+            <dt>Auditor verificador</dt>
+            <dd>{{ r.auditor }}</dd>
+          </div>
+          <div>
+            <dt>Período verificado</dt>
+            <dd>
+              {{ r.fechaEmision | date: 'dd/MM/yyyy' : 'UTC' }} →
+              {{ r.fechaVencimiento | date: 'dd/MM/yyyy' : 'UTC' }}
+            </dd>
+          </div>
+          @if (r.estado === 'revocada' && r.fechaRevocacion) {
+            <div>
+              <dt>Fecha de revocación</dt>
+              <dd>{{ r.fechaRevocacion | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
+            </div>
+          }
+        </dl>
+
+        <p class="ch-verificacion-publica__consulta">
+          Consultado el {{ r.fechaConsulta | date: 'dd/MM/yyyy HH:mm' : 'UTC' }} UTC
+        </p>
+
+        <app-button variant="tertiary" size="sm" (click)="verificarOtra()">
+          Verificar otra credencial
+        </app-button>
+      </app-card>
+    } @else {
+      <app-card class="ch-verificacion-publica__formulario">
+        <app-heading level="h1" text="Verificar una credencial" />
+        <p>
+          Ingresa el código de verificación de una certificación o insignia de CarbonHub para
+          confirmar su autenticidad.
+        </p>
+        <form novalidate (submit)="handleSubmit($event)">
+          <app-text-input
+            label="Código de verificación"
+            placeholder="CH-2026-8F4A19KD"
+            autocomplete="off"
+            hint="Ejemplo: CH-2026-8F4A19KD"
+            [formField]="verificarForm.codigo"
+            [error]="errorCodigo()"
+          />
+          <app-button
+            variant="primary"
+            type="submit"
+            [loading]="enviando()"
+            [disabled]="enviando()"
+          >
+            Verificar
+          </app-button>
+        </form>
+      </app-card>
+    }
+  </div>
+</app-state-layout>
