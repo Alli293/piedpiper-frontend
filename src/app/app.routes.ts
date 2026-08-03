@@ -228,6 +228,20 @@ export const routes: Routes = [
         (m) => m.RegisterEmissionPageComponent
       ),
   },
+  {
+    path: 'empresa/auditorias/nueva',
+    canActivate: [guardEmpresaAdmin],
+    loadComponent: () =>
+      import('./pages/auditorias/nueva-solicitud/nueva-solicitud-page.component').then(
+        (m) => m.NuevaSolicitudPageComponent
+      ),
+  },
+  {
+    // Pantalla de asignación de auditor (PP-45): placeholder hasta que exista la página real.
+    path: 'empresa/auditorias/:id/auditor',
+    canActivate: [guardEmpresaAdmin],
+    loadComponent: cargarPlaceholder,
+  },
   ...rutasPlaceholder,
   {
     path: 'perfil/configuracion-inicial',
