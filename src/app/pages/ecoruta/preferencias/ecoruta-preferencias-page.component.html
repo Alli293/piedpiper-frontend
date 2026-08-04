@@ -101,7 +101,7 @@
 
       <div class="ecoruta-preferencias-page__actions">
         <app-button type="submit" [disabled]="!canSubmit()" [loading]="submitting()">
-          Generar itinerario
+          {{ submitLabel() }}
         </app-button>
       </div>
     </form>
