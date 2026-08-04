@@ -205,6 +205,14 @@ export class EcoRutaPreferenciasPageComponent implements OnInit {
     void this.onSubmit();
   }
 
+  /**
+   * A diferencia del resto de las llamadas HTTP de este componente, esta se queda con
+   * `.subscribe()` en vez de `firstValueFrom` + try/catch: `firstValueFrom` difiere la
+   * resolución al menos un microtask aunque la fuente emita síncronamente, y varios tests
+   * interactúan con el formulario justo después de crear el fixture, sin esperar ese tick —
+   * quedarían escribiendo sobre campos todavía deshabilitados por `cargando`. `.subscribe()`
+   * conserva el timing síncrono que esos tests (y el propio guard de `disabled`) asumen.
+   */
   private cargarPreferencias(): void {
     this.cargando.set(true);
     this.ecoRutaPreferenciasService

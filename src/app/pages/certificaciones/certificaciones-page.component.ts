@@ -1,7 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
+import { LinkDirective } from '../../shared/components/link/link.directive';
 import { apiErrorMessage } from '../../shared/utils/http-error.utils';
 import { DashboardService } from '../dashboard/dashboard.service';
 import {
@@ -21,9 +23,8 @@ function mesActual(): string {
 
 /**
  * Pantalla de Certificaciones. Aloja el bloque "Estado de certificaciones"
- * (PP-74) y el "Calendario de vencimientos" (PP-77); el listado completo con
- * filtros llega en un PR aparte — los enlaces del panel de estado ya apuntan
- * a esta misma ruta con `?estado=...` para cuando ese listado exista.
+ * (PP-74), el "Calendario de vencimientos" (PP-77) y un enlace al listado
+ * completo con filtros (PP-59).
  */
 @Component({
   selector: 'app-certificaciones-page',
@@ -31,6 +32,8 @@ function mesActual(): string {
     ShellLayoutComponent,
     EstadoCertificacionesPanelComponent,
     CalendarioVencimientosComponent,
+    LinkDirective,
+    RouterLink,
   ],
   templateUrl: './certificaciones-page.component.html',
   styleUrl: './certificaciones-page.component.scss',
