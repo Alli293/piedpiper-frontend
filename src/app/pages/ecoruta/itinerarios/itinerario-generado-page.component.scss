@@ -223,6 +223,20 @@
   }
 }
 
+.ch-itinerario-generado__actividad-titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+  flex-wrap: wrap;
+
+  strong {
+    display: block;
+    color: var(--ch-text-primary);
+    font-family: var(--ch-font-heading);
+    font-size: 0.9rem;
+  }
+}
+
 .ch-itinerario-generado__actividad-meta {
   display: flex;
   flex-wrap: wrap;
