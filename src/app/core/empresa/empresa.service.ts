@@ -25,4 +25,14 @@ export class EmpresaService {
   listarInsignias(): Observable<InsigniaEmpresa[]> {
     return this.http.get<InsigniaEmpresa[]>(`${this.baseUrl}/insignias`);
   }
+
+  descargarInsigniaJsonLd(idInsigniaEmpresa: string): Observable<Blob> {
+    return this.http.get(`${environment.apiBaseUrl}/insignias/${idInsigniaEmpresa}/jsonld`, {
+      responseType: 'blob',
+    });
+  }
+
+  descargarInsigniaJwt(urlVerificacionJwt: string): Observable<Blob> {
+    return this.http.get(urlVerificacionJwt, { responseType: 'blob' });
+  }
 }

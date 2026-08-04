@@ -52,7 +52,7 @@ describe('InsigniasEmpresaListComponent', () => {
   it('renderiza las insignias ordenadas por fecha de obtencion descendente', () => {
     const fixture = crear();
     const root = fixture.nativeElement as HTMLElement;
-    const tarjetas = Array.from(root.querySelectorAll<HTMLElement>('.ch-ie__card'));
+    const tarjetas = Array.from(root.querySelectorAll<HTMLElement>('.ch-insignias-empresa__card'));
 
     expect(root.textContent).toContain('Insignias activas de Cafe del Valle S.A.');
     expect(tarjetas[0].textContent).toContain('Energia renovable');
@@ -65,13 +65,13 @@ describe('InsigniasEmpresaListComponent', () => {
     const fixture = crear();
     const root = fixture.nativeElement as HTMLElement;
     const carbonoNeutral = Array.from(
-      root.querySelectorAll<HTMLButtonElement>('.ch-ie__card-main')
+      root.querySelectorAll<HTMLButtonElement>('.ch-insignias-empresa__card-main')
     ).find((tarjeta) => tarjeta.textContent?.includes('Carbono Neutral'));
 
     carbonoNeutral?.click();
     fixture.detectChanges();
 
-    const detalle = root.querySelector('.ch-ie__detalle') as HTMLElement;
+    const detalle = root.querySelector('.ch-insignias-empresa__detalle') as HTMLElement;
     expect(detalle.textContent).toContain('Carbono Neutral');
     expect(detalle.textContent).toContain('CarbonHub');
     expect(detalle.textContent).not.toContain('via CarbonHub');
@@ -85,6 +85,6 @@ describe('InsigniasEmpresaListComponent', () => {
 
     const root = fixture.nativeElement as HTMLElement;
     expect(root.textContent).toContain('Sin insignias activas');
-    expect(root.querySelector('.ch-ie__card')).toBeNull();
+    expect(root.querySelector('.ch-insignias-empresa__card')).toBeNull();
   });
 });

@@ -1,26 +1,26 @@
 @if (insigniasOrdenadas().length === 0) {
-  <section class="ch-ie__vacio">
-    <span class="ch-ie__vacio-icono" aria-hidden="true">
+  <section class="ch-insignias-empresa__vacio">
+    <span class="ch-insignias-empresa__vacio-icono" aria-hidden="true">
       <app-icon name="insignias" [size]="34" />
     </span>
     <app-heading level="h1" text="Sin insignias activas" />
     <p>Cuando la empresa obtenga reconocimientos verificables, aparecerán aquí.</p>
   </section>
 } @else {
-  <div class="ch-ie">
-    <section class="ch-ie__resumen" aria-label="Resumen de insignias empresariales">
-      <div class="ch-ie__resumen-icono" aria-hidden="true">
+  <div class="ch-insignias-empresa">
+    <section class="ch-insignias-empresa__resumen" aria-label="Resumen de insignias empresariales">
+      <div class="ch-insignias-empresa__resumen-icono" aria-hidden="true">
         <app-icon name="empresa" [size]="20" />
       </div>
       <div>
-        <span class="ch-ie__eyebrow">Reconocimientos verificables</span>
+        <span class="ch-insignias-empresa__eyebrow">Reconocimientos verificables</span>
         <app-heading
           level="h1"
           [text]="nombreEmpresa() ? titulo() + ' de ' + nombreEmpresa() : titulo()"
         />
         <p>{{ descripcion() }}</p>
       </div>
-      <dl class="ch-ie__metricas">
+      <dl class="ch-insignias-empresa__metricas">
         <div>
           <dt>Insignias activas</dt>
           <dd>{{ cantidadActivas() }}</dd>
@@ -28,7 +28,7 @@
       </dl>
     </section>
 
-    <div class="ch-ie__nota" role="note">
+    <div class="ch-insignias-empresa__nota" role="note">
       <app-icon name="success" [size]="14" aria-hidden="true" />
       <span>
         Todas las insignias se emiten como credenciales
@@ -37,48 +37,69 @@
       </span>
     </div>
 
-    <div class="ch-ie__contenido">
-      <section class="ch-ie__principal">
-        <div class="ch-ie__seccion-titulo">
+    <div class="ch-insignias-empresa__contenido">
+      <section class="ch-insignias-empresa__principal">
+        <div class="ch-insignias-empresa__seccion-titulo">
           <span>Insignias activas</span>
           <strong>{{ cantidadActivas() }}</strong>
         </div>
 
-        <div class="ch-ie__grid">
+        <div class="ch-insignias-empresa__grid">
           @for (insignia of insigniasOrdenadas(); track llave(insignia)) {
             <article
-              class="ch-ie__card"
-              [class.ch-ie__card--activa]="
-                insigniaSeleccionada()?.idInsignia === insignia.idInsignia &&
-                insigniaSeleccionada()?.nivelInsignia === insignia.nivelInsignia
-              "
+              class="ch-insignias-empresa__card"
+              [class.ch-insignias-empresa__card--activa]="esSeleccionada(insignia)"
             >
+              @if (esSeleccionada(insignia)) {
+                <span
+                  class="ch-insignias-empresa__card-status"
+                  aria-label="Insignia seleccionada"
+                  title="Insignia seleccionada"
+                >
+                  <app-icon name="success" [size]="16" />
+                </span>
+              } @else if (insignia.urlVerificacionPublica) {
+                <button
+                  type="button"
+                  class="ch-insignias-empresa__card-status ch-insignias-empresa__card-status--link"
+                  aria-label="Verificar con OpenBadges 3.0"
+                  title="Verificar con OpenBadges 3.0"
+                  (click)="verificarOpenBadges.emit(insignia); $event.stopPropagation()"
+                >
+                  <app-icon name="ver" [size]="16" />
+                </button>
+              }
+
               <button
                 type="button"
-                class="ch-ie__card-main"
+                class="ch-insignias-empresa__card-main"
                 [attr.aria-label]="'Ver detalle de ' + insignia.nombre"
                 (click)="seleccionar(insignia)"
               >
                 <span
-                  class="ch-ie__card-icono"
-                  [class.ch-ie__card-icono--bronce]="insignia.nivelInsignia === 'bronce'"
-                  [class.ch-ie__card-icono--plata]="insignia.nivelInsignia === 'plata'"
-                  [class.ch-ie__card-icono--oro]="insignia.nivelInsignia === 'oro'"
+                  class="ch-insignias-empresa__card-icono"
+                  [class.ch-insignias-empresa__card-icono--bronce]="
+                    insignia.nivelInsignia === 'bronce'
+                  "
+                  [class.ch-insignias-empresa__card-icono--plata]="
+                    insignia.nivelInsignia === 'plata'
+                  "
+                  [class.ch-insignias-empresa__card-icono--oro]="insignia.nivelInsignia === 'oro'"
                   aria-hidden="true"
                 >
                   <app-icon name="insignias" [size]="28" />
                 </span>
 
-                <span class="ch-ie__card-copy">
+                <span class="ch-insignias-empresa__card-copy">
                   <strong>{{ insignia.nombre }}</strong>
-                  <span>{{ emisor() }}</span>
+                  <span>{{ emisor(insignia) }}</span>
                   <small>
                     <app-icon name="calendario" [size]="12" aria-hidden="true" />
                     {{ insignia.fechaObtencion | date: 'dd/MM/yyyy' }}
                   </small>
                 </span>
 
-                <span class="ch-ie__openbadges">
+                <span class="ch-insignias-empresa__openbadges">
                   <app-icon name="success" [size]="10" aria-hidden="true" />
                   OpenBadges 3.0
                 </span>
@@ -89,18 +110,22 @@
       </section>
 
       @if (insigniaSeleccionada(); as insignia) {
-        <aside class="ch-ie__detalle" aria-label="Detalle de verificacion">
-          <div class="ch-ie__seccion-titulo">
+        <aside class="ch-insignias-empresa__detalle" aria-label="Detalle de verificacion">
+          <div class="ch-insignias-empresa__seccion-titulo">
             <span>Detalle de verificacion</span>
           </div>
 
-          <div class="ch-ie__detalle-panel">
-            <div class="ch-ie__detalle-hero">
+          <div class="ch-insignias-empresa__detalle-panel">
+            <div class="ch-insignias-empresa__detalle-hero">
               <span
-                class="ch-ie__detalle-icono"
-                [class.ch-ie__detalle-icono--bronce]="insignia.nivelInsignia === 'bronce'"
-                [class.ch-ie__detalle-icono--plata]="insignia.nivelInsignia === 'plata'"
-                [class.ch-ie__detalle-icono--oro]="insignia.nivelInsignia === 'oro'"
+                class="ch-insignias-empresa__detalle-icono"
+                [class.ch-insignias-empresa__detalle-icono--bronce]="
+                  insignia.nivelInsignia === 'bronce'
+                "
+                [class.ch-insignias-empresa__detalle-icono--plata]="
+                  insignia.nivelInsignia === 'plata'
+                "
+                [class.ch-insignias-empresa__detalle-icono--oro]="insignia.nivelInsignia === 'oro'"
                 aria-hidden="true"
               >
                 <app-icon name="insignias" [size]="38" />
@@ -109,16 +134,19 @@
               <app-badge variant="success" icon="success">Insignia activa</app-badge>
             </div>
 
-            <div class="ch-ie__detalle-cuerpo">
-              <span class="ch-ie__detalle-eyebrow">Información de emisión</span>
+            <div class="ch-insignias-empresa__detalle-cuerpo">
+              <span class="ch-insignias-empresa__detalle-eyebrow">Información de emisión</span>
 
-              <dl class="ch-ie__detalle-lista">
+              <dl class="ch-insignias-empresa__detalle-lista">
                 <div>
                   <dt>
                     <app-icon name="insignias" [size]="13" aria-hidden="true" />
                     Insignia
                   </dt>
-                  <dd>{{ insignia.nombre }}</dd>
+                  <dd>
+                    <strong>{{ insignia.nombre }}</strong>
+                    <span>Nivel {{ nivelLabel(insignia.nivelInsignia) }}</span>
+                  </dd>
                 </div>
                 <div>
                   <dt>
@@ -126,7 +154,7 @@
                     Emisor
                   </dt>
                   <dd>
-                    <strong>{{ emisor() }}</strong>
+                    <strong>{{ emisor(insignia) }}</strong>
                   </dd>
                 </div>
                 <div>
@@ -136,23 +164,62 @@
                   </dt>
                   <dd>{{ insignia.fechaObtencion | date: 'dd/MM/yyyy' }}</dd>
                 </div>
+                <div>
+                  <dt>
+                    <app-icon name="success" [size]="13" aria-hidden="true" />
+                    Criterios
+                  </dt>
+                  <dd>{{ criterios(insignia) }}</dd>
+                </div>
               </dl>
 
-              <section class="ch-ie__credencial" aria-label="Reconocimiento verificable">
-                <div class="ch-ie__credencial-heading">
+              <section
+                class="ch-insignias-empresa__credencial"
+                aria-label="Reconocimiento verificable"
+              >
+                <div class="ch-insignias-empresa__credencial-heading">
                   <span aria-hidden="true">
                     <app-icon name="success" [size]="18" />
                   </span>
                   <div>
-                    <strong>Reconocimiento verificable</strong>
-                    <small>Requisitos validados por CarbonHub</small>
+                    <strong>Credencial verificable</strong>
+                    <small>Estandar OpenBadges 3.0</small>
                   </div>
                 </div>
                 <p>
                   Esta insignia fue otorgada automáticamente porque la empresa cumplió los
                   requisitos configurados en la plataforma.
                 </p>
-                <small class="ch-ie__verificacion-nota">
+                @if (insignia.urlVerificacionPublica) {
+                  <app-button variant="primary" (click)="verificarOpenBadges.emit(insignia)">
+                    <app-icon name="ver" [size]="16" />
+                    <span>Verificar con OpenBadges 3.0</span>
+                  </app-button>
+                }
+
+                @if (
+                  accionesPrivadas() &&
+                  (insignia.idInsigniaEmpresa ||
+                    insignia.urlLinkedIn ||
+                    insignia.urlVerificacionPublica)
+                ) {
+                  <div class="ch-insignias-empresa__acciones-secundarias">
+                    @if (insignia.urlVerificacionJwt || insignia.urlVerificacionPublica) {
+                      <app-button variant="secondary" (click)="descargarJwt.emit(insignia)">
+                        <app-icon name="descargar" [size]="16" />
+                        <span>Descargar .JWT</span>
+                      </app-button>
+                    }
+
+                    @if (insignia.urlLinkedIn || insignia.urlVerificacionPublica) {
+                      <app-button variant="secondary" (click)="compartirLinkedIn.emit(insignia)">
+                        <app-icon name="perfil-publico" [size]="16" />
+                        <span>Compartir en LinkedIn</span>
+                      </app-button>
+                    }
+                  </div>
+                }
+                <small class="ch-insignias-empresa__verificacion-nota">
                   Detección automática - niveles progresivos
                 </small>
               </section>

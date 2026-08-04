@@ -161,6 +161,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'empresa/certificaciones',
+    canActivate: [guardEmpresa],
+    loadComponent: () =>
+      import('./pages/certificaciones/certificaciones-page.component').then(
+        (m) => m.CertificacionesPageComponent
+      ),
+  },
+  {
     path: 'empresa/insignias',
     canActivate: [guardEmpresa],
     loadComponent: () =>
@@ -206,14 +214,6 @@ export const routes: Routes = [
     loadComponent: cargarPlaceholder,
   },
   {
-    path: 'ecoruta/itinerarios/:id',
-    canActivate: [usuarioIndividualGuard],
-    loadComponent: () =>
-      import('./pages/ecoruta/itinerarios/itinerario-generado-page.component').then(
-        (m) => m.ItinerarioGeneradoPageComponent
-      ),
-  },
-  {
     path: 'empresa/:slug/reputacion/certificaciones',
     loadComponent: () =>
       import('./pages/perfil-publico/certificaciones/certificaciones-publicas-page.component').then(
@@ -241,6 +241,22 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/emissions/register-emission/register-emission-page.component').then(
         (m) => m.RegisterEmissionPageComponent
+      ),
+  },
+  {
+    path: 'empresa/auditorias/nueva',
+    canActivate: [guardEmpresaAdmin],
+    loadComponent: () =>
+      import('./pages/auditorias/nueva-solicitud/nueva-solicitud-page.component').then(
+        (m) => m.NuevaSolicitudPageComponent
+      ),
+  },
+  {
+    path: 'empresa/auditorias/:id/auditor',
+    canActivate: [guardEmpresaAdmin],
+    loadComponent: () =>
+      import('./pages/auditorias/asignar-auditor/asignar-auditor-page.component').then(
+        (m) => m.AsignarAuditorPageComponent
       ),
   },
   ...rutasPlaceholder,

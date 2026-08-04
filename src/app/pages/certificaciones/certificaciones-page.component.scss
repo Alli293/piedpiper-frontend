@@ -1,0 +1,16 @@
+.ch-certificaciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-6);
+
+  &__placeholder {
+    font-family: var(--ch-font-body);
+    font-size: 13px;
+    color: var(--ch-text-secondary);
+    text-align: center;
+    padding: var(--ch-space-6);
+    border: 1px dashed var(--ch-border);
+    border-radius: var(--ch-radius-lg);
+    margin: 0;
+  }
+}

@@ -68,4 +68,39 @@ describe('EmpresaService', () => {
 
     expect(recibida).toEqual(respuestaInsignias);
   });
+
+  it('descarga una insignia empresarial como blob JSON-LD', () => {
+    const idInsigniaEmpresa = '11111111-1111-1111-1111-111111111111';
+    let recibida: Blob | undefined;
+
+    service.descargarInsigniaJsonLd(idInsigniaEmpresa).subscribe((r) => (recibida = r));
+
+    const req = httpMock.expectOne(
+      `${environment.apiBaseUrl}/insignias/${idInsigniaEmpresa}/jsonld`
+    );
+    expect(req.request.method).toBe('GET');
+    expect(req.request.responseType).toBe('blob');
+
+    const blob = new Blob(['{}'], { type: 'application/ld+json' });
+    req.flush(blob);
+
+    expect(recibida).toBe(blob);
+  });
+
+  it('descarga una insignia empresarial como blob JWT verificable', () => {
+    const urlJwt =
+      'https://carbonhub.test/api/insignias/11111111-1111-1111-1111-111111111111/verificacion.jwt';
+    let recibida: Blob | undefined;
+
+    service.descargarInsigniaJwt(urlJwt).subscribe((r) => (recibida = r));
+
+    const req = httpMock.expectOne(urlJwt);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.responseType).toBe('blob');
+
+    const blob = new Blob(['header.payload.signature'], { type: 'application/vc+ld+json+jwt' });
+    req.flush(blob);
+
+    expect(recibida).toBe(blob);
+  });
 });
