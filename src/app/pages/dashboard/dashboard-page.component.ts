@@ -1,11 +1,10 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { form, FormField, required, schema } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from '../../core/auth-session.service';
-import { BadgeComponent, BadgeVariant } from '../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
 import { HeadingComponent } from '../../shared/components/heading/heading.component';
@@ -27,12 +26,7 @@ import {
 } from '../emissions/models/emision.model';
 import { EmisionesService } from '../emissions/emisiones.service';
 import { DashboardService } from './dashboard.service';
-import {
-  InsigniaEmpresa,
-  NivelInsigniaEmpresa,
-  PeriodoDashboard,
-  ResumenHuellaDashboardResponse,
-} from './dashboard.model';
+import { PeriodoDashboard, ResumenHuellaDashboardResponse } from './dashboard.model';
 import { EvolucionService, PuntoMensual } from './evolucion.service';
 import { EvolucionChartComponent } from './evolucion-chart.component';
 
@@ -99,10 +93,8 @@ export const DONA_CIRCUNFERENCIA = 2 * Math.PI * DONA_RADIO;
 @Component({
   selector: 'app-dashboard-page',
   imports: [
-    BadgeComponent,
     ButtonComponent,
     CardStatComponent,
-    DatePipe,
     DecimalPipe,
     FormField,
     HeadingComponent,
@@ -125,7 +117,6 @@ export class DashboardPageComponent {
   private readonly anioActual = new Date().getFullYear();
   private solicitudResumen = 0;
   private solicitudResumenHuella = 0;
-  private solicitudInsignias = 0;
   private comparacionSolicitudId = 0;
 
   protected readonly sinEmisionesMensaje = SIN_EMISIONES_MENSAJE;
@@ -153,11 +144,6 @@ export class DashboardPageComponent {
   protected readonly cargandoResumenHuella = signal(false);
   protected readonly resumenHuellaError = signal<string | null>(null);
 
-  // --- Insignias empresariales (PP-60) ---
-  protected readonly insignias = signal<InsigniaEmpresa[]>([]);
-  protected readonly cargandoInsignias = signal(false);
-  protected readonly insigniasError = signal<string | null>(null);
-
   // --- Comparación contra el límite anual ---
   protected readonly cargandoComparacion = signal(false);
   protected readonly comparacion = signal<ComparacionEmisionesResponse | null>(null);
@@ -182,8 +168,6 @@ export class DashboardPageComponent {
   );
 
   protected readonly periodos = PERIODOS_DASHBOARD;
-  protected readonly insigniasVisibles = computed(() => this.insignias().slice(0, 6));
-
   protected readonly anioSeleccionado = computed(() => Number(this.periodoForm.anio().value()));
   protected readonly periodoSeleccionadoValue = computed(() => this.periodoSeleccionado());
 
@@ -230,8 +214,6 @@ export class DashboardPageComponent {
   );
 
   constructor() {
-    void this.cargarInsignias();
-
     // El año gobierna las tarjetas y el desglose anual de la dona.
     effect(() => {
       const anioField = this.periodoForm.anio();
@@ -415,24 +397,6 @@ export class DashboardPageComponent {
     return 'igual';
   }
 
-  protected nivelInsigniaLabel(nivel: NivelInsigniaEmpresa): string {
-    const labels: Record<NivelInsigniaEmpresa, string> = {
-      bronce: 'Bronce',
-      plata: 'Plata',
-      oro: 'Oro',
-    };
-    return labels[nivel];
-  }
-
-  protected nivelInsigniaVariant(nivel: NivelInsigniaEmpresa): BadgeVariant {
-    const variants: Record<NivelInsigniaEmpresa, BadgeVariant> = {
-      bronce: 'warning',
-      plata: 'info',
-      oro: 'success',
-    };
-    return variants[nivel];
-  }
-
   protected categoriasComparacion(
     comparacion: ComparacionEmisionesResponse
   ): CategoriaComparacionVisual[] {
@@ -482,27 +446,6 @@ export class DashboardPageComponent {
     } finally {
       if (solicitud === this.solicitudResumenHuella) {
         this.cargandoResumenHuella.set(false);
-      }
-    }
-  }
-
-  private async cargarInsignias(): Promise<void> {
-    const solicitud = ++this.solicitudInsignias;
-    this.cargandoInsignias.set(true);
-    this.insigniasError.set(null);
-    try {
-      const insignias = await firstValueFrom(this.dashboardService.listarInsignias());
-      if (solicitud !== this.solicitudInsignias) return;
-      this.insignias.set(insignias);
-    } catch (err: unknown) {
-      if (solicitud !== this.solicitudInsignias) return;
-      this.insignias.set([]);
-      this.insigniasError.set(
-        apiErrorMessage(err) ?? 'No se pudieron cargar las insignias empresariales.'
-      );
-    } finally {
-      if (solicitud === this.solicitudInsignias) {
-        this.cargandoInsignias.set(false);
       }
     }
   }

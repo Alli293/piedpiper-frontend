@@ -141,6 +141,7 @@ export class ShellLayoutComponent {
       dashboard: '/empresa/panel',
       emissions: '/empresa/emisiones',
       certificaciones: '/empresa/certificaciones',
+      'insignias-empresa': '/empresa/insignias',
       colaboradores: '/empresa/invitaciones',
       'ecoruta-planificar': '/ecoruta/preferencias',
       'ecoruta-itinerarios': '/ecoruta/itinerarios',
