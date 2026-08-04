@@ -123,7 +123,9 @@ describe('PerfilPublicoPageComponent', () => {
 
       fc.assert(
         fc.property(
-          fc.date({ min: new Date('2000-01-01'), max: new Date('2099-12-31') }),
+          fc
+            .date({ min: new Date('2000-01-01'), max: new Date('2099-12-31') })
+            .filter((d) => !isNaN(d.getTime())),
           (randomDate) => {
             const isoStr = randomDate.toISOString();
             const result = component['formatFechaCorta'](isoStr);

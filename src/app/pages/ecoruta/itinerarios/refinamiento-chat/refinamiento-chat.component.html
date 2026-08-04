@@ -1,0 +1,37 @@
+<section class="ch-refinamiento-chat" aria-label="Refinar itinerario con el asistente">
+  <header class="ch-refinamiento-chat__header">
+    <span class="ch-refinamiento-chat__header-icono" aria-hidden="true">
+      <app-icon name="enviar" [size]="16" />
+    </span>
+    <div>
+      <strong>Refinar con el asistente</strong>
+      <p>Pedí cambios y recalculá tu EcoScore</p>
+    </div>
+  </header>
+
+  <div class="ch-refinamiento-chat__mensajes">
+    <div class="ch-refinamiento-chat__mensaje ch-refinamiento-chat__mensaje--asistente">
+      <span class="ch-refinamiento-chat__mensaje-icono" aria-hidden="true">
+        <app-icon name="enviar" [size]="14" />
+      </span>
+      <p>{{ mensajeInicial() }}</p>
+    </div>
+  </div>
+
+  <form class="ch-refinamiento-chat__form" novalidate>
+    <input
+      type="text"
+      class="ch-refinamiento-chat__input"
+      placeholder="Ej: Quiero más actividades al aire libre"
+      disabled
+      aria-label="Escribí tu mensaje para el asistente"
+    />
+    <button type="submit" class="ch-refinamiento-chat__enviar" disabled aria-label="Enviar mensaje">
+      <app-icon name="enviar" [size]="16" />
+    </button>
+  </form>
+  <p class="ch-refinamiento-chat__ayuda">
+    <app-icon name="info" [size]="12" aria-hidden="true" />
+    <span>Disponible próximamente.</span>
+  </p>
+</section>

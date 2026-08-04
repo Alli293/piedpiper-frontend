@@ -116,7 +116,7 @@ describe('CertificacionesPageComponent', () => {
     expect(el.querySelector('.ch-estado-cert__error')?.textContent).toContain(
       'No fue posible cargar esta sección'
     );
-    expect(el.querySelector('.ch-certificaciones__placeholder')).toBeTruthy();
+    expect(el.querySelector('.ch-certificaciones__listado-link')).toBeTruthy();
   });
 
   it('carga el calendario del mes actual al iniciar', async () => {

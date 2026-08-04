@@ -1,0 +1,281 @@
+.ch-itinerario-generado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-4);
+  min-height: 100%;
+}
+
+.ch-itinerario-generado__estado {
+  min-height: min(560px, calc(100vh - 180px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-8);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-white);
+  text-align: center;
+  color: var(--ch-text-secondary);
+}
+
+.ch-itinerario-generado__loader {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--ch-radius-full);
+  border: 3px solid var(--ch-border);
+  border-top-color: var(--ch-green);
+  animation: ch-itinerario-spin 900ms linear infinite;
+}
+
+.ch-itinerario-generado__contenido {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--ch-space-5);
+  align-items: start;
+}
+
+.ch-itinerario-generado__principal {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-4);
+}
+
+.ch-itinerario-generado__lateral {
+  position: sticky;
+  top: 0;
+}
+
+.ch-itinerario-generado__resumen {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--ch-space-5);
+  padding: var(--ch-space-5);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-lg);
+  background: var(--ch-bg-white);
+  box-shadow: var(--ch-shadow-sm);
+}
+
+.ch-itinerario-generado__resumen-info p {
+  margin: var(--ch-space-1) 0 0;
+  color: var(--ch-text-secondary);
+  font-size: 0.86rem;
+}
+
+.ch-itinerario-generado__gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 140px;
+  flex-shrink: 0;
+}
+
+.ch-itinerario-generado__gauge-svg {
+  width: 110px;
+  height: 110px;
+}
+
+.ch-itinerario-generado__gauge-centro {
+  margin-top: -74px;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.ch-itinerario-generado__gauge-valor {
+  font-family: var(--ch-font-heading);
+  font-weight: 700;
+  font-size: 30px;
+  color: var(--ch-text-primary);
+}
+
+.ch-itinerario-generado__gauge-max {
+  font-family: var(--ch-font-body);
+  font-size: 11px;
+  color: var(--ch-text-secondary);
+}
+
+.ch-itinerario-generado__gauge-label {
+  margin: 0 0 var(--ch-space-2);
+  font-family: var(--ch-font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ch-text-secondary);
+  text-align: center;
+}
+
+.ch-itinerario-generado__aviso-parcial {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ch-space-2);
+  padding: var(--ch-space-3) var(--ch-space-4);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-warning-bg);
+  color: var(--ch-warning-dark);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.ch-itinerario-generado__dia {
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-white);
+  box-shadow: var(--ch-shadow-sm);
+  overflow: hidden;
+}
+
+.ch-itinerario-generado__dia-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--ch-space-3);
+  padding: var(--ch-space-4);
+  background: var(--ch-bg-main);
+  border-bottom: 1px solid var(--ch-border);
+
+  strong {
+    display: block;
+    color: var(--ch-text-primary);
+    font-family: var(--ch-font-heading);
+    font-size: 0.92rem;
+    text-transform: capitalize;
+  }
+}
+
+.ch-itinerario-generado__dia-numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border-radius: var(--ch-radius-full);
+  background: var(--ch-green);
+  color: var(--ch-text-on-dark);
+  font-family: var(--ch-font-heading);
+  font-weight: 700;
+}
+
+.ch-itinerario-generado__dia-ruta {
+  display: block;
+  margin-top: 2px;
+  color: var(--ch-text-secondary);
+  font-size: 0.78rem;
+}
+
+.ch-itinerario-generado__dia-conteo {
+  color: var(--ch-text-secondary);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.ch-itinerario-generado__actividades {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ch-itinerario-generado__actividad {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--ch-space-3);
+  padding: var(--ch-space-4);
+
+  & + & {
+    border-top: 1px solid var(--ch-border);
+  }
+}
+
+.ch-itinerario-generado__actividad-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border-radius: var(--ch-radius-full);
+  color: var(--ch-green);
+  background: var(--ch-green-soft);
+}
+
+.ch-itinerario-generado__actividad-info {
+  min-width: 0;
+
+  strong {
+    display: block;
+    color: var(--ch-text-primary);
+    font-family: var(--ch-font-heading);
+    font-size: 0.9rem;
+  }
+
+  p {
+    margin: var(--ch-space-1) 0 0;
+    color: var(--ch-text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+}
+
+.ch-itinerario-generado__actividad-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ch-space-3);
+  margin-top: var(--ch-space-2);
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--ch-text-secondary);
+    font-size: 0.76rem;
+  }
+}
+
+.ch-itinerario-generado__actividad-costo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ch-green-dark);
+  font-weight: 700;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+@keyframes ch-itinerario-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1180px) {
+  .ch-itinerario-generado__contenido {
+    grid-template-columns: 1fr;
+  }
+
+  .ch-itinerario-generado__lateral {
+    position: static;
+  }
+}
+
+@media (max-width: 780px) {
+  .ch-itinerario-generado__resumen {
+    grid-template-columns: 1fr;
+    text-align: center;
+    justify-items: center;
+  }
+
+  .ch-itinerario-generado__dia-header {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .ch-itinerario-generado__dia-conteo {
+    grid-column: 1 / -1;
+  }
+}

@@ -1,0 +1,141 @@
+<app-shell-layout
+  activeId="ecoruta-itinerarios"
+  variant="ecoruta"
+  companyName="EcoRuta"
+  companyRole="Viajes sostenibles"
+  companyInitials="ER"
+  [headerConfig]="headerConfig()"
+>
+  @if (cargando()) {
+    <section class="ch-itinerario-generado__estado" aria-live="polite">
+      <span class="ch-itinerario-generado__loader" aria-hidden="true"></span>
+      <p>Generando tu itinerario...</p>
+    </section>
+  } @else if (errorCarga()) {
+    <section class="ch-itinerario-generado__estado" role="alert">
+      <app-icon name="warning" [size]="32" />
+      <p>No se pudo cargar el itinerario.</p>
+      <app-button variant="secondary" (click)="cargar()">Reintentar</app-button>
+    </section>
+  } @else if (itinerario(); as data) {
+    <div class="ch-itinerario-generado">
+      <div class="ch-itinerario-generado__contenido">
+        <section class="ch-itinerario-generado__principal">
+          <section class="ch-itinerario-generado__resumen" aria-label="Resumen del itinerario">
+            <div class="ch-itinerario-generado__gauge">
+              <svg class="ch-itinerario-generado__gauge-svg" viewBox="0 0 120 120">
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="54"
+                  fill="none"
+                  stroke="var(--ch-border)"
+                  stroke-width="10"
+                />
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="54"
+                  fill="none"
+                  stroke="var(--ch-green)"
+                  stroke-width="10"
+                  stroke-linecap="round"
+                  [attr.stroke-dasharray]="donutDasharray()"
+                  transform="rotate(-90 60 60)"
+                />
+              </svg>
+              <div class="ch-itinerario-generado__gauge-centro">
+                @if (data.puntuacionAmbientalPreliminar !== null) {
+                  <span class="ch-itinerario-generado__gauge-valor">{{
+                    data.puntuacionAmbientalPreliminar
+                  }}</span>
+                  <span class="ch-itinerario-generado__gauge-max">/ 100</span>
+                }
+              </div>
+              <p class="ch-itinerario-generado__gauge-label">ECOSCORE DEL VIAJE</p>
+              @if (bandaEcoScore(); as banda) {
+                <app-badge [variant]="banda.variant">{{ banda.texto }}</app-badge>
+              }
+            </div>
+            <div class="ch-itinerario-generado__resumen-info">
+              <app-heading
+                level="h1"
+                [text]="'Costa Rica sostenible · ' + data.cantidadDias + ' días'"
+              />
+              <p>
+                Generado el {{ data.fechaGeneracion | date: 'dd/MM/yyyy - HH:mm' }} · Inicia el
+                {{ data.fechaInicio | date: 'dd/MM/yyyy' }}
+              </p>
+            </div>
+            <app-button (click)="volverAMisItinerarios()">Volver a mis itinerarios</app-button>
+          </section>
+
+          @if (data.generadoParcial && data.mensajeParcial) {
+            <div class="ch-itinerario-generado__aviso-parcial" role="status">
+              <app-icon name="info" [size]="16" aria-hidden="true" />
+              <span>{{ data.mensajeParcial }}</span>
+            </div>
+          }
+
+          @for (dia of data.dias; track dia.numeroDia) {
+            <article class="ch-itinerario-generado__dia">
+              <header class="ch-itinerario-generado__dia-header">
+                <span class="ch-itinerario-generado__dia-numero">{{ dia.numeroDia }}</span>
+                <div>
+                  <strong>{{ dia.fecha | date: 'EEEE d MMM' }}</strong>
+                  @if (etiquetaRuta(dia); as ruta) {
+                    <span class="ch-itinerario-generado__dia-ruta">{{ ruta }}</span>
+                  }
+                </div>
+                <span class="ch-itinerario-generado__dia-conteo">
+                  {{ dia.actividades.length }} actividad{{
+                    dia.actividades.length === 1 ? '' : 'es'
+                  }}
+                </span>
+              </header>
+
+              <ul class="ch-itinerario-generado__actividades">
+                @for (actividad of dia.actividades; track actividad.nombre + actividad.horario) {
+                  <li class="ch-itinerario-generado__actividad">
+                    <span class="ch-itinerario-generado__actividad-icono" aria-hidden="true">
+                      <app-icon name="viajero" [size]="18" />
+                    </span>
+                    <div class="ch-itinerario-generado__actividad-info">
+                      <strong>{{ actividad.nombre }}</strong>
+                      @if (actividad.descripcion) {
+                        <p>{{ actividad.descripcion }}</p>
+                      }
+                      <div class="ch-itinerario-generado__actividad-meta">
+                        <span>
+                          <app-icon name="reloj" [size]="12" aria-hidden="true" />
+                          {{ actividad.horario.slice(0, 5) }} · {{ actividad.duracionMinutos }} min
+                        </span>
+                        <span>
+                          <app-icon name="ubicacion" [size]="12" aria-hidden="true" />
+                          {{ etiquetaProvincia(actividad.provincia) }}
+                        </span>
+                        @if (actividad.establecimientoRecomendado) {
+                          <span>{{ actividad.establecimientoRecomendado }}</span>
+                        }
+                      </div>
+                    </div>
+                    @if (actividad.costoAproximado !== null) {
+                      <span class="ch-itinerario-generado__actividad-costo">
+                        <app-icon name="costo" [size]="12" aria-hidden="true" />
+                        {{ actividad.costoAproximado }} {{ actividad.moneda }}
+                      </span>
+                    }
+                  </li>
+                }
+              </ul>
+            </article>
+          }
+        </section>
+
+        <div class="ch-itinerario-generado__lateral">
+          <app-refinamiento-chat [itinerario]="data" />
+        </div>
+      </div>
+    </div>
+  }
+</app-shell-layout>

@@ -153,6 +153,22 @@ export const routes: Routes = [
       import('./pages/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent),
   },
   {
+    path: 'empresa/certificaciones/listado',
+    canActivate: [guardEmpresa],
+    loadComponent: () =>
+      import('./pages/certificaciones/listado/certificaciones-listado-page.component').then(
+        (m) => m.CertificacionesListadoPageComponent
+      ),
+  },
+  {
+    path: 'empresa/certificaciones/:id',
+    canActivate: [guardEmpresa],
+    loadComponent: () =>
+      import('./pages/certificaciones/detalle/certificacion-detalle-page.component').then(
+        (m) => m.CertificacionDetallePageComponent
+      ),
+  },
+  {
     path: 'empresa/benchmark',
     canActivate: [guardEmpresa],
     loadComponent: () =>
@@ -212,6 +228,14 @@ export const routes: Routes = [
     path: 'ecoruta/itinerarios',
     canActivate: [usuarioIndividualGuard],
     loadComponent: cargarPlaceholder,
+  },
+  {
+    path: 'ecoruta/itinerarios/:id',
+    canActivate: [usuarioIndividualGuard],
+    loadComponent: () =>
+      import('./pages/ecoruta/itinerarios/itinerario-generado-page.component').then(
+        (m) => m.ItinerarioGeneradoPageComponent
+      ),
   },
   {
     path: 'empresa/:slug/reputacion/certificaciones',

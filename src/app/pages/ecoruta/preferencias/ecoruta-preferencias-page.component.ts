@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import {
   disabled,
   FormField,
@@ -29,6 +30,7 @@ import { ToastService } from '../../../shared/services/toast.service';
 import { todayUtcMidnight, toIsoDateString } from '../../../shared/utils/date.utils';
 import { fieldError } from '../../../shared/utils/form-field.utils';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
+import { EcoRutaItinerariosService } from '../itinerarios/ecoruta-itinerarios.service';
 import { EcoRutaPreferenciasService } from '../ecoruta-preferencias.service';
 import {
   INTERES_OPTIONS,
@@ -85,10 +87,15 @@ const INITIAL_MODEL: PreferenciasViajeFormModel = {
 })
 export class EcoRutaPreferenciasPageComponent implements OnInit {
   private readonly ecoRutaPreferenciasService = inject(EcoRutaPreferenciasService);
+  private readonly itinerariosService = inject(EcoRutaItinerariosService);
   private readonly authSession = inject(AuthSessionService);
   private readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  /** Distingue el label del botón entre el paso de guardado y el de generación con IA. */
+  protected readonly generandoItinerario = signal(false);
 
   protected readonly tipoViajeOptions = TIPO_VIAJE_OPTIONS;
   protected readonly interesOptions = INTERES_OPTIONS;
@@ -172,6 +179,9 @@ export class EcoRutaPreferenciasPageComponent implements OnInit {
   protected readonly canSubmit = computed(
     () => this.preferenciasForm().valid() && !this.submitting() && !this.cargando()
   );
+  protected readonly submitLabel = computed(() =>
+    this.generandoItinerario() ? 'Generando itinerario...' : 'Generar itinerario'
+  );
 
   protected readonly mostrarUbicacion = computed(() => this.model().buscarCercaDeMi);
 
@@ -195,6 +205,14 @@ export class EcoRutaPreferenciasPageComponent implements OnInit {
     void this.onSubmit();
   }
 
+  /**
+   * A diferencia del resto de las llamadas HTTP de este componente, esta se queda con
+   * `.subscribe()` en vez de `firstValueFrom` + try/catch: `firstValueFrom` difiere la
+   * resolución al menos un microtask aunque la fuente emita síncronamente, y varios tests
+   * interactúan con el formulario justo después de crear el fixture, sin esperar ese tick —
+   * quedarían escribiendo sobre campos todavía deshabilitados por `cargando`. `.subscribe()`
+   * conserva el timing síncrono que esos tests (y el propio guard de `disabled`) asumen.
+   */
   private cargarPreferencias(): void {
     this.cargando.set(true);
     this.ecoRutaPreferenciasService
@@ -233,10 +251,19 @@ export class EcoRutaPreferenciasPageComponent implements OnInit {
         try {
           const response = await firstValueFrom(this.ecoRutaPreferenciasService.guardar(request));
           this.aplicarRespuesta(response);
-          const accion = response.recienCreada ? 'guardadas' : 'actualizadas';
-          this.toastService.success(`Tus preferencias de viaje fueron ${accion}.`);
         } catch (error: unknown) {
           this.manejarErrorGuardado(error);
+          return undefined;
+        }
+
+        this.generandoItinerario.set(true);
+        try {
+          const itinerario = await firstValueFrom(this.itinerariosService.generar());
+          await this.router.navigateByUrl(`/ecoruta/itinerarios/${itinerario.id}`);
+        } catch (error: unknown) {
+          this.manejarErrorGeneracion(error);
+        } finally {
+          this.generandoItinerario.set(false);
         }
         return undefined;
       },
@@ -304,6 +331,15 @@ export class EcoRutaPreferenciasPageComponent implements OnInit {
 
   private manejarErrorGuardado(error: unknown): void {
     const fallback = 'No se pudieron guardar tus preferencias. Intenta nuevamente.';
+    if (error instanceof HttpErrorResponse) {
+      this.toastService.error(apiErrorMessage(error) ?? fallback);
+      return;
+    }
+    this.toastService.error(fallback);
+  }
+
+  private manejarErrorGeneracion(error: unknown): void {
+    const fallback = 'Ocurrió un error al generar el itinerario. Intenta nuevamente más tarde.';
     if (error instanceof HttpErrorResponse) {
       this.toastService.error(apiErrorMessage(error) ?? fallback);
       return;
