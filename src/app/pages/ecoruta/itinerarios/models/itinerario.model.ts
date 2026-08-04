@@ -10,7 +10,6 @@ export interface ItinerarioActividad {
   establecimientoRecomendado: string | null;
   provincia: string;
   puntuacionAmbiental?: PuntuacionAmbientalResponse;
-  puntuacionAmbientalEstimada?: number;
   certificacionesActivas?: CertificacionActiva[];
 }
 

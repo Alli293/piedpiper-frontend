@@ -6,23 +6,7 @@ import { PuntuacionAmbientalResponse } from '../models/puntuacion-ambiental.mode
 @Component({
   selector: 'app-puntuacion-ambiental-badge',
   imports: [IconComponent, DecimalPipe],
-  template: `
-    @if (puntuacion()) {
-      <span
-        class="ch-puntuacion-badge"
-        [class]="badgeClass()"
-        [attr.aria-label]="
-          'Puntuación ambiental: ' + (puntuacion()!.puntuacionTotal | number: '1.0-0') + ' de 100'
-        "
-      >
-        <app-icon name="hoja" [size]="14" aria-hidden="true" />
-        <span class="ch-puntuacion-badge__valor" aria-hidden="true">{{
-          puntuacion()!.puntuacionTotal | number: '1.0-0'
-        }}</span>
-        <span class="ch-puntuacion-badge__max" aria-hidden="true">/100</span>
-      </span>
-    }
-  `,
+  templateUrl: './puntuacion-ambiental-badge.component.html',
   styleUrl: './puntuacion-ambiental-badge.component.scss',
 })
 export class PuntuacionAmbientalBadgeComponent {
