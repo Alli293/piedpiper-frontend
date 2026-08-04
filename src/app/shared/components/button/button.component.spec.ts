@@ -12,6 +12,7 @@ import { ButtonComponent, ButtonSize, ButtonVariant } from './button.component';
       [disabled]="disabled"
       [loading]="loading"
       [type]="type"
+      [ariaLabel]="ariaLabel"
     >
       Continuar
     </app-button>
@@ -24,6 +25,7 @@ class HostComponent {
   disabled = false;
   loading = false;
   type: 'button' | 'submit' | 'reset' = 'button';
+  ariaLabel: string | undefined;
 }
 
 describe('ButtonComponent', () => {
@@ -106,5 +108,21 @@ describe('ButtonComponent', () => {
     const boton: HTMLButtonElement = fixture.nativeElement.querySelector('button');
     expect(boton.id).toBe('btn-guardar');
     expect(host.hasAttribute('id')).toBe(false);
+  });
+
+  it('reenvia ariaLabel() al boton interno, no al host', () => {
+    const fixture = createFixture({ ariaLabel: 'Asignar a Ana Mora' });
+
+    const host: HTMLElement = fixture.nativeElement.querySelector('app-button');
+    const boton: HTMLButtonElement = fixture.nativeElement.querySelector('button');
+    expect(boton.getAttribute('aria-label')).toBe('Asignar a Ana Mora');
+    expect(host.hasAttribute('aria-label')).toBe(false);
+  });
+
+  it('no deja un aria-label vacio cuando no se pasa ninguno', () => {
+    const fixture = createFixture();
+
+    const boton: HTMLButtonElement = fixture.nativeElement.querySelector('button');
+    expect(boton.hasAttribute('aria-label')).toBe(false);
   });
 });

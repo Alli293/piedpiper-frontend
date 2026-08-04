@@ -14,6 +14,7 @@ import {
   EmisionResponse,
   TipoVehiculoOption,
 } from '../models/emision.model';
+import { seleccionarFechaDeInput } from '../../../shared/components/inputs/date-input/date-input.testing';
 
 const VALID_RESPONSE: EmisionResponse = {
   id: '1',
@@ -147,10 +148,11 @@ describe('RegisterEmissionPageComponent', () => {
     element.dispatchEvent(new Event(element.tagName === 'SELECT' ? 'change' : 'input'));
   }
 
-  function fillValidForm(root: HTMLElement): void {
+  function fillValidForm(fixture: ReturnType<typeof createFixture>): void {
+    const root = fixture.nativeElement as HTMLElement;
     setInputValue(root, 'textarea', 'Planta de tueste');
     setInputValue(root, 'app-number-input input', '500');
-    setInputValue(root, 'app-date-input input', '2026-07-01');
+    seleccionarFechaDeInput(fixture, new Date(Date.UTC(2026, 6, 1)));
   }
 
   async function submitForm(fixture: ReturnType<typeof createFixture>): Promise<void> {
@@ -203,7 +205,7 @@ describe('RegisterEmissionPageComponent', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    fillValidForm(root);
+    fillValidForm(fixture);
     setInputValue(root, 'app-number-input input', '0');
 
     await submitForm(fixture);
@@ -226,7 +228,7 @@ describe('RegisterEmissionPageComponent', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    fillValidForm(root);
+    fillValidForm(fixture);
     await submitForm(fixture);
 
     expect(registrarElectricidad).toHaveBeenCalledTimes(1);
@@ -262,8 +264,10 @@ describe('RegisterEmissionPageComponent', () => {
     clickCategory(root, 'Vuelos');
     fixture.detectChanges();
     setInputValue(root, 'input[type="number"]', '2');
-    setInputValue(root, 'input[type="date"]', '2026-07-01');
-    const textInputs = root.querySelectorAll<HTMLInputElement>('input[type="text"]');
+    seleccionarFechaDeInput(fixture, new Date(Date.UTC(2026, 6, 1)));
+    const textInputs = root.querySelectorAll<HTMLInputElement>(
+      'input[type="text"]:not(.ch-date-input__field)'
+    );
     textInputs[0].value = 'sfo';
     textInputs[0].dispatchEvent(new Event('input'));
     textInputs[1].value = 'yyz';
@@ -291,7 +295,9 @@ describe('RegisterEmissionPageComponent', () => {
     clickCategory(root, 'Vuelos');
     fixture.detectChanges();
 
-    const textInputs = root.querySelectorAll<HTMLInputElement>('input[type="text"]');
+    const textInputs = root.querySelectorAll<HTMLInputElement>(
+      'input[type="text"]:not(.ch-date-input__field)'
+    );
     textInputs[0].value = 'sfo';
     textInputs[0].dispatchEvent(new Event('input'));
     textInputs[1].value = 'yyz';
@@ -301,7 +307,9 @@ describe('RegisterEmissionPageComponent', () => {
     clickButton(root, 'Agregar vuelta');
     fixture.detectChanges();
 
-    const roundTripInputs = root.querySelectorAll<HTMLInputElement>('input[type="text"]');
+    const roundTripInputs = root.querySelectorAll<HTMLInputElement>(
+      'input[type="text"]:not(.ch-date-input__field)'
+    );
     expect(root.querySelectorAll('.register-emission-page__leg')).toHaveLength(2);
     expect(roundTripInputs[2].value).toBe('YYZ');
     expect(roundTripInputs[3].value).toBe('SFO');
@@ -320,7 +328,7 @@ describe('RegisterEmissionPageComponent', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    fillValidForm(root);
+    fillValidForm(fixture);
     await submitForm(fixture);
 
     expect(registrarElectricidad).not.toHaveBeenCalled();
@@ -395,7 +403,7 @@ describe('RegisterEmissionPageComponent', () => {
       combustibleSelect.dispatchEvent(new Event('change'));
 
       setInputValue(root, 'app-number-input input', '0');
-      setInputValue(root, 'app-date-input input', '2026-07-01');
+      seleccionarFechaDeInput(fixture, new Date(Date.UTC(2026, 6, 1)));
       setInputValue(root, 'textarea', 'Ruta de reparto');
 
       await submitForm(fixture);
@@ -419,7 +427,7 @@ describe('RegisterEmissionPageComponent', () => {
       combustibleSelect.dispatchEvent(new Event('change'));
 
       setInputValue(root, 'app-number-input input', '100');
-      setInputValue(root, 'app-date-input input', '2026-07-01');
+      seleccionarFechaDeInput(fixture, new Date(Date.UTC(2026, 6, 1)));
       setInputValue(root, 'textarea', 'Ruta de reparto');
 
       await submitForm(fixture);
@@ -443,7 +451,7 @@ describe('RegisterEmissionPageComponent', () => {
       combustibleSelect.dispatchEvent(new Event('change'));
 
       setInputValue(root, 'app-number-input input', '100');
-      setInputValue(root, 'app-date-input input', '2026-07-01');
+      seleccionarFechaDeInput(fixture, new Date(Date.UTC(2026, 6, 1)));
       setInputValue(root, 'textarea', 'Ruta de reparto');
 
       await submitForm(fixture);
@@ -508,21 +516,22 @@ describe('RegisterEmissionPageComponent', () => {
   });
 
   describe('envío de carga', () => {
-    function fillValidEnvioForm(root: HTMLElement): void {
+    function fillValidEnvioForm(fixture: ReturnType<typeof createFixture>): void {
+      const root = fixture.nativeElement as HTMLElement;
       setInputValue(root, 'textarea', 'Envío de café a puerto');
       const numberInputs = root.querySelectorAll<HTMLInputElement>('app-number-input input');
       numberInputs[0].value = '200';
       numberInputs[0].dispatchEvent(new Event('input'));
       numberInputs[1].value = '500';
       numberInputs[1].dispatchEvent(new Event('input'));
-      setInputValue(root, 'app-date-input input', '2026-07-01');
+      seleccionarFechaDeInput(fixture, new Date(Date.UTC(2026, 6, 1)));
     }
 
     it('does not call the service when weight is 0 (invalid form)', async () => {
       const fixture = createFixture();
       const root = selectEnvioTab(fixture);
 
-      fillValidEnvioForm(root);
+      fillValidEnvioForm(fixture);
       const numberInputs = root.querySelectorAll<HTMLInputElement>('app-number-input input');
       numberInputs[0].value = '0';
       numberInputs[0].dispatchEvent(new Event('input'));
@@ -538,7 +547,7 @@ describe('RegisterEmissionPageComponent', () => {
       const fixture = createFixture();
       const root = selectEnvioTab(fixture);
 
-      fillValidEnvioForm(root);
+      fillValidEnvioForm(fixture);
       await submitForm(fixture);
 
       expect(registrarEnvio).toHaveBeenCalledTimes(1);
@@ -562,7 +571,7 @@ describe('RegisterEmissionPageComponent', () => {
       const fixture = createFixture();
       const root = selectEnvioTab(fixture);
 
-      fillValidEnvioForm(root);
+      fillValidEnvioForm(fixture);
       await submitForm(fixture);
 
       expect(registrarEnvio).not.toHaveBeenCalled();
@@ -576,7 +585,7 @@ describe('RegisterEmissionPageComponent', () => {
       const fixture = createFixture();
       const root = selectEnvioTab(fixture);
 
-      fillValidEnvioForm(root);
+      fillValidEnvioForm(fixture);
       await submitForm(fixture);
 
       expect(toastError).toHaveBeenCalledWith(expect.stringContaining('sesión'));
@@ -597,7 +606,7 @@ describe('RegisterEmissionPageComponent', () => {
       const fixture = createFixture();
       const root = selectEnvioTab(fixture);
 
-      fillValidEnvioForm(root);
+      fillValidEnvioForm(fixture);
       await submitForm(fixture);
 
       expect(toastError).toHaveBeenCalledWith('El peso excede el límite permitido.');
@@ -609,7 +618,7 @@ describe('RegisterEmissionPageComponent', () => {
       const fixture = createFixture();
       const root = selectEnvioTab(fixture);
 
-      fillValidEnvioForm(root);
+      fillValidEnvioForm(fixture);
       await submitForm(fixture);
 
       expect(toastError).toHaveBeenCalledWith(expect.stringContaining('No se pudo conectar'));

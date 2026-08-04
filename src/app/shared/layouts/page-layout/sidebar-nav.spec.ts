@@ -13,7 +13,9 @@ describe('buildSidebarConfig', () => {
     expect(config.menuItems.map((item) => item.id)).toEqual([
       'dashboard',
       'emissions',
+      'certificaciones',
       'benchmark',
+      'insignias-empresa',
     ]);
   });
 

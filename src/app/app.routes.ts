@@ -161,6 +161,22 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'empresa/certificaciones',
+    canActivate: [guardEmpresa],
+    loadComponent: () =>
+      import('./pages/certificaciones/certificaciones-page.component').then(
+        (m) => m.CertificacionesPageComponent
+      ),
+  },
+  {
+    path: 'empresa/insignias',
+    canActivate: [guardEmpresa],
+    loadComponent: () =>
+      import('./pages/empresa/insignias/insignias-empresa-page.component').then(
+        (m) => m.InsigniasEmpresaPageComponent
+      ),
+  },
+  {
     path: 'empresa/limites',
     canActivate: [guardEmpresa],
     loadComponent: () =>
@@ -213,6 +229,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'empresa/:slug/reputacion/insignias',
+    loadComponent: () =>
+      import('./pages/perfil-publico/insignias/insignias-publicas-page.component').then(
+        (m) => m.InsigniasPublicasPageComponent
+      ),
+  },
+  {
     path: 'empresa/emisiones',
     canActivate: [guardEmpresa],
     loadComponent: () =>
@@ -226,6 +249,22 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/emissions/register-emission/register-emission-page.component').then(
         (m) => m.RegisterEmissionPageComponent
+      ),
+  },
+  {
+    path: 'empresa/auditorias/nueva',
+    canActivate: [guardEmpresaAdmin],
+    loadComponent: () =>
+      import('./pages/auditorias/nueva-solicitud/nueva-solicitud-page.component').then(
+        (m) => m.NuevaSolicitudPageComponent
+      ),
+  },
+  {
+    path: 'empresa/auditorias/:id/auditor',
+    canActivate: [guardEmpresaAdmin],
+    loadComponent: () =>
+      import('./pages/auditorias/asignar-auditor/asignar-auditor-page.component').then(
+        (m) => m.AsignarAuditorPageComponent
       ),
   },
   ...rutasPlaceholder,

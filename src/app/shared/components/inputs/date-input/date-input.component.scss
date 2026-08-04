@@ -48,11 +48,11 @@
   flex: 1;
   min-width: 0;
   padding-right: var(--ch-space-10);
+  cursor: pointer;
+  background: var(--ch-bg-white);
 
-  // The native calendar affordance is replaced by .ch-date-input__icon below,
-  // which calls showPicker() explicitly — hide it so there's only one icon.
-  &::-webkit-calendar-picker-indicator {
-    opacity: 0;
+  &:disabled {
+    cursor: not-allowed;
   }
 }
 

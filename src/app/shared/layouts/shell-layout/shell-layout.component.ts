@@ -140,6 +140,8 @@ export class ShellLayoutComponent {
       benchmark: '/empresa/benchmark',
       dashboard: '/empresa/panel',
       emissions: '/empresa/emisiones',
+      certificaciones: '/empresa/certificaciones',
+      'insignias-empresa': '/empresa/insignias',
       colaboradores: '/empresa/invitaciones',
       'ecoruta-planificar': '/ecoruta/preferencias',
       'ecoruta-itinerarios': '/ecoruta/itinerarios',

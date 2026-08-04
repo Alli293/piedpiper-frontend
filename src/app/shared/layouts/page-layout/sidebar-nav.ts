@@ -6,6 +6,8 @@ export type SidebarNavId =
   | 'dashboard'
   | 'emissions'
   | 'benchmark'
+  | 'certificaciones'
+  | 'insignias-empresa'
   | 'colaboradores'
   | 'settings'
   | 'ecoruta-planificar'
@@ -26,7 +28,9 @@ const SIDEBAR_NAV_ITEMS: Record<SidebarNavVariant, readonly SidebarNavItemDef[]>
   empresa: [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
     { id: 'emissions', label: 'Mis Emisiones', icon: 'emisiones' },
+    { id: 'certificaciones', label: 'Certificaciones', icon: 'certificaciones' },
     { id: 'benchmark', label: 'Madurez ambiental', icon: 'benchmark' },
+    { id: 'insignias-empresa', label: 'Insignias', icon: 'insignias' },
     { id: 'colaboradores', label: 'Colaboradores', icon: 'colaboradores', soloAdministrador: true },
   ],
   ecoruta: [

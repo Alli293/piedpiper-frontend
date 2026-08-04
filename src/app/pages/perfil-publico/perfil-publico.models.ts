@@ -9,3 +9,5 @@ export interface CertificacionPublica {
   // en el estado neutral por defecto, no en un error de tipos.
   estado: string;
 }
+
+export type { InsigniaEmpresa, NivelInsigniaEmpresa } from '../../core/empresa/empresa.models';

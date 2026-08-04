@@ -12,18 +12,31 @@ import { PerfilInicial } from '../../../core/models/perfil-inicial.model';
 import { PreferenciasViajeResponse } from '../models/preferencias-viaje.model';
 import { EcoRutaItinerariosService } from '../itinerarios/ecoruta-itinerarios.service';
 import { Itinerario } from '../itinerarios/models/itinerario.model';
-import { toIsoDateString } from '../../../shared/utils/date.utils';
+import { seleccionarFechaDeInput } from '../../../shared/components/inputs/date-input/date-input.testing';
 
-// Fecha relativa (no un literal fijo): el formulario exige minDate >= hoy, así que un
-// string hardcodeado queda inválido apenas pasa esa fecha en el calendario real.
-const UNA_SEMANA_DESPUES = new Date();
-UNA_SEMANA_DESPUES.setUTCDate(UNA_SEMANA_DESPUES.getUTCDate() + 7);
-const FECHA_INICIO = toIsoDateString(UNA_SEMANA_DESPUES);
+// minFecha del formulario es "hoy", asi que las fechas de prueba tienen que
+// quedar siempre en el futuro respecto al momento real en que corre la
+// suite, no un valor fijo que eventualmente pasa a ser una fecha vencida.
+function fechaFuturaUtc(diasDesdeHoy: number): Date {
+  const hoy = new Date();
+  return new Date(Date.UTC(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + diasDesdeHoy));
+}
+
+function fechaFuturaIso(diasDesdeHoy: number): string {
+  return fechaFuturaUtc(diasDesdeHoy).toISOString().slice(0, 10);
+}
+
+function fechaFuturaDisplay(diasDesdeHoy: number): string {
+  const [anio, mes, dia] = fechaFuturaIso(diasDesdeHoy).split('-');
+  return `${dia}/${mes}/${anio}`;
+}
+
+const FECHA_INICIO_ISO = fechaFuturaIso(30);
 
 const ITINERARIO_GENERADO: Itinerario = {
   id: 'itinerario-1',
   cantidadDias: 5,
-  fechaInicio: FECHA_INICIO,
+  fechaInicio: FECHA_INICIO_ISO,
   tipoViaje: 'FAMILIA',
   estado: 'GENERADO',
   version: 1,
@@ -37,7 +50,7 @@ const ITINERARIO_GENERADO: Itinerario = {
 const VALID_RESPONSE: PreferenciasViajeResponse = {
   id: '1',
   cantidadDias: 5,
-  fechaInicio: FECHA_INICIO,
+  fechaInicio: FECHA_INICIO_ISO,
   tipoViaje: 'FAMILIA',
   presupuesto: 'MODERADO',
   intereses: ['NATURALEZA', 'AVENTURA'],
@@ -122,8 +135,9 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     input.dispatchEvent(new Event('change'));
   }
 
-  function fillValidForm(root: HTMLElement): void {
-    setInputValue(root, 'app-date-input input', FECHA_INICIO);
+  function fillValidForm(fixture: ReturnType<typeof createFixture>): void {
+    const root = fixture.nativeElement as HTMLElement;
+    seleccionarFechaDeInput(fixture, fechaFuturaUtc(30));
     setInputValue(root, 'app-number-input input', '5');
     clickChipInGroup(root, 0, 'Familia');
     clickChipInGroup(root, 1, 'Naturaleza');
@@ -143,7 +157,9 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
 
-    expect(root.querySelector<HTMLInputElement>('app-date-input input')?.value).toBe(FECHA_INICIO);
+    expect(root.querySelector<HTMLInputElement>('app-date-input input')?.value).toBe(
+      fechaFuturaDisplay(30)
+    );
     expect(root.querySelector<HTMLInputElement>('app-number-input input')?.value).toBe('5');
 
     const familiaChip = Array.from(
@@ -163,7 +179,7 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    setInputValue(root, 'app-date-input input', FECHA_INICIO);
+    seleccionarFechaDeInput(fixture, fechaFuturaUtc(30));
     setInputValue(root, 'app-number-input input', '5');
     clickChipInGroup(root, 0, 'Familia');
 
@@ -178,13 +194,13 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    fillValidForm(root);
+    fillValidForm(fixture);
     await submitForm(fixture);
 
     expect(guardar).toHaveBeenCalledTimes(1);
     expect(guardar).toHaveBeenCalledWith({
       cantidadDias: 5,
-      fechaInicio: FECHA_INICIO,
+      fechaInicio: FECHA_INICIO_ISO,
       tipoViaje: 'FAMILIA',
       presupuesto: null,
       intereses: ['NATURALEZA'],
@@ -249,7 +265,7 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    fillValidForm(root);
+    fillValidForm(fixture);
     await submitForm(fixture);
 
     expect(toastError).toHaveBeenCalledWith('Selecciona el tipo de viaje.');
