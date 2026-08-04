@@ -46,6 +46,42 @@
   --ch-sky: #4fc1e9;
   --ch-blue-mid: #2ba6de;
 
+  // === NIVELES ECOLÓGICOS ===
+  // Sin nivel
+  --ch-nivel-sin-bg-from: #f3f4f6;
+  --ch-nivel-sin-bg-to: #e5e7eb;
+  --ch-nivel-sin-text: #6b7280;
+
+  // Bronce
+  --ch-nivel-bronce-bg-from: #fef3c7;
+  --ch-nivel-bronce-bg-to: #f59e0b33;
+  --ch-nivel-bronce-text: #92400e;
+  --ch-nivel-bronce-accent: #cd7f32;
+
+  // Plata
+  --ch-nivel-plata-bg-from: #f3f4f6;
+  --ch-nivel-plata-bg-to: #d1d5db;
+  --ch-nivel-plata-text: #374151;
+  --ch-nivel-plata-accent: #9ca3af;
+
+  // Oro
+  --ch-nivel-oro-bg-from: #fef9c3;
+  --ch-nivel-oro-bg-mid: #fbbf24;
+  --ch-nivel-oro-bg-to: #d97706;
+  --ch-nivel-oro-text: #78350f;
+  --ch-nivel-oro-accent: #d4a017;
+
+  // Platino
+  --ch-nivel-platino-bg-from: #ecfdf5;
+  --ch-nivel-platino-bg-mid: #6ee7b7;
+  --ch-nivel-platino-bg-to: #059669;
+  --ch-nivel-platino-text: #064e3b;
+
+  // === BADGES SEMÁNTICOS ===
+  --ch-badge-revocada-bg: #fef2f2;
+  --ch-badge-revocada-text: #b91c1c;
+  --ch-badge-revocada-accent: #ef4444;
+
   // === TYPOGRAPHY ===
   --ch-font-heading: 'Sora', sans-serif;
   --ch-font-body: 'Manrope', sans-serif;

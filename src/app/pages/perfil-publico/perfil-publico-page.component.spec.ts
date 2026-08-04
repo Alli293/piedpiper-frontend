@@ -1,0 +1,272 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { ActivatedRoute } from '@angular/router';
+import { Component, input } from '@angular/core';
+import * as fc from 'fast-check';
+
+import { PerfilPublicoPageComponent } from './perfil-publico-page.component';
+import { PerfilPublicoService } from './perfil-publico.service';
+import { PerfilPublicoDTO } from './perfil-publico.models';
+import { IconComponent } from '../../shared/components/icon/icon.component';
+import { LogoComponent } from '../../shared/components/logo/logo.component';
+import { environment } from '../../../environments/environment';
+
+// --- Stub components to avoid importing real child components with complex deps ---
+@Component({ selector: 'app-icon', template: '', standalone: true })
+class IconStubComponent {
+  name = input.required<string>();
+  size = input(16);
+}
+
+@Component({ selector: 'app-logo', template: '', standalone: true })
+class LogoStubComponent {
+  variant = input('on-light');
+  iconSize = input(24);
+  textSize = input('18px');
+  gap = input('9px');
+}
+
+// --- Test data ---
+const PERFIL_MOCK: PerfilPublicoDTO = {
+  nombreEmpresa: 'EcoTech Solutions',
+  logoUrl: 'https://example.com/logo.png',
+  sectorIndustrial: 'Tecnología',
+  pais: 'Costa Rica',
+  nivelEcologico: 'Oro',
+  fechaActualizacionNivel: '2025-03-15T14:30:00Z',
+  certificacionesVigentes: 5,
+  insigniasActivas: 3,
+};
+
+const PERFIL_SIN_NIVEL: PerfilPublicoDTO = {
+  ...PERFIL_MOCK,
+  nivelEcologico: 'Sin nivel',
+  fechaActualizacionNivel: null,
+  certificacionesVigentes: 0,
+  insigniasActivas: 0,
+};
+
+describe('PerfilPublicoPageComponent', () => {
+  let fixture: ComponentFixture<PerfilPublicoPageComponent>;
+  let component: PerfilPublicoPageComponent;
+  let httpMock: HttpTestingController;
+  const baseUrl = `${environment.apiBaseUrl}/perfil-publico`;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [PerfilPublicoPageComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        PerfilPublicoService,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { paramMap: { get: (_key: string) => 'eco-tech' } },
+          },
+        },
+      ],
+    })
+      .overrideComponent(PerfilPublicoPageComponent, {
+        remove: {
+          imports: [IconComponent, LogoComponent],
+        },
+        add: {
+          imports: [IconStubComponent, LogoStubComponent],
+        },
+      })
+      .compileComponents();
+
+    httpMock = TestBed.inject(HttpTestingController);
+
+    fixture = TestBed.createComponent(PerfilPublicoPageComponent);
+    component = fixture.componentInstance;
+  });
+
+  afterEach(() => {
+    httpMock.match(() => true); // flush any outstanding requests
+  });
+
+  function flushPerfil(dto: PerfilPublicoDTO): void {
+    const req = httpMock.expectOne(`${baseUrl}/eco-tech`);
+    req.flush(dto);
+    fixture.detectChanges();
+    // Also flush the subsequent certificaciones and insignias requests
+    httpMock.match(`${baseUrl}/eco-tech/certificaciones`).forEach((r) => r.flush([]));
+    httpMock.match(`${baseUrl}/eco-tech/insignias`).forEach((r) => r.flush([]));
+    fixture.detectChanges();
+  }
+
+  function flushError(status: number, body: object): void {
+    const req = httpMock.expectOne(`${baseUrl}/eco-tech`);
+    req.flush(body, { status, statusText: 'Error' });
+    fixture.detectChanges();
+  }
+
+  // =========================================================================
+  // Property Tests (fast-check)
+  // =========================================================================
+
+  describe('Property tests (fast-check)', () => {
+    /**
+     * Property 9: Formateo de fechas en locale es-CR
+     * Para cualquier fecha válida ISO 8601, la función formatFecha() produce una cadena
+     * que coincide con el formato es-CR (mes en español, formato 12h con a.m./p.m.).
+     *
+     * Validates: Requirements 4.3, 8.1
+     */
+    it('Property 9: formatFechaCorta produce formato es-CR para cualquier fecha válida', () => {
+      // Create component instance to access formatFechaCorta
+      fixture.detectChanges();
+      httpMock.expectOne(`${baseUrl}/eco-tech`).flush(PERFIL_MOCK);
+
+      fc.assert(
+        fc.property(
+          fc
+            .date({ min: new Date('2000-01-01'), max: new Date('2099-12-31') })
+            .filter((d) => !isNaN(d.getTime())),
+          (randomDate) => {
+            const isoStr = randomDate.toISOString();
+            const result = component['formatFechaCorta'](isoStr);
+
+            // Must not be empty
+            expect(result.length).toBeGreaterThan(0);
+
+            // Verify structure: should contain a 2-digit day
+            const dayMatch = result.match(/\d{1,2}/);
+            expect(dayMatch).not.toBeNull();
+
+            // Should contain Spanish month abbreviation (short month names in es-CR)
+            const spanishMonths = [
+              'ene',
+              'feb',
+              'mar',
+              'abr',
+              'may',
+              'jun',
+              'jul',
+              'ago',
+              'sept',
+              'sep',
+              'oct',
+              'nov',
+              'dic',
+            ];
+            const containsMonth = spanishMonths.some((m) => result.toLowerCase().includes(m));
+            expect(containsMonth).toBe(true);
+
+            // Should contain year (4 digits)
+            const yearMatch = result.match(/\d{4}/);
+            expect(yearMatch).not.toBeNull();
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    /**
+     * Property 10: Formateo de números con separador de miles
+     * Para cualquier número entero > 999, formatNumero() produce una cadena con
+     * separador de miles del locale es-CR (espacio fino U+202F o espacio regular).
+     *
+     * Validates: Requirements 8.2
+     */
+    it('Property 10: formatNumero usa separador de miles para números > 999', () => {
+      fixture.detectChanges();
+      httpMock.expectOne(`${baseUrl}/eco-tech`).flush(PERFIL_MOCK);
+
+      fc.assert(
+        fc.property(fc.integer({ min: 1000, max: 9999999 }), (num) => {
+          const result = component['formatNumero'](num);
+
+          // The result should not be empty
+          expect(result.length).toBeGreaterThan(0);
+
+          // Remove all non-digit characters to verify the digits are preserved
+          const digitsOnly = result.replace(/\D/g, '');
+          expect(digitsOnly).toBe(num.toString());
+
+          // For numbers >= 1000, there should be a separator character
+          // es-CR uses thin space (U+202F), non-breaking space (U+00A0), regular space, or period
+          // The formatted string should be longer than the raw digits (due to separators)
+          expect(result.length).toBeGreaterThan(digitsOnly.length);
+        }),
+        { numRuns: 100 }
+      );
+    });
+  });
+
+  // =========================================================================
+  // Unit Tests
+  // =========================================================================
+
+  describe('Unit tests', () => {
+    it('muestra spinner durante estado de carga', () => {
+      fixture.detectChanges();
+      const el = fixture.nativeElement as HTMLElement;
+      const spinner = el.querySelector('.pub-loading__spinner');
+      const loadingText = el.querySelector('.pub-loading__text');
+
+      expect(spinner).not.toBeNull();
+      expect(loadingText?.textContent).toContain('Cargando perfil');
+    });
+
+    it('renderiza nombre, sector, país y nivel cuando la data carga exitosamente', () => {
+      fixture.detectChanges();
+      flushPerfil(PERFIL_MOCK);
+
+      const el = fixture.nativeElement as HTMLElement;
+      const nombre = el.querySelector('.pub-card__nombre');
+      const nivel = el.querySelector('.pub-nivel__nombre');
+
+      expect(nombre?.textContent).toContain('EcoTech Solutions');
+      expect(nivel?.textContent).toContain('Oro');
+    });
+
+    it('renderiza página 404 cuando ocurre un error 404', () => {
+      fixture.detectChanges();
+      flushError(404, { mensaje: 'El perfil que buscas no existe o ya no está disponible.' });
+
+      const el = fixture.nativeElement as HTMLElement;
+      const errorSection = el.querySelector('.pub-error--404');
+      const errorMsg = el.querySelector('.pub-error__msg');
+
+      expect(errorSection).not.toBeNull();
+      expect(errorMsg?.textContent).toContain('El perfil que buscas no existe');
+    });
+
+    it('muestra nivel Sin nivel con clase correcta', () => {
+      fixture.detectChanges();
+      flushPerfil(PERFIL_SIN_NIVEL);
+
+      const el = fixture.nativeElement as HTMLElement;
+      const nivelCard = el.querySelector('.pub-nivel--sin-nivel');
+
+      expect(nivelCard).not.toBeNull();
+    });
+
+    it('oculta fecha cuando fechaActualizacionNivel es null', () => {
+      fixture.detectChanges();
+      flushPerfil(PERFIL_SIN_NIVEL);
+
+      const el = fixture.nativeElement as HTMLElement;
+      const fechaEl = el.querySelector('.pub-card__fecha');
+
+      // Fecha should show "Actualizado el " but with empty string since null
+      expect(fechaEl?.textContent?.trim()).toBe('Actualizado el');
+    });
+
+    it('muestra fecha cuando fechaActualizacionNivel tiene valor', () => {
+      fixture.detectChanges();
+      flushPerfil(PERFIL_MOCK);
+
+      const el = fixture.nativeElement as HTMLElement;
+      const fechaEl = el.querySelector('.pub-card__fecha');
+
+      expect(fechaEl).not.toBeNull();
+      expect(fechaEl?.textContent).toContain('Actualizado el');
+      expect(fechaEl?.textContent?.trim().length).toBeGreaterThan('Actualizado el'.length);
+    });
+  });
+});

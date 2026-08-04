@@ -1,0 +1,257 @@
+<!-- Header minimalista -->
+<header class="pub-header">
+  <div class="pub-header__inner">
+    <div class="pub-header__left">
+      <app-logo variant="on-light" [iconSize]="28" textSize="17px" gap="9px" />
+      <span class="pub-header__badge">
+        <app-icon name="success" [size]="14" aria-hidden="true" />
+        Perfil verificado
+      </span>
+    </div>
+    <div class="pub-header__right">
+      <a class="pub-header__link" href="/login">
+        <app-icon name="login" [size]="14" aria-hidden="true" />
+        Iniciar sesión
+      </a>
+    </div>
+  </div>
+</header>
+
+@switch (estado()) {
+  @case ('cargando') {
+    <div class="pub-loading" aria-live="polite" aria-label="Cargando perfil">
+      <span class="pub-loading__spinner" aria-hidden="true"></span>
+      <p class="pub-loading__text">Cargando perfil…</p>
+    </div>
+  }
+  @case ('exito') {
+    <main class="pub-main">
+      <!-- Company Card -->
+      <section class="pub-card" aria-label="Información de la empresa">
+        <div class="pub-card__top">
+          <!-- Left: Company info -->
+          <div class="pub-card__info">
+            <div class="pub-card__info-row">
+              <div class="pub-card__logo-wrapper">
+                @if (perfil()?.logoUrl) {
+                  <img
+                    class="pub-card__logo"
+                    [src]="perfil()!.logoUrl"
+                    [alt]="'Logo de ' + perfil()!.nombreEmpresa"
+                  />
+                } @else {
+                  <div class="pub-card__logo-placeholder" aria-hidden="true">
+                    <app-icon name="empresa" [size]="32" />
+                  </div>
+                }
+              </div>
+              <div class="pub-card__details">
+                <h1 class="pub-card__nombre">{{ perfil()?.nombreEmpresa }}</h1>
+                <p class="pub-card__meta">
+                  <app-icon name="empresa" [size]="14" aria-hidden="true" />
+                  <span>{{ perfil()?.sectorIndustrial }}</span>
+                  <span class="pub-card__meta-sep">·</span>
+                  <app-icon name="perfil-publico" [size]="14" aria-hidden="true" />
+                  <span>{{ perfil()?.pais }}</span>
+                </p>
+                <p class="pub-card__fecha">
+                  Actualizado el {{ formatFechaActualizacion(perfil()?.fechaActualizacionNivel) }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Nivel ecológico card -->
+          <div
+            class="pub-nivel"
+            [class.pub-nivel--sin-nivel]="perfil()?.nivelEcologico === 'Sin nivel'"
+            [class.pub-nivel--bronce]="perfil()?.nivelEcologico === 'Bronce'"
+            [class.pub-nivel--plata]="perfil()?.nivelEcologico === 'Plata'"
+            [class.pub-nivel--oro]="perfil()?.nivelEcologico === 'Oro'"
+            [class.pub-nivel--platino]="perfil()?.nivelEcologico === 'Platino'"
+            aria-label="Nivel ecológico"
+          >
+            <span class="pub-nivel__label">NIVEL ECOLÓGICO</span>
+            <span class="pub-nivel__nombre">
+              <app-icon [name]="getNivelConfig().icono" [size]="20" aria-hidden="true" />
+              {{ perfil()?.nivelEcologico }}
+            </span>
+            <span class="pub-nivel__vigencia">Vigente {{ getAnioVigencia() }}</span>
+
+            <!-- Progress bar -->
+            <div class="pub-nivel__progress" aria-hidden="true">
+              @for (nivel of nivelesOrden; track nivel; let i = $index) {
+                <div
+                  class="pub-nivel__step"
+                  [class.pub-nivel__step--active]="i <= getNivelIndex()"
+                  [class.pub-nivel__step--current]="i === getNivelIndex()"
+                >
+                  <span class="pub-nivel__step-dot"></span>
+                  <span class="pub-nivel__step-label">{{ nivel }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="pub-card__stats">
+          <div class="pub-card__stat">
+            <app-icon name="certificaciones" [size]="20" aria-hidden="true" />
+            <span class="pub-card__stat-label">Certificaciones vigentes:</span>
+            <span class="pub-card__stat-value">{{
+              formatNumero(perfil()?.certificacionesVigentes)
+            }}</span>
+          </div>
+          <div class="pub-card__stat">
+            <app-icon name="insignias" [size]="20" aria-hidden="true" />
+            <span class="pub-card__stat-label">Insignias activas:</span>
+            <span class="pub-card__stat-value">{{ formatNumero(perfil()?.insigniasActivas) }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Historial de certificaciones -->
+      <section class="pub-section" aria-labelledby="cert-title">
+        <div class="pub-section__header">
+          <div>
+            <h2 class="pub-section__title" id="cert-title">Historial de certificaciones</h2>
+            <p class="pub-section__subtitle">Verificadas por auditores certificados</p>
+          </div>
+        </div>
+
+        @if (certificaciones().length > 0) {
+          <div class="pub-table-wrapper">
+            <table class="pub-table" aria-label="Certificaciones de la empresa">
+              <thead>
+                <tr>
+                  <th>CERTIFICACIÓN</th>
+                  <th>AUDITOR</th>
+                  <th>VIGENCIA</th>
+                  <th>ESTADO</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (cert of certificaciones(); track cert.id) {
+                  <tr>
+                    <td class="pub-table__cert-cell">
+                      <app-icon name="certificaciones" [size]="16" aria-hidden="true" />
+                      <span>{{ cert.nombreCertificacion }}</span>
+                    </td>
+                    <td>{{ cert.tipo }}</td>
+                    <td>
+                      {{ formatFechaCorta(cert.fechaEmision) }} —
+                      {{ formatFechaCorta(cert.fechaVencimiento) }}
+                    </td>
+                    <td>
+                      <span class="pub-badge" [class]="getEstadoBadgeClass(cert.estado)">
+                        {{ getEstadoLabel(cert.estado) }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="pub-section__empty">
+            <app-icon name="certificaciones" [size]="32" aria-hidden="true" />
+            <p>No se encontraron certificaciones.</p>
+          </div>
+        }
+      </section>
+
+      <!-- Insignias activas -->
+      <section class="pub-section" aria-labelledby="insignias-title">
+        <div class="pub-section__header">
+          <div>
+            <h2 class="pub-section__title" id="insignias-title">Insignias activas</h2>
+            <p class="pub-section__subtitle">{{ insignias().length }} reconocimientos</p>
+          </div>
+        </div>
+
+        @if (insignias().length > 0) {
+          <div class="pub-insignias-grid">
+            @for (ins of insignias(); track ins.idInsignia) {
+              <div class="pub-insignia-card">
+                <div
+                  class="pub-insignia-card__icon"
+                  [class.pub-insignia-card__icon--bronce]="ins.nivelInsignia === 'bronce'"
+                  [class.pub-insignia-card__icon--plata]="ins.nivelInsignia === 'plata'"
+                  [class.pub-insignia-card__icon--oro]="ins.nivelInsignia === 'oro'"
+                >
+                  <app-icon name="insignias" [size]="20" aria-hidden="true" />
+                </div>
+                <span class="pub-insignia-card__name">{{ ins.nombre }}</span>
+                <span class="pub-insignia-card__date">{{
+                  formatFechaCorta(ins.fechaObtencion)
+                }}</span>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="pub-section__empty">
+            <app-icon name="insignias" [size]="32" aria-hidden="true" />
+            <p>No se encontraron insignias activas.</p>
+          </div>
+        }
+      </section>
+
+      <!-- Evolución de la huella de carbono -->
+      <section class="pub-section" aria-labelledby="evolucion-title">
+        <div class="pub-section__header">
+          <div>
+            <h2 class="pub-section__title" id="evolucion-title">
+              Evolución de la huella de carbono
+            </h2>
+          </div>
+        </div>
+
+        <div class="pub-chart-placeholder">
+          <div class="pub-chart-placeholder__header">
+            <div class="pub-chart-placeholder__stats">
+              <span class="pub-chart-placeholder__total">-- tCO₂e</span>
+              <span class="pub-chart-placeholder__change">--% vs año anterior</span>
+            </div>
+            <div class="pub-chart-placeholder__filters">
+              <button class="pub-chart-placeholder__filter" type="button">1A</button>
+              <button class="pub-chart-placeholder__filter" type="button">3A</button>
+              <button
+                class="pub-chart-placeholder__filter pub-chart-placeholder__filter--active"
+                type="button"
+              >
+                5A
+              </button>
+              <button class="pub-chart-placeholder__filter" type="button">Todo</button>
+            </div>
+          </div>
+          <div class="pub-chart-placeholder__body">
+            <app-icon name="emisiones" [size]="48" aria-hidden="true" />
+            <p>Los datos de evolución estarán disponibles próximamente.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="pub-footer">
+      <p class="pub-footer__text">
+        <span class="pub-footer__dot" aria-hidden="true"></span>
+        Perfil verificado por CarbonHub · carbonhub.cr/empresa/{{ slug }}
+      </p>
+    </footer>
+  }
+  @case ('error404') {
+    <div class="pub-error pub-error--404" role="alert">
+      <app-icon name="page-not-found" [size]="64" aria-hidden="true" />
+      <p class="pub-error__msg">{{ mensajeError() }}</p>
+    </div>
+  }
+  @case ('error500') {
+    <div class="pub-error pub-error--500" role="alert">
+      <app-icon name="error" [size]="64" aria-hidden="true" />
+      <p class="pub-error__msg">{{ mensajeError() }}</p>
+      <button class="pub-error__retry" (click)="reintentar()">Reintentar</button>
+    </div>
+  }
+}

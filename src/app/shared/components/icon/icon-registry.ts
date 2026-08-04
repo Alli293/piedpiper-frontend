@@ -31,9 +31,14 @@ export type IconName =
   | 'home'
   | 'info'
   | 'insignias'
+  | 'leaf-off'
   | 'linkedin'
   | 'login'
   | 'logout'
+  | 'medal-bronze'
+  | 'medal-gold'
+  | 'medal-platinum'
+  | 'medal-silver'
   | 'new'
   | 'notificacion'
   | 'ocultar'
@@ -161,6 +166,11 @@ export const ICONS: Record<IconName, string> = {
   insignias: `<svg viewBox="0 0 8 15" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <path d="M0 4.86374e-05H7.2V5.58755C7.2 5.86255 7.13438 6.11567 7.00313 6.34692C6.87188 6.57817 6.6875 6.76255 6.45 6.90005L3.8625 8.4563L4.40625 10.2H6.9L4.85625 11.6438L5.64375 14.175L3.6 12.6L1.55625 14.175L2.34375 11.6438L0.3 10.2H2.79375L3.3375 8.4563L0.73125 6.9188C0.49375 6.7813 0.3125 6.59692 0.1875 6.36567C0.0625 6.13442 0 5.87505 0 5.58755V4.86374e-05ZM1.125 1.12505V5.58755C1.125 5.66255 1.14062 5.7313 1.17188 5.7938C1.20312 5.8563 1.25 5.9063 1.3125 5.9438L3.0375 6.9563V1.12505H1.125ZM6.075 1.12505H4.1625V6.9563L5.8875 5.9438C5.95 5.9063 5.99688 5.8563 6.02813 5.7938C6.05938 5.7313 6.075 5.66255 6.075 5.58755V1.12505Z" fill="currentColor"/>
 </svg>`,
+  'leaf-off': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/><path d="M7 7l10 10"/><path d="M12 5c-2 2-4 6-4 9"/><path d="M12 5c2 2 4 6 4 9"/></svg>`,
+  'medal-bronze': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M8.21 3.98L7 2h10l-1.21 1.98"/><path d="M12 8V2"/><text x="12" y="17" text-anchor="middle" font-size="6" fill="currentColor" stroke="none">B</text></svg>`,
+  'medal-gold': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M8.21 3.98L7 2h10l-1.21 1.98"/><path d="M12 8V2"/><text x="12" y="17" text-anchor="middle" font-size="6" fill="currentColor" stroke="none">O</text></svg>`,
+  'medal-platinum': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M8.21 3.98L7 2h10l-1.21 1.98"/><path d="M12 8V2"/><text x="12" y="17" text-anchor="middle" font-size="6" fill="currentColor" stroke="none">P</text></svg>`,
+  'medal-silver': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M8.21 3.98L7 2h10l-1.21 1.98"/><path d="M12 8V2"/><text x="12" y="17" text-anchor="middle" font-size="6" fill="currentColor" stroke="none">S</text></svg>`,
   linkedin: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.446-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" fill="currentColor"/>
 </svg>`,
