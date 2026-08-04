@@ -12,16 +12,13 @@
     class="ch-text-input__field ch-date-input__field"
     [class.ch-text-input__field--error]="hasError()"
     [id]="inputId"
-    type="date"
-    [value]="displayValue()"
-    [attr.max]="maxAttr()"
-    [attr.min]="minAttr()"
+    type="text"
+    placeholder="dd/mm/aaaa"
+    readonly
     [disabled]="effectiveDisabled()"
     [required]="required()"
     [attr.aria-invalid]="hasError() ? 'true' : null"
     [attr.aria-describedby]="describedBy()"
-    (input)="onInput($event)"
-    (blur)="onBlur()"
   />
   <button
     type="button"

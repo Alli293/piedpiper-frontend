@@ -161,6 +161,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'empresa/certificaciones',
+    canActivate: [guardEmpresa],
+    loadComponent: () =>
+      import('./pages/certificaciones/certificaciones-page.component').then(
+        (m) => m.CertificacionesPageComponent
+      ),
+  },
+  {
     path: 'empresa/insignias',
     canActivate: [guardEmpresa],
     loadComponent: () =>
@@ -206,13 +214,6 @@ export const routes: Routes = [
     loadComponent: cargarPlaceholder,
   },
   {
-    path: 'empresa/:slug/reputacion',
-    loadComponent: () =>
-      import('./pages/perfil-publico/perfil-publico-page.component').then(
-        (m) => m.PerfilPublicoPageComponent
-      ),
-  },
-  {
     path: 'empresa/:slug/reputacion/certificaciones',
     loadComponent: () =>
       import('./pages/perfil-publico/certificaciones/certificaciones-publicas-page.component').then(
@@ -242,6 +243,22 @@ export const routes: Routes = [
         (m) => m.RegisterEmissionPageComponent
       ),
   },
+  {
+    path: 'empresa/auditorias/nueva',
+    canActivate: [guardEmpresaAdmin],
+    loadComponent: () =>
+      import('./pages/auditorias/nueva-solicitud/nueva-solicitud-page.component').then(
+        (m) => m.NuevaSolicitudPageComponent
+      ),
+  },
+  {
+    path: 'empresa/auditorias/:id/auditor',
+    canActivate: [guardEmpresaAdmin],
+    loadComponent: () =>
+      import('./pages/auditorias/asignar-auditor/asignar-auditor-page.component').then(
+        (m) => m.AsignarAuditorPageComponent
+      ),
+  },
   ...rutasPlaceholder,
   {
     path: 'perfil/configuracion-inicial',
@@ -257,13 +274,6 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/configuracion/configuracion-page.component').then(
         (m) => m.ConfiguracionPageComponent
-      ),
-  },
-  {
-    path: 'empresas-verificadas',
-    loadComponent: () =>
-      import('./pages/empresas-verificadas/empresas-verificadas-page.component').then(
-        (m) => m.EmpresasVerificadasPageComponent
       ),
   },
   {

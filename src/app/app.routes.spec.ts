@@ -67,6 +67,7 @@ describe('app.routes', () => {
       'empresa/configuracion-inicial',
       'empresa/panel',
       'empresa/benchmark',
+      'empresa/certificaciones',
       'empresa/insignias',
       'empresa/limites',
       'empresa/emisiones',
@@ -76,6 +77,12 @@ describe('app.routes', () => {
       const ruta = routes.find((r) => r.path === path);
       expect(ruta?.canActivate).toContain(guardEmpresa);
     }
+  });
+
+  it('la asignacion de auditor carga su pagina y solo permite administrador de empresa', () => {
+    const ruta = routes.find((r) => r.path === 'empresa/auditorias/:id/auditor');
+    expect(ruta?.canActivate).toContain(guardEmpresaAdmin);
+    expect(ruta?.loadComponent).toBeTypeOf('function');
   });
 
   it('empresa/invitaciones solo permite administrador de empresa', () => {

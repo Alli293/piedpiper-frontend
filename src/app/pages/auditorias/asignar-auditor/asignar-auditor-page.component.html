@@ -1,0 +1,128 @@
+<app-shell-layout [headerConfig]="headerConfig" backRoute="/empresa/panel">
+  <section class="ch-asignar" aria-label="Asignación de auditor">
+    <div class="ch-asignar__intro">
+      <app-heading level="h2" text="Asigne un auditor certificado" />
+      <p class="ch-asignar__descripcion">
+        Elija del directorio al auditor que revisará la solicitud. Le enviaremos la solicitud y le
+        avisaremos cuando responda.
+      </p>
+    </div>
+
+    @if (errorSolicitud(); as mensaje) {
+      <p class="ch-asignar__estado ch-asignar__estado--terminal" role="alert">{{ mensaje }}</p>
+    } @else {
+      @if (asignacion(); as pendiente) {
+        <div class="ch-asignar__pendiente" role="status" aria-live="polite">
+          <app-avatar
+            size="md"
+            [initials]="pendiente.iniciales"
+            [imageUrl]="pendiente.fotoPerfil"
+          />
+          <div class="ch-asignar__pendiente-datos">
+            <app-badge variant="warning">Asignación pendiente</app-badge>
+            <span class="ch-asignar__pendiente-nombre">{{ pendiente.nombre }}</span>
+            <span class="ch-asignar__pendiente-detalle">
+              Solicitud enviada a {{ pendiente.nombre }}. Te notificaremos cuando responda.
+            </span>
+          </div>
+        </div>
+      }
+
+      @if (errorAsignacion(); as mensaje) {
+        <p class="ch-asignar__error" role="alert">{{ mensaje }}</p>
+      }
+
+      @if (cargando()) {
+        <p class="ch-asignar__estado" role="status">Cargando auditores...</p>
+      } @else if (errorCarga()) {
+        <div class="ch-asignar__estado ch-asignar__estado--error" role="alert">
+          <p>No se pudo cargar el directorio de auditores. Intente nuevamente.</p>
+          <app-button variant="secondary" size="sm" (click)="reintentar()">Reintentar</app-button>
+        </div>
+      } @else if (sinAuditores()) {
+        <p class="ch-asignar__estado">
+          No hay auditores certificados disponibles en este momento. Intente nuevamente más tarde.
+        </p>
+      } @else {
+        <ul class="ch-asignar__grid">
+          @for (tarjeta of tarjetas(); track tarjeta.auditor.auditorId) {
+            <li
+              class="ch-auditor-opcion"
+              [class.ch-auditor-opcion--activa]="estaSeleccionado(tarjeta.auditor.auditorId)"
+            >
+              <header class="ch-auditor-opcion__header">
+                <app-avatar
+                  size="md"
+                  [initials]="tarjeta.iniciales"
+                  [imageUrl]="tarjeta.auditor.fotoPerfil ?? ''"
+                />
+                <span class="ch-auditor-opcion__nombre">{{ tarjeta.auditor.nombre }}</span>
+              </header>
+
+              <div class="ch-auditor-opcion__rating">
+                <span class="ch-auditor-opcion__estrellas" aria-hidden="true">
+                  @for (llena of tarjeta.estrellas; track $index) {
+                    <span [class.ch-auditor-opcion__estrella--llena]="llena">★</span>
+                  }
+                </span>
+                @if (tarjeta.auditor.calificacionPromedio !== null) {
+                  <span class="ch-auditor-opcion__nota">
+                    {{ tarjeta.auditor.calificacionPromedio }} ·
+                    {{ tarjeta.auditor.totalResenas }} reseñas
+                  </span>
+                } @else {
+                  <span class="ch-auditor-opcion__nota">Sin calificaciones aún</span>
+                }
+              </div>
+
+              @if (tarjeta.etiquetas.length > 0) {
+                <div class="ch-auditor-opcion__especialidades">
+                  @for (etiqueta of tarjeta.etiquetas; track etiqueta) {
+                    <app-badge variant="neutral">{{ etiqueta }}</app-badge>
+                  }
+                </div>
+              }
+
+              <span
+                class="ch-auditor-opcion__disponible"
+                [class.ch-auditor-opcion__disponible--activo]="tarjeta.auditor.disponible"
+              >
+                {{ tarjeta.auditor.disponible ? 'Disponible' : 'No disponible' }}
+              </span>
+
+              @if (!hayAsignacion()) {
+                <button
+                  type="button"
+                  class="ch-auditor-opcion__accion"
+                  [attr.aria-pressed]="estaSeleccionado(tarjeta.auditor.auditorId)"
+                  [attr.aria-label]="
+                    (estaSeleccionado(tarjeta.auditor.auditorId)
+                      ? 'Quitar la selección de '
+                      : 'Seleccionar a ') + tarjeta.auditor.nombre
+                  "
+                  [disabled]="enviando()"
+                  (click)="seleccionar(tarjeta.auditor)"
+                >
+                  {{ estaSeleccionado(tarjeta.auditor.auditorId) ? 'Seleccionado' : 'Seleccionar' }}
+                </button>
+              }
+            </li>
+          }
+        </ul>
+
+        @if (!hayAsignacion()) {
+          <div class="ch-asignar__acciones">
+            <app-button
+              [ariaLabel]="etiquetaAsignar()"
+              [disabled]="!puedeAsignar()"
+              [loading]="enviando()"
+              (click)="asignar()"
+            >
+              Asignar auditor
+            </app-button>
+          </div>
+        }
+      }
+    }
+  </section>
+</app-shell-layout>

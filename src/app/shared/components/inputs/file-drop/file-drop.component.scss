@@ -1,0 +1,147 @@
+@use '../../../styles/mixins';
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-2);
+}
+
+.ch-file-drop__label {
+  font-family: var(--ch-font-body);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--ch-text-primary);
+}
+
+.ch-file-drop__zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ch-space-2);
+  width: 100%;
+  padding: var(--ch-space-6);
+  border: 2px dashed var(--ch-border);
+  border-radius: var(--ch-radius-lg);
+  background: var(--ch-bg-white);
+  color: var(--ch-text-secondary);
+  font-family: var(--ch-font-body);
+  cursor: pointer;
+  transition:
+    border-color var(--ch-transition),
+    background var(--ch-transition);
+
+  &:hover:not(:disabled) {
+    border-color: var(--ch-border-focus);
+  }
+
+  &:focus-visible {
+    @include mixins.focus-ring;
+    border-color: var(--ch-border-focus);
+  }
+
+  &:disabled {
+    background: var(--ch-bg-main);
+    color: var(--ch-text-muted);
+    cursor: not-allowed;
+  }
+
+  &--activa {
+    border-color: var(--ch-border-focus);
+    background: var(--ch-green-soft);
+  }
+
+  &--error {
+    border-color: var(--ch-danger);
+  }
+}
+
+.ch-file-drop__zone-title {
+  font-size: 0.875rem;
+}
+
+.ch-file-drop__zone-action {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--ch-green);
+}
+
+.ch-file-drop__input {
+  @include mixins.visually-hidden;
+}
+
+.ch-file-drop__hint {
+  margin: 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.75rem;
+  color: var(--ch-text-secondary);
+}
+
+.ch-file-drop__error {
+  margin: 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.75rem;
+  color: var(--ch-danger);
+}
+
+.ch-file-drop__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  &--vacia {
+    display: none;
+  }
+}
+
+.ch-file-drop__item {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-3);
+  padding: var(--ch-space-2) var(--ch-space-3);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-white);
+  font-family: var(--ch-font-body);
+  font-size: 0.875rem;
+}
+
+.ch-file-drop__item-name {
+  @include mixins.truncate;
+  flex: 1;
+  min-width: 0;
+  color: var(--ch-text-primary);
+}
+
+.ch-file-drop__item-size {
+  color: var(--ch-text-secondary);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.ch-file-drop__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ch-space-1);
+  border: none;
+  border-radius: var(--ch-radius-sm);
+  background: transparent;
+  color: var(--ch-text-secondary);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    color: var(--ch-danger);
+  }
+
+  &:focus-visible {
+    @include mixins.focus-ring;
+  }
+
+  &:disabled {
+    color: var(--ch-text-muted);
+    cursor: not-allowed;
+  }
+}

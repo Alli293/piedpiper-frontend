@@ -47,4 +47,12 @@ export class PerfilPublicoService {
       `${this.baseUrl}/${encodeURIComponent(slug)}/insignias`
     );
   }
+
+  descargarInsigniaJsonLd(urlVerificacionPublica: string): Observable<Blob> {
+    return this.http.get(urlVerificacionPublica, { responseType: 'blob' });
+  }
+
+  descargarInsigniaJwt(urlVerificacionJwt: string): Observable<Blob> {
+    return this.http.get(urlVerificacionJwt, { responseType: 'blob' });
+  }
 }

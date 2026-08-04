@@ -14,7 +14,12 @@
     <app-insignias-empresa-list
       titulo="Insignias activas"
       descripcion="Reconocimientos automáticos por certificaciones activas y requisitos verificados."
+      [accionesPrivadas]="true"
       [insignias]="insignias()"
+      (descargarJsonLd)="descargarJsonLd($event)"
+      (descargarJwt)="descargarJwt($event)"
+      (compartirLinkedIn)="compartirLinkedIn($event)"
+      (verificarOpenBadges)="verificarOpenBadges($event)"
     />
   }
 </app-shell-layout>
