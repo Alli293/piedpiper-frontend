@@ -126,10 +126,6 @@
   line-height: 1.5;
 }
 
-.ch-ie__nota app-icon {
-  color: var(--ch-blue-mid);
-}
-
 .ch-ie__contenido {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 390px;
@@ -175,6 +171,21 @@
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--ch-green) 50%, transparent),
     var(--ch-shadow-sm);
+}
+
+.ch-ie__card-status {
+  position: absolute;
+  inset: var(--ch-space-3) var(--ch-space-3) auto auto;
+  z-index: 1;
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--ch-radius-full);
+  background: var(--ch-green);
+  color: var(--ch-text-on-dark);
 }
 
 .ch-ie__card-main {
@@ -345,12 +356,6 @@
   font-size: 0.88rem;
   font-weight: 700;
   overflow-wrap: anywhere;
-}
-
-.ch-ie__detalle-lista dd span {
-  color: var(--ch-text-secondary);
-  font-size: 0.78rem;
-  font-weight: 600;
 }
 
 .ch-ie__credencial {

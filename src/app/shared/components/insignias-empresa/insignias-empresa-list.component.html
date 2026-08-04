@@ -4,7 +4,7 @@
       <app-icon name="insignias" [size]="34" />
     </span>
     <app-heading level="h1" text="Sin insignias activas" />
-    <p>Cuando la empresa obtenga reconocimientos verificables, aparecerÃ¡n aquÃ­.</p>
+    <p>Cuando la empresa obtenga reconocimientos verificables, aparecerán aquí.</p>
   </section>
 } @else {
   <div class="ch-ie">
@@ -32,7 +32,7 @@
       <app-icon name="success" [size]="14" aria-hidden="true" />
       <span>
         Todas las insignias se emiten como credenciales
-        <strong>OpenBadges 3.0</strong>, un estÃ¡ndar abierto de credenciales verificables. Cualquier
+        <strong>OpenBadges 3.0</strong>, un estándar abierto de credenciales verificables. Cualquier
         persona puede comprobar su autenticidad de forma independiente.
       </span>
     </div>
@@ -46,10 +46,7 @@
 
         <div class="ch-ie__grid">
           @for (insignia of insigniasOrdenadas(); track llave(insignia)) {
-            <article
-              class="ch-ie__card"
-              [class.ch-ie__card--activa]="esSeleccionada(insignia)"
-            >
+            <article class="ch-ie__card" [class.ch-ie__card--activa]="esSeleccionada(insignia)">
               @if (esSeleccionada(insignia)) {
                 <span
                   class="ch-ie__card-status"
@@ -78,12 +75,8 @@
               >
                 <span
                   class="ch-ie__card-icono"
-                  [class.ch-ie__card-icono--bronce]="
-                    insignia.nivelInsignia === 'bronce'
-                  "
-                  [class.ch-ie__card-icono--plata]="
-                    insignia.nivelInsignia === 'plata'
-                  "
+                  [class.ch-ie__card-icono--bronce]="insignia.nivelInsignia === 'bronce'"
+                  [class.ch-ie__card-icono--plata]="insignia.nivelInsignia === 'plata'"
                   [class.ch-ie__card-icono--oro]="insignia.nivelInsignia === 'oro'"
                   aria-hidden="true"
                 >
@@ -119,12 +112,8 @@
             <div class="ch-ie__detalle-hero">
               <span
                 class="ch-ie__detalle-icono"
-                [class.ch-ie__detalle-icono--bronce]="
-                  insignia.nivelInsignia === 'bronce'
-                "
-                [class.ch-ie__detalle-icono--plata]="
-                  insignia.nivelInsignia === 'plata'
-                "
+                [class.ch-ie__detalle-icono--bronce]="insignia.nivelInsignia === 'bronce'"
+                [class.ch-ie__detalle-icono--plata]="insignia.nivelInsignia === 'plata'"
                 [class.ch-ie__detalle-icono--oro]="insignia.nivelInsignia === 'oro'"
                 aria-hidden="true"
               >
@@ -135,7 +124,7 @@
             </div>
 
             <div class="ch-ie__detalle-cuerpo">
-              <span class="ch-ie__detalle-eyebrow">InformaciÃ³n de emisiÃ³n</span>
+              <span class="ch-ie__detalle-eyebrow">Información de emisión</span>
 
               <dl class="ch-ie__detalle-lista">
                 <div>
@@ -173,10 +162,7 @@
                 </div>
               </dl>
 
-              <section
-                class="ch-ie__credencial"
-                aria-label="Reconocimiento verificable"
-              >
+              <section class="ch-ie__credencial" aria-label="Reconocimiento verificable">
                 <div class="ch-ie__credencial-heading">
                   <span aria-hidden="true">
                     <app-icon name="success" [size]="18" />
@@ -187,7 +173,7 @@
                   </div>
                 </div>
                 <p>
-                  Esta insignia fue otorgada automÃ¡ticamente porque la empresa cumpliÃ³ los
+                  Esta insignia fue otorgada automáticamente porque la empresa cumplió los
                   requisitos configurados en la plataforma.
                 </p>
                 @if (insignia.urlVerificacionPublica) {
@@ -220,7 +206,7 @@
                   </div>
                 }
                 <small class="ch-ie__verificacion-nota">
-                  DetecciÃ³n automÃ¡tica - niveles progresivos
+                  Detección automática - niveles progresivos
                 </small>
               </section>
             </div>
