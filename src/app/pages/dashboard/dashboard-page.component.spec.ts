@@ -110,6 +110,7 @@ describe('DashboardPageComponent', () => {
   };
   let dashboardService: {
     exportarReportePdf: ReturnType<typeof vi.fn>;
+    listarInsignias: ReturnType<typeof vi.fn>;
     obtenerResumenHuella: ReturnType<typeof vi.fn>;
   };
   let imaService: {
@@ -129,6 +130,17 @@ describe('DashboardPageComponent', () => {
     };
     dashboardService = {
       obtenerResumenHuella: vi.fn().mockReturnValue(of(RESUMEN_HUELLA_BASE)),
+      listarInsignias: vi.fn().mockReturnValue(
+        of([
+          {
+            idInsignia: 1,
+            nivelInsignia: 'bronce',
+            nombre: 'Carbono Neutral',
+            descripcion: 'Insignia activa verificable.',
+            fechaObtencion: '2026-01-15T00:00:00Z',
+          },
+        ])
+      ),
       exportarReportePdf: vi
         .fn()
         .mockReturnValue(of(new Blob(['pdf'], { type: 'application/pdf' }))),
@@ -227,6 +239,26 @@ describe('DashboardPageComponent', () => {
     expect(texto).toContain('Huella total 2026');
     expect(texto).toContain('Del limite anual');
     expect(texto).toContain('5,236 / 12,47 tCO2e');
+  });
+
+  it('muestra las insignias empresariales obtenidas', async () => {
+    await createFixture();
+    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+    expect(dashboardService.listarInsignias).toHaveBeenCalled();
+    expect(texto).toContain('Insignias empresariales');
+    expect(texto).toContain('Carbono Neutral');
+    expect(texto).toContain('Bronce');
+  });
+
+  it('muestra estado vacio cuando la empresa no tiene insignias', async () => {
+    dashboardService.listarInsignias.mockReturnValueOnce(of([]));
+
+    await createFixture();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'Aún no hay insignias empresariales activas.'
+    );
   });
 
   it('carga el resumen de huella con mes actual y el anio seleccionado por defecto', async () => {

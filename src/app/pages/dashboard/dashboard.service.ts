@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { ComparacionEmisionesResponse } from '../emissions/models/emision.model';
 import {
   CalendarioVencimientosResponse,
+  InsigniaEmpresa,
   PeriodoDashboard,
   ResumenCertificacionesDashboardResponse,
   ResumenHuellaDashboardResponse,
@@ -46,6 +47,10 @@ export class DashboardService {
     return this.http.get<ComparacionEmisionesResponse>(`${this.emisionesBaseUrl}/comparacion`, {
       params,
     });
+  }
+
+  listarInsignias(): Observable<InsigniaEmpresa[]> {
+    return this.http.get<InsigniaEmpresa[]>(`${this.dashboardBaseUrl}/insignias`);
   }
 
   exportarReportePdf(anio: number, mes?: number): Observable<Blob> {
