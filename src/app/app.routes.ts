@@ -169,6 +169,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'empresa/insignias',
+    canActivate: [guardEmpresa],
+    loadComponent: () =>
+      import('./pages/empresa/insignias/insignias-empresa-page.component').then(
+        (m) => m.InsigniasEmpresaPageComponent
+      ),
+  },
+  {
     path: 'empresa/limites',
     canActivate: [guardEmpresa],
     loadComponent: () =>
@@ -210,6 +218,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/perfil-publico/certificaciones/certificaciones-publicas-page.component').then(
         (m) => m.CertificacionesPublicasPageComponent
+      ),
+  },
+  {
+    path: 'empresa/:slug/reputacion/insignias',
+    loadComponent: () =>
+      import('./pages/perfil-publico/insignias/insignias-publicas-page.component').then(
+        (m) => m.InsigniasPublicasPageComponent
       ),
   },
   {

@@ -68,6 +68,7 @@ describe('app.routes', () => {
       'empresa/panel',
       'empresa/benchmark',
       'empresa/certificaciones',
+      'empresa/insignias',
       'empresa/limites',
       'empresa/emisiones',
       'empresa/emisiones/registrar',
@@ -109,6 +110,12 @@ describe('app.routes', () => {
 
   it('la ruta publica de certificaciones no exige sesion', () => {
     const ruta = routes.find((r) => r.path === 'empresa/:slug/reputacion/certificaciones');
+    expect(ruta).toBeDefined();
+    expect(ruta?.canActivate).toBeUndefined();
+  });
+
+  it('la ruta publica de insignias no exige sesion', () => {
+    const ruta = routes.find((r) => r.path === 'empresa/:slug/reputacion/insignias');
     expect(ruta).toBeDefined();
     expect(ruta?.canActivate).toBeUndefined();
   });

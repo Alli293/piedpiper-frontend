@@ -83,4 +83,23 @@ describe('DashboardService', () => {
       },
     });
   });
+
+  it('lista las insignias empresariales del dashboard', () => {
+    service.listarInsignias().subscribe((insignias) => {
+      expect(insignias[0].nivelInsignia).toBe('bronce');
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/dashboard/insignias`);
+    expect(req.request.method).toBe('GET');
+
+    req.flush([
+      {
+        idInsignia: 1,
+        nivelInsignia: 'bronce',
+        nombre: 'Carbono Neutral',
+        descripcion: 'Insignia activa verificable.',
+        fechaObtencion: '2026-01-15T00:00:00Z',
+      },
+    ]);
+  });
 });
