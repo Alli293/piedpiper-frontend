@@ -1,32 +1,34 @@
-<main class="ch-insignias-publicas">
-  @if (cargando()) {
-    <app-state-layout>
-      <section class="ch-insignias-publicas__estado" aria-live="polite">
-        <span class="ch-insignias-publicas__loader" aria-hidden="true"></span>
-        <app-heading level="h1" text="Cargando insignias" />
-        <p>Estamos consultando las insignias.</p>
-      </section>
-    </app-state-layout>
-  } @else if (noEncontrado()) {
-    <app-state-layout>
-      <section class="ch-insignias-publicas__estado">
-        <app-heading level="h1" [text]="noEncontradoMensaje" />
-        <p>Revisa el enlace e intenta de nuevo.</p>
-        <app-button variant="secondary" (click)="volver()">
-          <app-icon name="volver" [size]="16" />
-          <span>Volver</span>
-        </app-button>
-      </section>
-    </app-state-layout>
-  } @else if (error()) {
-    <app-state-layout>
-      <section class="ch-insignias-publicas__estado" role="alert">
-        <app-heading level="h1" [text]="errorMensaje()" />
-        <p>Puedes intentar nuevamente.</p>
-        <app-button variant="secondary" (click)="reintentar()">Reintentar</app-button>
-      </section>
-    </app-state-layout>
-  } @else {
+@if (cargando()) {
+  <app-state-layout>
+    <section class="ch-insignias-publicas__estado" aria-live="polite">
+      <span class="ch-insignias-publicas__loader" aria-hidden="true"></span>
+      <app-heading level="h1" text="Cargando insignias" />
+      <p>Estamos consultando las insignias.</p>
+    </section>
+  </app-state-layout>
+} @else if (noEncontrado()) {
+  <app-state-layout>
+    <section class="ch-insignias-publicas__estado">
+      <app-heading level="h1" [text]="noEncontradoMensaje" />
+      <p>Revisa el enlace e intenta de nuevo.</p>
+      <app-button variant="secondary" (click)="volver()">
+        <app-icon name="volver" [size]="16" />
+        <span>Volver</span>
+      </app-button>
+    </section>
+  </app-state-layout>
+} @else if (error()) {
+  <app-state-layout>
+    <section class="ch-insignias-publicas__estado" role="alert">
+      <app-heading level="h1" [text]="errorMensaje()" />
+      <p>Puedes intentar nuevamente.</p>
+      <app-button variant="secondary" (click)="reintentar()">Reintentar</app-button>
+    </section>
+  </app-state-layout>
+} @else {
+  <app-state-header />
+
+  <main class="ch-insignias-publicas">
     <div class="ch-insignias-publicas__contenedor">
       <button
         type="button"
@@ -42,5 +44,5 @@
         [insignias]="insignias()"
       />
     </div>
-  }
-</main>
+  </main>
+}

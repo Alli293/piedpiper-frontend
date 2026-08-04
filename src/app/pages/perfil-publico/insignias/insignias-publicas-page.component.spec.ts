@@ -49,6 +49,7 @@ describe('InsigniasPublicasPageComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(listarInsignias).toHaveBeenCalledWith('cafe-del-valle');
+    expect(root.textContent).toContain('Iniciar sesión');
     expect(root.textContent).toContain('Insignias activas');
     expect(root.textContent).toContain('Carbono Neutral');
   });
