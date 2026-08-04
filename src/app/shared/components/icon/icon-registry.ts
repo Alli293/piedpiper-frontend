@@ -151,7 +151,10 @@ export const ICONS: Record<IconName, string> = {
 <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9 1.96 2.5H17V9.5h2.5zM18 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" fill="currentColor"/>
 </svg>`,
   help: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 13 13" aria-hidden="true"><path fill="currentColor" d="M6.686 9.187a.63.63 0 0 0 .19-.463.63.63 0 0 0-.19-.462.63.63 0 0 0-.462-.189.63.63 0 0 0-.462.189.63.63 0 0 0-.189.462q0 .274.189.463.189.188.462.188a.63.63 0 0 0 .462-.188m-.93-1.817h.963q0-.43.097-.677.098-.247.554-.677.339-.338.534-.645.195-.306.195-.735 0-.73-.534-1.12t-1.263-.39q-.742 0-1.204.39t-.645.937l.86.339q.064-.234.293-.508.227-.273.696-.273.417 0 .625.228a.73.73 0 0 1 .209.5.85.85 0 0 1-.157.49 2 2 0 0 1-.39.422q-.574.508-.703.769-.13.26-.13.95m.494 4.089q-1.08 0-2.031-.41a5.3 5.3 0 0 1-1.654-1.114 5.3 5.3 0 0 1-1.113-1.653 5.1 5.1 0 0 1-.41-2.032q0-1.08.41-2.03a5.3 5.3 0 0 1 1.113-1.655A5.3 5.3 0 0 1 4.22 1.452a5.1 5.1 0 0 1 2.031-.41q1.08 0 2.031.41a5.3 5.3 0 0 1 1.654 1.113q.704.704 1.113 1.654t.41 2.031q0 1.08-.41 2.032a5.3 5.3 0 0 1-1.113 1.653q-.703.703-1.654 1.114-.95.41-2.03.41m0-1.042q1.745 0 2.956-1.211 1.21-1.21 1.21-2.956t-1.21-2.955T6.25 2.084t-2.956 1.21q-1.21 1.212-1.21 2.956 0 1.746 1.21 2.956 1.212 1.21 2.956 1.211"/></svg>`,
-  hoja: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-3.8 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>`,
+  hoja: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-3.8 10-10 10Z" />
+  <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+</svg>`,
   home: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" aria-hidden="true"><path fill="currentColor" d="M3.5 11.083h1.75v-3.5h3.5v3.5h1.75v-5.25L7 3.208 3.5 5.833zM2.333 12.25v-7L7 1.75l4.667 3.5v7H7.583v-3.5H6.417v3.5z"/></svg>`,
   info: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_6_16068)">
@@ -166,17 +169,42 @@ export const ICONS: Record<IconName, string> = {
   insignias: `<svg viewBox="0 0 8 15" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <path d="M0 4.86374e-05H7.2V5.58755C7.2 5.86255 7.13438 6.11567 7.00313 6.34692C6.87188 6.57817 6.6875 6.76255 6.45 6.90005L3.8625 8.4563L4.40625 10.2H6.9L4.85625 11.6438L5.64375 14.175L3.6 12.6L1.55625 14.175L2.34375 11.6438L0.3 10.2H2.79375L3.3375 8.4563L0.73125 6.9188C0.49375 6.7813 0.3125 6.59692 0.1875 6.36567C0.0625 6.13442 0 5.87505 0 5.58755V4.86374e-05ZM1.125 1.12505V5.58755C1.125 5.66255 1.14062 5.7313 1.17188 5.7938C1.20312 5.8563 1.25 5.9063 1.3125 5.9438L3.0375 6.9563V1.12505H1.125ZM6.075 1.12505H4.1625V6.9563L5.8875 5.9438C5.95 5.9063 5.99688 5.8563 6.02813 5.7938C6.05938 5.7313 6.075 5.66255 6.075 5.58755V1.12505Z" fill="currentColor"/>
 </svg>`,
-  'leaf-off': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/><path d="M7 7l10 10"/><path d="M12 5c-2 2-4 6-4 9"/><path d="M12 5c2 2 4 6 4 9"/></svg>`,
-  'medal-bronze': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M8.21 3.98L7 2h10l-1.21 1.98"/><path d="M12 8V2"/><text x="12" y="17" text-anchor="middle" font-size="6" fill="currentColor" stroke="none">B</text></svg>`,
-  'medal-gold': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M8.21 3.98L7 2h10l-1.21 1.98"/><path d="M12 8V2"/><text x="12" y="17" text-anchor="middle" font-size="6" fill="currentColor" stroke="none">O</text></svg>`,
-  'medal-platinum': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M8.21 3.98L7 2h10l-1.21 1.98"/><path d="M12 8V2"/><text x="12" y="17" text-anchor="middle" font-size="6" fill="currentColor" stroke="none">P</text></svg>`,
-  'medal-silver': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M8.21 3.98L7 2h10l-1.21 1.98"/><path d="M12 8V2"/><text x="12" y="17" text-anchor="middle" font-size="6" fill="currentColor" stroke="none">S</text></svg>`,
+  'leaf-off': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M12.5 5.5c4.5-1 7.5 1 8.5 5.5-1.5 4-5 6-9 5.5"/>
+  <path d="M5 21c1.5-5 5-8 9.5-9.5"/>
+  <line x1="2" y1="2" x2="22" y2="22"/>
+</svg>`,
   linkedin: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.446-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" fill="currentColor"/>
 </svg>`,
   login: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 10" aria-hidden="true"><path fill="currentColor" d="M4.688 9.375V8.333h3.645V1.042H4.688V0h3.645q.43 0 .736.306.306.307.306.736v7.291q0 .43-.306.736t-.736.306zM3.646 7.292l-.716-.756 1.328-1.328H0V4.167h4.258L2.93 2.839l.716-.756L6.25 4.688z"/></svg>`,
   logout: `<svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <path d="M1.35 12.75C0.975 12.75 0.65625 12.6187 0.39375 12.3562C0.13125 12.0938 0 11.775 0 11.4V1.35C0 0.974999 0.13125 0.656249 0.39375 0.393749C0.65625 0.131249 0.975 -9.53674e-07 1.35 -9.53674e-07H6.375V1.125H1.35C1.3 1.125 1.25 1.15 1.2 1.2C1.15 1.25 1.125 1.3 1.125 1.35V11.4C1.125 11.45 1.15 11.5 1.2 11.55C1.25 11.6 1.3 11.625 1.35 11.625H6.375V12.75H1.35ZM9.54375 9.58125L8.775 8.75625L10.5938 6.9375H4.2V5.8125H10.5938L8.775 3.99375L9.54375 3.16875L12.75 6.375L9.54375 9.58125Z" fill="currentColor"/>
+</svg>`,
+  'medal-bronze': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M8 2l4 4 4-4"/>
+  <path d="M12 6v4"/>
+  <circle cx="12" cy="16" r="6"/>
+  <path d="M10 14.5l1 1.5 3-3"/>
+</svg>`,
+  'medal-gold': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M8 2l4 4 4-4"/>
+  <path d="M12 6v4"/>
+  <circle cx="12" cy="16" r="6"/>
+  <polygon points="12,12 13.5,15 17,15.5 14.5,17.5 15,21 12,19.5 9,21 9.5,17.5 7,15.5 10.5,15" fill="currentColor" stroke="none"/>
+</svg>`,
+  'medal-platinum': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M8 2l4 4 4-4"/>
+  <path d="M12 6v4"/>
+  <circle cx="12" cy="16" r="6"/>
+  <path d="M12 12l2 3h-4l2 3-2 3 2-3 2 3-2-3h4l-2-3z" fill="currentColor" stroke="none"/>
+</svg>`,
+  'medal-silver': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M8 2l4 4 4-4"/>
+  <path d="M12 6v4"/>
+  <circle cx="12" cy="16" r="6"/>
+  <path d="M9.5 15a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 3.5"/>
+  <circle cx="12" cy="19.5" r="0.3" fill="currentColor"/>
 </svg>`,
   new: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_17_1187)">
