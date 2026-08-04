@@ -180,7 +180,7 @@ export class PerfilPublicoPageComponent {
     });
     this.meta.updateTag({
       property: 'og:url',
-      content: `/empresa/${slug}/reputacion`,
+      content: `${window.location.origin}/empresa/${slug}/reputacion`,
     });
   }
 
