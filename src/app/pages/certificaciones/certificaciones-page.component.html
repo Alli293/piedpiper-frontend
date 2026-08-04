@@ -14,8 +14,12 @@
       (mesChange)="onMesCalendarioChange($event)"
     />
 
-    <p class="ch-certificaciones__placeholder">
-      Próximamente: listado completo de certificaciones con filtros por estado.
-    </p>
+    <a
+      appLink
+      routerLink="/empresa/certificaciones/listado"
+      class="ch-certificaciones__listado-link"
+    >
+      Ver listado completo de certificaciones →
+    </a>
   </section>
 </app-shell-layout>
