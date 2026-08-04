@@ -230,14 +230,6 @@ export const routes: Routes = [
     loadComponent: cargarPlaceholder,
   },
   {
-    path: 'ecoruta/itinerarios/:id',
-    canActivate: [usuarioIndividualGuard],
-    loadComponent: () =>
-      import('./pages/ecoruta/itinerarios/itinerario-generado-page.component').then(
-        (m) => m.ItinerarioGeneradoPageComponent
-      ),
-  },
-  {
     path: 'empresa/:slug/reputacion/certificaciones',
     loadComponent: () =>
       import('./pages/perfil-publico/certificaciones/certificaciones-publicas-page.component').then(

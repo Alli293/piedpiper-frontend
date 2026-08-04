@@ -1,3 +1,5 @@
+import { CertificacionActiva, PuntuacionAmbientalResponse } from './puntuacion-ambiental.model';
+
 export interface ItinerarioActividad {
   nombre: string;
   descripcion: string | null;
@@ -7,6 +9,8 @@ export interface ItinerarioActividad {
   moneda: string | null;
   establecimientoRecomendado: string | null;
   provincia: string;
+  puntuacionAmbiental?: PuntuacionAmbientalResponse;
+  certificacionesActivas?: CertificacionActiva[];
 }
 
 export interface ItinerarioDia {

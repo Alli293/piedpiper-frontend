@@ -101,7 +101,12 @@
                       <app-icon name="viajero" [size]="18" />
                     </span>
                     <div class="ch-itinerario-generado__actividad-info">
-                      <strong>{{ actividad.nombre }}</strong>
+                      <div class="ch-itinerario-generado__actividad-titulo">
+                        <strong>{{ actividad.nombre }}</strong>
+                        <app-puntuacion-ambiental-badge
+                          [puntuacion]="actividad.puntuacionAmbiental ?? null"
+                        />
+                      </div>
                       @if (actividad.descripcion) {
                         <p>{{ actividad.descripcion }}</p>
                       }
@@ -118,6 +123,9 @@
                           <span>{{ actividad.establecimientoRecomendado }}</span>
                         }
                       </div>
+                      <app-certificaciones-detalle
+                        [certificaciones]="actividad.certificacionesActivas ?? []"
+                      />
                     </div>
                     @if (actividad.costoAproximado !== null) {
                       <span class="ch-itinerario-generado__actividad-costo">

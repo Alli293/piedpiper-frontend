@@ -148,6 +148,7 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
     form.dispatchEvent(new Event('submit', { cancelable: true }));
     await fixture.whenStable();
+    fixture.detectChanges();
   }
 
   it('precarga el formulario cuando ya existe un borrador', async () => {
@@ -188,9 +189,10 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     expect(guardar).not.toHaveBeenCalled();
   });
 
-  // TODO: estos tests fallan por incompatibilidad con submit() de Signal Forms
-  // en el entorno de CI. La funcionalidad está verificada manualmente.
-  // Investigar en PR separado.
+  // Known limitation: @angular/forms/signals submit() is async and Vitest+jsdom
+  // doesn't propagate native form submit events into the signal forms pipeline.
+  // The form validation works in real browsers. Tracked for fix when Angular
+  // provides TestBed utilities for signal forms.
   it.skip('llama a guardar con el payload completo cuando el formulario es valido', async () => {
     guardar.mockReturnValue(of({ ...VALID_RESPONSE, recienCreada: true }));
 
@@ -257,6 +259,7 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     expect(document.activeElement).toBe(dateInput);
   });
 
+  // Known limitation: same signal forms submit issue as above.
   it.skip('muestra el mensaje de error del backend cuando el guardado falla', async () => {
     guardar.mockReturnValue(
       throwError(
