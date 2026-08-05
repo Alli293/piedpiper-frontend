@@ -1,131 +1,133 @@
-<main class="solicitudes">
-  <header class="solicitudes__header">
-    <h1 class="solicitudes__title">Solicitudes de auditores</h1>
-    <p class="solicitudes__subtitle">
-      Revisa las solicitudes pendientes y aprueba o rechaza el ingreso de auditores certificados.
-    </p>
-  </header>
+<app-shell-layout [headerConfig]="headerConfig" activeId="solicitudes-auditor">
+  <main class="solicitudes">
+    <header class="solicitudes__header">
+      <h1 class="solicitudes__title">Solicitudes de auditores</h1>
+      <p class="solicitudes__subtitle">
+        Revisa las solicitudes pendientes y aprueba o rechaza el ingreso de auditores certificados.
+      </p>
+    </header>
 
-  @if (cargando()) {
-    <p class="solicitudes__vacio">Cargando solicitudes...</p>
-  } @else if (errorCarga()) {
-    <div class="solicitudes__vacio" role="alert">
-      <p>No pudimos cargar las solicitudes. Intenta nuevamente.</p>
-      <app-button variant="secondary" size="sm" (click)="cargar(pagina()?.pagina ?? 0)">
-        Reintentar
-      </app-button>
-    </div>
-  } @else if (!pagina() || pagina()!.contenido.length === 0) {
-    <p class="solicitudes__vacio">No hay solicitudes pendientes en este momento.</p>
-  } @else {
-    <div class="solicitudes__tabla-wrap">
-      <table class="solicitudes__tabla">
-        <thead>
-          <tr>
-            <th>Auditor</th>
-            <th>Correo</th>
-            <th>Fecha de solicitud</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (solicitud of pagina()!.contenido; track solicitud.id) {
-            <tr>
-              <td>{{ solicitud.nombreAuditor }}</td>
-              <td>{{ solicitud.email }}</td>
-              <td>{{ solicitud.fechaSolicitud | date: 'dd/MM/yyyy' }}</td>
-              <td class="solicitudes__acciones">
-                <app-button variant="tertiary" size="sm" (click)="abrirRevision(solicitud)">
-                  Revisar
-                </app-button>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-
-    @if (pagina()!.totalPaginas > 1) {
-      <div class="solicitudes__paginacion">
-        <app-button
-          variant="secondary"
-          size="sm"
-          [disabled]="pagina()!.pagina === 0"
-          (click)="cargar(pagina()!.pagina - 1)"
-        >
-          Anterior
-        </app-button>
-        <span class="solicitudes__paginacion-info">
-          Página {{ pagina()!.pagina + 1 }} de {{ pagina()!.totalPaginas }}
-        </span>
-        <app-button
-          variant="secondary"
-          size="sm"
-          [disabled]="pagina()!.pagina + 1 >= pagina()!.totalPaginas"
-          (click)="cargar(pagina()!.pagina + 1)"
-        >
-          Siguiente
+    @if (cargando()) {
+      <p class="solicitudes__vacio">Cargando solicitudes...</p>
+    } @else if (errorCarga()) {
+      <div class="solicitudes__vacio" role="alert">
+        <p>No pudimos cargar las solicitudes. Intenta nuevamente.</p>
+        <app-button variant="secondary" size="sm" (click)="cargar(pagina()?.pagina ?? 0)">
+          Reintentar
         </app-button>
       </div>
-    }
-  }
+    } @else if (!pagina() || pagina()!.contenido.length === 0) {
+      <p class="solicitudes__vacio">No hay solicitudes pendientes en este momento.</p>
+    } @else {
+      <div class="solicitudes__tabla-wrap">
+        <table class="solicitudes__tabla">
+          <thead>
+            <tr>
+              <th>Auditor</th>
+              <th>Correo</th>
+              <th>Fecha de solicitud</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (solicitud of pagina()!.contenido; track solicitud.id) {
+              <tr>
+                <td>{{ solicitud.nombreAuditor }}</td>
+                <td>{{ solicitud.email }}</td>
+                <td>{{ solicitud.fechaSolicitud | date: 'dd/MM/yyyy' }}</td>
+                <td class="solicitudes__acciones">
+                  <app-button variant="tertiary" size="sm" (click)="abrirRevision(solicitud)">
+                    Revisar
+                  </app-button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
-  @if (solicitudEnRevision(); as solicitud) {
-    <app-modal labelledBy="revisar-solicitud-title" size="md" (close)="cerrarRevision()">
-      <h2 id="revisar-solicitud-title" class="solicitudes__modal-title">Revisar solicitud</h2>
-
-      <dl class="solicitudes__datos">
-        <div class="solicitudes__dato">
-          <dt>Auditor</dt>
-          <dd>{{ solicitud.nombreAuditor }}</dd>
-        </div>
-        <div class="solicitudes__dato">
-          <dt>Correo</dt>
-          <dd>{{ solicitud.email }}</dd>
-        </div>
-        <div class="solicitudes__dato">
-          <dt>Fecha de solicitud</dt>
-          <dd>{{ solicitud.fechaSolicitud | date: 'dd/MM/yyyy HH:mm' }}</dd>
-        </div>
-      </dl>
-
-      <form class="solicitudes__form" novalidate (submit)="handleSubmit($event)">
-        <app-radio-group-field
-          label="Decisión"
-          [options]="decisionOptions"
-          [formField]="decisionForm.decision"
-          [disabled]="enviando()"
-        />
-
-        @if (esRechazo()) {
-          <app-textarea
-            label="Motivo del rechazo"
-            placeholder="Explica por qué se rechaza esta solicitud (mínimo 10 caracteres)"
-            [rows]="3"
-            [formField]="decisionForm.motivo"
-            [error]="errorMotivo()"
-          />
-        }
-
-        <div class="solicitudes__modal-actions">
+      @if (pagina()!.totalPaginas > 1) {
+        <div class="solicitudes__paginacion">
           <app-button
             variant="secondary"
-            type="button"
-            [disabled]="enviando()"
-            (click)="cerrarRevision()"
+            size="sm"
+            [disabled]="pagina()!.pagina === 0"
+            (click)="cargar(pagina()!.pagina - 1)"
           >
-            Cancelar
+            Anterior
           </app-button>
+          <span class="solicitudes__paginacion-info">
+            Página {{ pagina()!.pagina + 1 }} de {{ pagina()!.totalPaginas }}
+          </span>
           <app-button
-            variant="primary"
-            type="submit"
-            [disabled]="!puedeConfirmar()"
-            [loading]="enviando()"
+            variant="secondary"
+            size="sm"
+            [disabled]="pagina()!.pagina + 1 >= pagina()!.totalPaginas"
+            (click)="cargar(pagina()!.pagina + 1)"
           >
-            Confirmar decisión
+            Siguiente
           </app-button>
         </div>
-      </form>
-    </app-modal>
-  }
-</main>
+      }
+    }
+
+    @if (solicitudEnRevision(); as solicitud) {
+      <app-modal labelledBy="revisar-solicitud-title" size="md" (close)="cerrarRevision()">
+        <h2 id="revisar-solicitud-title" class="solicitudes__modal-title">Revisar solicitud</h2>
+
+        <dl class="solicitudes__datos">
+          <div class="solicitudes__dato">
+            <dt>Auditor</dt>
+            <dd>{{ solicitud.nombreAuditor }}</dd>
+          </div>
+          <div class="solicitudes__dato">
+            <dt>Correo</dt>
+            <dd>{{ solicitud.email }}</dd>
+          </div>
+          <div class="solicitudes__dato">
+            <dt>Fecha de solicitud</dt>
+            <dd>{{ solicitud.fechaSolicitud | date: 'dd/MM/yyyy HH:mm' }}</dd>
+          </div>
+        </dl>
+
+        <form class="solicitudes__form" novalidate (submit)="handleSubmit($event)">
+          <app-radio-group-field
+            label="Decisión"
+            [options]="decisionOptions"
+            [formField]="decisionForm.decision"
+            [disabled]="enviando()"
+          />
+
+          @if (esRechazo()) {
+            <app-textarea
+              label="Motivo del rechazo"
+              placeholder="Explica por qué se rechaza esta solicitud (mínimo 10 caracteres)"
+              [rows]="3"
+              [formField]="decisionForm.motivo"
+              [error]="errorMotivo()"
+            />
+          }
+
+          <div class="solicitudes__modal-actions">
+            <app-button
+              variant="secondary"
+              type="button"
+              [disabled]="enviando()"
+              (click)="cerrarRevision()"
+            >
+              Cancelar
+            </app-button>
+            <app-button
+              variant="primary"
+              type="submit"
+              [disabled]="!puedeConfirmar()"
+              [loading]="enviando()"
+            >
+              Confirmar decisión
+            </app-button>
+          </div>
+        </form>
+      </app-modal>
+    }
+  </main>
+</app-shell-layout>

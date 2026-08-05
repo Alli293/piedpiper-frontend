@@ -13,14 +13,12 @@ export const rutasPostAutenticacion = [
   'auditor/configuracion-inicial',
   'auditor/panel',
   'auditor/validacion-pendiente',
-  'admin/panel',
 ];
 
 const rutasPlaceholderConGuard: Record<string, CanActivateFn[]> = {
   'auditor/configuracion-inicial': [guardAuditor],
   'auditor/panel': [guardAuditor],
   'auditor/validacion-pendiente': [authGuard],
-  'admin/panel': [guardAdmin],
 };
 
 const rutasPlaceholder = rutasPostAutenticacion.map((path) => ({
@@ -105,6 +103,15 @@ export const routes: Routes = [
     path: 'auditores/:id',
     canActivate: [authGuard],
     loadComponent: cargarPlaceholder,
+  },
+  {
+    /**
+     * El backend manda al administrador de plataforma a /admin/panel al iniciar sesión, y esa era
+     * una pantalla placeholder sin navegación. Hasta que exista un panel propio, se lo lleva a la
+     * única pantalla de administración construida en vez de a una página vacía.
+     */
+    path: 'admin/panel',
+    redirectTo: 'admin/solicitudes-auditor',
   },
   {
     path: 'admin/solicitudes-auditor',
