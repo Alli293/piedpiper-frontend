@@ -199,14 +199,6 @@ export const routes: Routes = [
       import('./pages/limites/limites-page.component').then((m) => m.LimitesPageComponent),
   },
   {
-    path: 'madurez-ambiental',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./pages/madurez-ambiental/madurez-ambiental-page.component').then(
-        (m) => m.MadurezAmbientalPageComponent
-      ),
-  },
-  {
     path: 'ecoruta',
     canActivate: [usuarioIndividualGuard],
     loadComponent: cargarPlaceholder,
@@ -218,11 +210,6 @@ export const routes: Routes = [
       import('./pages/ecoruta/insignias/insignias-ecoruta-page.component').then(
         (m) => m.InsigniasEcoRutaPageComponent
       ),
-  },
-  {
-    path: 'ecoruta/planificar',
-    canActivate: [usuarioIndividualGuard],
-    loadComponent: cargarPlaceholder,
   },
   {
     path: 'ecoruta/itinerarios',
