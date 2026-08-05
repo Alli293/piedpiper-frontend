@@ -42,7 +42,14 @@ const ERROR_SONDEO =
   'No se pudo actualizar en tiempo real. Recarga la página para ver el estado más reciente.';
 const ERROR_NO_ENCONTRADA = 'Esta solicitud de auditoría no fue encontrada.';
 const ERROR_SIN_PERMISO = 'No tienes permiso para ver esta solicitud de auditoría.';
+const BYTES_POR_MB = 1024 * 1024;
+
 const ERROR_CARGA = 'No se pudo cargar el detalle de la auditoría. Intenta nuevamente.';
+
+/** 403 y 404 son definitivos: reintentar no los cambia. El resto puede ser un fallo pasajero. */
+function esErrorPermanente(err: unknown): boolean {
+  return err instanceof HttpErrorResponse && (err.status === 403 || err.status === 404);
+}
 
 @Component({
   selector: 'app-detalle-auditoria-page',
@@ -117,12 +124,16 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
       const transicion = detalle.historial
         .filter((entrada) => entrada.estadoNuevo === estado)
         .at(-1);
+      const situacion = this.situacionDe(indice, indiceActual);
+      // Un paso pendiente no muestra datos aunque el historial tenga una entrada suya: si la
+      // solicitud retrocedió (rechazo, vencimiento), esa entrada es de un intento ya superado.
+      const vigente = situacion !== 'pendiente' ? transicion : undefined;
       return {
         estado,
         titulo: TITULOS_PASO[estado],
-        situacion: this.situacionDe(indice, indiceActual),
-        fecha: transicion?.fecha ?? null,
-        responsable: transicion?.responsable ?? null,
+        situacion,
+        fecha: vigente?.fecha ?? null,
+        responsable: vigente?.responsable ?? null,
       };
     });
   });
@@ -140,7 +151,14 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
           // El catchError va adentro del switchMap: afuera, el error terminaría el stream externo
           // y el sondeo quedaría muerto hasta que el usuario recargue la página.
           this.auditoriasService.obtenerDetalle(this.idSolicitud()).pipe(
-            catchError(() => {
+            catchError((err: unknown) => {
+              if (esErrorPermanente(err)) {
+                // El acceso se perdio a mitad de camino: al rechazar, el auditor deja de estar
+                // asignado y la solicitud pasa a devolverle 403. Reintentar cada 15s no lo revierte.
+                this.errorCarga.set(this.mensajeDeError(err));
+                this.detenerSondeo();
+                return EMPTY;
+              }
               this.errorSondeo.set(ERROR_SONDEO);
               return EMPTY;
             })
@@ -156,9 +174,13 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.detenerSondeo();
+  }
+
+  private detenerSondeo(): void {
     document.removeEventListener('visibilitychange', this.alCambiarVisibilidad);
     this.suscripcionSondeo?.unsubscribe();
-    this.visibilidad.complete();
+    this.suscripcionSondeo = undefined;
   }
 
   private readonly alCambiarVisibilidad = (): void => {
@@ -174,9 +196,19 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
       );
     } catch (err: unknown) {
       this.errorCarga.set(this.mensajeDeError(err));
+      if (esErrorPermanente(err)) {
+        // 403 y 404 no se arreglan solos: seguir sondeando cada 15s no va a cambiar la respuesta,
+        // y el aviso de error nunca se limpia, asi que la pantalla tampoco se recuperaria.
+        this.detenerSondeo();
+      }
     } finally {
       this.cargando.set(false);
     }
+  }
+
+  /** El tamano llega en bytes desde el backend y en la tarjeta se muestra en MB. */
+  protected pesoLegible(tamanioBytes: number): string {
+    return `${(tamanioBytes / BYTES_POR_MB).toFixed(1)} MB`;
   }
 
   private mensajeDeError(err: unknown): string {

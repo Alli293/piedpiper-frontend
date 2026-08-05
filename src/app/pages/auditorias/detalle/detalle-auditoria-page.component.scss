@@ -187,13 +187,13 @@
 .ch-detalle-auditoria__paso--completado .ch-detalle-auditoria__nodo {
   background: var(--ch-green);
   border-color: var(--ch-green);
-  color: #fff;
+  color: var(--ch-text-on-dark);
 }
 
 .ch-detalle-auditoria__paso--en-curso .ch-detalle-auditoria__nodo {
   background: var(--ch-dark);
   border: 2px solid var(--ch-green);
-  color: #fff;
+  color: var(--ch-text-on-dark);
 }
 
 .ch-detalle-auditoria__paso-cuerpo {

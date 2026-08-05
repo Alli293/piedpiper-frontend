@@ -229,6 +229,42 @@ describe('DetalleAuditoriaPageComponent', () => {
     expect(aviso()).toBeNull();
   });
 
+  /**
+   * 403 y 404 no cambian por reintentar. Sin cortar el sondeo, la pantalla golpea el servidor cada
+   * 15 segundos indefinidamente y el aviso de error nunca se limpia, asi que tampoco se recupera.
+   */
+  it('deja de sondear cuando la carga inicial devuelve un error permanente', async () => {
+    auditoriasService.obtenerDetalle.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 403 }))
+    );
+    await montar();
+
+    expect(auditoriasService.obtenerDetalle).toHaveBeenCalledTimes(1);
+
+    vi.advanceTimersByTime(INTERVALO_SONDEO_DETALLE_MS * 4);
+    await estabilizar();
+
+    expect(auditoriasService.obtenerDetalle).toHaveBeenCalledTimes(1);
+  });
+
+  /** Al rechazar, el auditor deja de estar asignado y la solicitud pasa a devolverle 403. */
+  it('deja de sondear si pierde el acceso a mitad del sondeo', async () => {
+    await montar();
+
+    auditoriasService.obtenerDetalle.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 403 }))
+    );
+    vi.advanceTimersByTime(INTERVALO_SONDEO_DETALLE_MS);
+    await estabilizar();
+
+    expect(auditoriasService.obtenerDetalle).toHaveBeenCalledTimes(2);
+
+    vi.advanceTimersByTime(INTERVALO_SONDEO_DETALLE_MS * 4);
+    await estabilizar();
+
+    expect(auditoriasService.obtenerDetalle).toHaveBeenCalledTimes(2);
+  });
+
   it('una solicitud ajena muestra el mensaje de permiso y no la linea de tiempo', async () => {
     auditoriasService.obtenerDetalle.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 403 }))

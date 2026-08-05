@@ -62,7 +62,11 @@
         <article class="ch-detalle-auditoria__tarjeta">
           <header class="ch-detalle-auditoria__tarjeta-cabecera">
             <app-icon name="auditorias" [size]="18" aria-hidden="true" />
-            <h3 class="ch-detalle-auditoria__tarjeta-titulo">Línea de tiempo de la auditoría</h3>
+            <app-heading
+              level="h3"
+              class="ch-detalle-auditoria__tarjeta-titulo"
+              text="Línea de tiempo de la auditoría"
+            />
           </header>
           <ol class="ch-detalle-auditoria__linea" aria-live="polite">
             @for (paso of pasos(); track paso.estado) {
@@ -117,7 +121,11 @@
         <article class="ch-detalle-auditoria__tarjeta ch-detalle-auditoria__tarjeta--documentos">
           <header class="ch-detalle-auditoria__tarjeta-cabecera">
             <app-icon name="certificaciones" [size]="18" aria-hidden="true" />
-            <h3 class="ch-detalle-auditoria__tarjeta-titulo">Documentos adjuntos</h3>
+            <app-heading
+              level="h3"
+              class="ch-detalle-auditoria__tarjeta-titulo"
+              text="Documentos adjuntos"
+            />
             <span class="ch-detalle-auditoria__conteo">
               {{ auditoria.documentos.length }}
               {{ auditoria.documentos.length === 1 ? 'archivo' : 'archivos' }}
@@ -133,7 +141,7 @@
                       {{ documento.nombreArchivo }}
                     </p>
                     <p class="ch-detalle-auditoria__documento-peso">
-                      {{ (documento.tamanioBytes / 1024 / 1024).toFixed(1) }} MB
+                      {{ pesoLegible(documento.tamanioBytes) }}
                     </p>
                   </div>
                 </li>
