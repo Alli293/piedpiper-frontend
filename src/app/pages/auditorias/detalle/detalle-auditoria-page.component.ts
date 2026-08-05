@@ -22,7 +22,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
-import { abrirPestanaEnBlanco, mostrarBlobEnPestana } from '../../../shared/utils/download.utils';
+import { previsualizarBlobEnPestana } from '../../../shared/utils/download.utils';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import { initialsFromNombreCompleto } from '../../../shared/utils/initials.utils';
 import {
@@ -172,6 +172,13 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     return detalle.auditor.id === this.authSession.getUserId();
   });
 
+  /**
+   * El contador se calcula contra el reloj del navegador. Con el reloj del cliente mal puesto, el
+   * "Quedan N horas" puede mostrar de mas o de menos; lo que no cambia es el resultado, porque el
+   * plazo real lo hace cumplir el backend contra su propia hora al recibir la respuesta. Corregirlo
+   * de verdad pide que el detalle devuelva la hora del servidor para calcular el desfase, y eso es
+   * un campo nuevo en el contrato por un dato informativo: queda anotado, no hecho.
+   */
   private readonly horasRestantes = computed(() => {
     const asignacion = this.detalle()?.fechaAsignacion;
     if (!asignacion) {
@@ -323,25 +330,20 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
   protected readonly documentoAbriendo = signal<string | null>(null);
 
   /**
-   * La pestana se abre en el mismo clic y recien despues se le carga el contenido. Abrirla al
+   * La pestana se abre en el mismo clic y recien despues se le carga el contenido: abrirla al
    * volver la peticion la deja fuera de la ventana de activacion del usuario y el navegador la
-   * bloquea como emergente, que era lo que pasaba con el documento a medio traer.
+   * bloquea como emergente. Por eso el helper recibe como traer el documento y no el documento.
    */
   protected async verDocumento(idDocumento: string): Promise<void> {
-    const pestana = abrirPestanaEnBlanco();
-    if (!pestana) {
-      this.toastService.error(AVISO_VENTANA_BLOQUEADA);
-      return;
-    }
-
     this.documentoAbriendo.set(idDocumento);
     try {
-      const blob = await firstValueFrom(
-        this.auditoriasService.descargarDocumento(this.idSolicitud(), idDocumento)
+      const resultado = await previsualizarBlobEnPestana(() =>
+        firstValueFrom(this.auditoriasService.descargarDocumento(this.idSolicitud(), idDocumento))
       );
-      mostrarBlobEnPestana(pestana, blob);
+      if (resultado === 'bloqueada') {
+        this.toastService.error(AVISO_VENTANA_BLOQUEADA);
+      }
     } catch (err: unknown) {
-      pestana.close();
       this.toastService.error(apiErrorMessage(err) ?? ERROR_DOCUMENTO);
     } finally {
       this.documentoAbriendo.set(null);
@@ -391,14 +393,31 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
       this.mostrandoRechazo.set(false);
       this.modeloRechazo.set({ motivoRechazo: '' });
       this.toastService.success(mensajeExito);
-      await this.cargaInicial();
+      await this.refrescar();
     } catch (err: unknown) {
       this.toastService.error(apiErrorMessage(err) ?? ERROR_DECISION);
-      // Se recarga igual: un 409 significa que la solicitud cambio por otro lado, y dejar la
+      // Se refresca igual: un 409 significa que la solicitud cambio por otro lado, y dejar la
       // pantalla con el estado viejo invitaria a reintentar sobre algo que ya no existe.
-      await this.cargaInicial();
+      await this.refrescar();
     } finally {
       this.enviandoDecision.set(false);
+    }
+  }
+
+  /**
+   * Vuelve a pedir el detalle sin tocar {@link cargando}. Reusar la carga inicial mostraba de nuevo
+   * el esqueleto completo, y despues de aceptar o rechazar eso se ve como un parpadeo de toda la
+   * pantalla en vez de una actualizacion.
+   */
+  private async refrescar(): Promise<void> {
+    try {
+      this.detalle.set(
+        await firstValueFrom(this.auditoriasService.obtenerDetalle(this.idSolicitud()))
+      );
+      this.ahora.set(Date.now());
+    } catch {
+      // El detalle en pantalla sigue siendo el ultimo que el servidor confirmo; el resultado de la
+      // decision ya se informo por toast, asi que no hay nada mas que decirle al usuario aca.
     }
   }
 

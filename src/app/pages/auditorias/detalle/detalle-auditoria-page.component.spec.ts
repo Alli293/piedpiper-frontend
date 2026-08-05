@@ -76,6 +76,15 @@ describe('DetalleAuditoriaPageComponent', () => {
     estadoDescripcion: 'Certificación emitida',
   };
 
+  /** Con lo minimo que el helper realmente usa: si le falta algo, el test tiene que enterarse. */
+  function pestanaFalsa(): Window {
+    return {
+      location: { href: '' },
+      close: vi.fn(),
+      addEventListener: vi.fn(),
+    } as unknown as Window;
+  }
+
   function botonVerPdf(): HTMLButtonElement | null {
     return raiz().querySelector<HTMLButtonElement>(
       '.ch-detalle-auditoria__documento app-button button'
@@ -416,6 +425,8 @@ describe('DetalleAuditoriaPageComponent', () => {
     expect(raiz().querySelector('.ch-detalle-auditoria__documento-peso')?.textContent?.trim()).toBe(
       '—'
     );
+  });
+
   it('no ofrece las acciones a la empresa, que no es quien responde', async () => {
     await montar();
 
@@ -509,7 +520,7 @@ describe('DetalleAuditoriaPageComponent', () => {
    * previsualización devolvía 401.
    */
   it('previsualizar un documento lo pide al servicio y muestra el blob en la pestana', async () => {
-    const pestana = { location: { href: '' }, close: vi.fn() } as unknown as Window;
+    const pestana = pestanaFalsa();
     const abrir = vi.spyOn(window, 'open').mockReturnValue(pestana);
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
@@ -521,6 +532,13 @@ describe('DetalleAuditoriaPageComponent', () => {
     expect(auditoriasService.descargarDocumento).toHaveBeenCalledWith('sol-1', 'doc-1');
     expect(abrir).toHaveBeenCalledWith('', '_blank');
     expect(pestana.location.href).toBe('blob:fake');
+    // Sin esto, un fallo despues de asignar el href pasaria desapercibido: el href ya quedo puesto
+    // y la unica senal de que algo se rompio es el toast.
+    expect(
+      TestBed.inject(ToastService)
+        .toasts()
+        .some((t) => t.variant === 'error')
+    ).toBe(false);
   });
 
   /**
@@ -528,7 +546,7 @@ describe('DetalleAuditoriaPageComponent', () => {
    * petición ya cae fuera de la ventana de activación del usuario y la bloquea como emergente.
    */
   it('abre la pestana en el clic y no despues de que responde el servidor', async () => {
-    const pestana = { location: { href: '' }, close: vi.fn() } as unknown as Window;
+    const pestana = pestanaFalsa();
     const abrir = vi.spyOn(window, 'open').mockReturnValue(pestana);
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
@@ -557,7 +575,7 @@ describe('DetalleAuditoriaPageComponent', () => {
   });
 
   it('cierra la pestana y avisa cuando falla la descarga', async () => {
-    const pestana = { location: { href: '' }, close: vi.fn() } as unknown as Window;
+    const pestana = pestanaFalsa();
     vi.spyOn(window, 'open').mockReturnValue(pestana);
     auditoriasService.descargarDocumento.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 500 }))
