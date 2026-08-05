@@ -4,6 +4,8 @@ import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormField, form, required, schema, submit, validate } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
+import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
+import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { RadioGroupFieldComponent } from '../../../shared/components/inputs/radio-group-field/radio-group-field.component';
 import { SelectOption } from '../../../shared/components/inputs/select-input/select-input.component';
@@ -31,6 +33,7 @@ const MOTIVO_MAX = 500;
 @Component({
   selector: 'app-solicitudes-auditor-page',
   imports: [
+    ShellLayoutComponent,
     ButtonComponent,
     ModalComponent,
     RadioGroupFieldComponent,
@@ -42,6 +45,16 @@ const MOTIVO_MAX = 500;
   styleUrl: './solicitudes-auditor-page.component.scss',
 })
 export class SolicitudesAuditorPageComponent {
+  /**
+   * La pantalla vivía sin shell, así que el administrador de plataforma no tenía menú, ni forma de
+   * cerrar sesión, ni de llegar acá desde ningún lado: aterrizaba en un placeholder vacío.
+   */
+  protected readonly headerConfig: HeaderConfig = {
+    sectionLabel: 'ADMINISTRACIÓN',
+    pageTitle: 'Solicitudes de auditores',
+    showNotificationDot: false,
+  };
+
   private readonly validacionService = inject(ValidacionService);
   private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);

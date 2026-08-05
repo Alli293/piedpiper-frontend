@@ -13,14 +13,12 @@ export const rutasPostAutenticacion = [
   'auditor/configuracion-inicial',
   'auditor/panel',
   'auditor/validacion-pendiente',
-  'admin/panel',
 ];
 
 const rutasPlaceholderConGuard: Record<string, CanActivateFn[]> = {
   'auditor/configuracion-inicial': [guardAuditor],
   'auditor/panel': [guardAuditor],
   'auditor/validacion-pendiente': [authGuard],
-  'admin/panel': [guardAdmin],
 };
 
 const rutasPlaceholder = rutasPostAutenticacion.map((path) => ({
@@ -105,6 +103,15 @@ export const routes: Routes = [
     path: 'auditores/:id',
     canActivate: [authGuard],
     loadComponent: cargarPlaceholder,
+  },
+  {
+    /**
+     * El backend manda al administrador de plataforma a /admin/panel al iniciar sesión, y esa era
+     * una pantalla placeholder sin navegación. Hasta que exista un panel propio, se lo lleva a la
+     * única pantalla de administración construida en vez de a una página vacía.
+     */
+    path: 'admin/panel',
+    redirectTo: 'admin/solicitudes-auditor',
   },
   {
     path: 'admin/solicitudes-auditor',
@@ -199,14 +206,6 @@ export const routes: Routes = [
       import('./pages/limites/limites-page.component').then((m) => m.LimitesPageComponent),
   },
   {
-    path: 'madurez-ambiental',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./pages/madurez-ambiental/madurez-ambiental-page.component').then(
-        (m) => m.MadurezAmbientalPageComponent
-      ),
-  },
-  {
     path: 'ecoruta',
     canActivate: [usuarioIndividualGuard],
     loadComponent: cargarPlaceholder,
@@ -218,11 +217,6 @@ export const routes: Routes = [
       import('./pages/ecoruta/insignias/insignias-ecoruta-page.component').then(
         (m) => m.InsigniasEcoRutaPageComponent
       ),
-  },
-  {
-    path: 'ecoruta/planificar',
-    canActivate: [usuarioIndividualGuard],
-    loadComponent: cargarPlaceholder,
   },
   {
     path: 'ecoruta/itinerarios',
