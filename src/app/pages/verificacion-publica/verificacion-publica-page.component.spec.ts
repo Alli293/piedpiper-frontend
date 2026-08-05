@@ -59,6 +59,18 @@ describe('VerificacionPublicaPageComponent', () => {
     expect(verificar).not.toHaveBeenCalled();
   });
 
+  it('el encabezado con icono y titulo se muestra tanto en el formulario como en el resultado', async () => {
+    const sinCodigo = await crearFixture();
+    expect(
+      (sinCodigo.nativeElement as HTMLElement).querySelector('.ch-verificacion-publica__intro')
+    ).not.toBeNull();
+
+    const conResultado = await crearFixture('CH-2026-8F4A19KD');
+    expect(
+      (conResultado.nativeElement as HTMLElement).querySelector('.ch-verificacion-publica__intro')
+    ).not.toBeNull();
+  });
+
   it('con codigo en la ruta verifica automaticamente y muestra el estado de carga primero', () => {
     const fixture = TestBed.createComponent(VerificacionPublicaPageComponent);
     fixture.componentRef.setInput('codigo', 'CH-2026-8F4A19KD');
@@ -90,7 +102,7 @@ describe('VerificacionPublicaPageComponent', () => {
     expect(root.textContent).toContain('Credencial válida pero vencida');
   });
 
-  it('una credencial revocada se muestra con variante danger y su fecha de revocacion', async () => {
+  it('una credencial revocada se muestra con variante danger y la nota de revocacion', async () => {
     verificar.mockReturnValue(
       of({ ...RESULTADO_VIGENTE, estado: 'revocada', fechaRevocacion: '2026-06-01T00:00:00Z' })
     );
@@ -100,15 +112,81 @@ describe('VerificacionPublicaPageComponent', () => {
     const badge = root.querySelector('app-badge');
     expect(badge?.className).toContain('ch-badge--danger');
     expect(root.textContent).toContain('Credencial revocada');
-    expect(root.textContent).toContain('Fecha de revocación');
+    expect(root.querySelector('app-semantic-card')?.textContent).toContain(
+      'Esta credencial fue revocada el'
+    );
+    expect(root.textContent).toContain('01/06/2026');
+    expect(root.textContent).toContain('por la entidad certificadora y ya no es válida');
   });
 
-  it('un codigo mal formado o inexistente (404) muestra credencial no encontrada', async () => {
-    verificar.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 404 })));
+  it('una credencial vencida resalta en rojo la fecha de vencimiento', async () => {
+    verificar.mockReturnValue(of({ ...RESULTADO_VIGENTE, estado: 'valida_vencida' }));
+    const fixture = await crearFixture('CH-2026-8F4A19KD');
+    const root = fixture.nativeElement as HTMLElement;
+
+    const vencida = root.querySelector('.ch-verificacion-publica__mono--vencida');
+    expect(vencida?.textContent).toContain('15/01/2027');
+  });
+
+  it('una credencial vigente no resalta ninguna fecha en rojo', async () => {
+    const fixture = await crearFixture('CH-2026-8F4A19KD');
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.querySelector('.ch-verificacion-publica__mono--vencida')).toBeNull();
+  });
+
+  it('la etiqueta de estado (app-badge) no lleva icono, solo color', async () => {
+    const fixture = await crearFixture('CH-2026-8F4A19KD');
+    const root = fixture.nativeElement as HTMLElement;
+
+    const badge = root.querySelector('app-badge');
+    expect(badge?.querySelector('.ch-badge__icon')).toBeNull();
+  });
+
+  it('"Verificar otra credencial" es secundario y queda centrado', async () => {
+    const fixture = await crearFixture('CH-2026-8F4A19KD');
+    const root = fixture.nativeElement as HTMLElement;
+
+    const boton = root.querySelector('.ch-verificacion-publica__accion');
+    expect(boton?.className).toContain('ch-button--secondary');
+  });
+
+  it('todo resultado incluye la marca de tiempo de la consulta en fuente monoespaciada, en la hora local del visitante con am/pm', async () => {
+    const fixture = await crearFixture('CH-2026-8F4A19KD');
+    const root = fixture.nativeElement as HTMLElement;
+
+    const consulta = root.querySelector('.ch-verificacion-publica__consulta');
+    // No se fija una fecha exacta: fechaConsulta se muestra en la hora local
+    // de quien visita (no siempre UTC), asi que el dia/hora exactos dependen
+    // de la zona horaria de quien corre la prueba.
+    expect(consulta?.textContent).toMatch(
+      /Consulta: \d{2}\/\d{2}\/\d{4}, \d{2}:\d{2} (AM|PM) \(GMT.*\)/
+    );
+  });
+
+  it('un codigo mal formado o inexistente (404) muestra credencial no encontrada con el codigo consultado', async () => {
+    verificar.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 404,
+            error: {
+              status: 404,
+              message: 'Credencial no encontrada.',
+              timestamp: '2026-08-01T12:30:00Z',
+            },
+          })
+      )
+    );
     const fixture = await crearFixture('CH-2026-NOEXISTE');
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.textContent).toContain('Credencial no encontrada');
+    expect(root.textContent).toContain('CH-2026-NOEXISTE');
+    expect(root.textContent).toContain('Verificá que esté escrito correctamente');
+    expect(root.querySelector('.ch-verificacion-publica__consulta')?.textContent).toMatch(
+      /Consulta: \d{2}\/\d{2}\/\d{4}, \d{2}:\d{2} (AM|PM) \(GMT.*\)/
+    );
     expect(toastError).not.toHaveBeenCalled();
   });
 

@@ -29,6 +29,7 @@ describe('PerfilPublicoService', () => {
     fechaEmision: '2026-01-15T00:00:00Z',
     fechaVencimiento: '2027-01-15',
     estado: 'ACTIVA',
+    codigoVerificacion: 'CH-2026-8F4A19KD',
   };
 
   const insignia: InsigniaEmpresa = {

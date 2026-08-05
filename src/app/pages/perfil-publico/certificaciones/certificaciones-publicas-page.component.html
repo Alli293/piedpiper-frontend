@@ -92,6 +92,7 @@
                 <th scope="col">Auditor verificador</th>
                 <th scope="col">Período verificado</th>
                 <th scope="col">Estado</th>
+                <th scope="col">Verificación</th>
               </tr>
             </thead>
             <tbody>
@@ -137,6 +138,16 @@
                     <app-badge [variant]="variante(cert.estado)">{{
                       etiqueta(cert.estado)
                     }}</app-badge>
+                  </td>
+                  <td>
+                    <a
+                      appLink
+                      class="ch-certificaciones-publicas__verificar"
+                      [routerLink]="['/verificar', cert.codigoVerificacion]"
+                    >
+                      <app-icon name="ver" [size]="13" />
+                      Verificar
+                    </a>
                   </td>
                 </tr>
               }
