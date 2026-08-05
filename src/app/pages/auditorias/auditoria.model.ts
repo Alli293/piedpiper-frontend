@@ -105,6 +105,23 @@ export const PASOS_AUDITORIA: readonly EstadoSolicitudAuditoria[] = [
 
 export const INTERVALO_SONDEO_DETALLE_MS = 15_000;
 
+/** Fila de un listado de solicitudes. Sin documentos ni historial: para eso está el detalle. */
+export interface ResumenSolicitudAuditoria {
+  id: string;
+  tipoCertificacion: TipoCertificacion;
+  periodoInicio: string;
+  periodoFin: string;
+  estado: EstadoSolicitudAuditoria;
+  estadoDescripcion: string;
+  fechaCreacion: string;
+  nombreEmpresa: string | null;
+  idAuditor: string | null;
+  nombreAuditor: string | null;
+  fechaAsignacion: string | null;
+  fechaAceptacion: string | null;
+  cantidadDocumentos: number;
+}
+
 /** Valores que acepta el backend en el cuerpo del POST: su conversión es case-insensitive. */
 export type DecisionAuditorRequest = 'aceptada' | 'rechazada';
 

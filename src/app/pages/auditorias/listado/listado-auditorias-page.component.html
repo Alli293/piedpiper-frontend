@@ -1,0 +1,105 @@
+<app-shell-layout [headerConfig]="headerConfig()" [backRoute]="rutaInicio()">
+  <section class="ch-listado-auditorias" aria-label="Listado de auditorías">
+    <div class="ch-listado-auditorias__intro">
+      <div>
+        <app-heading
+          level="h2"
+          [text]="esEmpresa() ? 'Auditorías de tu empresa' : 'Solicitudes asignadas'"
+        />
+        <p class="ch-listado-auditorias__descripcion">
+          @if (esEmpresa()) {
+            Da seguimiento a cada solicitud de auditoría y consulta su estado.
+          } @else {
+            Responde las solicitudes que te asignaron y da seguimiento a las que ya aceptaste.
+          }
+        </p>
+      </div>
+      @if (esEmpresa()) {
+        <app-button (click)="nuevaSolicitud()">Nueva solicitud</app-button>
+      }
+    </div>
+
+    @if (cargando()) {
+      <p class="ch-listado-auditorias__estado">Cargando auditorías…</p>
+    } @else if (error()) {
+      <p class="ch-listado-auditorias__error" role="alert">{{ error() }}</p>
+    } @else if (ordenadas().length === 0) {
+      <div class="ch-listado-auditorias__vacio">
+        <p>
+          @if (esEmpresa()) {
+            Todavía no has solicitado ninguna auditoría.
+          } @else {
+            No tienes solicitudes asignadas por el momento.
+          }
+        </p>
+        @if (esEmpresa()) {
+          <app-button (click)="nuevaSolicitud()">Crear la primera solicitud</app-button>
+        }
+      </div>
+    } @else {
+      <div class="ch-listado-auditorias__tabla-marco">
+        <table class="ch-listado-auditorias__tabla">
+          <caption class="ch-listado-auditorias__caption">
+            Auditorías,
+            {{
+              ordenadas().length
+            }}
+            en total
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Período</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Enviada</th>
+              <th scope="col">{{ esEmpresa() ? 'Auditor' : 'Empresa' }}</th>
+              <th scope="col">Adjuntos</th>
+              <th scope="col"><span class="ch-listado-auditorias__oculto">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (solicitud of ordenadas(); track solicitud.id) {
+              <tr [class.ch-listado-auditorias__fila--espera]="esperaRespuesta(solicitud)">
+                <td>
+                  <span class="ch-listado-auditorias__periodo">
+                    {{ solicitud.periodoInicio | date: 'MMM y' }} –
+                    {{ solicitud.periodoFin | date: 'MMM y' }}
+                  </span>
+                  @if (esperaRespuesta(solicitud) && !esEmpresa()) {
+                    <span class="ch-listado-auditorias__aviso">Espera tu respuesta</span>
+                  }
+                </td>
+                <td>
+                  <app-badge [variant]="varianteDe(solicitud.estado)">
+                    {{ solicitud.estadoDescripcion }}
+                  </app-badge>
+                </td>
+                <td>{{ solicitud.fechaCreacion | date: 'd MMM y' }}</td>
+                <td>
+                  @if (esEmpresa()) {
+                    {{ solicitud.nombreAuditor ?? 'Sin asignar' }}
+                  } @else {
+                    {{ solicitud.nombreEmpresa }}
+                  }
+                </td>
+                <td>{{ solicitud.cantidadDocumentos }}</td>
+                <td class="ch-listado-auditorias__acciones">
+                  <app-button
+                    variant="secondary"
+                    size="sm"
+                    [ariaLabel]="
+                      'Ver el detalle de la auditoría del período ' +
+                      (solicitud.periodoInicio | date: 'MMMM y')
+                    "
+                    (click)="verDetalle(solicitud.id)"
+                  >
+                    Ver
+                  </app-button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</app-shell-layout>

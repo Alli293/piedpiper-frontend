@@ -6,6 +6,7 @@ import {
   AsignarAuditorRequest,
   DetalleSolicitudAuditoria,
   ResponderDecisionRequest,
+  ResumenSolicitudAuditoria,
   NuevaSolicitudAuditoriaRequest,
   SolicitudAuditoria,
   SolicitudAuditoriaAsignada,
@@ -15,6 +16,16 @@ import {
 export class AuditoriasService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/auditorias`;
+
+  /** Solicitudes de la empresa autenticada. El backend resuelve cuál es a partir del usuario. */
+  listarDeMiEmpresa(): Observable<ResumenSolicitudAuditoria[]> {
+    return this.http.get<ResumenSolicitudAuditoria[]>(this.baseUrl);
+  }
+
+  /** Solicitudes asignadas al auditor autenticado. */
+  listarAsignadas(): Observable<ResumenSolicitudAuditoria[]> {
+    return this.http.get<ResumenSolicitudAuditoria[]>(`${this.baseUrl}/asignadas`);
+  }
 
   crearSolicitud(
     datos: NuevaSolicitudAuditoriaRequest,
@@ -46,11 +57,14 @@ export class AuditoriasService {
   }
 
   /**
-   * URL de previsualización de un documento. Se arma acá y no en la plantilla para que el prefijo
-   * de la API viva en un solo lugar.
+   * Trae el contenido del documento por el cliente HTTP y no por la URL directa: el endpoint exige
+   * la cabecera de autenticación, que solo agrega el interceptor. Un enlace apuntando a la URL
+   * devolvería 401.
    */
-  urlDocumento(idSolicitud: string, idDocumento: string): string {
-    return `${this.baseUrl}/${idSolicitud}/documentos/${idDocumento}`;
+  descargarDocumento(idSolicitud: string, idDocumento: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${idSolicitud}/documentos/${idDocumento}`, {
+      responseType: 'blob',
+    });
   }
 
   asignarAuditor(

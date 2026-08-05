@@ -19,7 +19,7 @@ describe('DetalleAuditoriaPageComponent', () => {
   let auditoriasService: {
     obtenerDetalle: ReturnType<typeof vi.fn>;
     responderDecision: ReturnType<typeof vi.fn>;
-    urlDocumento: ReturnType<typeof vi.fn>;
+    descargarDocumento: ReturnType<typeof vi.fn>;
   };
   let oculto: boolean;
   let idSesion: string | null;
@@ -163,10 +163,9 @@ describe('DetalleAuditoriaPageComponent', () => {
     auditoriasService = {
       obtenerDetalle: vi.fn().mockReturnValue(of(enRevision)),
       responderDecision: vi.fn().mockReturnValue(of(undefined)),
-      urlDocumento: vi.fn(
-        (solicitud: string, documento: string) =>
-          `/api/auditorias/${solicitud}/documentos/${documento}`
-      ),
+      descargarDocumento: vi
+        .fn()
+        .mockReturnValue(of(new Blob(['%PDF-1.4'], { type: 'application/pdf' }))),
     };
 
     await TestBed.configureTestingModule({
@@ -498,13 +497,35 @@ describe('DetalleAuditoriaPageComponent', () => {
     expect(panelDecision()).toBeNull();
   });
 
-  it('cada documento se puede previsualizar en una pestana nueva', async () => {
-    await montar();
+  /**
+   * El documento se pide por el cliente HTTP y no con un enlace directo: el endpoint exige la
+   * cabecera de autenticación, que la navegación del navegador no envía. Con un `<a href>` la
+   * previsualización devolvía 401.
+   */
+  it('previsualizar un documento lo pide al servicio y abre el blob en una pestana', async () => {
+    const abrir = vi.spyOn(window, 'open').mockReturnValue({} as Window);
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
 
-    const enlace = raiz().querySelector<HTMLAnchorElement>('.ch-detalle-auditoria__ver-pdf');
-    expect(enlace?.getAttribute('href')).toBe('/api/auditorias/sol-1/documentos/doc-1');
-    expect(enlace?.target).toBe('_blank');
-    expect(enlace?.rel).toContain('noopener');
+    await montar();
+    raiz().querySelector<HTMLButtonElement>('.ch-detalle-auditoria__ver-pdf')?.click();
+    await estabilizar();
+
+    expect(auditoriasService.descargarDocumento).toHaveBeenCalledWith('sol-1', 'doc-1');
+    expect(abrir).toHaveBeenCalledWith('blob:fake', '_blank', 'noopener');
+  });
+
+  it('avisa cuando el navegador bloquea la ventana emergente', async () => {
+    vi.spyOn(window, 'open').mockReturnValue(null);
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+
+    await montar();
+    raiz().querySelector<HTMLButtonElement>('.ch-detalle-auditoria__ver-pdf')?.click();
+    await estabilizar();
+
+    const toasts = TestBed.inject(ToastService).toasts();
+    expect(toasts[toasts.length - 1].title).toContain('bloqueó la ventana emergente');
   });
 
   it('deja de sondear al destruir el componente', async () => {

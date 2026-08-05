@@ -320,6 +320,8 @@
 
 .ch-detalle-auditoria__ver-pdf {
   align-items: center;
+  background: var(--ch-bg-white);
+  cursor: pointer;
   border: 1px solid var(--ch-border);
   border-radius: var(--ch-radius-sm);
   color: var(--ch-text-muted);
@@ -332,7 +334,12 @@
   text-decoration: none;
 }
 
-.ch-detalle-auditoria__ver-pdf:hover {
+.ch-detalle-auditoria__ver-pdf:hover:not(:disabled) {
   border-color: var(--ch-green);
   color: var(--ch-green);
+}
+
+.ch-detalle-auditoria__ver-pdf:disabled {
+  cursor: progress;
+  opacity: 0.6;
 }

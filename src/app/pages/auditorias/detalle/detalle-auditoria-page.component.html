@@ -209,16 +209,16 @@
                       {{ pesoLegible(documento.tamanioBytes) }}
                     </p>
                   </div>
-                  <a
+                  <button
+                    type="button"
                     class="ch-detalle-auditoria__ver-pdf"
-                    [href]="urlDocumento(documento.id)"
-                    target="_blank"
-                    rel="noopener"
+                    [disabled]="documentoAbriendo() === documento.id"
                     [attr.aria-label]="'Ver ' + documento.nombreArchivo + ' en una pestaña nueva'"
+                    (click)="verDocumento(documento.id)"
                   >
                     <app-icon name="ver" [size]="14" aria-hidden="true" />
                     Ver PDF
-                  </a>
+                  </button>
                 </li>
               }
             </ul>

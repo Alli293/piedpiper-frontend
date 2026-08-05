@@ -22,6 +22,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
+import { abrirBlobEnPestana } from '../../../shared/utils/download.utils';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import { initialsFromNombreCompleto } from '../../../shared/utils/initials.utils';
 import {
@@ -70,6 +71,9 @@ const ERROR_DECISION = 'No se pudo registrar tu respuesta. Intenta nuevamente.';
 const MENSAJE_ACEPTADA = 'Aceptaste la solicitud. La auditoría quedó en revisión.';
 const MENSAJE_RECHAZADA = 'Rechazaste la solicitud. La empresa fue notificada.';
 const MENSAJE_MOTIVO_REQUERIDO = 'Indica el motivo del rechazo.';
+const ERROR_DOCUMENTO = 'No se pudo abrir el documento. Intenta nuevamente.';
+const AVISO_VENTANA_BLOQUEADA =
+  'Tu navegador bloqueó la ventana emergente. Permítelas para ver el documento.';
 
 const MILISEGUNDOS_POR_HORA = 60 * 60 * 1000;
 const HORAS_POR_DIA = 24;
@@ -318,8 +322,22 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     this.visibilidad.next(!document.hidden);
   };
 
-  protected urlDocumento(idDocumento: string): string {
-    return this.auditoriasService.urlDocumento(this.idSolicitud(), idDocumento);
+  protected readonly documentoAbriendo = signal<string | null>(null);
+
+  protected async verDocumento(idDocumento: string): Promise<void> {
+    this.documentoAbriendo.set(idDocumento);
+    try {
+      const blob = await firstValueFrom(
+        this.auditoriasService.descargarDocumento(this.idSolicitud(), idDocumento)
+      );
+      if (!abrirBlobEnPestana(blob)) {
+        this.toastService.error(AVISO_VENTANA_BLOQUEADA);
+      }
+    } catch (err: unknown) {
+      this.toastService.error(apiErrorMessage(err) ?? ERROR_DOCUMENTO);
+    } finally {
+      this.documentoAbriendo.set(null);
+    }
   }
 
   protected abrirRechazo(): void {
