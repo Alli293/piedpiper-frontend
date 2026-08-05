@@ -72,6 +72,9 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
   private readonly visibilidad = new Subject<boolean>();
   private suscripcionSondeo?: Subscription;
 
+  /** Se puso en true tras un 403 o un 404: no tiene sentido volver a preguntar. */
+  private accesoDescartado = false;
+
   protected readonly detalle = signal<DetalleSolicitudAuditoria | null>(null);
   protected readonly cargando = signal(true);
   protected readonly errorCarga = signal<string | null>(null);
@@ -139,7 +142,22 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
-    void this.cargaInicial();
+    void this.iniciar();
+  }
+
+  /**
+   * El sondeo arranca recien cuando la carga inicial termino. Arrancarlo en paralelo abria una
+   * carrera: si la peticion inicial tarda mas que el primer ciclo, su respuesta llega despues y
+   * pisa el detalle con datos mas viejos que los que ya se habian mostrado.
+   */
+  private async iniciar(): Promise<void> {
+    await this.cargaInicial();
+
+    // 403 y 404 no se arreglan solos: sondear no va a cambiar la respuesta, y el aviso de error
+    // nunca se limpia, asi que la pantalla tampoco se recuperaria.
+    if (this.accesoDescartado) {
+      return;
+    }
 
     document.addEventListener('visibilitychange', this.alCambiarVisibilidad);
     this.suscripcionSondeo = this.visibilidad
@@ -196,18 +214,21 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
       );
     } catch (err: unknown) {
       this.errorCarga.set(this.mensajeDeError(err));
-      if (esErrorPermanente(err)) {
-        // 403 y 404 no se arreglan solos: seguir sondeando cada 15s no va a cambiar la respuesta,
-        // y el aviso de error nunca se limpia, asi que la pantalla tampoco se recuperaria.
-        this.detenerSondeo();
-      }
+      this.accesoDescartado = esErrorPermanente(err);
     } finally {
       this.cargando.set(false);
     }
   }
 
-  /** El tamano llega en bytes desde el backend y en la tarjeta se muestra en MB. */
-  protected pesoLegible(tamanioBytes: number): string {
+  /**
+   * El tamano llega en bytes desde el backend y en la tarjeta se muestra en MB. Si no llega un
+   * numero utilizable se muestra un guion: es un dato accesorio y "NaN MB" seria peor que no
+   * mostrar nada.
+   */
+  protected pesoLegible(tamanioBytes: number | null | undefined): string {
+    if (typeof tamanioBytes !== 'number' || !Number.isFinite(tamanioBytes) || tamanioBytes < 0) {
+      return '—';
+    }
     return `${(tamanioBytes / BYTES_POR_MB).toFixed(1)} MB`;
   }
 

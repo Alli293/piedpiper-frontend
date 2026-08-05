@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthSessionService } from '../../../core/auth-session.service';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -306,6 +306,56 @@ describe('DetalleAuditoriaPageComponent', () => {
     );
     expect(titulos.at(-1)).toBe('Observaciones pendientes');
     expect(titulos).not.toContain('Certificación emitida');
+  });
+
+  /**
+   * Con el sondeo arrancando en paralelo a la carga inicial, una inicial mas lenta que un ciclo
+   * llegaba despues y pisaba el detalle con datos mas viejos que los que ya estaban en pantalla.
+   */
+  it('la carga inicial lenta no pisa lo que ya trajo el sondeo', async () => {
+    let responderInicial: (detalle: DetalleSolicitudAuditoria) => void = () => undefined;
+    auditoriasService.obtenerDetalle.mockReturnValueOnce(
+      new Observable<DetalleSolicitudAuditoria>((observador) => {
+        responderInicial = (detalle) => {
+          observador.next(detalle);
+          observador.complete();
+        };
+      })
+    );
+    auditoriasService.obtenerDetalle.mockReturnValue(of(certificada));
+
+    await montar();
+
+    // Mientras la inicial sigue en vuelo, el sondeo todavia no arranco.
+    vi.advanceTimersByTime(INTERVALO_SONDEO_DETALLE_MS * 2);
+    await estabilizar();
+    expect(auditoriasService.obtenerDetalle).toHaveBeenCalledTimes(1);
+
+    responderInicial(enRevision);
+    await estabilizar();
+
+    vi.advanceTimersByTime(INTERVALO_SONDEO_DETALLE_MS);
+    await estabilizar();
+
+    expect(auditoriasService.obtenerDetalle).toHaveBeenCalledTimes(2);
+    expect(situaciones().at(-1)).toBe('en-curso');
+  });
+
+  it('muestra un guion cuando el tamano del documento no es un numero utilizable', async () => {
+    auditoriasService.obtenerDetalle.mockReturnValue(
+      of({
+        ...enRevision,
+        documentos: [
+          { id: 'doc-1', nombreArchivo: 'inventario.pdf', tamanioBytes: null as unknown as number },
+        ],
+      })
+    );
+
+    await montar();
+
+    expect(raiz().querySelector('.ch-detalle-auditoria__documento-peso')?.textContent?.trim()).toBe(
+      '—'
+    );
   });
 
   it('deja de sondear al destruir el componente', async () => {
