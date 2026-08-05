@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from '../../../core/auth-session.service';
@@ -12,6 +12,7 @@ import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.co
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
+import { formatCurrency } from '../../../shared/utils/currency.utils';
 import { PROVINCIA_OPTIONS } from '../models/preferencias-viaje.model';
 import { CertificacionesDetalleComponent } from './certificaciones-detalle/certificaciones-detalle.component';
 import { EcoRutaItinerariosService } from './ecoruta-itinerarios.service';
@@ -55,6 +56,9 @@ export class ItinerarioGeneradoPageComponent {
   protected readonly cargando = signal(true);
   protected readonly errorCarga = signal(false);
   protected readonly itinerario = signal<Itinerario | null>(null);
+  protected readonly diasExpandidos = signal<Set<number>>(new Set());
+
+  private readonly chatPanel = viewChild<ElementRef<HTMLElement>>('chatPanel');
 
   private cargaRequestId = 0;
 
@@ -83,6 +87,8 @@ export class ItinerarioGeneradoPageComponent {
     return `${(score / 100) * circumference}, ${circumference}`;
   });
 
+  protected readonly esVersionVigente = computed(() => true);
+
   constructor() {
     void this.cargar();
   }
@@ -101,7 +107,9 @@ export class ItinerarioGeneradoPageComponent {
     try {
       const itinerario = await firstValueFrom(this.itinerariosService.obtener(id));
       if (requestId !== this.cargaRequestId) return;
-      this.itinerario.set(this.ordenar(itinerario));
+      const ordenado = this.ordenar(itinerario);
+      this.itinerario.set(ordenado);
+      this.diasExpandidos.set(new Set(ordenado.dias.map((dia) => dia.numeroDia)));
     } catch (err: unknown) {
       if (requestId !== this.cargaRequestId) return;
       this.errorCarga.set(true);
@@ -123,6 +131,26 @@ export class ItinerarioGeneradoPageComponent {
 
   protected volverAMisItinerarios(): void {
     void this.router.navigateByUrl('/ecoruta/itinerarios');
+  }
+
+  protected toggleDia(numeroDia: number): void {
+    this.diasExpandidos.update((actual) => {
+      const siguiente = new Set(actual);
+      siguiente.has(numeroDia) ? siguiente.delete(numeroDia) : siguiente.add(numeroDia);
+      return siguiente;
+    });
+  }
+
+  protected diaExpandido(numeroDia: number): boolean {
+    return this.diasExpandidos().has(numeroDia);
+  }
+
+  protected formatearCosto(actividad: ItinerarioActividad): string {
+    return formatCurrency(actividad.costoAproximado ?? 0, actividad.moneda ?? 'CRC');
+  }
+
+  protected preguntarSobreActividad(): void {
+    this.chatPanel()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   /**
