@@ -289,6 +289,22 @@ describe('ShellLayoutComponent', () => {
     expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/empresa/certificaciones');
   });
 
+  it('navega al listado de auditorias del auditor', async () => {
+    const fixture = await createFixture({ activeId: 'auditorias' });
+
+    (fixture.componentInstance as any).onMenuItem('auditorias');
+
+    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/auditor/auditorias');
+  });
+
+  it('navega a solicitudes de auditor del administrador', async () => {
+    const fixture = await createFixture({ activeId: 'solicitudes-auditor' });
+
+    (fixture.componentInstance as any).onMenuItem('solicitudes-auditor');
+
+    expect(routerStub.navigateByUrl).toHaveBeenCalledWith('/admin/solicitudes-auditor');
+  });
+
   it('navega a las insignias de empresa', async () => {
     const fixture = await createFixture({ activeId: 'dashboard' });
 

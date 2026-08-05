@@ -45,6 +45,10 @@ export class ListadoAuditoriasPageComponent implements OnInit {
     userInitials: this.authSession.getUserInitials(),
   }));
 
+  protected readonly rutaInicio = computed(() =>
+    this.esEmpresa() ? '/empresa/panel' : '/auditor/panel'
+  );
+
   /**
    * Las que esperan respuesta del auditor van primero: es lo único que tiene un plazo corriendo, y
    * enterrarlas entre las ya respondidas es como se pierde una por vencimiento.
