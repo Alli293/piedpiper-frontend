@@ -139,6 +139,17 @@ describe('ListadoAuditoriasPageComponent', () => {
     expect(navegar).toHaveBeenCalledWith(['/empresa/auditorias', 'sol-2']);
   });
 
+  /** El detalle es la misma pantalla, pero cada rol la abre bajo su propia sección. */
+  it('el auditor abre el detalle bajo su propia ruta y no bajo la de empresa', async () => {
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    await montar('auditor');
+
+    filas()[0].querySelector('button')?.click();
+    await estabilizar();
+
+    expect(navegar).toHaveBeenCalledWith(['/auditor/auditorias', 'sol-2']);
+  });
+
   it('el boton de nueva solicitud lleva al formulario de creacion', async () => {
     const navegar = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     await montar();

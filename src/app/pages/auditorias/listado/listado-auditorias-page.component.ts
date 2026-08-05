@@ -53,11 +53,16 @@ export class ListadoAuditoriasPageComponent implements OnInit {
    * Las que esperan respuesta del auditor van primero: es lo único que tiene un plazo corriendo, y
    * enterrarlas entre las ya respondidas es como se pierde una por vencimiento.
    */
-  protected readonly ordenadas = computed(() => {
-    const pendientes = (s: ResumenSolicitudAuditoria) =>
-      s.idAuditor !== null && s.fechaAceptacion === null ? 0 : 1;
-    return [...this.solicitudes()].sort((a, b) => pendientes(a) - pendientes(b));
-  });
+  protected readonly ordenadas = computed(() =>
+    [...this.solicitudes()].sort(
+      (a, b) => Number(this.esperaRespuesta(b)) - Number(this.esperaRespuesta(a))
+    )
+  );
+
+  /** El detalle es el mismo para ambos roles, pero cada uno lo ve bajo su propia sección. */
+  private readonly rutaDetalle = computed(() =>
+    this.esEmpresa() ? '/empresa/auditorias' : '/auditor/auditorias'
+  );
 
   async ngOnInit(): Promise<void> {
     this.cargando.set(true);
@@ -92,7 +97,7 @@ export class ListadoAuditoriasPageComponent implements OnInit {
   }
 
   protected verDetalle(idSolicitud: string): void {
-    void this.router.navigate(['/empresa/auditorias', idSolicitud]);
+    void this.router.navigate([this.rutaDetalle(), idSolicitud]);
   }
 
   protected nuevaSolicitud(): void {

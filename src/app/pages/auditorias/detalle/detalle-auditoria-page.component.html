@@ -62,9 +62,11 @@
         <article class="ch-detalle-auditoria__decision" aria-label="Respuesta a la solicitud">
           <div class="ch-detalle-auditoria__decision-cabecera">
             <div>
-              <h3 class="ch-detalle-auditoria__tarjeta-titulo">
-                Esta solicitud espera tu respuesta
-              </h3>
+              <app-heading
+                level="h3"
+                class="ch-detalle-auditoria__tarjeta-titulo"
+                text="Esta solicitud espera tu respuesta"
+              />
               <p
                 class="ch-detalle-auditoria__plazo"
                 [class.ch-detalle-auditoria__plazo--vencido]="plazoVencido()"
@@ -209,16 +211,15 @@
                       {{ pesoLegible(documento.tamanioBytes) }}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    class="ch-detalle-auditoria__ver-pdf"
-                    [disabled]="documentoAbriendo() === documento.id"
-                    [attr.aria-label]="'Ver ' + documento.nombreArchivo + ' en una pestaña nueva'"
+                  <app-button
+                    variant="tertiary"
+                    size="sm"
+                    [loading]="documentoAbriendo() === documento.id"
+                    [ariaLabel]="'Ver ' + documento.nombreArchivo + ' en una pestaña nueva'"
                     (click)="verDocumento(documento.id)"
                   >
-                    <app-icon name="ver" [size]="14" aria-hidden="true" />
                     Ver PDF
-                  </button>
+                  </app-button>
                 </li>
               }
             </ul>

@@ -76,6 +76,12 @@ describe('DetalleAuditoriaPageComponent', () => {
     estadoDescripcion: 'Certificación emitida',
   };
 
+  function botonVerPdf(): HTMLButtonElement | null {
+    return raiz().querySelector<HTMLButtonElement>(
+      '.ch-detalle-auditoria__documento app-button button'
+    );
+  }
+
   function raiz(): HTMLElement {
     return fixture.nativeElement as HTMLElement;
   }
@@ -502,28 +508,78 @@ describe('DetalleAuditoriaPageComponent', () => {
    * cabecera de autenticación, que la navegación del navegador no envía. Con un `<a href>` la
    * previsualización devolvía 401.
    */
-  it('previsualizar un documento lo pide al servicio y abre el blob en una pestana', async () => {
-    const abrir = vi.spyOn(window, 'open').mockReturnValue({} as Window);
+  it('previsualizar un documento lo pide al servicio y muestra el blob en la pestana', async () => {
+    const pestana = { location: { href: '' }, close: vi.fn() } as unknown as Window;
+    const abrir = vi.spyOn(window, 'open').mockReturnValue(pestana);
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
 
     await montar();
-    raiz().querySelector<HTMLButtonElement>('.ch-detalle-auditoria__ver-pdf')?.click();
+    botonVerPdf()?.click();
     await estabilizar();
 
     expect(auditoriasService.descargarDocumento).toHaveBeenCalledWith('sol-1', 'doc-1');
-    expect(abrir).toHaveBeenCalledWith('blob:fake', '_blank', 'noopener');
+    expect(abrir).toHaveBeenCalledWith('', '_blank');
+    expect(pestana.location.href).toBe('blob:fake');
+  });
+
+  /**
+   * El navegador solo deja abrir una pestaña durante el manejo del clic. Abrirla al volver la
+   * petición ya cae fuera de la ventana de activación del usuario y la bloquea como emergente.
+   */
+  it('abre la pestana en el clic y no despues de que responde el servidor', async () => {
+    const pestana = { location: { href: '' }, close: vi.fn() } as unknown as Window;
+    const abrir = vi.spyOn(window, 'open').mockReturnValue(pestana);
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+
+    let responder: (blob: Blob) => void = () => undefined;
+    auditoriasService.descargarDocumento.mockReturnValue(
+      new Observable<Blob>((observador) => {
+        responder = (blob) => {
+          observador.next(blob);
+          observador.complete();
+        };
+      })
+    );
+
+    await montar();
+    botonVerPdf()?.click();
+    await estabilizar();
+
+    expect(abrir).toHaveBeenCalledTimes(1);
+    expect(pestana.location.href).toBe('');
+
+    responder(new Blob(['%PDF']));
+    await estabilizar();
+
+    expect(pestana.location.href).toBe('blob:fake');
+  });
+
+  it('cierra la pestana y avisa cuando falla la descarga', async () => {
+    const pestana = { location: { href: '' }, close: vi.fn() } as unknown as Window;
+    vi.spyOn(window, 'open').mockReturnValue(pestana);
+    auditoriasService.descargarDocumento.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 }))
+    );
+
+    await montar();
+    botonVerPdf()?.click();
+    await estabilizar();
+
+    expect(pestana.close).toHaveBeenCalled();
+    const toasts = TestBed.inject(ToastService).toasts();
+    expect(toasts[toasts.length - 1].title).toContain('No se pudo abrir el documento');
   });
 
   it('avisa cuando el navegador bloquea la ventana emergente', async () => {
     vi.spyOn(window, 'open').mockReturnValue(null);
-    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
-    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
 
     await montar();
-    raiz().querySelector<HTMLButtonElement>('.ch-detalle-auditoria__ver-pdf')?.click();
+    botonVerPdf()?.click();
     await estabilizar();
 
+    expect(auditoriasService.descargarDocumento).not.toHaveBeenCalled();
     const toasts = TestBed.inject(ToastService).toasts();
     expect(toasts[toasts.length - 1].title).toContain('bloqueó la ventana emergente');
   });

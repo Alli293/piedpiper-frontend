@@ -306,6 +306,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'auditor/auditorias/:id',
+    canActivate: [guardDetalleAuditoria],
+    loadComponent: () =>
+      import('./pages/auditorias/detalle/detalle-auditoria-page.component').then(
+        (m) => m.DetalleAuditoriaPageComponent
+      ),
+  },
+  {
     path: 'empresa/auditorias/:id/auditor',
     canActivate: [guardEmpresaAdmin],
     loadComponent: () =>
