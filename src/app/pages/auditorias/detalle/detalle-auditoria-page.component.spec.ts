@@ -16,8 +16,14 @@ import { DetalleAuditoriaPageComponent } from './detalle-auditoria-page.componen
 
 describe('DetalleAuditoriaPageComponent', () => {
   let fixture: ComponentFixture<DetalleAuditoriaPageComponent>;
-  let auditoriasService: { obtenerDetalle: ReturnType<typeof vi.fn> };
+  let auditoriasService: {
+    obtenerDetalle: ReturnType<typeof vi.fn>;
+    responderDecision: ReturnType<typeof vi.fn>;
+    urlDocumento: ReturnType<typeof vi.fn>;
+  };
   let oculto: boolean;
+  let idSesion: string | null;
+  let rolSesion: string;
 
   const enRevision: DetalleSolicitudAuditoria = {
     id: 'sol-1',
@@ -32,6 +38,9 @@ describe('DetalleAuditoriaPageComponent', () => {
     auditor: { id: 'aud-1', nombre: 'Guillermo Murillo Salas' },
     origenAsignacion: 'MANUAL',
     fechaAsignacion: '2026-06-10T09:15:00Z',
+    fechaAceptacion: null,
+    motivoRechazo: null,
+    fechaRechazo: null,
     nombreEmpresa: 'Café del Valle S.A.',
     historial: [
       {
@@ -87,6 +96,42 @@ describe('DetalleAuditoriaPageComponent', () => {
     return raiz().querySelector('.ch-detalle-auditoria__aviso')?.textContent?.trim() ?? null;
   }
 
+  function panelDecision(): HTMLElement | null {
+    return raiz().querySelector('.ch-detalle-auditoria__decision');
+  }
+
+  function plazo(): string | null {
+    return raiz().querySelector('.ch-detalle-auditoria__plazo')?.textContent?.trim() ?? null;
+  }
+
+  function botonesDecision(): HTMLButtonElement[] {
+    return Array.from(
+      raiz().querySelectorAll<HTMLButtonElement>('.ch-detalle-auditoria__decision-botones button')
+    );
+  }
+
+  function botonPorTexto(texto: string): HTMLButtonElement | undefined {
+    return botonesDecision().find((boton) => boton.textContent?.trim() === texto);
+  }
+
+  /** Deja la solicitud asignada al auditor de la sesión, con la asignación hecha hace `horas`. */
+  function asignadaAlAuditor(horas: number): DetalleSolicitudAuditoria {
+    return {
+      ...enRevision,
+      estado: 'SOLICITUD_ENVIADA',
+      estadoDescripcion: 'Solicitud enviada',
+      fechaAsignacion: new Date(Date.now() - horas * 60 * 60 * 1000).toISOString(),
+      fechaAceptacion: null,
+    };
+  }
+
+  async function montarComoAuditorAsignado(horas = 2): Promise<void> {
+    idSesion = 'aud-1';
+    rolSesion = 'auditor_certificado';
+    auditoriasService.obtenerDetalle.mockReturnValue(of(asignadaAlAuditor(horas)));
+    await montar();
+  }
+
   async function estabilizar(): Promise<void> {
     for (let intento = 0; intento < 5; intento += 1) {
       fixture.detectChanges();
@@ -111,9 +156,18 @@ describe('DetalleAuditoriaPageComponent', () => {
   beforeEach(async () => {
     vi.useFakeTimers();
     oculto = false;
+    idSesion = 'admin-1';
+    rolSesion = 'administrador_empresa';
     vi.spyOn(document, 'hidden', 'get').mockImplementation(() => oculto);
 
-    auditoriasService = { obtenerDetalle: vi.fn().mockReturnValue(of(enRevision)) };
+    auditoriasService = {
+      obtenerDetalle: vi.fn().mockReturnValue(of(enRevision)),
+      responderDecision: vi.fn().mockReturnValue(of(undefined)),
+      urlDocumento: vi.fn(
+        (solicitud: string, documento: string) =>
+          `/api/auditorias/${solicitud}/documentos/${documento}`
+      ),
+    };
 
     await TestBed.configureTestingModule({
       imports: [DetalleAuditoriaPageComponent],
@@ -125,8 +179,9 @@ describe('DetalleAuditoriaPageComponent', () => {
           provide: AuthSessionService,
           useValue: {
             isAdministradorEmpresa: () => true,
-            getRole: vi.fn().mockReturnValue('administrador_empresa'),
+            getRole: vi.fn().mockReturnValue(rolSesion),
             getUserName: vi.fn().mockReturnValue('Admin'),
+            getUserId: vi.fn(() => idSesion),
           },
         },
         { provide: AuthService, useValue: { token: signal('fake-token'), cerrarSesion: vi.fn() } },
@@ -356,6 +411,100 @@ describe('DetalleAuditoriaPageComponent', () => {
     expect(raiz().querySelector('.ch-detalle-auditoria__documento-peso')?.textContent?.trim()).toBe(
       '—'
     );
+  it('no ofrece las acciones a la empresa, que no es quien responde', async () => {
+    await montar();
+
+    expect(panelDecision()).toBeNull();
+  });
+
+  it('el auditor asignado ve el panel para aceptar o rechazar', async () => {
+    await montarComoAuditorAsignado();
+
+    expect(panelDecision()).not.toBeNull();
+    expect(botonPorTexto('Aceptar')).toBeDefined();
+    expect(botonPorTexto('Rechazar')).toBeDefined();
+  });
+
+  it('con mas de un dia por delante el plazo se muestra en dias completos', async () => {
+    await montarComoAuditorAsignado(50);
+
+    expect(plazo()).toBe('Quedan 2 días');
+  });
+
+  it('en el ultimo dia el plazo se muestra en horas completas', async () => {
+    await montarComoAuditorAsignado(100);
+
+    expect(plazo()).toBe('Quedan 20 horas');
+  });
+
+  it('pasado el plazo lo dice en vez de mostrar un contador en cero', async () => {
+    await montarComoAuditorAsignado(130);
+
+    expect(plazo()).toBe('El plazo para responder venció');
+  });
+
+  it('aceptar envia la decision al servicio', async () => {
+    await montarComoAuditorAsignado();
+
+    botonPorTexto('Aceptar')?.click();
+    await estabilizar();
+
+    expect(auditoriasService.responderDecision).toHaveBeenCalledWith('sol-1', {
+      decision: 'aceptada',
+    });
+  });
+
+  it('el campo de motivo solo aparece al elegir rechazar', async () => {
+    await montarComoAuditorAsignado();
+    expect(raiz().querySelector('app-textarea')).toBeNull();
+
+    botonPorTexto('Rechazar')?.click();
+    await estabilizar();
+
+    expect(raiz().querySelector('app-textarea')).not.toBeNull();
+  });
+
+  it('el boton de confirmar queda deshabilitado hasta que el motivo alcanza el minimo', async () => {
+    await montarComoAuditorAsignado();
+    botonPorTexto('Rechazar')?.click();
+    await estabilizar();
+
+    expect(botonPorTexto('Confirmar rechazo')?.disabled).toBe(true);
+
+    const campo = raiz().querySelector('textarea');
+    if (campo) {
+      campo.value = 'corto';
+      campo.dispatchEvent(new Event('input'));
+    }
+    await estabilizar();
+    expect(botonPorTexto('Confirmar rechazo')?.disabled).toBe(true);
+
+    if (campo) {
+      campo.value = 'No tengo disponibilidad este trimestre';
+      campo.dispatchEvent(new Event('input'));
+    }
+    await estabilizar();
+    expect(botonPorTexto('Confirmar rechazo')?.disabled).toBe(false);
+  });
+
+  it('una solicitud ya aceptada deja de ofrecer las acciones', async () => {
+    idSesion = 'aud-1';
+    rolSesion = 'auditor_certificado';
+    auditoriasService.obtenerDetalle.mockReturnValue(
+      of({ ...asignadaAlAuditor(2), fechaAceptacion: '2026-06-11T10:00:00Z' })
+    );
+    await montar();
+
+    expect(panelDecision()).toBeNull();
+  });
+
+  it('cada documento se puede previsualizar en una pestana nueva', async () => {
+    await montar();
+
+    const enlace = raiz().querySelector<HTMLAnchorElement>('.ch-detalle-auditoria__ver-pdf');
+    expect(enlace?.getAttribute('href')).toBe('/api/auditorias/sol-1/documentos/doc-1');
+    expect(enlace?.target).toBe('_blank');
+    expect(enlace?.rel).toContain('noopener');
   });
 
   it('deja de sondear al destruir el componente', async () => {

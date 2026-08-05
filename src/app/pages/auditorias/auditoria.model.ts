@@ -81,6 +81,12 @@ export interface TransicionEstadoAuditoria {
 /** Respuesta de GET /auditorias/{id}: la solicitud con su línea de tiempo completa. */
 export interface DetalleSolicitudAuditoria extends SolicitudAuditoriaAsignada {
   estadoDescripcion: string;
+  fechaAceptacion: string | null;
+
+  /** Motivo del último rechazo. Sigue visible aunque la asignación ya se haya liberado. */
+  motivoRechazo: string | null;
+
+  fechaRechazo: string | null;
   nombreEmpresa: string | null;
   historial: TransicionEstadoAuditoria[];
 }
@@ -98,6 +104,20 @@ export const PASOS_AUDITORIA: readonly EstadoSolicitudAuditoria[] = [
 ];
 
 export const INTERVALO_SONDEO_DETALLE_MS = 15_000;
+
+/** Valores que acepta el backend en el cuerpo del POST: su conversión es case-insensitive. */
+export type DecisionAuditorRequest = 'aceptada' | 'rechazada';
+
+export interface ResponderDecisionRequest {
+  decision: DecisionAuditorRequest;
+  motivoRechazo?: string;
+}
+
+export const MINIMO_CARACTERES_MOTIVO_RECHAZO = 10;
+export const MAXIMO_CARACTERES_MOTIVO_RECHAZO = 300;
+
+/** El auditor tiene 120 horas desde la asignación para responder. */
+export const HORAS_PARA_RESPONDER = 120;
 
 export const MAXIMO_DOCUMENTOS_SOLICITUD = 10;
 export const MAXIMO_BYTES_DOCUMENTO = 15 * 1024 * 1024;

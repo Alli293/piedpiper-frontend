@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import {
   AsignarAuditorRequest,
   DetalleSolicitudAuditoria,
+  ResponderDecisionRequest,
   NuevaSolicitudAuditoriaRequest,
   SolicitudAuditoria,
   SolicitudAuditoriaAsignada,
@@ -38,6 +39,18 @@ export class AuditoriasService {
    */
   obtenerDetalle(idSolicitud: string): Observable<DetalleSolicitudAuditoria> {
     return this.http.get<DetalleSolicitudAuditoria>(`${this.baseUrl}/${idSolicitud}`);
+  }
+
+  responderDecision(idSolicitud: string, request: ResponderDecisionRequest): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${idSolicitud}/decision`, request);
+  }
+
+  /**
+   * URL de previsualización de un documento. Se arma acá y no en la plantilla para que el prefijo
+   * de la API viva en un solo lugar.
+   */
+  urlDocumento(idSolicitud: string, idDocumento: string): string {
+    return `${this.baseUrl}/${idSolicitud}/documentos/${idDocumento}`;
   }
 
   asignarAuditor(
