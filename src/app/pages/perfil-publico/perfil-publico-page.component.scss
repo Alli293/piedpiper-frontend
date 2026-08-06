@@ -45,6 +45,11 @@
   @include mixins.desktop-up {
     padding: var(--ch-space-8) var(--ch-space-6);
   }
+
+  &__container {
+    max-width: 1080px;
+    margin: 0 auto;
+  }
 }
 
 // === Company Card ===
