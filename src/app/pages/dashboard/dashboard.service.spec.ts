@@ -84,6 +84,26 @@ describe('DashboardService', () => {
     });
   });
 
+  it('consulta las alertas activas del dashboard', () => {
+    service.obtenerAlertas().subscribe((alertas) => {
+      expect(alertas[0].urgencia).toBe('vencida');
+      expect(alertas[0].diasRestantes).toBe(-24);
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/dashboard/alertas`);
+    expect(req.request.method).toBe('GET');
+
+    req.flush([
+      {
+        idCertificacion: 'abc',
+        nombre: 'Bandera Azul Ecológica 2025',
+        fechaVencimiento: '2026-06-04',
+        diasRestantes: -24,
+        urgencia: 'vencida',
+      },
+    ]);
+  });
+
   it('lista las insignias empresariales del dashboard', () => {
     service.listarInsignias().subscribe((insignias) => {
       expect(insignias[0].nivelInsignia).toBe('bronce');

@@ -6,12 +6,24 @@
       [error]="resumenError()"
     />
 
+    <app-alertas-activas-panel
+      [alertas]="alertas()"
+      [loading]="cargandoAlertas()"
+      [error]="alertasError()"
+    />
+
     <app-calendario-vencimientos
       [mes]="mesCalendario()"
       [calendario]="calendario()"
       [loading]="cargandoCalendario()"
       [error]="calendarioError()"
       (mesChange)="onMesCalendarioChange($event)"
+    />
+
+    <app-insignias-empresa-panel
+      [insignias]="insignias()"
+      [loading]="cargandoInsignias()"
+      [error]="insigniasError()"
     />
 
     <a
