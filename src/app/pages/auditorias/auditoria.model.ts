@@ -130,6 +130,12 @@ export interface ResponderDecisionRequest {
   motivoRechazo?: string;
 }
 
+export type ResultadoAuditoriaRequest = 'aprobada' | 'observaciones';
+
+export interface EmitirResultadoAuditoriaRequest {
+  resultado: ResultadoAuditoriaRequest;
+}
+
 export const MINIMO_CARACTERES_MOTIVO_RECHAZO = 10;
 export const MAXIMO_CARACTERES_MOTIVO_RECHAZO = 300;
 
