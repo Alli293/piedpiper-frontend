@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Meta, Title } from '@angular/platform-browser';
@@ -99,16 +99,20 @@ export class PerfilPublicoPageComponent {
     this.cargar();
   }
 
-  protected getNivelConfig(): NivelConfig {
-    const nivel = this.perfil()?.nivelEcologico ?? 'Sin nivel';
+  protected readonly nivelConfig = computed(() => {
+    const nivel = this.normalizarNivel(this.perfil()?.nivelEcologico);
     return NIVEL_MAP[nivel] ?? NIVEL_MAP['Sin nivel'];
-  }
+  });
 
-  protected getNivelIndex(): number {
-    const nivel = this.perfil()?.nivelEcologico ?? 'Sin nivel';
+  protected readonly nivelIndex = computed(() => {
+    const nivel = this.normalizarNivel(this.perfil()?.nivelEcologico);
     const idx = NIVELES_ORDEN.indexOf(nivel);
     return idx >= 0 ? idx : -1;
-  }
+  });
+
+  protected readonly nivelNormalizado = computed(() => {
+    return this.normalizarNivel(this.perfil()?.nivelEcologico);
+  });
 
   protected formatFechaActualizacion(fecha: string | null | undefined): string {
     if (!fecha) return '';
@@ -118,6 +122,16 @@ export class PerfilPublicoPageComponent {
       month: 'long',
       year: 'numeric',
     }).format(date);
+  }
+
+  /**
+   * Normaliza el nivel ecológico del backend (que puede venir en mayúsculas: "ORO")
+   * al formato que usa el frontend ("Oro") para las clases CSS y el mapa de configuración.
+   */
+  protected normalizarNivel(nivel: string | null | undefined): string {
+    if (!nivel || nivel.trim() === '') return 'Sin nivel';
+    const lower = nivel.toLowerCase();
+    return lower.charAt(0).toUpperCase() + lower.slice(1);
   }
 
   protected formatFechaCorta(fecha: string | null | undefined): string {
