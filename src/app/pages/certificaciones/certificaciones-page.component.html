@@ -14,6 +14,12 @@
       (mesChange)="onMesCalendarioChange($event)"
     />
 
+    <app-insignias-empresa-panel
+      [insignias]="insignias()"
+      [loading]="cargandoInsignias()"
+      [error]="insigniasError()"
+    />
+
     <a
       appLink
       routerLink="/empresa/certificaciones/listado"

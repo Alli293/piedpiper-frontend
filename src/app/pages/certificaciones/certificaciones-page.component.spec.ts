@@ -9,6 +9,8 @@ import { AuthService } from '../../core/auth/auth.service';
 import { SesionInactividadService } from '../../core/auth/sesion-inactividad.service';
 import { PerfilInicialService } from '../../core/services/perfil-inicial.service';
 import { PerfilInicial } from '../../core/models/perfil-inicial.model';
+import { EmpresaService } from '../../core/empresa/empresa.service';
+import { InsigniaEmpresa } from '../../core/empresa/empresa.models';
 import { CertificacionesPageComponent } from './certificaciones-page.component';
 import { DashboardService } from '../dashboard/dashboard.service';
 import {
@@ -22,11 +24,22 @@ describe('CertificacionesPageComponent', () => {
     obtenerResumenCertificaciones: ReturnType<typeof vi.fn>;
     obtenerCalendarioVencimientos: ReturnType<typeof vi.fn>;
   };
+  let empresaService: {
+    listarInsignias: ReturnType<typeof vi.fn>;
+  };
 
   const RESUMEN: ResumenCertificacionesDashboardResponse = {
     activas: 5,
     proximasAVencer: 3,
     vencidas: 1,
+  };
+
+  const INSIGNIA: InsigniaEmpresa = {
+    idInsignia: 1,
+    nivelInsignia: 'oro',
+    nombre: 'Carbono Neutral 2026',
+    descripcion: 'Reconocimiento por neutralidad de carbono.',
+    fechaObtencion: '2026-04-12T00:00:00Z',
   };
 
   // El componente pide el calendario del mes actual REAL (usa `new Date()`), así
@@ -62,12 +75,16 @@ describe('CertificacionesPageComponent', () => {
       obtenerResumenCertificaciones: vi.fn().mockReturnValue(of(RESUMEN)),
       obtenerCalendarioVencimientos: vi.fn().mockReturnValue(of(CALENDARIO)),
     };
+    empresaService = {
+      listarInsignias: vi.fn().mockReturnValue(of([INSIGNIA])),
+    };
 
     await TestBed.configureTestingModule({
       imports: [CertificacionesPageComponent],
       providers: [
         provideRouter([]),
         { provide: DashboardService, useValue: dashboardService },
+        { provide: EmpresaService, useValue: empresaService },
         {
           provide: AuthSessionService,
           useValue: {
@@ -152,6 +169,29 @@ describe('CertificacionesPageComponent', () => {
 
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('.ch-calendario__error')).toBeTruthy();
+    expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
+  });
+
+  it('carga las insignias empresariales al iniciar', async () => {
+    fixture = await createFixture();
+    expect(empresaService.listarInsignias).toHaveBeenCalled();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-insignias-panel__item-copy strong')?.textContent).toContain(
+      'Carbono Neutral 2026'
+    );
+  });
+
+  it('un fallo en las insignias no afecta a los demás bloques de la página', async () => {
+    empresaService.listarInsignias.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 }))
+    );
+
+    fixture = await createFixture();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-insignias-panel__error')?.textContent).toContain(
+      'No fue posible cargar esta sección'
+    );
     expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
   });
 });

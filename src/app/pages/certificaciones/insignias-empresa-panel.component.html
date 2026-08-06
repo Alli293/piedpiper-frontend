@@ -1,0 +1,58 @@
+<article class="ch-insignias-panel" aria-label="Insignias activas">
+  <header class="ch-insignias-panel__header">
+    <span class="ch-insignias-panel__icon">
+      <app-icon name="insignias" [size]="16" />
+    </span>
+    <app-heading level="h3" text="Insignias activas" />
+    <a appLink routerLink="/empresa/insignias" class="ch-insignias-panel__ver-todas">
+      Ver todas →
+    </a>
+  </header>
+
+  @if (loading()) {
+    <p class="ch-insignias-panel__loading">Cargando insignias...</p>
+  } @else if (error()) {
+    <p class="ch-insignias-panel__error" role="alert">{{ errorMensaje() }}</p>
+  } @else if (insigniasOrdenadas().length === 0) {
+    <p class="ch-insignias-panel__vacio">{{ sinInsigniasMensaje }}</p>
+  } @else {
+    <ul class="ch-insignias-panel__lista">
+      @for (insignia of insigniasOrdenadas(); track llave(insignia)) {
+        <li>
+          <a
+            class="ch-insignias-panel__item"
+            routerLink="/empresa/insignias"
+            [queryParams]="{ insignia: llave(insignia) }"
+            [attr.aria-label]="
+              'Ver detalle de ' + insignia.nombre + ', nivel ' + nivelLabel(insignia.nivelInsignia)
+            "
+          >
+            <span
+              class="ch-insignias-panel__item-icon"
+              [class.ch-insignias-panel__item-icon--bronce]="insignia.nivelInsignia === 'bronce'"
+              [class.ch-insignias-panel__item-icon--plata]="insignia.nivelInsignia === 'plata'"
+              [class.ch-insignias-panel__item-icon--oro]="insignia.nivelInsignia === 'oro'"
+              aria-hidden="true"
+            >
+              <app-icon name="insignias" [size]="18" />
+            </span>
+
+            <span class="ch-insignias-panel__item-copy">
+              <strong>{{ insignia.nombre }}</strong>
+              <small>Obtenida {{ insignia.fechaObtencion | date: 'dd/MM/yyyy' }}</small>
+            </span>
+
+            <span
+              class="ch-insignias-panel__nivel"
+              [class.ch-insignias-panel__nivel--bronce]="insignia.nivelInsignia === 'bronce'"
+              [class.ch-insignias-panel__nivel--plata]="insignia.nivelInsignia === 'plata'"
+              [class.ch-insignias-panel__nivel--oro]="insignia.nivelInsignia === 'oro'"
+            >
+              {{ nivelLabel(insignia.nivelInsignia) }}
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</article>
