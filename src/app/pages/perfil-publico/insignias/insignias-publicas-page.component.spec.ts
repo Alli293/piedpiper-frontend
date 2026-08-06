@@ -5,6 +5,7 @@ import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { InsigniaEmpresa } from '../../../core/empresa/empresa.models';
 import { ToastService } from '../../../shared/services/toast.service';
+import { PerfilPublicoDTO } from '../perfil-publico.models';
 import { PerfilPublicoService } from '../perfil-publico.service';
 import { InsigniasPublicasPageComponent } from './insignias-publicas-page.component';
 
@@ -21,9 +22,21 @@ const INSIGNIA: InsigniaEmpresa = {
     'https://carbonhub.test/api/insignias/11111111-1111-1111-1111-111111111111/verificacion.jwt',
 };
 
+const PERFIL: PerfilPublicoDTO = {
+  nombreEmpresa: 'Café del Valle S.A.',
+  logoUrl: null,
+  sectorIndustrial: 'AGRICULTURA',
+  pais: 'Costa Rica',
+  nivelEcologico: 'Oro',
+  fechaActualizacionNivel: '2026-01-01T00:00:00Z',
+  certificacionesVigentes: 3,
+  insigniasActivas: 1,
+};
+
 describe('InsigniasPublicasPageComponent', () => {
   let perfilPublicoService: {
     listarInsignias: ReturnType<typeof vi.fn>;
+    obtenerPerfil: ReturnType<typeof vi.fn>;
     descargarInsigniaJsonLd: ReturnType<typeof vi.fn>;
     descargarInsigniaJwt: ReturnType<typeof vi.fn>;
   };
@@ -33,6 +46,7 @@ describe('InsigniasPublicasPageComponent', () => {
   beforeEach(async () => {
     perfilPublicoService = {
       listarInsignias: vi.fn().mockReturnValue(of([INSIGNIA])),
+      obtenerPerfil: vi.fn().mockReturnValue(of(PERFIL)),
       descargarInsigniaJsonLd: vi
         .fn()
         .mockReturnValue(of(new Blob(['{}'], { type: 'application/ld+json' }))),
@@ -149,5 +163,27 @@ describe('InsigniasPublicasPageComponent', () => {
 
     expect(perfilPublicoService.listarInsignias).toHaveBeenCalledTimes(2);
     expect(root.textContent).toContain('Carbono Neutral');
+  });
+
+  it('muestra el nombre de la empresa en el breadcrumb y en el titulo de la lista', async () => {
+    const fixture = await crear();
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(perfilPublicoService.obtenerPerfil).toHaveBeenCalledWith('cafe-del-valle');
+    expect(root.querySelector('.ch-pp-header__crumb-link')?.textContent?.trim()).toBe(
+      'Café del Valle S.A.'
+    );
+    expect(root.textContent).toContain('Insignias activas de Café del Valle S.A.');
+  });
+
+  it('si falla la carga del perfil, la lista de insignias igual se muestra', async () => {
+    perfilPublicoService.obtenerPerfil.mockReturnValue(throwError(() => new Error('falla red')));
+    const fixture = await crear();
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.textContent).toContain('Carbono Neutral');
+    expect(root.querySelector('.ch-pp-header__crumb-link')?.textContent?.trim()).toBe(
+      'Perfil público'
+    );
   });
 });

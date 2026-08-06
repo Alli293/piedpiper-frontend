@@ -22,7 +22,7 @@ describe('StateLayoutComponent', () => {
   it('renderiza el encabezado de estado', () => {
     const fixture = createFixture();
 
-    expect(fixture.nativeElement.querySelector('app-state-header')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('app-public-header')).toBeTruthy();
   });
 
   it('proyecta el contenido dentro de ch-state-layout__content', () => {

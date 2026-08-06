@@ -3,9 +3,20 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { CertificacionPublica } from '../perfil-publico.models';
+import { CertificacionPublica, PerfilPublicoDTO } from '../perfil-publico.models';
 import { PerfilPublicoService } from '../perfil-publico.service';
 import { CertificacionesPublicasPageComponent } from './certificaciones-publicas-page.component';
+
+const PERFIL: PerfilPublicoDTO = {
+  nombreEmpresa: 'Café del Valle S.A.',
+  logoUrl: null,
+  sectorIndustrial: 'AGRICULTURA',
+  pais: 'Costa Rica',
+  nivelEcologico: 'Oro',
+  fechaActualizacionNivel: '2026-01-01T00:00:00Z',
+  certificacionesVigentes: 3,
+  insigniasActivas: 1,
+};
 
 const CERT_VIGENTE: CertificacionPublica = {
   id: 'cert-1',
@@ -42,17 +53,19 @@ const CERT_ESTADO_DESCONOCIDO: CertificacionPublica = {
 
 describe('CertificacionesPublicasPageComponent', () => {
   let listarCertificaciones: ReturnType<typeof vi.fn>;
+  let obtenerPerfil: ReturnType<typeof vi.fn>;
   let locationBack: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     listarCertificaciones = vi.fn().mockReturnValue(of([]));
+    obtenerPerfil = vi.fn().mockReturnValue(of(PERFIL));
     locationBack = vi.fn();
 
     await TestBed.configureTestingModule({
       imports: [CertificacionesPublicasPageComponent],
       providers: [
         provideRouter([]),
-        { provide: PerfilPublicoService, useValue: { listarCertificaciones } },
+        { provide: PerfilPublicoService, useValue: { listarCertificaciones, obtenerPerfil } },
         { provide: Location, useValue: { back: locationBack } },
       ],
     }).compileComponents();
@@ -169,10 +182,18 @@ describe('CertificacionesPublicasPageComponent', () => {
     // 1 en Entidad + 2 en Auditor verificador (nombre y numero)
     expect(placeholdersFila.length).toBe(3);
     placeholdersFila.forEach((el) => expect(el.textContent?.trim()).toBe('—'));
+  });
 
-    expect(
-      root.querySelector('.ch-certificaciones-publicas__logo')?.getAttribute('aria-label')
-    ).toBe('Dato no disponible');
+  it('muestra el nombre y logo de la empresa en el encabezado de seccion', async () => {
+    listarCertificaciones.mockReturnValue(of([CERT_VIGENTE]));
+    const fixture = await crearFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(obtenerPerfil).toHaveBeenCalledWith('cafe-del-valle');
+    expect(root.querySelector('.ch-pp-header__crumb-link')?.textContent?.trim()).toBe(
+      'Café del Valle S.A.'
+    );
+    expect(root.textContent).toContain('Certificaciones verificadas de Café del Valle S.A.');
   });
 
   it('filtrar por Vigentes reduce las filas mostradas', async () => {
@@ -219,7 +240,7 @@ describe('CertificacionesPublicasPageComponent', () => {
     const fixture = await crearFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    const conteoTotal = root.querySelector('.ch-certificaciones-publicas__conteo strong');
+    const conteoTotal = root.querySelector('.ch-pp-header__conteo strong');
     expect(conteoTotal?.textContent?.trim()).toBe('2');
 
     const chipVigentes = Array.from(
@@ -284,5 +305,17 @@ describe('CertificacionesPublicasPageComponent', () => {
     const periodo = root.querySelector('.ch-certificaciones-publicas__periodo');
     expect(periodo?.textContent).toContain('15/01/2026');
     expect(periodo?.textContent).toContain('15/01/2027');
+  });
+
+  it('si falla la carga del perfil, la tabla de certificaciones igual se muestra', async () => {
+    obtenerPerfil.mockReturnValue(throwError(() => new Error('falla red')));
+    listarCertificaciones.mockReturnValue(of([CERT_VIGENTE]));
+    const fixture = await crearFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(filas(root).length).toBe(1);
+    expect(root.querySelector('.ch-pp-header__crumb-link')?.textContent?.trim()).toBe(
+      'Perfil público'
+    );
   });
 });

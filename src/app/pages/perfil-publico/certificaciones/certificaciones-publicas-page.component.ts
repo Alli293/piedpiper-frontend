@@ -15,8 +15,9 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { LinkDirective } from '../../../shared/components/link/link.directive';
 import { StateLayoutComponent } from '../../../shared/layouts/state-layout/state-layout.component';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
-import { CertificacionPublica } from '../perfil-publico.models';
+import { CertificacionPublica, PerfilPublicoDTO } from '../perfil-publico.models';
 import { PerfilPublicoService } from '../perfil-publico.service';
+import { PerfilPublicoSeccionHeaderComponent } from '../shared/perfil-publico-seccion-header.component';
 
 type FiltroEstado = 'TODAS' | 'ACTIVA' | 'VENCIDA' | 'REVOCADA';
 
@@ -42,6 +43,7 @@ const ESTADOS: Record<string, { etiqueta: string; variante: BadgeVariant }> = {
     IconComponent,
     LinkDirective,
     RouterLink,
+    PerfilPublicoSeccionHeaderComponent,
     StateLayoutComponent,
   ],
   templateUrl: './certificaciones-publicas-page.component.html',
@@ -54,6 +56,7 @@ export class CertificacionesPublicasPageComponent implements OnInit {
   readonly slug = input.required<string>();
 
   protected readonly certificaciones = signal<CertificacionPublica[]>([]);
+  protected readonly perfil = signal<PerfilPublicoDTO | null>(null);
   protected readonly cargando = signal(true);
   protected readonly error = signal(false);
   protected readonly noEncontrado = signal(false);
@@ -92,6 +95,7 @@ export class CertificacionesPublicasPageComponent implements OnInit {
 
   ngOnInit(): void {
     void this.cargarCertificaciones();
+    void this.cargarPerfil();
   }
 
   protected seleccionarFiltro(id: string): void {
@@ -116,6 +120,15 @@ export class CertificacionesPublicasPageComponent implements OnInit {
 
   protected variante(estado: string): BadgeVariant {
     return ESTADOS[estado]?.variante ?? 'neutral';
+  }
+
+  private async cargarPerfil(): Promise<void> {
+    try {
+      const perfil = await firstValueFrom(this.perfilPublicoService.obtenerPerfil(this.slug()));
+      this.perfil.set(perfil);
+    } catch {
+      // El encabezado degrada a su variante generica; no afecta el resto de la pagina.
+    }
   }
 
   private async cargarCertificaciones(): Promise<void> {

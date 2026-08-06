@@ -8,44 +8,6 @@
   font-family: var(--ch-font-body);
 }
 
-.ch-certificaciones-publicas__breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: var(--ch-space-2);
-  color: var(--ch-text-secondary);
-  font-size: 0.8125rem;
-}
-
-.ch-certificaciones-publicas__volver {
-  display: inline-grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--ch-border);
-  border-radius: var(--ch-radius-md);
-  background: var(--ch-bg-white);
-  color: var(--ch-text-secondary);
-  cursor: pointer;
-
-  &:focus-visible {
-    @include mixins.focus-ring;
-  }
-}
-
-.ch-certificaciones-publicas__crumb-actual {
-  color: var(--ch-text-secondary);
-  font-weight: 600;
-}
-
-.ch-certificaciones-publicas__crumb-sep {
-  color: var(--ch-border);
-}
-
-.ch-certificaciones-publicas__crumb-here {
-  color: var(--ch-text-primary);
-  font-weight: 700;
-}
-
 .ch-certificaciones-publicas__estado {
   display: flex;
   flex-direction: column;
@@ -108,81 +70,6 @@
 
 .ch-certificaciones-publicas__vacio-filtro p {
   margin: 0;
-}
-
-.ch-certificaciones-publicas__header {
-  display: flex;
-  align-items: center;
-  gap: var(--ch-space-5);
-  padding: var(--ch-space-6);
-  border: 1px solid var(--ch-border);
-  border-radius: var(--ch-radius-lg);
-  background: var(--ch-bg-white);
-  box-shadow: var(--ch-shadow-sm);
-}
-
-.ch-certificaciones-publicas__logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  width: 60px;
-  height: 60px;
-  border: 1px solid var(--ch-border);
-  border-radius: var(--ch-radius-lg);
-  background: var(--ch-bg-main);
-  color: var(--ch-text-muted);
-}
-
-.ch-certificaciones-publicas__titulo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ch-space-1);
-  min-width: 0;
-  flex: 1;
-}
-
-.ch-certificaciones-publicas__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--ch-space-1);
-  color: var(--ch-green-dark);
-  font-family: var(--ch-font-mono);
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.ch-certificaciones-publicas__subtitulo {
-  margin: 0;
-  color: var(--ch-text-secondary);
-  font-size: 0.8125rem;
-}
-
-.ch-certificaciones-publicas__conteo {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--ch-space-1);
-  flex: 0 0 auto;
-  text-align: right;
-}
-
-.ch-certificaciones-publicas__conteo strong {
-  color: var(--ch-green);
-  font-family: var(--ch-font-heading);
-  font-size: 1.875rem;
-  font-weight: 700;
-}
-
-.ch-certificaciones-publicas__conteo span {
-  color: var(--ch-text-secondary);
-  font-family: var(--ch-font-mono);
-  font-size: 0.59rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .ch-certificaciones-publicas__toolbar {
@@ -308,16 +195,5 @@
 @keyframes ch-certificaciones-publicas-spin {
   to {
     transform: rotate(360deg);
-  }
-}
-
-@media (max-width: 640px) {
-  .ch-certificaciones-publicas__header {
-    flex-wrap: wrap;
-  }
-
-  .ch-certificaciones-publicas__conteo {
-    align-items: flex-start;
-    text-align: left;
   }
 }

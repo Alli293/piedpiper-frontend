@@ -9,20 +9,6 @@
   margin: 0 auto;
 }
 
-.ch-insignias-publicas__volver {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  margin-bottom: var(--ch-space-4);
-  border: 1px solid var(--ch-border);
-  border-radius: var(--ch-radius-md);
-  background: var(--ch-bg-white);
-  color: var(--ch-text-primary);
-  cursor: pointer;
-}
-
 .ch-insignias-publicas__estado {
   display: grid;
   justify-items: center;
