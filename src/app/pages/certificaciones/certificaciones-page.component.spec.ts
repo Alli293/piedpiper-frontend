@@ -29,9 +29,6 @@ describe('CertificacionesPageComponent', () => {
   let empresaService: {
     listarInsignias: ReturnType<typeof vi.fn>;
   };
-  let empresaService: {
-    listarInsignias: ReturnType<typeof vi.fn>;
-  };
 
   const RESUMEN: ResumenCertificacionesDashboardResponse = {
     activas: 5,
@@ -88,9 +85,6 @@ describe('CertificacionesPageComponent', () => {
       obtenerResumenCertificaciones: vi.fn().mockReturnValue(of(RESUMEN)),
       obtenerCalendarioVencimientos: vi.fn().mockReturnValue(of(CALENDARIO)),
       obtenerAlertas: vi.fn().mockReturnValue(of([ALERTA])),
-    };
-    empresaService = {
-      listarInsignias: vi.fn().mockReturnValue(of([INSIGNIA])),
     };
     empresaService = {
       listarInsignias: vi.fn().mockReturnValue(of([INSIGNIA])),

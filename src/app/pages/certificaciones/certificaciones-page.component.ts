@@ -3,8 +3,6 @@ import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { EmpresaService } from '../../core/empresa/empresa.service';
 import { InsigniaEmpresa } from '../../core/empresa/empresa.models';
-import { EmpresaService } from '../../core/empresa/empresa.service';
-import { InsigniaEmpresa } from '../../core/empresa/empresa.models';
 import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { LinkDirective } from '../../shared/components/link/link.directive';
@@ -18,7 +16,6 @@ import {
 import { AlertasActivasPanelComponent } from './alertas-activas-panel.component';
 import { CalendarioVencimientosComponent } from './calendario-vencimientos.component';
 import { EstadoCertificacionesPanelComponent } from './estado-certificaciones-panel.component';
-import { InsigniasEmpresaPanelComponent } from './insignias-empresa-panel.component';
 import { InsigniasEmpresaPanelComponent } from './insignias-empresa-panel.component';
 
 const ERROR_RESUMEN_MENSAJE = 'No fue posible cargar esta sección. Intenta recargar la página.';
@@ -76,10 +73,6 @@ export class CertificacionesPageComponent {
   protected readonly cargandoAlertas = signal(false);
   protected readonly alertas = signal<AlertaVencimiento[]>([]);
   protected readonly alertasError = signal<string | null>(null);
-
-  protected readonly cargandoInsignias = signal(false);
-  protected readonly insignias = signal<InsigniaEmpresa[]>([]);
-  protected readonly insigniasError = signal<string | null>(null);
 
   constructor() {
     void this.cargarResumen();
@@ -154,20 +147,6 @@ export class CertificacionesPageComponent {
       this.alertasError.set(apiErrorMessage(err) ?? ERROR_RESUMEN_MENSAJE);
     } finally {
       this.cargandoAlertas.set(false);
-    }
-  }
-
-  private async cargarInsignias(): Promise<void> {
-    this.cargandoInsignias.set(true);
-    this.insigniasError.set(null);
-    try {
-      const insignias = await firstValueFrom(this.empresaService.listarInsignias());
-      this.insignias.set(insignias);
-    } catch (err: unknown) {
-      this.insignias.set([]);
-      this.insigniasError.set(apiErrorMessage(err) ?? ERROR_RESUMEN_MENSAJE);
-    } finally {
-      this.cargandoInsignias.set(false);
     }
   }
 }
