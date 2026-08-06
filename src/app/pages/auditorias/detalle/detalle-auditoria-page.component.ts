@@ -12,7 +12,7 @@ import {
 } from '@angular/forms/signals';
 import { EMPTY, Subject, Subscription, firstValueFrom, timer } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
-import { AuthSessionService } from '../../../core/auth-session.service';
+import { AUDITOR_CERTIFICADO, AuthSessionService } from '../../../core/auth-session.service';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
@@ -129,6 +129,17 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
 
   protected readonly minimoMotivo = MINIMO_CARACTERES_MOTIVO_RECHAZO;
   protected readonly maximoMotivo = MAXIMO_CARACTERES_MOTIVO_RECHAZO;
+
+  /**
+   * El detalle lo abren los dos roles y cada uno vuelve a su propio listado. Estaba fijo en
+   * /empresa/panel, asi que al auditor el boton de volver lo mandaba a una ruta que su guard le
+   * bloquea: quedaba rebotado al login en vez de volver a sus solicitudes.
+   */
+  protected readonly rutaVolver = computed(() =>
+    this.authSession.getRole() === AUDITOR_CERTIFICADO
+      ? '/auditor/auditorias'
+      : '/empresa/auditorias'
+  );
 
   protected readonly headerConfig: HeaderConfig = {
     sectionLabel: 'AUDITORÍAS',

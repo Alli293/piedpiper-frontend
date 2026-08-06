@@ -1,4 +1,4 @@
-<app-shell-layout [headerConfig]="headerConfig" backRoute="/empresa/panel">
+<app-shell-layout [headerConfig]="headerConfig" [backRoute]="rutaVolver()">
   <section class="ch-detalle-auditoria" aria-label="Detalle de la auditoría">
     @if (cargando()) {
       <p class="ch-detalle-auditoria__estado-carga">Cargando el detalle de la auditoría…</p>

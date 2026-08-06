@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthSessionService } from '../../../core/auth-session.service';
@@ -83,6 +83,10 @@ describe('DetalleAuditoriaPageComponent', () => {
       close: vi.fn(),
       addEventListener: vi.fn(),
     } as unknown as Window;
+  }
+
+  function botonVolver(): HTMLButtonElement | null {
+    return raiz().querySelector<HTMLButtonElement>('button[aria-label="Volver"]');
   }
 
   function botonVerPdf(): HTMLButtonElement | null {
@@ -193,7 +197,7 @@ describe('DetalleAuditoriaPageComponent', () => {
           provide: AuthSessionService,
           useValue: {
             isAdministradorEmpresa: () => true,
-            getRole: vi.fn().mockReturnValue(rolSesion),
+            getRole: vi.fn(() => rolSesion),
             getUserName: vi.fn().mockReturnValue('Admin'),
             getUserId: vi.fn(() => idSesion),
           },
@@ -600,6 +604,31 @@ describe('DetalleAuditoriaPageComponent', () => {
     expect(auditoriasService.descargarDocumento).not.toHaveBeenCalled();
     const toasts = TestBed.inject(ToastService).toasts();
     expect(toasts[toasts.length - 1].title).toContain('bloqueó la ventana emergente');
+  });
+
+  /**
+   * El boton de volver estaba fijo en /empresa/panel, una ruta que el guard de empresa le bloquea
+   * al auditor: desde su propio detalle, volver lo sacaba de la aplicacion en vez de devolverlo a
+   * sus solicitudes.
+   */
+  it('el auditor vuelve a sus solicitudes asignadas y no al panel de empresa', async () => {
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    await montarComoAuditorAsignado();
+
+    botonVolver()?.click();
+    await estabilizar();
+
+    expect(navegar).toHaveBeenCalledWith('/auditor/auditorias');
+  });
+
+  it('la empresa vuelve a su propio listado de auditorias', async () => {
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    await montar();
+
+    botonVolver()?.click();
+    await estabilizar();
+
+    expect(navegar).toHaveBeenCalledWith('/empresa/auditorias');
   });
 
   it('deja de sondear al destruir el componente', async () => {
