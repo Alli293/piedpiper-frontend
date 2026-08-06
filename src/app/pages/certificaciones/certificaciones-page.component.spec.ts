@@ -14,6 +14,7 @@ import { InsigniaEmpresa } from '../../core/empresa/empresa.models';
 import { CertificacionesPageComponent } from './certificaciones-page.component';
 import { DashboardService } from '../dashboard/dashboard.service';
 import {
+  AlertaVencimiento,
   CalendarioVencimientosResponse,
   ResumenCertificacionesDashboardResponse,
 } from '../dashboard/dashboard.model';
@@ -23,6 +24,10 @@ describe('CertificacionesPageComponent', () => {
   let dashboardService: {
     obtenerResumenCertificaciones: ReturnType<typeof vi.fn>;
     obtenerCalendarioVencimientos: ReturnType<typeof vi.fn>;
+    obtenerAlertas: ReturnType<typeof vi.fn>;
+  };
+  let empresaService: {
+    listarInsignias: ReturnType<typeof vi.fn>;
   };
   let empresaService: {
     listarInsignias: ReturnType<typeof vi.fn>;
@@ -40,6 +45,14 @@ describe('CertificacionesPageComponent', () => {
     nombre: 'Carbono Neutral 2026',
     descripcion: 'Reconocimiento por neutralidad de carbono.',
     fechaObtencion: '2026-04-12T00:00:00Z',
+  };
+
+  const ALERTA: AlertaVencimiento = {
+    idCertificacion: 'c1',
+    nombre: 'Bandera Azul Ecológica 2025',
+    fechaVencimiento: '2026-06-04',
+    diasRestantes: -24,
+    urgencia: 'vencida',
   };
 
   // El componente pide el calendario del mes actual REAL (usa `new Date()`), así
@@ -74,6 +87,10 @@ describe('CertificacionesPageComponent', () => {
     dashboardService = {
       obtenerResumenCertificaciones: vi.fn().mockReturnValue(of(RESUMEN)),
       obtenerCalendarioVencimientos: vi.fn().mockReturnValue(of(CALENDARIO)),
+      obtenerAlertas: vi.fn().mockReturnValue(of([ALERTA])),
+    };
+    empresaService = {
+      listarInsignias: vi.fn().mockReturnValue(of([INSIGNIA])),
     };
     empresaService = {
       listarInsignias: vi.fn().mockReturnValue(of([INSIGNIA])),
@@ -190,6 +207,29 @@ describe('CertificacionesPageComponent', () => {
 
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('.ch-insignias-panel__error')?.textContent).toContain(
+      'No fue posible cargar esta sección'
+    );
+    expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
+  });
+
+  it('carga las alertas activas al iniciar', async () => {
+    fixture = await createFixture();
+    expect(dashboardService.obtenerAlertas).toHaveBeenCalled();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-alertas-panel__item-nombre strong')?.textContent).toContain(
+      'Bandera Azul Ecológica 2025'
+    );
+  });
+
+  it('un fallo en las alertas no afecta a los demás bloques de la página', async () => {
+    dashboardService.obtenerAlertas.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 }))
+    );
+
+    fixture = await createFixture();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-alertas-panel__error')?.textContent).toContain(
       'No fue posible cargar esta sección'
     );
     expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);

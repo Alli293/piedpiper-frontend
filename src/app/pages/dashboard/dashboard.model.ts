@@ -26,6 +26,14 @@ export interface CalendarioVencimientosResponse {
   readonly vencimientosPorFecha: Record<string, CertificacionVencimiento[]>;
 }
 
+export interface AlertaVencimiento {
+  readonly idCertificacion: string;
+  readonly nombre: string;
+  readonly fechaVencimiento: string;
+  readonly diasRestantes: number;
+  readonly urgencia: UrgenciaVencimiento;
+}
+
 export type NivelInsigniaEmpresa = 'bronce' | 'plata' | 'oro';
 
 export interface InsigniaEmpresa {

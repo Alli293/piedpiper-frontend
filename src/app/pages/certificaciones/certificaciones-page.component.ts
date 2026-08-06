@@ -3,17 +3,22 @@ import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { EmpresaService } from '../../core/empresa/empresa.service';
 import { InsigniaEmpresa } from '../../core/empresa/empresa.models';
+import { EmpresaService } from '../../core/empresa/empresa.service';
+import { InsigniaEmpresa } from '../../core/empresa/empresa.models';
 import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
 import { LinkDirective } from '../../shared/components/link/link.directive';
 import { apiErrorMessage } from '../../shared/utils/http-error.utils';
 import { DashboardService } from '../dashboard/dashboard.service';
 import {
+  AlertaVencimiento,
   CalendarioVencimientosResponse,
   ResumenCertificacionesDashboardResponse,
 } from '../dashboard/dashboard.model';
+import { AlertasActivasPanelComponent } from './alertas-activas-panel.component';
 import { CalendarioVencimientosComponent } from './calendario-vencimientos.component';
 import { EstadoCertificacionesPanelComponent } from './estado-certificaciones-panel.component';
+import { InsigniasEmpresaPanelComponent } from './insignias-empresa-panel.component';
 import { InsigniasEmpresaPanelComponent } from './insignias-empresa-panel.component';
 
 const ERROR_RESUMEN_MENSAJE = 'No fue posible cargar esta sección. Intenta recargar la página.';
@@ -26,13 +31,15 @@ function mesActual(): string {
 
 /**
  * Pantalla de Certificaciones. Aloja el bloque "Estado de certificaciones"
- * (PP-74), el "Calendario de vencimientos" (PP-77) y un enlace al listado
- * completo con filtros (PP-59).
+ * (PP-74), "Alertas activas" (PP-76), el "Calendario de vencimientos"
+ * (PP-77), "Insignias activas" (PP-75) y un enlace al listado completo con
+ * filtros (PP-59).
  */
 @Component({
   selector: 'app-certificaciones-page',
   imports: [
     ShellLayoutComponent,
+    AlertasActivasPanelComponent,
     EstadoCertificacionesPanelComponent,
     CalendarioVencimientosComponent,
     InsigniasEmpresaPanelComponent,
@@ -66,9 +73,19 @@ export class CertificacionesPageComponent {
   protected readonly insignias = signal<InsigniaEmpresa[]>([]);
   protected readonly insigniasError = signal<string | null>(null);
 
+  protected readonly cargandoAlertas = signal(false);
+  protected readonly alertas = signal<AlertaVencimiento[]>([]);
+  protected readonly alertasError = signal<string | null>(null);
+
+  protected readonly cargandoInsignias = signal(false);
+  protected readonly insignias = signal<InsigniaEmpresa[]>([]);
+  protected readonly insigniasError = signal<string | null>(null);
+
   constructor() {
     void this.cargarResumen();
     void this.cargarCalendario(this.mesCalendario());
+    void this.cargarInsignias();
+    void this.cargarAlertas();
     void this.cargarInsignias();
   }
 
@@ -109,6 +126,34 @@ export class CertificacionesPageComponent {
       if (solicitud === this.solicitudCalendario) {
         this.cargandoCalendario.set(false);
       }
+    }
+  }
+
+  private async cargarInsignias(): Promise<void> {
+    this.cargandoInsignias.set(true);
+    this.insigniasError.set(null);
+    try {
+      const insignias = await firstValueFrom(this.empresaService.listarInsignias());
+      this.insignias.set(insignias);
+    } catch (err: unknown) {
+      this.insignias.set([]);
+      this.insigniasError.set(apiErrorMessage(err) ?? ERROR_RESUMEN_MENSAJE);
+    } finally {
+      this.cargandoInsignias.set(false);
+    }
+  }
+
+  private async cargarAlertas(): Promise<void> {
+    this.cargandoAlertas.set(true);
+    this.alertasError.set(null);
+    try {
+      const alertas = await firstValueFrom(this.dashboardService.obtenerAlertas());
+      this.alertas.set(alertas);
+    } catch (err: unknown) {
+      this.alertas.set([]);
+      this.alertasError.set(apiErrorMessage(err) ?? ERROR_RESUMEN_MENSAJE);
+    } finally {
+      this.cargandoAlertas.set(false);
     }
   }
 

@@ -1,0 +1,187 @@
+.ch-alertas-panel {
+  background: var(--ch-bg-white);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-lg);
+  padding: var(--ch-space-6);
+  box-shadow: var(--ch-shadow-sm);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: var(--ch-space-5);
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    flex-shrink: 0;
+    background: var(--ch-green-soft);
+    color: var(--ch-green-dark);
+  }
+
+  &__loading,
+  &__error,
+  &__vacio {
+    font-family: var(--ch-font-body);
+    font-size: 13px;
+    color: var(--ch-text-secondary);
+    margin: 0;
+  }
+
+  &__error {
+    color: var(--ch-danger);
+  }
+
+  &__lista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ch-space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--ch-space-3);
+    padding: var(--ch-space-4);
+    padding-left: calc(var(--ch-space-4) + 8px);
+    border: 1px solid var(--ch-border);
+    border-radius: var(--ch-radius-md);
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--ch-text-secondary);
+    }
+
+    &--danger {
+      background: var(--ch-danger-bg);
+      border-color: color-mix(in srgb, var(--ch-danger) 35%, var(--ch-border));
+    }
+
+    &--warning {
+      background: var(--ch-warning-bg);
+      border-color: color-mix(in srgb, var(--ch-warning) 45%, var(--ch-border));
+    }
+  }
+
+  &__barra {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+
+    .ch-alertas-panel__item--danger & {
+      background: var(--ch-danger);
+    }
+
+    .ch-alertas-panel__item--warning & {
+      background: var(--ch-warning);
+    }
+  }
+
+  &__item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    flex-shrink: 0;
+    background: var(--ch-bg-white);
+
+    .ch-alertas-panel__item--danger & {
+      color: var(--ch-danger);
+    }
+
+    .ch-alertas-panel__item--warning & {
+      color: var(--ch-warning-dark);
+    }
+  }
+
+  &__item-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  &__item-nombre {
+    display: flex;
+    align-items: center;
+    gap: var(--ch-space-2);
+    min-width: 0;
+
+    strong {
+      font-family: var(--ch-font-heading);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ch-text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &__item-copy small {
+    font-family: var(--ch-font-body);
+    font-size: 12px;
+    color: var(--ch-text-secondary);
+  }
+
+  &__badge-vencida {
+    flex-shrink: 0;
+    font-family: var(--ch-font-body);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--ch-danger);
+    color: var(--ch-text-on-dark);
+  }
+
+  &__dias {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+
+    strong {
+      font-family: var(--ch-font-heading);
+      font-weight: 700;
+      font-size: 22px;
+      line-height: 1;
+
+      .ch-alertas-panel__item--danger & {
+        color: var(--ch-danger);
+      }
+
+      .ch-alertas-panel__item--warning & {
+        color: var(--ch-warning-dark);
+      }
+    }
+
+    small {
+      font-family: var(--ch-font-body);
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--ch-text-secondary);
+    }
+  }
+}
