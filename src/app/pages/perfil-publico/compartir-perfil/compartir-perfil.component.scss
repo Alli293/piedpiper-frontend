@@ -245,6 +245,25 @@
     }
   }
 
+  &__og-img-placeholder {
+    width: 100%;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ch-bg-main);
+    color: var(--ch-text-muted);
+    font-family: var(--ch-font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+
+    @include mixins.desktop-up {
+      width: 200px;
+      height: auto;
+      min-height: 120px;
+    }
+  }
+
   &__og-body {
     padding: var(--ch-space-3) var(--ch-space-4);
     display: flex;
