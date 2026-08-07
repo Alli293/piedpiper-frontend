@@ -63,7 +63,7 @@ export class RefinamientoChatComponent {
         this.comparacionResponse.set(response);
         this.cargandoAlternativas.set(false);
         if (response.alternativas.length === 0 && response.mensaje) {
-          this.toastService.success(response.mensaje, undefined, 5000);
+          this.toastService.info(response.mensaje, undefined, 5000);
         }
       },
       error: (err) => {
