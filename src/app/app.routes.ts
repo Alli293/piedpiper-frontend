@@ -160,11 +160,27 @@ export const routes: Routes = [
       import('./pages/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent),
   },
   {
+    path: 'empresa/metas/registrar',
+    canActivate: [guardEmpresa],
+    loadComponent: () =>
+      import('./pages/metas/registrar/registrar-meta-page.component').then(
+        (m) => m.RegistrarMetaPageComponent
+      ),
+  },
+  {
     path: 'empresa/certificaciones/listado',
     canActivate: [guardEmpresa],
     loadComponent: () =>
       import('./pages/certificaciones/listado/certificaciones-listado-page.component').then(
         (m) => m.CertificacionesListadoPageComponent
+      ),
+  },
+  {
+    path: 'empresa/certificaciones/alertas',
+    canActivate: [guardEmpresa],
+    loadComponent: () =>
+      import('./pages/certificaciones/alertas/centro-alertas-page.component').then(
+        (m) => m.CentroAlertasPageComponent
       ),
   },
   {

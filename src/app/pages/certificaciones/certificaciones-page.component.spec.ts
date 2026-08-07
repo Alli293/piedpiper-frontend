@@ -18,6 +18,8 @@ import {
   CalendarioVencimientosResponse,
   ResumenCertificacionesDashboardResponse,
 } from '../dashboard/dashboard.model';
+import { MetaReduccion } from '../metas/metas.model';
+import { MetasService } from '../metas/metas.service';
 
 describe('CertificacionesPageComponent', () => {
   let fixture: ComponentFixture<CertificacionesPageComponent>;
@@ -28,6 +30,9 @@ describe('CertificacionesPageComponent', () => {
   };
   let empresaService: {
     listarInsignias: ReturnType<typeof vi.fn>;
+  };
+  let metasService: {
+    listarMetas: ReturnType<typeof vi.fn>;
   };
 
   const RESUMEN: ResumenCertificacionesDashboardResponse = {
@@ -50,6 +55,17 @@ describe('CertificacionesPageComponent', () => {
     fechaVencimiento: '2026-06-04',
     diasRestantes: -24,
     urgencia: 'vencida',
+  };
+
+  const META: MetaReduccion = {
+    id: 'm1',
+    nombreMeta: 'Reducir huella total a 4,200 tCO2e',
+    valorObjetivoHuellaT: 4200,
+    fechaLimite: '2027-12-31',
+    huellaActualT: 3024,
+    progresoPorcentaje: 72,
+    vencida: false,
+    fechaCreacion: '2026-01-01T00:00:00Z',
   };
 
   // El componente pide el calendario del mes actual REAL (usa `new Date()`), así
@@ -89,6 +105,9 @@ describe('CertificacionesPageComponent', () => {
     empresaService = {
       listarInsignias: vi.fn().mockReturnValue(of([INSIGNIA])),
     };
+    metasService = {
+      listarMetas: vi.fn().mockReturnValue(of([META])),
+    };
 
     await TestBed.configureTestingModule({
       imports: [CertificacionesPageComponent],
@@ -96,6 +115,7 @@ describe('CertificacionesPageComponent', () => {
         provideRouter([]),
         { provide: DashboardService, useValue: dashboardService },
         { provide: EmpresaService, useValue: empresaService },
+        { provide: MetasService, useValue: metasService },
         {
           provide: AuthSessionService,
           useValue: {
@@ -224,6 +244,29 @@ describe('CertificacionesPageComponent', () => {
 
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('.ch-alertas-panel__error')?.textContent).toContain(
+      'No fue posible cargar esta sección'
+    );
+    expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
+  });
+
+  it('carga las metas de reducción al iniciar', async () => {
+    fixture = await createFixture();
+    expect(metasService.listarMetas).toHaveBeenCalled();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-metas-panel__item-copy strong')?.textContent).toContain(
+      'Reducir huella total a 4,200 tCO2e'
+    );
+  });
+
+  it('un fallo en las metas no afecta a los demás bloques de la página', async () => {
+    metasService.listarMetas.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 }))
+    );
+
+    fixture = await createFixture();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-metas-panel__error')?.textContent).toContain(
       'No fue posible cargar esta sección'
     );
     expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);

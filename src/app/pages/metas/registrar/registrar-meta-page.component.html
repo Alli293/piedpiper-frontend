@@ -1,0 +1,42 @@
+<app-shell-layout [headerConfig]="headerConfig" backRoute="/empresa/panel">
+  <div class="ch-registrar-meta">
+    <section class="ch-registrar-meta__card" aria-labelledby="registrar-meta-titulo">
+      <div class="ch-registrar-meta__intro">
+        <app-heading level="h2" id="registrar-meta-titulo" text="Nueva meta de reducción" />
+        <p>
+          Define un objetivo de huella de carbono y una fecha límite. El progreso se calculará
+          automáticamente comparándolo con tu huella del período seleccionado en el dashboard.
+        </p>
+      </div>
+
+      <form novalidate (submit)="handleSubmit($event)">
+        <app-text-input
+          label="Nombre de la meta"
+          placeholder="Ej. Reducir huella total a 4,200 tCO2e"
+          [formField]="metaForm.nombreMeta"
+          [error]="nombreMetaError()"
+        />
+
+        <app-number-input
+          label="Objetivo (tCO₂e)"
+          placeholder="Ej. 50"
+          step="0.0001"
+          [formField]="metaForm.valorObjetivoHuellaT"
+          [error]="valorObjetivoError()"
+        />
+
+        <app-date-input
+          label="Fecha límite"
+          [formField]="metaForm.fechaLimite"
+          [error]="fechaLimiteError()"
+        />
+
+        <div class="ch-registrar-meta__actions">
+          <app-button type="submit" [disabled]="!puedeEnviar()" [loading]="enviando()">
+            Registrar meta
+          </app-button>
+        </div>
+      </form>
+    </section>
+  </div>
+</app-shell-layout>

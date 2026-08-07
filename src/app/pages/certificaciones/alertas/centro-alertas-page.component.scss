@@ -1,0 +1,219 @@
+.ch-centro-alertas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-5);
+
+  &__intro {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ch-space-4);
+  }
+
+  &__intro-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--ch-radius-md);
+    flex-shrink: 0;
+    background: var(--ch-danger-bg);
+    color: var(--ch-danger);
+  }
+
+  &__intro-copy {
+    flex: 1;
+    min-width: 0;
+
+    p {
+      font-family: var(--ch-font-body);
+      font-size: 14px;
+      color: var(--ch-text-secondary);
+      margin: var(--ch-space-2) 0 0;
+    }
+  }
+
+  &__accion-inmediata {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+    text-align: right;
+
+    strong {
+      font-family: var(--ch-font-heading);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--ch-danger);
+      line-height: 1;
+    }
+
+    span {
+      font-family: var(--ch-font-body);
+      font-size: 11px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--ch-text-secondary);
+      margin-top: 4px;
+    }
+  }
+
+  &__controles {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ch-space-4);
+    flex-wrap: wrap;
+  }
+
+  &__buscador {
+    min-width: 240px;
+    max-width: 320px;
+    flex: 1;
+  }
+
+  &__loading,
+  &__error {
+    font-family: var(--ch-font-body);
+    font-size: 14px;
+    color: var(--ch-text-secondary);
+  }
+
+  &__error {
+    color: var(--ch-danger);
+  }
+
+  &__vacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--ch-space-2);
+    padding: var(--ch-space-12) var(--ch-space-4);
+
+    p {
+      font-family: var(--ch-font-body);
+      font-size: 14px;
+      color: var(--ch-text-secondary);
+      margin: 0;
+      max-width: 420px;
+    }
+  }
+
+  &__vacio-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--ch-green-soft);
+    color: var(--ch-green-dark);
+    margin-bottom: var(--ch-space-2);
+  }
+
+  &__grupo-titulo {
+    display: flex;
+    align-items: center;
+    gap: var(--ch-space-2);
+    font-family: var(--ch-font-body);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--ch-text-secondary);
+    margin: 0;
+
+    &--vencidas {
+      color: var(--ch-danger);
+    }
+  }
+
+  &__lista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ch-space-3);
+    margin: 0 0 var(--ch-space-2);
+    padding: 0;
+    list-style: none;
+  }
+
+  &__fila {
+    display: flex;
+    align-items: center;
+    gap: var(--ch-space-3);
+    padding: var(--ch-space-3) var(--ch-space-4);
+    background: var(--ch-bg-white);
+    border: 1px solid var(--ch-border);
+    border-radius: var(--ch-radius-md);
+
+    &--vencida {
+      background: var(--ch-danger-bg);
+      border-color: color-mix(in srgb, var(--ch-danger) 35%, var(--ch-border));
+    }
+  }
+
+  &__fila-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    flex-shrink: 0;
+    background: var(--ch-bg-main);
+    color: var(--ch-danger);
+
+    .ch-centro-alertas__fila:not(.ch-centro-alertas__fila--vencida) & {
+      color: var(--ch-warning-dark);
+    }
+  }
+
+  &__fila-nombre {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--ch-font-heading);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ch-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__fila-fecha {
+    flex-shrink: 0;
+    font-family: var(--ch-font-body);
+    font-size: 13px;
+    color: var(--ch-text-secondary);
+    min-width: 90px;
+  }
+
+  &__fila-dias {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+    min-width: 48px;
+
+    strong {
+      font-family: var(--ch-font-heading);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ch-text-primary);
+      line-height: 1;
+    }
+
+    small {
+      font-family: var(--ch-font-body);
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--ch-text-secondary);
+    }
+  }
+
+  &__ver-detalle {
+    flex-shrink: 0;
+    text-decoration: none;
+  }
+}

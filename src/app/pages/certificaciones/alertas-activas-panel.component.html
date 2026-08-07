@@ -4,6 +4,9 @@
       <app-icon name="warning" [size]="16" />
     </span>
     <app-heading level="h3" text="Alertas activas" />
+    <a appLink routerLink="/empresa/certificaciones/alertas" class="ch-alertas-panel__ver-todas">
+      Ver todas →
+    </a>
   </header>
 
   @if (loading()) {
