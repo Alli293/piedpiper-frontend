@@ -72,6 +72,7 @@ export class PerfilPublicoPageComponent {
   protected insignias = signal<InsigniaEmpresa[]>([]);
   protected evolucion = signal<EvolucionHuellaPublica | null>(null);
   protected mensajeError = signal<string>('');
+  protected mostrarCompartir = signal<boolean>(false);
 
   protected readonly maxTco2e = computed(() => {
     const ev = this.evolucion();
@@ -187,6 +188,14 @@ export class PerfilPublicoPageComponent {
 
   protected reintentar(): void {
     this.cargar();
+  }
+
+  protected toggleCompartir(): void {
+    this.mostrarCompartir.update((v) => !v);
+  }
+
+  protected cerrarCompartir(): void {
+    this.mostrarCompartir.set(false);
   }
 
   protected readonly nivelConfig = computed(() => {

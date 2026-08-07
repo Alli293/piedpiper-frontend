@@ -9,6 +9,17 @@
       </span>
     </div>
     <div class="pub-header__right">
+      @if (estado() === 'exito') {
+        <button
+          class="pub-header__btn-compartir"
+          type="button"
+          (click)="toggleCompartir()"
+          aria-label="Compartir perfil"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Compartir
+        </button>
+      }
       <a class="pub-header__link" href="/login">
         <app-icon name="login" [size]="14" aria-hidden="true" />
         Iniciar sesión
@@ -249,8 +260,22 @@
         }
       </section>
 
-      <!-- Compartir perfil -->
-      <app-compartir-perfil [slug]="slug" />
+      <!-- Compartir perfil (modal) -->
+      @if (mostrarCompartir()) {
+        <div class="pub-modal-overlay" (click)="cerrarCompartir()" (keydown.escape)="cerrarCompartir()">
+          <div class="pub-modal" role="dialog" aria-modal="true" aria-label="Compartir perfil" (click)="$event.stopPropagation()">
+            <div class="pub-modal__header">
+              <h2 class="pub-modal__title">Compartir perfil</h2>
+              <button class="pub-modal__close" type="button" (click)="cerrarCompartir()" aria-label="Cerrar">
+                ✕
+              </button>
+            </div>
+            <div class="pub-modal__body">
+              <app-compartir-perfil [slug]="slug" />
+            </div>
+          </div>
+        </div>
+      }
     </main>
 
     <!-- Footer -->
