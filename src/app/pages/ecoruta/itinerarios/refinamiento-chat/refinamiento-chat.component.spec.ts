@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { RefinamientoChatComponent } from './refinamiento-chat.component';
 import { Itinerario } from '../models/itinerario.model';
 
@@ -22,6 +24,7 @@ describe('RefinamientoChatComponent', () => {
   async function crearFixture(input: Itinerario) {
     await TestBed.configureTestingModule({
       imports: [RefinamientoChatComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(RefinamientoChatComponent);
