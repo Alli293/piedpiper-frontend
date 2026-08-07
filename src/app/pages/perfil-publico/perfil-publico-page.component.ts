@@ -17,6 +17,7 @@ import {
 } from 'chart.js';
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
 import { LogoComponent } from '../../shared/components/logo/logo.component';
+import { CompartirPerfilComponent } from './compartir-perfil/compartir-perfil.component';
 import {
   CertificacionPublica,
   EvolucionHuellaPublica,
@@ -56,7 +57,7 @@ Chart.register(
   standalone: true,
   templateUrl: './perfil-publico-page.component.html',
   styleUrl: './perfil-publico-page.component.scss',
-  imports: [IconComponent, LogoComponent, DecimalPipe, BaseChartDirective],
+  imports: [IconComponent, LogoComponent, DecimalPipe, BaseChartDirective, CompartirPerfilComponent],
 })
 export class PerfilPublicoPageComponent {
   private readonly route = inject(ActivatedRoute);
