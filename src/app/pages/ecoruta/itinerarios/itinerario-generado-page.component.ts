@@ -180,7 +180,7 @@ export class ItinerarioGeneradoPageComponent {
 
   private mensajeError(err: unknown): string {
     if (err instanceof HttpErrorResponse && err.status === 404) {
-      return apiErrorMessage(err) ?? 'No encontramos este itinerario.';
+      return apiErrorMessage(err) ?? 'No fue posible encontrar el itinerario solicitado.';
     }
     return apiErrorMessage(err) ?? ERROR_CARGA;
   }
