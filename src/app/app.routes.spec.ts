@@ -48,6 +48,7 @@ describe('app.routes', () => {
       'ecoruta/preferencias',
       'ecoruta/insignias',
       'ecoruta/itinerarios',
+      'ecoruta/itinerarios/:id',
     ];
 
     for (const path of rutasEcoRuta) {
