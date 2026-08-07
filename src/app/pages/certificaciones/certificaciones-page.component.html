@@ -1,11 +1,18 @@
 <app-shell-layout activeId="certificaciones" [headerConfig]="headerConfig()">
   <section class="ch-certificaciones" aria-label="Certificaciones">
     <app-estado-certificaciones-panel
-      class="ch-certificaciones__full"
       [resumen]="resumen()"
       [loading]="cargandoResumen()"
       [error]="resumenError()"
     />
+
+    @if (cargandoRecomendacion() || recomendacion() || recomendacionError()) {
+      <app-recomendacion-renovacion-panel
+        [recomendacion]="recomendacion()"
+        [loading]="cargandoRecomendacion()"
+        [error]="recomendacionError()"
+      />
+    }
 
     <app-alertas-activas-panel
       [alertas]="alertas()"

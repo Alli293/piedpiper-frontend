@@ -11,6 +11,7 @@ import { DashboardService } from '../dashboard/dashboard.service';
 import {
   AlertaVencimiento,
   CalendarioVencimientosResponse,
+  RecomendacionRenovacion,
   ResumenCertificacionesDashboardResponse,
 } from '../dashboard/dashboard.model';
 import { AlertasActivasPanelComponent } from './alertas-activas-panel.component';
@@ -18,6 +19,7 @@ import { CalendarioVencimientosComponent } from './calendario-vencimientos.compo
 import { EstadoCertificacionesPanelComponent } from './estado-certificaciones-panel.component';
 import { InsigniasEmpresaPanelComponent } from './insignias-empresa-panel.component';
 import { MetasReduccionPanelComponent } from './metas-reduccion-panel.component';
+import { RecomendacionRenovacionPanelComponent } from './recomendacion-renovacion-panel.component';
 import { MetaReduccion } from '../metas/metas.model';
 import { MetasService } from '../metas/metas.service';
 
@@ -31,9 +33,10 @@ function mesActual(): string {
 
 /**
  * Pantalla de Certificaciones. Aloja el bloque "Estado de certificaciones"
- * (PP-74), "Alertas activas" (PP-76), "Insignias activas" (PP-75), "Metas
- * de reducción" (PP-78), el "Calendario de vencimientos" (PP-77) y un
- * enlace al listado completo con filtros (PP-59).
+ * (PP-74), "Recomendación de renovación" (PP-72), "Alertas activas"
+ * (PP-76), "Insignias activas" (PP-75), "Metas de reducción" (PP-78), el
+ * "Calendario de vencimientos" (PP-77) y un enlace al listado completo con
+ * filtros (PP-59).
  */
 @Component({
   selector: 'app-certificaciones-page',
@@ -44,6 +47,7 @@ function mesActual(): string {
     CalendarioVencimientosComponent,
     InsigniasEmpresaPanelComponent,
     MetasReduccionPanelComponent,
+    RecomendacionRenovacionPanelComponent,
     LinkDirective,
     RouterLink,
   ],
@@ -83,12 +87,17 @@ export class CertificacionesPageComponent {
   protected readonly metas = signal<MetaReduccion[]>([]);
   protected readonly metasError = signal<string | null>(null);
 
+  protected readonly cargandoRecomendacion = signal(false);
+  protected readonly recomendacion = signal<RecomendacionRenovacion | null>(null);
+  protected readonly recomendacionError = signal<string | null>(null);
+
   constructor() {
     void this.cargarResumen();
     void this.cargarCalendario(this.mesCalendario());
     void this.cargarInsignias();
     void this.cargarAlertas();
     void this.cargarMetas();
+    void this.cargarRecomendacion();
   }
 
   protected onMesCalendarioChange(mes: string): void {
@@ -170,6 +179,20 @@ export class CertificacionesPageComponent {
       this.metasError.set(apiErrorMessage(err) ?? ERROR_RESUMEN_MENSAJE);
     } finally {
       this.cargandoMetas.set(false);
+    }
+  }
+
+  private async cargarRecomendacion(): Promise<void> {
+    this.cargandoRecomendacion.set(true);
+    this.recomendacionError.set(null);
+    try {
+      const recomendacion = await firstValueFrom(this.dashboardService.obtenerRecomendacion());
+      this.recomendacion.set(recomendacion);
+    } catch (err: unknown) {
+      this.recomendacion.set(null);
+      this.recomendacionError.set(apiErrorMessage(err) ?? ERROR_RESUMEN_MENSAJE);
+    } finally {
+      this.cargandoRecomendacion.set(false);
     }
   }
 }

@@ -16,6 +16,7 @@ import { DashboardService } from '../dashboard/dashboard.service';
 import {
   AlertaVencimiento,
   CalendarioVencimientosResponse,
+  RecomendacionRenovacion,
   ResumenCertificacionesDashboardResponse,
 } from '../dashboard/dashboard.model';
 import { MetaReduccion } from '../metas/metas.model';
@@ -27,6 +28,7 @@ describe('CertificacionesPageComponent', () => {
     obtenerResumenCertificaciones: ReturnType<typeof vi.fn>;
     obtenerCalendarioVencimientos: ReturnType<typeof vi.fn>;
     obtenerAlertas: ReturnType<typeof vi.fn>;
+    obtenerRecomendacion: ReturnType<typeof vi.fn>;
   };
   let empresaService: {
     listarInsignias: ReturnType<typeof vi.fn>;
@@ -68,6 +70,16 @@ describe('CertificacionesPageComponent', () => {
     fechaCreacion: '2026-01-01T00:00:00Z',
   };
 
+  const RECOMENDACION: RecomendacionRenovacion = {
+    idCertificacion: 'c1',
+    nombreCertificacion: 'GHG Protocol — Corporate Standard',
+    fechaVencimiento: '2026-07-03',
+    diasRestantes: 5,
+    impactoHuellaT: 120.5,
+    justificacion: 'Vence en 5 días y respalda 3 de tus insignias activas.',
+    sugerenciaAccion: 'Renovarla ahora evita perder tu nivel Oro.',
+  };
+
   // El componente pide el calendario del mes actual REAL (usa `new Date()`), así
   // que el mock tiene que calzar con eso en vez de una fecha fija — de lo
   // contrario el test pasa solo por coincidencia en la máquina/fecha donde se
@@ -101,6 +113,7 @@ describe('CertificacionesPageComponent', () => {
       obtenerResumenCertificaciones: vi.fn().mockReturnValue(of(RESUMEN)),
       obtenerCalendarioVencimientos: vi.fn().mockReturnValue(of(CALENDARIO)),
       obtenerAlertas: vi.fn().mockReturnValue(of([ALERTA])),
+      obtenerRecomendacion: vi.fn().mockReturnValue(of(RECOMENDACION)),
     };
     empresaService = {
       listarInsignias: vi.fn().mockReturnValue(of([INSIGNIA])),
@@ -267,6 +280,40 @@ describe('CertificacionesPageComponent', () => {
 
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('.ch-metas-panel__error')?.textContent).toContain(
+      'No fue posible cargar esta sección'
+    );
+    expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
+  });
+
+  it('muestra la recomendación de renovación junto al estado de certificaciones', async () => {
+    fixture = await createFixture();
+    expect(dashboardService.obtenerRecomendacion).toHaveBeenCalled();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-recomendacion-panel__cert strong')?.textContent).toContain(
+      'GHG Protocol — Corporate Standard'
+    );
+  });
+
+  it('no muestra el bloque de recomendación si no hay certificaciones con alerta activa', async () => {
+    dashboardService.obtenerRecomendacion.mockReturnValue(of(null));
+
+    fixture = await createFixture();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-recomendacion-panel')).toBeNull();
+    // El resto de la página sigue funcionando normalmente.
+    expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
+  });
+
+  it('un fallo en la recomendación no afecta a los demás bloques de la página', async () => {
+    dashboardService.obtenerRecomendacion.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 }))
+    );
+
+    fixture = await createFixture();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-recomendacion-panel__error')?.textContent).toContain(
       'No fue posible cargar esta sección'
     );
     expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
