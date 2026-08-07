@@ -3,7 +3,8 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import * as fc from 'fast-check';
 import { environment } from '../../../environments/environment';
-import { CertificacionPublica, InsigniaEmpresa, PerfilPublicoDTO } from './perfil-publico.models';
+import { EnlacePerfilDTO } from './models/enlace-perfil.model';
+import { CertificacionPublica, EvolucionHuellaPublica, InsigniaEmpresa, PerfilPublicoDTO } from './perfil-publico.models';
 import { PerfilPublicoService } from './perfil-publico.service';
 
 describe('PerfilPublicoService', () => {
@@ -213,6 +214,55 @@ describe('PerfilPublicoService', () => {
 
       const req = httpMock.expectOne(`${baseUrl}/empresa%20con%20espacio/evolucion-huella`);
       req.flush({ totalActualTco2e: 0, variacionPorcentual: null, serie: [] });
+    });
+  });
+
+  describe('obtenerEnlaceComparticion', () => {
+    const enlaceMock: EnlacePerfilDTO = {
+      urlCanonica: 'http://localhost:4200/empresa/cafe-del-valle/reputacion',
+      codigoIncrustar:
+        '<a href="http://localhost:4200/empresa/cafe-del-valle/reputacion">Perfil verificado en CarbonHub</a>',
+      qrBase64: 'data:image/png;base64,abc123',
+      ogTitulo: 'Café del Valle — Perfil de Reputación Ecológica | CarbonHub',
+      ogDescripcion:
+        'Nivel ecológico: Oro. Consulta el desempeño ambiental verificado de Café del Valle.',
+      ogImagen: 'https://example.com/logo.png',
+      ogUrl: 'http://localhost:4200/empresa/cafe-del-valle/reputacion',
+    };
+
+    it('hace GET a /api/perfil-publico/{slug}/compartir y retorna EnlacePerfilDTO', () => {
+      let resultado: EnlacePerfilDTO | undefined;
+      service.obtenerEnlaceComparticion('cafe-del-valle').subscribe((valor) => (resultado = valor));
+
+      const req = httpMock.expectOne(`${baseUrl}/cafe-del-valle/compartir`);
+      expect(req.request.method).toBe('GET');
+      req.flush(enlaceMock);
+
+      expect(resultado).toEqual(enlaceMock);
+    });
+
+    it('escapa el slug en la URL', () => {
+      service.obtenerEnlaceComparticion('empresa con espacio').subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/empresa%20con%20espacio/compartir`);
+      req.flush(enlaceMock);
+    });
+
+    it('propaga errores HTTP correctamente', () => {
+      let error: unknown;
+      service.obtenerEnlaceComparticion('no-existe').subscribe({
+        error: (err) => (error = err),
+      });
+
+      httpMock
+        .expectOne(`${baseUrl}/no-existe/compartir`)
+        .flush(
+          { mensaje: 'El perfil que buscas no existe o ya no está disponible.' },
+          { status: 404, statusText: 'Not Found' }
+        );
+
+      expect(error).toBeInstanceOf(HttpErrorResponse);
+      expect((error as HttpErrorResponse).status).toBe(404);
     });
   });
 

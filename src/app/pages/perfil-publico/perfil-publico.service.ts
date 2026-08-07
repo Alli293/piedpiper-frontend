@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { EnlacePerfilDTO } from './models/enlace-perfil.model';
 import {
   BusquedaPerfilPublicoDTO,
   CertificacionPublica,
@@ -61,5 +62,9 @@ export class PerfilPublicoService {
     return this.http.get<EvolucionHuellaPublica>(
       `${this.baseUrl}/${encodeURIComponent(slug)}/evolucion-huella`
     );
+  }
+
+  obtenerEnlaceComparticion(slug: string): Observable<EnlacePerfilDTO> {
+    return this.http.get<EnlacePerfilDTO>(`${this.baseUrl}/${encodeURIComponent(slug)}/compartir`);
   }
 }
