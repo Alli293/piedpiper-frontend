@@ -147,9 +147,7 @@
   &__stats {
     display: flex;
     gap: var(--ch-space-3);
-    padding-top: var(--ch-space-5);
     margin-top: var(--ch-space-5);
-    border-top: 1px solid var(--ch-border);
     flex-wrap: wrap;
   }
 
@@ -300,7 +298,7 @@
 
   &__header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     margin-bottom: var(--ch-space-4);
     gap: var(--ch-space-3);
@@ -388,6 +386,7 @@
 
   thead {
     background: var(--ch-bg-main);
+    font-family: var(--ch-font-mono);
 
     th {
       padding: var(--ch-space-3) var(--ch-space-4);
@@ -450,10 +449,6 @@
       background: var(--ch-bg-main);
       color: var(--ch-text-muted);
     }
-  }
-
-  &__badge {
-    text-transform: uppercase;
   }
 }
 

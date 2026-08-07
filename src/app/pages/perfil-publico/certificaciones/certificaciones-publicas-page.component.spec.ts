@@ -1,7 +1,7 @@
 import { Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { CertificacionPublica, PerfilPublicoDTO } from '../perfil-publico.models';
 import { PerfilPublicoService } from '../perfil-publico.service';
@@ -173,15 +173,49 @@ describe('CertificacionesPublicasPageComponent', () => {
     ]);
   });
 
-  it('las celdas de Entidad y Auditor son placeholders accesibles', async () => {
+  it('la celda de Auditor muestra el nombre real', async () => {
     listarCertificaciones.mockReturnValue(of([CERT_VIGENTE]));
     const fixture = await crearFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    const placeholdersFila = root.querySelectorAll('tbody [aria-label="Dato no disponible"]');
-    // 1 en Entidad + 2 en Auditor verificador (nombre y numero)
-    expect(placeholdersFila.length).toBe(3);
-    placeholdersFila.forEach((el) => expect(el.textContent?.trim()).toBe('—'));
+    const auditorCell = root.querySelector('tbody .ch-certificaciones-publicas__auditor');
+    expect(auditorCell?.textContent?.trim()).toBe(CERT_VIGENTE.nombreAuditor);
+  });
+
+  it('sin codigo de verificacion muestra "Sin código" y el boton Verificar queda deshabilitado', async () => {
+    listarCertificaciones.mockReturnValue(
+      of([{ ...CERT_VIGENTE, codigoVerificacion: null as unknown as string }])
+    );
+    const fixture = await crearFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.querySelector('button.ch-certificaciones-publicas__codigo')).toBeNull();
+    expect(root.textContent).toContain('Sin código');
+    expect(root.querySelector('.ch-certificaciones-publicas__codigo-tooltip')).toBeNull();
+
+    const verificarBtn = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
+      (boton) => boton.textContent?.includes('Verificar')
+    );
+    expect(verificarBtn?.disabled).toBe(true);
+  });
+
+  it('copia el codigo de verificacion al portapapeles y muestra el tooltip al hacer clic', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+    listarCertificaciones.mockReturnValue(of([CERT_VIGENTE]));
+    const fixture = await crearFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    const boton: HTMLButtonElement | null = root.querySelector(
+      '.ch-certificaciones-publicas__codigo'
+    );
+    expect(boton?.textContent).toContain(CERT_VIGENTE.codigoVerificacion);
+    boton?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(writeText).toHaveBeenCalledWith(CERT_VIGENTE.codigoVerificacion);
+    expect(root.textContent).toContain('Código copiado');
   });
 
   it('muestra el nombre y logo de la empresa en el encabezado de seccion', async () => {
@@ -285,16 +319,23 @@ describe('CertificacionesPublicasPageComponent', () => {
     expect(filas(root).length).toBe(1);
   });
 
-  it('cada fila enlaza a la verificacion publica de su propio codigo', async () => {
+  it('el boton Verificar de cada fila navega a la verificacion publica de su propio codigo', async () => {
     listarCertificaciones.mockReturnValue(of([CERT_VIGENTE, CERT_MAS_ANTIGUA]));
     const fixture = await crearFixture();
     const root = fixture.nativeElement as HTMLElement;
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
 
-    const enlaces = filas(root).map((fila) =>
-      fila.querySelector<HTMLAnchorElement>('.ch-certificaciones-publicas__verificar')
+    const botones = filas(root).map((fila) =>
+      Array.from(fila.querySelectorAll<HTMLButtonElement>('button')).find((boton) =>
+        boton.textContent?.includes('Verificar')
+      )
     );
-    expect(enlaces[0]?.getAttribute('href')).toBe('/verificar/CH-2026-8F4A19KD');
-    expect(enlaces[1]?.getAttribute('href')).toBe('/verificar/CH-2025-9G5B29ME');
+    botones[0]?.click();
+    botones[1]?.click();
+
+    expect(navigateSpy).toHaveBeenNthCalledWith(1, ['/verificar', 'CH-2026-8F4A19KD']);
+    expect(navigateSpy).toHaveBeenNthCalledWith(2, ['/verificar', 'CH-2025-9G5B29ME']);
   });
 
   it('las fechas se muestran en dd/MM/yyyy interpretadas en UTC', async () => {

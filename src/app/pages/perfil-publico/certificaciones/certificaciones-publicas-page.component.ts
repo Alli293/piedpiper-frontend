@@ -1,7 +1,7 @@
 import { DatePipe, Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
@@ -12,7 +12,6 @@ import {
 } from '../../../shared/components/filter-chips/filter-chips.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
-import { LinkDirective } from '../../../shared/components/link/link.directive';
 import { StateLayoutComponent } from '../../../shared/layouts/state-layout/state-layout.component';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import { CertificacionPublica, PerfilPublicoDTO } from '../perfil-publico.models';
@@ -41,8 +40,6 @@ const ESTADOS: Record<string, { etiqueta: string; variante: BadgeVariant }> = {
     FilterChipsComponent,
     HeadingComponent,
     IconComponent,
-    LinkDirective,
-    RouterLink,
     PerfilPublicoSeccionHeaderComponent,
     StateLayoutComponent,
   ],
@@ -52,6 +49,7 @@ const ESTADOS: Record<string, { etiqueta: string; variante: BadgeVariant }> = {
 export class CertificacionesPublicasPageComponent implements OnInit {
   private readonly perfilPublicoService = inject(PerfilPublicoService);
   private readonly location = inject(Location);
+  private readonly router = inject(Router);
 
   readonly slug = input.required<string>();
 
@@ -63,6 +61,7 @@ export class CertificacionesPublicasPageComponent implements OnInit {
   protected readonly errorMensaje = signal(MENSAJE_ERROR_CERTIFICACIONES);
   protected readonly filtroEstado = signal<FiltroEstado>('TODAS');
   protected readonly noEncontradoMensaje = MENSAJE_NO_ENCONTRADO;
+  protected readonly codigoCopiado = signal<string | null>(null);
 
   private cargaRequestId = 0;
 
@@ -120,6 +119,20 @@ export class CertificacionesPublicasPageComponent implements OnInit {
 
   protected variante(estado: string): BadgeVariant {
     return ESTADOS[estado]?.variante ?? 'neutral';
+  }
+
+  protected async copiarCodigo(codigo: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(codigo);
+      this.codigoCopiado.set(codigo);
+      setTimeout(() => this.codigoCopiado.set(null), 2000);
+    } catch {
+      // Clipboard API no disponible o permiso denegado: no hay accion de respaldo posible.
+    }
+  }
+
+  protected verificar(codigoVerificacion: string): void {
+    void this.router.navigate(['/verificar', codigoVerificacion]);
   }
 
   private async cargarPerfil(): Promise<void> {

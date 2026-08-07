@@ -61,6 +61,25 @@
                   </p>
                 </div>
               </div>
+              <div class="pub-card__info-row">
+                <!-- Stats row -->
+                <div class="pub-card__stats">
+                  <app-card-stat
+                    class="pub-card__stat"
+                    icon="certificaciones"
+                    tono="green"
+                    [value]="formatNumero(perfil()?.certificacionesVigentes)"
+                    label="Certificaciones vigentes"
+                  />
+                  <app-card-stat
+                    class="pub-card__stat"
+                    icon="insignias"
+                    tono="sky"
+                    [value]="formatNumero(perfil()?.insigniasActivas)"
+                    label="Insignias activas"
+                  />
+                </div>
+              </div>
             </div>
 
             <!-- Right: Nivel ecológico card -->
@@ -94,24 +113,6 @@
                 }
               </div>
             </div>
-          </div>
-
-          <!-- Stats row -->
-          <div class="pub-card__stats">
-            <app-card-stat
-              class="pub-card__stat"
-              icon="certificaciones"
-              tono="green"
-              [value]="formatNumero(perfil()?.certificacionesVigentes)"
-              label="Certificaciones vigentes"
-            />
-            <app-card-stat
-              class="pub-card__stat"
-              icon="insignias"
-              tono="sky"
-              [value]="formatNumero(perfil()?.insigniasActivas)"
-              label="Insignias activas"
-            />
           </div>
         </app-card>
 

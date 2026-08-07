@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
 
 @Component({
@@ -10,4 +10,6 @@ import { PublicHeaderComponent } from '../../components/public-header/public-hea
     class: 'ch-state-layout',
   },
 })
-export class StateLayoutComponent {}
+export class StateLayoutComponent {
+  readonly align = input<'center' | 'start'>('center');
+}

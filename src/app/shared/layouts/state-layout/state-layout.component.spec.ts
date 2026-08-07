@@ -9,6 +9,12 @@ import { StateLayoutComponent } from './state-layout.component';
 })
 class HostComponent {}
 
+@Component({
+  imports: [StateLayoutComponent],
+  template: `<app-state-layout align="start"><p>Listado</p></app-state-layout>`,
+})
+class HostAlineadoAlInicioComponent {}
+
 describe('StateLayoutComponent', () => {
   function createFixture() {
     const fixture = TestBed.configureTestingModule({
@@ -31,5 +37,21 @@ describe('StateLayoutComponent', () => {
     expect(fixture.nativeElement.querySelector('.ch-state-layout__content')?.textContent).toContain(
       'Cuenta verificada'
     );
+  });
+
+  it('no aplica el modificador de alineacion al inicio por defecto', () => {
+    const fixture = createFixture();
+
+    expect(fixture.nativeElement.querySelector('.ch-state-layout__content--start')).toBeFalsy();
+  });
+
+  it('aplica el modificador de alineacion al inicio cuando align="start"', () => {
+    const fixture = TestBed.configureTestingModule({
+      imports: [HostAlineadoAlInicioComponent],
+      providers: [provideRouter([])],
+    }).createComponent(HostAlineadoAlInicioComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.ch-state-layout__content--start')).toBeTruthy();
   });
 });

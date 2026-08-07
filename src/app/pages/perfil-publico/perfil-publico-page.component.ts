@@ -269,6 +269,7 @@ export class PerfilPublicoPageComponent {
       case 'ACTIVA':
         return 'success';
       case 'VENCIDA':
+        return 'warning';
       case 'REVOCADA':
         return 'danger';
       default:
