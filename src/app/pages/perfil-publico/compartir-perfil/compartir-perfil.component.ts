@@ -52,7 +52,7 @@ export class CompartirPerfilComponent implements OnInit, OnDestroy {
       },
       () => {
         this.errorClipboard.set(true);
-      },
+      }
     );
   }
 
@@ -69,7 +69,7 @@ export class CompartirPerfilComponent implements OnInit, OnDestroy {
       },
       () => {
         this.errorClipboard.set(true);
-      },
+      }
     );
   }
 

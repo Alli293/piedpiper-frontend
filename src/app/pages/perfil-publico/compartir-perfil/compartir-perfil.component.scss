@@ -13,7 +13,12 @@
 
   &__skeleton {
     border-radius: var(--ch-radius-md);
-    background: linear-gradient(90deg, var(--ch-bg-main) 25%, var(--ch-border) 50%, var(--ch-bg-main) 75%);
+    background: linear-gradient(
+      90deg,
+      var(--ch-bg-main) 25%,
+      var(--ch-border) 50%,
+      var(--ch-bg-main) 75%
+    );
     background-size: 200% 100%;
     animation: ch-shimmer 1.5s infinite;
 
