@@ -83,11 +83,18 @@
     <div class="ch-compartir__block">
       <h3 class="ch-compartir__heading">Previsualización en redes sociales</h3>
       <div class="ch-compartir__og-card">
-        <img
-          class="ch-compartir__og-img"
-          [src]="enlace()!.ogImagen"
-          [alt]="'Imagen de ' + enlace()!.ogTitulo"
-        />
+        @if (!ogImagenError()) {
+          <img
+            class="ch-compartir__og-img"
+            [src]="enlace()!.ogImagen"
+            [alt]="'Imagen de ' + enlace()!.ogTitulo"
+            (error)="ogImagenError.set(true)"
+          />
+        } @else {
+          <div class="ch-compartir__og-img-placeholder">
+            <span>OG</span>
+          </div>
+        }
         <div class="ch-compartir__og-body">
           <p class="ch-compartir__og-title">{{ enlace()!.ogTitulo }}</p>
           <p class="ch-compartir__og-desc">{{ enlace()!.ogDescripcion }}</p>

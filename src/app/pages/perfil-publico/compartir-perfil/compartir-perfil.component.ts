@@ -20,6 +20,7 @@ export class CompartirPerfilComponent implements OnInit, OnDestroy {
   protected readonly enlace = signal<EnlacePerfilDTO | null>(null);
   protected readonly copiado = signal<'ninguno' | 'enlace' | 'codigo'>('ninguno');
   protected readonly errorClipboard = signal<boolean>(false);
+  protected readonly ogImagenError = signal<boolean>(false);
 
   private copiadoTimeout: ReturnType<typeof setTimeout> | null = null;
   private readonly metaTagsInsertados: HTMLMetaElement[] = [];
@@ -97,6 +98,7 @@ export class CompartirPerfilComponent implements OnInit, OnDestroy {
   private cargarEnlace(): void {
     this.estado.set('cargando');
     this.enlace.set(null);
+    this.ogImagenError.set(false);
     this.limpiarMetaTags();
 
     this.perfilService.obtenerEnlaceComparticion(this.slug()).subscribe({
