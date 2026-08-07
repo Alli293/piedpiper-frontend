@@ -119,7 +119,7 @@ export class VerificacionPublicaPageComponent implements OnInit {
   ngOnInit(): void {
     const codigo = this.codigo();
     if (codigo) {
-      void this.verificar(codigo);
+      void this.verificar(normalizarCodigo(codigo));
     }
   }
 
@@ -142,7 +142,7 @@ export class VerificacionPublicaPageComponent implements OnInit {
 
   protected reintentar(): void {
     const codigo = this.codigo();
-    if (codigo) void this.verificar(codigo);
+    if (codigo) void this.verificar(normalizarCodigo(codigo));
   }
 
   protected verificarOtra(): void {
@@ -152,7 +152,7 @@ export class VerificacionPublicaPageComponent implements OnInit {
   private async onSubmit(): Promise<void> {
     await submit(this.verificarForm, {
       action: async (field) => {
-        const codigo = field().value().codigo.trim().toUpperCase();
+        const codigo = normalizarCodigo(field().value().codigo);
         await this.router.navigate(['/verificar', codigo]);
         return undefined;
       },
@@ -181,6 +181,13 @@ export class VerificacionPublicaPageComponent implements OnInit {
       this.cargando.set(false);
     }
   }
+}
+
+// Normaliza tanto el código enviado por el formulario como el que llega por
+// ruta directa (/verificar/:codigo), que puede venir en minúsculas o con
+// espacios y el backend solo acepta en mayúsculas.
+function normalizarCodigo(codigo: string): string {
+  return codigo.trim().toUpperCase();
 }
 
 // El backend timbra cada error (incluido el 404) con su propio timestamp

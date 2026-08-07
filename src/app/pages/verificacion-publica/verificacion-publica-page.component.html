@@ -4,9 +4,9 @@
       <span class="ch-verificacion-publica__intro-icon" aria-hidden="true">
         <app-icon name="verificar" [size]="22" />
       </span>
-      <app-heading level="h1" text="Verificá una credencial CarbonHub" />
+      <app-heading level="h1" text="Verifica una credencial CarbonHub" />
       <p class="ch-verificacion-publica__intro-sub">
-        Ingresá el código de verificación de una certificación o insignia para confirmar su
+        Ingresa el código de verificación de una certificación o insignia para confirmar su
         autenticidad y vigencia. Información pública, sin necesidad de registrarte.
       </p>
     </header>
@@ -37,7 +37,7 @@
         <div class="ch-verificacion-publica__rc-body">
           <p class="ch-verificacion-publica__rc-msg">
             No existe ninguna credencial con el código <strong>{{ codigo() }}</strong
-            >. Verificá que esté escrito correctamente, incluyendo los guiones.
+            >. Verifica que esté escrito correctamente, incluyendo los guiones.
           </p>
           <p class="ch-verificacion-publica__consulta">
             <app-icon name="reloj-solido" [size]="11" />
@@ -154,7 +154,7 @@
       <app-card class="ch-verificacion-publica__formulario">
         <p class="ch-verificacion-publica__form-title">Código de verificación</p>
         <p class="ch-verificacion-publica__form-sub">
-          Lo encontrás en el certificado digital o junto a la insignia compartida por la empresa.
+          Lo encuentras en el certificado digital o junto a la insignia compartida por la empresa.
         </p>
         <form novalidate (submit)="handleSubmit($event)">
           <app-text-input

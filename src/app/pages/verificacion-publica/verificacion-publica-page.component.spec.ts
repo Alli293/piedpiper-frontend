@@ -81,6 +81,14 @@ describe('VerificacionPublicaPageComponent', () => {
     expect(verificar).toHaveBeenCalledWith('CH-2026-8F4A19KD');
   });
 
+  it('normaliza a mayusculas y sin espacios el codigo que llega por la ruta', () => {
+    const fixture = TestBed.createComponent(VerificacionPublicaPageComponent);
+    fixture.componentRef.setInput('codigo', ' ch-2026-8f4a19kd ');
+    fixture.detectChanges();
+
+    expect(verificar).toHaveBeenCalledWith('CH-2026-8F4A19KD');
+  });
+
   it('una credencial vigente se muestra con variante success', async () => {
     const fixture = await crearFixture('CH-2026-8F4A19KD');
     const root = fixture.nativeElement as HTMLElement;
@@ -183,7 +191,7 @@ describe('VerificacionPublicaPageComponent', () => {
 
     expect(root.textContent).toContain('Credencial no encontrada');
     expect(root.textContent).toContain('CH-2026-NOEXISTE');
-    expect(root.textContent).toContain('Verificá que esté escrito correctamente');
+    expect(root.textContent).toContain('Verifica que esté escrito correctamente');
     expect(root.querySelector('.ch-verificacion-publica__consulta')?.textContent).toMatch(
       /Consulta: \d{2}\/\d{2}\/\d{4}, \d{2}:\d{2} (AM|PM) \(GMT.*\)/
     );
