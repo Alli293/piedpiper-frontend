@@ -39,6 +39,11 @@
   color: var(--ch-text-on-dark);
 }
 
+.ch-toast--info .ch-toast__icon {
+  background: var(--ch-sky);
+  color: var(--ch-dark);
+}
+
 .ch-toast__text {
   flex: 1;
   min-width: 0;

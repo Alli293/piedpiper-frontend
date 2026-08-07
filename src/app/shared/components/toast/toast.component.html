@@ -1,7 +1,14 @@
 @for (toast of toasts(); track toast.id) {
-  <div class="ch-toast" [class.ch-toast--error]="toast.variant === 'error'">
+  <div
+    class="ch-toast"
+    [class.ch-toast--error]="toast.variant === 'error'"
+    [class.ch-toast--info]="toast.variant === 'info'"
+  >
     <span class="ch-toast__icon">
-      <app-icon [name]="toast.variant === 'success' ? 'success' : 'error'" [size]="18" />
+      <app-icon
+        [name]="toast.variant === 'error' ? 'error' : toast.variant === 'info' ? 'info' : 'success'"
+        [size]="18"
+      />
     </span>
 
     <div class="ch-toast__text">
