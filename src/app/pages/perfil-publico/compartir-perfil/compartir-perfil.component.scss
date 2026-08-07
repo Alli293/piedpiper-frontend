@@ -1,1 +1,317 @@
-// Styles placeholder — full implementation in task 9.2
+@use '../../../shared/styles/mixins';
+
+// ============================================================
+// COMPARTIR PERFIL — Sharing tools section
+// ============================================================
+
+// === Loading skeleton ===
+.ch-compartir-loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-6) 0;
+
+  &__skeleton {
+    border-radius: var(--ch-radius-md);
+    background: linear-gradient(90deg, var(--ch-bg-main) 25%, var(--ch-border) 50%, var(--ch-bg-main) 75%);
+    background-size: 200% 100%;
+    animation: ch-shimmer 1.5s infinite;
+
+    &--url {
+      height: 48px;
+      width: 100%;
+    }
+
+    &--qr {
+      height: 160px;
+      width: 160px;
+    }
+
+    &--code {
+      height: 80px;
+      width: 100%;
+    }
+  }
+}
+
+@keyframes ch-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// === Main section ===
+.ch-compartir {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-6);
+  padding: var(--ch-space-6) 0;
+
+  &__block {
+    background: var(--ch-bg-white);
+    border: 1px solid var(--ch-border);
+    border-radius: var(--ch-radius-lg);
+    padding: var(--ch-space-5);
+    box-shadow: var(--ch-shadow-sm);
+  }
+
+  &__heading {
+    font-family: var(--ch-font-heading);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--ch-text-primary);
+    margin: 0 0 var(--ch-space-3);
+  }
+
+  // --- URL row ---
+  &__url-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ch-space-3);
+
+    @include mixins.desktop-up {
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+
+  &__url {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--ch-font-mono);
+    font-size: 0.8125rem;
+    color: var(--ch-text-primary);
+    background: var(--ch-bg-main);
+    border: 1px solid var(--ch-border);
+    border-radius: var(--ch-radius-md);
+    padding: var(--ch-space-2) var(--ch-space-3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: break-all;
+  }
+
+  &__clipboard-error {
+    font-family: var(--ch-font-body);
+    font-size: 0.8125rem;
+    color: var(--ch-danger);
+    margin: var(--ch-space-2) 0 0;
+  }
+
+  // --- Buttons ---
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ch-space-1);
+    font-family: var(--ch-font-body);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    padding: var(--ch-space-2) var(--ch-space-4);
+    border: none;
+    border-radius: var(--ch-radius-md);
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      background-color var(--ch-transition),
+      color var(--ch-transition);
+
+    &:focus-visible {
+      @include mixins.focus-ring;
+    }
+
+    &--primary {
+      background: var(--ch-green);
+      color: var(--ch-text-on-dark);
+
+      &:hover {
+        background: var(--ch-green-dark);
+      }
+    }
+
+    &--secondary {
+      background: var(--ch-bg-main);
+      color: var(--ch-text-primary);
+      border: 1px solid var(--ch-border);
+
+      &:hover {
+        background: var(--ch-border);
+      }
+    }
+  }
+
+  &__btn-feedback {
+    color: inherit;
+  }
+
+  // --- QR ---
+  &__qr-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ch-space-3);
+
+    @include mixins.desktop-up {
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+
+  &__qr-img {
+    width: 150px;
+    height: 150px;
+    border: 1px solid var(--ch-border);
+    border-radius: var(--ch-radius-md);
+    object-fit: contain;
+    background: var(--ch-bg-white);
+  }
+
+  &__qr-error {
+    font-family: var(--ch-font-body);
+    font-size: 0.8125rem;
+    color: var(--ch-text-muted);
+    margin: 0;
+  }
+
+  // --- Code block (sello) ---
+  &__sello-preview {
+    padding: var(--ch-space-4);
+    background: var(--ch-bg-main);
+    border: 1px dashed var(--ch-border);
+    border-radius: var(--ch-radius-md);
+    margin-bottom: var(--ch-space-3);
+    overflow: auto;
+  }
+
+  &__code-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ch-space-3);
+
+    @include mixins.desktop-up {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+  }
+
+  &__code-block {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--ch-font-mono);
+    font-size: 0.75rem;
+    color: var(--ch-text-secondary);
+    background: var(--ch-bg-main);
+    border: 1px solid var(--ch-border);
+    border-radius: var(--ch-radius-md);
+    padding: var(--ch-space-3);
+    margin: 0;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  // --- Open Graph preview ---
+  &__og-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--ch-border);
+    border-radius: var(--ch-radius-md);
+    overflow: hidden;
+    background: var(--ch-bg-white);
+
+    @include mixins.desktop-up {
+      flex-direction: row;
+    }
+  }
+
+  &__og-img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    background: var(--ch-bg-main);
+
+    @include mixins.desktop-up {
+      width: 200px;
+      height: auto;
+      min-height: 120px;
+    }
+  }
+
+  &__og-body {
+    padding: var(--ch-space-3) var(--ch-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ch-space-1);
+    min-width: 0;
+  }
+
+  &__og-title {
+    font-family: var(--ch-font-heading);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--ch-text-primary);
+    margin: 0;
+    @include mixins.truncate;
+  }
+
+  &__og-desc {
+    font-family: var(--ch-font-body);
+    font-size: 0.8125rem;
+    color: var(--ch-text-secondary);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__og-url {
+    font-family: var(--ch-font-mono);
+    font-size: 0.6875rem;
+    color: var(--ch-text-muted);
+    margin: 0;
+    @include mixins.truncate;
+  }
+}
+
+// === Error state ===
+.ch-compartir-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--ch-space-8) var(--ch-space-4);
+  gap: var(--ch-space-4);
+
+  &__msg {
+    font-family: var(--ch-font-body);
+    font-size: 0.9375rem;
+    color: var(--ch-text-primary);
+    margin: 0;
+  }
+
+  &__retry {
+    font-family: var(--ch-font-body);
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: var(--ch-space-2) var(--ch-space-4);
+    background: var(--ch-green);
+    color: var(--ch-text-on-dark);
+    border: none;
+    border-radius: var(--ch-radius-md);
+    cursor: pointer;
+    transition: background-color var(--ch-transition);
+
+    &:hover {
+      background: var(--ch-green-dark);
+    }
+
+    &:focus-visible {
+      @include mixins.focus-ring;
+    }
+  }
+}
