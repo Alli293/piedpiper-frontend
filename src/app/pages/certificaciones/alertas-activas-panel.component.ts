@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { AlertaVencimiento, UrgenciaVencimiento } from '../dashboard/dashboard.model';
 import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
+import { LinkDirective } from '../../shared/components/link/link.directive';
 
 const ERROR_POR_DEFECTO = 'No fue posible cargar esta sección. Intenta recargar la página.';
 const SIN_ALERTAS_MENSAJE = 'No hay alertas activas en este momento.';
@@ -29,7 +30,7 @@ const ICONO_POR_TONO: Record<TonoAlerta, IconName> = {
  */
 @Component({
   selector: 'app-alertas-activas-panel',
-  imports: [DatePipe, HeadingComponent, IconComponent, RouterLink],
+  imports: [DatePipe, HeadingComponent, IconComponent, LinkDirective, RouterLink],
   templateUrl: './alertas-activas-panel.component.html',
   styleUrl: './alertas-activas-panel.component.scss',
 })

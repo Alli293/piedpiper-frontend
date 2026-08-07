@@ -1,6 +1,7 @@
 <app-shell-layout activeId="certificaciones" [headerConfig]="headerConfig()">
   <section class="ch-certificaciones" aria-label="Certificaciones">
     <app-estado-certificaciones-panel
+      class="ch-certificaciones__full"
       [resumen]="resumen()"
       [loading]="cargandoResumen()"
       [error]="resumenError()"
@@ -12,6 +13,18 @@
       [error]="alertasError()"
     />
 
+    <app-insignias-empresa-panel
+      [insignias]="insignias()"
+      [loading]="cargandoInsignias()"
+      [error]="insigniasError()"
+    />
+
+    <app-metas-reduccion-panel
+      [metas]="metas()"
+      [loading]="cargandoMetas()"
+      [error]="metasError()"
+    />
+
     <app-calendario-vencimientos
       [mes]="mesCalendario()"
       [calendario]="calendario()"
@@ -20,16 +33,10 @@
       (mesChange)="onMesCalendarioChange($event)"
     />
 
-    <app-insignias-empresa-panel
-      [insignias]="insignias()"
-      [loading]="cargandoInsignias()"
-      [error]="insigniasError()"
-    />
-
     <a
       appLink
       routerLink="/empresa/certificaciones/listado"
-      class="ch-certificaciones__listado-link"
+      class="ch-certificaciones__listado-link ch-certificaciones__full"
     >
       Ver listado completo de certificaciones →
     </a>
