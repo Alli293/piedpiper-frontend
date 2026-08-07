@@ -232,6 +232,20 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'empresas-verificadas',
+    loadComponent: () =>
+      import('./pages/empresas-verificadas/empresas-verificadas-page.component').then(
+        (m) => m.EmpresasVerificadasPageComponent
+      ),
+  },
+  {
+    path: 'empresa/:slug/reputacion',
+    loadComponent: () =>
+      import('./pages/perfil-publico/perfil-publico-page.component').then(
+        (m) => m.PerfilPublicoPageComponent
+      ),
+  },
+  {
     path: 'empresa/:slug/reputacion/certificaciones',
     loadComponent: () =>
       import('./pages/perfil-publico/certificaciones/certificaciones-publicas-page.component').then(
