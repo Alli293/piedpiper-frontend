@@ -8,7 +8,8 @@ const ENLACE_COMPLETO: EnlacePerfilDTO = {
   urlCanonica: 'https://carbonhub.app/empresa/cafe-del-valle/reputacion',
   codigoIncrustar:
     '<a href="https://carbonhub.app/empresa/cafe-del-valle/reputacion" style="display:inline-block;padding:8px 12px;border:1px solid #ccc;border-radius:4px;text-decoration:none;color:#333;">Café del Valle S.A. — Perfil verificado en CarbonHub</a>',
-  qrBase64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIABQAB',
+  qrBase64:
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIABQAB',
   ogTitulo: 'Café del Valle S.A. — Perfil de Reputación Ecológica | CarbonHub',
   ogDescripcion:
     'Nivel ecológico: ORO. Consulta el desempeño ambiental verificado de Café del Valle S.A.',
@@ -114,8 +115,8 @@ describe('CompartirPerfilComponent', () => {
     const fixture = crear();
     const root = fixture.nativeElement as HTMLElement;
 
-    const botonCopiar = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
-      (btn) => btn.textContent?.includes('Copiar enlace')
+    const botonCopiar = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find((btn) =>
+      btn.textContent?.includes('Copiar enlace')
     );
     expect(botonCopiar).not.toBeNull();
 
@@ -137,8 +138,8 @@ describe('CompartirPerfilComponent', () => {
     const fixture = crear();
     const root = fixture.nativeElement as HTMLElement;
 
-    const botonCopiar = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
-      (btn) => btn.textContent?.includes('Copiar enlace')
+    const botonCopiar = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find((btn) =>
+      btn.textContent?.includes('Copiar enlace')
     );
     botonCopiar!.click();
 
@@ -169,9 +170,9 @@ describe('CompartirPerfilComponent', () => {
     const fixture = crear();
     const root = fixture.nativeElement as HTMLElement;
 
-    const botonCopiarCodigo = Array.from(
-      root.querySelectorAll<HTMLButtonElement>('button')
-    ).find((btn) => btn.textContent?.includes('Copiar código'));
+    const botonCopiarCodigo = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
+      (btn) => btn.textContent?.includes('Copiar código')
+    );
     expect(botonCopiarCodigo).not.toBeNull();
 
     botonCopiarCodigo!.click();
@@ -214,8 +215,8 @@ describe('CompartirPerfilComponent', () => {
     const fixture = crear();
     const root = fixture.nativeElement as HTMLElement;
 
-    const botonCopiar = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
-      (btn) => btn.textContent?.includes('Copiar enlace')
+    const botonCopiar = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find((btn) =>
+      btn.textContent?.includes('Copiar enlace')
     );
     botonCopiar!.click();
     fixture.detectChanges();

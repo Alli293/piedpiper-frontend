@@ -1,5 +1,9 @@
 @if (estado() === 'cargando') {
-  <div class="ch-compartir-loading" aria-live="polite" aria-label="Cargando opciones de compartición">
+  <div
+    class="ch-compartir-loading"
+    aria-live="polite"
+    aria-label="Cargando opciones de compartición"
+  >
     <div class="ch-compartir-loading__skeleton ch-compartir-loading__skeleton--url"></div>
     <div class="ch-compartir-loading__skeleton ch-compartir-loading__skeleton--qr"></div>
     <div class="ch-compartir-loading__skeleton ch-compartir-loading__skeleton--code"></div>
@@ -95,11 +99,7 @@
 } @else if (estado() === 'error') {
   <div class="ch-compartir-error" role="alert">
     <p class="ch-compartir-error__msg">No fue posible cargar las opciones de compartición</p>
-    <button
-      class="ch-compartir-error__retry"
-      type="button"
-      (click)="reintentar()"
-    >
+    <button class="ch-compartir-error__retry" type="button" (click)="reintentar()">
       Reintentar
     </button>
   </div>
