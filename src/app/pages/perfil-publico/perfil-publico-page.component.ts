@@ -44,6 +44,7 @@ export class PerfilPublicoPageComponent {
   protected certificaciones = signal<CertificacionPublica[]>([]);
   protected insignias = signal<InsigniaEmpresa[]>([]);
   protected mensajeError = signal<string>('');
+  protected mostrarCompartir = signal<boolean>(false);
 
   protected readonly nivelesOrden = NIVELES_ORDEN;
 
@@ -98,6 +99,14 @@ export class PerfilPublicoPageComponent {
 
   protected reintentar(): void {
     this.cargar();
+  }
+
+  protected toggleCompartir(): void {
+    this.mostrarCompartir.update((v) => !v);
+  }
+
+  protected cerrarCompartir(): void {
+    this.mostrarCompartir.set(false);
   }
 
   protected getNivelConfig(): NivelConfig {
