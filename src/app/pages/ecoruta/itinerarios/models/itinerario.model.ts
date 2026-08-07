@@ -1,6 +1,7 @@
 import { CertificacionActiva, PuntuacionAmbientalResponse } from './puntuacion-ambiental.model';
 
 export interface ItinerarioActividad {
+  id?: string;
   nombre: string;
   descripcion: string | null;
   horario: string;
@@ -9,6 +10,7 @@ export interface ItinerarioActividad {
   moneda: string | null;
   establecimientoRecomendado: string | null;
   provincia: string;
+  puntuacionAmbientalEstimada?: number;
   puntuacionAmbiental?: PuntuacionAmbientalResponse;
   puntuacionAmbientalEstimada?: number | null;
   certificacionesActivas?: CertificacionActiva[];
