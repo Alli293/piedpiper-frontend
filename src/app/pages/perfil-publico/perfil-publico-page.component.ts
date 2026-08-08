@@ -5,6 +5,16 @@ import { DecimalPipe } from '@angular/common';
 import { Meta, Title } from '@angular/platform-browser';
 
 import { BaseChartDirective } from 'ng2-charts';
+import {
+  Chart,
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Filler,
+  Tooltip,
+} from 'chart.js';
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
 import { LogoComponent } from '../../shared/components/logo/logo.component';
 import {
@@ -30,6 +40,8 @@ const NIVEL_MAP: Record<string, NivelConfig> = {
 };
 
 const NIVELES_ORDEN = ['Bronce', 'Plata', 'Oro', 'Platino'];
+
+Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler, Tooltip);
 
 @Component({
   selector: 'app-perfil-publico-page',
