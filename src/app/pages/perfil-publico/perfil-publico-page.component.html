@@ -91,16 +91,16 @@
           <!-- Right: Nivel ecológico card -->
           <div
             class="pub-nivel"
-            [class.pub-nivel--sin-nivel]="getNivelConfig().clase === 'sin-nivel'"
-            [class.pub-nivel--bronce]="getNivelConfig().clase === 'bronce'"
-            [class.pub-nivel--plata]="getNivelConfig().clase === 'plata'"
-            [class.pub-nivel--oro]="getNivelConfig().clase === 'oro'"
-            [class.pub-nivel--platino]="getNivelConfig().clase === 'platino'"
+            [class.pub-nivel--sin-nivel]="nivelConfig().clase === 'sin-nivel'"
+            [class.pub-nivel--bronce]="nivelConfig().clase === 'bronce'"
+            [class.pub-nivel--plata]="nivelConfig().clase === 'plata'"
+            [class.pub-nivel--oro]="nivelConfig().clase === 'oro'"
+            [class.pub-nivel--platino]="nivelConfig().clase === 'platino'"
             aria-label="Nivel ecológico"
           >
             <span class="pub-nivel__label">NIVEL ECOLÓGICO</span>
             <span class="pub-nivel__nombre">
-              <app-icon [name]="getNivelConfig().icono" [size]="20" aria-hidden="true" />
+              <app-icon [name]="nivelConfig().icono" [size]="20" aria-hidden="true" />
               {{ perfil()?.nivelEcologico }}
             </span>
             <span class="pub-nivel__vigencia">Vigente {{ getAnioVigencia() }}</span>
@@ -110,8 +110,8 @@
               @for (nivel of nivelesOrden; track nivel; let i = $index) {
                 <div
                   class="pub-nivel__step"
-                  [class.pub-nivel__step--active]="i <= getNivelIndex()"
-                  [class.pub-nivel__step--current]="i === getNivelIndex()"
+                  [class.pub-nivel__step--active]="i <= nivelIndex()"
+                  [class.pub-nivel__step--current]="i === nivelIndex()"
                 >
                   <span class="pub-nivel__step-dot"></span>
                   <span class="pub-nivel__step-label">{{ nivel }}</span>
