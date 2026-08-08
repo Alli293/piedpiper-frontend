@@ -26,6 +26,7 @@ describe('PerfilPublicoService', () => {
     id: 'cert-1',
     tipo: 'CARBONO_NEUTRAL',
     nombreCertificacion: 'Carbono Neutral',
+    nombreAuditor: 'Ana Mora',
     fechaEmision: '2026-01-15T00:00:00Z',
     fechaVencimiento: '2027-01-15',
     estado: 'ACTIVA',

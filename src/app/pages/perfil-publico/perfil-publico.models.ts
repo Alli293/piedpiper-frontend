@@ -13,6 +13,7 @@ export interface CertificacionPublica {
   id: string;
   tipo: string;
   nombreCertificacion: string;
+  nombreAuditor: string;
   fechaEmision: string;
   fechaVencimiento: string;
   // Se mantiene como string (no un union) para tolerar valores nuevos que el
