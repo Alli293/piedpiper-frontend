@@ -16,10 +16,15 @@ describe('EcoRutaItinerariosService', () => {
     estado: 'GENERADO',
     version: 1,
     puntuacionAmbientalPreliminar: 85,
+    ecoScore: 85,
+    clasificacionAmbiental: 'EXCELENTE',
+    ecoScoreParcial: false,
+    ecoScoreCalculadoEn: '2026-07-30T20:38:19.896Z',
     fechaGeneracion: '2026-07-30T20:38:19.896Z',
     generadoParcial: false,
     mensajeParcial: null,
     dias: [],
+    establecimientosEvaluados: [],
   };
 
   beforeEach(() => {
