@@ -38,3 +38,14 @@ export interface PageResponse<T> {
 }
 
 export type { InsigniaEmpresa, NivelInsigniaEmpresa } from '../../core/empresa/empresa.models';
+
+export interface EvolucionHuellaPublica {
+  totalActualTco2e: number;
+  variacionPorcentual: number | null;
+  serie: PuntoAnualHuella[];
+}
+
+export interface PuntoAnualHuella {
+  anio: number;
+  totalTco2e: number;
+}

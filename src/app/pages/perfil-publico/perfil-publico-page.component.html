@@ -207,29 +207,49 @@
           </div>
         </div>
 
-        <div class="pub-chart-placeholder">
-          <div class="pub-chart-placeholder__header">
-            <div class="pub-chart-placeholder__stats">
-              <span class="pub-chart-placeholder__total">-- tCO₂e</span>
-              <span class="pub-chart-placeholder__change">--% vs año anterior</span>
+        @if (evolucion() && evolucion()!.serie.length > 0) {
+          <div class="pub-chart-placeholder">
+            <div class="pub-chart-placeholder__header">
+              <div class="pub-chart-placeholder__stats">
+                <span class="pub-chart-placeholder__total"
+                  >{{ evolucion()!.totalActualTco2e | number : '1.2-2' }} tCO₂e</span
+                >
+                @if (evolucion()!.variacionPorcentual !== null) {
+                  <span
+                    class="pub-chart-placeholder__change"
+                    [class.pub-chart-placeholder__change--down]="
+                      evolucion()!.variacionPorcentual! < 0
+                    "
+                    [class.pub-chart-placeholder__change--up]="
+                      evolucion()!.variacionPorcentual! > 0
+                    "
+                    >{{ evolucion()!.variacionPorcentual! > 0 ? '+' : ''
+                    }}{{ evolucion()!.variacionPorcentual }}% vs año anterior</span
+                  >
+                }
+              </div>
             </div>
-            <div class="pub-chart-placeholder__filters">
-              <button class="pub-chart-placeholder__filter" type="button">1A</button>
-              <button class="pub-chart-placeholder__filter" type="button">3A</button>
-              <button
-                class="pub-chart-placeholder__filter pub-chart-placeholder__filter--active"
-                type="button"
-              >
-                5A
-              </button>
-              <button class="pub-chart-placeholder__filter" type="button">Todo</button>
+            <div class="pub-chart-bars" aria-label="Gráfico de evolución anual">
+              @for (punto of evolucion()!.serie; track punto.anio) {
+                <div class="pub-chart-bars__col">
+                  <div
+                    class="pub-chart-bars__bar"
+                    [style.height.%]="(punto.totalTco2e / maxTco2e()) * 100"
+                    [attr.aria-label]="punto.anio + ': ' + punto.totalTco2e + ' tCO₂e'"
+                  ></div>
+                  <span class="pub-chart-bars__label">{{ punto.anio }}</span>
+                </div>
+              }
             </div>
           </div>
-          <div class="pub-chart-placeholder__body">
-            <app-icon name="emisiones" [size]="48" aria-hidden="true" />
-            <p>Los datos de evolución estarán disponibles próximamente.</p>
+        } @else {
+          <div class="pub-chart-placeholder">
+            <div class="pub-chart-placeholder__body">
+              <app-icon name="emisiones" [size]="48" aria-hidden="true" />
+              <p>No hay datos de emisiones registrados.</p>
+            </div>
           </div>
-        </div>
+        }
       </section>
     </main>
 

@@ -1,11 +1,17 @@
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { DecimalPipe } from '@angular/common';
 import { Meta, Title } from '@angular/platform-browser';
 
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
 import { LogoComponent } from '../../shared/components/logo/logo.component';
-import { CertificacionPublica, InsigniaEmpresa, PerfilPublicoDTO } from './perfil-publico.models';
+import {
+  CertificacionPublica,
+  EvolucionHuellaPublica,
+  InsigniaEmpresa,
+  PerfilPublicoDTO,
+} from './perfil-publico.models';
 import { PerfilPublicoService } from './perfil-publico.service';
 
 interface NivelConfig {
@@ -29,7 +35,7 @@ const NIVELES_ORDEN = ['Bronce', 'Plata', 'Oro', 'Platino'];
   standalone: true,
   templateUrl: './perfil-publico-page.component.html',
   styleUrl: './perfil-publico-page.component.scss',
-  imports: [IconComponent, LogoComponent],
+  imports: [IconComponent, LogoComponent, DecimalPipe],
 })
 export class PerfilPublicoPageComponent {
   private readonly route = inject(ActivatedRoute);
@@ -42,7 +48,14 @@ export class PerfilPublicoPageComponent {
   protected perfil = signal<PerfilPublicoDTO | null>(null);
   protected certificaciones = signal<CertificacionPublica[]>([]);
   protected insignias = signal<InsigniaEmpresa[]>([]);
+  protected evolucion = signal<EvolucionHuellaPublica | null>(null);
   protected mensajeError = signal<string>('');
+
+  protected readonly maxTco2e = computed(() => {
+    const ev = this.evolucion();
+    if (!ev || ev.serie.length === 0) return 1;
+    return Math.max(...ev.serie.map((p) => p.totalTco2e), 0.001);
+  });
 
   protected readonly nivelesOrden = NIVELES_ORDEN;
 
@@ -66,6 +79,7 @@ export class PerfilPublicoPageComponent {
         this.actualizarMetaTags(dto, slug);
         this.cargarCertificaciones(slug);
         this.cargarInsignias(slug);
+        this.cargarEvolucion(slug);
       },
       error: (err: unknown) => {
         if (err instanceof HttpErrorResponse && err.status === 404) {
@@ -92,6 +106,13 @@ export class PerfilPublicoPageComponent {
     this.perfilService.listarInsignias(slug).subscribe({
       next: (ins) => this.insignias.set(ins),
       error: () => this.insignias.set([]),
+    });
+  }
+
+  private cargarEvolucion(slug: string): void {
+    this.perfilService.obtenerEvolucionHuella(slug).subscribe({
+      next: (ev) => this.evolucion.set(ev),
+      error: () => this.evolucion.set(null),
     });
   }
 

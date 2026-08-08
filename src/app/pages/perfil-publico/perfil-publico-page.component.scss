@@ -688,6 +688,48 @@
   }
 }
 
+// === Chart bars ===
+.pub-chart-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--ch-space-3);
+  padding: var(--ch-space-6) var(--ch-space-4);
+  min-height: 200px;
+
+  &__col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ch-space-2);
+    flex: 1;
+    max-width: 60px;
+  }
+
+  &__bar {
+    width: 100%;
+    min-height: 4px;
+    background: var(--ch-green);
+    border-radius: var(--ch-radius-sm) var(--ch-radius-sm) 0 0;
+    transition: height 0.3s ease;
+  }
+
+  &__label {
+    font-family: var(--ch-font-body);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--ch-text-muted);
+  }
+}
+
+.pub-chart-placeholder__change--down {
+  color: var(--ch-green-dark);
+}
+
+.pub-chart-placeholder__change--up {
+  color: #dc2626;
+}
+
 // === Footer ===
 .pub-footer {
   border-top: 1px solid var(--ch-border);
