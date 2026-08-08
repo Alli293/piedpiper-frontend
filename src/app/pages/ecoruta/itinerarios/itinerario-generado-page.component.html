@@ -87,6 +87,7 @@
                 class="ch-itinerario-generado__dia-header"
                 (click)="toggleDia(dia.numeroDia)"
                 [attr.aria-expanded]="diaExpandido(dia.numeroDia)"
+                [attr.aria-controls]="'ch-itinerario-generado__actividades-' + dia.numeroDia"
               >
                 <span class="ch-itinerario-generado__dia-numero">{{ dia.numeroDia }}</span>
                 <div>
@@ -112,7 +113,10 @@
               </button>
 
               @if (diaExpandido(dia.numeroDia)) {
-                <ul class="ch-itinerario-generado__actividades">
+                <ul
+                  class="ch-itinerario-generado__actividades"
+                  [id]="'ch-itinerario-generado__actividades-' + dia.numeroDia"
+                >
                   @for (actividad of dia.actividades; track actividad.nombre + actividad.horario) {
                     <li class="ch-itinerario-generado__actividad">
                       <span class="ch-itinerario-generado__actividad-icono" aria-hidden="true">
@@ -149,7 +153,7 @@
                         <app-button
                           variant="tertiary"
                           size="sm"
-                          (click)="preguntarSobreActividad()"
+                          (click)="preguntarSobreActividad(actividad)"
                         >
                           Preguntar sobre esto
                         </app-button>

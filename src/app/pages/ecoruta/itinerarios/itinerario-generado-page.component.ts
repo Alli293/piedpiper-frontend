@@ -87,6 +87,7 @@ export class ItinerarioGeneradoPageComponent {
     return `${(score / 100) * circumference}, ${circumference}`;
   });
 
+  // TODO(PP-88): reemplazar por comparación real de versión cuando exista la regeneración.
   protected readonly esVersionVigente = computed(() => true);
 
   constructor() {
@@ -136,7 +137,11 @@ export class ItinerarioGeneradoPageComponent {
   protected toggleDia(numeroDia: number): void {
     this.diasExpandidos.update((actual) => {
       const siguiente = new Set(actual);
-      siguiente.has(numeroDia) ? siguiente.delete(numeroDia) : siguiente.add(numeroDia);
+      if (siguiente.has(numeroDia)) {
+        siguiente.delete(numeroDia);
+      } else {
+        siguiente.add(numeroDia);
+      }
       return siguiente;
     });
   }
@@ -145,11 +150,16 @@ export class ItinerarioGeneradoPageComponent {
     return this.diasExpandidos().has(numeroDia);
   }
 
+  /**
+   * `costoAproximado` nunca es null acá: el único call site en la plantilla ya filtra con
+   * `@if (actividad.costoAproximado !== null)` antes de invocar este método.
+   */
   protected formatearCosto(actividad: ItinerarioActividad): string {
-    return formatCurrency(actividad.costoAproximado ?? 0, actividad.moneda ?? 'CRC');
+    return formatCurrency(actividad.costoAproximado!, actividad.moneda);
   }
 
-  protected preguntarSobreActividad(): void {
+  // TODO(PP-88): pasarle el contexto de `actividad` al chat en vez de solo hacer scroll.
+  protected preguntarSobreActividad(actividad: ItinerarioActividad): void {
     this.chatPanel()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 

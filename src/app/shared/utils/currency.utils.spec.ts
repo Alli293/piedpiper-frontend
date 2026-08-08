@@ -18,4 +18,17 @@ describe('formatCurrency', () => {
     // extranjeras — "$" en Costa Rica es ambiguo (podría ser colones o dólares).
     expect(formatCurrency(12, 'USD')).toContain('USD');
   });
+
+  it('cae a CRC cuando la moneda es null', () => {
+    expect(formatCurrency(1000, null)).toContain('₡');
+  });
+
+  it('cae a CRC cuando la moneda es un string vacío', () => {
+    expect(formatCurrency(1000, '')).toContain('₡');
+  });
+
+  it('cae a CRC en vez de lanzar RangeError con un código de moneda inválido', () => {
+    expect(() => formatCurrency(1000, 'NO_ES_UN_CODIGO')).not.toThrow();
+    expect(formatCurrency(1000, 'NO_ES_UN_CODIGO')).toContain('₡');
+  });
 });
