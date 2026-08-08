@@ -133,12 +133,15 @@ function esFiltroValido(valor: string): valor is FiltroVigencia {
 
 // Mapea el `estado` que envía el panel "Estado de certificaciones" del
 // dashboard (activa | proxima_a_vencer | vencida) al filtro de vigencia que
-// soporta este listado. Este listado aun no distingue "próximas a vencer"
-// como chip propio, así que se agrupa junto con "activa" bajo VIGENTE.
+// soporta este listado. `proxima_a_vencer` NO se mapea a propósito: este
+// listado aun no tiene un chip para esa noción, y agruparla bajo VIGENTE
+// hacía que la tarjeta prometiera un filtro que no cumplía (ver comentarios
+// de PR #74). Mientras ese chip no exista, esa tarjeta no es un enlace
+// (`estado-certificaciones-panel`), así que este caso no debería llegar
+// nunca en la práctica; se deja el fallback a TODAS por seguridad.
 function mapEstadoAFiltro(estado: string | null): FiltroVigencia | null {
   switch (estado) {
     case 'activa':
-    case 'proxima_a_vencer':
       return 'VIGENTE';
     case 'vencida':
       return 'VENCIDA';

@@ -16,25 +16,41 @@
   } @else {
     <div class="ch-estado-cert__grid">
       @for (tarjeta of tarjetas(); track tarjeta.estado) {
-        <a
-          class="ch-estado-cert__card"
-          [class.ch-estado-cert__card--success]="tarjeta.tono === 'success'"
-          [class.ch-estado-cert__card--warning]="tarjeta.tono === 'warning'"
-          [class.ch-estado-cert__card--danger]="tarjeta.tono === 'danger'"
-          routerLink="/empresa/certificaciones/listado"
-          [queryParams]="{ estado: tarjeta.estado }"
-          [attr.aria-label]="tarjeta.label + ': ' + tarjeta.value + ' certificaciones'"
-        >
-          <span class="ch-estado-cert__card-top">
-            <span class="ch-estado-cert__card-icon">
-              <app-icon [name]="tarjeta.icon" [size]="16" />
-            </span>
+        @if (tarjeta.enlazable) {
+          <a
+            class="ch-estado-cert__card"
+            [class.ch-estado-cert__card--success]="tarjeta.tono === 'success'"
+            [class.ch-estado-cert__card--warning]="tarjeta.tono === 'warning'"
+            [class.ch-estado-cert__card--danger]="tarjeta.tono === 'danger'"
+            routerLink="/empresa/certificaciones/listado"
+            [queryParams]="{ estado: tarjeta.estado }"
+            [attr.aria-label]="tarjeta.label + ': ' + tarjeta.value + ' certificaciones'"
+          >
+            <ng-container *ngTemplateOutlet="contenidoTarjeta; context: { $implicit: tarjeta }" />
             <span class="ch-estado-cert__card-arrow" aria-hidden="true">↗</span>
-          </span>
-          <span class="ch-estado-cert__card-value">{{ tarjeta.value }}</span>
-          <span class="ch-estado-cert__card-label">{{ tarjeta.label }}</span>
-        </a>
+          </a>
+        } @else {
+          <div
+            class="ch-estado-cert__card ch-estado-cert__card--sin-enlace"
+            [class.ch-estado-cert__card--success]="tarjeta.tono === 'success'"
+            [class.ch-estado-cert__card--warning]="tarjeta.tono === 'warning'"
+            [class.ch-estado-cert__card--danger]="tarjeta.tono === 'danger'"
+            [attr.aria-label]="tarjeta.label + ': ' + tarjeta.value + ' certificaciones'"
+          >
+            <ng-container *ngTemplateOutlet="contenidoTarjeta; context: { $implicit: tarjeta }" />
+          </div>
+        }
       }
     </div>
   }
 </article>
+
+<ng-template #contenidoTarjeta let-tarjeta>
+  <span class="ch-estado-cert__card-top">
+    <span class="ch-estado-cert__card-icon">
+      <app-icon [name]="tarjeta.icon" [size]="16" />
+    </span>
+  </span>
+  <span class="ch-estado-cert__card-value">{{ tarjeta.value }}</span>
+  <span class="ch-estado-cert__card-label">{{ tarjeta.label }}</span>
+</ng-template>
