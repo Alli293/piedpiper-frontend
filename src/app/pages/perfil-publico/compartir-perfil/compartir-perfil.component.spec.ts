@@ -227,4 +227,53 @@ describe('CompartirPerfilComponent', () => {
       'No fue posible copiar el enlace. Selecciona la URL manualmente.'
     );
   });
+
+  it('previsualización del sello sanitiza HTML potencialmente peligroso', () => {
+    const htmlMalicioso =
+      '<img src="x" onerror="alert(1)"><script>alert("xss")</script><a href="javascript:void(0)">Click</a>';
+    perfilPublicoService.obtenerEnlaceComparticion.mockReturnValue(
+      of({ ...ENLACE_COMPLETO, codigoIncrustar: htmlMalicioso })
+    );
+
+    const fixture = crear();
+    const root = fixture.nativeElement as HTMLElement;
+    const preview = root.querySelector('.ch-compartir__sello-preview')!;
+
+    // Angular sanitiza [innerHTML]: scripts se eliminan, onerror se elimina,
+    // y URLs con javascript: se marcan como "unsafe:" haciéndolas inoperables
+    expect(preview.innerHTML).not.toContain('<script>');
+    expect(preview.innerHTML).not.toContain('onerror');
+    expect(preview.innerHTML).not.toContain('href="javascript:');
+
+    // El código crudo SÍ se muestra tal cual en el bloque <code> (solo texto, no se ejecuta)
+    const codeBlock = root.querySelector('.ch-compartir__code-block');
+    expect(codeBlock?.textContent).toContain('<script>');
+  });
+
+  it('limpiarMetaTags restaura el contenido previo en lugar de eliminar tags existentes', () => {
+    // Simular que la página padre ya creó un og:title
+    const existingMeta = document.createElement('meta');
+    existingMeta.setAttribute('property', 'og:title');
+    existingMeta.setAttribute('content', 'Título previo de la página padre');
+    document.head.appendChild(existingMeta);
+
+    const fixture = crear();
+
+    // Tras cargar el componente, el meta tag debería tener el contenido del DTO
+    const metaActual = document.head.querySelector<HTMLMetaElement>('meta[property="og:title"]');
+    expect(metaActual).not.toBeNull();
+    expect(metaActual!.getAttribute('content')).toBe(ENLACE_COMPLETO.ogTitulo);
+
+    // Al destruir el componente, debería restaurar el valor previo, no eliminar el tag
+    fixture.destroy();
+
+    const metaRestaurado = document.head.querySelector<HTMLMetaElement>(
+      'meta[property="og:title"]'
+    );
+    expect(metaRestaurado).not.toBeNull();
+    expect(metaRestaurado!.getAttribute('content')).toBe('Título previo de la página padre');
+
+    // Limpiar
+    existingMeta.remove();
+  });
 });

@@ -23,7 +23,8 @@ export class CompartirPerfilComponent implements OnInit, OnDestroy {
   protected readonly ogImagenError = signal<boolean>(false);
 
   private copiadoTimeout: ReturnType<typeof setTimeout> | null = null;
-  private readonly metaTagsInsertados: HTMLMetaElement[] = [];
+  private readonly metaTagsCreados: HTMLMetaElement[] = [];
+  private readonly metaTagsPrevios = new Map<HTMLMetaElement, string>();
 
   ngOnInit(): void {
     this.cargarEnlace();
@@ -136,23 +137,29 @@ export class CompartirPerfilComponent implements OnInit, OnDestroy {
     ];
 
     for (const tag of tags) {
-      let meta = head.querySelector<HTMLMetaElement>(`meta[property="${tag.property}"]`);
-      if (meta) {
-        meta.setAttribute('content', tag.content);
+      const existente = head.querySelector<HTMLMetaElement>(`meta[property="${tag.property}"]`);
+      if (existente) {
+        this.metaTagsPrevios.set(existente, existente.getAttribute('content') ?? '');
+        existente.setAttribute('content', tag.content);
       } else {
-        meta = this.document.createElement('meta');
+        const meta = this.document.createElement('meta');
         meta.setAttribute('property', tag.property);
         meta.setAttribute('content', tag.content);
         head.appendChild(meta);
+        this.metaTagsCreados.push(meta);
       }
-      this.metaTagsInsertados.push(meta);
     }
   }
 
   private limpiarMetaTags(): void {
-    for (const meta of this.metaTagsInsertados) {
+    for (const meta of this.metaTagsCreados) {
       meta.remove();
     }
-    this.metaTagsInsertados.length = 0;
+    this.metaTagsCreados.length = 0;
+
+    for (const [meta, contenidoPrevio] of this.metaTagsPrevios) {
+      meta.setAttribute('content', contenidoPrevio);
+    }
+    this.metaTagsPrevios.clear();
   }
 }

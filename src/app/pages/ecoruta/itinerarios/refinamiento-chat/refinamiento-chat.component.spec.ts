@@ -76,8 +76,15 @@ describe('RefinamientoChatComponent', () => {
 
 describe('RefinamientoChatComponent — integración con alternativas', () => {
   let fixture: ComponentFixture<RefinamientoChatComponent>;
-  let alternativasService: { obtenerAlternativas: ReturnType<typeof vi.fn>; sustituirActividad: ReturnType<typeof vi.fn> };
-  let toastService: { info: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; success: ReturnType<typeof vi.fn> };
+  let alternativasService: {
+    obtenerAlternativas: ReturnType<typeof vi.fn>;
+    sustituirActividad: ReturnType<typeof vi.fn>;
+  };
+  let toastService: {
+    info: ReturnType<typeof vi.fn>;
+    error: ReturnType<typeof vi.fn>;
+    success: ReturnType<typeof vi.fn>;
+  };
 
   const itinerarioConActividades: Itinerario = {
     id: 'itin-1',
@@ -188,7 +195,7 @@ describe('RefinamientoChatComponent — integración con alternativas', () => {
 
   function clickCompararAlternativas(): void {
     const btnComparar = (fixture.nativeElement as HTMLElement).querySelector(
-      '.ch-refinamiento-chat__btn-comparar',
+      '.ch-refinamiento-chat__btn-comparar'
     ) as HTMLButtonElement;
     btnComparar.click();
     fixture.detectChanges();
@@ -202,7 +209,7 @@ describe('RefinamientoChatComponent — integración con alternativas', () => {
       clickCompararAlternativas();
 
       const tarjetas = (fixture.nativeElement as HTMLElement).querySelector(
-        'app-alternativas-comparacion',
+        'app-alternativas-comparacion'
       );
       expect(tarjetas).not.toBeNull();
     });
@@ -211,7 +218,7 @@ describe('RefinamientoChatComponent — integración con alternativas', () => {
       await setup();
 
       const tarjetas = (fixture.nativeElement as HTMLElement).querySelector(
-        'app-alternativas-comparacion',
+        'app-alternativas-comparacion'
       );
       expect(tarjetas).toBeNull();
     });
@@ -232,7 +239,7 @@ describe('RefinamientoChatComponent — integración con alternativas', () => {
       expect(toastService.info).toHaveBeenCalledWith(
         'No existen alternativas disponibles para esta actividad.',
         undefined,
-        5000,
+        5000
       );
     });
 
@@ -246,7 +253,7 @@ describe('RefinamientoChatComponent — integración con alternativas', () => {
       expect(toastService.error).toHaveBeenCalledWith(
         'No tienes permiso para acceder a este itinerario.',
         undefined,
-        5000,
+        5000
       );
     });
 
@@ -260,7 +267,7 @@ describe('RefinamientoChatComponent — integración con alternativas', () => {
       expect(toastService.error).toHaveBeenCalledWith(
         'No fue posible generar la comparación solicitada.',
         undefined,
-        5000,
+        5000
       );
     });
 
@@ -280,11 +287,11 @@ describe('RefinamientoChatComponent — integración con alternativas', () => {
       expect(toastService.error).toHaveBeenCalledWith(
         'No fue posible realizar la sustitución. Intenta nuevamente.',
         undefined,
-        5000,
+        5000
       );
       // comparacionResponse should still be present (cards still visible)
       const tarjetas = (fixture.nativeElement as HTMLElement).querySelector(
-        'app-alternativas-comparacion',
+        'app-alternativas-comparacion'
       );
       expect(tarjetas).not.toBeNull();
     });
@@ -328,11 +335,11 @@ describe('RefinamientoChatComponent — integración con alternativas', () => {
       expect(toastService.success).toHaveBeenCalledWith(
         'Actividad reemplazada exitosamente.',
         undefined,
-        5000,
+        5000
       );
       // After successful substitution, comparacionResponse is cleared (cards disappear)
       const tarjetas = (fixture.nativeElement as HTMLElement).querySelector(
-        'app-alternativas-comparacion',
+        'app-alternativas-comparacion'
       );
       expect(tarjetas).toBeNull();
     });

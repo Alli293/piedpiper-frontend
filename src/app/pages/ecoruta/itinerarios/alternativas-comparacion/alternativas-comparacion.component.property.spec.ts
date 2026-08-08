@@ -33,7 +33,9 @@ describe('Property 7: Card rendering includes all required fields with correct i
     mejorDesempeno: fc.boolean(),
   });
 
-  function createComponent(alternativas: AlternativaDTO[]): ComponentFixture<AlternativasComparacionComponent> {
+  function createComponent(
+    alternativas: AlternativaDTO[]
+  ): ComponentFixture<AlternativasComparacionComponent> {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       imports: [AlternativasComparacionComponent],
@@ -41,7 +43,10 @@ describe('Property 7: Card rendering includes all required fields with correct i
 
     const fixture = TestBed.createComponent(AlternativasComparacionComponent);
     fixture.componentRef.setInput('alternativas', alternativas);
-    fixture.componentRef.setInput('actividadOriginal', { nombre: 'Actividad Original', ecoScore: 50 });
+    fixture.componentRef.setInput('actividadOriginal', {
+      nombre: 'Actividad Original',
+      ecoScore: 50,
+    });
     fixture.componentRef.setInput('cargando', false);
     fixture.detectChanges();
     return fixture;
