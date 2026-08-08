@@ -15,6 +15,7 @@ import {
 } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from '../../../core/auth-session.service';
+import { InsigniaNotificacionService } from '../../../core/services/insignia-notificacion.service';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { ChipSelectComponent } from '../../../shared/components/inputs/chip-select/chip-select.component';
@@ -88,6 +89,7 @@ const INITIAL_MODEL: PreferenciasViajeFormModel = {
 export class EcoRutaPreferenciasPageComponent implements OnInit {
   private readonly ecoRutaPreferenciasService = inject(EcoRutaPreferenciasService);
   private readonly itinerariosService = inject(EcoRutaItinerariosService);
+  private readonly insigniaNotificacionService = inject(InsigniaNotificacionService);
   private readonly authSession = inject(AuthSessionService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
@@ -257,9 +259,11 @@ export class EcoRutaPreferenciasPageComponent implements OnInit {
         }
 
         this.generandoItinerario.set(true);
+        const idsPrevios = await this.insigniaNotificacionService.obtenerIdsActuales();
         try {
           const itinerario = await firstValueFrom(this.itinerariosService.generar());
           await this.router.navigateByUrl(`/ecoruta/itinerarios/${itinerario.id}`);
+          void this.insigniaNotificacionService.revisarConReintentos(idsPrevios);
         } catch (error: unknown) {
           this.manejarErrorGeneracion(error);
         } finally {
