@@ -297,5 +297,26 @@ describe('PerfilPublicoPageComponent', () => {
       // Debe haber un canvas para chart.js
       expect(el.querySelector('canvas')).not.toBeNull();
     });
+
+    it('no muestra el boton de compartir del header mientras el perfil esta cargando', () => {
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('.ch-public-header__compartir')).toBeNull();
+    });
+
+    it('abre el modal de compartir perfil al hacer clic en compartir del header', () => {
+      fixture.detectChanges();
+      flushPerfil(PERFIL_MOCK);
+
+      const el = fixture.nativeElement as HTMLElement;
+      const botonCompartir: HTMLElement | null = el.querySelector('.ch-public-header__compartir');
+      expect(botonCompartir).not.toBeNull();
+
+      botonCompartir!.click();
+      fixture.detectChanges();
+
+      expect(el.querySelector('.pub-modal__title')?.textContent).toContain('Compartir perfil');
+    });
   });
 });

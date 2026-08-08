@@ -1,6 +1,6 @@
 <app-public-header
   [mostrarBadgeVerificado]="true"
-  [mostrarCompartir]="true"
+  [mostrarCompartir]="estado() === 'exito'"
   [mostrarLogin]="true"
   (compartir)="toggleCompartir()"
 />
