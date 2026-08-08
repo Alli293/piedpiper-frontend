@@ -4,7 +4,11 @@ import { IconComponent } from '../../../../shared/components/icon/icon.component
 import { ToastService } from '../../../../shared/services/toast.service';
 import { AlternativasComparacionComponent } from '../alternativas-comparacion/alternativas-comparacion.component';
 import { EcoRutaAlternativasService } from '../ecoruta-alternativas.service';
-import { AlternativaDTO, ComparacionResponse, SustitucionRequest } from '../models/alternativas.model';
+import {
+  AlternativaDTO,
+  ComparacionResponse,
+  SustitucionRequest,
+} from '../models/alternativas.model';
 import { Itinerario, ItinerarioActividad } from '../models/itinerario.model';
 
 @Component({
@@ -72,13 +76,13 @@ export class RefinamientoChatComponent {
           this.toastService.error(
             'No tienes permiso para acceder a este itinerario.',
             undefined,
-            5000,
+            5000
           );
         } else {
           this.toastService.error(
             'No fue posible generar la comparación solicitada.',
             undefined,
-            5000,
+            5000
           );
         }
       },
@@ -113,13 +117,13 @@ export class RefinamientoChatComponent {
           this.toastService.error(
             'No tienes permiso para acceder a este itinerario.',
             undefined,
-            5000,
+            5000
           );
         } else {
           this.toastService.error(
             'No fue posible realizar la sustitución. Intenta nuevamente.',
             undefined,
-            5000,
+            5000
           );
         }
       },

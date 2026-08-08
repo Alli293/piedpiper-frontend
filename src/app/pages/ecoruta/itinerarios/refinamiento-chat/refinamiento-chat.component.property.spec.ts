@@ -30,7 +30,7 @@ describe('Property 8: Failed substitution preserves original itinerary state', (
     moneda: fc.oneof(fc.constant(null), fc.constant('CRC'), fc.constant('USD')),
     establecimientoRecomendado: fc.oneof(
       fc.constant(null),
-      fc.string({ minLength: 1, maxLength: 30 }),
+      fc.string({ minLength: 1, maxLength: 30 })
     ),
     provincia: fc.constantFrom(
       'San José',
@@ -39,17 +39,16 @@ describe('Property 8: Failed substitution preserves original itinerary state', (
       'Heredia',
       'Guanacaste',
       'Puntarenas',
-      'Limón',
+      'Limón'
     ),
     puntuacionAmbientalEstimada: fc.oneof(fc.constant(undefined), fc.integer({ min: 0, max: 100 })),
     puntuacionAmbiental: fc.constant(undefined),
     certificacionesActivas: fc.constant(undefined),
   });
 
-  const itinerarioArb: fc.Arbitrary<Itinerario> = fc
-    .integer({ min: 1, max: 4 })
-    .chain((numDias) =>
-      fc.tuple(
+  const itinerarioArb: fc.Arbitrary<Itinerario> = fc.integer({ min: 1, max: 4 }).chain((numDias) =>
+    fc
+      .tuple(
         fc.uuid(),
         fc.constantFrom('INDIVIDUAL', 'PAREJA', 'FAMILIAR'),
         fc.constantFrom('GENERADO', 'REFINADO'),
@@ -59,28 +58,40 @@ describe('Property 8: Failed substitution preserves original itinerary state', (
         fc.oneof(fc.constant(null), fc.string({ minLength: 1, maxLength: 20 })),
         // Generate dias with unique numeroDia and 1-3 actividades each
         ...Array.from({ length: numDias }, (_, i) =>
-          fc.array(actividadArb, { minLength: 1, maxLength: 3 }).map(
-            (actividades): ItinerarioDia => ({
+          fc
+            .array(actividadArb, { minLength: 1, maxLength: 3 })
+            .map((actividades): ItinerarioDia => ({
               numeroDia: i + 1,
               fecha: `2026-09-0${i + 1}`,
               actividades,
-            }),
-          ),
-        ),
-      ).map(([id, tipoViaje, estado, version, puntuacion, generadoParcial, mensajeParcial, ...dias]) => ({
-        id: id as string,
-        cantidadDias: numDias,
-        fechaInicio: '2026-09-01',
-        tipoViaje: tipoViaje as string,
-        estado: estado as string,
-        version: version as number,
-        puntuacionAmbientalPreliminar: puntuacion as number | null,
-        fechaGeneracion: '2026-07-30T20:00:00Z',
-        generadoParcial: generadoParcial as boolean,
-        mensajeParcial: mensajeParcial as string | null,
-        dias: dias as ItinerarioDia[],
-      })),
-    );
+            }))
+        )
+      )
+      .map(
+        ([
+          id,
+          tipoViaje,
+          estado,
+          version,
+          puntuacion,
+          generadoParcial,
+          mensajeParcial,
+          ...dias
+        ]) => ({
+          id: id as string,
+          cantidadDias: numDias,
+          fechaInicio: '2026-09-01',
+          tipoViaje: tipoViaje as string,
+          estado: estado as string,
+          version: version as number,
+          puntuacionAmbientalPreliminar: puntuacion as number | null,
+          fechaGeneracion: '2026-07-30T20:00:00Z',
+          generadoParcial: generadoParcial as boolean,
+          mensajeParcial: mensajeParcial as string | null,
+          dias: dias as ItinerarioDia[],
+        })
+      )
+  );
 
   // Generate a valid AlternativaDTO (the one the user would try to replace with)
   const alternativaArb: fc.Arbitrary<AlternativaDTO> = fc.record({
@@ -94,7 +105,7 @@ describe('Property 8: Failed substitution preserves original itinerary state', (
     moneda: fc.oneof(fc.constant(null), fc.constant('CRC'), fc.constant('USD')),
     establecimientoRecomendado: fc.oneof(
       fc.constant(null),
-      fc.string({ minLength: 1, maxLength: 30 }),
+      fc.string({ minLength: 1, maxLength: 30 })
     ),
     diferenciaAmbiental: fc.integer({ min: -100, max: 100 }),
     mejorDesempeno: fc.boolean(),
@@ -111,9 +122,7 @@ describe('Property 8: Failed substitution preserves original itinerary state', (
         errorStatusArb,
         (itinerario, alternativa, errorStatus) => {
           // Ensure there's at least one actividad with an id to select
-          const actividadConId = itinerario.dias
-            .flatMap((d) => d.actividades)
-            .find((a) => a.id);
+          const actividadConId = itinerario.dias.flatMap((d) => d.actividades).find((a) => a.id);
           if (!actividadConId) return; // skip if no actividad with id
 
           TestBed.resetTestingModule();
@@ -139,13 +148,8 @@ describe('Property 8: Failed substitution preserves original itinerary state', (
           component['onReemplazar'](alternativa);
 
           // The service should have made a PUT request — respond with an error
-          const req = httpMock.expectOne(
-            (r) => r.method === 'PUT' && r.url.includes('/sustituir'),
-          );
-          req.flush(
-            { message: 'Error' },
-            { status: errorStatus, statusText: 'Error' },
-          );
+          const req = httpMock.expectOne((r) => r.method === 'PUT' && r.url.includes('/sustituir'));
+          req.flush({ message: 'Error' }, { status: errorStatus, statusText: 'Error' });
           fixture.detectChanges();
 
           // The itinerario signal should remain unchanged
@@ -157,9 +161,9 @@ describe('Property 8: Failed substitution preserves original itinerary state', (
 
           fixture.destroy();
           httpMock.verify();
-        },
+        }
       ),
-      { numRuns: 100 },
+      { numRuns: 100 }
     );
   }, 30000);
 });

@@ -40,7 +40,7 @@ const ACTIVIDAD_ORIGINAL = { nombre: 'Canopy extremo', ecoScore: 60 };
 describe('AlternativasComparacionComponent', () => {
   function crearFixture(
     alternativas: AlternativaDTO[] = ALTERNATIVAS_MOCK,
-    opciones: { cargando?: boolean } = {},
+    opciones: { cargando?: boolean } = {}
   ): ComponentFixture<AlternativasComparacionComponent> {
     const fixture = TestBed.configureTestingModule({
       imports: [AlternativasComparacionComponent],
@@ -109,7 +109,7 @@ describe('AlternativasComparacionComponent', () => {
 
       expect(diferencias[0].classList.contains('ch-alternativas__diferencia--positiva')).toBe(true);
       expect(diferencias[0].classList.contains('ch-alternativas__diferencia--negativa')).toBe(
-        false,
+        false
       );
     });
 
@@ -119,7 +119,7 @@ describe('AlternativasComparacionComponent', () => {
 
       expect(diferencias[2].classList.contains('ch-alternativas__diferencia--negativa')).toBe(true);
       expect(diferencias[2].classList.contains('ch-alternativas__diferencia--positiva')).toBe(
-        false,
+        false
       );
     });
   });
@@ -145,7 +145,7 @@ describe('AlternativasComparacionComponent', () => {
     it('muestra botón general "Cambialo por el..." con nombre de la mejor alternativa', () => {
       const fixture = crearFixture();
       const botonGeneral = fixture.nativeElement.querySelector(
-        '.ch-alternativas__boton-reemplazar',
+        '.ch-alternativas__boton-reemplazar'
       );
 
       expect(botonGeneral).not.toBeNull();
@@ -171,7 +171,7 @@ describe('AlternativasComparacionComponent', () => {
       fixture.componentInstance.reemplazar.subscribe((alt: AlternativaDTO) => (emitida = alt));
 
       const botonGeneral = fixture.nativeElement.querySelector(
-        '.ch-alternativas__boton-reemplazar',
+        '.ch-alternativas__boton-reemplazar'
       );
       botonGeneral.click();
 

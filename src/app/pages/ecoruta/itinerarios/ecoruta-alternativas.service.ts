@@ -17,7 +17,11 @@ export class EcoRutaAlternativasService {
     );
   }
 
-  sustituirActividad(itinerarioId: string, actividadId: string, body: SustitucionRequest): Observable<Itinerario> {
+  sustituirActividad(
+    itinerarioId: string,
+    actividadId: string,
+    body: SustitucionRequest
+  ): Observable<Itinerario> {
     return this.http.put<Itinerario>(
       `${EcoRutaAlternativasService.URL}/${itinerarioId}/actividades/${actividadId}/sustituir`,
       body

@@ -21,6 +21,6 @@ export class AlternativasComparacionComponent {
   }
 
   protected getMejorAlternativa(): AlternativaDTO | undefined {
-    return this.alternativas().find(a => a.mejorDesempeno);
+    return this.alternativas().find((a) => a.mejorDesempeno);
   }
 }

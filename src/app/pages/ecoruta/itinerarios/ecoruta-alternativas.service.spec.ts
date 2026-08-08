@@ -72,7 +72,9 @@ describe('EcoRutaAlternativasService', () => {
   describe('obtenerAlternativas', () => {
     it('hace GET a /ecoruta/itinerarios/{id}/actividades/{actividadId}/alternativas', () => {
       let resultado: ComparacionResponse | undefined;
-      service.obtenerAlternativas(itinerarioId, actividadId).subscribe((response) => (resultado = response));
+      service
+        .obtenerAlternativas(itinerarioId, actividadId)
+        .subscribe((response) => (resultado = response));
 
       const req = httpMock.expectOne(
         `${EcoRutaAlternativasService.URL}/${itinerarioId}/actividades/${actividadId}/alternativas`
