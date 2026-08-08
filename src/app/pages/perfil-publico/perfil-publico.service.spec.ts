@@ -4,7 +4,12 @@ import { TestBed } from '@angular/core/testing';
 import * as fc from 'fast-check';
 import { environment } from '../../../environments/environment';
 import { EnlacePerfilDTO } from './models/enlace-perfil.model';
-import { CertificacionPublica, EvolucionHuellaPublica, InsigniaEmpresa, PerfilPublicoDTO } from './perfil-publico.models';
+import {
+  CertificacionPublica,
+  EvolucionHuellaPublica,
+  InsigniaEmpresa,
+  PerfilPublicoDTO,
+} from './perfil-publico.models';
 import { PerfilPublicoService } from './perfil-publico.service';
 
 describe('PerfilPublicoService', () => {
