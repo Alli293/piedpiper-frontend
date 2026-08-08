@@ -26,8 +26,16 @@ interface BandaEcoScore {
   variant: BadgeVariant;
 }
 
+const BANDA_POR_CLASIFICACION: Record<string, BandaEcoScore> = {
+  EXCELENTE: { texto: 'Excelente', variant: 'success' },
+  BUENA: { texto: 'Buena', variant: 'info' },
+  MODERADA: { texto: 'Moderada', variant: 'warning' },
+  MEJORABLE: { texto: 'Mejorable', variant: 'danger' },
+};
+
 const ERROR_CARGA = 'No se pudo cargar el itinerario. Intenta nuevamente.';
 const ERROR_ACCESO_DENEGADO = 'No tienes permiso para acceder a este itinerario.';
+const ECOSCORE_NO_DISPONIBLE = 'No fue posible calcular el impacto ambiental del itinerario.';
 const TOAST_DURATION_MS = 5000;
 
 @Component({
@@ -72,16 +80,19 @@ export class ItinerarioGeneradoPageComponent {
   }));
 
   protected readonly bandaEcoScore = computed<BandaEcoScore | null>(() => {
-    const score = this.itinerario()?.puntuacionAmbientalPreliminar;
-    if (score === null || score === undefined) return null;
-    if (score >= 80) return { texto: 'Excelente', variant: 'success' };
-    if (score >= 60) return { texto: 'Buena', variant: 'info' };
-    if (score >= 40) return { texto: 'Moderada', variant: 'warning' };
-    return { texto: 'Mejorable', variant: 'danger' };
+    const clasificacion = this.itinerario()?.clasificacionAmbiental;
+    if (!clasificacion) return null;
+    return BANDA_POR_CLASIFICACION[clasificacion] ?? null;
   });
 
+  // El backend puede omitir este campo (queda null) cuando no hay establecimientos que evaluar;
+  // se normaliza acá para que la plantilla nunca reciba null en un campo tipado como arreglo.
+  protected readonly establecimientosEvaluados = computed(
+    () => this.itinerario()?.establecimientosEvaluados ?? []
+  );
+
   protected readonly donutDasharray = computed(() => {
-    const score = this.itinerario()?.puntuacionAmbientalPreliminar;
+    const score = this.itinerario()?.ecoScore;
     const circumference = 2 * Math.PI * 54;
     if (score === null || score === undefined) return `0, ${circumference}`;
     return `${(score / 100) * circumference}, ${circumference}`;
@@ -111,6 +122,9 @@ export class ItinerarioGeneradoPageComponent {
       const ordenado = this.ordenar(itinerario);
       this.itinerario.set(ordenado);
       this.diasExpandidos.set(new Set(ordenado.dias.map((dia) => dia.numeroDia)));
+      if (itinerario.ecoScore === null) {
+        this.toastService.error(ECOSCORE_NO_DISPONIBLE, undefined, TOAST_DURATION_MS);
+      }
     } catch (err: unknown) {
       if (requestId !== this.cargaRequestId) return;
       this.errorCarga.set(true);

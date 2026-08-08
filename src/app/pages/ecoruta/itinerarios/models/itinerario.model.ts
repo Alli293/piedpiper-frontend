@@ -1,4 +1,5 @@
 import { CertificacionActiva, PuntuacionAmbientalResponse } from './puntuacion-ambiental.model';
+import { EstablecimientoEcoScore } from './establecimiento-ecoscore.model';
 
 export interface ItinerarioActividad {
   id?: string;
@@ -30,8 +31,13 @@ export interface Itinerario {
   estado: string;
   version: number;
   puntuacionAmbientalPreliminar: number | null;
+  ecoScore: number | null;
+  clasificacionAmbiental: 'EXCELENTE' | 'BUENA' | 'MODERADA' | 'MEJORABLE' | null;
+  ecoScoreParcial: boolean;
+  ecoScoreCalculadoEn: string | null;
   fechaGeneracion: string;
   generadoParcial: boolean;
   mensajeParcial: string | null;
   dias: ItinerarioDia[];
+  establecimientosEvaluados: EstablecimientoEcoScore[] | null;
 }
