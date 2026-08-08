@@ -1,7 +1,24 @@
 export type TipoCertificacion = 'INICIAL' | 'RENOVACION';
 
 export type EstadoSolicitudAuditoria =
-  'SOLICITUD_ENVIADA' | 'OBSERVACIONES_PENDIENTES' | 'CERTIFICACION_EMITIDA';
+  | 'SOLICITUD_ENVIADA'
+  | 'AUDITOR_ASIGNADO'
+  | 'EN_REVISION'
+  | 'REPORTE_CARGADO'
+  | 'OBSERVACIONES_PENDIENTES'
+  | 'CERTIFICACION_EMITIDA';
+
+export type EventoTransicionAuditoria =
+  | 'SOLICITUD_CREADA'
+  | 'AUDITOR_ACEPTA'
+  | 'INICIO_REVISION'
+  | 'REPORTE_CARGADO'
+  | 'RESULTADO_APROBADA'
+  | 'RESULTADO_OBSERVACIONES'
+  | 'AUDITOR_RECHAZA'
+  | 'VENCIDA_POR_NO_RESPUESTA';
+
+export type ActorTransicionAuditoria = 'EMPRESA' | 'AUDITOR' | 'SISTEMA';
 
 export interface NuevaSolicitudAuditoriaRequest {
   periodoInicio: string;
@@ -50,6 +67,37 @@ export interface SolicitudAuditoriaAsignada extends SolicitudAuditoria {
   origenAsignacion: OrigenAsignacion | null;
   fechaAsignacion: string | null;
 }
+
+export interface TransicionEstadoAuditoria {
+  estadoAnterior: EstadoSolicitudAuditoria;
+  estadoNuevo: EstadoSolicitudAuditoria;
+  evento: EventoTransicionAuditoria;
+  actor: ActorTransicionAuditoria;
+  /** Ya resuelto por el servidor: para las transiciones automáticas llega "Proceso automático". */
+  responsable: string;
+  fecha: string;
+}
+
+/** Respuesta de GET /auditorias/{id}: la solicitud con su línea de tiempo completa. */
+export interface DetalleSolicitudAuditoria extends SolicitudAuditoriaAsignada {
+  estadoDescripcion: string;
+  nombreEmpresa: string | null;
+  historial: TransicionEstadoAuditoria[];
+}
+
+/**
+ * Pasos que la pantalla dibuja siempre, en orden, aunque el historial todavía no los alcance: el
+ * diseño muestra el recorrido completo con los pendientes en gris para que se vea cuánto falta.
+ */
+export const PASOS_AUDITORIA: readonly EstadoSolicitudAuditoria[] = [
+  'SOLICITUD_ENVIADA',
+  'AUDITOR_ASIGNADO',
+  'EN_REVISION',
+  'REPORTE_CARGADO',
+  'CERTIFICACION_EMITIDA',
+];
+
+export const INTERVALO_SONDEO_DETALLE_MS = 15_000;
 
 export const MAXIMO_DOCUMENTOS_SOLICITUD = 10;
 export const MAXIMO_BYTES_DOCUMENTO = 15 * 1024 * 1024;

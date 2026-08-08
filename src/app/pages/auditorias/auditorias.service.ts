@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AsignarAuditorRequest,
+  DetalleSolicitudAuditoria,
   NuevaSolicitudAuditoriaRequest,
   SolicitudAuditoria,
   SolicitudAuditoriaAsignada,
@@ -29,6 +30,14 @@ export class AuditoriasService {
 
   obtenerSolicitud(idSolicitud: string): Observable<SolicitudAuditoriaAsignada> {
     return this.http.get<SolicitudAuditoriaAsignada>(`${this.baseUrl}/${idSolicitud}`);
+  }
+
+  /**
+   * Misma ruta que {@link obtenerSolicitud}: el backend devuelve el historial dentro de la
+   * respuesta, así que son dos vistas del mismo recurso y no dos endpoints.
+   */
+  obtenerDetalle(idSolicitud: string): Observable<DetalleSolicitudAuditoria> {
+    return this.http.get<DetalleSolicitudAuditoria>(`${this.baseUrl}/${idSolicitud}`);
   }
 
   asignarAuditor(
