@@ -1,0 +1,84 @@
+:host {
+  position: fixed;
+  left: 50%;
+  top: var(--ch-space-6);
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: min(420px, calc(100% - #{var(--ch-space-8)} * 2));
+  pointer-events: none;
+}
+
+.ch-insignia-notificacion {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ch-space-3);
+  padding: var(--ch-space-4);
+  border-radius: var(--ch-radius-lg);
+  background: var(--ch-green-dark);
+  box-shadow: 0 10px 15px rgba(14, 42, 59, 0.34);
+  pointer-events: auto;
+}
+
+.ch-insignia-notificacion__icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--ch-radius-full);
+  background: var(--ch-green-light);
+  color: var(--ch-dark);
+}
+
+.ch-insignia-notificacion__texto {
+  flex: 1;
+  min-width: 0;
+}
+
+.ch-insignia-notificacion__titulo {
+  margin: 0;
+  font-family: var(--ch-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ch-text-on-dark-muted);
+}
+
+.ch-insignia-notificacion__nombre {
+  margin: var(--ch-space-1) 0 0;
+  font-family: var(--ch-font-heading);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ch-text-on-dark);
+}
+
+.ch-insignia-notificacion__descripcion {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: var(--ch-text-on-dark-muted);
+}
+
+.ch-insignia-notificacion__cerrar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--ch-radius-sm);
+  background: transparent;
+  color: var(--ch-text-on-dark-muted);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ch-text-on-dark);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(43, 166, 222, 0.45);
+  }
+}

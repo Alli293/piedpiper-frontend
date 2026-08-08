@@ -92,6 +92,17 @@
         color: var(--ch-danger);
       }
     }
+
+    // Tarjeta sin filtro equivalente en el listado (ver PP-74 / comentarios
+    // de PR): no navega, así que no debe insinuar que es clickeable.
+    &--sin-enlace {
+      cursor: default;
+
+      &:hover,
+      &:focus-visible {
+        border-color: var(--ch-border);
+      }
+    }
   }
 
   &__card-top {

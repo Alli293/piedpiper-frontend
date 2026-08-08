@@ -9,6 +9,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
 import { PerfilInicial } from '../../../core/models/perfil-inicial.model';
 import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
+import { seleccionarFechaDeInput } from '../../../shared/components/inputs/date-input/date-input.testing';
 import { ToastService } from '../../../shared/services/toast.service';
 import { DetalleSolicitudAuditoria, INTERVALO_SONDEO_DETALLE_MS } from '../auditoria.model';
 import { AuditoriasService } from '../auditorias.service';
@@ -19,6 +20,8 @@ describe('DetalleAuditoriaPageComponent', () => {
   let auditoriasService: {
     obtenerDetalle: ReturnType<typeof vi.fn>;
     responderDecision: ReturnType<typeof vi.fn>;
+    emitirResultado: ReturnType<typeof vi.fn>;
+    cargarReporte: ReturnType<typeof vi.fn>;
     descargarDocumento: ReturnType<typeof vi.fn>;
   };
   let oculto: boolean;
@@ -41,6 +44,9 @@ describe('DetalleAuditoriaPageComponent', () => {
     fechaAceptacion: null,
     motivoRechazo: null,
     fechaRechazo: null,
+    reporteAuditoria: null,
+    fechaAuditoriaRealizada: null,
+    fechaCargaReporte: null,
     nombreEmpresa: 'Café del Valle S.A.',
     historial: [
       {
@@ -77,7 +83,7 @@ describe('DetalleAuditoriaPageComponent', () => {
   };
 
   /** Con lo minimo que el helper realmente usa: si le falta algo, el test tiene que enterarse. */
-  function pestanaFalsa(): Window {
+  function ventanaFalsa(): Window {
     return {
       location: { href: '' },
       close: vi.fn(),
@@ -133,6 +139,28 @@ describe('DetalleAuditoriaPageComponent', () => {
     return botonesDecision().find((boton) => boton.textContent?.trim() === texto);
   }
 
+  function botonCargaReporte(): HTMLButtonElement | null {
+    return raiz().querySelector<HTMLButtonElement>(
+      '.ch-detalle-auditoria__reporte-form app-button button'
+    );
+  }
+
+  function inputReporte(): HTMLInputElement | null {
+    return raiz().querySelector<HTMLInputElement>(
+      '.ch-detalle-auditoria__reporte input[type="file"]'
+    );
+  }
+
+  async function seleccionarReporte(archivo: File): Promise<void> {
+    const input = inputReporte();
+    if (!input) throw new Error('No se encontró el input de reporte');
+    Object.defineProperty(input, 'files', { value: [archivo], configurable: true });
+    input.dispatchEvent(new Event('change'));
+    await Promise.resolve();
+    await Promise.resolve();
+    await estabilizar();
+  }
+
   /** Deja la solicitud asignada al auditor de la sesión, con la asignación hecha hace `horas`. */
   function asignadaAlAuditor(horas: number): DetalleSolicitudAuditoria {
     return {
@@ -148,6 +176,29 @@ describe('DetalleAuditoriaPageComponent', () => {
     idSesion = 'aud-1';
     rolSesion = 'auditor_certificado';
     auditoriasService.obtenerDetalle.mockReturnValue(of(asignadaAlAuditor(horas)));
+    await montar();
+  }
+
+  async function montarCargaReporte(
+    estado: DetalleSolicitudAuditoria['estado'] = 'EN_REVISION'
+  ): Promise<void> {
+    idSesion = 'aud-1';
+    rolSesion = 'auditor_certificado';
+    auditoriasService.obtenerDetalle.mockReturnValue(
+      of({
+        ...enRevision,
+        estado,
+        estadoDescripcion:
+          estado === 'REPORTE_CARGADO' ? 'Reporte cargado' : enRevision.estadoDescripcion,
+        fechaAceptacion: '2026-07-20T10:00:00Z',
+        reporteAuditoria:
+          estado === 'REPORTE_CARGADO'
+            ? { id: 'rep-1', nombreArchivo: 'reporte.pdf', tamanioBytes: 20 }
+            : null,
+        fechaAuditoriaRealizada: estado === 'REPORTE_CARGADO' ? '2026-07-28' : null,
+        fechaCargaReporte: estado === 'REPORTE_CARGADO' ? '2026-07-28T18:00:00Z' : null,
+      })
+    );
     await montar();
   }
 
@@ -172,6 +223,20 @@ describe('DetalleAuditoriaPageComponent', () => {
     await estabilizar();
   }
 
+  function reportePdf(nombre = 'reporte.pdf'): File {
+    return new File(['%PDF-1.7 contenido'], nombre, { type: 'application/pdf' });
+  }
+
+  function reportePesado(): File {
+    return new File(['%PDF-', new Uint8Array(25 * 1024 * 1024 + 1)], 'pesado.pdf', {
+      type: 'application/pdf',
+    });
+  }
+
+  function errorApi(mensaje: string, status = 422): HttpErrorResponse {
+    return new HttpErrorResponse({ status, error: { message: mensaje } });
+  }
+
   beforeEach(async () => {
     vi.useFakeTimers();
     oculto = false;
@@ -182,6 +247,26 @@ describe('DetalleAuditoriaPageComponent', () => {
     auditoriasService = {
       obtenerDetalle: vi.fn().mockReturnValue(of(enRevision)),
       responderDecision: vi.fn().mockReturnValue(of(undefined)),
+      emitirResultado: vi.fn().mockReturnValue(
+        of({
+          ...enRevision,
+          estado: 'CERTIFICACION_EMITIDA',
+          estadoDescripcion: 'Certificación emitida',
+          reporteAuditoria: { id: 'rep-1', nombreArchivo: 'reporte.pdf', tamanioBytes: 20 },
+          fechaAuditoriaRealizada: '2026-07-28',
+          fechaCargaReporte: '2026-07-28T18:00:00Z',
+        } as DetalleSolicitudAuditoria)
+      ),
+      cargarReporte: vi.fn().mockReturnValue(
+        of({
+          ...enRevision,
+          estado: 'REPORTE_CARGADO',
+          estadoDescripcion: 'Reporte cargado',
+          reporteAuditoria: { id: 'rep-1', nombreArchivo: 'reporte.pdf', tamanioBytes: 20 },
+          fechaAuditoriaRealizada: '2026-07-28',
+          fechaCargaReporte: '2026-07-28T18:00:00Z',
+        } as DetalleSolicitudAuditoria)
+      ),
       descargarDocumento: vi
         .fn()
         .mockReturnValue(of(new Blob(['%PDF-1.4'], { type: 'application/pdf' }))),
@@ -252,7 +337,7 @@ describe('DetalleAuditoriaPageComponent', () => {
     expect(situaciones().at(-1)).toBe('en-curso');
   });
 
-  it('detiene el sondeo cuando la pestana pierde el foco y lo reanuda al recuperarlo', async () => {
+  it('detiene el sondeo cuando la pestaña pierde el foco y lo reanuda al recuperarlo', async () => {
     await montar();
 
     await cambiarVisibilidad(true);
@@ -518,14 +603,193 @@ describe('DetalleAuditoriaPageComponent', () => {
     expect(panelDecision()).toBeNull();
   });
 
+  it('habilita la carga de reporte para el auditor asignado cuando la solicitud esta en revision', async () => {
+    await montarCargaReporte();
+
+    expect(raiz().querySelector('.ch-detalle-auditoria__reporte-form')).not.toBeNull();
+    expect(botonCargaReporte()?.disabled).toBe(true);
+  });
+
+  it('muestra el texto deshabilitado cuando el estado no permite cargar reporte', async () => {
+    await montarCargaReporte('CERTIFICACION_EMITIDA');
+
+    expect(raiz().querySelector('.ch-detalle-auditoria__reporte-form')).toBeNull();
+    expect(raiz().textContent).toContain(
+      'La carga del reporte estará disponible una vez que la auditoría esté en revisión.'
+    );
+  });
+
+  it('valida el tipo de archivo al seleccionar el reporte', async () => {
+    await montarCargaReporte();
+
+    await seleccionarReporte(new File(['texto'], 'reporte.txt', { type: 'text/plain' }));
+
+    expect(raiz().querySelector('.ch-file-drop__error')?.textContent).toContain(
+      'Solo se aceptan archivos en formato PDF.'
+    );
+    expect(botonCargaReporte()?.disabled).toBe(true);
+  });
+
+  it('muestra error inline cuando el reporte supera veinticinco megas', async () => {
+    await montarCargaReporte();
+
+    await seleccionarReporte(reportePesado());
+
+    expect(raiz().querySelector('.ch-file-drop__error')?.textContent).toContain(
+      'El archivo no puede superar 25 MB.'
+    );
+  });
+
+  it('envia el archivo y la fecha al cargar reporte', async () => {
+    await montarCargaReporte();
+    const archivo = reportePdf();
+
+    await seleccionarReporte(archivo);
+    seleccionarFechaDeInput(
+      fixture,
+      new Date(Date.UTC(2026, 6, 28)),
+      '.ch-detalle-auditoria__reporte-form'
+    );
+    await estabilizar();
+
+    botonCargaReporte()?.click();
+    await estabilizar();
+
+    expect(auditoriasService.cargarReporte).toHaveBeenCalledWith('sol-1', archivo, '2026-07-28');
+    expect(raiz().textContent).toContain('reporte.pdf');
+  });
+
+  it('acepta la fecha local de aceptacion aunque el instante UTC sea del dia siguiente', async () => {
+    idSesion = 'aud-1';
+    rolSesion = 'auditor_certificado';
+    auditoriasService.obtenerDetalle.mockReturnValue(
+      of({
+        ...enRevision,
+        fechaAceptacion: '2026-08-06T04:04:00Z',
+      })
+    );
+    const archivo = reportePdf();
+
+    await montar();
+    await seleccionarReporte(archivo);
+    seleccionarFechaDeInput(
+      fixture,
+      new Date(Date.UTC(2026, 7, 5)),
+      '.ch-detalle-auditoria__reporte-form'
+    );
+    await estabilizar();
+
+    expect(
+      raiz().querySelector(
+        '.ch-detalle-auditoria__reporte-form app-date-input .ch-text-input__error'
+      )
+    ).toBeNull();
+    expect(botonCargaReporte()?.disabled).toBe(false);
+  });
+
+  it('muestra el error de fecha devuelto por el servidor en el campo de fecha', async () => {
+    auditoriasService.cargarReporte.mockReturnValue(
+      throwError(() =>
+        errorApi(
+          'La fecha de la auditoría debe estar entre la fecha de aceptación y la fecha actual.'
+        )
+      )
+    );
+    await montarCargaReporte();
+
+    await seleccionarReporte(reportePdf());
+    seleccionarFechaDeInput(
+      fixture,
+      new Date(Date.UTC(2026, 6, 28)),
+      '.ch-detalle-auditoria__reporte-form'
+    );
+    await estabilizar();
+    botonCargaReporte()?.click();
+    await estabilizar();
+
+    expect(
+      raiz().querySelector(
+        '.ch-detalle-auditoria__reporte-form app-date-input .ch-text-input__error'
+      )?.textContent
+    ).toContain('fecha de la auditor');
+  });
+
+  it('muestra el error de archivo devuelto por el servidor en el selector de reporte', async () => {
+    auditoriasService.cargarReporte.mockReturnValue(
+      throwError(() =>
+        errorApi(
+          'El archivo no pudo ser procesado. Verifica que no esté dañado y vuelve a intentarlo.'
+        )
+      )
+    );
+    await montarCargaReporte();
+
+    await seleccionarReporte(reportePdf());
+    seleccionarFechaDeInput(
+      fixture,
+      new Date(Date.UTC(2026, 6, 28)),
+      '.ch-detalle-auditoria__reporte-form'
+    );
+    await estabilizar();
+    botonCargaReporte()?.click();
+    await estabilizar();
+
+    expect(raiz().querySelector('.ch-file-drop__error')?.textContent).toContain('archivo');
+  });
+
+  it('muestra un error general cuando el servidor no lo asocia a un campo', async () => {
+    auditoriasService.cargarReporte.mockReturnValue(
+      throwError(() =>
+        errorApi('No es posible cargar el reporte en el estado actual de la solicitud.', 409)
+      )
+    );
+    await montarCargaReporte();
+
+    await seleccionarReporte(reportePdf());
+    seleccionarFechaDeInput(
+      fixture,
+      new Date(Date.UTC(2026, 6, 28)),
+      '.ch-detalle-auditoria__reporte-form'
+    );
+    await estabilizar();
+    botonCargaReporte()?.click();
+    await estabilizar();
+
+    expect(raiz().querySelector('.ch-detalle-auditoria__reporte-alerta')?.textContent).toContain(
+      'No es posible cargar'
+    );
+  });
+
+  it('muestra el panel de resultado cuando el reporte ya esta cargado', async () => {
+    await montarCargaReporte('REPORTE_CARGADO');
+
+    expect(raiz().textContent).toContain('Emitir resultado');
+    expect(raiz().textContent).toContain('Aprobar auditor');
+    expect(raiz().textContent).toContain('Observaciones');
+  });
+
+  it('envia el resultado aprobado y actualiza el estado', async () => {
+    await montarCargaReporte('REPORTE_CARGADO');
+
+    Array.from(raiz().querySelectorAll<HTMLButtonElement>('button'))
+      .find((boton) => boton.textContent?.includes('Aprobar auditor'))
+      ?.click();
+    await estabilizar();
+
+    expect(auditoriasService.emitirResultado).toHaveBeenCalledWith('sol-1', {
+      resultado: 'aprobada',
+    });
+    expect(raiz().textContent).toContain('Certificación emitida');
+  });
+
   /**
    * El documento se pide por el cliente HTTP y no con un enlace directo: el endpoint exige la
    * cabecera de autenticación, que la navegación del navegador no envía. Con un `<a href>` la
    * previsualización devolvía 401.
    */
-  it('previsualizar un documento lo pide al servicio y muestra el blob en la pestana', async () => {
-    const pestana = pestanaFalsa();
-    const abrir = vi.spyOn(window, 'open').mockReturnValue(pestana);
+  it('previsualizar un documento lo pide al servicio y muestra el blob en la pestaña', async () => {
+    const ventana = ventanaFalsa();
+    const abrir = vi.spyOn(window, 'open').mockReturnValue(ventana);
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
 
@@ -535,7 +799,7 @@ describe('DetalleAuditoriaPageComponent', () => {
 
     expect(auditoriasService.descargarDocumento).toHaveBeenCalledWith('sol-1', 'doc-1');
     expect(abrir).toHaveBeenCalledWith('', '_blank');
-    expect(pestana.location.href).toBe('blob:fake');
+    expect(ventana.location.href).toBe('blob:fake');
     // Sin esto, un fallo despues de asignar el href pasaria desapercibido: el href ya quedo puesto
     // y la unica senal de que algo se rompio es el toast.
     expect(
@@ -549,9 +813,9 @@ describe('DetalleAuditoriaPageComponent', () => {
    * El navegador solo deja abrir una pestaña durante el manejo del clic. Abrirla al volver la
    * petición ya cae fuera de la ventana de activación del usuario y la bloquea como emergente.
    */
-  it('abre la pestana en el clic y no despues de que responde el servidor', async () => {
-    const pestana = pestanaFalsa();
-    const abrir = vi.spyOn(window, 'open').mockReturnValue(pestana);
+  it('abre la pestaña en el clic y no después de que responde el servidor', async () => {
+    const ventana = ventanaFalsa();
+    const abrir = vi.spyOn(window, 'open').mockReturnValue(ventana);
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
 
@@ -570,17 +834,17 @@ describe('DetalleAuditoriaPageComponent', () => {
     await estabilizar();
 
     expect(abrir).toHaveBeenCalledTimes(1);
-    expect(pestana.location.href).toBe('');
+    expect(ventana.location.href).toBe('');
 
     responder(new Blob(['%PDF']));
     await estabilizar();
 
-    expect(pestana.location.href).toBe('blob:fake');
+    expect(ventana.location.href).toBe('blob:fake');
   });
 
-  it('cierra la pestana y avisa cuando falla la descarga', async () => {
-    const pestana = pestanaFalsa();
-    vi.spyOn(window, 'open').mockReturnValue(pestana);
+  it('cierra la pestaña y avisa cuando falla la descarga', async () => {
+    const ventana = ventanaFalsa();
+    vi.spyOn(window, 'open').mockReturnValue(ventana);
     auditoriasService.descargarDocumento.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 500 }))
     );
@@ -589,7 +853,7 @@ describe('DetalleAuditoriaPageComponent', () => {
     botonVerPdf()?.click();
     await estabilizar();
 
-    expect(pestana.close).toHaveBeenCalled();
+    expect(ventana.close).toHaveBeenCalled();
     const toasts = TestBed.inject(ToastService).toasts();
     expect(toasts[toasts.length - 1].title).toContain('No se pudo abrir el documento');
   });

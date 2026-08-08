@@ -98,4 +98,30 @@ describe('AuditoriasService', () => {
 
     req.flush({ id: 'sol-9', documentos: [] });
   });
+
+  it('cargarReporte hace POST multipart con el archivo y la fecha', () => {
+    const archivo = pdf('reporte.pdf');
+
+    service.cargarReporte('sol-9', archivo, '2026-07-28').subscribe();
+
+    const req = httpMock.expectOne(`${baseUrl}/sol-9/reporte`);
+    expect(req.request.method).toBe('POST');
+
+    const body = req.request.body as FormData;
+    expect((body.get('reporteAuditoria') as File).name).toBe('reporte.pdf');
+    expect((body.get('reporteAuditoria') as File).type).toBe('application/pdf');
+    expect(body.get('fechaAuditoriaRealizada')).toBe('2026-07-28');
+
+    req.flush({ id: 'sol-9', documentos: [], historial: [] });
+  });
+
+  it('emitirResultado hace POST al endpoint de resultado', () => {
+    service.emitirResultado('sol-9', { resultado: 'aprobada' }).subscribe();
+
+    const req = httpMock.expectOne(`${baseUrl}/sol-9/resultado`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ resultado: 'aprobada' });
+
+    req.flush({ id: 'sol-9', documentos: [], historial: [] });
+  });
 });

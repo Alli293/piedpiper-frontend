@@ -193,6 +193,55 @@ describe('PerfilPublicoService', () => {
     });
   });
 
+  describe('obtenerEnlaceComparticion', () => {
+    const enlaceMock: EnlacePerfilDTO = {
+      urlCanonica: 'http://localhost:4200/empresa/cafe-del-valle/reputacion',
+      codigoIncrustar:
+        '<a href="http://localhost:4200/empresa/cafe-del-valle/reputacion">Perfil verificado en CarbonHub</a>',
+      qrBase64: 'data:image/png;base64,abc123',
+      ogTitulo: 'Café del Valle — Perfil de Reputación Ecológica | CarbonHub',
+      ogDescripcion:
+        'Nivel ecológico: Oro. Consulta el desempeño ambiental verificado de Café del Valle.',
+      ogImagen: 'https://example.com/logo.png',
+      ogUrl: 'http://localhost:4200/empresa/cafe-del-valle/reputacion',
+    };
+
+    it('hace GET a /api/perfil-publico/{slug}/compartir y retorna EnlacePerfilDTO', () => {
+      let resultado: EnlacePerfilDTO | undefined;
+      service.obtenerEnlaceComparticion('cafe-del-valle').subscribe((valor) => (resultado = valor));
+
+      const req = httpMock.expectOne(`${baseUrl}/cafe-del-valle/compartir`);
+      expect(req.request.method).toBe('GET');
+      req.flush(enlaceMock);
+
+      expect(resultado).toEqual(enlaceMock);
+    });
+
+    it('escapa el slug en la URL', () => {
+      service.obtenerEnlaceComparticion('empresa con espacio').subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/empresa%20con%20espacio/compartir`);
+      req.flush(enlaceMock);
+    });
+
+    it('propaga errores HTTP correctamente', () => {
+      let error: unknown;
+      service.obtenerEnlaceComparticion('no-existe').subscribe({
+        error: (err) => (error = err),
+      });
+
+      httpMock
+        .expectOne(`${baseUrl}/no-existe/compartir`)
+        .flush(
+          { mensaje: 'El perfil que buscas no existe o ya no está disponible.' },
+          { status: 404, statusText: 'Not Found' }
+        );
+
+      expect(error).toBeInstanceOf(HttpErrorResponse);
+      expect((error as HttpErrorResponse).status).toBe(404);
+    });
+  });
+
   describe('obtenerEvolucionHuella', () => {
     it('hace GET a /api/perfil-publico/{slug}/evolucion-huella y retorna EvolucionHuellaPublica', () => {
       const mockEvolucion = {

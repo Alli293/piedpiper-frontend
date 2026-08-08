@@ -13,6 +13,7 @@ import { PreferenciasViajeResponse } from '../models/preferencias-viaje.model';
 import { EcoRutaItinerariosService } from '../itinerarios/ecoruta-itinerarios.service';
 import { Itinerario } from '../itinerarios/models/itinerario.model';
 import { seleccionarFechaDeInput } from '../../../shared/components/inputs/date-input/date-input.testing';
+import { InsigniaNotificacionService } from '../../../core/services/insignia-notificacion.service';
 
 // minFecha del formulario es "hoy", asi que las fechas de prueba tienen que
 // quedar siempre en el futuro respecto al momento real en que corre la
@@ -72,6 +73,8 @@ describe('EcoRutaPreferenciasPageComponent', () => {
   let obtener: ReturnType<typeof vi.fn>;
   let guardar: ReturnType<typeof vi.fn>;
   let generar: ReturnType<typeof vi.fn>;
+  let obtenerIdsActuales: ReturnType<typeof vi.fn>;
+  let revisarConReintentos: ReturnType<typeof vi.fn>;
   let storage: Storage;
   let toastError: ReturnType<typeof vi.spyOn>;
 
@@ -84,6 +87,8 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     obtener = vi.fn().mockReturnValue(throwError(() => new HttpErrorResponse({ status: 404 })));
     guardar = vi.fn();
     generar = vi.fn().mockReturnValue(of(ITINERARIO_GENERADO));
+    obtenerIdsActuales = vi.fn().mockResolvedValue(new Set<number>());
+    revisarConReintentos = vi.fn().mockResolvedValue(undefined);
 
     await TestBed.configureTestingModule({
       imports: [EcoRutaPreferenciasPageComponent],
@@ -92,6 +97,10 @@ describe('EcoRutaPreferenciasPageComponent', () => {
         provideRouter([]),
         { provide: EcoRutaPreferenciasService, useValue: { obtener, guardar } },
         { provide: EcoRutaItinerariosService, useValue: { generar } },
+        {
+          provide: InsigniaNotificacionService,
+          useValue: { obtenerIdsActuales, revisarConReintentos },
+        },
         {
           provide: PerfilInicialService,
           useValue: {
@@ -220,6 +229,12 @@ describe('EcoRutaPreferenciasPageComponent', () => {
       limitacionesMovilidad: null,
       requiereHospedaje: false,
     });
+    // El snapshot de "antes" se toma justo antes de generar, y la revisión con
+    // reintentos se dispara después (fire-and-forget, no bloquea la navegación).
+    expect(obtenerIdsActuales).toHaveBeenCalledTimes(1);
+    expect(revisarConReintentos).toHaveBeenCalledWith(
+      await obtenerIdsActuales.mock.results[0].value
+    );
   });
 
   it('muestra el campo de ubicacion actual al activar buscar cerca de mi', async () => {
@@ -280,6 +295,10 @@ describe('EcoRutaPreferenciasPageComponent', () => {
     await submitForm(fixture);
 
     expect(toastError).toHaveBeenCalledWith('Selecciona el tipo de viaje.');
+    // El guardado falló antes de llegar a generar el itinerario, así que nunca
+    // debería tomarse un snapshot de insignias ni dispararse la revisión.
+    expect(obtenerIdsActuales).not.toHaveBeenCalled();
+    expect(revisarConReintentos).not.toHaveBeenCalled();
   });
 });
 

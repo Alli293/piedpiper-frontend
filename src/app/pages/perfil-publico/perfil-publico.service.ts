@@ -58,6 +58,10 @@ export class PerfilPublicoService {
     return this.http.get(urlVerificacionJwt, { responseType: 'blob' });
   }
 
+  obtenerEnlaceComparticion(slug: string): Observable<EnlacePerfilDTO> {
+    return this.http.get<EnlacePerfilDTO>(`${this.baseUrl}/${encodeURIComponent(slug)}/compartir`);
+  }
+
   obtenerEvolucionHuella(slug: string): Observable<EvolucionHuellaPublica> {
     return this.http.get<EvolucionHuellaPublica>(
       `${this.baseUrl}/${encodeURIComponent(slug)}/evolucion-huella`
