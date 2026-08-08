@@ -95,6 +95,9 @@ describe('PerfilPublicoPageComponent', () => {
     // Also flush the subsequent certificaciones and insignias requests
     httpMock.match(`${baseUrl}/eco-tech/certificaciones`).forEach((r) => r.flush([]));
     httpMock.match(`${baseUrl}/eco-tech/insignias`).forEach((r) => r.flush([]));
+    httpMock
+      .match(`${baseUrl}/eco-tech/evolucion-huella`)
+      .forEach((r) => r.flush({ totalActualTco2e: 0, variacionPorcentual: null, serie: [] }));
     fixture.detectChanges();
   }
 
@@ -268,5 +271,25 @@ describe('PerfilPublicoPageComponent', () => {
       expect(fechaEl?.textContent).toContain('Actualizado el');
       expect(fechaEl?.textContent?.trim().length).toBeGreaterThan('Actualizado el'.length);
     });
+
+    it.each([
+      { input: 'ORO', expected: 'Oro', cssClass: 'pub-nivel--oro' },
+      { input: 'PLATA', expected: 'Plata', cssClass: 'pub-nivel--plata' },
+      { input: 'BRONCE', expected: 'Bronce', cssClass: 'pub-nivel--bronce' },
+      { input: 'PLATINO', expected: 'Platino', cssClass: 'pub-nivel--platino' },
+    ])(
+      'normalizarNivel convierte $input (mayúsculas backend) a $expected y aplica clase $cssClass',
+      ({ input, expected, cssClass }) => {
+        fixture.detectChanges();
+        flushPerfil({ ...PERFIL_MOCK, nivelEcologico: input });
+
+        const el = fixture.nativeElement as HTMLElement;
+        const nivelCard = el.querySelector(`.${cssClass}`);
+        const nivelText = el.querySelector('.pub-nivel__nombre');
+
+        expect(nivelCard).not.toBeNull();
+        expect(nivelText?.textContent).toContain(expected);
+      }
+    );
   });
 });
