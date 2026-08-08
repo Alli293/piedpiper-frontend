@@ -11,27 +11,33 @@ const CERT_VIGENTE: CertificacionPublica = {
   id: 'cert-1',
   tipo: 'CARBONO_NEUTRAL',
   nombreCertificacion: 'Carbono Neutral',
+  nombreAuditor: 'Ana Mora',
   fechaEmision: '2026-01-15T00:00:00Z',
   fechaVencimiento: '2027-01-15',
   estado: 'ACTIVA',
+  codigoVerificacion: 'CH-2026-8F4A19KD',
 };
 
 const CERT_MAS_ANTIGUA: CertificacionPublica = {
   id: 'cert-2',
   tipo: 'INVENTARIO_GEI',
   nombreCertificacion: 'Inventario GEI',
+  nombreAuditor: 'Carlos Ruiz',
   fechaEmision: '2025-06-01T00:00:00Z',
   fechaVencimiento: '2026-06-01',
   estado: 'ACTIVA',
+  codigoVerificacion: 'CH-2025-9G5B29ME',
 };
 
 const CERT_ESTADO_DESCONOCIDO: CertificacionPublica = {
   id: 'cert-3',
   tipo: 'HUELLA_PRODUCTO',
   nombreCertificacion: 'Huella de Producto',
+  nombreAuditor: 'María López',
   fechaEmision: '2024-01-01T00:00:00Z',
   fechaVencimiento: '2027-01-01',
   estado: 'SUSPENDIDA',
+  codigoVerificacion: 'CH-2024-F2ASGWST',
 };
 
 describe('CertificacionesPublicasPageComponent', () => {
@@ -256,6 +262,18 @@ describe('CertificacionesPublicasPageComponent', () => {
 
     expect(listarCertificaciones).toHaveBeenCalledTimes(2);
     expect(filas(root).length).toBe(1);
+  });
+
+  it('cada fila enlaza a la verificacion publica de su propio codigo', async () => {
+    listarCertificaciones.mockReturnValue(of([CERT_VIGENTE, CERT_MAS_ANTIGUA]));
+    const fixture = await crearFixture();
+    const root = fixture.nativeElement as HTMLElement;
+
+    const enlaces = filas(root).map((fila) =>
+      fila.querySelector<HTMLAnchorElement>('.ch-certificaciones-publicas__verificar')
+    );
+    expect(enlaces[0]?.getAttribute('href')).toBe('/verificar/CH-2026-8F4A19KD');
+    expect(enlaces[1]?.getAttribute('href')).toBe('/verificar/CH-2025-9G5B29ME');
   });
 
   it('las fechas se muestran en dd/MM/yyyy interpretadas en UTC', async () => {

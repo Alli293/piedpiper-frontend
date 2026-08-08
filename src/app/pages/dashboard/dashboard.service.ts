@@ -4,9 +4,11 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ComparacionEmisionesResponse } from '../emissions/models/emision.model';
 import {
+  AlertaVencimiento,
   CalendarioVencimientosResponse,
   InsigniaEmpresa,
   PeriodoDashboard,
+  RecomendacionRenovacion,
   ResumenCertificacionesDashboardResponse,
   ResumenHuellaDashboardResponse,
 } from './dashboard.model';
@@ -40,6 +42,20 @@ export class DashboardService {
     return this.http.get<CalendarioVencimientosResponse>(`${this.dashboardBaseUrl}/calendario`, {
       params,
     });
+  }
+
+  /** Alertas activas del panel del dashboard (PP-76), ordenadas de más a menos urgente. */
+  obtenerAlertas(): Observable<AlertaVencimiento[]> {
+    return this.http.get<AlertaVencimiento[]>(`${this.dashboardBaseUrl}/alertas`);
+  }
+
+  /**
+   * Recomendación de renovación generada por IA (PP-72). `null` cuando no hay
+   * certificaciones con alerta activa (el backend responde 200 sin cuerpo en
+   * ese caso; Angular lo traduce a `null`).
+   */
+  obtenerRecomendacion(): Observable<RecomendacionRenovacion | null> {
+    return this.http.get<RecomendacionRenovacion | null>(`${this.dashboardBaseUrl}/recomendacion`);
   }
 
   obtenerComparacion(anio: number): Observable<ComparacionEmisionesResponse> {

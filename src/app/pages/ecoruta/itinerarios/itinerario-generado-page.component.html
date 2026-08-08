@@ -66,6 +66,9 @@
                 Generado el {{ data.fechaGeneracion | date: 'dd/MM/yyyy - HH:mm' }} · Inicia el
                 {{ data.fechaInicio | date: 'dd/MM/yyyy' }}
               </p>
+              @if (esVersionVigente()) {
+                <app-badge variant="success">Versión vigente</app-badge>
+              }
             </div>
             <app-button (click)="volverAMisItinerarios()">Volver a mis itinerarios</app-button>
           </section>
@@ -79,7 +82,13 @@
 
           @for (dia of data.dias; track dia.numeroDia) {
             <article class="ch-itinerario-generado__dia">
-              <header class="ch-itinerario-generado__dia-header">
+              <button
+                type="button"
+                class="ch-itinerario-generado__dia-header"
+                (click)="toggleDia(dia.numeroDia)"
+                [attr.aria-expanded]="diaExpandido(dia.numeroDia)"
+                [attr.aria-controls]="'ch-itinerario-generado__actividades-' + dia.numeroDia"
+              >
                 <span class="ch-itinerario-generado__dia-numero">{{ dia.numeroDia }}</span>
                 <div>
                   <strong>{{ dia.fecha | date: 'EEEE d MMM' }}</strong>
@@ -92,55 +101,78 @@
                     dia.actividades.length === 1 ? '' : 'es'
                   }}
                 </span>
-              </header>
+                <app-icon
+                  class="ch-itinerario-generado__dia-chevron"
+                  [class.ch-itinerario-generado__dia-chevron--colapsado]="
+                    !diaExpandido(dia.numeroDia)
+                  "
+                  name="chevron-abajo"
+                  [size]="16"
+                  aria-hidden="true"
+                />
+              </button>
 
-              <ul class="ch-itinerario-generado__actividades">
-                @for (actividad of dia.actividades; track actividad.nombre + actividad.horario) {
-                  <li class="ch-itinerario-generado__actividad">
-                    <span class="ch-itinerario-generado__actividad-icono" aria-hidden="true">
-                      <app-icon name="viajero" [size]="18" />
-                    </span>
-                    <div class="ch-itinerario-generado__actividad-info">
-                      <div class="ch-itinerario-generado__actividad-titulo">
-                        <strong>{{ actividad.nombre }}</strong>
-                        <app-puntuacion-ambiental-badge
-                          [puntuacion]="actividad.puntuacionAmbiental ?? null"
-                        />
-                      </div>
-                      @if (actividad.descripcion) {
-                        <p>{{ actividad.descripcion }}</p>
-                      }
-                      <div class="ch-itinerario-generado__actividad-meta">
-                        <span>
-                          <app-icon name="reloj" [size]="12" aria-hidden="true" />
-                          {{ actividad.horario.slice(0, 5) }} · {{ actividad.duracionMinutos }} min
-                        </span>
-                        <span>
-                          <app-icon name="ubicacion" [size]="12" aria-hidden="true" />
-                          {{ etiquetaProvincia(actividad.provincia) }}
-                        </span>
-                        @if (actividad.establecimientoRecomendado) {
-                          <span>{{ actividad.establecimientoRecomendado }}</span>
-                        }
-                      </div>
-                      <app-certificaciones-detalle
-                        [certificaciones]="actividad.certificacionesActivas ?? []"
-                      />
-                    </div>
-                    @if (actividad.costoAproximado !== null) {
-                      <span class="ch-itinerario-generado__actividad-costo">
-                        <app-icon name="costo" [size]="12" aria-hidden="true" />
-                        {{ actividad.costoAproximado }} {{ actividad.moneda }}
+              @if (diaExpandido(dia.numeroDia)) {
+                <ul
+                  class="ch-itinerario-generado__actividades"
+                  [id]="'ch-itinerario-generado__actividades-' + dia.numeroDia"
+                >
+                  @for (actividad of dia.actividades; track actividad.nombre + actividad.horario) {
+                    <li class="ch-itinerario-generado__actividad">
+                      <span class="ch-itinerario-generado__actividad-icono" aria-hidden="true">
+                        <app-icon name="viajero" [size]="18" />
                       </span>
-                    }
-                  </li>
-                }
-              </ul>
+                      <div class="ch-itinerario-generado__actividad-info">
+                        <div class="ch-itinerario-generado__actividad-titulo">
+                          <strong>{{ actividad.nombre }}</strong>
+                          <app-puntuacion-ambiental-badge
+                            [puntuacion]="actividad.puntuacionAmbiental ?? null"
+                            [puntuacionEstimada]="actividad.puntuacionAmbientalEstimada ?? null"
+                          />
+                        </div>
+                        @if (actividad.descripcion) {
+                          <p>{{ actividad.descripcion }}</p>
+                        }
+                        <div class="ch-itinerario-generado__actividad-meta">
+                          <span>
+                            <app-icon name="reloj" [size]="12" aria-hidden="true" />
+                            {{ actividad.horario.slice(0, 5) }} ·
+                            {{ actividad.duracionMinutos }} min
+                          </span>
+                          <span>
+                            <app-icon name="ubicacion" [size]="12" aria-hidden="true" />
+                            {{ etiquetaProvincia(actividad.provincia) }}
+                          </span>
+                          @if (actividad.establecimientoRecomendado) {
+                            <span>{{ actividad.establecimientoRecomendado }}</span>
+                          }
+                        </div>
+                        <app-certificaciones-detalle
+                          [certificaciones]="actividad.certificacionesActivas ?? []"
+                        />
+                        <app-button
+                          variant="tertiary"
+                          size="sm"
+                          (click)="preguntarSobreActividad(actividad)"
+                        >
+                          Preguntar sobre esto
+                        </app-button>
+                      </div>
+                      @if (actividad.costoAproximado !== null) {
+                        <span class="ch-itinerario-generado__actividad-costo">
+                          <app-icon name="costo" [size]="12" aria-hidden="true" />
+                          {{ formatearCosto(actividad) }}
+                        </span>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
             </article>
           }
         </section>
 
-        <div class="ch-itinerario-generado__lateral">
+        <div class="ch-itinerario-generado__lateral" #chatPanel>
           <app-refinamiento-chat
             [itinerario]="data"
             (itinerarioActualizado)="itinerario.set($event)"

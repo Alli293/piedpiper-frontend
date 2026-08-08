@@ -9,6 +9,18 @@ export const guardEmpresaAdmin: CanActivateFn = rolGuard('ADMINISTRADOR_EMPRESA'
 export const guardAuditor: CanActivateFn = rolGuard('AUDITOR_CERTIFICADO');
 export const guardAdmin: CanActivateFn = rolGuard('ADMINISTRADOR_PLATAFORMA');
 
+/**
+ * El detalle de una auditoría lo consultan los tres roles que participan del proceso: la empresa
+ * dueña, el auditor asignado y el administrador de plataforma. El backend abre el endpoint a los
+ * tres y decide por relación con la solicitud; restringir la ruta solo a la empresa dejaría al
+ * auditor sin poder abrir la pantalla desde la que responde.
+ */
+export const guardDetalleAuditoria: CanActivateFn = rolGuard(
+  'ADMINISTRADOR_EMPRESA',
+  'AUDITOR_CERTIFICADO',
+  'ADMINISTRADOR_PLATAFORMA'
+);
+
 export const rutasPostAutenticacion = [
   'auditor/configuracion-inicial',
   'auditor/panel',
@@ -160,11 +172,27 @@ export const routes: Routes = [
       import('./pages/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent),
   },
   {
+    path: 'empresa/metas/registrar',
+    canActivate: [guardEmpresa],
+    loadComponent: () =>
+      import('./pages/metas/registrar/registrar-meta-page.component').then(
+        (m) => m.RegistrarMetaPageComponent
+      ),
+  },
+  {
     path: 'empresa/certificaciones/listado',
     canActivate: [guardEmpresa],
     loadComponent: () =>
       import('./pages/certificaciones/listado/certificaciones-listado-page.component').then(
         (m) => m.CertificacionesListadoPageComponent
+      ),
+  },
+  {
+    path: 'empresa/certificaciones/alertas',
+    canActivate: [guardEmpresa],
+    loadComponent: () =>
+      import('./pages/certificaciones/alertas/centro-alertas-page.component').then(
+        (m) => m.CentroAlertasPageComponent
       ),
   },
   {
@@ -224,6 +252,14 @@ export const routes: Routes = [
     loadComponent: cargarPlaceholder,
   },
   {
+    path: 'ecoruta/itinerarios/:id',
+    canActivate: [usuarioIndividualGuard],
+    loadComponent: () =>
+      import('./pages/ecoruta/itinerarios/itinerario-generado-page.component').then(
+        (m) => m.ItinerarioGeneradoPageComponent
+      ),
+  },
+  {
     path: 'empresas-verificadas',
     loadComponent: () =>
       import('./pages/empresas-verificadas/empresas-verificadas-page.component').then(
@@ -252,6 +288,20 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'verificar',
+    loadComponent: () =>
+      import('./pages/verificacion-publica/verificacion-publica-page.component').then(
+        (m) => m.VerificacionPublicaPageComponent
+      ),
+  },
+  {
+    path: 'verificar/:codigo',
+    loadComponent: () =>
+      import('./pages/verificacion-publica/verificacion-publica-page.component').then(
+        (m) => m.VerificacionPublicaPageComponent
+      ),
+  },
+  {
     path: 'empresa/emisiones',
     canActivate: [guardEmpresa],
     loadComponent: () =>
@@ -268,11 +318,45 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'empresa/auditorias',
+    canActivate: [guardEmpresaAdmin],
+    loadComponent: () =>
+      import('./pages/auditorias/listado/listado-auditorias-page.component').then(
+        (m) => m.ListadoAuditoriasPageComponent
+      ),
+    data: { perspectiva: 'empresa' },
+  },
+  {
+    path: 'auditor/auditorias',
+    canActivate: [guardAuditor],
+    loadComponent: () =>
+      import('./pages/auditorias/listado/listado-auditorias-page.component').then(
+        (m) => m.ListadoAuditoriasPageComponent
+      ),
+    data: { perspectiva: 'auditor' },
+  },
+  {
     path: 'empresa/auditorias/nueva',
     canActivate: [guardEmpresaAdmin],
     loadComponent: () =>
       import('./pages/auditorias/nueva-solicitud/nueva-solicitud-page.component').then(
         (m) => m.NuevaSolicitudPageComponent
+      ),
+  },
+  {
+    path: 'empresa/auditorias/:id',
+    canActivate: [guardDetalleAuditoria],
+    loadComponent: () =>
+      import('./pages/auditorias/detalle/detalle-auditoria-page.component').then(
+        (m) => m.DetalleAuditoriaPageComponent
+      ),
+  },
+  {
+    path: 'auditor/auditorias/:id',
+    canActivate: [guardDetalleAuditoria],
+    loadComponent: () =>
+      import('./pages/auditorias/detalle/detalle-auditoria-page.component').then(
+        (m) => m.DetalleAuditoriaPageComponent
       ),
   },
   {

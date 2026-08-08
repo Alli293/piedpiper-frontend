@@ -9,24 +9,75 @@ import { AuthService } from '../../core/auth/auth.service';
 import { SesionInactividadService } from '../../core/auth/sesion-inactividad.service';
 import { PerfilInicialService } from '../../core/services/perfil-inicial.service';
 import { PerfilInicial } from '../../core/models/perfil-inicial.model';
+import { EmpresaService } from '../../core/empresa/empresa.service';
+import { InsigniaEmpresa } from '../../core/empresa/empresa.models';
 import { CertificacionesPageComponent } from './certificaciones-page.component';
 import { DashboardService } from '../dashboard/dashboard.service';
 import {
+  AlertaVencimiento,
   CalendarioVencimientosResponse,
+  RecomendacionRenovacion,
   ResumenCertificacionesDashboardResponse,
 } from '../dashboard/dashboard.model';
+import { MetaReduccion } from '../metas/metas.model';
+import { MetasService } from '../metas/metas.service';
 
 describe('CertificacionesPageComponent', () => {
   let fixture: ComponentFixture<CertificacionesPageComponent>;
   let dashboardService: {
     obtenerResumenCertificaciones: ReturnType<typeof vi.fn>;
     obtenerCalendarioVencimientos: ReturnType<typeof vi.fn>;
+    obtenerAlertas: ReturnType<typeof vi.fn>;
+    obtenerRecomendacion: ReturnType<typeof vi.fn>;
+  };
+  let empresaService: {
+    listarInsignias: ReturnType<typeof vi.fn>;
+  };
+  let metasService: {
+    listarMetas: ReturnType<typeof vi.fn>;
   };
 
   const RESUMEN: ResumenCertificacionesDashboardResponse = {
     activas: 5,
     proximasAVencer: 3,
     vencidas: 1,
+  };
+
+  const INSIGNIA: InsigniaEmpresa = {
+    idInsignia: 1,
+    nivelInsignia: 'oro',
+    nombre: 'Carbono Neutral 2026',
+    descripcion: 'Reconocimiento por neutralidad de carbono.',
+    fechaObtencion: '2026-04-12T00:00:00Z',
+  };
+
+  const ALERTA: AlertaVencimiento = {
+    idCertificacion: 'c1',
+    nombre: 'Bandera Azul Ecológica 2025',
+    fechaVencimiento: '2026-06-04',
+    diasRestantes: -24,
+    urgencia: 'vencida',
+  };
+
+  const META: MetaReduccion = {
+    id: 'm1',
+    nombreMeta: 'Reducir huella total a 4,200 tCO2e',
+    valorObjetivoHuellaT: 4200,
+    fechaLimite: '2027-12-31',
+    huellaActualT: 3024,
+    progresoPorcentaje: 72,
+    vencida: false,
+    fechaCreacion: '2026-01-01T00:00:00Z',
+  };
+
+  const RECOMENDACION: RecomendacionRenovacion = {
+    idCertificacion: 'c1',
+    nombreCertificacion: 'GHG Protocol — Corporate Standard',
+    fechaVencimiento: '2026-07-03',
+    diasRestantes: 5,
+    impactoHuellaT: 120.5,
+    justificacion: 'Vence en 5 días y respalda 3 de tus insignias activas.',
+    sugerenciaAccion: 'Renovarla ahora evita perder tu nivel Oro.',
   };
 
   // El componente pide el calendario del mes actual REAL (usa `new Date()`), así
@@ -61,6 +112,14 @@ describe('CertificacionesPageComponent', () => {
     dashboardService = {
       obtenerResumenCertificaciones: vi.fn().mockReturnValue(of(RESUMEN)),
       obtenerCalendarioVencimientos: vi.fn().mockReturnValue(of(CALENDARIO)),
+      obtenerAlertas: vi.fn().mockReturnValue(of([ALERTA])),
+      obtenerRecomendacion: vi.fn().mockReturnValue(of(RECOMENDACION)),
+    };
+    empresaService = {
+      listarInsignias: vi.fn().mockReturnValue(of([INSIGNIA])),
+    };
+    metasService = {
+      listarMetas: vi.fn().mockReturnValue(of([META])),
     };
 
     await TestBed.configureTestingModule({
@@ -68,6 +127,8 @@ describe('CertificacionesPageComponent', () => {
       providers: [
         provideRouter([]),
         { provide: DashboardService, useValue: dashboardService },
+        { provide: EmpresaService, useValue: empresaService },
+        { provide: MetasService, useValue: metasService },
         {
           provide: AuthSessionService,
           useValue: {
@@ -152,6 +213,109 @@ describe('CertificacionesPageComponent', () => {
 
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('.ch-calendario__error')).toBeTruthy();
+    expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
+  });
+
+  it('carga las insignias empresariales al iniciar (una sola vez)', async () => {
+    fixture = await createFixture();
+    expect(empresaService.listarInsignias).toHaveBeenCalledTimes(1);
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-insignias-panel__item-copy strong')?.textContent).toContain(
+      'Carbono Neutral 2026'
+    );
+  });
+
+  it('un fallo en las insignias no afecta a los demás bloques de la página', async () => {
+    empresaService.listarInsignias.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 }))
+    );
+
+    fixture = await createFixture();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-insignias-panel__error')?.textContent).toContain(
+      'No fue posible cargar esta sección'
+    );
+    expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
+  });
+
+  it('carga las alertas activas al iniciar', async () => {
+    fixture = await createFixture();
+    expect(dashboardService.obtenerAlertas).toHaveBeenCalled();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-alertas-panel__item-nombre strong')?.textContent).toContain(
+      'Bandera Azul Ecológica 2025'
+    );
+  });
+
+  it('un fallo en las alertas no afecta a los demás bloques de la página', async () => {
+    dashboardService.obtenerAlertas.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 }))
+    );
+
+    fixture = await createFixture();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-alertas-panel__error')?.textContent).toContain(
+      'No fue posible cargar esta sección'
+    );
+    expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
+  });
+
+  it('carga las metas de reducción al iniciar', async () => {
+    fixture = await createFixture();
+    expect(metasService.listarMetas).toHaveBeenCalled();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-metas-panel__item-copy strong')?.textContent).toContain(
+      'Reducir huella total a 4,200 tCO2e'
+    );
+  });
+
+  it('un fallo en las metas no afecta a los demás bloques de la página', async () => {
+    metasService.listarMetas.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 }))
+    );
+
+    fixture = await createFixture();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-metas-panel__error')?.textContent).toContain(
+      'No fue posible cargar esta sección'
+    );
+    expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
+  });
+
+  it('muestra la recomendación de renovación junto al estado de certificaciones', async () => {
+    fixture = await createFixture();
+    expect(dashboardService.obtenerRecomendacion).toHaveBeenCalled();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-recomendacion-panel__cert strong')?.textContent).toContain(
+      'GHG Protocol — Corporate Standard'
+    );
+  });
+
+  it('no muestra el bloque de recomendación si no hay certificaciones con alerta activa', async () => {
+    dashboardService.obtenerRecomendacion.mockReturnValue(of(null));
+
+    fixture = await createFixture();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-recomendacion-panel')).toBeNull();
+    // El resto de la página sigue funcionando normalmente.
+    expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
+  });
+
+  it('un fallo en la recomendación no afecta a los demás bloques de la página', async () => {
+    dashboardService.obtenerRecomendacion.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 }))
+    );
+
+    fixture = await createFixture();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.ch-recomendacion-panel__error')?.textContent).toContain(
+      'No fue posible cargar esta sección'
+    );
     expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
   });
 });

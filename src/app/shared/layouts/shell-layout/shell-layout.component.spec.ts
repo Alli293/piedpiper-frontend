@@ -116,16 +116,17 @@ describe('ShellLayoutComponent', () => {
     );
   }
 
-  it('renderiza los 5 ítems del menú de sidebar-nav, en orden', async () => {
+  it('renderiza los ítems del menú de sidebar-nav, en orden', async () => {
     const fixture = await createFixture({ activeId: 'dashboard' });
     const root = fixture.nativeElement as HTMLElement;
 
     const items = root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item');
-    expect(items.length).toBe(6);
+    expect(items.length).toBe(7);
     expect(menuLabels(root)).toEqual([
       'Dashboard',
       'Mis Emisiones',
       'Certificaciones',
+      'Auditorías',
       'Madurez ambiental',
       'Insignias',
       'Colaboradores',
@@ -165,7 +166,7 @@ describe('ShellLayoutComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item--active').length).toBe(0);
-    expect(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item').length).toBe(6);
+    expect(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item').length).toBe(7);
   });
 
   it('renderiza navegación EcoRuta cuando recibe la variante ecoruta', async () => {

@@ -1,0 +1,181 @@
+<app-state-layout>
+  <div class="ch-verificacion-publica">
+    <header class="ch-verificacion-publica__intro">
+      <span class="ch-verificacion-publica__intro-icon" aria-hidden="true">
+        <app-icon name="verificar" [size]="22" />
+      </span>
+      <app-heading level="h1" text="Verifica una credencial CarbonHub" />
+      <p class="ch-verificacion-publica__intro-sub">
+        Ingresa el código de verificación de una certificación o insignia para confirmar su
+        autenticidad y vigencia. Información pública, sin necesidad de registrarte.
+      </p>
+    </header>
+
+    @if (cargando()) {
+      <section class="ch-verificacion-publica__estado" role="status">
+        <span class="ch-verificacion-publica__loader" aria-hidden="true"></span>
+        <p>Verificando credencial...</p>
+      </section>
+    } @else if (noEncontrado()) {
+      <app-card class="ch-verificacion-publica__rc" variant="outlined" padding="none">
+        <div
+          card-header
+          class="ch-verificacion-publica__rc-top ch-verificacion-publica__rc-top--{{
+            noEncontradaInfo.variante
+          }}"
+        >
+          <span class="ch-verificacion-publica__rc-badge">
+            <app-icon [name]="noEncontradaInfo.icon" [size]="22" />
+          </span>
+          <div class="ch-verificacion-publica__rc-heading">
+            <p class="ch-verificacion-publica__rc-title">{{ noEncontradaInfo.titulo }}</p>
+            <app-badge [variant]="noEncontradaInfo.variante">
+              {{ noEncontradaInfo.etiquetaCorta }}
+            </app-badge>
+          </div>
+        </div>
+        <div class="ch-verificacion-publica__rc-body">
+          <p class="ch-verificacion-publica__rc-msg">
+            No existe ninguna credencial con el código <strong>{{ codigo() }}</strong
+            >. Verifica que esté escrito correctamente, incluyendo los guiones.
+          </p>
+          <p class="ch-verificacion-publica__consulta">
+            <app-icon name="reloj-solido" [size]="11" />
+            Consulta: {{ consultaFallida() | date: 'dd/MM/yyyy, hh:mm a (O)' }}
+          </p>
+          <app-button
+            class="ch-verificacion-publica__accion"
+            variant="secondary"
+            size="sm"
+            (click)="verificarOtra()"
+          >
+            Verificar otro código
+          </app-button>
+        </div>
+      </app-card>
+    } @else if (error()) {
+      <app-card class="ch-verificacion-publica__estado" role="alert">
+        <app-icon name="danger" [size]="32" />
+        <p>No fue posible verificar esta credencial en este momento.</p>
+        <p class="ch-verificacion-publica__consulta">
+          <app-icon name="reloj-solido" [size]="11" />
+          Consulta: {{ consultaFallida() | date: 'dd/MM/yyyy, hh:mm a (O)' }}
+        </p>
+        <app-button variant="secondary" size="sm" (click)="reintentar()">Reintentar</app-button>
+      </app-card>
+    } @else if (resultado(); as r) {
+      @let info = infoEstado(r.estado);
+      <app-card class="ch-verificacion-publica__rc" variant="outlined" padding="none">
+        <div
+          card-header
+          class="ch-verificacion-publica__rc-top ch-verificacion-publica__rc-top--{{
+            info.variante
+          }}"
+        >
+          <span class="ch-verificacion-publica__rc-badge">
+            <app-icon [name]="info.icon" [size]="22" />
+          </span>
+          <div class="ch-verificacion-publica__rc-heading">
+            <p class="ch-verificacion-publica__rc-title">{{ info.titulo }}</p>
+            <app-badge [variant]="info.variante">
+              {{ info.etiquetaCorta }}
+            </app-badge>
+          </div>
+        </div>
+
+        <div class="ch-verificacion-publica__rc-body">
+          <p class="ch-verificacion-publica__cred-name">
+            <span class="ch-verificacion-publica__cred-name-icon">
+              <app-icon name="certificaciones" [size]="14" />
+            </span>
+            <span class="ch-verificacion-publica__cred-name-text">{{ r.nombreCertificacion }}</span>
+          </p>
+          <p class="ch-verificacion-publica__cred-kind">Certificación ambiental</p>
+
+          @if (esRevocada(r.estado)) {
+            <app-semantic-card variant="danger" class="ch-verificacion-publica__revoke-box">
+              <span>
+                Esta credencial fue revocada el
+                <strong>{{ r.fechaRevocacion | date: 'dd/MM/yyyy' : 'UTC' }}</strong>
+                por la entidad certificadora y ya no es válida.
+              </span>
+            </app-semantic-card>
+          }
+
+          <dl class="ch-verificacion-publica__dl">
+            <div class="ch-verificacion-publica__dl-row">
+              <dt><app-icon name="empresa" [size]="12" />Empresa</dt>
+              <dd>{{ r.empresa }}</dd>
+            </div>
+            <div class="ch-verificacion-publica__dl-row">
+              <dt><app-icon name="auditor-badge" [size]="12" />Auditor</dt>
+              <dd>{{ r.auditor }}</dd>
+            </div>
+            <div class="ch-verificacion-publica__dl-row">
+              <dt><app-icon name="auditor" [size]="12" />Entidad</dt>
+              <dd>{{ r.entidadCertificadora }}</dd>
+            </div>
+            <div class="ch-verificacion-publica__dl-row">
+              <dt>
+                <app-icon name="calendario" [size]="12" />
+                {{ esRevocada(r.estado) ? 'Vigencia original' : 'Período' }}
+              </dt>
+              <dd class="ch-verificacion-publica__periodo">
+                <span class="ch-verificacion-publica__mono">{{
+                  r.fechaEmision | date: 'dd/MM/yyyy' : 'UTC'
+                }}</span>
+                <span class="ch-verificacion-publica__sep">→</span>
+                <span
+                  class="ch-verificacion-publica__mono"
+                  [class.ch-verificacion-publica__mono--vencida]="esVencida(r.estado)"
+                >
+                  {{ r.fechaVencimiento | date: 'dd/MM/yyyy' : 'UTC' }}
+                </span>
+              </dd>
+            </div>
+          </dl>
+
+          <p class="ch-verificacion-publica__consulta">
+            <app-icon name="reloj-solido" [size]="11" />
+            Consulta: {{ r.fechaConsulta | date: 'dd/MM/yyyy, hh:mm a (O)' }}
+          </p>
+
+          <app-button
+            class="ch-verificacion-publica__accion"
+            variant="secondary"
+            size="sm"
+            (click)="verificarOtra()"
+          >
+            Verificar otra credencial
+          </app-button>
+        </div>
+      </app-card>
+    } @else {
+      <app-card class="ch-verificacion-publica__formulario">
+        <p class="ch-verificacion-publica__form-title">Código de verificación</p>
+        <p class="ch-verificacion-publica__form-sub">
+          Lo encuentras en el certificado digital o junto a la insignia compartida por la empresa.
+        </p>
+        <form novalidate (submit)="handleSubmit($event)">
+          <app-text-input
+            label="Código de verificación"
+            placeholder="CH-2026-8F4A19KD"
+            autocomplete="off"
+            hint="Solo letras, números y guiones. Ej: CH-2026-8F4A19KD"
+            [formField]="verificarForm.codigo"
+            [error]="errorCodigo()"
+          />
+          <app-button
+            variant="primary"
+            type="submit"
+            [loading]="enviando()"
+            [disabled]="enviando()"
+          >
+            <app-icon name="ver" [size]="14" />
+            Verificar
+          </app-button>
+        </form>
+      </app-card>
+    }
+  </div>
+</app-state-layout>

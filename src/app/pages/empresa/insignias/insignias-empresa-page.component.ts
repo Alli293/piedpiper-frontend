@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { EmpresaService } from '../../../core/empresa/empresa.service';
 import { InsigniaEmpresa } from '../../../core/empresa/empresa.models';
@@ -25,10 +26,14 @@ const OPENBADGES_VALIDATOR_URL = 'https://certlister.com/ob3-validator/';
 export class InsigniasEmpresaPageComponent {
   private readonly empresaService = inject(EmpresaService);
   private readonly toastService = inject(ToastService);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly cargando = signal(true);
   protected readonly errorCarga = signal(false);
   protected readonly insignias = signal<InsigniaEmpresa[]>([]);
+  protected readonly seleccionInicial = signal<string | null>(
+    this.route.snapshot.queryParamMap.get('insignia')
+  );
 
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'EMPRESA / INSIGNIAS',

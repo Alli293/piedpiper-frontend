@@ -155,6 +155,7 @@ export class ShellLayoutComponent {
       dashboard: '/empresa/panel',
       emissions: '/empresa/emisiones',
       certificaciones: '/empresa/certificaciones',
+      'auditorias-empresa': '/empresa/auditorias',
       'insignias-empresa': '/empresa/insignias',
       colaboradores: '/empresa/invitaciones',
       'ecoruta-planificar': '/ecoruta/preferencias',
@@ -162,7 +163,7 @@ export class ShellLayoutComponent {
       'ecoruta-insignias': '/ecoruta/insignias',
       settings: '/configuracion',
       'perfil-publico': '/auditor/perfil',
-      auditorias: '/auditor/panel',
+      auditorias: '/auditor/auditorias',
       'solicitudes-auditor': '/admin/solicitudes-auditor',
     };
     void this.router.navigateByUrl(rutas[menuId]);

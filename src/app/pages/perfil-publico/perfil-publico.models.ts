@@ -13,12 +13,14 @@ export interface CertificacionPublica {
   id: string;
   tipo: string;
   nombreCertificacion: string;
+  nombreAuditor: string;
   fechaEmision: string;
   fechaVencimiento: string;
   // Se mantiene como string (no un union) para tolerar valores nuevos que el
   // backend agregue (VENCIDA, REVOCADA) sin romper la compilacion: deben caer
   // en el estado neutral por defecto, no en un error de tipos.
   estado: string;
+  codigoVerificacion: string;
 }
 
 export interface BusquedaPerfilPublicoDTO {
@@ -37,3 +39,14 @@ export interface PageResponse<T> {
 }
 
 export type { InsigniaEmpresa, NivelInsigniaEmpresa } from '../../core/empresa/empresa.models';
+
+export interface EvolucionHuellaPublica {
+  totalActualTco2e: number;
+  variacionPorcentual: number | null;
+  serie: PuntoAnualHuella[];
+}
+
+export interface PuntoAnualHuella {
+  anio: number;
+  totalTco2e: number;
+}

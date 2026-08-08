@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthSessionService } from '../../../core/auth-session.service';
@@ -95,6 +95,14 @@ describe('AsignarAuditorPageComponent', () => {
       await fixture.whenStable();
     }
     fixture.detectChanges();
+  }
+
+  function botonVerDetalle(): HTMLButtonElement | null {
+    return (
+      Array.from(raiz().querySelectorAll<HTMLButtonElement>('button')).find(
+        (boton) => boton.textContent?.trim() === 'Ver detalle'
+      ) ?? null
+    );
   }
 
   async function montar(): Promise<void> {
@@ -235,6 +243,25 @@ describe('AsignarAuditorPageComponent', () => {
     const pendienteUi = raiz().querySelector('.ch-asignar__pendiente');
     expect(pendienteUi?.getAttribute('role')).toBe('status');
     expect(pendienteUi?.textContent).toContain('Ana Mora');
+  });
+
+  /**
+   * Sin esta salida la pantalla es un callejon sin salida: la empresa asigna y se queda aca, sin
+   * forma de llegar por clics al seguimiento de la auditoria que acaba de generar.
+   */
+  it('tras asignar, Ver detalle lleva al seguimiento de esa solicitud', async () => {
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    await montar();
+
+    botonesSeleccionar()[0].click();
+    await estabilizar();
+    botonAsignar()?.click();
+    await estabilizar();
+
+    botonVerDetalle()?.click();
+    await estabilizar();
+
+    expect(navegar).toHaveBeenCalledWith(['/empresa/auditorias', 'sol-1']);
   });
 
   it('reenvia la etiqueta accesible al boton interno de asignar', async () => {

@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
@@ -54,6 +55,7 @@ interface AsignacionPendiente {
 export class AsignarAuditorPageComponent implements OnInit {
   private readonly auditoresService = inject(AuditoresService);
   private readonly auditoriasService = inject(AuditoriasService);
+  private readonly router = inject(Router);
   private readonly toastService = inject(ToastService);
 
   /** Id de la solicitud, enlazado desde la ruta empresa/auditorias/:id/auditor. */
@@ -153,6 +155,14 @@ export class AsignarAuditorPageComponent implements OnInit {
 
   protected asignar(): void {
     void this.enviarAsignacion('manual');
+  }
+
+  /**
+   * Sin esto la pantalla es un callejón sin salida: tras asignar, la empresa se queda acá sin forma
+   * de llegar al seguimiento de la auditoría que acaba de generar.
+   */
+  protected verDetalle(): void {
+    void this.router.navigate(['/empresa/auditorias', this.id()]);
   }
 
   protected reintentar(): void {

@@ -26,6 +26,29 @@ export interface CalendarioVencimientosResponse {
   readonly vencimientosPorFecha: Record<string, CertificacionVencimiento[]>;
 }
 
+export interface AlertaVencimiento {
+  readonly idCertificacion: string;
+  readonly nombre: string;
+  readonly fechaVencimiento: string;
+  readonly diasRestantes: number;
+  readonly urgencia: UrgenciaVencimiento;
+}
+
+/**
+ * Recomendación de renovación generada por IA (PP-72). `justificacion` y
+ * `sugerenciaAccion` son `null` cuando la IA no estuvo disponible — mostrar
+ * el mensaje de no disponibilidad en ese caso, no un texto vacío.
+ */
+export interface RecomendacionRenovacion {
+  readonly idCertificacion: string;
+  readonly nombreCertificacion: string;
+  readonly fechaVencimiento: string;
+  readonly diasRestantes: number;
+  readonly impactoHuellaT: number;
+  readonly justificacion: string | null;
+  readonly sugerenciaAccion: string | null;
+}
+
 export type NivelInsigniaEmpresa = 'bronce' | 'plata' | 'oro';
 
 export interface InsigniaEmpresa {

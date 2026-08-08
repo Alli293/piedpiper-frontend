@@ -714,6 +714,21 @@
   }
 }
 
+// === Chart canvas ===
+.pub-chart-canvas-wrapper {
+  padding: var(--ch-space-4);
+  height: 220px;
+  position: relative;
+}
+
+.pub-chart-placeholder__change--down {
+  color: var(--ch-green-dark);
+}
+
+.pub-chart-placeholder__change--up {
+  color: #dc2626;
+}
+
 // === Footer ===
 .pub-footer {
   border-top: 1px solid var(--ch-border);

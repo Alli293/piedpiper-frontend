@@ -1,6 +1,7 @@
 import { DatePipe, Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
@@ -11,6 +12,7 @@ import {
 } from '../../../shared/components/filter-chips/filter-chips.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { LinkDirective } from '../../../shared/components/link/link.directive';
 import { StateLayoutComponent } from '../../../shared/layouts/state-layout/state-layout.component';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import { CertificacionPublica } from '../perfil-publico.models';
@@ -38,6 +40,8 @@ const ESTADOS: Record<string, { etiqueta: string; variante: BadgeVariant }> = {
     FilterChipsComponent,
     HeadingComponent,
     IconComponent,
+    LinkDirective,
+    RouterLink,
     StateLayoutComponent,
   ],
   templateUrl: './certificaciones-publicas-page.component.html',

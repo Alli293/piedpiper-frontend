@@ -84,6 +84,55 @@ describe('DashboardService', () => {
     });
   });
 
+  it('consulta las alertas activas del dashboard', () => {
+    service.obtenerAlertas().subscribe((alertas) => {
+      expect(alertas[0].urgencia).toBe('vencida');
+      expect(alertas[0].diasRestantes).toBe(-24);
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/dashboard/alertas`);
+    expect(req.request.method).toBe('GET');
+
+    req.flush([
+      {
+        idCertificacion: 'abc',
+        nombre: 'Bandera Azul Ecológica 2025',
+        fechaVencimiento: '2026-06-04',
+        diasRestantes: -24,
+        urgencia: 'vencida',
+      },
+    ]);
+  });
+
+  it('consulta la recomendación de renovación del dashboard', () => {
+    service.obtenerRecomendacion().subscribe((recomendacion) => {
+      expect(recomendacion?.nombreCertificacion).toBe('GHG Protocol — Corporate Standard');
+      expect(recomendacion?.justificacion).toContain('Vence en 5 días');
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/dashboard/recomendacion`);
+    expect(req.request.method).toBe('GET');
+
+    req.flush({
+      idCertificacion: 'c1',
+      nombreCertificacion: 'GHG Protocol — Corporate Standard',
+      fechaVencimiento: '2026-07-03',
+      diasRestantes: 5,
+      impactoHuellaT: 120.5,
+      justificacion: 'Vence en 5 días y respalda 3 de tus insignias activas.',
+      sugerenciaAccion: 'Renovarla ahora evita perder tu nivel Oro.',
+    });
+  });
+
+  it('devuelve null cuando no hay certificaciones con alerta activa', () => {
+    service.obtenerRecomendacion().subscribe((recomendacion) => {
+      expect(recomendacion).toBeNull();
+    });
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/dashboard/recomendacion`);
+    req.flush(null);
+  });
+
   it('lista las insignias empresariales del dashboard', () => {
     service.listarInsignias().subscribe((insignias) => {
       expect(insignias[0].nivelInsignia).toBe('bronce');

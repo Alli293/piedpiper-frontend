@@ -73,6 +73,35 @@ describe('PuntuacionAmbientalBadgeComponent', () => {
     expect(badge?.classList.contains('ch-puntuacion-badge--bajo')).toBe(true);
   });
 
+  it('uses puntuacionTotal over puntuacionEstimada when both are present, even when puntuacionTotal is 0', () => {
+    componentRef.setInput('puntuacion', buildPuntuacion(0));
+    componentRef.setInput('puntuacionEstimada', 60);
+    fixture.detectChanges();
+
+    const badge = el.querySelector('.ch-puntuacion-badge');
+    expect(badge?.textContent).toContain('0');
+    expect(badge?.classList.contains('ch-puntuacion-badge--bajo')).toBe(true);
+  });
+
+  it('falls back to puntuacionEstimada when puntuacion is absent', () => {
+    componentRef.setInput('puntuacion', null);
+    componentRef.setInput('puntuacionEstimada', 45);
+    fixture.detectChanges();
+
+    const badge = el.querySelector('.ch-puntuacion-badge');
+    expect(badge).toBeTruthy();
+    expect(badge?.textContent).toContain('45');
+    expect(badge?.classList.contains('ch-puntuacion-badge--medio')).toBe(true);
+  });
+
+  it('does not render when both puntuacion and puntuacionEstimada are absent', () => {
+    componentRef.setInput('puntuacion', null);
+    componentRef.setInput('puntuacionEstimada', null);
+    fixture.detectChanges();
+
+    expect(el.querySelector('.ch-puntuacion-badge')).toBeFalsy();
+  });
+
   function buildPuntuacion(total: number): PuntuacionAmbientalResponse {
     return {
       puntuacionTotal: total,

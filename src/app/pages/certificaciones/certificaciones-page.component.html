@@ -6,6 +6,32 @@
       [error]="resumenError()"
     />
 
+    @if (cargandoRecomendacion() || recomendacion() || recomendacionError()) {
+      <app-recomendacion-renovacion-panel
+        [recomendacion]="recomendacion()"
+        [loading]="cargandoRecomendacion()"
+        [error]="recomendacionError()"
+      />
+    }
+
+    <app-alertas-activas-panel
+      [alertas]="alertas()"
+      [loading]="cargandoAlertas()"
+      [error]="alertasError()"
+    />
+
+    <app-insignias-empresa-panel
+      [insignias]="insignias()"
+      [loading]="cargandoInsignias()"
+      [error]="insigniasError()"
+    />
+
+    <app-metas-reduccion-panel
+      [metas]="metas()"
+      [loading]="cargandoMetas()"
+      [error]="metasError()"
+    />
+
     <app-calendario-vencimientos
       [mes]="mesCalendario()"
       [calendario]="calendario()"
@@ -17,7 +43,7 @@
     <a
       appLink
       routerLink="/empresa/certificaciones/listado"
-      class="ch-certificaciones__listado-link"
+      class="ch-certificaciones__listado-link ch-certificaciones__full"
     >
       Ver listado completo de certificaciones →
     </a>
