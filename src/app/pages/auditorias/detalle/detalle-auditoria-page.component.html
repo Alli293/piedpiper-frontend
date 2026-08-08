@@ -1,4 +1,4 @@
-<app-shell-layout [headerConfig]="headerConfig" backRoute="/empresa/panel">
+<app-shell-layout [headerConfig]="headerConfig" [backRoute]="rutaVolver()">
   <section class="ch-detalle-auditoria" aria-label="Detalle de la auditoría">
     @if (cargando()) {
       <p class="ch-detalle-auditoria__estado-carga">Cargando el detalle de la auditoría…</p>
@@ -57,6 +57,73 @@
           </span>
         </div>
       </article>
+
+      @if (puedeResponder()) {
+        <article class="ch-detalle-auditoria__decision" aria-label="Respuesta a la solicitud">
+          <div class="ch-detalle-auditoria__decision-cabecera">
+            <div>
+              <app-heading
+                level="h3"
+                class="ch-detalle-auditoria__tarjeta-titulo"
+                text="Esta solicitud espera tu respuesta"
+              />
+              <p
+                class="ch-detalle-auditoria__plazo"
+                [class.ch-detalle-auditoria__plazo--vencido]="plazoVencido()"
+                role="status"
+              >
+                {{ tiempoRestante() }}
+              </p>
+            </div>
+            @if (!mostrandoRechazo()) {
+              <div class="ch-detalle-auditoria__decision-botones">
+                <app-button
+                  variant="secondary"
+                  [disabled]="enviandoDecision()"
+                  (click)="abrirRechazo()"
+                >
+                  Rechazar
+                </app-button>
+                <app-button [loading]="enviandoDecision()" (click)="aceptar()">Aceptar</app-button>
+              </div>
+            }
+          </div>
+
+          @if (mostrandoRechazo()) {
+            <form
+              class="ch-detalle-auditoria__rechazo"
+              novalidate
+              (submit)="confirmarRechazo($event)"
+            >
+              <app-textarea
+                label="Motivo del rechazo"
+                [formField]="rechazoForm.motivoRechazo"
+                placeholder="Explica por qué no puedes tomar esta auditoría."
+                [rows]="3"
+                [hint]="caracteresMotivo() + ' / ' + maximoMotivo + ' caracteres'"
+              />
+              <div class="ch-detalle-auditoria__decision-botones">
+                <app-button
+                  type="button"
+                  variant="secondary"
+                  [disabled]="enviandoDecision()"
+                  (click)="cancelarRechazo()"
+                >
+                  Cancelar
+                </app-button>
+                <app-button
+                  type="submit"
+                  variant="danger"
+                  [disabled]="!motivoValido() || enviandoDecision()"
+                  [loading]="enviandoDecision()"
+                >
+                  Confirmar rechazo
+                </app-button>
+              </div>
+            </form>
+          }
+        </article>
+      }
 
       <div class="ch-detalle-auditoria__columnas">
         <article class="ch-detalle-auditoria__tarjeta">
@@ -144,6 +211,15 @@
                       {{ pesoLegible(documento.tamanioBytes) }}
                     </p>
                   </div>
+                  <app-button
+                    variant="tertiary"
+                    size="sm"
+                    [loading]="documentoAbriendo() === documento.id"
+                    [ariaLabel]="'Ver ' + documento.nombreArchivo + ' en una pestaña nueva'"
+                    (click)="verDocumento(documento.id)"
+                  >
+                    Ver PDF
+                  </app-button>
                 </li>
               }
             </ul>

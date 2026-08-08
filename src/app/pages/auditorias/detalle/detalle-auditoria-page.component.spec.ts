@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthSessionService } from '../../../core/auth-session.service';
@@ -16,8 +16,14 @@ import { DetalleAuditoriaPageComponent } from './detalle-auditoria-page.componen
 
 describe('DetalleAuditoriaPageComponent', () => {
   let fixture: ComponentFixture<DetalleAuditoriaPageComponent>;
-  let auditoriasService: { obtenerDetalle: ReturnType<typeof vi.fn> };
+  let auditoriasService: {
+    obtenerDetalle: ReturnType<typeof vi.fn>;
+    responderDecision: ReturnType<typeof vi.fn>;
+    descargarDocumento: ReturnType<typeof vi.fn>;
+  };
   let oculto: boolean;
+  let idSesion: string | null;
+  let rolSesion: string;
 
   const enRevision: DetalleSolicitudAuditoria = {
     id: 'sol-1',
@@ -32,6 +38,9 @@ describe('DetalleAuditoriaPageComponent', () => {
     auditor: { id: 'aud-1', nombre: 'Guillermo Murillo Salas' },
     origenAsignacion: 'MANUAL',
     fechaAsignacion: '2026-06-10T09:15:00Z',
+    fechaAceptacion: null,
+    motivoRechazo: null,
+    fechaRechazo: null,
     nombreEmpresa: 'Café del Valle S.A.',
     historial: [
       {
@@ -67,6 +76,25 @@ describe('DetalleAuditoriaPageComponent', () => {
     estadoDescripcion: 'Certificación emitida',
   };
 
+  /** Con lo minimo que el helper realmente usa: si le falta algo, el test tiene que enterarse. */
+  function pestanaFalsa(): Window {
+    return {
+      location: { href: '' },
+      close: vi.fn(),
+      addEventListener: vi.fn(),
+    } as unknown as Window;
+  }
+
+  function botonVolver(): HTMLButtonElement | null {
+    return raiz().querySelector<HTMLButtonElement>('button[aria-label="Volver"]');
+  }
+
+  function botonVerPdf(): HTMLButtonElement | null {
+    return raiz().querySelector<HTMLButtonElement>(
+      '.ch-detalle-auditoria__documento app-button button'
+    );
+  }
+
   function raiz(): HTMLElement {
     return fixture.nativeElement as HTMLElement;
   }
@@ -85,6 +113,42 @@ describe('DetalleAuditoriaPageComponent', () => {
 
   function aviso(): string | null {
     return raiz().querySelector('.ch-detalle-auditoria__aviso')?.textContent?.trim() ?? null;
+  }
+
+  function panelDecision(): HTMLElement | null {
+    return raiz().querySelector('.ch-detalle-auditoria__decision');
+  }
+
+  function plazo(): string | null {
+    return raiz().querySelector('.ch-detalle-auditoria__plazo')?.textContent?.trim() ?? null;
+  }
+
+  function botonesDecision(): HTMLButtonElement[] {
+    return Array.from(
+      raiz().querySelectorAll<HTMLButtonElement>('.ch-detalle-auditoria__decision-botones button')
+    );
+  }
+
+  function botonPorTexto(texto: string): HTMLButtonElement | undefined {
+    return botonesDecision().find((boton) => boton.textContent?.trim() === texto);
+  }
+
+  /** Deja la solicitud asignada al auditor de la sesión, con la asignación hecha hace `horas`. */
+  function asignadaAlAuditor(horas: number): DetalleSolicitudAuditoria {
+    return {
+      ...enRevision,
+      estado: 'SOLICITUD_ENVIADA',
+      estadoDescripcion: 'Solicitud enviada',
+      fechaAsignacion: new Date(Date.now() - horas * 60 * 60 * 1000).toISOString(),
+      fechaAceptacion: null,
+    };
+  }
+
+  async function montarComoAuditorAsignado(horas = 2): Promise<void> {
+    idSesion = 'aud-1';
+    rolSesion = 'auditor_certificado';
+    auditoriasService.obtenerDetalle.mockReturnValue(of(asignadaAlAuditor(horas)));
+    await montar();
   }
 
   async function estabilizar(): Promise<void> {
@@ -111,9 +175,17 @@ describe('DetalleAuditoriaPageComponent', () => {
   beforeEach(async () => {
     vi.useFakeTimers();
     oculto = false;
+    idSesion = 'admin-1';
+    rolSesion = 'administrador_empresa';
     vi.spyOn(document, 'hidden', 'get').mockImplementation(() => oculto);
 
-    auditoriasService = { obtenerDetalle: vi.fn().mockReturnValue(of(enRevision)) };
+    auditoriasService = {
+      obtenerDetalle: vi.fn().mockReturnValue(of(enRevision)),
+      responderDecision: vi.fn().mockReturnValue(of(undefined)),
+      descargarDocumento: vi
+        .fn()
+        .mockReturnValue(of(new Blob(['%PDF-1.4'], { type: 'application/pdf' }))),
+    };
 
     await TestBed.configureTestingModule({
       imports: [DetalleAuditoriaPageComponent],
@@ -125,8 +197,9 @@ describe('DetalleAuditoriaPageComponent', () => {
           provide: AuthSessionService,
           useValue: {
             isAdministradorEmpresa: () => true,
-            getRole: vi.fn().mockReturnValue('administrador_empresa'),
+            getRole: vi.fn(() => rolSesion),
             getUserName: vi.fn().mockReturnValue('Admin'),
+            getUserId: vi.fn(() => idSesion),
           },
         },
         { provide: AuthService, useValue: { token: signal('fake-token'), cerrarSesion: vi.fn() } },
@@ -356,6 +429,206 @@ describe('DetalleAuditoriaPageComponent', () => {
     expect(raiz().querySelector('.ch-detalle-auditoria__documento-peso')?.textContent?.trim()).toBe(
       '—'
     );
+  });
+
+  it('no ofrece las acciones a la empresa, que no es quien responde', async () => {
+    await montar();
+
+    expect(panelDecision()).toBeNull();
+  });
+
+  it('el auditor asignado ve el panel para aceptar o rechazar', async () => {
+    await montarComoAuditorAsignado();
+
+    expect(panelDecision()).not.toBeNull();
+    expect(botonPorTexto('Aceptar')).toBeDefined();
+    expect(botonPorTexto('Rechazar')).toBeDefined();
+  });
+
+  it('con mas de un dia por delante el plazo se muestra en dias completos', async () => {
+    await montarComoAuditorAsignado(50);
+
+    expect(plazo()).toBe('Quedan 2 días');
+  });
+
+  it('en el ultimo dia el plazo se muestra en horas completas', async () => {
+    await montarComoAuditorAsignado(100);
+
+    expect(plazo()).toBe('Quedan 20 horas');
+  });
+
+  it('pasado el plazo lo dice en vez de mostrar un contador en cero', async () => {
+    await montarComoAuditorAsignado(130);
+
+    expect(plazo()).toBe('El plazo para responder venció');
+  });
+
+  it('aceptar envia la decision al servicio', async () => {
+    await montarComoAuditorAsignado();
+
+    botonPorTexto('Aceptar')?.click();
+    await estabilizar();
+
+    expect(auditoriasService.responderDecision).toHaveBeenCalledWith('sol-1', {
+      decision: 'aceptada',
+    });
+  });
+
+  it('el campo de motivo solo aparece al elegir rechazar', async () => {
+    await montarComoAuditorAsignado();
+    expect(raiz().querySelector('app-textarea')).toBeNull();
+
+    botonPorTexto('Rechazar')?.click();
+    await estabilizar();
+
+    expect(raiz().querySelector('app-textarea')).not.toBeNull();
+  });
+
+  it('el boton de confirmar queda deshabilitado hasta que el motivo alcanza el minimo', async () => {
+    await montarComoAuditorAsignado();
+    botonPorTexto('Rechazar')?.click();
+    await estabilizar();
+
+    expect(botonPorTexto('Confirmar rechazo')?.disabled).toBe(true);
+
+    const campo = raiz().querySelector('textarea');
+    if (campo) {
+      campo.value = 'corto';
+      campo.dispatchEvent(new Event('input'));
+    }
+    await estabilizar();
+    expect(botonPorTexto('Confirmar rechazo')?.disabled).toBe(true);
+
+    if (campo) {
+      campo.value = 'No tengo disponibilidad este trimestre';
+      campo.dispatchEvent(new Event('input'));
+    }
+    await estabilizar();
+    expect(botonPorTexto('Confirmar rechazo')?.disabled).toBe(false);
+  });
+
+  it('una solicitud ya aceptada deja de ofrecer las acciones', async () => {
+    idSesion = 'aud-1';
+    rolSesion = 'auditor_certificado';
+    auditoriasService.obtenerDetalle.mockReturnValue(
+      of({ ...asignadaAlAuditor(2), fechaAceptacion: '2026-06-11T10:00:00Z' })
+    );
+    await montar();
+
+    expect(panelDecision()).toBeNull();
+  });
+
+  /**
+   * El documento se pide por el cliente HTTP y no con un enlace directo: el endpoint exige la
+   * cabecera de autenticación, que la navegación del navegador no envía. Con un `<a href>` la
+   * previsualización devolvía 401.
+   */
+  it('previsualizar un documento lo pide al servicio y muestra el blob en la pestana', async () => {
+    const pestana = pestanaFalsa();
+    const abrir = vi.spyOn(window, 'open').mockReturnValue(pestana);
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+
+    await montar();
+    botonVerPdf()?.click();
+    await estabilizar();
+
+    expect(auditoriasService.descargarDocumento).toHaveBeenCalledWith('sol-1', 'doc-1');
+    expect(abrir).toHaveBeenCalledWith('', '_blank');
+    expect(pestana.location.href).toBe('blob:fake');
+    // Sin esto, un fallo despues de asignar el href pasaria desapercibido: el href ya quedo puesto
+    // y la unica senal de que algo se rompio es el toast.
+    expect(
+      TestBed.inject(ToastService)
+        .toasts()
+        .some((t) => t.variant === 'error')
+    ).toBe(false);
+  });
+
+  /**
+   * El navegador solo deja abrir una pestaña durante el manejo del clic. Abrirla al volver la
+   * petición ya cae fuera de la ventana de activación del usuario y la bloquea como emergente.
+   */
+  it('abre la pestana en el clic y no despues de que responde el servidor', async () => {
+    const pestana = pestanaFalsa();
+    const abrir = vi.spyOn(window, 'open').mockReturnValue(pestana);
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+
+    let responder: (blob: Blob) => void = () => undefined;
+    auditoriasService.descargarDocumento.mockReturnValue(
+      new Observable<Blob>((observador) => {
+        responder = (blob) => {
+          observador.next(blob);
+          observador.complete();
+        };
+      })
+    );
+
+    await montar();
+    botonVerPdf()?.click();
+    await estabilizar();
+
+    expect(abrir).toHaveBeenCalledTimes(1);
+    expect(pestana.location.href).toBe('');
+
+    responder(new Blob(['%PDF']));
+    await estabilizar();
+
+    expect(pestana.location.href).toBe('blob:fake');
+  });
+
+  it('cierra la pestana y avisa cuando falla la descarga', async () => {
+    const pestana = pestanaFalsa();
+    vi.spyOn(window, 'open').mockReturnValue(pestana);
+    auditoriasService.descargarDocumento.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 }))
+    );
+
+    await montar();
+    botonVerPdf()?.click();
+    await estabilizar();
+
+    expect(pestana.close).toHaveBeenCalled();
+    const toasts = TestBed.inject(ToastService).toasts();
+    expect(toasts[toasts.length - 1].title).toContain('No se pudo abrir el documento');
+  });
+
+  it('avisa cuando el navegador bloquea la ventana emergente', async () => {
+    vi.spyOn(window, 'open').mockReturnValue(null);
+
+    await montar();
+    botonVerPdf()?.click();
+    await estabilizar();
+
+    expect(auditoriasService.descargarDocumento).not.toHaveBeenCalled();
+    const toasts = TestBed.inject(ToastService).toasts();
+    expect(toasts[toasts.length - 1].title).toContain('bloqueó la ventana emergente');
+  });
+
+  /**
+   * El boton de volver estaba fijo en /empresa/panel, una ruta que el guard de empresa le bloquea
+   * al auditor: desde su propio detalle, volver lo sacaba de la aplicacion en vez de devolverlo a
+   * sus solicitudes.
+   */
+  it('el auditor vuelve a sus solicitudes asignadas y no al panel de empresa', async () => {
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    await montarComoAuditorAsignado();
+
+    botonVolver()?.click();
+    await estabilizar();
+
+    expect(navegar).toHaveBeenCalledWith('/auditor/auditorias');
+  });
+
+  it('la empresa vuelve a su propio listado de auditorias', async () => {
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    await montar();
+
+    botonVolver()?.click();
+    await estabilizar();
+
+    expect(navegar).toHaveBeenCalledWith('/empresa/auditorias');
   });
 
   it('deja de sondear al destruir el componente', async () => {

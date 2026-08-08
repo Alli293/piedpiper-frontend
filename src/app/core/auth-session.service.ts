@@ -3,6 +3,7 @@ import { AuthService } from './auth/auth.service';
 
 export const ADMINISTRADOR_EMPRESA = 'administrador_empresa';
 export const USUARIO_GENERAL_EMPRESA = 'usuario_general_empresa';
+export const AUDITOR_CERTIFICADO = 'auditor_certificado';
 
 @Injectable({ providedIn: 'root' })
 export class AuthSessionService {

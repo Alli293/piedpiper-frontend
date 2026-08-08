@@ -1,25 +1,47 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, input, signal } from '@angular/core';
+import {
+  form,
+  FormField,
+  maxLength,
+  minLength,
+  required,
+  schema,
+  submit,
+} from '@angular/forms/signals';
 import { EMPTY, Subject, Subscription, firstValueFrom, timer } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
+import { AUDITOR_CERTIFICADO, AuthSessionService } from '../../../core/auth-session.service';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/badge.component';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
+import { TextareaComponent } from '../../../shared/components/inputs/textarea/textarea.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
+import { ToastService } from '../../../shared/services/toast.service';
+import { previsualizarBlobEnPestana } from '../../../shared/utils/download.utils';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import { initialsFromNombreCompleto } from '../../../shared/utils/initials.utils';
 import {
   DetalleSolicitudAuditoria,
   EstadoSolicitudAuditoria,
+  HORAS_PARA_RESPONDER,
   INTERVALO_SONDEO_DETALLE_MS,
+  MAXIMO_CARACTERES_MOTIVO_RECHAZO,
+  MINIMO_CARACTERES_MOTIVO_RECHAZO,
   PASOS_AUDITORIA,
+  ResponderDecisionRequest,
 } from '../auditoria.model';
 import { AuditoriasService } from '../auditorias.service';
 
 type SituacionPaso = 'completado' | 'en-curso' | 'pendiente';
+
+interface RechazoFormModel {
+  motivoRechazo: string;
+}
 
 interface PasoLineaTiempo {
   estado: EstadoSolicitudAuditoria;
@@ -45,6 +67,16 @@ const ERROR_SIN_PERMISO = 'No tienes permiso para ver esta solicitud de auditor�
 const BYTES_POR_MB = 1024 * 1024;
 
 const ERROR_CARGA = 'No se pudo cargar el detalle de la auditoría. Intenta nuevamente.';
+const ERROR_DECISION = 'No se pudo registrar tu respuesta. Intenta nuevamente.';
+const MENSAJE_ACEPTADA = 'Aceptaste la solicitud. La auditoría quedó en revisión.';
+const MENSAJE_RECHAZADA = 'Rechazaste la solicitud. La empresa fue notificada.';
+const MENSAJE_MOTIVO_REQUERIDO = 'Indica el motivo del rechazo.';
+const ERROR_DOCUMENTO = 'No se pudo abrir el documento. Intenta nuevamente.';
+const AVISO_VENTANA_BLOQUEADA =
+  'Tu navegador bloqueó la ventana emergente. Permítelas para ver el documento.';
+
+const MILISEGUNDOS_POR_HORA = 60 * 60 * 1000;
+const HORAS_POR_DIA = 24;
 
 /** 403 y 404 son definitivos: reintentar no los cambia. El resto puede ser un fallo pasajero. */
 function esErrorPermanente(err: unknown): boolean {
@@ -56,10 +88,13 @@ function esErrorPermanente(err: unknown): boolean {
   imports: [
     AvatarComponent,
     BadgeComponent,
+    ButtonComponent,
     DatePipe,
     HeadingComponent,
     IconComponent,
+    FormField,
     ShellLayoutComponent,
+    TextareaComponent,
   ],
   templateUrl: './detalle-auditoria-page.component.html',
   styleUrl: './detalle-auditoria-page.component.scss',
@@ -68,6 +103,8 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
   readonly idSolicitud = input.required<string>({ alias: 'id' });
 
   private readonly auditoriasService = inject(AuditoriasService);
+  private readonly authSession = inject(AuthSessionService);
+  private readonly toastService = inject(ToastService);
 
   private readonly visibilidad = new Subject<boolean>();
   private suscripcionSondeo?: Subscription;
@@ -79,6 +116,30 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
   protected readonly cargando = signal(true);
   protected readonly errorCarga = signal<string | null>(null);
   protected readonly errorSondeo = signal<string | null>(null);
+  protected readonly mostrandoRechazo = signal(false);
+  protected readonly motivoRechazo = signal('');
+  protected readonly enviandoDecision = signal(false);
+
+  /**
+   * Marca de tiempo que refresca el contador. Se actualiza en cada ciclo del sondeo en vez de con
+   * un temporizador propio: el contador se muestra en dias u horas completas, asi que refrescarlo
+   * cada 15 segundos ya es mas fino de lo que la pantalla llega a mostrar.
+   */
+  private readonly ahora = signal(Date.now());
+
+  protected readonly minimoMotivo = MINIMO_CARACTERES_MOTIVO_RECHAZO;
+  protected readonly maximoMotivo = MAXIMO_CARACTERES_MOTIVO_RECHAZO;
+
+  /**
+   * El detalle lo abren los dos roles y cada uno vuelve a su propio listado. Estaba fijo en
+   * /empresa/panel, asi que al auditor el boton de volver lo mandaba a una ruta que su guard le
+   * bloquea: quedaba rebotado al login en vez de volver a sus solicitudes.
+   */
+  protected readonly rutaVolver = computed(() =>
+    this.authSession.getRole() === AUDITOR_CERTIFICADO
+      ? '/auditor/auditorias'
+      : '/empresa/auditorias'
+  );
 
   protected readonly headerConfig: HeaderConfig = {
     sectionLabel: 'AUDITORÍAS',
@@ -86,6 +147,77 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     showNotificationDot: true,
     showBackButton: true,
   };
+
+  protected readonly modeloRechazo = signal<RechazoFormModel>({ motivoRechazo: '' });
+
+  protected readonly rechazoForm = form(
+    this.modeloRechazo,
+    schema<RechazoFormModel>((path) => {
+      required(path.motivoRechazo, { message: MENSAJE_MOTIVO_REQUERIDO });
+      minLength(path.motivoRechazo, MINIMO_CARACTERES_MOTIVO_RECHAZO, {
+        message: `El motivo debe tener al menos ${MINIMO_CARACTERES_MOTIVO_RECHAZO} caracteres.`,
+      });
+      maxLength(path.motivoRechazo, MAXIMO_CARACTERES_MOTIVO_RECHAZO, {
+        message: `El motivo no puede superar los ${MAXIMO_CARACTERES_MOTIVO_RECHAZO} caracteres.`,
+      });
+    })
+  );
+
+  protected readonly caracteresMotivo = computed(
+    () => this.modeloRechazo().motivoRechazo.trim().length
+  );
+
+  /** Sale del propio formulario para no repetir los limites que ya declara el schema. */
+  protected readonly motivoValido = computed(() => this.rechazoForm.motivoRechazo().valid());
+
+  /**
+   * Las acciones solo aparecen para el auditor que tiene la asignacion pendiente. El backend valida
+   * lo mismo, asi que esconderlas no es la proteccion: es no ofrecerle al usuario un boton que solo
+   * le puede devolver un error.
+   */
+  protected readonly puedeResponder = computed(() => {
+    const detalle = this.detalle();
+    if (!detalle || !detalle.auditor || detalle.fechaAceptacion || !detalle.fechaAsignacion) {
+      return false;
+    }
+    return detalle.auditor.id === this.authSession.getUserId();
+  });
+
+  /**
+   * El contador se calcula contra el reloj del navegador. Con el reloj del cliente mal puesto, el
+   * "Quedan N horas" puede mostrar de mas o de menos; lo que no cambia es el resultado, porque el
+   * plazo real lo hace cumplir el backend contra su propia hora al recibir la respuesta. Corregirlo
+   * de verdad pide que el detalle devuelva la hora del servidor para calcular el desfase, y eso es
+   * un campo nuevo en el contrato por un dato informativo: queda anotado, no hecho.
+   */
+  private readonly horasRestantes = computed(() => {
+    const asignacion = this.detalle()?.fechaAsignacion;
+    if (!asignacion) {
+      return 0;
+    }
+    const vencimiento =
+      new Date(asignacion).getTime() + HORAS_PARA_RESPONDER * MILISEGUNDOS_POR_HORA;
+    return Math.max(0, (vencimiento - this.ahora()) / MILISEGUNDOS_POR_HORA);
+  });
+
+  /**
+   * Dias completos mientras falte mas de un dia, y horas completas en el ultimo dia. Ambos hacia
+   * abajo: redondear hacia arriba prometeria al auditor un tiempo que en realidad ya no tiene.
+   */
+  protected readonly tiempoRestante = computed(() => {
+    const horas = this.horasRestantes();
+    if (horas <= 0) {
+      return 'El plazo para responder venció';
+    }
+    if (horas > HORAS_POR_DIA) {
+      const dias = Math.floor(horas / HORAS_POR_DIA);
+      return `Quedan ${dias} ${dias === 1 ? 'día' : 'días'}`;
+    }
+    const horasEnteras = Math.floor(horas);
+    return `Quedan ${horasEnteras} ${horasEnteras === 1 ? 'hora' : 'horas'}`;
+  });
+
+  protected readonly plazoVencido = computed(() => this.horasRestantes() <= 0);
 
   protected readonly nombreAuditor = computed(() => this.detalle()?.auditor?.nombre ?? null);
 
@@ -186,6 +318,7 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
       .subscribe((detalle) => {
         this.errorSondeo.set(null);
         this.detalle.set(detalle);
+        this.ahora.set(Date.now());
       });
 
     this.visibilidad.next(!document.hidden);
@@ -205,6 +338,100 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     this.visibilidad.next(!document.hidden);
   };
 
+  protected readonly documentoAbriendo = signal<string | null>(null);
+
+  /**
+   * La pestana se abre en el mismo clic y recien despues se le carga el contenido: abrirla al
+   * volver la peticion la deja fuera de la ventana de activacion del usuario y el navegador la
+   * bloquea como emergente. Por eso el helper recibe como traer el documento y no el documento.
+   */
+  protected async verDocumento(idDocumento: string): Promise<void> {
+    this.documentoAbriendo.set(idDocumento);
+    try {
+      const resultado = await previsualizarBlobEnPestana(() =>
+        firstValueFrom(this.auditoriasService.descargarDocumento(this.idSolicitud(), idDocumento))
+      );
+      if (resultado === 'bloqueada') {
+        this.toastService.error(AVISO_VENTANA_BLOQUEADA);
+      }
+    } catch (err: unknown) {
+      this.toastService.error(apiErrorMessage(err) ?? ERROR_DOCUMENTO);
+    } finally {
+      this.documentoAbriendo.set(null);
+    }
+  }
+
+  protected abrirRechazo(): void {
+    this.mostrandoRechazo.set(true);
+  }
+
+  protected cancelarRechazo(): void {
+    this.mostrandoRechazo.set(false);
+    this.modeloRechazo.set({ motivoRechazo: '' });
+  }
+
+  protected aceptar(): void {
+    void this.responder({ decision: 'aceptada' }, MENSAJE_ACEPTADA);
+  }
+
+  protected confirmarRechazo(event: Event): void {
+    event.preventDefault();
+    void this.enviarRechazo();
+  }
+
+  private async enviarRechazo(): Promise<void> {
+    await submit(this.rechazoForm, {
+      action: async (field) => {
+        await this.responder(
+          { decision: 'rechazada', motivoRechazo: field().value().motivoRechazo.trim() },
+          MENSAJE_RECHAZADA
+        );
+        return undefined;
+      },
+      onInvalid: (field) => field().markAsTouched(),
+    });
+  }
+
+  /**
+   * Tras responder se recarga el detalle en vez de asumir el nuevo estado: la respuesta del
+   * servidor es la unica que sabe en que estado quedo la solicitud, y ademas trae la entrada nueva
+   * de la linea de tiempo.
+   */
+  private async responder(request: ResponderDecisionRequest, mensajeExito: string): Promise<void> {
+    this.enviandoDecision.set(true);
+    try {
+      await firstValueFrom(this.auditoriasService.responderDecision(this.idSolicitud(), request));
+      this.mostrandoRechazo.set(false);
+      this.modeloRechazo.set({ motivoRechazo: '' });
+      this.toastService.success(mensajeExito);
+      await this.refrescar();
+    } catch (err: unknown) {
+      this.toastService.error(apiErrorMessage(err) ?? ERROR_DECISION);
+      // Se refresca igual: un 409 significa que la solicitud cambio por otro lado, y dejar la
+      // pantalla con el estado viejo invitaria a reintentar sobre algo que ya no existe.
+      await this.refrescar();
+    } finally {
+      this.enviandoDecision.set(false);
+    }
+  }
+
+  /**
+   * Vuelve a pedir el detalle sin tocar {@link cargando}. Reusar la carga inicial mostraba de nuevo
+   * el esqueleto completo, y despues de aceptar o rechazar eso se ve como un parpadeo de toda la
+   * pantalla en vez de una actualizacion.
+   */
+  private async refrescar(): Promise<void> {
+    try {
+      this.detalle.set(
+        await firstValueFrom(this.auditoriasService.obtenerDetalle(this.idSolicitud()))
+      );
+      this.ahora.set(Date.now());
+    } catch {
+      // El detalle en pantalla sigue siendo el ultimo que el servidor confirmo; el resultado de la
+      // decision ya se informo por toast, asi que no hay nada mas que decirle al usuario aca.
+    }
+  }
+
   private async cargaInicial(): Promise<void> {
     this.cargando.set(true);
     this.errorCarga.set(null);
@@ -212,6 +439,7 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
       this.detalle.set(
         await firstValueFrom(this.auditoriasService.obtenerDetalle(this.idSolicitud()))
       );
+      this.ahora.set(Date.now());
     } catch (err: unknown) {
       this.errorCarga.set(this.mensajeDeError(err));
       this.accesoDescartado = esErrorPermanente(err);

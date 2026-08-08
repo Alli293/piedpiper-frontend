@@ -276,3 +276,70 @@
 .ch-detalle-auditoria__sin-documentos {
   padding: var(--ch-space-4);
 }
+
+.ch-detalle-auditoria__decision {
+  background: var(--ch-bg-white);
+  border: 1px solid var(--ch-green);
+  border-radius: var(--ch-radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-3);
+  padding: var(--ch-space-4);
+}
+
+.ch-detalle-auditoria__decision-cabecera {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ch-space-3);
+  justify-content: space-between;
+}
+
+.ch-detalle-auditoria__plazo {
+  color: var(--ch-text-muted);
+  font-family: var(--ch-font-mono);
+  font-size: 0.8rem;
+  margin-top: var(--ch-space-1);
+}
+
+.ch-detalle-auditoria__plazo--vencido {
+  color: var(--ch-danger);
+  font-weight: 600;
+}
+
+.ch-detalle-auditoria__decision-botones {
+  display: flex;
+  gap: var(--ch-space-2);
+}
+
+.ch-detalle-auditoria__rechazo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-3);
+}
+
+.ch-detalle-auditoria__ver-pdf {
+  align-items: center;
+  background: var(--ch-bg-white);
+  cursor: pointer;
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-sm);
+  color: var(--ch-text-muted);
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  gap: var(--ch-space-1);
+  padding: var(--ch-space-1) var(--ch-space-2);
+  text-decoration: none;
+}
+
+.ch-detalle-auditoria__ver-pdf:hover:not(:disabled) {
+  border-color: var(--ch-green);
+  color: var(--ch-green);
+}
+
+.ch-detalle-auditoria__ver-pdf:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
