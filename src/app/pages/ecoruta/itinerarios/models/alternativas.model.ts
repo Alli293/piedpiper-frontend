@@ -25,4 +25,6 @@ export interface SustitucionRequest {
   moneda: string | null;
   establecimientoRecomendado: string | null;
   ecoScore: number;
+  categoriaTuristica: string;
+  provincia: string;
 }

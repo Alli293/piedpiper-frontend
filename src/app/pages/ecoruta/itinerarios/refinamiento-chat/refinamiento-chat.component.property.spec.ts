@@ -4,7 +4,7 @@ import { provideHttpClientTesting, HttpTestingController } from '@angular/common
 import * as fc from 'fast-check';
 import { RefinamientoChatComponent } from './refinamiento-chat.component';
 import { Itinerario, ItinerarioActividad, ItinerarioDia } from '../models/itinerario.model';
-import { AlternativaDTO } from '../models/alternativas.model';
+import { AlternativaDTO, ComparacionResponse } from '../models/alternativas.model';
 
 /**
  * Property 8: Failed substitution preserves original itinerary state
@@ -143,6 +143,14 @@ describe('Property 8: Failed substitution preserves original itinerary state', (
 
           // Set up the actividadSeleccionadaId so onReemplazar works
           component['actividadSeleccionadaId'].set(actividadConId.id!);
+          component['comparacionResponse'].set({
+            actividadOriginalNombre: 'Test',
+            ecoScoreOriginal: 50,
+            categoriaTuristica: 'NATURALEZA',
+            provincia: 'SAN_JOSE',
+            alternativas: [alternativa],
+            mensaje: null,
+          });
 
           // Trigger the substitution attempt
           component['onReemplazar'](alternativa);

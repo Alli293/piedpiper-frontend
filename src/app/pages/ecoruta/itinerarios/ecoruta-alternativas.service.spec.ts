@@ -107,6 +107,8 @@ describe('EcoRutaAlternativasService', () => {
       moneda: 'CRC',
       establecimientoRecomendado: 'Reserva Biológica Tirimbina',
       ecoScore: 85,
+      categoriaTuristica: 'NATURALEZA',
+      provincia: 'HEREDIA',
     };
 
     it('hace PUT a /ecoruta/itinerarios/{id}/actividades/{actividadId}/sustituir con body correcto', () => {
@@ -133,6 +135,8 @@ describe('EcoRutaAlternativasService', () => {
         moneda: null,
         establecimientoRecomendado: null,
         ecoScore: 78,
+        categoriaTuristica: 'AVENTURA',
+        provincia: 'SAN_JOSE',
       };
 
       service.sustituirActividad(itinerarioId, actividadId, bodyCompleto).subscribe();
