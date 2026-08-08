@@ -103,10 +103,13 @@ describe('CentroAlertasPageComponent', () => {
   it('filtra por urgencia al seleccionar un chip', async () => {
     fixture = await createFixture();
 
-    fixture.componentInstance['seleccionarFiltro']('VENCIDAS');
+    const el = fixture.nativeElement as HTMLElement;
+    const chips = Array.from(el.querySelectorAll('.ch-filter-chips__item'));
+    const chipVencidas = chips.find((chip) => chip.textContent?.includes('Vencidas')) as
+      HTMLButtonElement | undefined;
+    chipVencidas?.click();
     fixture.detectChanges();
 
-    const el = fixture.nativeElement as HTMLElement;
     const nombres = Array.from(el.querySelectorAll('.ch-centro-alertas__fila-nombre')).map((n) =>
       n.textContent?.trim()
     );
@@ -116,10 +119,14 @@ describe('CentroAlertasPageComponent', () => {
   it('filtra por nombre con el buscador', async () => {
     fixture = await createFixture();
 
-    fixture.componentInstance['onBusquedaChange']('GHG');
+    const el = fixture.nativeElement as HTMLElement;
+    const buscador = el.querySelector(
+      'input[placeholder="Buscar certificación..."]'
+    ) as HTMLInputElement;
+    buscador.value = 'GHG';
+    buscador.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    const el = fixture.nativeElement as HTMLElement;
     const nombres = Array.from(el.querySelectorAll('.ch-centro-alertas__fila-nombre')).map((n) =>
       n.textContent?.trim()
     );

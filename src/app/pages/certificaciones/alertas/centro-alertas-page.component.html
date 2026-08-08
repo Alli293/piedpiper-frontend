@@ -53,7 +53,7 @@
     } @else {
       @if (vencidas().length > 0) {
         <h3 class="ch-centro-alertas__grupo-titulo ch-centro-alertas__grupo-titulo--vencidas">
-          <app-icon name="error" [size]="14" />
+          <app-icon name="error" [size]="14" aria-hidden="true" />
           Vencidas · requieren renovación inmediata
         </h3>
         <ul class="ch-centro-alertas__lista">
@@ -86,7 +86,7 @@
 
       @if (proximasAVencer().length > 0) {
         <h3 class="ch-centro-alertas__grupo-titulo">
-          <app-icon name="reloj" [size]="14" />
+          <app-icon name="reloj" [size]="14" aria-hidden="true" />
           Próximas a vencer
         </h3>
         <ul class="ch-centro-alertas__lista">

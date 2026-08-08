@@ -1,6 +1,6 @@
 <article class="ch-alertas-panel" aria-label="Alertas activas">
   <header class="ch-alertas-panel__header">
-    <span class="ch-alertas-panel__icon">
+    <span class="ch-alertas-panel__icon" aria-hidden="true">
       <app-icon name="warning" [size]="16" />
     </span>
     <app-heading level="h3" text="Alertas activas" />
@@ -24,13 +24,7 @@
             [class.ch-alertas-panel__item--danger]="tono(alerta) === 'danger'"
             [class.ch-alertas-panel__item--warning]="tono(alerta) === 'warning'"
             [routerLink]="['/empresa/certificaciones', alerta.idCertificacion]"
-            [attr.aria-label]="
-              alerta.nombre +
-              (estaVencida(alerta)
-                ? ', vencida hace ' + -alerta.diasRestantes
-                : ', vence en ' + alerta.diasRestantes) +
-              ' días'
-            "
+            [attr.aria-label]="alerta.nombre + ', ' + diasLabel(alerta)"
           >
             <span class="ch-alertas-panel__barra" aria-hidden="true"></span>
 
