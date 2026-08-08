@@ -41,7 +41,15 @@ const NIVEL_MAP: Record<string, NivelConfig> = {
 
 const NIVELES_ORDEN = ['Bronce', 'Plata', 'Oro', 'Platino'];
 
-Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler, Tooltip);
+Chart.register(
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Filler,
+  Tooltip
+);
 
 @Component({
   selector: 'app-perfil-publico-page',
