@@ -19,6 +19,7 @@ export interface CertificacionPublica {
   // backend agregue (VENCIDA, REVOCADA) sin romper la compilacion: deben caer
   // en el estado neutral por defecto, no en un error de tipos.
   estado: string;
+  codigoVerificacion: string;
 }
 
 export interface BusquedaPerfilPublicoDTO {

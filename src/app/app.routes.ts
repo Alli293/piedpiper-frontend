@@ -288,6 +288,20 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'verificar',
+    loadComponent: () =>
+      import('./pages/verificacion-publica/verificacion-publica-page.component').then(
+        (m) => m.VerificacionPublicaPageComponent
+      ),
+  },
+  {
+    path: 'verificar/:codigo',
+    loadComponent: () =>
+      import('./pages/verificacion-publica/verificacion-publica-page.component').then(
+        (m) => m.VerificacionPublicaPageComponent
+      ),
+  },
+  {
     path: 'empresa/emisiones',
     canActivate: [guardEmpresa],
     loadComponent: () =>
