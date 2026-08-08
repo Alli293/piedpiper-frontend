@@ -99,9 +99,14 @@ describe('RefinamientoChatComponent — integración con alternativas', () => {
     estado: 'GENERADO',
     version: 1,
     puntuacionAmbientalPreliminar: 75,
+    ecoScore: 75,
+    clasificacionAmbiental: 'BUENA',
+    ecoScoreParcial: false,
+    ecoScoreCalculadoEn: '2026-07-30T20:00:00Z',
     fechaGeneracion: '2026-07-30T20:00:00Z',
     generadoParcial: false,
     mensajeParcial: null,
+    establecimientosEvaluados: null,
     dias: [
       {
         numeroDia: 1,
