@@ -57,7 +57,13 @@ Chart.register(
   standalone: true,
   templateUrl: './perfil-publico-page.component.html',
   styleUrl: './perfil-publico-page.component.scss',
-  imports: [IconComponent, LogoComponent, CompartirPerfilComponent, DecimalPipe, BaseChartDirective],
+  imports: [
+    IconComponent,
+    LogoComponent,
+    CompartirPerfilComponent,
+    DecimalPipe,
+    BaseChartDirective,
+  ],
 })
 export class PerfilPublicoPageComponent {
   private readonly route = inject(ActivatedRoute);
