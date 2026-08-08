@@ -233,6 +233,10 @@ describe('DetalleAuditoriaPageComponent', () => {
     });
   }
 
+  function errorApi(mensaje: string, status = 422): HttpErrorResponse {
+    return new HttpErrorResponse({ status, error: { message: mensaje } });
+  }
+
   beforeEach(async () => {
     vi.useFakeTimers();
     oculto = false;
@@ -681,6 +685,79 @@ describe('DetalleAuditoriaPageComponent', () => {
       )
     ).toBeNull();
     expect(botonCargaReporte()?.disabled).toBe(false);
+  });
+
+  it('muestra el error de fecha devuelto por el servidor en el campo de fecha', async () => {
+    auditoriasService.cargarReporte.mockReturnValue(
+      throwError(() =>
+        errorApi(
+          'La fecha de la auditoría debe estar entre la fecha de aceptación y la fecha actual.'
+        )
+      )
+    );
+    await montarCargaReporte();
+
+    await seleccionarReporte(reportePdf());
+    seleccionarFechaDeInput(
+      fixture,
+      new Date(Date.UTC(2026, 6, 28)),
+      '.ch-detalle-auditoria__reporte-form'
+    );
+    await estabilizar();
+    botonCargaReporte()?.click();
+    await estabilizar();
+
+    expect(
+      raiz().querySelector(
+        '.ch-detalle-auditoria__reporte-form app-date-input .ch-text-input__error'
+      )?.textContent
+    ).toContain('fecha de la auditor');
+  });
+
+  it('muestra el error de archivo devuelto por el servidor en el selector de reporte', async () => {
+    auditoriasService.cargarReporte.mockReturnValue(
+      throwError(() =>
+        errorApi(
+          'El archivo no pudo ser procesado. Verifica que no esté dañado y vuelve a intentarlo.'
+        )
+      )
+    );
+    await montarCargaReporte();
+
+    await seleccionarReporte(reportePdf());
+    seleccionarFechaDeInput(
+      fixture,
+      new Date(Date.UTC(2026, 6, 28)),
+      '.ch-detalle-auditoria__reporte-form'
+    );
+    await estabilizar();
+    botonCargaReporte()?.click();
+    await estabilizar();
+
+    expect(raiz().querySelector('.ch-file-drop__error')?.textContent).toContain('archivo');
+  });
+
+  it('muestra un error general cuando el servidor no lo asocia a un campo', async () => {
+    auditoriasService.cargarReporte.mockReturnValue(
+      throwError(() =>
+        errorApi('No es posible cargar el reporte en el estado actual de la solicitud.', 409)
+      )
+    );
+    await montarCargaReporte();
+
+    await seleccionarReporte(reportePdf());
+    seleccionarFechaDeInput(
+      fixture,
+      new Date(Date.UTC(2026, 6, 28)),
+      '.ch-detalle-auditoria__reporte-form'
+    );
+    await estabilizar();
+    botonCargaReporte()?.click();
+    await estabilizar();
+
+    expect(raiz().querySelector('.ch-detalle-auditoria__reporte-alerta')?.textContent).toContain(
+      'No es posible cargar'
+    );
   });
 
   it('muestra el panel de resultado cuando el reporte ya esta cargado', async () => {

@@ -3,13 +3,14 @@ import { Component, OnInit, computed, inject, input, signal } from '@angular/cor
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from '../../../core/auth-session.service';
-import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/badge.component';
+import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
-import { EstadoSolicitudAuditoria, ResumenSolicitudAuditoria } from '../auditoria.model';
+import { ResumenSolicitudAuditoria } from '../auditoria.model';
+import { variantePorEstadoAuditoria } from '../auditoria-estado.utils';
 import { AuditoriasService } from '../auditorias.service';
 
 const ERROR_CARGA = 'No se pudieron cargar las auditorías. Intenta nuevamente.';
@@ -79,18 +80,7 @@ export class ListadoAuditoriasPageComponent implements OnInit {
     }
   }
 
-  protected varianteDe(estado: EstadoSolicitudAuditoria): BadgeVariant {
-    switch (estado) {
-      case 'CERTIFICACION_EMITIDA':
-        return 'success';
-      case 'OBSERVACIONES_PENDIENTES':
-        return 'warning';
-      case 'SOLICITUD_ENVIADA':
-        return 'neutral';
-      default:
-        return 'info';
-    }
-  }
+  protected readonly varianteDe = variantePorEstadoAuditoria;
 
   protected esperaRespuesta(solicitud: ResumenSolicitudAuditoria): boolean {
     return solicitud.idAuditor !== null && solicitud.fechaAceptacion === null;
