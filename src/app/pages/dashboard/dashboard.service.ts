@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ComparacionEmisionesResponse } from '../emissions/models/emision.model';
 import {
+  AlertaVencimiento,
   CalendarioVencimientosResponse,
   InsigniaEmpresa,
   PeriodoDashboard,
@@ -40,6 +41,11 @@ export class DashboardService {
     return this.http.get<CalendarioVencimientosResponse>(`${this.dashboardBaseUrl}/calendario`, {
       params,
     });
+  }
+
+  /** Alertas activas del panel del dashboard (PP-76), ordenadas de más a menos urgente. */
+  obtenerAlertas(): Observable<AlertaVencimiento[]> {
+    return this.http.get<AlertaVencimiento[]>(`${this.dashboardBaseUrl}/alertas`);
   }
 
   obtenerComparacion(anio: number): Observable<ComparacionEmisionesResponse> {

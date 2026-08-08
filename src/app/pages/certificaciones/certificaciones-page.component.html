@@ -6,6 +6,12 @@
       [error]="resumenError()"
     />
 
+    <app-alertas-activas-panel
+      [alertas]="alertas()"
+      [loading]="cargandoAlertas()"
+      [error]="alertasError()"
+    />
+
     <app-calendario-vencimientos
       [mes]="mesCalendario()"
       [calendario]="calendario()"
