@@ -63,16 +63,27 @@ describe('EstadoCertificacionesPanelComponent', () => {
     expect(valores).toEqual(['0', '0', '0']);
   });
 
-  it('cada conteo enlaza al listado filtrado por su estado', () => {
+  it('las tarjetas "Activas" y "Vencidas" enlazan al listado filtrado por su estado', () => {
     componentRef.setInput('resumen', resumen());
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    const links = Array.from(el.querySelectorAll('.ch-estado-cert__card')) as HTMLAnchorElement[];
+    const links = Array.from(el.querySelectorAll('a.ch-estado-cert__card')) as HTMLAnchorElement[];
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
-      '/empresa/certificaciones?estado=activa',
-      '/empresa/certificaciones?estado=proxima_a_vencer',
-      '/empresa/certificaciones?estado=vencida',
+      '/empresa/certificaciones/listado?estado=activa',
+      '/empresa/certificaciones/listado?estado=vencida',
     ]);
+  });
+
+  it('"Próximas a vencer" no es un enlace porque el listado no tiene ese filtro', () => {
+    componentRef.setInput('resumen', resumen());
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const tarjetas = Array.from(el.querySelectorAll('.ch-estado-cert__card'));
+    const proximaAVencer = tarjetas.find((tarjeta) =>
+      tarjeta.textContent?.includes('Próximas a vencer')
+    );
+    expect(proximaAVencer?.tagName).toBe('DIV');
+    expect(proximaAVencer?.hasAttribute('href')).toBe(false);
   });
 
   it('usa la etiqueta singular "Vencida" cuando el conteo es 1', () => {
