@@ -224,6 +224,14 @@ export const routes: Routes = [
     loadComponent: cargarPlaceholder,
   },
   {
+    path: 'ecoruta/itinerarios/:id',
+    canActivate: [usuarioIndividualGuard],
+    loadComponent: () =>
+      import('./pages/ecoruta/itinerarios/itinerario-generado-page.component').then(
+        (m) => m.ItinerarioGeneradoPageComponent
+      ),
+  },
+  {
     path: 'empresas-verificadas',
     loadComponent: () =>
       import('./pages/empresas-verificadas/empresas-verificadas-page.component').then(

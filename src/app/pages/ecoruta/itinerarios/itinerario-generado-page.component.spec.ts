@@ -21,9 +21,14 @@ const ITINERARIO_BASE: Itinerario = {
   estado: 'GENERADO',
   version: 1,
   puntuacionAmbientalPreliminar: 85,
+  ecoScore: 85,
+  clasificacionAmbiental: 'EXCELENTE',
+  ecoScoreParcial: false,
+  ecoScoreCalculadoEn: '2026-07-30T20:38:19.896Z',
   fechaGeneracion: '2026-07-30T20:38:19.896Z',
   generadoParcial: false,
   mensajeParcial: null,
+  establecimientosEvaluados: [],
   dias: [
     {
       numeroDia: 2,
@@ -142,6 +147,78 @@ describe('ItinerarioGeneradoPageComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('itinerario parcial');
+  });
+
+  it('muestra un banner inline cuando el EcoScore fue calculado con informacion parcial', async () => {
+    await crearFixture();
+    httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush({
+      ...ITINERARIO_BASE,
+      ecoScoreParcial: true,
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain(
+      'El EcoScore fue calculado con información parcial'
+    );
+  });
+
+  it('muestra un toast de error cuando no fue posible calcular el EcoScore', async () => {
+    await crearFixture();
+    const errorSpy = vi.spyOn(toastService, 'error');
+
+    httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush({
+      ...ITINERARIO_BASE,
+      ecoScore: null,
+      clasificacionAmbiental: null,
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      'No fue posible calcular el impacto ambiental del itinerario.',
+      undefined,
+      5000
+    );
+  });
+
+  it('muestra el desglose ambiental por establecimiento', async () => {
+    await crearFixture();
+    httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush({
+      ...ITINERARIO_BASE,
+      establecimientosEvaluados: [
+        {
+          nombreEstablecimiento: 'Reserva Selvatura',
+          puntuacionAmbiental: {
+            puntuacionTotal: 68,
+            componenteCertificaciones: 30,
+            componenteIma: 24,
+            componenteBenchmark: 14,
+            cantidadCertificacionesActivas: 3,
+            estimado: false,
+          },
+        },
+      ],
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const texto = fixture.nativeElement.textContent as string;
+    expect(texto).toContain('Desglose por establecimiento');
+    expect(texto).toContain('Reserva Selvatura');
+  });
+
+  it('no revienta y omite el desglose cuando el backend envia establecimientosEvaluados null', async () => {
+    await crearFixture();
+    httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush({
+      ...ITINERARIO_BASE,
+      establecimientosEvaluados: null,
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).not.toContain('Desglose por establecimiento');
+    expect(fixture.nativeElement.textContent).toContain('85');
   });
 
   it('muestra estado de error y permite reintentar si la carga falla', async () => {
