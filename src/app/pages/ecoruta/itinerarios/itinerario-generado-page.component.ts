@@ -1,10 +1,9 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from '../../../core/auth-session.service';
-import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
@@ -21,16 +20,24 @@ import { PuntuacionAmbientalBadgeComponent } from './puntuacion-ambiental-badge/
 import { RefinamientoChatComponent } from './refinamiento-chat/refinamiento-chat.component';
 import { derivarEtiquetaRuta } from './utils/ruta-diaria.utils';
 
-interface BandaEcoScore {
+type ClaveClasificacion = 'excelente' | 'buena' | 'moderada' | 'mejorable';
+
+interface ClasificacionInfo {
   texto: string;
-  variant: BadgeVariant;
+  clave: ClaveClasificacion;
 }
 
-const BANDA_POR_CLASIFICACION: Record<string, BandaEcoScore> = {
-  EXCELENTE: { texto: 'Excelente', variant: 'success' },
-  BUENA: { texto: 'Buena', variant: 'info' },
-  MODERADA: { texto: 'Moderada', variant: 'warning' },
-  MEJORABLE: { texto: 'Mejorable', variant: 'danger' },
+interface EscalaEcoScoreItem {
+  clave: string;
+  rango: string;
+  texto: string;
+}
+
+const INFO_POR_CLASIFICACION: Record<string, ClasificacionInfo> = {
+  EXCELENTE: { texto: 'Excelente', clave: 'excelente' },
+  BUENA: { texto: 'Buena', clave: 'buena' },
+  MODERADA: { texto: 'Moderada', clave: 'moderada' },
+  MEJORABLE: { texto: 'Mejorable', clave: 'mejorable' },
 };
 
 const ERROR_CARGA = 'No se pudo cargar el itinerario. Intenta nuevamente.';
@@ -41,7 +48,6 @@ const TOAST_DURATION_MS = 5000;
 @Component({
   selector: 'app-itinerario-generado-page',
   imports: [
-    BadgeComponent,
     ButtonComponent,
     CertificacionesDetalleComponent,
     DatePipe,
@@ -56,7 +62,6 @@ const TOAST_DURATION_MS = 5000;
 })
 export class ItinerarioGeneradoPageComponent {
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
   private readonly itinerariosService = inject(EcoRutaItinerariosService);
   private readonly authSession = inject(AuthSessionService);
   private readonly toastService = inject(ToastService);
@@ -70,19 +75,26 @@ export class ItinerarioGeneradoPageComponent {
 
   private cargaRequestId = 0;
 
+  protected readonly escalaEcoScore: readonly EscalaEcoScoreItem[] = [
+    { clave: 'EXCELENTE', rango: '80–100', texto: 'Excelente' },
+    { clave: 'BUENA', rango: '60–79', texto: 'Buena' },
+    { clave: 'MODERADA', rango: '40–59', texto: 'Moderada' },
+    { clave: 'MEJORABLE', rango: '0–39', texto: 'Mejorable' },
+  ];
+
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'ECORUTA / ITINERARIO',
     pageTitle: this.itinerario()
-      ? `Itinerario · ${this.itinerario()!.cantidadDias} días`
+      ? `Costa Rica sostenible · ${this.itinerario()!.cantidadDias} días`
       : 'Itinerario generado',
     showNotificationDot: false,
     userInitials: this.authSession.getUserInitials(),
   }));
 
-  protected readonly bandaEcoScore = computed<BandaEcoScore | null>(() => {
+  protected readonly bandaEcoScore = computed<ClasificacionInfo | null>(() => {
     const clasificacion = this.itinerario()?.clasificacionAmbiental;
     if (!clasificacion) return null;
-    return BANDA_POR_CLASIFICACION[clasificacion] ?? null;
+    return INFO_POR_CLASIFICACION[clasificacion] ?? null;
   });
 
   // El backend puede omitir este campo (queda null) cuando no hay establecimientos que evaluar;
@@ -97,9 +109,6 @@ export class ItinerarioGeneradoPageComponent {
     if (score === null || score === undefined) return `0, ${circumference}`;
     return `${(score / 100) * circumference}, ${circumference}`;
   });
-
-  // TODO(PP-88): reemplazar por comparación real de versión cuando exista la regeneración.
-  protected readonly esVersionVigente = computed(() => true);
 
   constructor() {
     void this.cargar();
@@ -142,10 +151,6 @@ export class ItinerarioGeneradoPageComponent {
 
   protected etiquetaProvincia(codigo: string): string {
     return PROVINCIA_OPTIONS.find((option) => option.value === codigo)?.label ?? codigo;
-  }
-
-  protected volverAMisItinerarios(): void {
-    void this.router.navigateByUrl('/ecoruta/itinerarios');
   }
 
   protected toggleDia(numeroDia: number): void {
