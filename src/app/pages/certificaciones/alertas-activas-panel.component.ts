@@ -50,6 +50,12 @@ export class AlertasActivasPanelComponent {
     return alerta.urgencia === 'vencida';
   }
 
+  protected diasLabel(alerta: AlertaVencimiento): string {
+    return this.estaVencida(alerta)
+      ? `vencida hace ${-alerta.diasRestantes} días`
+      : `vence en ${alerta.diasRestantes} días`;
+  }
+
   protected tono(alerta: AlertaVencimiento): TonoAlerta {
     return TONO_POR_URGENCIA[alerta.urgencia];
   }
