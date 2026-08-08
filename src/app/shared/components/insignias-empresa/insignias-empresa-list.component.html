@@ -8,34 +8,32 @@
   </section>
 } @else {
   <div class="ch-ie">
-    <section class="ch-ie__resumen" aria-label="Resumen de insignias empresariales">
-      <div class="ch-ie__resumen-icono" aria-hidden="true">
-        <app-icon name="empresa" [size]="20" />
-      </div>
-      <div>
-        <span class="ch-ie__eyebrow">Reconocimientos verificables</span>
-        <app-heading
-          level="h1"
-          [text]="nombreEmpresa() ? titulo() + ' de ' + nombreEmpresa() : titulo()"
-        />
-        <p>{{ descripcion() }}</p>
-      </div>
-      <dl class="ch-ie__metricas">
-        <div>
-          <dt>Insignias activas</dt>
-          <dd>{{ cantidadActivas() }}</dd>
+    @if (mostrarResumen()) {
+      <section class="ch-ie__resumen" aria-label="Resumen de insignias empresariales">
+        <div class="ch-ie__resumen-icono" aria-hidden="true">
+          <app-icon name="empresa" [size]="20" />
         </div>
-      </dl>
-    </section>
+        <div>
+          <span class="ch-ie__eyebrow">Reconocimientos verificables</span>
+          <app-heading
+            level="h1"
+            [text]="nombreEmpresa() ? titulo() + ' de ' + nombreEmpresa() : titulo()"
+          />
+          <p>{{ descripcion() }}</p>
+        </div>
+        <dl class="ch-ie__metricas">
+          <div>
+            <dt>Insignias activas</dt>
+            <dd>{{ cantidadActivas() }}</dd>
+          </div>
+        </dl>
+      </section>
+    }
 
-    <div class="ch-ie__nota" role="note">
-      <app-icon name="success" [size]="14" aria-hidden="true" />
-      <span>
-        Todas las insignias se emiten como credenciales
-        <strong>OpenBadges 3.0</strong>, un estándar abierto de credenciales verificables. Cualquier
-        persona puede comprobar su autenticidad de forma independiente.
-      </span>
-    </div>
+    <app-semantic-card
+      variant="info"
+      text="Todas las insignias se emiten como credenciales OpenBadges 3.0, un estándar abierto de credenciales verificables. Cualquier persona puede comprobar su autenticidad de forma independiente."
+    />
 
     <div class="ch-ie__contenido">
       <section class="ch-ie__principal">
@@ -55,7 +53,7 @@
                 >
                   <app-icon name="success" [size]="16" />
                 </span>
-              } @else if (insignia.urlVerificacionPublica) {
+              } @else if (insignia.codigoVerificacion) {
                 <button
                   type="button"
                   class="ch-ie__card-status ch-ie__card-status--link"
@@ -63,7 +61,7 @@
                   title="Verificar con OpenBadges 3.0"
                   (click)="verificarOpenBadges.emit(insignia); $event.stopPropagation()"
                 >
-                  <app-icon name="ver" [size]="16" />
+                  <app-icon name="redirect" [size]="16" />
                 </button>
               }
 
@@ -92,10 +90,9 @@
                   </small>
                 </span>
 
-                <span class="ch-ie__openbadges">
-                  <app-icon name="success" [size]="10" aria-hidden="true" />
-                  OpenBadges 3.0
-                </span>
+                <app-badge class="ch-ie__openbadges" variant="neutral" icon="verificada"
+                  >OpenBadges 3.0</app-badge
+                >
               </button>
             </article>
           }
@@ -134,8 +131,18 @@
                   </dt>
                   <dd>
                     <strong>{{ insignia.nombre }}</strong>
-                    <span>Nivel {{ nivelLabel(insignia.nivelInsignia) }}</span>
                   </dd>
+                </div>
+                <div>
+                  <dt>
+                    <app-icon
+                      [name]="nivelIcono(insignia.nivelInsignia)"
+                      [size]="13"
+                      aria-hidden="true"
+                    />
+                    Nivel
+                  </dt>
+                  <dd>{{ nivelLabel(insignia.nivelInsignia) }}</dd>
                 </div>
                 <div>
                   <dt>
@@ -165,7 +172,7 @@
               <section class="ch-ie__credencial" aria-label="Reconocimiento verificable">
                 <div class="ch-ie__credencial-heading">
                   <span aria-hidden="true">
-                    <app-icon name="success" [size]="18" />
+                    <app-icon name="verificar" [size]="18" />
                   </span>
                   <div>
                     <strong>Credencial verificable</strong>
@@ -173,40 +180,18 @@
                   </div>
                 </div>
                 <p>
-                  Esta insignia fue otorgada automáticamente porque la empresa cumplió los
-                  requisitos configurados en la plataforma.
+                  Esta insignia es una credencial verificable. Comprueba su autenticidad e
+                  integridad de forma con un verificador compatible con OpenBadges 3.0.
                 </p>
-                @if (insignia.urlVerificacionPublica) {
+                @if (insignia.codigoVerificacion) {
                   <app-button variant="primary" (click)="verificarOpenBadges.emit(insignia)">
-                    <app-icon name="ver" [size]="16" />
+                    <app-icon name="redirect" [size]="16" />
                     <span>Verificar con OpenBadges 3.0</span>
                   </app-button>
                 }
 
-                @if (
-                  accionesPrivadas() &&
-                  (insignia.idInsigniaEmpresa ||
-                    insignia.urlLinkedIn ||
-                    insignia.urlVerificacionPublica)
-                ) {
-                  <div class="ch-ie__acciones-secundarias">
-                    @if (insignia.urlVerificacionJwt || insignia.urlVerificacionPublica) {
-                      <app-button variant="secondary" (click)="descargarJwt.emit(insignia)">
-                        <app-icon name="descargar" [size]="16" />
-                        <span>Descargar .JWT</span>
-                      </app-button>
-                    }
-
-                    @if (insignia.urlLinkedIn || insignia.urlVerificacionPublica) {
-                      <app-button variant="secondary" (click)="compartirLinkedIn.emit(insignia)">
-                        <app-icon name="perfil-publico" [size]="16" />
-                        <span>Compartir en LinkedIn</span>
-                      </app-button>
-                    }
-                  </div>
-                }
                 <small class="ch-ie__verificacion-nota">
-                  Detección automática - niveles progresivos
+                  Verificación independiente · estándar abierto
                 </small>
               </section>
             </div>

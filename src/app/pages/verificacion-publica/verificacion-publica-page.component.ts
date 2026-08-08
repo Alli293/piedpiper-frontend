@@ -127,6 +127,24 @@ export class VerificacionPublicaPageComponent implements OnInit {
     return ESTADOS[estado];
   }
 
+  protected esInsignia(categoria: string): boolean {
+    return categoria === 'INSIGNIA';
+  }
+
+  protected nivelLabel(nivel: string | null): string {
+    const labels: Record<string, string> = { bronce: 'Bronce', plata: 'Plata', oro: 'Oro' };
+    return nivel ? (labels[nivel] ?? nivel) : '';
+  }
+
+  protected nivelIcono(nivel: string | null): IconName {
+    const iconos: Record<string, IconName> = {
+      bronce: 'medal-bronze',
+      plata: 'medal-silver',
+      oro: 'medal-gold',
+    };
+    return (nivel && iconos[nivel]) || 'insignias';
+  }
+
   protected esVencida(estado: EstadoVerificacion): boolean {
     return estado === 'valida_vencida';
   }
