@@ -7,6 +7,7 @@ export type SidebarNavId =
   | 'emissions'
   | 'benchmark'
   | 'certificaciones'
+  | 'auditorias-empresa'
   | 'insignias-empresa'
   | 'colaboradores'
   | 'settings'
@@ -29,6 +30,7 @@ const SIDEBAR_NAV_ITEMS: Record<SidebarNavVariant, readonly SidebarNavItemDef[]>
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
     { id: 'emissions', label: 'Mis Emisiones', icon: 'emisiones' },
     { id: 'certificaciones', label: 'Certificaciones', icon: 'certificaciones' },
+    { id: 'auditorias-empresa', label: 'Auditorías', icon: 'auditorias', soloAdministrador: true },
     { id: 'benchmark', label: 'Madurez ambiental', icon: 'benchmark' },
     { id: 'insignias-empresa', label: 'Insignias', icon: 'insignias' },
     { id: 'colaboradores', label: 'Colaboradores', icon: 'colaboradores', soloAdministrador: true },
@@ -132,7 +134,7 @@ interface AuditorNavItemDef {
 }
 
 const AUDITOR_NAV_ITEMS: readonly AuditorNavItemDef[] = [
-  { id: 'auditorias', label: 'Auditorías', icon: 'auditorias', disabled: true },
+  { id: 'auditorias', label: 'Auditorías', icon: 'auditorias' },
   { id: 'perfil-publico', label: 'Perfil Público', icon: 'perfil-publico' },
 ];
 

@@ -25,7 +25,7 @@ export const RUTA_INICIO_POR_ROL: Record<RolUsuario, string> = {
   USUARIO_INDIVIDUAL: 'ecoruta/preferencias',
   USUARIO_GENERAL: 'empresa/panel',
   ADMINISTRADOR_EMPRESA: 'empresa/panel',
-  AUDITOR_CERTIFICADO: 'auditor/panel',
+  AUDITOR_CERTIFICADO: 'auditor/auditorias',
   ADMINISTRADOR_PLATAFORMA: 'admin/panel',
 };
 

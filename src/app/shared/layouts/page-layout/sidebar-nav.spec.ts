@@ -63,14 +63,17 @@ describe('buildSidebarConfig', () => {
 });
 
 describe('buildAuditorSidebarConfig', () => {
-  it('incluye los items del auditor con auditorías deshabilitada', () => {
+  it('incluye los items del auditor con auditorías habilitada', () => {
     const config = buildAuditorSidebarConfig({
       auditorName: 'Ana Mora',
       auditorInitials: 'AM',
     });
 
+    // Estuvo deshabilitada mientras no existió el listado. Con el listado en pie, dejarla
+    // apagada era la única razón por la que el auditor no podía llegar a sus solicitudes.
     const auditorias = config.menuItems.find((item) => item.id === 'auditorias');
-    expect(auditorias?.disabled).toBe(true);
+    expect(auditorias).toBeDefined();
+    expect(auditorias?.disabled).toBeFalsy();
     expect(config.companyRole).toBe('Auditor · Verificado');
   });
 

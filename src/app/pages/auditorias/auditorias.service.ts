@@ -4,6 +4,9 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AsignarAuditorRequest,
+  DetalleSolicitudAuditoria,
+  ResponderDecisionRequest,
+  ResumenSolicitudAuditoria,
   NuevaSolicitudAuditoriaRequest,
   SolicitudAuditoria,
   SolicitudAuditoriaAsignada,
@@ -13,6 +16,16 @@ import {
 export class AuditoriasService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/auditorias`;
+
+  /** Solicitudes de la empresa autenticada. El backend resuelve cuál es a partir del usuario. */
+  listarDeMiEmpresa(): Observable<ResumenSolicitudAuditoria[]> {
+    return this.http.get<ResumenSolicitudAuditoria[]>(this.baseUrl);
+  }
+
+  /** Solicitudes asignadas al auditor autenticado. */
+  listarAsignadas(): Observable<ResumenSolicitudAuditoria[]> {
+    return this.http.get<ResumenSolicitudAuditoria[]>(`${this.baseUrl}/asignadas`);
+  }
 
   crearSolicitud(
     datos: NuevaSolicitudAuditoriaRequest,
@@ -29,6 +42,29 @@ export class AuditoriasService {
 
   obtenerSolicitud(idSolicitud: string): Observable<SolicitudAuditoriaAsignada> {
     return this.http.get<SolicitudAuditoriaAsignada>(`${this.baseUrl}/${idSolicitud}`);
+  }
+
+  /**
+   * Misma ruta que {@link obtenerSolicitud}: el backend devuelve el historial dentro de la
+   * respuesta, así que son dos vistas del mismo recurso y no dos endpoints.
+   */
+  obtenerDetalle(idSolicitud: string): Observable<DetalleSolicitudAuditoria> {
+    return this.http.get<DetalleSolicitudAuditoria>(`${this.baseUrl}/${idSolicitud}`);
+  }
+
+  responderDecision(idSolicitud: string, request: ResponderDecisionRequest): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${idSolicitud}/decision`, request);
+  }
+
+  /**
+   * Trae el contenido del documento por el cliente HTTP y no por la URL directa: el endpoint exige
+   * la cabecera de autenticación, que solo agrega el interceptor. Un enlace apuntando a la URL
+   * devolvería 401.
+   */
+  descargarDocumento(idSolicitud: string, idDocumento: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${idSolicitud}/documentos/${idDocumento}`, {
+      responseType: 'blob',
+    });
   }
 
   asignarAuditor(
