@@ -126,4 +126,22 @@ describe('InsigniaNotificacionService', () => {
 
     expect(service.pendientes()).toEqual([]);
   });
+
+  it('no encola una insignia nueva si el usuario navegó mientras el reintento seguía en vuelo', async () => {
+    vi.useFakeTimers();
+
+    const promesaRevision = service.revisarConReintentos(new Set([1]));
+    await vi.advanceTimersByTimeAsync(1500); // dispara la petición del primer intento
+
+    // El usuario navega a otra pantalla mientras esa petición sigue en vuelo.
+    void router.navigateByUrl('/cualquier-ruta').catch(() => undefined);
+    await Promise.resolve();
+
+    // La respuesta llega tarde con una insignia nueva, pero ya no debería aplicar:
+    // el usuario ya no está en la pantalla que originó la revisión.
+    flushListado([insignia(1), insignia(2)]);
+    await promesaRevision;
+
+    expect(service.pendientes()).toEqual([]);
+  });
 });

@@ -21,11 +21,22 @@ export class InsigniaNotificacionService {
   private readonly _pendientes = signal<InsigniaEcoRuta[]>([]);
   readonly pendientes = this._pendientes.asReadonly();
 
+  /**
+   * Se incrementa en cada `NavigationStart`. `revisarConReintentos` guarda el valor vigente al
+   * arrancar y lo revalida antes de encolar una insignia nueva: si cambió, hubo una navegación
+   * mientras el bucle de reintentos seguía en vuelo (hasta 9.5s: 1.5s + 3s + 5s) y el resultado
+   * ya no aplica a la pantalla que lo originó, así que se descarta en silencio.
+   */
+  private tokenDeNavegacion = 0;
+
   constructor() {
     // Criterio de aceptación: se descarta todo al cambiar de ruta.
     this.router.events
       .pipe(filter((evento): evento is NavigationStart => evento instanceof NavigationStart))
-      .subscribe(() => this._pendientes.set([]));
+      .subscribe(() => {
+        this.tokenDeNavegacion++;
+        this._pendientes.set([]);
+      });
   }
 
   async obtenerIdsActuales(): Promise<ReadonlySet<number> | null> {
@@ -41,10 +52,14 @@ export class InsigniaNotificacionService {
   async revisarConReintentos(idsPrevios: ReadonlySet<number> | null): Promise<void> {
     if (idsPrevios === null) return;
 
+    const tokenAlArrancar = this.tokenDeNavegacion;
+
     for (const esperaMs of REINTENTOS_MS) {
       await this.esperar(esperaMs);
+      if (this.tokenDeNavegacion !== tokenAlArrancar) return; // hubo navegación: ya no aplica.
       try {
         const actuales = await firstValueFrom(this.insigniasService.listarObtenidas());
+        if (this.tokenDeNavegacion !== tokenAlArrancar) return;
         const nuevas = actuales.filter((insignia) => !idsPrevios.has(insignia.idInsignia));
         if (nuevas.length > 0) {
           this._pendientes.update((actual) => [...actual, ...nuevas]);
