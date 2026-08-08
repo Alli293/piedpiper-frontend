@@ -91,6 +91,7 @@
 .ch-certificaciones-publicas__table-wrap {
   width: 100%;
   overflow-x: auto;
+  overflow-y: clip;
   border: 1px solid var(--ch-border);
   border-radius: var(--ch-radius-lg);
   background: var(--ch-bg-white);
@@ -123,6 +124,12 @@
 
 .ch-certificaciones-publicas__table-wrap tr:last-child td {
   border-bottom: 0;
+}
+
+.ch-certificaciones-publicas__table-wrap tr:last-child td:first-child {
+  /* Deja espacio para que el tooltip de "código copiado" no quede recortado por el
+     overflow-y: clip del wrap (necesario para evitar el parpadeo del scrollbar). */
+  padding-bottom: calc(var(--ch-space-3) + 24px);
 }
 
 .ch-certificaciones-publicas__cert-cell {

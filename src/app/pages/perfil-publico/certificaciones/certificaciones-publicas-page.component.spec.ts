@@ -1,4 +1,3 @@
-import { Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
@@ -54,19 +53,16 @@ const CERT_ESTADO_DESCONOCIDO: CertificacionPublica = {
 describe('CertificacionesPublicasPageComponent', () => {
   let listarCertificaciones: ReturnType<typeof vi.fn>;
   let obtenerPerfil: ReturnType<typeof vi.fn>;
-  let locationBack: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     listarCertificaciones = vi.fn().mockReturnValue(of([]));
     obtenerPerfil = vi.fn().mockReturnValue(of(PERFIL));
-    locationBack = vi.fn();
 
     await TestBed.configureTestingModule({
       imports: [CertificacionesPublicasPageComponent],
       providers: [
         provideRouter([]),
         { provide: PerfilPublicoService, useValue: { listarCertificaciones, obtenerPerfil } },
-        { provide: Location, useValue: { back: locationBack } },
       ],
     }).compileComponents();
   });
@@ -216,6 +212,19 @@ describe('CertificacionesPublicasPageComponent', () => {
 
     expect(writeText).toHaveBeenCalledWith(CERT_VIGENTE.codigoVerificacion);
     expect(root.textContent).toContain('Código copiado');
+  });
+
+  it('el boton Volver navega a la reputacion de la empresa, no al historial del navegador', async () => {
+    listarCertificaciones.mockReturnValue(of([CERT_VIGENTE]));
+    const fixture = await crearFixture('cafe-del-valle');
+    const root = fixture.nativeElement as HTMLElement;
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    const botonVolver: HTMLButtonElement | null = root.querySelector('.ch-pp-header__volver');
+    botonVolver?.click();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/empresa', 'cafe-del-valle', 'reputacion']);
   });
 
   it('muestra el nombre y logo de la empresa en el encabezado de seccion', async () => {

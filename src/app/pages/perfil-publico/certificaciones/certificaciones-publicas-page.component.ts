@@ -1,4 +1,4 @@
-import { DatePipe, Location } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -48,7 +48,6 @@ const ESTADOS: Record<string, { etiqueta: string; variante: BadgeVariant }> = {
 })
 export class CertificacionesPublicasPageComponent implements OnInit {
   private readonly perfilPublicoService = inject(PerfilPublicoService);
-  private readonly location = inject(Location);
   private readonly router = inject(Router);
 
   readonly slug = input.required<string>();
@@ -110,7 +109,7 @@ export class CertificacionesPublicasPageComponent implements OnInit {
   }
 
   protected volver(): void {
-    this.location.back();
+    void this.router.navigate(['/empresa', this.slug(), 'reputacion']);
   }
 
   protected etiqueta(estado: string): string {
