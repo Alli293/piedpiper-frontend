@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, input, output, signal } from '@angular/core';
+import { Component, computed, effect, input, output, signal, untracked } from '@angular/core';
 import { InsigniaEmpresa, NivelInsigniaEmpresa } from '../../../core/empresa/empresa.models';
 import { BadgeComponent } from '../badge/badge.component';
 import { ButtonComponent } from '../button/button.component';
@@ -20,6 +20,8 @@ export class InsigniasEmpresaListComponent {
   );
   nombreEmpresa = input<string>();
   accionesPrivadas = input(false);
+  /** Llave (`idInsignia-nivelInsignia`) de la insignia a preseleccionar, p. ej. al llegar desde un enlace de detalle. */
+  seleccionInicial = input<string | null>(null);
 
   descargarJsonLd = output<InsigniaEmpresa>();
   descargarJwt = output<InsigniaEmpresa>();
@@ -39,6 +41,21 @@ export class InsigniasEmpresaListComponent {
     const seleccion = this.seleccion();
     return insignias.find((insignia) => this.llave(insignia) === seleccion) ?? insignias[0] ?? null;
   });
+
+  constructor() {
+    // Preselecciona la insignia indicada por query param (enlace de detalle) una
+    // vez que la lista está disponible; no pisa una selección posterior del usuario.
+    effect(() => {
+      const insignias = this.insigniasOrdenadas();
+      const llaveInicial = this.seleccionInicial();
+      if (!llaveInicial || insignias.length === 0) return;
+      untracked(() => {
+        if (this.seleccion() === null) {
+          this.seleccion.set(llaveInicial);
+        }
+      });
+    });
+  }
 
   protected seleccionar(insignia: InsigniaEmpresa): void {
     this.seleccion.set(this.llave(insignia));
