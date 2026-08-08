@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy, inject, input, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, OnDestroy, inject, input, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DOCUMENT } from '@angular/common';
 import { EnlacePerfilDTO } from '../models/enlace-perfil.model';
 import { PerfilPublicoService } from '../perfil-publico.service';
@@ -13,6 +14,7 @@ import { PerfilPublicoService } from '../perfil-publico.service';
 export class CompartirPerfilComponent implements OnInit, OnDestroy {
   private readonly perfilService = inject(PerfilPublicoService);
   private readonly document = inject(DOCUMENT);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly slug = input.required<string>();
 
@@ -47,6 +49,11 @@ export class CompartirPerfilComponent implements OnInit, OnDestroy {
 
     this.errorClipboard.set(false);
 
+    if (!navigator.clipboard?.writeText) {
+      this.errorClipboard.set(true);
+      return;
+    }
+
     navigator.clipboard.writeText(url).then(
       () => {
         this.copiado.set('enlace');
@@ -63,6 +70,11 @@ export class CompartirPerfilComponent implements OnInit, OnDestroy {
     if (!codigo) return;
 
     this.errorClipboard.set(false);
+
+    if (!navigator.clipboard?.writeText) {
+      this.errorClipboard.set(true);
+      return;
+    }
 
     navigator.clipboard.writeText(codigo).then(
       () => {
@@ -102,16 +114,19 @@ export class CompartirPerfilComponent implements OnInit, OnDestroy {
     this.ogImagenError.set(false);
     this.limpiarMetaTags();
 
-    this.perfilService.obtenerEnlaceComparticion(this.slug()).subscribe({
-      next: (dto) => {
-        this.enlace.set(dto);
-        this.estado.set('exito');
-        this.insertarMetaTags(dto);
-      },
-      error: () => {
-        this.estado.set('error');
-      },
-    });
+    this.perfilService
+      .obtenerEnlaceComparticion(this.slug())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (dto) => {
+          this.enlace.set(dto);
+          this.estado.set('exito');
+          this.insertarMetaTags(dto);
+        },
+        error: () => {
+          this.estado.set('error');
+        },
+      });
   }
 
   private iniciarTimeoutCopiado(): void {
