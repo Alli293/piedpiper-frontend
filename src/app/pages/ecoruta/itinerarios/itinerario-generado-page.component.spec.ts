@@ -168,6 +168,24 @@ describe('ItinerarioGeneradoPageComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Excelente');
   });
 
+  it('muestra un toast de acceso denegado cuando el itinerario es de otro usuario (403)', async () => {
+    await crearFixture();
+    const errorSpy = vi.spyOn(toastService, 'error');
+
+    httpMock
+      .expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`)
+      .flush({}, { status: 403, statusText: 'Forbidden' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      'No tienes permiso para acceder a este itinerario.',
+      undefined,
+      5000
+    );
+    expect(fixture.nativeElement.textContent).toContain('No se pudo cargar el itinerario.');
+  });
+
   it('el boton "Volver a mis itinerarios" navega a /ecoruta/itinerarios', async () => {
     await crearFixture();
     httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush(ITINERARIO_BASE);
@@ -182,5 +200,64 @@ describe('ItinerarioGeneradoPageComponent', () => {
     volver?.click();
 
     expect(navigateSpy).toHaveBeenCalledWith('/ecoruta/itinerarios');
+  });
+
+  it('colapsa y expande las actividades de un día al hacer click en su encabezado', async () => {
+    await crearFixture();
+    httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush(ITINERARIO_BASE);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    const headerDia1 = root.querySelectorAll<HTMLButtonElement>(
+      '.ch-itinerario-generado__dia-header'
+    )[0];
+
+    expect(root.querySelectorAll('.ch-itinerario-generado__actividades').length).toBe(2);
+    expect(headerDia1.getAttribute('aria-expanded')).toBe('true');
+
+    headerDia1.click();
+    fixture.detectChanges();
+
+    expect(root.querySelectorAll('.ch-itinerario-generado__actividades').length).toBe(1);
+    expect(headerDia1.getAttribute('aria-expanded')).toBe('false');
+
+    headerDia1.click();
+    fixture.detectChanges();
+
+    expect(root.querySelectorAll('.ch-itinerario-generado__actividades').length).toBe(2);
+  });
+
+  it('el boton "Preguntar sobre esto" hace scroll hacia el panel de chat', async () => {
+    await crearFixture();
+    httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush(ITINERARIO_BASE);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    const panel = root.querySelector<HTMLElement>('.ch-itinerario-generado__lateral')!;
+    // jsdom no implementa scrollIntoView de forma nativa: se stubea directo en vez
+    // de vi.spyOn, que requiere que el método ya exista en el prototype.
+    const scrollSpy = vi.fn();
+    panel.scrollIntoView = scrollSpy;
+
+    const botones = Array.from(root.querySelectorAll('button'));
+    const preguntar = botones.find((boton) => boton.textContent?.includes('Preguntar sobre esto'));
+    preguntar?.click();
+
+    expect(scrollSpy).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+  });
+
+  it('muestra el badge de "Versión vigente" y el costo formateado en colones/dólares', async () => {
+    await crearFixture();
+    httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush(ITINERARIO_BASE);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const texto = fixture.nativeElement.textContent as string;
+    expect(texto).toContain('Versión vigente');
+    // es-CR antepone el código ISO para monedas extranjeras (ver currency.utils.spec.ts)
+    expect(texto).toContain('USD');
+    expect(texto).toContain('18');
   });
 });

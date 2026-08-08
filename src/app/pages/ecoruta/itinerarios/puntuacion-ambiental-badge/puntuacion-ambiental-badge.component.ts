@@ -11,11 +11,15 @@ import { PuntuacionAmbientalResponse } from '../models/puntuacion-ambiental.mode
 })
 export class PuntuacionAmbientalBadgeComponent {
   puntuacion = input<PuntuacionAmbientalResponse | null>(null);
+  puntuacionEstimada = input<number | null>(null);
+
+  protected readonly valorMostrado = computed(
+    () => this.puntuacion()?.puntuacionTotal ?? this.puntuacionEstimada() ?? null
+  );
 
   protected readonly badgeClass = computed(() => {
-    const p = this.puntuacion();
-    if (!p) return '';
-    const total = p.puntuacionTotal ?? 0;
+    const total = this.valorMostrado();
+    if (total === null) return '';
     if (total >= 70) return 'ch-puntuacion-badge--alto';
     if (total >= 40) return 'ch-puntuacion-badge--medio';
     return 'ch-puntuacion-badge--bajo';

@@ -130,12 +130,17 @@
 
 .ch-itinerario-generado__dia-header {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
   gap: var(--ch-space-3);
+  width: 100%;
   padding: var(--ch-space-4);
   background: var(--ch-bg-main);
+  border: none;
   border-bottom: 1px solid var(--ch-border);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 
   strong {
     display: block;
@@ -143,6 +148,16 @@
     font-family: var(--ch-font-heading);
     font-size: 0.92rem;
     text-transform: capitalize;
+  }
+}
+
+.ch-itinerario-generado__dia-chevron {
+  flex-shrink: 0;
+  color: var(--ch-text-secondary);
+  transition: transform 150ms ease;
+
+  &--colapsado {
+    transform: rotate(-90deg);
   }
 }
 
@@ -286,7 +301,7 @@
   }
 
   .ch-itinerario-generado__dia-header {
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
   .ch-itinerario-generado__dia-conteo {
