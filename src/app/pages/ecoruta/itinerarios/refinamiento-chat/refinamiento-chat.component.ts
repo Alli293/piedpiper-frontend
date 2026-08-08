@@ -102,6 +102,8 @@ export class RefinamientoChatComponent {
       moneda: alternativa.moneda,
       establecimientoRecomendado: alternativa.establecimientoRecomendado,
       ecoScore: alternativa.ecoScore,
+      categoriaTuristica: this.comparacionResponse()!.categoriaTuristica,
+      provincia: this.comparacionResponse()!.provincia,
     };
 
     this.cargandoSustitucion.set(true);
