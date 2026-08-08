@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ToastHostComponent } from './shared/components/toast/toast.component';
+import { InsigniaNotificacionHostComponent } from './shared/components/insignia-notificacion/insignia-notificacion-host.component';
 import { SesionInactividadService } from './core/auth/sesion-inactividad.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ToastHostComponent],
+  imports: [RouterOutlet, ToastHostComponent, InsigniaNotificacionHostComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

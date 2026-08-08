@@ -1,0 +1,22 @@
+@if (actual(); as insignia) {
+  <div class="ch-insignia-notificacion" role="alert">
+    <span class="ch-insignia-notificacion__icono" aria-hidden="true">
+      <app-icon name="insignias" [size]="20" />
+    </span>
+
+    <div class="ch-insignia-notificacion__texto">
+      <p class="ch-insignia-notificacion__titulo">¡Nueva insignia desbloqueada!</p>
+      <p class="ch-insignia-notificacion__nombre">{{ insignia.nombre }}</p>
+      <p class="ch-insignia-notificacion__descripcion">{{ insignia.descripcion }}</p>
+    </div>
+
+    <button
+      type="button"
+      class="ch-insignia-notificacion__cerrar"
+      aria-label="Cerrar notificación"
+      (click)="cerrar()"
+    >
+      <app-icon name="cerrar" [size]="16" />
+    </button>
+  </div>
+}
