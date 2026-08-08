@@ -1,11 +1,28 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { DecimalPipe } from '@angular/common';
 import { Meta, Title } from '@angular/platform-browser';
 
+import { BaseChartDirective } from 'ng2-charts';
+import {
+  Chart,
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Filler,
+  Tooltip,
+} from 'chart.js';
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
 import { LogoComponent } from '../../shared/components/logo/logo.component';
-import { CertificacionPublica, InsigniaEmpresa, PerfilPublicoDTO } from './perfil-publico.models';
+import {
+  CertificacionPublica,
+  EvolucionHuellaPublica,
+  InsigniaEmpresa,
+  PerfilPublicoDTO,
+} from './perfil-publico.models';
 import { PerfilPublicoService } from './perfil-publico.service';
 
 interface NivelConfig {
@@ -24,12 +41,22 @@ const NIVEL_MAP: Record<string, NivelConfig> = {
 
 const NIVELES_ORDEN = ['Bronce', 'Plata', 'Oro', 'Platino'];
 
+Chart.register(
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Filler,
+  Tooltip
+);
+
 @Component({
   selector: 'app-perfil-publico-page',
   standalone: true,
   templateUrl: './perfil-publico-page.component.html',
   styleUrl: './perfil-publico-page.component.scss',
-  imports: [IconComponent, LogoComponent],
+  imports: [IconComponent, LogoComponent, DecimalPipe, BaseChartDirective],
 })
 export class PerfilPublicoPageComponent {
   private readonly route = inject(ActivatedRoute);
@@ -42,7 +69,61 @@ export class PerfilPublicoPageComponent {
   protected perfil = signal<PerfilPublicoDTO | null>(null);
   protected certificaciones = signal<CertificacionPublica[]>([]);
   protected insignias = signal<InsigniaEmpresa[]>([]);
+  protected evolucion = signal<EvolucionHuellaPublica | null>(null);
   protected mensajeError = signal<string>('');
+
+  protected readonly maxTco2e = computed(() => {
+    const ev = this.evolucion();
+    if (!ev || ev.serie.length === 0) return 1;
+    return Math.max(...ev.serie.map((p) => p.totalTco2e), 0.001);
+  });
+
+  protected readonly chartData = computed(() => {
+    const ev = this.evolucion();
+    if (!ev || ev.serie.length === 0) return { labels: [], datasets: [] };
+    return {
+      labels: ev.serie.map((p) => p.anio.toString()),
+      datasets: [
+        {
+          data: ev.serie.map((p) => p.totalTco2e),
+          borderColor: '#16a34a',
+          backgroundColor: 'rgba(22, 163, 74, 0.08)',
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#16a34a',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+        },
+      ],
+    };
+  });
+
+  protected readonly chartOptions = computed(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx: { parsed: { y: number } }) => `${ctx.parsed.y.toFixed(3)} tCO₂e`,
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: false,
+        grid: { color: 'rgba(0,0,0,0.05)' },
+        ticks: {
+          font: { size: 11 },
+          callback: (value: string | number) => `${value}`,
+        },
+      },
+      x: {
+        grid: { display: false },
+        ticks: { font: { size: 12, weight: 'bold' as const } },
+      },
+    },
+  }));
 
   protected readonly nivelesOrden = NIVELES_ORDEN;
 
@@ -66,6 +147,7 @@ export class PerfilPublicoPageComponent {
         this.actualizarMetaTags(dto, slug);
         this.cargarCertificaciones(slug);
         this.cargarInsignias(slug);
+        this.cargarEvolucion(slug);
       },
       error: (err: unknown) => {
         if (err instanceof HttpErrorResponse && err.status === 404) {
@@ -95,20 +177,31 @@ export class PerfilPublicoPageComponent {
     });
   }
 
+  private cargarEvolucion(slug: string): void {
+    this.perfilService.obtenerEvolucionHuella(slug).subscribe({
+      next: (ev) => this.evolucion.set(ev),
+      error: () => this.evolucion.set(null),
+    });
+  }
+
   protected reintentar(): void {
     this.cargar();
   }
 
-  protected getNivelConfig(): NivelConfig {
-    const nivel = this.perfil()?.nivelEcologico ?? 'Sin nivel';
+  protected readonly nivelConfig = computed(() => {
+    const nivel = this.normalizarNivel(this.perfil()?.nivelEcologico);
     return NIVEL_MAP[nivel] ?? NIVEL_MAP['Sin nivel'];
-  }
+  });
 
-  protected getNivelIndex(): number {
-    const nivel = this.perfil()?.nivelEcologico ?? 'Sin nivel';
+  protected readonly nivelIndex = computed(() => {
+    const nivel = this.normalizarNivel(this.perfil()?.nivelEcologico);
     const idx = NIVELES_ORDEN.indexOf(nivel);
     return idx >= 0 ? idx : -1;
-  }
+  });
+
+  protected readonly nivelNormalizado = computed(() => {
+    return this.normalizarNivel(this.perfil()?.nivelEcologico);
+  });
 
   protected formatFechaActualizacion(fecha: string | null | undefined): string {
     if (!fecha) return '';
@@ -118,6 +211,16 @@ export class PerfilPublicoPageComponent {
       month: 'long',
       year: 'numeric',
     }).format(date);
+  }
+
+  /**
+   * Normaliza el nivel ecológico del backend (que puede venir en mayúsculas: "ORO")
+   * al formato que usa el frontend ("Oro") para las clases CSS y el mapa de configuración.
+   */
+  protected normalizarNivel(nivel: string | null | undefined): string {
+    if (!nivel || nivel.trim() === '') return 'Sin nivel';
+    const limpio = nivel.trim().toLowerCase();
+    return limpio.charAt(0).toUpperCase() + limpio.slice(1);
   }
 
   protected formatFechaCorta(fecha: string | null | undefined): string {

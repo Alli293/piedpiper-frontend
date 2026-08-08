@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import {
   BusquedaPerfilPublicoDTO,
   CertificacionPublica,
+  EvolucionHuellaPublica,
   InsigniaEmpresa,
   PageResponse,
   PerfilPublicoDTO,
@@ -54,5 +55,11 @@ export class PerfilPublicoService {
 
   descargarInsigniaJwt(urlVerificacionJwt: string): Observable<Blob> {
     return this.http.get(urlVerificacionJwt, { responseType: 'blob' });
+  }
+
+  obtenerEvolucionHuella(slug: string): Observable<EvolucionHuellaPublica> {
+    return this.http.get<EvolucionHuellaPublica>(
+      `${this.baseUrl}/${encodeURIComponent(slug)}/evolucion-huella`
+    );
   }
 }
