@@ -79,7 +79,6 @@ export class CertificacionesPageComponent {
     void this.cargarCalendario(this.mesCalendario());
     void this.cargarInsignias();
     void this.cargarAlertas();
-    void this.cargarInsignias();
   }
 
   protected onMesCalendarioChange(mes: string): void {

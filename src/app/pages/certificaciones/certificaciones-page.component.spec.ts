@@ -183,9 +183,9 @@ describe('CertificacionesPageComponent', () => {
     expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
   });
 
-  it('carga las insignias empresariales al iniciar', async () => {
+  it('carga las insignias empresariales al iniciar (una sola vez)', async () => {
     fixture = await createFixture();
-    expect(empresaService.listarInsignias).toHaveBeenCalled();
+    expect(empresaService.listarInsignias).toHaveBeenCalledTimes(1);
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('.ch-insignias-panel__item-copy strong')?.textContent).toContain(
       'Carbono Neutral 2026'

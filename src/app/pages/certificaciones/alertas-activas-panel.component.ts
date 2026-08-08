@@ -24,13 +24,8 @@ const ICONO_POR_TONO: Record<TonoAlerta, IconName> = {
 
 /**
  * Bloque "Alertas activas" (PP-76): certificaciones vencidas o próximas a
- * vencer de la empresa, ordenadas de más a menos urgente, con acceso
- * directo a la vista de detalle de cada certificación.
- *
- * Presentacional: el fetch y el manejo de error viven en la página
- * contenedora (mismo patrón que `estado-certificaciones-panel` /
- * `calendario-vencimientos` / `insignias-empresa-panel`), para que una
- * falla acá no afecte a los demás bloques del dashboard de Certificaciones.
+ * vencer, ordenadas de más a menos urgente. Presentacional — el fetch y el
+ * manejo de error viven en la página contenedora.
  */
 @Component({
   selector: 'app-alertas-activas-panel',
