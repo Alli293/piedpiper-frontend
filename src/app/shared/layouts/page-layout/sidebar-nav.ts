@@ -84,6 +84,48 @@ export function buildSidebarConfig(options: BuildSidebarConfigOptions): SidebarC
 
 export type AuditorSidebarNavId = 'auditorias' | 'perfil-publico';
 
+export type AdminSidebarNavId = 'solicitudes-auditor';
+
+/**
+ * El administrador de plataforma solo tiene una pantalla construida (PP-21). Hasta que exista un
+ * panel propio, este menú es su única forma de llegar a ella: antes aterrizaba en un placeholder
+ * sin navegación y no podía moverse a ningún lado.
+ */
+const ADMIN_NAV_ITEMS: readonly { id: AdminSidebarNavId; label: string; icon: IconName }[] = [
+  { id: 'solicitudes-auditor', label: 'Solicitudes de auditor', icon: 'auditor' },
+];
+
+export interface BuildAdminSidebarConfigOptions {
+  activeId?: AdminSidebarNavId;
+  adminName: string;
+  adminInitials: string;
+  settingsLabel?: string;
+}
+
+export function buildAdminSidebarConfig(options: BuildAdminSidebarConfigOptions): SidebarConfig {
+  const menuItems: SidebarMenuItem[] = ADMIN_NAV_ITEMS.map((item) => ({
+    id: item.id,
+    label: item.label,
+    icon: item.icon,
+    active: item.id === options.activeId,
+    disabled: false,
+  }));
+
+  const bottomItems: SidebarBottomItem[] = options.settingsLabel
+    ? SIDEBAR_BOTTOM_ITEMS.map((item) =>
+        item.id === 'settings' ? { ...item, label: options.settingsLabel as string } : item
+      )
+    : [...SIDEBAR_BOTTOM_ITEMS];
+
+  return {
+    menuItems,
+    bottomItems,
+    companyName: options.adminName,
+    companyRole: 'Administrador de plataforma',
+    companyInitials: options.adminInitials,
+  };
+}
+
 interface AuditorNavItemDef {
   id: AuditorSidebarNavId;
   label: string;

@@ -1,4 +1,8 @@
-import { buildAuditorSidebarConfig, buildSidebarConfig } from './sidebar-nav';
+import {
+  buildAdminSidebarConfig,
+  buildAuditorSidebarConfig,
+  buildSidebarConfig,
+} from './sidebar-nav';
 
 describe('buildSidebarConfig', () => {
   const base = {
@@ -93,5 +97,29 @@ describe('buildAuditorSidebarConfig', () => {
 
     const settings = config.bottomItems.find((item) => item.id === 'settings');
     expect(settings?.label).toBe('Mi cuenta');
+  });
+});
+
+describe('buildAdminSidebarConfig', () => {
+  it('le da al administrador de plataforma un menu con su pantalla y cierre de sesion', () => {
+    const config = buildAdminSidebarConfig({
+      adminName: 'Marta Admin',
+      adminInitials: 'MA',
+    });
+
+    expect(config.menuItems.map((item) => item.id)).toEqual(['solicitudes-auditor']);
+    expect(config.menuItems[0].disabled).toBe(false);
+    expect(config.bottomItems.map((item) => item.id)).toContain('logout');
+    expect(config.companyRole).toBe('Administrador de plataforma');
+  });
+
+  it('marca como activo el item indicado', () => {
+    const config = buildAdminSidebarConfig({
+      activeId: 'solicitudes-auditor',
+      adminName: 'Marta Admin',
+      adminInitials: 'MA',
+    });
+
+    expect(config.menuItems[0].active).toBe(true);
   });
 });

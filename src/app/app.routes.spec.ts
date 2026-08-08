@@ -48,13 +48,22 @@ describe('app.routes', () => {
       'ecoruta/preferencias',
       'ecoruta/insignias',
       'ecoruta/itinerarios',
-      'ecoruta/planificar',
     ];
 
     for (const path of rutasEcoRuta) {
       const ruta = routes.find((r) => r.path === path);
       expect(ruta?.canActivate).toEqual([usuarioIndividualGuard]);
     }
+  });
+
+  /**
+   * El backend manda al administrador de plataforma acá al iniciar sesión. Era un placeholder sin
+   * navegación: entraba a una pantalla vacía y no podía moverse. Mientras no exista un panel
+   * propio, redirige a la única pantalla de administración construida.
+   */
+  it('admin/panel redirige a la pantalla de solicitudes de auditor', () => {
+    const ruta = routes.find((r) => r.path === 'admin/panel');
+    expect(ruta?.redirectTo).toBe('admin/solicitudes-auditor');
   });
 
   it('/panel redirige a la ruta canonica empresa/panel', () => {

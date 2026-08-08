@@ -9,6 +9,8 @@ import { SidebarBottomItemId } from '../../components/sidebar/sidebar.component'
 import { HeaderConfig, PageLayoutComponent } from '../page-layout/page-layout.component';
 import {
   AuditorSidebarNavId,
+  AdminSidebarNavId,
+  buildAdminSidebarConfig,
   buildAuditorSidebarConfig,
   buildSidebarConfig,
   SidebarNavId,
@@ -20,10 +22,10 @@ import { apiErrorMessage } from '../../utils/http-error.utils';
 
 const ERROR_PERFIL_MENSAJE = 'No se pudo cargar tu perfil. Algunos datos podrían no mostrarse.';
 
-export type SidebarVariant = 'empresa' | 'auditor' | 'auto';
+export type SidebarVariant = 'empresa' | 'auditor' | 'admin' | 'auto';
 
 /** Ids this shell's own sidebarConfig can ever emit. */
-type ShellMenuItemId = SidebarNavId | AuditorSidebarNavId | SidebarBottomItemId;
+type ShellMenuItemId = SidebarNavId | AuditorSidebarNavId | AdminSidebarNavId | SidebarBottomItemId;
 
 /**
  * Shared shell for authenticated pages: owns sidebar construction so pages
@@ -42,7 +44,7 @@ export class ShellLayoutComponent {
   private readonly perfilInicialService = inject(PerfilInicialService);
   private readonly toastService = inject(ToastService);
 
-  activeId = input<SidebarNavId | AuditorSidebarNavId>();
+  activeId = input<SidebarNavId | AuditorSidebarNavId | AdminSidebarNavId>();
   variant = input<SidebarNavVariant>('empresa');
   sidebarVariant = input<SidebarVariant>('auto');
   companyRole = input('Empresa · Admin');
@@ -57,14 +59,15 @@ export class ShellLayoutComponent {
 
   backClicked = output<void>();
 
-  private readonly resolvedVariant = computed<'empresa' | 'auditor'>(() => {
+  private readonly resolvedVariant = computed<'empresa' | 'auditor' | 'admin'>(() => {
     const explicit = this.sidebarVariant();
-    if (explicit === 'empresa' || explicit === 'auditor') return explicit;
+    if (explicit === 'empresa' || explicit === 'auditor' || explicit === 'admin') return explicit;
     // EcoRuta already selects its own explicit navigation variant.
     if (this.variant() === 'ecoruta') return 'empresa';
     // Auto-detect from role
     const role = this.authSessionService.getRole();
-    return role === 'auditor_certificado' ? 'auditor' : 'empresa';
+    if (role === 'auditor_certificado') return 'auditor';
+    return role === 'administrador_plataforma' ? 'admin' : 'empresa';
   });
 
   private readonly companyName = computed(
@@ -83,6 +86,17 @@ export class ShellLayoutComponent {
   });
 
   protected readonly sidebarConfig = computed(() => {
+    if (this.resolvedVariant() === 'admin') {
+      return buildAdminSidebarConfig({
+        activeId: this.activeId() as AdminSidebarNavId | undefined,
+        adminName:
+          this.displayName() ??
+          (this.perfilInicialService.perfil()?.nombreVisible || 'Administrador'),
+        adminInitials: this.displayInitials() ?? this.userInitials(),
+        settingsLabel: this.settingsLabel(),
+      });
+    }
+
     if (this.resolvedVariant() === 'auditor') {
       return buildAuditorSidebarConfig({
         activeId: this.activeId() as AuditorSidebarNavId | undefined,
@@ -150,6 +164,7 @@ export class ShellLayoutComponent {
       settings: '/configuracion',
       'perfil-publico': '/auditor/perfil',
       auditorias: '/auditor/auditorias',
+      'solicitudes-auditor': '/admin/solicitudes-auditor',
     };
     void this.router.navigateByUrl(rutas[menuId]);
   }
