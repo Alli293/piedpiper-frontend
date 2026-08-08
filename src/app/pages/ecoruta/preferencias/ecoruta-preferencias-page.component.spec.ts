@@ -42,10 +42,15 @@ const ITINERARIO_GENERADO: Itinerario = {
   estado: 'GENERADO',
   version: 1,
   puntuacionAmbientalPreliminar: 80,
+  ecoScore: 80,
+  clasificacionAmbiental: 'EXCELENTE',
+  ecoScoreParcial: false,
+  ecoScoreCalculadoEn: '2026-08-01T00:00:00.000Z',
   fechaGeneracion: '2026-08-01T00:00:00.000Z',
   generadoParcial: false,
   mensajeParcial: null,
   dias: [],
+  establecimientosEvaluados: [],
 };
 
 const VALID_RESPONSE: PreferenciasViajeResponse = {
