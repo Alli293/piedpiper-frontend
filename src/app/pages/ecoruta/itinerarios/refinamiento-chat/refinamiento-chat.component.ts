@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { IconComponent } from '../../../../shared/components/icon/icon.component';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { AlternativasComparacionComponent } from '../alternativas-comparacion/alternativas-comparacion.component';
@@ -19,6 +19,7 @@ import { Itinerario, ItinerarioActividad } from '../models/itinerario.model';
 })
 export class RefinamientoChatComponent {
   itinerario = input.required<Itinerario>();
+  itinerarioActualizado = output<Itinerario>();
 
   private readonly alternativasService = inject(EcoRutaAlternativasService);
   private readonly toastService = inject(ToastService);
@@ -106,9 +107,10 @@ export class RefinamientoChatComponent {
     this.cargandoSustitucion.set(true);
 
     this.alternativasService.sustituirActividad(itinerarioId, actividadId, body).subscribe({
-      next: () => {
+      next: (itinerarioActualizado) => {
         this.cargandoSustitucion.set(false);
         this.comparacionResponse.set(null);
+        this.itinerarioActualizado.emit(itinerarioActualizado);
         this.toastService.success('Actividad reemplazada exitosamente.', undefined, 5000);
       },
       error: (err) => {

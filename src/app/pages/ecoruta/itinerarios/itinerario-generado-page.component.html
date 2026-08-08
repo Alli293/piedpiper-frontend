@@ -141,7 +141,10 @@
         </section>
 
         <div class="ch-itinerario-generado__lateral">
-          <app-refinamiento-chat [itinerario]="data" />
+          <app-refinamiento-chat
+            [itinerario]="data"
+            (itinerarioActualizado)="itinerario.set($event)"
+          />
         </div>
       </div>
     </div>

@@ -91,11 +91,11 @@
           <!-- Right: Nivel ecológico card -->
           <div
             class="pub-nivel"
-            [class.pub-nivel--sin-nivel]="perfil()?.nivelEcologico === 'Sin nivel'"
-            [class.pub-nivel--bronce]="perfil()?.nivelEcologico === 'Bronce'"
-            [class.pub-nivel--plata]="perfil()?.nivelEcologico === 'Plata'"
-            [class.pub-nivel--oro]="perfil()?.nivelEcologico === 'Oro'"
-            [class.pub-nivel--platino]="perfil()?.nivelEcologico === 'Platino'"
+            [class.pub-nivel--sin-nivel]="getNivelConfig().clase === 'sin-nivel'"
+            [class.pub-nivel--bronce]="getNivelConfig().clase === 'bronce'"
+            [class.pub-nivel--plata]="getNivelConfig().clase === 'plata'"
+            [class.pub-nivel--oro]="getNivelConfig().clase === 'oro'"
+            [class.pub-nivel--platino]="getNivelConfig().clase === 'platino'"
             aria-label="Nivel ecológico"
           >
             <span class="pub-nivel__label">NIVEL ECOLÓGICO</span>

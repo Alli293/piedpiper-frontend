@@ -16,14 +16,14 @@ interface NivelConfig {
 }
 
 const NIVEL_MAP: Record<string, NivelConfig> = {
-  'Sin nivel': { clase: 'sin-nivel', icono: 'leaf-off', color: '#6b7280' },
-  Bronce: { clase: 'bronce', icono: 'medal-bronze', color: '#cd7f32' },
-  Plata: { clase: 'plata', icono: 'medal-silver', color: '#9ca3af' },
-  Oro: { clase: 'oro', icono: 'medal-gold', color: '#d4a017' },
-  Platino: { clase: 'platino', icono: 'medal-platinum', color: '#2ba6de' },
+  'sin nivel': { clase: 'sin-nivel', icono: 'leaf-off', color: '#6b7280' },
+  bronce: { clase: 'bronce', icono: 'medal-bronze', color: '#cd7f32' },
+  plata: { clase: 'plata', icono: 'medal-silver', color: '#9ca3af' },
+  oro: { clase: 'oro', icono: 'medal-gold', color: '#d4a017' },
+  platino: { clase: 'platino', icono: 'medal-platinum', color: '#2ba6de' },
 };
 
-const NIVELES_ORDEN = ['Bronce', 'Plata', 'Oro', 'Platino'];
+const NIVELES_ORDEN = ['bronce', 'plata', 'oro', 'platino'];
 
 @Component({
   selector: 'app-perfil-publico-page',
@@ -110,12 +110,12 @@ export class PerfilPublicoPageComponent {
   }
 
   protected getNivelConfig(): NivelConfig {
-    const nivel = this.perfil()?.nivelEcologico ?? 'Sin nivel';
-    return NIVEL_MAP[nivel] ?? NIVEL_MAP['Sin nivel'];
+    const nivel = (this.perfil()?.nivelEcologico ?? 'Sin nivel').toLowerCase();
+    return NIVEL_MAP[nivel] ?? NIVEL_MAP['sin nivel'];
   }
 
   protected getNivelIndex(): number {
-    const nivel = this.perfil()?.nivelEcologico ?? 'Sin nivel';
+    const nivel = (this.perfil()?.nivelEcologico ?? 'sin nivel').toLowerCase();
     const idx = NIVELES_ORDEN.indexOf(nivel);
     return idx >= 0 ? idx : -1;
   }
