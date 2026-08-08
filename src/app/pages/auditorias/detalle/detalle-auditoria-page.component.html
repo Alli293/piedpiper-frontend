@@ -1,9 +1,7 @@
 <app-shell-layout [headerConfig]="headerConfig" [backRoute]="rutaVolver()">
   <section class="ch-detalle-auditoria" aria-label="Detalle de la auditoría">
     @if (cargando()) {
-      <p class="ch-detalle-auditoria__estado-carga">
-        Cargando el detalle de la auditor&iacute;a...
-      </p>
+      <p class="ch-detalle-auditoria__estado-carga">Cargando el detalle de la auditoría...</p>
     } @else if (errorCarga()) {
       <p class="ch-detalle-auditoria__error" role="alert">{{ errorCarga() }}</p>
     } @else if (detalle(); as auditoria) {
@@ -17,14 +15,14 @@
             <div class="ch-detalle-auditoria__titulo-fila">
               <app-heading
                 level="h2"
-                [text]="'Auditoria ambiental - ' + (auditoria.periodoInicio | date: 'y')"
+                [text]="'Auditoría ambiental · ' + (auditoria.periodoInicio | date: 'y')"
               />
               <app-badge [variant]="variantePorEstado()">{{
                 auditoria.estadoDescripcion
               }}</app-badge>
             </div>
             <p class="ch-detalle-auditoria__subtitulo">
-              {{ auditoria.nombreEmpresa }} - Solicitud enviada el
+              {{ auditoria.nombreEmpresa }} · Solicitud enviada el
               {{ auditoria.fechaCreacion | date: 'd MMM y' }}
             </p>
           </div>
@@ -41,7 +39,7 @@
             <dd class="ch-detalle-auditoria__valor">{{ auditoria.nombreEmpresa }}</dd>
           </div>
           <div class="ch-detalle-auditoria__celda">
-            <dt class="ch-detalle-auditoria__etiqueta">A&ntilde;o fiscal</dt>
+            <dt class="ch-detalle-auditoria__etiqueta">Año fiscal</dt>
             <dd class="ch-detalle-auditoria__valor">
               {{ auditoria.periodoInicio | date: 'y' }}
             </dd>
@@ -53,7 +51,7 @@
             </dd>
           </div>
           <div class="ch-detalle-auditoria__celda">
-            <dt class="ch-detalle-auditoria__etiqueta">Fecha de aceptaci&oacute;n</dt>
+            <dt class="ch-detalle-auditoria__etiqueta">Fecha de aceptación</dt>
             <dd class="ch-detalle-auditoria__valor">
               {{ auditoria.fechaAceptacion ? (auditoria.fechaAceptacion | date: 'd MMM y') : '-' }}
             </dd>
@@ -101,7 +99,7 @@
               <app-textarea
                 label="Motivo del rechazo"
                 [formField]="rechazoForm.motivoRechazo"
-                placeholder="Explica por qu&eacute; no puedes tomar esta auditor&iacute;a."
+                placeholder="Explica por qué no puedes tomar esta auditoría."
                 [rows]="3"
                 [hint]="caracteresMotivo() + ' / ' + maximoMotivo + ' caracteres'"
               />
@@ -195,14 +193,13 @@
                 <app-heading
                   level="h3"
                   class="ch-detalle-auditoria__tarjeta-titulo"
-                  text="Cargar reporte de auditor&iacute;a"
+                  text="Cargar reporte de auditoría"
                 />
                 <p class="ch-detalle-auditoria__reporte-ayuda">
                   @if (auditoria.reporteAuditoria) {
                     Ya existe un reporte cargado para esta solicitud.
                   } @else {
-                    Sube el PDF con los resultados oficiales. Quedar&aacute; visible para la
-                    empresa.
+                    Sube el PDF con los resultados oficiales. Quedará visible para la empresa.
                   }
                 </p>
               </header>
@@ -267,7 +264,7 @@
                     />
 
                     <app-date-input
-                      label="Fecha en que se realiz&oacute; la auditor&iacute;a"
+                      label="Fecha en que se realizó la auditoría"
                       [formField]="cargaReporteForm.fechaAuditoriaRealizada"
                       [error]="fechaReporteError()"
                     />
@@ -302,7 +299,7 @@
                   text="Emitir resultado"
                 />
                 <p class="ch-detalle-auditoria__reporte-ayuda">
-                  Cierra la revisi&oacute;n con el dictamen final de la auditor&iacute;a.
+                  Cierra la revisión con el dictamen final de la auditoría.
                 </p>
               </header>
 
@@ -326,7 +323,7 @@
                   [loading]="enviandoResultado()"
                   (click)="aprobarAuditoria()"
                 >
-                  Aprobar auditor&iacute;a
+                  Aprobar auditoría
                 </app-button>
               </div>
             </article>
@@ -362,7 +359,7 @@
                       variant="tertiary"
                       size="sm"
                       [loading]="documentoAbriendo() === documento.id"
-                      [ariaLabel]="'Ver ' + documento.nombreArchivo + ' en una pestana nueva'"
+                      [ariaLabel]="'Ver ' + documento.nombreArchivo + ' en una pestaña nueva'"
                       (click)="verDocumento(documento.id)"
                     >
                       Ver PDF

@@ -1,4 +1,4 @@
-﻿import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, input, signal } from '@angular/core';
 import {
@@ -79,7 +79,7 @@ const ERROR_SONDEO =
 const ERROR_NO_ENCONTRADA = 'Esta solicitud de auditoría no fue encontrada.';
 const ERROR_SIN_PERMISO = 'No tienes permiso para ver esta solicitud de auditoría.';
 const BYTES_POR_MB = 1024 * 1024;
-const ERROR_RESULTADO = 'No se pudo emitir el resultado de la auditoria. Intenta nuevamente.';
+const ERROR_RESULTADO = 'No se pudo emitir el resultado de la auditoría. Intenta nuevamente.';
 
 const ERROR_CARGA = 'No se pudo cargar el detalle de la auditoría. Intenta nuevamente.';
 const ERROR_DECISION = 'No se pudo registrar tu respuesta. Intenta nuevamente.';
@@ -106,9 +106,9 @@ const FORMATEADOR_FECHA_NEGOCIO = new Intl.DateTimeFormat('en-CA', {
 });
 const MILISEGUNDOS_POR_HORA = 60 * 60 * 1000;
 const HORAS_POR_DIA = 24;
-const MENSAJE_RESULTADO_APROBADO = 'Resultado aprobado. La certificacion fue emitida.';
+const MENSAJE_RESULTADO_APROBADO = 'Resultado aprobado. La certificación fue emitida.';
 const MENSAJE_RESULTADO_OBSERVACIONES =
-  'Resultado emitido con observaciones. La empresa debe corregir la documentacion.';
+  'Resultado emitido con observaciones. La empresa debe corregir la documentación.';
 
 /** 403 y 404 son definitivos: reintentar no los cambia. El resto puede ser un fallo pasajero. */
 function esErrorPermanente(err: unknown): boolean {
@@ -221,7 +221,7 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
         const fecha = ctx.value();
         const minima = this.fechaMinimaReporte();
         if (fecha === null || minima === null) return undefined;
-        if (fecha.getTime() < minima.getTime() || fecha.getTime() > this.hoy.getTime()) {
+        if (fecha.getTime() < minima.getTime()) {
           return { kind: 'fechaAuditoriaFueraDeRango', message: MENSAJE_FECHA_REPORTE_INVALIDA };
         }
         return undefined;
@@ -447,8 +447,8 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
   protected readonly documentoAbriendo = signal<string | null>(null);
 
   /**
-   * La pestana se abre en el mismo clic y recien despues se le carga el contenido: abrirla al
-   * volver la peticion la deja fuera de la ventana de activacion del usuario y el navegador la
+   * La pestaña se abre en el mismo clic y recién después se le carga el contenido: abrirla al
+   * volver la petición la deja fuera de la ventana de activación del usuario y el navegador la
    * bloquea como emergente. Por eso el helper recibe como traer el documento y no el documento.
    */
   protected async verDocumento(idDocumento: string): Promise<void> {
@@ -664,6 +664,8 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
 
   private asignarErrorReporte(err: unknown): void {
     const mensaje = apiErrorMessage(err) ?? ERROR_REPORTE;
+    // El backend todavía no expone códigos estructurados por campo; mientras tanto se clasifica
+    // por mensaje normalizado para mostrar el error junto al control más útil.
     const normalizado = normalizarMensaje(mensaje);
     if (normalizado.includes('fecha de la auditoria')) {
       this.errorFechaReporteServidor.set(mensaje);

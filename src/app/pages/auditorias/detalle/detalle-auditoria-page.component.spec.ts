@@ -83,7 +83,7 @@ describe('DetalleAuditoriaPageComponent', () => {
   };
 
   /** Con lo minimo que el helper realmente usa: si le falta algo, el test tiene que enterarse. */
-  function pestanaFalsa(): Window {
+  function ventanaFalsa(): Window {
     return {
       location: { href: '' },
       close: vi.fn(),
@@ -251,7 +251,7 @@ describe('DetalleAuditoriaPageComponent', () => {
         of({
           ...enRevision,
           estado: 'CERTIFICACION_EMITIDA',
-          estadoDescripcion: 'Certificacion emitida',
+          estadoDescripcion: 'Certificación emitida',
           reporteAuditoria: { id: 'rep-1', nombreArchivo: 'reporte.pdf', tamanioBytes: 20 },
           fechaAuditoriaRealizada: '2026-07-28',
           fechaCargaReporte: '2026-07-28T18:00:00Z',
@@ -337,7 +337,7 @@ describe('DetalleAuditoriaPageComponent', () => {
     expect(situaciones().at(-1)).toBe('en-curso');
   });
 
-  it('detiene el sondeo cuando la pestana pierde el foco y lo reanuda al recuperarlo', async () => {
+  it('detiene el sondeo cuando la pestaña pierde el foco y lo reanuda al recuperarlo', async () => {
     await montar();
 
     await cambiarVisibilidad(true);
@@ -779,7 +779,7 @@ describe('DetalleAuditoriaPageComponent', () => {
     expect(auditoriasService.emitirResultado).toHaveBeenCalledWith('sol-1', {
       resultado: 'aprobada',
     });
-    expect(raiz().textContent).toContain('Certificacion emitida');
+    expect(raiz().textContent).toContain('Certificación emitida');
   });
 
   /**
@@ -787,9 +787,9 @@ describe('DetalleAuditoriaPageComponent', () => {
    * cabecera de autenticación, que la navegación del navegador no envía. Con un `<a href>` la
    * previsualización devolvía 401.
    */
-  it('previsualizar un documento lo pide al servicio y muestra el blob en la pestana', async () => {
-    const pestana = pestanaFalsa();
-    const abrir = vi.spyOn(window, 'open').mockReturnValue(pestana);
+  it('previsualizar un documento lo pide al servicio y muestra el blob en la pestaña', async () => {
+    const ventana = ventanaFalsa();
+    const abrir = vi.spyOn(window, 'open').mockReturnValue(ventana);
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
 
@@ -799,7 +799,7 @@ describe('DetalleAuditoriaPageComponent', () => {
 
     expect(auditoriasService.descargarDocumento).toHaveBeenCalledWith('sol-1', 'doc-1');
     expect(abrir).toHaveBeenCalledWith('', '_blank');
-    expect(pestana.location.href).toBe('blob:fake');
+    expect(ventana.location.href).toBe('blob:fake');
     // Sin esto, un fallo despues de asignar el href pasaria desapercibido: el href ya quedo puesto
     // y la unica senal de que algo se rompio es el toast.
     expect(
@@ -813,9 +813,9 @@ describe('DetalleAuditoriaPageComponent', () => {
    * El navegador solo deja abrir una pestaña durante el manejo del clic. Abrirla al volver la
    * petición ya cae fuera de la ventana de activación del usuario y la bloquea como emergente.
    */
-  it('abre la pestana en el clic y no despues de que responde el servidor', async () => {
-    const pestana = pestanaFalsa();
-    const abrir = vi.spyOn(window, 'open').mockReturnValue(pestana);
+  it('abre la pestaña en el clic y no después de que responde el servidor', async () => {
+    const ventana = ventanaFalsa();
+    const abrir = vi.spyOn(window, 'open').mockReturnValue(ventana);
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
 
@@ -834,17 +834,17 @@ describe('DetalleAuditoriaPageComponent', () => {
     await estabilizar();
 
     expect(abrir).toHaveBeenCalledTimes(1);
-    expect(pestana.location.href).toBe('');
+    expect(ventana.location.href).toBe('');
 
     responder(new Blob(['%PDF']));
     await estabilizar();
 
-    expect(pestana.location.href).toBe('blob:fake');
+    expect(ventana.location.href).toBe('blob:fake');
   });
 
-  it('cierra la pestana y avisa cuando falla la descarga', async () => {
-    const pestana = pestanaFalsa();
-    vi.spyOn(window, 'open').mockReturnValue(pestana);
+  it('cierra la pestaña y avisa cuando falla la descarga', async () => {
+    const ventana = ventanaFalsa();
+    vi.spyOn(window, 'open').mockReturnValue(ventana);
     auditoriasService.descargarDocumento.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 500 }))
     );
@@ -853,7 +853,7 @@ describe('DetalleAuditoriaPageComponent', () => {
     botonVerPdf()?.click();
     await estabilizar();
 
-    expect(pestana.close).toHaveBeenCalled();
+    expect(ventana.close).toHaveBeenCalled();
     const toasts = TestBed.inject(ToastService).toasts();
     expect(toasts[toasts.length - 1].title).toContain('No se pudo abrir el documento');
   });
