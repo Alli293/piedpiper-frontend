@@ -2,45 +2,59 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, input, signal } from '@angular/core';
 import {
+  disabled,
   form,
   FormField,
+  maxDate,
   maxLength,
   minLength,
   required,
   schema,
   submit,
+  validate,
 } from '@angular/forms/signals';
 import { EMPTY, Subject, Subscription, firstValueFrom, timer } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { AUDITOR_CERTIFICADO, AuthSessionService } from '../../../core/auth-session.service';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
-import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/badge.component';
+import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
+import { DateInputComponent } from '../../../shared/components/inputs/date-input/date-input.component';
+import { FileDropComponent } from '../../../shared/components/inputs/file-drop/file-drop.component';
 import { TextareaComponent } from '../../../shared/components/inputs/textarea/textarea.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
+import { todayUtcMidnight, toIsoDateString } from '../../../shared/utils/date.utils';
 import { previsualizarBlobEnPestana } from '../../../shared/utils/download.utils';
+import { fieldError } from '../../../shared/utils/form-field.utils';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
-import { initialsFromNombreCompleto } from '../../../shared/utils/initials.utils';
 import {
   DetalleSolicitudAuditoria,
   EstadoSolicitudAuditoria,
   HORAS_PARA_RESPONDER,
   INTERVALO_SONDEO_DETALLE_MS,
   MAXIMO_CARACTERES_MOTIVO_RECHAZO,
+  MAXIMO_BYTES_REPORTE_AUDITORIA,
   MINIMO_CARACTERES_MOTIVO_RECHAZO,
   PASOS_AUDITORIA,
   ResponderDecisionRequest,
+  ResultadoAuditoriaRequest,
 } from '../auditoria.model';
+import { variantePorEstadoAuditoria } from '../auditoria-estado.utils';
 import { AuditoriasService } from '../auditorias.service';
 
 type SituacionPaso = 'completado' | 'en-curso' | 'pendiente';
 
 interface RechazoFormModel {
   motivoRechazo: string;
+}
+
+interface CargaReporteFormModel {
+  fechaAuditoriaRealizada: Date | null;
+  reporteAuditoria: File[];
 }
 
 interface PasoLineaTiempo {
@@ -65,9 +79,17 @@ const ERROR_SONDEO =
 const ERROR_NO_ENCONTRADA = 'Esta solicitud de auditoría no fue encontrada.';
 const ERROR_SIN_PERMISO = 'No tienes permiso para ver esta solicitud de auditoría.';
 const BYTES_POR_MB = 1024 * 1024;
+const ERROR_RESULTADO = 'No se pudo emitir el resultado de la auditoría. Intenta nuevamente.';
 
 const ERROR_CARGA = 'No se pudo cargar el detalle de la auditoría. Intenta nuevamente.';
 const ERROR_DECISION = 'No se pudo registrar tu respuesta. Intenta nuevamente.';
+const ERROR_REPORTE = 'No se pudo cargar el reporte de auditoría. Intenta nuevamente.';
+const MENSAJE_REPORTE_REQUERIDO = 'Selecciona el reporte de auditoría en PDF.';
+const MENSAJE_FECHA_REPORTE_REQUERIDA = 'Selecciona la fecha en que realizaste la auditoría.';
+const MENSAJE_FECHA_REPORTE_INVALIDA =
+  'La fecha de la auditoría debe estar entre la fecha de aceptación y la fecha actual.';
+const MENSAJE_CARGA_DESHABILITADA =
+  'La carga del reporte estará disponible una vez que la auditoría esté en revisión.';
 const MENSAJE_ACEPTADA = 'Aceptaste la solicitud. La auditoría quedó en revisión.';
 const MENSAJE_RECHAZADA = 'Rechazaste la solicitud. La empresa fue notificada.';
 const MENSAJE_MOTIVO_REQUERIDO = 'Indica el motivo del rechazo.';
@@ -75,8 +97,18 @@ const ERROR_DOCUMENTO = 'No se pudo abrir el documento. Intenta nuevamente.';
 const AVISO_VENTANA_BLOQUEADA =
   'Tu navegador bloqueó la ventana emergente. Permítelas para ver el documento.';
 
+const ZONA_HORARIA_NEGOCIO = 'America/Costa_Rica';
+const FORMATEADOR_FECHA_NEGOCIO = new Intl.DateTimeFormat('en-CA', {
+  day: '2-digit',
+  month: '2-digit',
+  timeZone: ZONA_HORARIA_NEGOCIO,
+  year: 'numeric',
+});
 const MILISEGUNDOS_POR_HORA = 60 * 60 * 1000;
 const HORAS_POR_DIA = 24;
+const MENSAJE_RESULTADO_APROBADO = 'Resultado aprobado. La certificación fue emitida.';
+const MENSAJE_RESULTADO_OBSERVACIONES =
+  'Resultado emitido con observaciones. La empresa debe corregir la documentación.';
 
 /** 403 y 404 son definitivos: reintentar no los cambia. El resto puede ser un fallo pasajero. */
 function esErrorPermanente(err: unknown): boolean {
@@ -86,12 +118,13 @@ function esErrorPermanente(err: unknown): boolean {
 @Component({
   selector: 'app-detalle-auditoria-page',
   imports: [
-    AvatarComponent,
     BadgeComponent,
     ButtonComponent,
     DatePipe,
+    DateInputComponent,
     HeadingComponent,
     IconComponent,
+    FileDropComponent,
     FormField,
     ShellLayoutComponent,
     TextareaComponent,
@@ -119,6 +152,13 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
   protected readonly mostrandoRechazo = signal(false);
   protected readonly motivoRechazo = signal('');
   protected readonly enviandoDecision = signal(false);
+  protected readonly enviandoReporte = signal(false);
+  protected readonly enviandoResultado = signal(false);
+  protected readonly mostrandoReemplazoReporte = signal(false);
+  protected readonly errorReporteGeneral = signal<string | null>(null);
+  protected readonly errorResultado = signal<string | null>(null);
+  private readonly errorReporteServidor = signal<string | null>(null);
+  private readonly errorFechaReporteServidor = signal<string | null>(null);
 
   /**
    * Marca de tiempo que refresca el contador. Se actualiza en cada ciclo del sondeo en vez de con
@@ -129,6 +169,9 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
 
   protected readonly minimoMotivo = MINIMO_CARACTERES_MOTIVO_RECHAZO;
   protected readonly maximoMotivo = MAXIMO_CARACTERES_MOTIVO_RECHAZO;
+  protected readonly maximoBytesReporte = MAXIMO_BYTES_REPORTE_AUDITORIA;
+  protected readonly hoy = todayUtcMidnight();
+  protected readonly mensajeCargaDeshabilitada = MENSAJE_CARGA_DESHABILITADA;
 
   /**
    * El detalle lo abren los dos roles y cada uno vuelve a su propio listado. Estaba fijo en
@@ -149,6 +192,10 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
   };
 
   protected readonly modeloRechazo = signal<RechazoFormModel>({ motivoRechazo: '' });
+  protected readonly modeloCargaReporte = signal<CargaReporteFormModel>({
+    fechaAuditoriaRealizada: null,
+    reporteAuditoria: [],
+  });
 
   protected readonly rechazoForm = form(
     this.modeloRechazo,
@@ -163,12 +210,47 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     })
   );
 
+  protected readonly cargaReporteForm = form(
+    this.modeloCargaReporte,
+    schema<CargaReporteFormModel>((path) => {
+      required(path.fechaAuditoriaRealizada, { message: MENSAJE_FECHA_REPORTE_REQUERIDA });
+      maxDate(path.fechaAuditoriaRealizada, this.hoy, {
+        message: MENSAJE_FECHA_REPORTE_INVALIDA,
+      });
+      validate(path.fechaAuditoriaRealizada, (ctx) => {
+        const fecha = ctx.value();
+        const minima = this.fechaMinimaReporte();
+        if (fecha === null || minima === null) return undefined;
+        if (fecha.getTime() < minima.getTime()) {
+          return { kind: 'fechaAuditoriaFueraDeRango', message: MENSAJE_FECHA_REPORTE_INVALIDA };
+        }
+        return undefined;
+      });
+      validate(path.reporteAuditoria, ({ value }) =>
+        value().length === 0
+          ? { kind: 'reporteRequerido', message: MENSAJE_REPORTE_REQUERIDO }
+          : undefined
+      );
+      disabled(path.fechaAuditoriaRealizada, { when: () => !this.puedeEditarReporte() });
+      disabled(path.reporteAuditoria, { when: () => !this.puedeEditarReporte() });
+    })
+  );
+
   protected readonly caracteresMotivo = computed(
     () => this.modeloRechazo().motivoRechazo.trim().length
   );
 
   /** Sale del propio formulario para no repetir los limites que ya declara el schema. */
   protected readonly motivoValido = computed(() => this.rechazoForm.motivoRechazo().valid());
+
+  protected readonly fechaReporteError = computed(
+    () =>
+      this.errorFechaReporteServidor() ??
+      fieldError(this.cargaReporteForm.fechaAuditoriaRealizada())
+  );
+  protected readonly reporteError = computed(
+    () => this.errorReporteServidor() ?? fieldError(this.cargaReporteForm.reporteAuditoria())
+  );
 
   /**
    * Las acciones solo aparecen para el auditor que tiene la asignacion pendiente. El backend valida
@@ -182,6 +264,44 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     }
     return detalle.auditor.id === this.authSession.getUserId();
   });
+
+  protected readonly esAuditorAsignado = computed(() => {
+    const detalle = this.detalle();
+    return detalle?.auditor?.id === this.authSession.getUserId();
+  });
+
+  protected readonly estadoPermiteReporte = computed(() => {
+    const estado = this.detalle()?.estado;
+    return estado === 'EN_REVISION' || estado === 'REPORTE_CARGADO';
+  });
+
+  protected readonly puedeEditarReporte = computed(
+    () => this.esAuditorAsignado() && this.estadoPermiteReporte() && !this.enviandoReporte()
+  );
+
+  protected readonly puedeEnviarReporte = computed(
+    () => this.puedeEditarReporte() && this.cargaReporteForm().valid() && !this.enviandoReporte()
+  );
+
+  protected readonly puedeEmitirResultado = computed(() => {
+    const detalle = this.detalle();
+    return (
+      this.esAuditorAsignado() &&
+      detalle?.estado === 'REPORTE_CARGADO' &&
+      !!detalle.reporteAuditoria &&
+      !this.enviandoResultado()
+    );
+  });
+
+  protected readonly muestraFormularioReporte = computed(
+    () =>
+      this.estadoPermiteReporte() &&
+      (!this.detalle()?.reporteAuditoria || this.mostrandoReemplazoReporte())
+  );
+
+  protected readonly fechaMinimaReporte = computed(() =>
+    fechaNegocioDeIsoComoUtcMidnight(this.detalle()?.fechaAceptacion)
+  );
 
   /**
    * El contador se calcula contra el reloj del navegador. Con el reloj del cliente mal puesto, el
@@ -221,23 +341,9 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
 
   protected readonly nombreAuditor = computed(() => this.detalle()?.auditor?.nombre ?? null);
 
-  protected readonly inicialesAuditor = computed(() => {
-    const nombre = this.nombreAuditor();
-    return nombre ? initialsFromNombreCompleto(nombre) : '';
-  });
-
-  protected readonly variantePorEstado = computed<BadgeVariant>(() => {
-    switch (this.detalle()?.estado) {
-      case 'CERTIFICACION_EMITIDA':
-        return 'success';
-      case 'OBSERVACIONES_PENDIENTES':
-        return 'warning';
-      case 'SOLICITUD_ENVIADA':
-        return 'neutral';
-      default:
-        return 'info';
-    }
-  });
+  protected readonly variantePorEstado = computed(() =>
+    variantePorEstadoAuditoria(this.detalle()?.estado)
+  );
 
   /**
    * La línea de tiempo dibuja el recorrido completo, no solo lo ocurrido: los pasos que todavía no
@@ -341,8 +447,8 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
   protected readonly documentoAbriendo = signal<string | null>(null);
 
   /**
-   * La pestana se abre en el mismo clic y recien despues se le carga el contenido: abrirla al
-   * volver la peticion la deja fuera de la ventana de activacion del usuario y el navegador la
+   * La pestaña se abre en el mismo clic y recién después se le carga el contenido: abrirla al
+   * volver la petición la deja fuera de la ventana de activación del usuario y el navegador la
    * bloquea como emergente. Por eso el helper recibe como traer el documento y no el documento.
    */
   protected async verDocumento(idDocumento: string): Promise<void> {
@@ -359,6 +465,90 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     } finally {
       this.documentoAbriendo.set(null);
     }
+  }
+
+  protected actualizarReporte(archivos: File[]): void {
+    this.errorReporteGeneral.set(null);
+    this.errorReporteServidor.set(null);
+    this.modeloCargaReporte.update((modelo) => ({
+      ...modelo,
+      reporteAuditoria: archivos.slice(-1),
+    }));
+    this.cargaReporteForm.reporteAuditoria().markAsTouched();
+  }
+
+  protected handleCargaReporte(event: Event): void {
+    event.preventDefault();
+    void this.cargarReporte();
+  }
+
+  protected abrirReemplazoReporte(): void {
+    this.errorReporteGeneral.set(null);
+    this.errorFechaReporteServidor.set(null);
+    this.errorReporteServidor.set(null);
+    this.mostrandoReemplazoReporte.set(true);
+  }
+
+  protected aprobarAuditoria(): void {
+    void this.emitirResultado('aprobada', MENSAJE_RESULTADO_APROBADO);
+  }
+
+  protected registrarObservaciones(): void {
+    void this.emitirResultado('observaciones', MENSAJE_RESULTADO_OBSERVACIONES);
+  }
+
+  private async emitirResultado(
+    resultado: ResultadoAuditoriaRequest,
+    mensajeExito: string
+  ): Promise<void> {
+    this.enviandoResultado.set(true);
+    this.errorResultado.set(null);
+    try {
+      const detalle = await firstValueFrom(
+        this.auditoriasService.emitirResultado(this.idSolicitud(), { resultado })
+      );
+      this.detalle.set(detalle);
+      this.toastService.success(mensajeExito);
+    } catch (err: unknown) {
+      this.errorResultado.set(apiErrorMessage(err) ?? ERROR_RESULTADO);
+    } finally {
+      this.enviandoResultado.set(false);
+    }
+  }
+
+  private async cargarReporte(): Promise<void> {
+    await submit(this.cargaReporteForm, {
+      action: async (field) => {
+        const { fechaAuditoriaRealizada, reporteAuditoria } = field().value();
+        const archivo = reporteAuditoria[0];
+        if (!fechaAuditoriaRealizada || !archivo) return undefined;
+
+        this.enviandoReporte.set(true);
+        this.errorReporteGeneral.set(null);
+        this.errorFechaReporteServidor.set(null);
+        this.errorReporteServidor.set(null);
+        try {
+          const detalle = await firstValueFrom(
+            this.auditoriasService.cargarReporte(
+              this.idSolicitud(),
+              archivo,
+              toIsoDateString(fechaAuditoriaRealizada)
+            )
+          );
+          this.detalle.set(detalle);
+          this.mostrandoReemplazoReporte.set(false);
+          this.modeloCargaReporte.set({ fechaAuditoriaRealizada: null, reporteAuditoria: [] });
+          this.cargaReporteForm().reset();
+          this.toastService.success('Reporte de auditoría cargado.');
+        } catch (err: unknown) {
+          this.asignarErrorReporte(err);
+        } finally {
+          this.enviandoReporte.set(false);
+        }
+        return undefined;
+      },
+      onInvalid: (field) => field().markAsTouched(),
+    });
   }
 
   protected abrirRechazo(): void {
@@ -472,6 +662,22 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     return apiErrorMessage(err) ?? ERROR_CARGA;
   }
 
+  private asignarErrorReporte(err: unknown): void {
+    const mensaje = apiErrorMessage(err) ?? ERROR_REPORTE;
+    // El backend todavía no expone códigos estructurados por campo; mientras tanto se clasifica
+    // por mensaje normalizado para mostrar el error junto al control más útil.
+    const normalizado = normalizarMensaje(mensaje);
+    if (normalizado.includes('fecha de la auditoria')) {
+      this.errorFechaReporteServidor.set(mensaje);
+      return;
+    }
+    if (normalizado.includes('archivo') || normalizado.includes('pdf')) {
+      this.errorReporteServidor.set(mensaje);
+      return;
+    }
+    this.errorReporteGeneral.set(mensaje);
+  }
+
   /**
    * Con observaciones pendientes el recorrido no termina en la certificación, así que ese último
    * paso se sustituye en vez de agregarse: mostrar los dos daría a entender que la auditoría sigue
@@ -491,4 +697,27 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     }
     return indice === indiceActual ? 'en-curso' : 'pendiente';
   }
+}
+
+function fechaNegocioDeIsoComoUtcMidnight(fecha: string | null | undefined): Date | null {
+  if (!fecha) return null;
+  const valor = new Date(fecha);
+  if (Number.isNaN(valor.getTime())) return null;
+
+  const partes = FORMATEADOR_FECHA_NEGOCIO.formatToParts(valor);
+  const anio = Number(partes.find((parte) => parte.type === 'year')?.value);
+  const mes = Number(partes.find((parte) => parte.type === 'month')?.value);
+  const dia = Number(partes.find((parte) => parte.type === 'day')?.value);
+
+  if (!Number.isInteger(anio) || !Number.isInteger(mes) || !Number.isInteger(dia)) {
+    return null;
+  }
+  return new Date(Date.UTC(anio, mes - 1, dia));
+}
+
+function normalizarMensaje(mensaje: string): string {
+  return mensaje
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
 }

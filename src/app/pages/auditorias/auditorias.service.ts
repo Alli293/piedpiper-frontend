@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import {
   AsignarAuditorRequest,
   DetalleSolicitudAuditoria,
+  EmitirResultadoAuditoriaRequest,
   ResponderDecisionRequest,
   ResumenSolicitudAuditoria,
   NuevaSolicitudAuditoriaRequest,
@@ -54,6 +55,31 @@ export class AuditoriasService {
 
   responderDecision(idSolicitud: string, request: ResponderDecisionRequest): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${idSolicitud}/decision`, request);
+  }
+
+  emitirResultado(
+    idSolicitud: string,
+    request: EmitirResultadoAuditoriaRequest
+  ): Observable<DetalleSolicitudAuditoria> {
+    return this.http.post<DetalleSolicitudAuditoria>(
+      `${this.baseUrl}/${idSolicitud}/resultado`,
+      request
+    );
+  }
+
+  cargarReporte(
+    idSolicitud: string,
+    reporteAuditoria: File,
+    fechaAuditoriaRealizada: string
+  ): Observable<DetalleSolicitudAuditoria> {
+    const formData = new FormData();
+    formData.append('reporteAuditoria', reporteAuditoria, reporteAuditoria.name);
+    formData.append('fechaAuditoriaRealizada', fechaAuditoriaRealizada);
+
+    return this.http.post<DetalleSolicitudAuditoria>(
+      `${this.baseUrl}/${idSolicitud}/reporte`,
+      formData
+    );
   }
 
   /**

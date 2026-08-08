@@ -82,6 +82,9 @@ export interface TransicionEstadoAuditoria {
 export interface DetalleSolicitudAuditoria extends SolicitudAuditoriaAsignada {
   estadoDescripcion: string;
   fechaAceptacion: string | null;
+  reporteAuditoria: DocumentoSolicitudAuditoria | null;
+  fechaAuditoriaRealizada: string | null;
+  fechaCargaReporte: string | null;
 
   /** Motivo del último rechazo. Sigue visible aunque la asignación ya se haya liberado. */
   motivoRechazo: string | null;
@@ -130,13 +133,20 @@ export interface ResponderDecisionRequest {
   motivoRechazo?: string;
 }
 
+export type ResultadoAuditoriaRequest = 'aprobada' | 'observaciones';
+
+export interface EmitirResultadoAuditoriaRequest {
+  resultado: ResultadoAuditoriaRequest;
+}
+
 export const MINIMO_CARACTERES_MOTIVO_RECHAZO = 10;
 export const MAXIMO_CARACTERES_MOTIVO_RECHAZO = 300;
 
-/** El auditor tiene 120 horas desde la asignación para responder. */
+/** Debe mantenerse alineado con el default backend `auditoria.expiracion-asignacion-horas`. */
 export const HORAS_PARA_RESPONDER = 120;
 
 export const MAXIMO_DOCUMENTOS_SOLICITUD = 10;
 export const MAXIMO_BYTES_DOCUMENTO = 15 * 1024 * 1024;
+export const MAXIMO_BYTES_REPORTE_AUDITORIA = 25 * 1024 * 1024;
 export const MAXIMO_MESES_PERIODO = 12;
 export const MAXIMO_CARACTERES_DESCRIPCION = 500;
