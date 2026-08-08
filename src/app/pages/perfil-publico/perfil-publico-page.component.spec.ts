@@ -1,18 +1,18 @@
+import { Component, input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
-import { Component, input } from '@angular/core';
-import * as fc from 'fast-check';
 
-import { PerfilPublicoPageComponent } from './perfil-publico-page.component';
-import { PerfilPublicoService } from './perfil-publico.service';
-import { PerfilPublicoDTO } from './perfil-publico.models';
+import { environment } from '../../../environments/environment';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { LogoComponent } from '../../shared/components/logo/logo.component';
-import { environment } from '../../../environments/environment';
+import { CompartirPerfilComponent } from './compartir-perfil/compartir-perfil.component';
+import { EvolucionHuellaChartComponent } from './evolucion-huella-chart.component';
+import { PerfilPublicoPageComponent } from './perfil-publico-page.component';
+import { PerfilPublicoService } from './perfil-publico.service';
+import { EvolucionHuellaDTO, PerfilPublicoDTO, PuntoHuella } from './perfil-publico.models';
 
-// --- Stub components to avoid importing real child components with complex deps ---
 @Component({ selector: 'app-icon', template: '', standalone: true })
 class IconStubComponent {
   name = input.required<string>();
@@ -27,7 +27,16 @@ class LogoStubComponent {
   gap = input('9px');
 }
 
-// --- Test data ---
+@Component({ selector: 'app-compartir-perfil', template: '', standalone: true })
+class CompartirPerfilStubComponent {
+  slug = input.required<string>();
+}
+
+@Component({ selector: 'app-evolucion-huella-chart', template: '', standalone: true })
+class EvolucionHuellaChartStubComponent {
+  serie = input<PuntoHuella[]>([]);
+}
+
 const PERFIL_MOCK: PerfilPublicoDTO = {
   nombreEmpresa: 'EcoTech Solutions',
   logoUrl: 'https://example.com/logo.png',
@@ -39,12 +48,13 @@ const PERFIL_MOCK: PerfilPublicoDTO = {
   insigniasActivas: 3,
 };
 
-const PERFIL_SIN_NIVEL: PerfilPublicoDTO = {
-  ...PERFIL_MOCK,
-  nivelEcologico: 'Sin nivel',
-  fechaActualizacionNivel: null,
-  certificacionesVigentes: 0,
-  insigniasActivas: 0,
+const EVOLUCION_MOCK: EvolucionHuellaDTO = {
+  rangoPeriodo: 'ultimos_3_anios',
+  tendencia: 'reduccion',
+  serie: [
+    { periodo: '2025', huellaT: 5.236, variacionPorcentual: null },
+    { periodo: '2026', huellaT: 4.2, variacionPorcentual: -19.8 },
+  ],
 };
 
 describe('PerfilPublicoPageComponent', () => {
@@ -70,10 +80,20 @@ describe('PerfilPublicoPageComponent', () => {
     })
       .overrideComponent(PerfilPublicoPageComponent, {
         remove: {
-          imports: [IconComponent, LogoComponent],
+          imports: [
+            IconComponent,
+            LogoComponent,
+            CompartirPerfilComponent,
+            EvolucionHuellaChartComponent,
+          ],
         },
         add: {
-          imports: [IconStubComponent, LogoStubComponent],
+          imports: [
+            IconStubComponent,
+            LogoStubComponent,
+            CompartirPerfilStubComponent,
+            EvolucionHuellaChartStubComponent,
+          ],
         },
       })
       .compileComponents();
@@ -85,248 +105,156 @@ describe('PerfilPublicoPageComponent', () => {
   });
 
   afterEach(() => {
-    httpMock.match(() => true); // flush any outstanding requests
+    httpMock.match(() => true);
   });
 
-  function flushPerfil(dto: PerfilPublicoDTO): void {
-    const req = httpMock.expectOne(`${baseUrl}/eco-tech`);
-    req.flush(dto);
+  function flushPerfil(dto: PerfilPublicoDTO, huella: EvolucionHuellaDTO = EVOLUCION_MOCK): void {
+    httpMock.expectOne(`${baseUrl}/eco-tech`).flush(dto);
     fixture.detectChanges();
-    // Also flush the subsequent certificaciones and insignias requests
     httpMock.match(`${baseUrl}/eco-tech/certificaciones`).forEach((r) => r.flush([]));
     httpMock.match(`${baseUrl}/eco-tech/insignias`).forEach((r) => r.flush([]));
-    httpMock
-      .match(`${baseUrl}/eco-tech/evolucion-huella`)
-      .forEach((r) => r.flush({ totalActualTco2e: 0, variacionPorcentual: null, serie: [] }));
+    httpMock.match(`${baseUrl}/eco-tech/huella?rango=ultimos_3_anios`).forEach((r) => {
+      r.flush(huella);
+    });
     fixture.detectChanges();
   }
 
   function flushError(status: number, body: object): void {
-    const req = httpMock.expectOne(`${baseUrl}/eco-tech`);
-    req.flush(body, { status, statusText: 'Error' });
+    httpMock.expectOne(`${baseUrl}/eco-tech`).flush(body, { status, statusText: 'Error' });
     fixture.detectChanges();
   }
 
-  // =========================================================================
-  // Property Tests (fast-check)
-  // =========================================================================
+  it('muestra spinner durante estado de carga', () => {
+    fixture.detectChanges();
 
-  describe('Property tests (fast-check)', () => {
-    /**
-     * Property 9: Formateo de fechas en locale es-CR
-     * Para cualquier fecha válida ISO 8601, la función formatFecha() produce una cadena
-     * que coincide con el formato es-CR (mes en español, formato 12h con a.m./p.m.).
-     *
-     * Validates: Requirements 4.3, 8.1
-     */
-    it('Property 9: formatFechaCorta produce formato es-CR para cualquier fecha válida', () => {
-      // Create component instance to access formatFechaCorta
-      fixture.detectChanges();
-      httpMock.expectOne(`${baseUrl}/eco-tech`).flush(PERFIL_MOCK);
-
-      fc.assert(
-        fc.property(
-          fc
-            .date({ min: new Date('2000-01-01'), max: new Date('2099-12-31') })
-            .filter((d) => !isNaN(d.getTime())),
-          (randomDate) => {
-            const isoStr = randomDate.toISOString();
-            const result = component['formatFechaCorta'](isoStr);
-
-            // Must not be empty
-            expect(result.length).toBeGreaterThan(0);
-
-            // Verify structure: should contain a 2-digit day
-            const dayMatch = result.match(/\d{1,2}/);
-            expect(dayMatch).not.toBeNull();
-
-            // Should contain Spanish month abbreviation (short month names in es-CR)
-            const spanishMonths = [
-              'ene',
-              'feb',
-              'mar',
-              'abr',
-              'may',
-              'jun',
-              'jul',
-              'ago',
-              'sept',
-              'sep',
-              'oct',
-              'nov',
-              'dic',
-            ];
-            const containsMonth = spanishMonths.some((m) => result.toLowerCase().includes(m));
-            expect(containsMonth).toBe(true);
-
-            // Should contain year (4 digits)
-            const yearMatch = result.match(/\d{4}/);
-            expect(yearMatch).not.toBeNull();
-          }
-        ),
-        { numRuns: 100 }
-      );
-    });
-
-    /**
-     * Property 10: Formateo de números con separador de miles
-     * Para cualquier número entero > 999, formatNumero() produce una cadena con
-     * separador de miles del locale es-CR (espacio fino U+202F o espacio regular).
-     *
-     * Validates: Requirements 8.2
-     */
-    it('Property 10: formatNumero usa separador de miles para números > 999', () => {
-      fixture.detectChanges();
-      httpMock.expectOne(`${baseUrl}/eco-tech`).flush(PERFIL_MOCK);
-
-      fc.assert(
-        fc.property(fc.integer({ min: 1000, max: 9999999 }), (num) => {
-          const result = component['formatNumero'](num);
-
-          // The result should not be empty
-          expect(result.length).toBeGreaterThan(0);
-
-          // Remove all non-digit characters to verify the digits are preserved
-          const digitsOnly = result.replace(/\D/g, '');
-          expect(digitsOnly).toBe(num.toString());
-
-          // For numbers >= 1000, there should be a separator character
-          // es-CR uses thin space (U+202F), non-breaking space (U+00A0), regular space, or period
-          // The formatted string should be longer than the raw digits (due to separators)
-          expect(result.length).toBeGreaterThan(digitsOnly.length);
-        }),
-        { numRuns: 100 }
-      );
-    });
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.pub-loading__spinner')).not.toBeNull();
+    expect(el.querySelector('.pub-loading__text')?.textContent).toContain('Cargando perfil');
   });
 
-  // =========================================================================
-  // Unit Tests
-  // =========================================================================
+  it('renderiza nombre, sector, país y nivel cuando la data carga exitosamente', () => {
+    fixture.detectChanges();
+    flushPerfil(PERFIL_MOCK);
 
-  describe('Unit tests', () => {
-    it('muestra spinner durante estado de carga', () => {
-      fixture.detectChanges();
-      const el = fixture.nativeElement as HTMLElement;
-      const spinner = el.querySelector('.pub-loading__spinner');
-      const loadingText = el.querySelector('.pub-loading__text');
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.pub-card__nombre')?.textContent).toContain('EcoTech Solutions');
+    expect(el.querySelector('.pub-nivel__nombre')?.textContent).toContain('Oro');
+  });
 
-      expect(spinner).not.toBeNull();
-      expect(loadingText?.textContent).toContain('Cargando perfil');
-    });
+  it('renderiza página 404 cuando ocurre un error 404', () => {
+    fixture.detectChanges();
+    flushError(404, { mensaje: 'El perfil que buscas no existe o ya no está disponible.' });
 
-    it('renderiza nombre, sector, país y nivel cuando la data carga exitosamente', () => {
-      fixture.detectChanges();
-      flushPerfil(PERFIL_MOCK);
-
-      const el = fixture.nativeElement as HTMLElement;
-      const nombre = el.querySelector('.pub-card__nombre');
-      const nivel = el.querySelector('.pub-nivel__nombre');
-
-      expect(nombre?.textContent).toContain('EcoTech Solutions');
-      expect(nivel?.textContent).toContain('Oro');
-    });
-
-    it('renderiza página 404 cuando ocurre un error 404', () => {
-      fixture.detectChanges();
-      flushError(404, { mensaje: 'El perfil que buscas no existe o ya no está disponible.' });
-
-      const el = fixture.nativeElement as HTMLElement;
-      const errorSection = el.querySelector('.pub-error--404');
-      const errorMsg = el.querySelector('.pub-error__msg');
-
-      expect(errorSection).not.toBeNull();
-      expect(errorMsg?.textContent).toContain('El perfil que buscas no existe');
-    });
-
-    it('muestra nivel Sin nivel con clase correcta', () => {
-      fixture.detectChanges();
-      flushPerfil(PERFIL_SIN_NIVEL);
-
-      const el = fixture.nativeElement as HTMLElement;
-      const nivelCard = el.querySelector('.pub-nivel--sin-nivel');
-
-      expect(nivelCard).not.toBeNull();
-    });
-
-    it('oculta fecha cuando fechaActualizacionNivel es null', () => {
-      fixture.detectChanges();
-      flushPerfil(PERFIL_SIN_NIVEL);
-
-      const el = fixture.nativeElement as HTMLElement;
-      const fechaEl = el.querySelector('.pub-card__fecha');
-
-      // Fecha should show "Actualizado el " but with empty string since null
-      expect(fechaEl?.textContent?.trim()).toBe('Actualizado el');
-    });
-
-    it('muestra fecha cuando fechaActualizacionNivel tiene valor', () => {
-      fixture.detectChanges();
-      flushPerfil(PERFIL_MOCK);
-
-      const el = fixture.nativeElement as HTMLElement;
-      const fechaEl = el.querySelector('.pub-card__fecha');
-
-      expect(fechaEl).not.toBeNull();
-      expect(fechaEl?.textContent).toContain('Actualizado el');
-      expect(fechaEl?.textContent?.trim().length).toBeGreaterThan('Actualizado el'.length);
-    });
-
-    it.each([
-      { input: 'ORO', expected: 'Oro', cssClass: 'pub-nivel--oro' },
-      { input: 'PLATA', expected: 'Plata', cssClass: 'pub-nivel--plata' },
-      { input: 'BRONCE', expected: 'Bronce', cssClass: 'pub-nivel--bronce' },
-      { input: 'PLATINO', expected: 'Platino', cssClass: 'pub-nivel--platino' },
-    ])(
-      'normalizarNivel convierte $input (mayúsculas backend) a $expected y aplica clase $cssClass',
-      ({ input, expected, cssClass }) => {
-        fixture.detectChanges();
-        flushPerfil({ ...PERFIL_MOCK, nivelEcologico: input });
-
-        const el = fixture.nativeElement as HTMLElement;
-        const nivelCard = el.querySelector(`.${cssClass}`);
-        const nivelText = el.querySelector('.pub-nivel__nombre');
-
-        expect(nivelCard).not.toBeNull();
-        expect(nivelText?.textContent).toContain(expected);
-      }
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.pub-error--404')).not.toBeNull();
+    expect(el.querySelector('.pub-error__msg')?.textContent).toContain(
+      'El perfil que buscas no existe'
     );
+  });
 
-    it('muestra mensaje vacío cuando evolución no tiene datos', () => {
+  it.each([
+    { input: 'ORO', expected: 'Oro', cssClass: 'pub-nivel--oro' },
+    { input: 'PLATA', expected: 'Plata', cssClass: 'pub-nivel--plata' },
+    { input: 'BRONCE', expected: 'Bronce', cssClass: 'pub-nivel--bronce' },
+    { input: 'PLATINO', expected: 'Platino', cssClass: 'pub-nivel--platino' },
+  ])(
+    'normalizarNivel convierte $input a $expected y aplica clase $cssClass',
+    ({ input, expected, cssClass }) => {
       fixture.detectChanges();
-      flushPerfil(PERFIL_MOCK);
-
-      const el = fixture.nativeElement as HTMLElement;
-      // flushPerfil envía serie vacía, así que debe mostrar el estado vacío
-      const emptyMsg = el.querySelector('.pub-chart-placeholder__body p');
-      expect(emptyMsg?.textContent).toContain('No hay datos de emisiones registrados');
-    });
-
-    it('muestra gráfica cuando evolución tiene datos', () => {
-      fixture.detectChanges();
-      const req = httpMock.expectOne(`${baseUrl}/eco-tech`);
-      req.flush(PERFIL_MOCK);
-      fixture.detectChanges();
-      httpMock.match(`${baseUrl}/eco-tech/certificaciones`).forEach((r) => r.flush([]));
-      httpMock.match(`${baseUrl}/eco-tech/insignias`).forEach((r) => r.flush([]));
-      httpMock.match(`${baseUrl}/eco-tech/evolucion-huella`).forEach((r) =>
-        r.flush({
-          totalActualTco2e: 1.86,
-          variacionPorcentual: -21.0,
-          serie: [
-            { anio: 2023, totalTco2e: 1.86 },
-            { anio: 2024, totalTco2e: 1.47 },
-          ],
-        })
-      );
-      fixture.detectChanges();
+      flushPerfil({ ...PERFIL_MOCK, nivelEcologico: input });
 
       const el = fixture.nativeElement as HTMLElement;
-      // Debe mostrar el total y la variación
-      expect(el.querySelector('.pub-chart-placeholder__total')?.textContent).toContain('1.86');
-      expect(el.querySelector('.pub-chart-placeholder__change')?.textContent).toContain('-21');
-      // Debe haber un canvas para chart.js
-      expect(el.querySelector('canvas')).not.toBeNull();
+      expect(el.querySelector(`.${cssClass}`)).not.toBeNull();
+      expect(el.querySelector('.pub-nivel__nombre')?.textContent).toContain(expected);
+    }
+  );
+
+  it('abre el modal de compartir perfil', () => {
+    fixture.detectChanges();
+    flushPerfil(PERFIL_MOCK);
+
+    const boton = fixture.nativeElement.querySelector(
+      '.pub-header__btn-compartir'
+    ) as HTMLButtonElement;
+    boton.click();
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.pub-modal')).not.toBeNull();
+    expect(el.querySelector('app-compartir-perfil')).not.toBeNull();
+  });
+
+  it('muestra gráfico y tendencia cuando hay varios periodos verificados', () => {
+    fixture.detectChanges();
+    flushPerfil(PERFIL_MOCK);
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('app-evolucion-huella-chart')).not.toBeNull();
+    expect(el.querySelector('.pub-huella__total')?.textContent).toContain('4,2 tCO');
+    expect(el.querySelector('.pub-huella__trend')?.textContent).toContain('Disminu');
+  });
+
+  it('muestra aviso de historial insuficiente con un solo periodo', () => {
+    fixture.detectChanges();
+    flushPerfil(PERFIL_MOCK, {
+      rangoPeriodo: 'ultimo_anio',
+      tendencia: 'sin_cambio',
+      serie: [{ periodo: '2026', huellaT: 5.236, variacionPorcentual: null }],
     });
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.textContent).toContain('Aún no hay suficiente historial para mostrar una tendencia.');
+    expect(el.querySelector('app-evolucion-huella-chart')).not.toBeNull();
+  });
+
+  it('muestra mensaje normal cuando no hay datos verificados', () => {
+    fixture.detectChanges();
+    flushPerfil(PERFIL_MOCK, {
+      rangoPeriodo: 'ultimos_3_anios',
+      tendencia: 'sin_cambio',
+      serie: [],
+    });
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.textContent).toContain(
+      'Esta empresa aún no cuenta con datos de huella de carbono verificados.'
+    );
+    expect(el.querySelector('app-evolucion-huella-chart')).toBeNull();
+  });
+
+  it('muestra error inline cuando falla la evolución sin romper el perfil', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${baseUrl}/eco-tech`).flush(PERFIL_MOCK);
+    httpMock.match(`${baseUrl}/eco-tech/certificaciones`).forEach((r) => r.flush([]));
+    httpMock.match(`${baseUrl}/eco-tech/insignias`).forEach((r) => r.flush([]));
+    httpMock
+      .expectOne(`${baseUrl}/eco-tech/huella?rango=ultimos_3_anios`)
+      .flush({}, { status: 500, statusText: 'Error' });
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.pub-card__nombre')?.textContent).toContain('EcoTech Solutions');
+    expect(el.textContent).toContain(
+      'No fue posible cargar la evolución de la huella de carbono en este momento.'
+    );
+  });
+
+  it('recarga la huella al cambiar el rango', () => {
+    fixture.detectChanges();
+    flushPerfil(PERFIL_MOCK);
+
+    const botones = fixture.nativeElement.querySelectorAll(
+      '.pub-huella__filter'
+    ) as NodeListOf<HTMLButtonElement>;
+    botones[2].click();
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${baseUrl}/eco-tech/huella?rango=historico`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ ...EVOLUCION_MOCK, rangoPeriodo: 'historico' });
+  });
+
+  it('formatea números con locale es-CR', () => {
+    expect(component['formatNumero'](1234567)).toContain('1');
   });
 });

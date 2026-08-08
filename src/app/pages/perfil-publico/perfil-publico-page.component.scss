@@ -627,8 +627,8 @@
   }
 }
 
-// === Chart placeholder ===
-.pub-chart-placeholder {
+// === Huella chart ===
+.pub-huella {
   background: var(--ch-bg-white);
   border: 1px solid var(--ch-border);
   border-radius: var(--ch-radius-md);
@@ -660,6 +660,41 @@
   &__change {
     font-family: var(--ch-font-body);
     font-size: 0.75rem;
+    color: var(--ch-text-muted);
+  }
+
+  &__summary {
+    display: flex;
+    align-items: center;
+    gap: var(--ch-space-2);
+    padding: var(--ch-space-3) var(--ch-space-4) 0;
+    font-family: var(--ch-font-body);
+    font-size: 0.8125rem;
+    color: var(--ch-text-secondary);
+    flex-wrap: wrap;
+  }
+
+  &__trend {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0 var(--ch-space-2);
+    border-radius: var(--ch-radius-pill);
+    font-weight: 700;
+  }
+
+  &__trend--reduccion {
+    background: var(--ch-green-soft);
+    color: var(--ch-green-dark);
+  }
+
+  &__trend--aumento {
+    background: color-mix(in srgb, var(--ch-warning) 15%, transparent);
+    color: var(--ch-warning-dark);
+  }
+
+  &__trend--sin-cambio {
+    background: var(--ch-bg-main);
     color: var(--ch-text-muted);
   }
 
@@ -697,20 +732,26 @@
     }
   }
 
-  &__body {
+  &__state,
+  &__message {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 200px;
-    color: var(--ch-text-muted);
+    min-height: 240px;
     padding: var(--ch-space-6);
+  }
 
-    p {
-      font-family: var(--ch-font-body);
-      font-size: 0.875rem;
-      margin: var(--ch-space-3) 0 0;
-    }
+  &__message {
+    margin: 0;
+    font-family: var(--ch-font-body);
+    font-size: 0.875rem;
+    color: var(--ch-text-muted);
+    text-align: center;
+  }
+
+  &__spinner {
+    width: 32px;
+    height: 32px;
   }
 }
 

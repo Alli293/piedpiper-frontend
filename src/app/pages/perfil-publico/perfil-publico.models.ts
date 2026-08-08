@@ -23,6 +23,22 @@ export interface CertificacionPublica {
   codigoVerificacion: string;
 }
 
+export type RangoPeriodoHuella = 'ultimo_anio' | 'ultimos_3_anios' | 'historico';
+
+export type TendenciaHuella = 'reduccion' | 'aumento' | 'sin_cambio';
+
+export interface PuntoHuella {
+  periodo: string;
+  huellaT: number;
+  variacionPorcentual: number | null;
+}
+
+export interface EvolucionHuellaDTO {
+  rangoPeriodo: RangoPeriodoHuella;
+  tendencia: TendenciaHuella;
+  serie: PuntoHuella[];
+}
+
 export interface BusquedaPerfilPublicoDTO {
   nombreEmpresa: string;
   slug: string;

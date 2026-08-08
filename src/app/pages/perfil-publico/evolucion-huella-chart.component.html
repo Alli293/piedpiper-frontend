@@ -1,0 +1,10 @@
+<div class="ch-evolucion-huella">
+  <div class="ch-evolucion-huella__grafico">
+    <canvas baseChart [data]="chartData()" [options]="chartOptions()" [type]="'line'"> </canvas>
+  </div>
+  <div class="ch-evolucion-huella__bosque" aria-hidden="true">
+    @for (arbol of arboles(); track arbol) {
+      <span class="ch-evolucion-huella__arbol"></span>
+    }
+  </div>
+</div>
