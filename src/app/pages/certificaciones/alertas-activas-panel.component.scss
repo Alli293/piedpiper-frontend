@@ -12,6 +12,13 @@
     margin-bottom: var(--ch-space-5);
   }
 
+  &__ver-todas {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
   &__icon {
     display: flex;
     align-items: center;
