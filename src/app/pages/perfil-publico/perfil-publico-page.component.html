@@ -223,23 +223,20 @@
                     [class.pub-chart-placeholder__change--up]="
                       evolucion()!.variacionPorcentual! > 0
                     "
-                    >{{ evolucion()!.variacionPorcentual! > 0 ? '+' : ''
+                    >{{ evolucion()!.variacionPorcentual! < 0 ? '↓' : '↑' }}
+                    {{ evolucion()!.variacionPorcentual! > 0 ? '+' : ''
                     }}{{ evolucion()!.variacionPorcentual }}% vs año anterior</span
                   >
                 }
               </div>
             </div>
-            <div class="pub-chart-bars" aria-label="Gráfico de evolución anual">
-              @for (punto of evolucion()!.serie; track punto.anio) {
-                <div class="pub-chart-bars__col">
-                  <div
-                    class="pub-chart-bars__bar"
-                    [style.height.%]="(punto.totalTco2e / maxTco2e()) * 100"
-                    [attr.aria-label]="punto.anio + ': ' + punto.totalTco2e + ' tCO₂e'"
-                  ></div>
-                  <span class="pub-chart-bars__label">{{ punto.anio }}</span>
-                </div>
-              }
+            <div class="pub-chart-canvas-wrapper">
+              <canvas
+                baseChart
+                type="line"
+                [data]="chartData()"
+                [options]="chartOptions()"
+              ></canvas>
             </div>
           </div>
         } @else {

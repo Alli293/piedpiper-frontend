@@ -4,6 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DecimalPipe } from '@angular/common';
 import { Meta, Title } from '@angular/platform-browser';
 
+import { BaseChartDirective } from 'ng2-charts';
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
 import { LogoComponent } from '../../shared/components/logo/logo.component';
 import {
@@ -35,7 +36,7 @@ const NIVELES_ORDEN = ['Bronce', 'Plata', 'Oro', 'Platino'];
   standalone: true,
   templateUrl: './perfil-publico-page.component.html',
   styleUrl: './perfil-publico-page.component.scss',
-  imports: [IconComponent, LogoComponent, DecimalPipe],
+  imports: [IconComponent, LogoComponent, DecimalPipe, BaseChartDirective],
 })
 export class PerfilPublicoPageComponent {
   private readonly route = inject(ActivatedRoute);
@@ -56,6 +57,53 @@ export class PerfilPublicoPageComponent {
     if (!ev || ev.serie.length === 0) return 1;
     return Math.max(...ev.serie.map((p) => p.totalTco2e), 0.001);
   });
+
+  protected readonly chartData = computed(() => {
+    const ev = this.evolucion();
+    if (!ev || ev.serie.length === 0) return { labels: [], datasets: [] };
+    return {
+      labels: ev.serie.map((p) => p.anio.toString()),
+      datasets: [
+        {
+          data: ev.serie.map((p) => p.totalTco2e),
+          borderColor: '#16a34a',
+          backgroundColor: 'rgba(22, 163, 74, 0.08)',
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#16a34a',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+        },
+      ],
+    };
+  });
+
+  protected readonly chartOptions = computed(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx: { parsed: { y: number } }) => `${ctx.parsed.y.toFixed(3)} tCO₂e`,
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: false,
+        grid: { color: 'rgba(0,0,0,0.05)' },
+        ticks: {
+          font: { size: 11 },
+          callback: (value: string | number) => `${value}`,
+        },
+      },
+      x: {
+        grid: { display: false },
+        ticks: { font: { size: 12, weight: 'bold' as const } },
+      },
+    },
+  }));
 
   protected readonly nivelesOrden = NIVELES_ORDEN;
 
