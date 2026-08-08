@@ -113,7 +113,7 @@ describe('PerfilPublicoPageComponent', () => {
     fixture.detectChanges();
     httpMock.match(`${baseUrl}/eco-tech/certificaciones`).forEach((r) => r.flush([]));
     httpMock.match(`${baseUrl}/eco-tech/insignias`).forEach((r) => r.flush([]));
-    httpMock.match(`${baseUrl}/eco-tech/huella?rango=ultimos_3_anios`).forEach((r) => {
+    httpMock.match(`${baseUrl}/eco-tech/evolucion-huella?rango=ultimos_3_anios`).forEach((r) => {
       r.flush(huella);
     });
     fixture.detectChanges();
@@ -228,7 +228,7 @@ describe('PerfilPublicoPageComponent', () => {
     httpMock.match(`${baseUrl}/eco-tech/certificaciones`).forEach((r) => r.flush([]));
     httpMock.match(`${baseUrl}/eco-tech/insignias`).forEach((r) => r.flush([]));
     httpMock
-      .expectOne(`${baseUrl}/eco-tech/huella?rango=ultimos_3_anios`)
+      .expectOne(`${baseUrl}/eco-tech/evolucion-huella?rango=ultimos_3_anios`)
       .flush({}, { status: 500, statusText: 'Error' });
     fixture.detectChanges();
 
@@ -249,7 +249,7 @@ describe('PerfilPublicoPageComponent', () => {
     botones[2].click();
     fixture.detectChanges();
 
-    const req = httpMock.expectOne(`${baseUrl}/eco-tech/huella?rango=historico`);
+    const req = httpMock.expectOne(`${baseUrl}/eco-tech/evolucion-huella?rango=historico`);
     expect(req.request.method).toBe('GET');
     req.flush({ ...EVOLUCION_MOCK, rangoPeriodo: 'historico' });
   });
