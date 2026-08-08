@@ -9,13 +9,30 @@ import { VerificacionPublicaPageComponent } from './verificacion-publica-page.co
 
 const RESULTADO_VIGENTE: VerificacionCredencial = {
   estado: 'valida_vigente',
+  categoria: 'CERTIFICACION',
   tipo: 'CARBONO_NEUTRAL',
   nombreCertificacion: 'Carbono Neutral',
+  nivelInsignia: null,
   empresa: 'EcoCorp',
   auditor: 'Ana Pérez',
   entidadCertificadora: 'CarbonHub',
   fechaEmision: '2026-01-15T00:00:00Z',
   fechaVencimiento: '2027-01-15',
+  fechaRevocacion: null,
+  fechaConsulta: '2026-08-01T12:30:00Z',
+};
+
+const RESULTADO_INSIGNIA: VerificacionCredencial = {
+  estado: 'valida_vigente',
+  categoria: 'INSIGNIA',
+  tipo: 'INSIGNIA',
+  nombreCertificacion: 'Excelencia climática empresarial',
+  nivelInsignia: 'oro',
+  empresa: 'EcoCorp',
+  auditor: null,
+  entidadCertificadora: 'CarbonHub',
+  fechaEmision: '2026-01-15T00:00:00Z',
+  fechaVencimiento: null,
   fechaRevocacion: null,
   fechaConsulta: '2026-08-01T12:30:00Z',
 };
@@ -98,6 +115,20 @@ describe('VerificacionPublicaPageComponent', () => {
     expect(root.textContent).toContain('Credencial válida y vigente');
     expect(root.textContent).toContain('EcoCorp');
     expect(root.textContent).toContain('CarbonHub');
+  });
+
+  it('una insignia muestra Nivel y Obtenida en vez de Auditor y Período', async () => {
+    verificar.mockReturnValue(of(RESULTADO_INSIGNIA));
+    const fixture = await crearFixture('CH-2026-8F4A19KD');
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.textContent).toContain('Insignia verificable');
+    expect(root.textContent).toContain('Nivel');
+    expect(root.textContent).toContain('Oro');
+    expect(root.textContent).toContain('Obtenida');
+    expect(root.textContent).toContain('Emisor');
+    expect(root.textContent).not.toContain('Auditor');
+    expect(root.textContent).not.toContain('Período');
   });
 
   it('una credencial vencida se muestra con variante warning', async () => {

@@ -1,5 +1,5 @@
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { DecimalPipe } from '@angular/common';
 import { Meta, Title } from '@angular/platform-browser';
@@ -16,8 +16,12 @@ import {
   Tooltip,
 } from 'chart.js';
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
-import { LogoComponent } from '../../shared/components/logo/logo.component';
 import { CompartirPerfilComponent } from './compartir-perfil/compartir-perfil.component';
+import { BadgeComponent, BadgeVariant } from '../../shared/components/badge/badge.component';
+import { CardComponent } from '../../shared/components/card/card.component';
+import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
+import { PublicHeaderComponent } from '../../shared/components/public-header/public-header.component';
+import { capitalizar, esCostaRica, nombrePais } from '../../shared/utils/empresa-catalogos.utils';
 import {
   CertificacionPublica,
   EvolucionHuellaPublica,
@@ -58,9 +62,13 @@ Chart.register(
   templateUrl: './perfil-publico-page.component.html',
   styleUrl: './perfil-publico-page.component.scss',
   imports: [
+    RouterLink,
     IconComponent,
-    LogoComponent,
     CompartirPerfilComponent,
+    BadgeComponent,
+    CardComponent,
+    CardStatComponent,
+    PublicHeaderComponent,
     DecimalPipe,
     BaseChartDirective,
   ],
@@ -219,16 +227,6 @@ export class PerfilPublicoPageComponent {
     return this.normalizarNivel(this.perfil()?.nivelEcologico);
   });
 
-  protected formatFechaActualizacion(fecha: string | null | undefined): string {
-    if (!fecha) return '';
-    const date = new Date(fecha);
-    return new Intl.DateTimeFormat('es-CR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }).format(date);
-  }
-
   /**
    * Normaliza el nivel ecológico del backend (que puede venir en mayúsculas: "ORO")
    * al formato que usa el frontend ("Oro") para las clases CSS y el mapa de configuración.
@@ -254,30 +252,46 @@ export class PerfilPublicoPageComponent {
     return new Intl.NumberFormat('es-CR').format(value);
   }
 
-  protected getEstadoBadgeClass(estado: string): string {
+  protected sectorFormateado(): string {
+    return capitalizar(this.perfil()?.sectorIndustrial);
+  }
+
+  protected paisNombre(): string {
+    return nombrePais(this.perfil()?.pais);
+  }
+
+  protected esPaisCostaRica(): boolean {
+    return esCostaRica(this.perfil()?.pais);
+  }
+
+  protected getEstadoBadgeVariant(estado: string): BadgeVariant {
     switch (estado) {
       case 'ACTIVA':
-        return 'badge--vigente';
+        return 'success';
       case 'VENCIDA':
-        return 'badge--vencida';
+        return 'warning';
       case 'REVOCADA':
-        return 'badge--revocada';
+        return 'danger';
       default:
-        return 'badge--neutral';
+        return 'neutral';
     }
   }
 
   protected getEstadoLabel(estado: string): string {
     switch (estado) {
       case 'ACTIVA':
-        return 'VIGENTE';
+        return 'Vigente';
       case 'VENCIDA':
-        return 'VENCIDA';
+        return 'Vencida';
       case 'REVOCADA':
-        return 'REVOCADA';
+        return 'Revocada';
       default:
         return estado;
     }
+  }
+
+  protected esCertificacionActiva(estado: string): boolean {
+    return estado === 'ACTIVA';
   }
 
   protected getAnioVigencia(): string {

@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
@@ -27,6 +27,7 @@ const INSIGNIA = {
   urlVerificacionJwt:
     'https://carbonhub.test/api/insignias/11111111-1111-1111-1111-111111111111/verificacion.jwt',
   urlLinkedIn: 'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME',
+  codigoVerificacion: 'CH-2026-8F4A19KD',
 };
 
 const PERFIL = {
@@ -131,40 +132,23 @@ describe('InsigniasEmpresaPageComponent', () => {
     expect(empresaService.descargarInsigniaJsonLd).not.toHaveBeenCalled();
   });
 
-  it('descarga el JWT real desde el boton de detalle', async () => {
+  it('no muestra los botones de descargar JWT y compartir en LinkedIn', async () => {
     const fixture = await crear();
     const root = fixture.nativeElement as HTMLElement;
-    const click = vi
-      .spyOn(HTMLAnchorElement.prototype, 'click')
-      .mockImplementation(() => undefined);
-    const boton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find((b) =>
-      b.textContent?.includes('Descargar .JWT')
-    );
 
-    boton?.click();
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    expect(empresaService.descargarInsigniaJwt).toHaveBeenCalledWith(INSIGNIA.urlVerificacionJwt);
-    expect(click).toHaveBeenCalled();
-    click.mockRestore();
+    expect(root.textContent).not.toContain('Descargar .JWT');
+    expect(root.textContent).not.toContain('Compartir en LinkedIn');
   });
 
-  it('abre LinkedIn y la verificacion OpenBadges en nueva pestana', async () => {
-    const open = vi.spyOn(window, 'open').mockImplementation(() => null);
+  it('navega a /verificar/:codigo al hacer clic en Verificar con OpenBadges 3.0', async () => {
     const fixture = await crear();
+    const router = TestBed.inject(Router);
+    const navegar = vi.spyOn(router, 'navigate').mockResolvedValue(true);
     const root = fixture.nativeElement as HTMLElement;
     const botones = Array.from(root.querySelectorAll<HTMLButtonElement>('button'));
-    const urlValidador = `https://certlister.com/ob3-validator/?url=${encodeURIComponent(
-      INSIGNIA.urlVerificacionJwt
-    )}`;
 
-    botones.find((b) => b.textContent?.includes('Compartir en LinkedIn'))?.click();
     botones.find((b) => b.textContent?.includes('Verificar con OpenBadges 3.0'))?.click();
 
-    expect(open).toHaveBeenCalledWith(INSIGNIA.urlLinkedIn, '_blank', 'noopener');
-    expect(open).toHaveBeenCalledWith(urlValidador, '_blank', 'noopener');
-
-    open.mockRestore();
+    expect(navegar).toHaveBeenCalledWith(['/verificar', 'CH-2026-8F4A19KD']);
   });
 });

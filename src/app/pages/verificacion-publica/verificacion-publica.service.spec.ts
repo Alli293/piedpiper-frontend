@@ -12,8 +12,10 @@ describe('VerificacionPublicaService', () => {
 
   const resultado: VerificacionCredencial = {
     estado: 'valida_vigente',
+    categoria: 'CERTIFICACION',
     tipo: 'CARBONO_NEUTRAL',
     nombreCertificacion: 'Carbono Neutral',
+    nivelInsignia: null,
     empresa: 'EcoCorp',
     auditor: 'Ana Pérez',
     entidadCertificadora: 'CarbonHub',

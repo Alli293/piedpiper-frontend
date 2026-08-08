@@ -1,0 +1,34 @@
+<nav class="ch-pp-header__breadcrumb" aria-label="Ruta">
+  <button type="button" class="ch-pp-header__volver" aria-label="Volver" (click)="volver.emit()">
+    <app-icon name="volver" [size]="16" />
+  </button>
+  <a appLink class="ch-pp-header__crumb-link" [routerLink]="['/empresa', slug(), 'reputacion']">{{
+    crumbEmpresa()
+  }}</a>
+  <span class="ch-pp-header__crumb-sep">/</span>
+  <span class="ch-pp-header__crumb-here">{{ seccionLabel() }}</span>
+</nav>
+
+@if (mostrarResumen()) {
+  <header class="ch-pp-header__card">
+    <span class="ch-pp-header__logo" aria-hidden="true">
+      @if (perfil()?.logoUrl; as logo) {
+        <img [src]="logo" [alt]="'Logo de ' + nombreEmpresa()" />
+      } @else {
+        <app-icon name="empresa" [size]="20" />
+      }
+    </span>
+    <div class="ch-pp-header__titulo">
+      <span class="ch-pp-header__eyebrow">
+        <app-icon name="auditor" [size]="11" />
+        {{ eyebrow() }}
+      </span>
+      <app-heading level="h1" [text]="tituloCompleto()" />
+      <p class="ch-pp-header__subtitulo">{{ subtitulo() }}</p>
+    </div>
+    <div class="ch-pp-header__conteo">
+      <strong>{{ conteo() }}</strong>
+      <span>{{ conteoLabel() }}</span>
+    </div>
+  </header>
+}

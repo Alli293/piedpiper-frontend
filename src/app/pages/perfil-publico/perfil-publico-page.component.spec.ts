@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { Component, input } from '@angular/core';
 import * as fc from 'fast-check';
 
@@ -9,7 +9,6 @@ import { PerfilPublicoPageComponent } from './perfil-publico-page.component';
 import { PerfilPublicoService } from './perfil-publico.service';
 import { PerfilPublicoDTO } from './perfil-publico.models';
 import { IconComponent } from '../../shared/components/icon/icon.component';
-import { LogoComponent } from '../../shared/components/logo/logo.component';
 import { environment } from '../../../environments/environment';
 
 // --- Stub components to avoid importing real child components with complex deps ---
@@ -17,14 +16,6 @@ import { environment } from '../../../environments/environment';
 class IconStubComponent {
   name = input.required<string>();
   size = input(16);
-}
-
-@Component({ selector: 'app-logo', template: '', standalone: true })
-class LogoStubComponent {
-  variant = input('on-light');
-  iconSize = input(24);
-  textSize = input('18px');
-  gap = input('9px');
 }
 
 // --- Test data ---
@@ -59,6 +50,7 @@ describe('PerfilPublicoPageComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
         PerfilPublicoService,
         {
           provide: ActivatedRoute,
@@ -70,10 +62,10 @@ describe('PerfilPublicoPageComponent', () => {
     })
       .overrideComponent(PerfilPublicoPageComponent, {
         remove: {
-          imports: [IconComponent, LogoComponent],
+          imports: [IconComponent],
         },
         add: {
-          imports: [IconStubComponent, LogoStubComponent],
+          imports: [IconStubComponent],
         },
       })
       .compileComponents();
@@ -249,29 +241,6 @@ describe('PerfilPublicoPageComponent', () => {
       expect(nivelCard).not.toBeNull();
     });
 
-    it('oculta fecha cuando fechaActualizacionNivel es null', () => {
-      fixture.detectChanges();
-      flushPerfil(PERFIL_SIN_NIVEL);
-
-      const el = fixture.nativeElement as HTMLElement;
-      const fechaEl = el.querySelector('.pub-card__fecha');
-
-      // Fecha should show "Actualizado el " but with empty string since null
-      expect(fechaEl?.textContent?.trim()).toBe('Actualizado el');
-    });
-
-    it('muestra fecha cuando fechaActualizacionNivel tiene valor', () => {
-      fixture.detectChanges();
-      flushPerfil(PERFIL_MOCK);
-
-      const el = fixture.nativeElement as HTMLElement;
-      const fechaEl = el.querySelector('.pub-card__fecha');
-
-      expect(fechaEl).not.toBeNull();
-      expect(fechaEl?.textContent).toContain('Actualizado el');
-      expect(fechaEl?.textContent?.trim().length).toBeGreaterThan('Actualizado el'.length);
-    });
-
     it.each([
       { input: 'ORO', expected: 'Oro', cssClass: 'pub-nivel--oro' },
       { input: 'PLATA', expected: 'Plata', cssClass: 'pub-nivel--plata' },
@@ -327,6 +296,27 @@ describe('PerfilPublicoPageComponent', () => {
       expect(el.querySelector('.pub-chart-placeholder__change')?.textContent).toContain('-21');
       // Debe haber un canvas para chart.js
       expect(el.querySelector('canvas')).not.toBeNull();
+    });
+
+    it('no muestra el boton de compartir del header mientras el perfil esta cargando', () => {
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('.ch-public-header__compartir')).toBeNull();
+    });
+
+    it('abre el modal de compartir perfil al hacer clic en compartir del header', () => {
+      fixture.detectChanges();
+      flushPerfil(PERFIL_MOCK);
+
+      const el = fixture.nativeElement as HTMLElement;
+      const botonCompartir: HTMLElement | null = el.querySelector('.ch-public-header__compartir');
+      expect(botonCompartir).not.toBeNull();
+
+      botonCompartir!.click();
+      fixture.detectChanges();
+
+      expect(el.querySelector('.pub-modal__title')?.textContent).toContain('Compartir perfil');
     });
   });
 });

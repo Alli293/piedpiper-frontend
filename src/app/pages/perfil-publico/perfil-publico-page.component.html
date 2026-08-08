@@ -1,48 +1,9 @@
-<!-- Header minimalista -->
-<header class="pub-header">
-  <div class="pub-header__inner">
-    <div class="pub-header__left">
-      <app-logo variant="on-light" [iconSize]="28" textSize="17px" gap="9px" />
-      <span class="pub-header__badge">
-        <app-icon name="success" [size]="14" aria-hidden="true" />
-        Perfil verificado
-      </span>
-    </div>
-    <div class="pub-header__right">
-      @if (estado() === 'exito') {
-        <button
-          class="pub-header__btn-compartir"
-          type="button"
-          (click)="toggleCompartir()"
-          aria-label="Compartir perfil"
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <circle cx="18" cy="5" r="3" />
-            <circle cx="6" cy="12" r="3" />
-            <circle cx="18" cy="19" r="3" />
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-          </svg>
-          Compartir
-        </button>
-      }
-      <a class="pub-header__link" href="/login">
-        <app-icon name="login" [size]="14" aria-hidden="true" />
-        Iniciar sesión
-      </a>
-    </div>
-  </div>
-</header>
+<app-public-header
+  [mostrarBadgeVerificado]="true"
+  [mostrarCompartir]="estado() === 'exito'"
+  [mostrarLogin]="true"
+  (compartir)="toggleCompartir()"
+/>
 
 @switch (estado()) {
   @case ('cargando') {
@@ -53,228 +14,284 @@
   }
   @case ('exito') {
     <main class="pub-main">
-      <!-- Company Card -->
-      <section class="pub-card" aria-label="Información de la empresa">
-        <div class="pub-card__top">
-          <!-- Left: Company info -->
-          <div class="pub-card__info">
-            <div class="pub-card__info-row">
-              <div class="pub-card__logo-wrapper">
-                @if (perfil()?.logoUrl) {
-                  <img
-                    class="pub-card__logo"
-                    [src]="perfil()!.logoUrl"
-                    [alt]="'Logo de ' + perfil()!.nombreEmpresa"
+      <div class="pub-main__container">
+        <!-- Company Card -->
+        <app-card
+          variant="outlined"
+          padding="md"
+          class="pub-card"
+          aria-label="Información de la empresa"
+        >
+          <div class="pub-card__top">
+            <!-- Left: Company info -->
+            <div class="pub-card__info">
+              <div class="pub-card__info-row">
+                <div class="pub-card__logo-wrapper">
+                  @if (perfil()?.logoUrl) {
+                    <img
+                      class="pub-card__logo"
+                      [src]="perfil()!.logoUrl"
+                      [alt]="'Logo de ' + perfil()!.nombreEmpresa"
+                    />
+                  } @else {
+                    <div class="pub-card__logo-placeholder" aria-hidden="true">
+                      <app-icon name="empresa" [size]="32" />
+                    </div>
+                  }
+                </div>
+                <div class="pub-card__details">
+                  <h1 class="pub-card__nombre">{{ perfil()?.nombreEmpresa }}</h1>
+                  <p class="pub-card__meta">
+                    <app-icon name="sector" [size]="14" aria-hidden="true" />
+                    <span>{{ sectorFormateado() }}</span>
+                    <span class="pub-card__meta-sep">·</span>
+                    @if (esPaisCostaRica()) {
+                      <img
+                        class="pub-card__flag"
+                        src="/images/flags/costa-rica.svg"
+                        width="18"
+                        height="12"
+                        alt=""
+                        aria-hidden="true"
+                      />
+                    } @else {
+                      <app-icon name="mundo" [size]="14" aria-hidden="true" />
+                    }
+                    <span>{{ paisNombre() }}</span>
+                  </p>
+                </div>
+              </div>
+              <div class="pub-card__info-row">
+                <!-- Stats row -->
+                <div class="pub-card__stats">
+                  <app-card-stat
+                    class="pub-card__stat"
+                    icon="certificaciones"
+                    tono="green"
+                    [value]="formatNumero(perfil()?.certificacionesVigentes)"
+                    label="Certificaciones vigentes"
                   />
-                } @else {
-                  <div class="pub-card__logo-placeholder" aria-hidden="true">
-                    <app-icon name="empresa" [size]="32" />
+                  <app-card-stat
+                    class="pub-card__stat"
+                    icon="insignias"
+                    tono="sky"
+                    [value]="formatNumero(perfil()?.insigniasActivas)"
+                    label="Insignias activas"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Nivel ecológico card -->
+            <div
+              class="pub-nivel"
+              [class.pub-nivel--sin-nivel]="nivelConfig().clase === 'sin-nivel'"
+              [class.pub-nivel--bronce]="nivelConfig().clase === 'bronce'"
+              [class.pub-nivel--plata]="nivelConfig().clase === 'plata'"
+              [class.pub-nivel--oro]="nivelConfig().clase === 'oro'"
+              [class.pub-nivel--platino]="nivelConfig().clase === 'platino'"
+              aria-label="Nivel ecológico"
+            >
+              <span class="pub-nivel__label">NIVEL ECOLÓGICO</span>
+              <span class="pub-nivel__nombre">
+                <app-icon [name]="nivelConfig().icono" [size]="20" aria-hidden="true" />
+                {{ nivelNormalizado() }}
+              </span>
+              <span class="pub-nivel__vigencia">Vigente {{ getAnioVigencia() }}</span>
+
+              <!-- Progress bar -->
+              <div class="pub-nivel__progress" aria-hidden="true">
+                @for (nivel of nivelesOrden; track nivel; let i = $index) {
+                  <div
+                    class="pub-nivel__step"
+                    [class.pub-nivel__step--active]="i <= nivelIndex()"
+                    [class.pub-nivel__step--current]="i === nivelIndex()"
+                  >
+                    <span class="pub-nivel__step-dot"></span>
+                    <span class="pub-nivel__step-label">{{ nivel }}</span>
                   </div>
                 }
               </div>
-              <div class="pub-card__details">
-                <h1 class="pub-card__nombre">{{ perfil()?.nombreEmpresa }}</h1>
-                <p class="pub-card__meta">
-                  <app-icon name="empresa" [size]="14" aria-hidden="true" />
-                  <span>{{ perfil()?.sectorIndustrial }}</span>
-                  <span class="pub-card__meta-sep">·</span>
-                  <app-icon name="perfil-publico" [size]="14" aria-hidden="true" />
-                  <span>{{ perfil()?.pais }}</span>
-                </p>
-                <p class="pub-card__fecha">
-                  Actualizado el {{ formatFechaActualizacion(perfil()?.fechaActualizacionNivel) }}
-                </p>
-              </div>
             </div>
           </div>
+        </app-card>
 
-          <!-- Right: Nivel ecológico card -->
-          <div
-            class="pub-nivel"
-            [class.pub-nivel--sin-nivel]="nivelConfig().clase === 'sin-nivel'"
-            [class.pub-nivel--bronce]="nivelConfig().clase === 'bronce'"
-            [class.pub-nivel--plata]="nivelConfig().clase === 'plata'"
-            [class.pub-nivel--oro]="nivelConfig().clase === 'oro'"
-            [class.pub-nivel--platino]="nivelConfig().clase === 'platino'"
-            aria-label="Nivel ecológico"
-          >
-            <span class="pub-nivel__label">NIVEL ECOLÓGICO</span>
-            <span class="pub-nivel__nombre">
-              <app-icon [name]="nivelConfig().icono" [size]="20" aria-hidden="true" />
-              {{ nivelNormalizado() }}
-            </span>
-            <span class="pub-nivel__vigencia">Vigente {{ getAnioVigencia() }}</span>
-
-            <!-- Progress bar -->
-            <div class="pub-nivel__progress" aria-hidden="true">
-              @for (nivel of nivelesOrden; track nivel; let i = $index) {
-                <div
-                  class="pub-nivel__step"
-                  [class.pub-nivel__step--active]="i <= nivelIndex()"
-                  [class.pub-nivel__step--current]="i === nivelIndex()"
-                >
-                  <span class="pub-nivel__step-dot"></span>
-                  <span class="pub-nivel__step-label">{{ nivel }}</span>
-                </div>
-              }
+        <!-- Historial de certificaciones -->
+        <section class="pub-section" aria-labelledby="cert-title">
+          <div class="pub-section__header">
+            <div class="pub-section__title-row">
+              <app-icon name="auditor" [size]="20" aria-hidden="true" />
+              <h2 class="pub-section__title" id="cert-title">Historial de certificaciones</h2>
+              <span class="pub-section__subtitle-inline"
+                >verificadas por auditores certificados</span
+              >
             </div>
-          </div>
-        </div>
-
-        <!-- Stats row -->
-        <div class="pub-card__stats">
-          <div class="pub-card__stat">
-            <app-icon name="certificaciones" [size]="20" aria-hidden="true" />
-            <span class="pub-card__stat-label">Certificaciones vigentes:</span>
-            <span class="pub-card__stat-value">{{
-              formatNumero(perfil()?.certificacionesVigentes)
-            }}</span>
-          </div>
-          <div class="pub-card__stat">
-            <app-icon name="insignias" [size]="20" aria-hidden="true" />
-            <span class="pub-card__stat-label">Insignias activas:</span>
-            <span class="pub-card__stat-value">{{ formatNumero(perfil()?.insigniasActivas) }}</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Historial de certificaciones -->
-      <section class="pub-section" aria-labelledby="cert-title">
-        <div class="pub-section__header">
-          <div>
-            <h2 class="pub-section__title" id="cert-title">Historial de certificaciones</h2>
-            <p class="pub-section__subtitle">Verificadas por auditores certificados</p>
-          </div>
-        </div>
-
-        @if (certificaciones().length > 0) {
-          <div class="pub-table-wrapper">
-            <table class="pub-table" aria-label="Certificaciones de la empresa">
-              <thead>
-                <tr>
-                  <th>CERTIFICACIÓN</th>
-                  <th>AUDITOR</th>
-                  <th>VIGENCIA</th>
-                  <th>ESTADO</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (cert of certificaciones(); track cert.id) {
-                  <tr>
-                    <td class="pub-table__cert-cell">
-                      <app-icon name="certificaciones" [size]="16" aria-hidden="true" />
-                      <span>{{ cert.nombreCertificacion }}</span>
-                    </td>
-                    <td>{{ cert.nombreAuditor }}</td>
-                    <td>
-                      {{ formatFechaCorta(cert.fechaEmision) }} —
-                      {{ formatFechaCorta(cert.fechaVencimiento) }}
-                    </td>
-                    <td>
-                      <span class="pub-badge" [class]="getEstadoBadgeClass(cert.estado)">
-                        {{ getEstadoLabel(cert.estado) }}
-                      </span>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        } @else {
-          <div class="pub-section__empty">
-            <app-icon name="certificaciones" [size]="32" aria-hidden="true" />
-            <p>No se encontraron certificaciones.</p>
-          </div>
-        }
-      </section>
-
-      <!-- Insignias activas -->
-      <section class="pub-section" aria-labelledby="insignias-title">
-        <div class="pub-section__header">
-          <div>
-            <h2 class="pub-section__title" id="insignias-title">Insignias activas</h2>
-            <p class="pub-section__subtitle">{{ insignias().length }} reconocimientos</p>
-          </div>
-        </div>
-
-        @if (insignias().length > 0) {
-          <div class="pub-insignias-grid">
-            @for (ins of insignias(); track ins.idInsignia) {
-              <div class="pub-insignia-card">
-                <div
-                  class="pub-insignia-card__icon"
-                  [class.pub-insignia-card__icon--bronce]="ins.nivelInsignia === 'bronce'"
-                  [class.pub-insignia-card__icon--plata]="ins.nivelInsignia === 'plata'"
-                  [class.pub-insignia-card__icon--oro]="ins.nivelInsignia === 'oro'"
-                >
-                  <app-icon name="insignias" [size]="20" aria-hidden="true" />
-                </div>
-                <span class="pub-insignia-card__name">{{ ins.nombre }}</span>
-                <span class="pub-insignia-card__date">{{
-                  formatFechaCorta(ins.fechaObtencion)
-                }}</span>
-              </div>
+            @if (certificaciones().length > 0) {
+              <a
+                class="pub-section__link"
+                [routerLink]="['/empresa', slug, 'reputacion', 'certificaciones']"
+              >
+                Ver todas
+                <app-icon name="chevron-derecha" [size]="14" aria-hidden="true" />
+              </a>
             }
           </div>
-        } @else {
-          <div class="pub-section__empty">
-            <app-icon name="insignias" [size]="32" aria-hidden="true" />
-            <p>No se encontraron insignias activas.</p>
-          </div>
-        }
-      </section>
 
-      <!-- Evolución de la huella de carbono -->
-      <section class="pub-section" aria-labelledby="evolucion-title">
-        <div class="pub-section__header">
-          <div>
-            <h2 class="pub-section__title" id="evolucion-title">
-              Evolución de la huella de carbono
-            </h2>
-          </div>
-        </div>
+          @if (certificaciones().length > 0) {
+            <app-card variant="outlined" padding="none" class="pub-table-card">
+              <div class="pub-table-wrapper">
+                <table class="pub-table" aria-label="Certificaciones de la empresa">
+                  <thead>
+                    <tr>
+                      <th>Certificación</th>
+                      <th>Auditor</th>
+                      <th>Vigencia</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (cert of certificaciones(); track cert.id) {
+                      <tr>
+                        <td class="pub-table__cert-cell">
+                          <span
+                            class="pub-table__cert-ic"
+                            [class.pub-table__cert-ic--inactiva]="
+                              !esCertificacionActiva(cert.estado)
+                            "
+                            aria-hidden="true"
+                          >
+                            <app-icon name="certificaciones" [size]="17" />
+                          </span>
+                          <span>{{ cert.nombreCertificacion }}</span>
+                        </td>
+                        <td class="pub-table__mono">{{ cert.nombreAuditor }}</td>
+                        <td class="pub-table__mono">
+                          {{ formatFechaCorta(cert.fechaEmision) }} —
+                          {{ formatFechaCorta(cert.fechaVencimiento) }}
+                        </td>
+                        <td>
+                          <app-badge
+                            class="pub-table__badge"
+                            [variant]="getEstadoBadgeVariant(cert.estado)"
+                          >
+                            {{ getEstadoLabel(cert.estado) }}
+                          </app-badge>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </app-card>
+          } @else {
+            <div class="pub-section__empty">
+              <app-icon name="certificaciones" [size]="32" aria-hidden="true" />
+              <p>No se encontraron certificaciones.</p>
+            </div>
+          }
+        </section>
 
-        @if (evolucion() && evolucion()!.serie.length > 0) {
-          <div class="pub-chart-placeholder">
-            <div class="pub-chart-placeholder__header">
-              <div class="pub-chart-placeholder__stats">
-                <span class="pub-chart-placeholder__total"
-                  >{{ evolucion()!.totalActualTco2e | number: '1.2-2' }} tCO₂e</span
-                >
-                @if (evolucion()!.variacionPorcentual !== null) {
-                  <span
-                    class="pub-chart-placeholder__change"
-                    [class.pub-chart-placeholder__change--down]="
-                      evolucion()!.variacionPorcentual! < 0
-                    "
-                    [class.pub-chart-placeholder__change--up]="
-                      evolucion()!.variacionPorcentual! > 0
-                    "
-                    >{{ evolucion()!.variacionPorcentual! < 0 ? '↓' : '↑' }}
-                    {{ evolucion()!.variacionPorcentual! > 0 ? '+' : ''
-                    }}{{ evolucion()!.variacionPorcentual }}% vs año anterior</span
+        <!-- Insignias activas -->
+        <section class="pub-section" aria-labelledby="insignias-title">
+          <div class="pub-section__header">
+            <div class="pub-section__title-row">
+              <app-icon name="insignias" [size]="20" aria-hidden="true" />
+              <h2 class="pub-section__title" id="insignias-title">Insignias activas</h2>
+              <span class="pub-section__subtitle-inline"
+                >{{ insignias().length }} reconocimientos</span
+              >
+            </div>
+            @if (insignias().length > 0) {
+              <a
+                class="pub-section__link"
+                [routerLink]="['/empresa', slug, 'reputacion', 'insignias']"
+              >
+                Ver todas
+                <app-icon name="chevron-derecha" [size]="14" aria-hidden="true" />
+              </a>
+            }
+          </div>
+
+          @if (insignias().length > 0) {
+            <div class="pub-insignias-grid">
+              @for (ins of insignias(); track ins.idInsignia) {
+                <app-card variant="outlined" padding="sm" class="pub-insignia-card">
+                  <div
+                    class="pub-insignia-card__icon"
+                    [class.pub-insignia-card__icon--bronce]="ins.nivelInsignia === 'bronce'"
+                    [class.pub-insignia-card__icon--plata]="ins.nivelInsignia === 'plata'"
+                    [class.pub-insignia-card__icon--oro]="ins.nivelInsignia === 'oro'"
                   >
-                }
+                    <app-icon name="insignias" [size]="20" aria-hidden="true" />
+                  </div>
+                  <span class="pub-insignia-card__name">{{ ins.nombre }}</span>
+                  <span class="pub-insignia-card__date">{{
+                    formatFechaCorta(ins.fechaObtencion)
+                  }}</span>
+                </app-card>
+              }
+            </div>
+          } @else {
+            <div class="pub-section__empty">
+              <app-icon name="insignias" [size]="32" aria-hidden="true" />
+              <p>No se encontraron insignias activas.</p>
+            </div>
+          }
+        </section>
+
+        <!-- Evolución de la huella de carbono -->
+        <section class="pub-section" aria-labelledby="evolucion-title">
+          <div class="pub-section__header">
+            <div class="pub-section__title-row">
+              <app-icon name="evolucion" [size]="20" aria-hidden="true" />
+              <h2 class="pub-section__title" id="evolucion-title">
+                Evolución de la huella de carbono
+              </h2>
+            </div>
+          </div>
+
+          @if (evolucion() && evolucion()!.serie.length > 0) {
+            <app-card variant="outlined" padding="md" class="pub-chart-card">
+              <div class="pub-chart-placeholder__header">
+                <div class="pub-chart-placeholder__stats">
+                  <span class="pub-chart-placeholder__total"
+                    >{{ evolucion()!.totalActualTco2e | number: '1.2-2' }} tCO₂e</span
+                  >
+                  @if (evolucion()!.variacionPorcentual !== null) {
+                    <span
+                      class="pub-chart-placeholder__change"
+                      [class.pub-chart-placeholder__change--down]="
+                        evolucion()!.variacionPorcentual! < 0
+                      "
+                      [class.pub-chart-placeholder__change--up]="
+                        evolucion()!.variacionPorcentual! > 0
+                      "
+                      >{{ evolucion()!.variacionPorcentual! < 0 ? '↓' : '↑' }}
+                      {{ evolucion()!.variacionPorcentual! > 0 ? '+' : ''
+                      }}{{ evolucion()!.variacionPorcentual }}% vs año anterior</span
+                    >
+                  }
+                </div>
+              </div>
+              <div class="pub-chart-canvas-wrapper">
+                <canvas
+                  baseChart
+                  type="line"
+                  [data]="chartData()"
+                  [options]="chartOptions()"
+                ></canvas>
+              </div>
+            </app-card>
+          } @else {
+            <div class="pub-chart-placeholder">
+              <div class="pub-chart-placeholder__body">
+                <app-icon name="emisiones" [size]="48" aria-hidden="true" />
+                <p>No hay datos de emisiones registrados.</p>
               </div>
             </div>
-            <div class="pub-chart-canvas-wrapper">
-              <canvas
-                baseChart
-                type="line"
-                [data]="chartData()"
-                [options]="chartOptions()"
-              ></canvas>
-            </div>
-          </div>
-        } @else {
-          <div class="pub-chart-placeholder">
-            <div class="pub-chart-placeholder__body">
-              <app-icon name="emisiones" [size]="48" aria-hidden="true" />
-              <p>No hay datos de emisiones registrados.</p>
-            </div>
-          </div>
-        }
-      </section>
+          }
+        </section>
+      </div>
 
       <!-- Compartir perfil (modal) -->
       @if (mostrarCompartir()) {
@@ -313,7 +330,7 @@
     <footer class="pub-footer">
       <p class="pub-footer__text">
         <span class="pub-footer__dot" aria-hidden="true"></span>
-        Perfil verificado por CarbonHub · carbonhub.cr/empresa/{{ slug }}
+        Perfil verificado por CarbonHub · carbonhub.cr/empresa/{{ slug }}/reputacion
       </p>
     </footer>
   }

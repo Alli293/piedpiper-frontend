@@ -5,10 +5,19 @@ import { BadgeComponent } from '../badge/badge.component';
 import { ButtonComponent } from '../button/button.component';
 import { HeadingComponent } from '../heading/heading.component';
 import { IconComponent } from '../icon/icon.component';
+import { IconName } from '../icon/icon-registry';
+import { SemanticCardComponent } from '../semantic-card/semantic-card.component';
 
 @Component({
   selector: 'app-insignias-empresa-list',
-  imports: [BadgeComponent, ButtonComponent, DatePipe, HeadingComponent, IconComponent],
+  imports: [
+    BadgeComponent,
+    ButtonComponent,
+    DatePipe,
+    HeadingComponent,
+    IconComponent,
+    SemanticCardComponent,
+  ],
   templateUrl: './insignias-empresa-list.component.html',
   styleUrl: './insignias-empresa-list.component.scss',
 })
@@ -22,10 +31,14 @@ export class InsigniasEmpresaListComponent {
   accionesPrivadas = input(false);
   /** Llave (`idInsignia-nivelInsignia`) de la insignia a preseleccionar, p. ej. al llegar desde un enlace de detalle. */
   seleccionInicial = input<string | null>(null);
+  /**
+   * Algunas paginas (p. ej. el perfil publico) ya pintan su propia tarjeta de
+   * resumen (eyebrow/titulo/conteo) con `app-perfil-publico-seccion-header`. En
+   * esos casos se oculta el resumen propio de esta lista para no duplicarlo.
+   */
+  mostrarResumen = input(true);
 
   descargarJsonLd = output<InsigniaEmpresa>();
-  descargarJwt = output<InsigniaEmpresa>();
-  compartirLinkedIn = output<InsigniaEmpresa>();
   verificarOpenBadges = output<InsigniaEmpresa>();
 
   protected readonly seleccion = signal<string | null>(null);
@@ -75,6 +88,15 @@ export class InsigniasEmpresaListComponent {
       oro: 'Oro',
     };
     return labels[nivel];
+  }
+
+  protected nivelIcono(nivel: NivelInsigniaEmpresa): IconName {
+    const iconos: Record<NivelInsigniaEmpresa, IconName> = {
+      bronce: 'medal-bronze',
+      plata: 'medal-silver',
+      oro: 'medal-gold',
+    };
+    return iconos[nivel];
   }
 
   protected readonly cantidadActivas = computed(() => this.insigniasOrdenadas().length);
