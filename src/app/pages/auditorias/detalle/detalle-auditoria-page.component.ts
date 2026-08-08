@@ -1,4 +1,4 @@
-import { HttpErrorResponse } from '@angular/common/http';
+﻿import { HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, input, signal } from '@angular/core';
 import {
@@ -17,7 +17,7 @@ import { EMPTY, Subject, Subscription, firstValueFrom, timer } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { AUDITOR_CERTIFICADO, AuthSessionService } from '../../../core/auth-session.service';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
-import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/badge.component';
+import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { DateInputComponent } from '../../../shared/components/inputs/date-input/date-input.component';
@@ -43,6 +43,7 @@ import {
   ResponderDecisionRequest,
   ResultadoAuditoriaRequest,
 } from '../auditoria.model';
+import { variantePorEstadoAuditoria } from '../auditoria-estado.utils';
 import { AuditoriasService } from '../auditorias.service';
 
 type SituacionPaso = 'completado' | 'en-curso' | 'pendiente';
@@ -340,18 +341,9 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
 
   protected readonly nombreAuditor = computed(() => this.detalle()?.auditor?.nombre ?? null);
 
-  protected readonly variantePorEstado = computed<BadgeVariant>(() => {
-    switch (this.detalle()?.estado) {
-      case 'CERTIFICACION_EMITIDA':
-        return 'success';
-      case 'OBSERVACIONES_PENDIENTES':
-        return 'warning';
-      case 'SOLICITUD_ENVIADA':
-        return 'neutral';
-      default:
-        return 'info';
-    }
-  });
+  protected readonly variantePorEstado = computed(() =>
+    variantePorEstadoAuditoria(this.detalle()?.estado)
+  );
 
   /**
    * La línea de tiempo dibuja el recorrido completo, no solo lo ocurrido: los pasos que todavía no
@@ -672,11 +664,12 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
 
   private asignarErrorReporte(err: unknown): void {
     const mensaje = apiErrorMessage(err) ?? ERROR_REPORTE;
-    if (mensaje.includes('fecha de la auditoría')) {
+    const normalizado = normalizarMensaje(mensaje);
+    if (normalizado.includes('fecha de la auditoria')) {
       this.errorFechaReporteServidor.set(mensaje);
       return;
     }
-    if (mensaje.includes('archivo') || mensaje.includes('PDF')) {
+    if (normalizado.includes('archivo') || normalizado.includes('pdf')) {
       this.errorReporteServidor.set(mensaje);
       return;
     }
@@ -718,4 +711,11 @@ function fechaNegocioDeIsoComoUtcMidnight(fecha: string | null | undefined): Dat
     return null;
   }
   return new Date(Date.UTC(anio, mes - 1, dia));
+}
+
+function normalizarMensaje(mensaje: string): string {
+  return mensaje
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
 }
