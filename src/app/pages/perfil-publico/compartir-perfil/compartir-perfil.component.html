@@ -1,0 +1,113 @@
+@if (estado() === 'cargando') {
+  <div
+    class="ch-compartir-loading"
+    aria-live="polite"
+    aria-label="Cargando opciones de compartición"
+  >
+    <div class="ch-compartir-loading__skeleton ch-compartir-loading__skeleton--url"></div>
+    <div class="ch-compartir-loading__skeleton ch-compartir-loading__skeleton--qr"></div>
+    <div class="ch-compartir-loading__skeleton ch-compartir-loading__skeleton--code"></div>
+  </div>
+} @else if (estado() === 'exito') {
+  <section class="ch-compartir" aria-label="Herramientas de compartición del perfil">
+    <!-- URL Canónica + Copiar enlace -->
+    <div class="ch-compartir__block">
+      <h3 class="ch-compartir__heading">Enlace del perfil</h3>
+      <div class="ch-compartir__url-row">
+        <code class="ch-compartir__url">{{ enlace()!.urlCanonica }}</code>
+        <button
+          class="ch-compartir__btn ch-compartir__btn--primary"
+          type="button"
+          (click)="copiarEnlace()"
+          [attr.aria-label]="copiado() === 'enlace' ? 'Enlace copiado' : 'Copiar enlace'"
+        >
+          @if (copiado() === 'enlace') {
+            <span class="ch-compartir__btn-feedback">✓ Enlace copiado</span>
+          } @else {
+            Copiar enlace
+          }
+        </button>
+      </div>
+      @if (errorClipboard()) {
+        <p class="ch-compartir__clipboard-error" role="alert">
+          No fue posible copiar el enlace. Selecciona la URL manualmente.
+        </p>
+      }
+    </div>
+
+    <!-- Código QR -->
+    <div class="ch-compartir__block">
+      <h3 class="ch-compartir__heading">Código QR</h3>
+      @if (enlace()!.qrBase64) {
+        <div class="ch-compartir__qr-wrapper">
+          <img
+            class="ch-compartir__qr-img"
+            [src]="enlace()!.qrBase64"
+            alt="Código QR del perfil público"
+          />
+          <button
+            class="ch-compartir__btn ch-compartir__btn--secondary"
+            type="button"
+            (click)="descargarQr()"
+          >
+            Descargar QR
+          </button>
+        </div>
+      } @else {
+        <p class="ch-compartir__qr-error">No fue posible generar el código QR.</p>
+      }
+    </div>
+
+    <!-- Fragmento incrustable (sello) -->
+    <div class="ch-compartir__block">
+      <h3 class="ch-compartir__heading">Sello incrustable</h3>
+      <div class="ch-compartir__sello-preview" [innerHTML]="enlace()!.codigoIncrustar"></div>
+      <div class="ch-compartir__code-row">
+        <pre class="ch-compartir__code-block"><code>{{ enlace()!.codigoIncrustar }}</code></pre>
+        <button
+          class="ch-compartir__btn ch-compartir__btn--secondary"
+          type="button"
+          (click)="copiarCodigo()"
+          [attr.aria-label]="copiado() === 'codigo' ? 'Código copiado' : 'Copiar código'"
+        >
+          @if (copiado() === 'codigo') {
+            <span class="ch-compartir__btn-feedback">✓ Código copiado</span>
+          } @else {
+            Copiar código
+          }
+        </button>
+      </div>
+    </div>
+
+    <!-- Previsualización Open Graph -->
+    <div class="ch-compartir__block">
+      <h3 class="ch-compartir__heading">Previsualización en redes sociales</h3>
+      <div class="ch-compartir__og-card">
+        @if (!ogImagenError()) {
+          <img
+            class="ch-compartir__og-img"
+            [src]="enlace()!.ogImagen"
+            [alt]="'Imagen de ' + enlace()!.ogTitulo"
+            (error)="ogImagenError.set(true)"
+          />
+        } @else {
+          <div class="ch-compartir__og-img-placeholder">
+            <span>OG</span>
+          </div>
+        }
+        <div class="ch-compartir__og-body">
+          <p class="ch-compartir__og-title">{{ enlace()!.ogTitulo }}</p>
+          <p class="ch-compartir__og-desc">{{ enlace()!.ogDescripcion }}</p>
+          <p class="ch-compartir__og-url">{{ enlace()!.ogUrl }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+} @else if (estado() === 'error') {
+  <div class="ch-compartir-error" role="alert">
+    <p class="ch-compartir-error__msg">No fue posible cargar las opciones de compartición</p>
+    <button class="ch-compartir-error__retry" type="button" (click)="reintentar()">
+      Reintentar
+    </button>
+  </div>
+}

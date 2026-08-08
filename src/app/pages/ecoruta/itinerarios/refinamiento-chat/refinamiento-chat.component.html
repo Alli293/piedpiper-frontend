@@ -16,6 +16,48 @@
       </span>
       <p>{{ mensajeInicial() }}</p>
     </div>
+
+    <!-- Activities list with "Comparar alternativas" buttons -->
+    <div class="ch-refinamiento-chat__actividades">
+      @for (item of actividades(); track item.actividadIndex + '-' + item.diaNumero) {
+        <div class="ch-refinamiento-chat__actividad-item">
+          <span class="ch-refinamiento-chat__actividad-nombre">
+            Día {{ item.diaNumero }} — {{ item.actividad.nombre }}
+          </span>
+          @if (item.actividad.id) {
+            <button
+              type="button"
+              class="ch-refinamiento-chat__btn-comparar"
+              [disabled]="cargandoAlternativas() || cargandoSustitucion()"
+              (click)="compararAlternativas(item.actividad.id!)"
+            >
+              Comparar alternativas
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Alternativas comparison cards (shown as special chat message) -->
+    @if (cargandoAlternativas()) {
+      <div class="ch-refinamiento-chat__mensaje ch-refinamiento-chat__mensaje--asistente">
+        <span class="ch-refinamiento-chat__mensaje-icono" aria-hidden="true">
+          <app-icon name="enviar" [size]="14" />
+        </span>
+        <p>Buscando alternativas más sostenibles…</p>
+      </div>
+    }
+
+    @if (comparacionResponse(); as response) {
+      <div class="ch-refinamiento-chat__alternativas-mensaje">
+        <app-alternativas-comparacion
+          [alternativas]="response.alternativas"
+          [actividadOriginal]="actividadOriginalInfo()"
+          [cargando]="cargandoSustitucion()"
+          (reemplazar)="onReemplazar($event)"
+        />
+      </div>
+    }
   </div>
 
   <form class="ch-refinamiento-chat__form" novalidate>

@@ -1,0 +1,54 @@
+@if (cargando()) {
+  <div class="ch-alternativas__cargando">
+    <span class="ch-alternativas__spinner"></span>
+    <p>Actualizando itinerario y recalculando EcoScore...</p>
+  </div>
+} @else {
+  <div class="ch-alternativas">
+    <p class="ch-alternativas__titulo">
+      COMPARATIVA · VS. OPCIÓN ORIGINAL (ECOSCORE {{ actividadOriginal().ecoScore }})
+    </p>
+
+    @for (alt of alternativas(); track alt.nombre) {
+      <div
+        class="ch-alternativas__tarjeta"
+        [class.ch-alternativas__tarjeta--mejor]="alt.mejorDesempeno"
+      >
+        <div class="ch-alternativas__tarjeta-header">
+          <div class="ch-alternativas__tarjeta-nombre">
+            <strong>{{ alt.nombre }}</strong>
+            @if (alt.mejorDesempeno) {
+              <span class="ch-alternativas__badge">RECOMENDADA</span>
+            }
+          </div>
+          <div class="ch-alternativas__tarjeta-score">
+            <span class="ch-alternativas__score-valor">{{ alt.ecoScore }}</span>
+            <span class="ch-alternativas__score-max">/100</span>
+          </div>
+        </div>
+        <div class="ch-alternativas__tarjeta-detalle">
+          @if (alt.costoAproximado !== null) {
+            <span>₡{{ alt.costoAproximado | number: '1.0-0' }}</span>
+            <span class="ch-alternativas__separador">·</span>
+          }
+          <span
+            class="ch-alternativas__diferencia"
+            [class.ch-alternativas__diferencia--positiva]="alt.diferenciaAmbiental > 0"
+            [class.ch-alternativas__diferencia--negativa]="alt.diferenciaAmbiental < 0"
+          >
+            {{ alt.diferenciaAmbiental > 0 ? '+' : '' }}{{ alt.diferenciaAmbiental }} EcoScore
+          </span>
+        </div>
+        <button class="ch-alternativas__boton-tarjeta" (click)="onReemplazar(alt)">
+          Reemplazar
+        </button>
+      </div>
+    }
+
+    @if (getMejorAlternativa(); as mejor) {
+      <button class="ch-alternativas__boton-reemplazar" (click)="onReemplazar(mejor)">
+        Cambialo por el {{ mejor.nombre }}
+      </button>
+    }
+  </div>
+}

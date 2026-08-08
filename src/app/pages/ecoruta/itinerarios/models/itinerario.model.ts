@@ -1,6 +1,7 @@
 import { CertificacionActiva, PuntuacionAmbientalResponse } from './puntuacion-ambiental.model';
 
 export interface ItinerarioActividad {
+  id?: string;
   nombre: string;
   descripcion: string | null;
   horario: string;

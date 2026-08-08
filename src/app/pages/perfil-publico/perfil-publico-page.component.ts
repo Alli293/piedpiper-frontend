@@ -17,6 +17,7 @@ import {
 } from 'chart.js';
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
 import { LogoComponent } from '../../shared/components/logo/logo.component';
+import { CompartirPerfilComponent } from './compartir-perfil/compartir-perfil.component';
 import {
   CertificacionPublica,
   EvolucionHuellaPublica,
@@ -32,14 +33,14 @@ interface NivelConfig {
 }
 
 const NIVEL_MAP: Record<string, NivelConfig> = {
-  'Sin nivel': { clase: 'sin-nivel', icono: 'leaf-off', color: '#6b7280' },
-  Bronce: { clase: 'bronce', icono: 'medal-bronze', color: '#cd7f32' },
-  Plata: { clase: 'plata', icono: 'medal-silver', color: '#9ca3af' },
-  Oro: { clase: 'oro', icono: 'medal-gold', color: '#d4a017' },
-  Platino: { clase: 'platino', icono: 'medal-platinum', color: '#2ba6de' },
+  'sin nivel': { clase: 'sin-nivel', icono: 'leaf-off', color: '#6b7280' },
+  bronce: { clase: 'bronce', icono: 'medal-bronze', color: '#cd7f32' },
+  plata: { clase: 'plata', icono: 'medal-silver', color: '#9ca3af' },
+  oro: { clase: 'oro', icono: 'medal-gold', color: '#d4a017' },
+  platino: { clase: 'platino', icono: 'medal-platinum', color: '#2ba6de' },
 };
 
-const NIVELES_ORDEN = ['Bronce', 'Plata', 'Oro', 'Platino'];
+const NIVELES_ORDEN = ['bronce', 'plata', 'oro', 'platino'];
 
 Chart.register(
   LineController,
@@ -56,7 +57,13 @@ Chart.register(
   standalone: true,
   templateUrl: './perfil-publico-page.component.html',
   styleUrl: './perfil-publico-page.component.scss',
-  imports: [IconComponent, LogoComponent, DecimalPipe, BaseChartDirective],
+  imports: [
+    IconComponent,
+    LogoComponent,
+    CompartirPerfilComponent,
+    DecimalPipe,
+    BaseChartDirective,
+  ],
 })
 export class PerfilPublicoPageComponent {
   private readonly route = inject(ActivatedRoute);
@@ -71,6 +78,7 @@ export class PerfilPublicoPageComponent {
   protected insignias = signal<InsigniaEmpresa[]>([]);
   protected evolucion = signal<EvolucionHuellaPublica | null>(null);
   protected mensajeError = signal<string>('');
+  protected mostrarCompartir = signal<boolean>(false);
 
   protected readonly maxTco2e = computed(() => {
     const ev = this.evolucion();
@@ -188,13 +196,21 @@ export class PerfilPublicoPageComponent {
     this.cargar();
   }
 
+  protected toggleCompartir(): void {
+    this.mostrarCompartir.update((v) => !v);
+  }
+
+  protected cerrarCompartir(): void {
+    this.mostrarCompartir.set(false);
+  }
+
   protected readonly nivelConfig = computed(() => {
-    const nivel = this.normalizarNivel(this.perfil()?.nivelEcologico);
-    return NIVEL_MAP[nivel] ?? NIVEL_MAP['Sin nivel'];
+    const nivel = this.normalizarNivel(this.perfil()?.nivelEcologico).toLowerCase();
+    return NIVEL_MAP[nivel] ?? NIVEL_MAP['sin nivel'];
   });
 
   protected readonly nivelIndex = computed(() => {
-    const nivel = this.normalizarNivel(this.perfil()?.nivelEcologico);
+    const nivel = this.normalizarNivel(this.perfil()?.nivelEcologico).toLowerCase();
     const idx = NIVELES_ORDEN.indexOf(nivel);
     return idx >= 0 ? idx : -1;
   });

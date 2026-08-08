@@ -73,6 +73,32 @@
       border-radius: var(--ch-radius-sm);
     }
   }
+
+  &__btn-compartir {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ch-space-1);
+    font-family: var(--ch-font-body);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ch-green-dark);
+    background: var(--ch-bg-white);
+    border: 1px solid var(--ch-green);
+    border-radius: var(--ch-radius-md);
+    padding: var(--ch-space-1) var(--ch-space-3);
+    cursor: pointer;
+    transition:
+      background-color var(--ch-transition),
+      color var(--ch-transition);
+
+    &:hover {
+      background: var(--ch-green-soft);
+    }
+
+    &:focus-visible {
+      @include mixins.focus-ring;
+    }
+  }
 }
 
 // === Loading ===
@@ -767,5 +793,71 @@
     &:focus-visible {
       @include mixins.focus-ring;
     }
+  }
+}
+
+// === Modal overlay (compartir) ===
+.pub-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  padding: var(--ch-space-4);
+}
+
+.pub-modal {
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--ch-bg-white);
+  border-radius: var(--ch-radius-lg);
+  box-shadow: var(--ch-shadow-lg);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--ch-space-4) var(--ch-space-5);
+    border-bottom: 1px solid var(--ch-border);
+  }
+
+  &__title {
+    font-family: var(--ch-font-heading);
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--ch-text-primary);
+    margin: 0;
+  }
+
+  &__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    border-radius: var(--ch-radius-sm);
+    font-size: 1.125rem;
+    color: var(--ch-text-secondary);
+    cursor: pointer;
+    transition: background-color var(--ch-transition);
+
+    &:hover {
+      background: var(--ch-bg-main);
+    }
+
+    &:focus-visible {
+      @include mixins.focus-ring;
+    }
+  }
+
+  &__body {
+    padding: var(--ch-space-4) var(--ch-space-5);
   }
 }
