@@ -219,8 +219,8 @@ export class PerfilPublicoPageComponent {
    */
   protected normalizarNivel(nivel: string | null | undefined): string {
     if (!nivel || nivel.trim() === '') return 'Sin nivel';
-    const lower = nivel.toLowerCase();
-    return lower.charAt(0).toUpperCase() + lower.slice(1);
+    const limpio = nivel.trim().toLowerCase();
+    return limpio.charAt(0).toUpperCase() + limpio.slice(1);
   }
 
   protected formatFechaCorta(fecha: string | null | undefined): string {

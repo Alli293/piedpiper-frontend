@@ -186,6 +186,35 @@ describe('PerfilPublicoService', () => {
     });
   });
 
+  describe('obtenerEvolucionHuella', () => {
+    it('hace GET a /api/perfil-publico/{slug}/evolucion-huella y retorna EvolucionHuellaPublica', () => {
+      const mockEvolucion = {
+        totalActualTco2e: 1.86,
+        variacionPorcentual: -21.0,
+        serie: [
+          { anio: 2023, totalTco2e: 1.86 },
+          { anio: 2024, totalTco2e: 1.47 },
+        ],
+      };
+
+      let resultado: unknown;
+      service.obtenerEvolucionHuella('cafe-del-valle').subscribe((valor) => (resultado = valor));
+
+      const req = httpMock.expectOne(`${baseUrl}/cafe-del-valle/evolucion-huella`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockEvolucion);
+
+      expect(resultado).toEqual(mockEvolucion);
+    });
+
+    it('escapa el slug en la URL', () => {
+      service.obtenerEvolucionHuella('empresa con espacio').subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/empresa%20con%20espacio/evolucion-huella`);
+      req.flush({ totalActualTco2e: 0, variacionPorcentual: null, serie: [] });
+    });
+  });
+
   describe('Property tests (fast-check)', () => {
     /**
      * Property 11: Slug vacío no genera petición HTTP

@@ -291,5 +291,42 @@ describe('PerfilPublicoPageComponent', () => {
         expect(nivelText?.textContent).toContain(expected);
       }
     );
+
+    it('muestra mensaje vacío cuando evolución no tiene datos', () => {
+      fixture.detectChanges();
+      flushPerfil(PERFIL_MOCK);
+
+      const el = fixture.nativeElement as HTMLElement;
+      // flushPerfil envía serie vacía, así que debe mostrar el estado vacío
+      const emptyMsg = el.querySelector('.pub-chart-placeholder__body p');
+      expect(emptyMsg?.textContent).toContain('No hay datos de emisiones registrados');
+    });
+
+    it('muestra gráfica cuando evolución tiene datos', () => {
+      fixture.detectChanges();
+      const req = httpMock.expectOne(`${baseUrl}/eco-tech`);
+      req.flush(PERFIL_MOCK);
+      fixture.detectChanges();
+      httpMock.match(`${baseUrl}/eco-tech/certificaciones`).forEach((r) => r.flush([]));
+      httpMock.match(`${baseUrl}/eco-tech/insignias`).forEach((r) => r.flush([]));
+      httpMock.match(`${baseUrl}/eco-tech/evolucion-huella`).forEach((r) =>
+        r.flush({
+          totalActualTco2e: 1.86,
+          variacionPorcentual: -21.0,
+          serie: [
+            { anio: 2023, totalTco2e: 1.86 },
+            { anio: 2024, totalTco2e: 1.47 },
+          ],
+        })
+      );
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      // Debe mostrar el total y la variación
+      expect(el.querySelector('.pub-chart-placeholder__total')?.textContent).toContain('1.86');
+      expect(el.querySelector('.pub-chart-placeholder__change')?.textContent).toContain('-21');
+      // Debe haber un canvas para chart.js
+      expect(el.querySelector('canvas')).not.toBeNull();
+    });
   });
 });
