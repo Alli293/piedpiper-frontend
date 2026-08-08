@@ -4,7 +4,7 @@
       <app-icon name="certificaciones" [size]="18" />
     </span>
     <app-heading level="h3" text="Estado de certificaciones" />
-    <a appLink routerLink="/empresa/certificaciones" class="ch-estado-cert__ver-todas">
+    <a appLink routerLink="/empresa/certificaciones/listado" class="ch-estado-cert__ver-todas">
       Ver todas →
     </a>
   </header>
@@ -21,7 +21,7 @@
           [class.ch-estado-cert__card--success]="tarjeta.tono === 'success'"
           [class.ch-estado-cert__card--warning]="tarjeta.tono === 'warning'"
           [class.ch-estado-cert__card--danger]="tarjeta.tono === 'danger'"
-          routerLink="/empresa/certificaciones"
+          routerLink="/empresa/certificaciones/listado"
           [queryParams]="{ estado: tarjeta.estado }"
           [attr.aria-label]="tarjeta.label + ': ' + tarjeta.value + ' certificaciones'"
         >

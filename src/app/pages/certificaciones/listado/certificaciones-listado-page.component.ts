@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { CertificacionResumen } from '../../../core/models/certificacion.model';
 import { CertificacionesService } from '../../../core/services/certificaciones.service';
@@ -43,6 +43,7 @@ const ERROR_MENSAJE = 'No fue posible cargar las certificaciones en este momento
 export class CertificacionesListadoPageComponent implements OnInit {
   private readonly certificacionesService = inject(CertificacionesService);
   private readonly toastService = inject(ToastService);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly certificaciones = signal<CertificacionResumen[]>([]);
   protected readonly cargando = signal(true);
@@ -85,6 +86,9 @@ export class CertificacionesListadoPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    const estado = this.route.snapshot.queryParamMap.get('estado');
+    const filtroInicial = mapEstadoAFiltro(estado);
+    if (filtroInicial) this.filtro.set(filtroInicial);
     void this.cargarCertificaciones();
   }
 
@@ -125,4 +129,20 @@ export class CertificacionesListadoPageComponent implements OnInit {
 
 function esFiltroValido(valor: string): valor is FiltroVigencia {
   return valor === 'TODAS' || valor === 'VIGENTE' || valor === 'VENCIDA';
+}
+
+// Mapea el `estado` que envía el panel "Estado de certificaciones" del
+// dashboard (activa | proxima_a_vencer | vencida) al filtro de vigencia que
+// soporta este listado. Este listado aun no distingue "próximas a vencer"
+// como chip propio, así que se agrupa junto con "activa" bajo VIGENTE.
+function mapEstadoAFiltro(estado: string | null): FiltroVigencia | null {
+  switch (estado) {
+    case 'activa':
+    case 'proxima_a_vencer':
+      return 'VIGENTE';
+    case 'vencida':
+      return 'VENCIDA';
+    default:
+      return null;
+  }
 }

@@ -69,9 +69,9 @@ describe('EstadoCertificacionesPanelComponent', () => {
     const el = fixture.nativeElement as HTMLElement;
     const links = Array.from(el.querySelectorAll('.ch-estado-cert__card')) as HTMLAnchorElement[];
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
-      '/empresa/certificaciones?estado=activa',
-      '/empresa/certificaciones?estado=proxima_a_vencer',
-      '/empresa/certificaciones?estado=vencida',
+      '/empresa/certificaciones/listado?estado=activa',
+      '/empresa/certificaciones/listado?estado=proxima_a_vencer',
+      '/empresa/certificaciones/listado?estado=vencida',
     ]);
   });
 
