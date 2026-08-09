@@ -8,6 +8,11 @@ export const guardEmpresa: CanActivateFn = rolGuard('ADMINISTRADOR_EMPRESA', 'US
 export const guardEmpresaAdmin: CanActivateFn = rolGuard('ADMINISTRADOR_EMPRESA');
 export const guardAuditor: CanActivateFn = rolGuard('AUDITOR_CERTIFICADO');
 export const guardAdmin: CanActivateFn = rolGuard('ADMINISTRADOR_PLATAFORMA');
+export const guardDirectorioAuditores: CanActivateFn = rolGuard(
+  'ADMINISTRADOR_EMPRESA',
+  'USUARIO_GENERAL',
+  'AUDITOR_CERTIFICADO'
+);
 
 /**
  * El detalle de una auditoría lo consultan los tres roles que participan del proceso: la empresa
@@ -105,7 +110,7 @@ export const routes: Routes = [
   },
   {
     path: 'auditores',
-    canActivate: [authGuard],
+    canActivate: [guardDirectorioAuditores],
     loadComponent: () =>
       import('./pages/auditores/directorio-auditores-page.component').then(
         (m) => m.DirectorioAuditoresPageComponent
@@ -113,7 +118,7 @@ export const routes: Routes = [
   },
   {
     path: 'auditores/:id',
-    canActivate: [authGuard],
+    canActivate: [guardDirectorioAuditores],
     loadComponent: cargarPlaceholder,
   },
   {
@@ -274,13 +279,6 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'empresa/:slug/reputacion',
-    loadComponent: () =>
-      import('./pages/perfil-publico/perfil-publico-page.component').then(
-        (m) => m.PerfilPublicoPageComponent
-      ),
-  },
-  {
     path: 'empresa/:slug/reputacion/certificaciones',
     loadComponent: () =>
       import('./pages/perfil-publico/certificaciones/certificaciones-publicas-page.component').then(
@@ -393,6 +391,7 @@ export const routes: Routes = [
   },
   {
     path: 'ui-kit',
+    canActivate: [guardAdmin],
     loadComponent: () =>
       import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),
   },

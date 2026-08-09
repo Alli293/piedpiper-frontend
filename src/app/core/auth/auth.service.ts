@@ -107,8 +107,8 @@ export class AuthService {
   }
 
   validarTokenReset(token: string): Observable<ValidarTokenResetResponse> {
-    return this.http.get<ValidarTokenResetResponse>(`${this.baseUrl}/reset-contrasena`, {
-      params: { token },
+    return this.http.post<ValidarTokenResetResponse>(`${this.baseUrl}/reset-contrasena/validar`, {
+      token,
     });
   }
 
@@ -125,9 +125,7 @@ export class AuthService {
   }
 
   verificarCorreo(token: string): Observable<MensajeResponse> {
-    return this.http.get<MensajeResponse>(`${this.baseUrl}/verificar-correo`, {
-      params: { token },
-    });
+    return this.http.post<MensajeResponse>(`${this.baseUrl}/verificar-correo`, { token });
   }
 
   reenviarVerificacion(email: string): Observable<MensajeResponse> {

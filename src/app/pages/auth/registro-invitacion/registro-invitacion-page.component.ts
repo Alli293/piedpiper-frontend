@@ -20,6 +20,7 @@ import { HeadingComponent } from '../../../shared/components/heading/heading.com
 import { LinkDirective } from '../../../shared/components/link/link.directive';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import { AuthService } from '../../../core/auth/auth.service';
+import { EnlaceUnSoloUsoService } from '../../../core/auth/enlace-un-solo-uso.service';
 import { GoogleIdentityService } from '../../../core/auth/google-identity.service';
 import {
   InvitacionPublica,
@@ -44,12 +45,14 @@ import { RegistroInvitacionCorreoFormComponent } from './registro-invitacion-cor
 export class RegistroInvitacionPageComponent implements OnInit {
   private readonly invitacionesService = inject(InvitacionesService);
   private readonly authService = inject(AuthService);
+  private readonly enlaceUnSoloUso = inject(EnlaceUnSoloUsoService);
   private readonly googleIdentity = inject(GoogleIdentityService);
   private readonly router = inject(Router);
   private readonly zone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly token = input('');
+  protected readonly tokenSeguro = signal('');
 
   private readonly googleButton = viewChild<ElementRef<HTMLElement>>('googleButton');
   private botonRenderizado = false;
@@ -78,6 +81,7 @@ export class RegistroInvitacionPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.tokenSeguro.set(this.enlaceUnSoloUso.consumir(this.token()));
     this.validarToken();
   }
 
@@ -89,7 +93,7 @@ export class RegistroInvitacionPageComponent implements OnInit {
     this.cuentaExistente.set(false);
     this.registrando.set(true);
     this.authService
-      .registrarConInvitacion(this.token(), idToken, true)
+      .registrarConInvitacion(this.tokenSeguro(), idToken, true)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (respuesta) => {
@@ -112,13 +116,13 @@ export class RegistroInvitacionPageComponent implements OnInit {
   }
 
   private validarToken(): void {
-    if (!this.token()) {
+    if (!this.tokenSeguro()) {
       this.cargando.set(false);
       this.mensajePantalla.set('Este enlace de invitación no es válido.');
       return;
     }
     this.invitacionesService
-      .resolver(this.token())
+      .resolver(this.tokenSeguro())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (invitacion) => {

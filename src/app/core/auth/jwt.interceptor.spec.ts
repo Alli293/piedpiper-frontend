@@ -70,4 +70,15 @@ describe('jwtInterceptor', () => {
     expect(req.request.headers.has('Authorization')).toBe(false);
     req.flush({});
   });
+
+  it('no confia en una ruta que solo comparte el prefijo textual de la API', () => {
+    authServiceStub.token = () => 'jwt-123';
+
+    httpClient.get('/api-maliciosa/recopilar').subscribe();
+
+    const req = httpMock.expectOne('/api-maliciosa/recopilar');
+    expect(req.request.headers.has('Authorization')).toBe(false);
+    expect(sesionInactividadStub.reiniciar).not.toHaveBeenCalled();
+    req.flush({});
+  });
 });
