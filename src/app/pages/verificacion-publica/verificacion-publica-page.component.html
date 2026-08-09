@@ -86,11 +86,16 @@
         <div class="ch-verificacion-publica__rc-body">
           <p class="ch-verificacion-publica__cred-name">
             <span class="ch-verificacion-publica__cred-name-icon">
-              <app-icon name="certificaciones" [size]="14" />
+              <app-icon
+                [name]="esInsignia(r.categoria) ? 'insignias' : 'certificaciones'"
+                [size]="14"
+              />
             </span>
             <span class="ch-verificacion-publica__cred-name-text">{{ r.nombreCertificacion }}</span>
           </p>
-          <p class="ch-verificacion-publica__cred-kind">Certificación ambiental</p>
+          <p class="ch-verificacion-publica__cred-kind">
+            {{ esInsignia(r.categoria) ? 'Insignia verificable' : 'Certificación ambiental' }}
+          </p>
 
           @if (esRevocada(r.estado)) {
             <app-semantic-card variant="danger" class="ch-verificacion-publica__revoke-box">
@@ -107,32 +112,51 @@
               <dt><app-icon name="empresa" [size]="12" />Empresa</dt>
               <dd>{{ r.empresa }}</dd>
             </div>
-            <div class="ch-verificacion-publica__dl-row">
-              <dt><app-icon name="auditor-badge" [size]="12" />Auditor</dt>
-              <dd>{{ r.auditor }}</dd>
-            </div>
-            <div class="ch-verificacion-publica__dl-row">
-              <dt><app-icon name="auditor" [size]="12" />Entidad</dt>
-              <dd>{{ r.entidadCertificadora }}</dd>
-            </div>
+            @if (esInsignia(r.categoria)) {
+              <div class="ch-verificacion-publica__dl-row">
+                <dt><app-icon [name]="nivelIcono(r.nivelInsignia)" [size]="12" />Nivel</dt>
+                <dd>{{ nivelLabel(r.nivelInsignia) }}</dd>
+              </div>
+            } @else {
+              <div class="ch-verificacion-publica__dl-row">
+                <dt><app-icon name="auditor-badge" [size]="12" />Auditor</dt>
+                <dd>{{ r.auditor }}</dd>
+              </div>
+            }
             <div class="ch-verificacion-publica__dl-row">
               <dt>
-                <app-icon name="calendario" [size]="12" />
-                {{ esRevocada(r.estado) ? 'Vigencia original' : 'Período' }}
+                <app-icon name="auditor" [size]="12" />
+                {{ esInsignia(r.categoria) ? 'Emisor' : 'Entidad' }}
               </dt>
-              <dd class="ch-verificacion-publica__periodo">
-                <span class="ch-verificacion-publica__mono">{{
-                  r.fechaEmision | date: 'dd/MM/yyyy' : 'UTC'
-                }}</span>
-                <span class="ch-verificacion-publica__sep">→</span>
-                <span
-                  class="ch-verificacion-publica__mono"
-                  [class.ch-verificacion-publica__mono--vencida]="esVencida(r.estado)"
-                >
-                  {{ r.fechaVencimiento | date: 'dd/MM/yyyy' : 'UTC' }}
-                </span>
-              </dd>
+              <dd>{{ r.entidadCertificadora }}</dd>
             </div>
+            @if (esInsignia(r.categoria)) {
+              <div class="ch-verificacion-publica__dl-row">
+                <dt><app-icon name="calendario" [size]="12" />Obtenida</dt>
+                <dd class="ch-verificacion-publica__mono">
+                  {{ r.fechaEmision | date: 'dd/MM/yyyy' : 'UTC' }}
+                </dd>
+              </div>
+            } @else {
+              <div class="ch-verificacion-publica__dl-row">
+                <dt>
+                  <app-icon name="calendario" [size]="12" />
+                  {{ esRevocada(r.estado) ? 'Vigencia original' : 'Período' }}
+                </dt>
+                <dd class="ch-verificacion-publica__periodo">
+                  <span class="ch-verificacion-publica__mono">{{
+                    r.fechaEmision | date: 'dd/MM/yyyy' : 'UTC'
+                  }}</span>
+                  <span class="ch-verificacion-publica__sep">→</span>
+                  <span
+                    class="ch-verificacion-publica__mono"
+                    [class.ch-verificacion-publica__mono--vencida]="esVencida(r.estado)"
+                  >
+                    {{ r.fechaVencimiento | date: 'dd/MM/yyyy' : 'UTC' }}
+                  </span>
+                </dd>
+              </div>
+            }
           </dl>
 
           <p class="ch-verificacion-publica__consulta">

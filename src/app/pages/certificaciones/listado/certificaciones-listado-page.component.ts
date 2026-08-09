@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { CertificacionResumen } from '../../../core/models/certificacion.model';
 import { CertificacionesService } from '../../../core/services/certificaciones.service';
@@ -43,6 +43,7 @@ const ERROR_MENSAJE = 'No fue posible cargar las certificaciones en este momento
 export class CertificacionesListadoPageComponent implements OnInit {
   private readonly certificacionesService = inject(CertificacionesService);
   private readonly toastService = inject(ToastService);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly certificaciones = signal<CertificacionResumen[]>([]);
   protected readonly cargando = signal(true);
@@ -85,6 +86,9 @@ export class CertificacionesListadoPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    const estado = this.route.snapshot.queryParamMap.get('estado');
+    const filtroInicial = mapEstadoAFiltro(estado);
+    if (filtroInicial) this.filtro.set(filtroInicial);
     void this.cargarCertificaciones();
   }
 
@@ -125,4 +129,23 @@ export class CertificacionesListadoPageComponent implements OnInit {
 
 function esFiltroValido(valor: string): valor is FiltroVigencia {
   return valor === 'TODAS' || valor === 'VIGENTE' || valor === 'VENCIDA';
+}
+
+// Mapea el `estado` que envía el panel "Estado de certificaciones" del
+// dashboard (activa | proxima_a_vencer | vencida) al filtro de vigencia que
+// soporta este listado. `proxima_a_vencer` NO se mapea a propósito: este
+// listado aun no tiene un chip para esa noción, y agruparla bajo VIGENTE
+// hacía que la tarjeta prometiera un filtro que no cumplía (ver comentarios
+// de PR #74). Mientras ese chip no exista, esa tarjeta no es un enlace
+// (`estado-certificaciones-panel`), así que este caso no debería llegar
+// nunca en la práctica; se deja el fallback a TODAS por seguridad.
+function mapEstadoAFiltro(estado: string | null): FiltroVigencia | null {
+  switch (estado) {
+    case 'activa':
+      return 'VIGENTE';
+    case 'vencida':
+      return 'VENCIDA';
+    default:
+      return null;
+  }
 }

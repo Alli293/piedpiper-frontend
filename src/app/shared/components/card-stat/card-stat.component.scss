@@ -34,3 +34,43 @@
   font-size: 0.875rem;
   color: var(--ch-text-secondary);
 }
+
+.ch-card-stat__body {
+  display: block;
+}
+
+.ch-card-stat__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--ch-radius-md);
+  background: color-mix(in srgb, var(--ch-sky) 18%, transparent);
+  color: var(--ch-sky);
+}
+
+:host(.ch-card-stat--with-icon) {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-3);
+}
+
+:host(.ch-card-stat--with-icon.ch-card-stat--green) .ch-card-stat__icon {
+  background: var(--ch-green-soft);
+  color: var(--ch-green-dark);
+}
+
+:host(.ch-card-stat--with-icon) .ch-card-stat__body {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+:host(.ch-card-stat--with-icon) .ch-card-stat__value {
+  margin-top: 0;
+}
+
+:host(.ch-card-stat--with-icon) .ch-card-stat__label {
+  margin-top: 2px;
+}

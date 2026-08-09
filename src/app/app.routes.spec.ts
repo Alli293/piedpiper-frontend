@@ -118,6 +118,13 @@ describe('app.routes', () => {
     expect(ruta?.canActivate).toBeUndefined();
   });
 
+  it('la ruta publica del hub de perfil publico no exige sesion', () => {
+    const ruta = routes.find((r) => r.path === 'empresa/:slug/reputacion');
+    expect(ruta).toBeDefined();
+    expect(ruta?.canActivate).toBeUndefined();
+    expect(ruta?.loadComponent).toBeTypeOf('function');
+  });
+
   it('la ruta publica de certificaciones no exige sesion', () => {
     const ruta = routes.find((r) => r.path === 'empresa/:slug/reputacion/certificaciones');
     expect(ruta).toBeDefined();

@@ -1,18 +1,16 @@
-<app-state-layout>
+<app-state-layout align="start">
   <div class="ch-certificaciones-publicas">
-    <nav class="ch-certificaciones-publicas__breadcrumb" aria-label="Ruta">
-      <button
-        type="button"
-        class="ch-certificaciones-publicas__volver"
-        aria-label="Volver"
-        (click)="volver()"
-      >
-        <app-icon name="volver" [size]="16" />
-      </button>
-      <span class="ch-certificaciones-publicas__crumb-actual">Perfil público</span>
-      <span class="ch-certificaciones-publicas__crumb-sep">/</span>
-      <span class="ch-certificaciones-publicas__crumb-here">Certificaciones verificadas</span>
-    </nav>
+    <app-perfil-publico-seccion-header
+      [perfil]="perfil()"
+      [slug]="slug()"
+      seccionLabel="Certificaciones verificadas"
+      eyebrow="Historial verificado"
+      titulo="Certificaciones verificadas"
+      subtitulo="Todas las certificaciones emitidas y verificadas por auditores certificados de CarbonHub. Información pública."
+      [conteo]="certificaciones().length"
+      conteoLabel="Certificaciones registradas"
+      (volver)="volver()"
+    />
 
     @if (cargando()) {
       <section class="ch-certificaciones-publicas__estado" role="status">
@@ -43,27 +41,6 @@
         </p>
       </app-card>
     } @else {
-      <header class="ch-certificaciones-publicas__header">
-        <span class="ch-certificaciones-publicas__logo" aria-label="Dato no disponible">
-          <app-icon name="empresa" [size]="20" />
-        </span>
-        <div class="ch-certificaciones-publicas__titulo">
-          <span class="ch-certificaciones-publicas__eyebrow">
-            <app-icon name="success" [size]="11" />
-            Historial verificado
-          </span>
-          <app-heading level="h1" text="Certificaciones verificadas" />
-          <p class="ch-certificaciones-publicas__subtitulo">
-            Todas las certificaciones emitidas y verificadas por auditores certificados de
-            CarbonHub. Información pública.
-          </p>
-        </div>
-        <div class="ch-certificaciones-publicas__conteo">
-          <strong>{{ certificaciones().length }}</strong>
-          <span>Certificaciones registradas</span>
-        </div>
-      </header>
-
       <div class="ch-certificaciones-publicas__toolbar">
         <span class="ch-certificaciones-publicas__filtro-label">
           <app-icon name="config" [size]="13" />
@@ -88,7 +65,6 @@
             <thead>
               <tr>
                 <th scope="col">Certificación</th>
-                <th scope="col">Entidad</th>
                 <th scope="col">Auditor verificador</th>
                 <th scope="col">Período verificado</th>
                 <th scope="col">Estado</th>
@@ -105,31 +81,33 @@
                       </span>
                       <div>
                         <strong>{{ cert.nombreCertificacion }}</strong>
-                        <span class="ch-certificaciones-publicas__cert-tipo">{{ cert.tipo }}</span>
+                        @if (cert.codigoVerificacion) {
+                          <button
+                            type="button"
+                            class="ch-certificaciones-publicas__codigo"
+                            (click)="copiarCodigo(cert.codigoVerificacion)"
+                            [attr.aria-label]="
+                              'Copiar código de verificación ' + cert.codigoVerificacion
+                            "
+                          >
+                            <app-icon name="copiar" [size]="11" />
+                            {{ cert.codigoVerificacion }}
+                          </button>
+                          @if (codigoCopiado() === cert.codigoVerificacion) {
+                            <span class="ch-certificaciones-publicas__codigo-tooltip" role="status"
+                              >Código copiado</span
+                            >
+                          }
+                        } @else {
+                          <span
+                            class="ch-certificaciones-publicas__codigo ch-certificaciones-publicas__codigo--vacio"
+                            >Sin código</span
+                          >
+                        }
                       </div>
                     </div>
                   </td>
-                  <td>
-                    <span
-                      class="ch-certificaciones-publicas__placeholder"
-                      aria-label="Dato no disponible"
-                      >—</span
-                    >
-                  </td>
-                  <td>
-                    <div class="ch-certificaciones-publicas__auditor-cell">
-                      <span
-                        class="ch-certificaciones-publicas__placeholder"
-                        aria-label="Dato no disponible"
-                        >—</span
-                      >
-                      <span
-                        class="ch-certificaciones-publicas__placeholder ch-certificaciones-publicas__placeholder--secundario"
-                        aria-label="Dato no disponible"
-                        >—</span
-                      >
-                    </div>
-                  </td>
+                  <td class="ch-certificaciones-publicas__auditor">{{ cert.nombreAuditor }}</td>
                   <td class="ch-certificaciones-publicas__periodo">
                     {{ cert.fechaEmision | date: 'dd/MM/yyyy' : 'UTC' }} →
                     {{ cert.fechaVencimiento | date: 'dd/MM/yyyy' : 'UTC' }}
@@ -140,14 +118,15 @@
                     }}</app-badge>
                   </td>
                   <td>
-                    <a
-                      appLink
-                      class="ch-certificaciones-publicas__verificar"
-                      [routerLink]="['/verificar', cert.codigoVerificacion]"
+                    <app-button
+                      variant="primary"
+                      size="sm"
+                      [disabled]="!cert.codigoVerificacion"
+                      (click)="verificar(cert.codigoVerificacion)"
                     >
-                      <app-icon name="ver" [size]="13" />
+                      <app-icon name="redirect" [size]="12" />
                       Verificar
-                    </a>
+                    </app-button>
                   </td>
                 </tr>
               }

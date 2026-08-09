@@ -24,7 +24,7 @@
 }
 
 .ch-badge__icon {
-  color: currentColor;
+  color: var(--ch-badge-icon-color, currentColor);
 }
 
 :host(.ch-badge--success) {

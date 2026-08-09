@@ -274,6 +274,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'empresa/:slug/reputacion',
+    loadComponent: () =>
+      import('./pages/perfil-publico/perfil-publico-page.component').then(
+        (m) => m.PerfilPublicoPageComponent
+      ),
+  },
+  {
     path: 'empresa/:slug/reputacion/certificaciones',
     loadComponent: () =>
       import('./pages/perfil-publico/certificaciones/certificaciones-publicas-page.component').then(
