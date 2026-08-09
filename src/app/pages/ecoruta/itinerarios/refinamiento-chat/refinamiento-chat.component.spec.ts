@@ -20,10 +20,15 @@ describe('RefinamientoChatComponent', () => {
     estado: 'GENERADO',
     version: 1,
     puntuacionAmbientalPreliminar: 82,
+    ecoScore: 82,
+    clasificacionAmbiental: 'BUENA',
+    ecoScoreParcial: false,
+    ecoScoreCalculadoEn: '2026-07-30T20:00:00Z',
     fechaGeneracion: '2026-07-30T20:00:00Z',
     generadoParcial: false,
     mensajeParcial: null,
     dias: [],
+    establecimientosEvaluados: [],
   };
 
   async function crearFixture(input: Itinerario) {
@@ -53,7 +58,7 @@ describe('RefinamientoChatComponent', () => {
   });
 
   it('omite el EcoScore del mensaje cuando es nulo', async () => {
-    fixture = await crearFixture({ ...itinerario, puntuacionAmbientalPreliminar: null });
+    fixture = await crearFixture({ ...itinerario, ecoScore: null });
 
     // El encabezado del panel ("...recalculá tu EcoScore") sí menciona "EcoScore" siempre;
     // lo que se valida acá es que el MENSAJE del asistente en particular lo omita.
@@ -94,9 +99,14 @@ describe('RefinamientoChatComponent — integración con alternativas', () => {
     estado: 'GENERADO',
     version: 1,
     puntuacionAmbientalPreliminar: 75,
+    ecoScore: 75,
+    clasificacionAmbiental: 'BUENA',
+    ecoScoreParcial: false,
+    ecoScoreCalculadoEn: '2026-07-30T20:00:00Z',
     fechaGeneracion: '2026-07-30T20:00:00Z',
     generadoParcial: false,
     mensajeParcial: null,
+    establecimientosEvaluados: [],
     dias: [
       {
         numeroDia: 1,
