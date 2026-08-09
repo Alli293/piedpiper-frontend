@@ -26,6 +26,18 @@ describe('EnlaceUnSoloUsoService', () => {
     expect(window.location.search).toBe('?idioma=es');
   });
 
+  it('prioriza el token del fragmento y elimina ambos secretos si también existe en query', () => {
+    window.history.replaceState(
+      {},
+      '',
+      '/verificar-correo?idioma=es&token=query-token#token=fragment-token&paso=1'
+    );
+
+    expect(service.consumir()).toBe('fragment-token');
+    expect(window.location.search).toBe('?idioma=es');
+    expect(window.location.hash).toBe('#paso=1');
+  });
+
   it('usa el token recibido por binding cuando la URL ya no contiene el secreto', () => {
     window.history.replaceState({}, '', '/registro/invitacion');
 

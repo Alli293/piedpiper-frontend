@@ -55,7 +55,7 @@ export class ResetContrasenaPageComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly token = input('');
-  private readonly tokenSeguro = signal('');
+  private readonly tokenLimpio = signal('');
 
   protected readonly cargando = signal(true);
   protected readonly email = signal('');
@@ -99,15 +99,15 @@ export class ResetContrasenaPageComponent implements OnInit {
   protected readonly submitting = computed(() => this.restablecerForm().submitting());
 
   ngOnInit(): void {
-    this.tokenSeguro.set(this.enlaceUnSoloUso.consumir(this.token()));
-    if (!this.tokenSeguro()) {
+    this.tokenLimpio.set(this.enlaceUnSoloUso.consumir(this.token()));
+    if (!this.tokenLimpio()) {
       this.cargando.set(false);
       this.mensajeInvalido.set('Este enlace no es válido o expiró.');
       return;
     }
 
     this.authService
-      .validarTokenReset(this.tokenSeguro())
+      .validarTokenReset(this.tokenLimpio())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (respuesta) => {
@@ -135,7 +135,7 @@ export class ResetContrasenaPageComponent implements OnInit {
         try {
           const respuesta = await firstValueFrom(
             this.authService.restablecerContrasena(
-              this.tokenSeguro(),
+              this.tokenLimpio(),
               value.contrasena,
               value.confirmarContrasena
             )

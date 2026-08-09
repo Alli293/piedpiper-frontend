@@ -41,6 +41,16 @@ describe('jwtInterceptor', () => {
     req.flush({});
   });
 
+  it('agrega el header Authorization al path exacto de la API', () => {
+    authServiceStub.token = () => 'jwt-123';
+
+    httpClient.get(environment.apiBaseUrl).subscribe();
+
+    const req = httpMock.expectOne(environment.apiBaseUrl);
+    expect(req.request.headers.get('Authorization')).toBe('Bearer jwt-123');
+    req.flush({});
+  });
+
   it('reinicia el temporizador de inactividad cuando adjunta el token', () => {
     authServiceStub.token = () => 'jwt-123';
 

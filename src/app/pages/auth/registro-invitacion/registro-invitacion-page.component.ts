@@ -52,7 +52,7 @@ export class RegistroInvitacionPageComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly token = input('');
-  protected readonly tokenSeguro = signal('');
+  protected readonly tokenLimpio = signal('');
 
   private readonly googleButton = viewChild<ElementRef<HTMLElement>>('googleButton');
   private botonRenderizado = false;
@@ -81,7 +81,7 @@ export class RegistroInvitacionPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.tokenSeguro.set(this.enlaceUnSoloUso.consumir(this.token()));
+    this.tokenLimpio.set(this.enlaceUnSoloUso.consumir(this.token()));
     this.validarToken();
   }
 
@@ -93,7 +93,7 @@ export class RegistroInvitacionPageComponent implements OnInit {
     this.cuentaExistente.set(false);
     this.registrando.set(true);
     this.authService
-      .registrarConInvitacion(this.tokenSeguro(), idToken, true)
+      .registrarConInvitacion(this.tokenLimpio(), idToken, true)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (respuesta) => {
@@ -116,13 +116,13 @@ export class RegistroInvitacionPageComponent implements OnInit {
   }
 
   private validarToken(): void {
-    if (!this.tokenSeguro()) {
+    if (!this.tokenLimpio()) {
       this.cargando.set(false);
       this.mensajePantalla.set('Este enlace de invitación no es válido.');
       return;
     }
     this.invitacionesService
-      .resolver(this.tokenSeguro())
+      .resolver(this.tokenLimpio())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (invitacion) => {

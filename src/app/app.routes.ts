@@ -8,6 +8,7 @@ export const guardEmpresa: CanActivateFn = rolGuard('ADMINISTRADOR_EMPRESA', 'US
 export const guardEmpresaAdmin: CanActivateFn = rolGuard('ADMINISTRADOR_EMPRESA');
 export const guardAuditor: CanActivateFn = rolGuard('AUDITOR_CERTIFICADO');
 export const guardAdmin: CanActivateFn = rolGuard('ADMINISTRADOR_PLATAFORMA');
+// El backend excluye deliberadamente al administrador de plataforma de este directorio.
 export const guardDirectorioAuditores: CanActivateFn = rolGuard(
   'ADMINISTRADOR_EMPRESA',
   'USUARIO_GENERAL',

@@ -70,15 +70,15 @@ export class VerificarCorreoPageComponent implements OnInit {
   protected readonly reenviarEnviando = computed(() => this.reenviarForm().submitting());
 
   ngOnInit(): void {
-    const tokenSeguro = this.enlaceUnSoloUso.consumir(this.token());
-    if (!tokenSeguro) {
+    const tokenLimpio = this.enlaceUnSoloUso.consumir(this.token());
+    if (!tokenLimpio) {
       this.cargando.set(false);
       this.mensajeInvalido.set('Este enlace de verificación no es válido.');
       return;
     }
 
     this.authService
-      .verificarCorreo(tokenSeguro)
+      .verificarCorreo(tokenLimpio)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (respuesta) => {
