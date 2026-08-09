@@ -150,26 +150,34 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--ch-space-2) var(--ch-space-3);
+  gap: var(--ch-space-2);
+  padding: var(--ch-space-3);
   border-radius: var(--ch-radius-sm);
+  border-left: 3px solid var(--ch-green);
   background: var(--ch-bg-main);
   font-size: 0.82rem;
 }
 
 .ch-refinamiento-chat__actividad-nombre {
+  flex: 1;
+  min-width: 0;
   color: var(--ch-text-primary);
   font-weight: 500;
 }
 
 .ch-refinamiento-chat__btn-comparar {
-  padding: var(--ch-space-1) var(--ch-space-3);
-  border: 1px solid var(--ch-green);
+  flex-shrink: 0;
+  min-width: 90px;
+  padding: var(--ch-space-1) var(--ch-space-2);
+  border: 1.5px solid var(--ch-green);
   border-radius: var(--ch-radius-pill);
   background: transparent;
   color: var(--ch-green-dark);
   font-family: var(--ch-font-body);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
   cursor: pointer;
   transition:
     background 0.2s,
