@@ -1,0 +1,73 @@
+.ch-evolucion-huella {
+  position: relative;
+  min-height: 260px;
+
+  &__grafico {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 240px;
+  }
+
+  &__bosque {
+    position: absolute;
+    right: var(--ch-space-5);
+    bottom: var(--ch-space-3);
+    left: var(--ch-space-5);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    pointer-events: none;
+    opacity: 0.18;
+  }
+
+  &__arbol {
+    position: relative;
+    width: 18px;
+    height: 28px;
+    animation: ch-arbol-respiro 3.6s ease-in-out infinite;
+
+    &::before {
+      content: '';
+      position: absolute;
+      right: 2px;
+      bottom: 6px;
+      left: 2px;
+      height: 18px;
+      border-radius: 16px 16px 8px 8px;
+      background: var(--ch-green);
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 8px;
+      width: 3px;
+      height: 10px;
+      border-radius: var(--ch-radius-pill);
+      background: var(--ch-green-dark);
+    }
+
+    &:nth-child(2n) {
+      height: 22px;
+      animation-delay: 0.4s;
+    }
+
+    &:nth-child(3n) {
+      height: 32px;
+      animation-delay: 0.8s;
+    }
+  }
+}
+
+@keyframes ch-arbol-respiro {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+
+  50% {
+    transform: translateY(-2px) scaleY(1.04);
+  }
+}

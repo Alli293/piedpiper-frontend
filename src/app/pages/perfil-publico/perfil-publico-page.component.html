@@ -9,13 +9,12 @@
   @case ('cargando') {
     <div class="pub-loading" aria-live="polite" aria-label="Cargando perfil">
       <span class="pub-loading__spinner" aria-hidden="true"></span>
-      <p class="pub-loading__text">Cargando perfil…</p>
+      <p class="pub-loading__text">Cargando perfil...</p>
     </div>
   }
   @case ('exito') {
     <main class="pub-main">
       <div class="pub-main__container">
-        <!-- Company Card -->
         <app-card
           variant="outlined"
           padding="md"
@@ -23,7 +22,6 @@
           aria-label="Información de la empresa"
         >
           <div class="pub-card__top">
-            <!-- Left: Company info -->
             <div class="pub-card__info">
               <div class="pub-card__info-row">
                 <div class="pub-card__logo-wrapper">
@@ -62,7 +60,6 @@
                 </div>
               </div>
               <div class="pub-card__info-row">
-                <!-- Stats row -->
                 <div class="pub-card__stats">
                   <app-card-stat
                     class="pub-card__stat"
@@ -82,7 +79,6 @@
               </div>
             </div>
 
-            <!-- Right: Nivel ecológico card -->
             <div
               class="pub-nivel"
               [class.pub-nivel--sin-nivel]="nivelConfig().clase === 'sin-nivel'"
@@ -99,7 +95,6 @@
               </span>
               <span class="pub-nivel__vigencia">Vigente {{ getAnioVigencia() }}</span>
 
-              <!-- Progress bar -->
               <div class="pub-nivel__progress" aria-hidden="true">
                 @for (nivel of nivelesOrden; track nivel; let i = $index) {
                   <div
@@ -116,7 +111,6 @@
           </div>
         </app-card>
 
-        <!-- Historial de certificaciones -->
         <section class="pub-section" aria-labelledby="cert-title">
           <div class="pub-section__header">
             <div class="pub-section__title-row">
@@ -191,7 +185,6 @@
           }
         </section>
 
-        <!-- Insignias activas -->
         <section class="pub-section" aria-labelledby="insignias-title">
           <div class="pub-section__header">
             <div class="pub-section__title-row">
@@ -239,7 +232,6 @@
           }
         </section>
 
-        <!-- Evolución de la huella de carbono -->
         <section class="pub-section" aria-labelledby="evolucion-title">
           <div class="pub-section__header">
             <div class="pub-section__title-row">
@@ -250,83 +242,106 @@
             </div>
           </div>
 
-          @if (evolucion() && evolucion()!.serie.length > 0) {
-            <app-card variant="outlined" padding="md" class="pub-chart-card">
-              <div class="pub-chart-placeholder__header">
-                <div class="pub-chart-placeholder__stats">
-                  <span class="pub-chart-placeholder__total"
-                    >{{ evolucion()!.totalActualTco2e | number: '1.2-2' }} tCO₂e</span
+          <div class="pub-huella">
+            <div class="pub-huella__header">
+              <div class="pub-huella__stats">
+                @if (ultimoPuntoHuella(); as punto) {
+                  <span class="pub-huella__total">{{ formatToneladas(punto.huellaT) }} tCO₂e</span>
+                  <span class="pub-huella__change">
+                    {{ formatVariacion(punto.variacionPorcentual) }} vs periodo anterior
+                  </span>
+                } @else {
+                  <span class="pub-huella__total">-- tCO₂e</span>
+                  <span class="pub-huella__change">Datos verificados</span>
+                }
+              </div>
+              <div class="pub-huella__filters" aria-label="Rango de evolución de huella">
+                @for (rango of rangosHuella; track rango.valor) {
+                  <button
+                    class="pub-huella__filter"
+                    [class.pub-huella__filter--active]="rangoHuella() === rango.valor"
+                    type="button"
+                    [attr.aria-pressed]="rangoHuella() === rango.valor"
+                    (click)="cambiarRangoHuella(rango.valor)"
                   >
-                  @if (evolucion()!.variacionPorcentual !== null) {
-                    <span
-                      class="pub-chart-placeholder__change"
-                      [class.pub-chart-placeholder__change--down]="
-                        evolucion()!.variacionPorcentual! < 0
-                      "
-                      [class.pub-chart-placeholder__change--up]="
-                        evolucion()!.variacionPorcentual! > 0
-                      "
-                      >{{ evolucion()!.variacionPorcentual! < 0 ? '↓' : '↑' }}
-                      {{ evolucion()!.variacionPorcentual! > 0 ? '+' : ''
-                      }}{{ evolucion()!.variacionPorcentual }}% vs año anterior</span
-                    >
-                  }
-                </div>
-              </div>
-              <div class="pub-chart-canvas-wrapper">
-                <canvas
-                  baseChart
-                  type="line"
-                  [data]="chartData()"
-                  [options]="chartOptions()"
-                ></canvas>
-              </div>
-            </app-card>
-          } @else {
-            <div class="pub-chart-placeholder">
-              <div class="pub-chart-placeholder__body">
-                <app-icon name="emisiones" [size]="48" aria-hidden="true" />
-                <p>No hay datos de emisiones registrados.</p>
+                    {{ rango.etiqueta }}
+                  </button>
+                }
               </div>
             </div>
-          }
-        </section>
-      </div>
 
-      <!-- Compartir perfil (modal) -->
-      @if (mostrarCompartir()) {
-        <div
-          class="pub-modal-overlay"
-          (click)="cerrarCompartir()"
-          (keydown.escape)="cerrarCompartir()"
-        >
+            @switch (huellaEstado()) {
+              @case ('cargando') {
+                <div class="pub-huella__state" aria-live="polite" aria-label="Cargando evolución">
+                  <span class="pub-loading__spinner pub-huella__spinner" aria-hidden="true"></span>
+                </div>
+              }
+              @case ('error') {
+                <p class="pub-huella__message" role="alert">
+                  No fue posible cargar la evolución de la huella de carbono en este momento.
+                </p>
+              }
+              @case ('exito') {
+                @if ((huella()?.serie?.length ?? 0) === 0) {
+                  <p class="pub-huella__message">
+                    Esta empresa aún no cuenta con datos de huella de carbono verificados.
+                  </p>
+                } @else {
+                  <div class="pub-huella__summary">
+                    <span
+                      class="pub-huella__trend"
+                      [class.pub-huella__trend--reduccion]="huella()?.tendencia === 'reduccion'"
+                      [class.pub-huella__trend--aumento]="huella()?.tendencia === 'aumento'"
+                      [class.pub-huella__trend--sin-cambio]="huella()?.tendencia === 'sin_cambio'"
+                    >
+                      {{ tendenciaLabel() }}
+                    </span>
+                    @if ((huella()?.serie?.length ?? 0) === 1) {
+                      <span>Aún no hay suficiente historial para mostrar una tendencia.</span>
+                    } @else {
+                      <span>Respecto al primer periodo mostrado.</span>
+                    }
+                  </div>
+                  <app-evolucion-huella-chart [serie]="huella()?.serie ?? []" />
+                }
+              }
+            }
+          </div>
+        </section>
+
+        @if (mostrarCompartir()) {
           <div
-            class="pub-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Compartir perfil"
-            (click)="$event.stopPropagation()"
+            class="pub-modal-overlay"
+            (click)="cerrarCompartir()"
+            (keydown.escape)="cerrarCompartir()"
           >
-            <div class="pub-modal__header">
-              <h2 class="pub-modal__title">Compartir perfil</h2>
-              <button
-                class="pub-modal__close"
-                type="button"
-                (click)="cerrarCompartir()"
-                aria-label="Cerrar"
-              >
-                ✕
-              </button>
-            </div>
-            <div class="pub-modal__body">
-              <app-compartir-perfil [slug]="slug" />
+            <div
+              class="pub-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Compartir perfil"
+              (click)="$event.stopPropagation()"
+            >
+              <div class="pub-modal__header">
+                <h2 class="pub-modal__title">Compartir perfil</h2>
+                <button
+                  class="pub-modal__close"
+                  type="button"
+                  (click)="cerrarCompartir()"
+                  aria-label="Cerrar"
+                >
+                  ×
+                </button>
+              </div>
+              <div class="pub-modal__body">
+                <app-compartir-perfil [slug]="slug" />
+              </div>
             </div>
           </div>
-        </div>
-      }
+        }
+      </div>
     </main>
 
-    <!-- Footer -->
     <footer class="pub-footer">
       <p class="pub-footer__text">
         <span class="pub-footer__dot" aria-hidden="true"></span>
@@ -344,7 +359,7 @@
     <div class="pub-error pub-error--500" role="alert">
       <app-icon name="error" [size]="64" aria-hidden="true" />
       <p class="pub-error__msg">{{ mensajeError() }}</p>
-      <button class="pub-error__retry" (click)="reintentar()">Reintentar</button>
+      <button class="pub-error__retry" type="button" (click)="reintentar()">Reintentar</button>
     </div>
   }
 }
