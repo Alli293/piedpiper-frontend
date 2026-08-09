@@ -69,6 +69,17 @@ describe('RefinamientoChatComponent', () => {
     expect(mensaje?.textContent).toContain('está listo. ¿Querés ajustar algo?');
   });
 
+  it('omite el EcoScore del mensaje cuando el campo está ausente (undefined)', async () => {
+    const { ecoScore, ...sinEcoScore } = itinerario;
+    fixture = await crearFixture(sinEcoScore as Itinerario);
+
+    const mensaje = (fixture.nativeElement as HTMLElement).querySelector(
+      '.ch-refinamiento-chat__mensaje p'
+    );
+    expect(mensaje?.textContent).not.toContain('EcoScore');
+    expect(mensaje?.textContent).toContain('está listo. ¿Querés ajustar algo?');
+  });
+
   it('el input y el boton de enviar estan deshabilitados', async () => {
     fixture = await crearFixture(itinerario);
     const root = fixture.nativeElement as HTMLElement;

@@ -11,8 +11,8 @@ export interface ItinerarioActividad {
   moneda: string | null;
   establecimientoRecomendado: string | null;
   provincia: string;
-  puntuacionAmbientalEstimada?: number | null;
   puntuacionAmbiental?: PuntuacionAmbientalResponse;
+  puntuacionAmbientalEstimada?: number | null;
   certificacionesActivas?: CertificacionActiva[];
 }
 

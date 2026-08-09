@@ -167,7 +167,7 @@
 
 .ch-refinamiento-chat__btn-comparar {
   flex-shrink: 0;
-  width: 90px;
+  min-width: 90px;
   padding: var(--ch-space-1) var(--ch-space-2);
   border: 1.5px solid var(--ch-green);
   border-radius: var(--ch-radius-pill);
