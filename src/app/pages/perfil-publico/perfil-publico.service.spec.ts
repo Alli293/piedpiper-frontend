@@ -4,7 +4,12 @@ import { TestBed } from '@angular/core/testing';
 import * as fc from 'fast-check';
 import { environment } from '../../../environments/environment';
 import { EnlacePerfilDTO } from './models/enlace-perfil.model';
-import { CertificacionPublica, InsigniaEmpresa, PerfilPublicoDTO } from './perfil-publico.models';
+import {
+  CertificacionPublica,
+  EvolucionHuellaDTO,
+  InsigniaEmpresa,
+  PerfilPublicoDTO,
+} from './perfil-publico.models';
 import { PerfilPublicoService } from './perfil-publico.service';
 
 describe('PerfilPublicoService', () => {
@@ -40,6 +45,15 @@ describe('PerfilPublicoService', () => {
     nombre: 'Carbono Neutral',
     descripcion: 'Primera insignia empresarial.',
     fechaObtencion: '2026-01-15T00:00:00Z',
+  };
+
+  const evolucion: EvolucionHuellaDTO = {
+    rangoPeriodo: 'ultimos_3_anios',
+    tendencia: 'reduccion',
+    serie: [
+      { periodo: '2025', huellaT: 5.236, variacionPorcentual: null },
+      { periodo: '2026', huellaT: 4.2, variacionPorcentual: -19.8 },
+    ],
   };
 
   beforeEach(() => {
@@ -238,31 +252,27 @@ describe('PerfilPublicoService', () => {
   });
 
   describe('obtenerEvolucionHuella', () => {
-    it('hace GET a /api/perfil-publico/{slug}/evolucion-huella y retorna EvolucionHuellaPublica', () => {
-      const mockEvolucion = {
-        totalActualTco2e: 1.86,
-        variacionPorcentual: -21.0,
-        serie: [
-          { anio: 2023, totalTco2e: 1.86 },
-          { anio: 2024, totalTco2e: 1.47 },
-        ],
-      };
+    it('hace GET a /api/perfil-publico/{slug}/evolucion-huella con el query param de rango', () => {
+      let resultado: EvolucionHuellaDTO | undefined;
+      service
+        .obtenerEvolucionHuella('cafe-del-valle', 'historico')
+        .subscribe((valor) => (resultado = valor));
 
-      let resultado: unknown;
-      service.obtenerEvolucionHuella('cafe-del-valle').subscribe((valor) => (resultado = valor));
-
-      const req = httpMock.expectOne(`${baseUrl}/cafe-del-valle/evolucion-huella`);
+      const req = httpMock.expectOne(`${baseUrl}/cafe-del-valle/evolucion-huella?rango=historico`);
       expect(req.request.method).toBe('GET');
-      req.flush(mockEvolucion);
+      req.flush(evolucion);
 
-      expect(resultado).toEqual(mockEvolucion);
+      expect(resultado).toEqual(evolucion);
     });
 
-    it('escapa el slug en la URL', () => {
-      service.obtenerEvolucionHuella('empresa con espacio').subscribe();
+    it('usa ultimos_3_anios como rango por defecto', () => {
+      service.obtenerEvolucionHuella('cafe-del-valle').subscribe();
 
-      const req = httpMock.expectOne(`${baseUrl}/empresa%20con%20espacio/evolucion-huella`);
-      req.flush({ totalActualTco2e: 0, variacionPorcentual: null, serie: [] });
+      const req = httpMock.expectOne(
+        `${baseUrl}/cafe-del-valle/evolucion-huella?rango=ultimos_3_anios`
+      );
+      expect(req.request.params.get('rango')).toBe('ultimos_3_anios');
+      req.flush(evolucion);
     });
   });
 

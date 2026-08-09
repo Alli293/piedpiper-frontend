@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { AuthSessionService } from '../../../core/auth-session.service';
 import { PerfilInicial } from '../../../core/models/perfil-inicial.model';
@@ -21,9 +21,14 @@ const ITINERARIO_BASE: Itinerario = {
   estado: 'GENERADO',
   version: 1,
   puntuacionAmbientalPreliminar: 85,
+  ecoScore: 85,
+  clasificacionAmbiental: 'EXCELENTE',
+  ecoScoreParcial: false,
+  ecoScoreCalculadoEn: '2026-07-30T20:38:19.896Z',
   fechaGeneracion: '2026-07-30T20:38:19.896Z',
   generadoParcial: false,
   mensajeParcial: null,
+  establecimientosEvaluados: [],
   dias: [
     {
       numeroDia: 2,
@@ -120,10 +125,25 @@ describe('ItinerarioGeneradoPageComponent', () => {
     expect(texto).toContain('Almuerzo');
     expect(texto).toContain('Tarde libre');
 
+    // El título real del itinerario vive en el header, no en un heading duplicado en el body.
+    expect(texto).toContain('Costa Rica sostenible · 2 días');
+
+    // Escala de rangos: las 4 categorías se listan siempre, y solo la del itinerario
+    // actual (Excelente, 85) queda resaltada.
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(texto).toContain('80–100');
+    expect(texto).toContain('60–79');
+    expect(texto).toContain('40–59');
+    expect(texto).toContain('0–39');
+    expect(
+      raiz.querySelector('.ch-itinerario-generado__escala-item--excelente')?.classList
+    ).toContain('is-activo');
+    expect(
+      raiz.querySelector('.ch-itinerario-generado__escala-item--buena')?.classList
+    ).not.toContain('is-activo');
+
     const nombresActividades = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll(
-        '.ch-itinerario-generado__actividad-info strong'
-      )
+      raiz.querySelectorAll('.ch-itinerario-generado__actividad-info strong')
     ).map((el) => el.textContent?.trim());
     // Dia 1 (Caminata 08:00 antes que Almuerzo 12:00) debe ir antes del dia 2 (Tarde libre),
     // aunque el backend los haya devuelto en otro orden.
@@ -142,6 +162,78 @@ describe('ItinerarioGeneradoPageComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('itinerario parcial');
+  });
+
+  it('muestra un banner inline cuando el EcoScore fue calculado con informacion parcial', async () => {
+    await crearFixture();
+    httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush({
+      ...ITINERARIO_BASE,
+      ecoScoreParcial: true,
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain(
+      'El EcoScore fue calculado con información parcial'
+    );
+  });
+
+  it('muestra un toast de error cuando no fue posible calcular el EcoScore', async () => {
+    await crearFixture();
+    const errorSpy = vi.spyOn(toastService, 'error');
+
+    httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush({
+      ...ITINERARIO_BASE,
+      ecoScore: null,
+      clasificacionAmbiental: null,
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      'No fue posible calcular el impacto ambiental del itinerario.',
+      undefined,
+      5000
+    );
+  });
+
+  it('muestra el desglose ambiental por establecimiento', async () => {
+    await crearFixture();
+    httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush({
+      ...ITINERARIO_BASE,
+      establecimientosEvaluados: [
+        {
+          nombreEstablecimiento: 'Reserva Selvatura',
+          puntuacionAmbiental: {
+            puntuacionTotal: 68,
+            componenteCertificaciones: 30,
+            componenteIma: 24,
+            componenteBenchmark: 14,
+            cantidadCertificacionesActivas: 3,
+            estimado: false,
+          },
+        },
+      ],
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const texto = fixture.nativeElement.textContent as string;
+    expect(texto).toContain('Desglose por establecimiento');
+    expect(texto).toContain('Reserva Selvatura');
+  });
+
+  it('no revienta y omite el desglose cuando el backend envia establecimientosEvaluados null', async () => {
+    await crearFixture();
+    httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush({
+      ...ITINERARIO_BASE,
+      establecimientosEvaluados: null,
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).not.toContain('Desglose por establecimiento');
+    expect(fixture.nativeElement.textContent).toContain('85');
   });
 
   it('muestra estado de error y permite reintentar si la carga falla', async () => {
@@ -184,22 +276,6 @@ describe('ItinerarioGeneradoPageComponent', () => {
       5000
     );
     expect(fixture.nativeElement.textContent).toContain('No se pudo cargar el itinerario.');
-  });
-
-  it('el boton "Volver a mis itinerarios" navega a /ecoruta/itinerarios', async () => {
-    await crearFixture();
-    httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush(ITINERARIO_BASE);
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const router = TestBed.inject(Router);
-    const navigateSpy = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
-
-    const botones = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button'));
-    const volver = botones.find((boton) => boton.textContent?.includes('Volver a mis itinerarios'));
-    volver?.click();
-
-    expect(navigateSpy).toHaveBeenCalledWith('/ecoruta/itinerarios');
   });
 
   it('colapsa y expande las actividades de un día al hacer click en su encabezado', async () => {
@@ -246,18 +322,5 @@ describe('ItinerarioGeneradoPageComponent', () => {
     preguntar?.click();
 
     expect(scrollSpy).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
-  });
-
-  it('muestra el badge de "Versión vigente" y el costo formateado en colones/dólares', async () => {
-    await crearFixture();
-    httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush(ITINERARIO_BASE);
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const texto = fixture.nativeElement.textContent as string;
-    expect(texto).toContain('Versión vigente');
-    // es-CR antepone el código ISO para monedas extranjeras (ver currency.utils.spec.ts)
-    expect(texto).toContain('USD');
-    expect(texto).toContain('18');
   });
 });

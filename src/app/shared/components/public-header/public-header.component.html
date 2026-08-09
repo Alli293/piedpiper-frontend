@@ -1,0 +1,38 @@
+<div class="ch-public-header__left">
+  <app-logo variant="on-light" [iconSize]="26" textSize="1rem" />
+  @if (mostrarBadgeVerificado()) {
+    <span class="ch-public-header__badge">
+      <app-icon name="success" [size]="14" aria-hidden="true" />
+      Perfil verificado
+    </span>
+  }
+</div>
+
+<div class="ch-public-header__actions">
+  @if (mostrarCompartir()) {
+    <app-button
+      class="ch-public-header__compartir"
+      variant="link"
+      size="sm"
+      type="button"
+      (click)="compartir.emit()"
+    >
+      <span class="ch-public-header__compartir-content">
+        <app-icon name="compartir" [size]="13" aria-hidden="true" />
+        Compartir
+      </span>
+    </app-button>
+  }
+  @if (mostrarAyuda()) {
+    <span class="ch-public-header__help">
+      <app-icon name="help" [size]="13" />
+      Ayuda
+    </span>
+  }
+  @if (mostrarLogin()) {
+    <a appLink routerLink="/login" class="ch-public-header__login">
+      <app-icon name="login" [size]="11" />
+      Iniciar sesión
+    </a>
+  }
+</div>

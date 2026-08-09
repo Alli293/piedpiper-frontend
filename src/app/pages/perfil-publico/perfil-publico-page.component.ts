@@ -1,28 +1,23 @@
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { DecimalPipe } from '@angular/common';
 import { Meta, Title } from '@angular/platform-browser';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { BaseChartDirective } from 'ng2-charts';
-import {
-  Chart,
-  LineController,
-  LineElement,
-  PointElement,
-  LinearScale,
-  CategoryScale,
-  Filler,
-  Tooltip,
-} from 'chart.js';
+import { BadgeComponent, BadgeVariant } from '../../shared/components/badge/badge.component';
+import { CardComponent } from '../../shared/components/card/card.component';
+import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
-import { LogoComponent } from '../../shared/components/logo/logo.component';
+import { PublicHeaderComponent } from '../../shared/components/public-header/public-header.component';
+import { capitalizar, esCostaRica, nombrePais } from '../../shared/utils/empresa-catalogos.utils';
 import { CompartirPerfilComponent } from './compartir-perfil/compartir-perfil.component';
+import { EvolucionHuellaChartComponent } from './evolucion-huella-chart.component';
 import {
   CertificacionPublica,
-  EvolucionHuellaPublica,
+  EvolucionHuellaDTO,
   InsigniaEmpresa,
   PerfilPublicoDTO,
+  PuntoHuella,
+  RangoPeriodoHuella,
 } from './perfil-publico.models';
 import { PerfilPublicoService } from './perfil-publico.service';
 
@@ -30,6 +25,11 @@ interface NivelConfig {
   clase: string;
   icono: IconName;
   color: string;
+}
+
+interface RangoHuellaOption {
+  valor: RangoPeriodoHuella;
+  etiqueta: string;
 }
 
 const NIVEL_MAP: Record<string, NivelConfig> = {
@@ -42,15 +42,11 @@ const NIVEL_MAP: Record<string, NivelConfig> = {
 
 const NIVELES_ORDEN = ['bronce', 'plata', 'oro', 'platino'];
 
-Chart.register(
-  LineController,
-  LineElement,
-  PointElement,
-  LinearScale,
-  CategoryScale,
-  Filler,
-  Tooltip
-);
+const RANGOS_HUELLA: RangoHuellaOption[] = [
+  { valor: 'ultimo_anio', etiqueta: '1A' },
+  { valor: 'ultimos_3_anios', etiqueta: '3A' },
+  { valor: 'historico', etiqueta: 'Todo' },
+];
 
 @Component({
   selector: 'app-perfil-publico-page',
@@ -58,11 +54,14 @@ Chart.register(
   templateUrl: './perfil-publico-page.component.html',
   styleUrl: './perfil-publico-page.component.scss',
   imports: [
+    RouterLink,
     IconComponent,
-    LogoComponent,
     CompartirPerfilComponent,
-    DecimalPipe,
-    BaseChartDirective,
+    BadgeComponent,
+    CardComponent,
+    CardStatComponent,
+    PublicHeaderComponent,
+    EvolucionHuellaChartComponent,
   ],
 })
 export class PerfilPublicoPageComponent {
@@ -76,64 +75,14 @@ export class PerfilPublicoPageComponent {
   protected perfil = signal<PerfilPublicoDTO | null>(null);
   protected certificaciones = signal<CertificacionPublica[]>([]);
   protected insignias = signal<InsigniaEmpresa[]>([]);
-  protected evolucion = signal<EvolucionHuellaPublica | null>(null);
+  protected huella = signal<EvolucionHuellaDTO | null>(null);
+  protected huellaEstado = signal<'cargando' | 'exito' | 'error'>('cargando');
+  protected rangoHuella = signal<RangoPeriodoHuella>('ultimos_3_anios');
   protected mensajeError = signal<string>('');
   protected mostrarCompartir = signal<boolean>(false);
 
-  protected readonly maxTco2e = computed(() => {
-    const ev = this.evolucion();
-    if (!ev || ev.serie.length === 0) return 1;
-    return Math.max(...ev.serie.map((p) => p.totalTco2e), 0.001);
-  });
-
-  protected readonly chartData = computed(() => {
-    const ev = this.evolucion();
-    if (!ev || ev.serie.length === 0) return { labels: [], datasets: [] };
-    return {
-      labels: ev.serie.map((p) => p.anio.toString()),
-      datasets: [
-        {
-          data: ev.serie.map((p) => p.totalTco2e),
-          borderColor: '#16a34a',
-          backgroundColor: 'rgba(22, 163, 74, 0.08)',
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#16a34a',
-          pointRadius: 5,
-          pointHoverRadius: 7,
-        },
-      ],
-    };
-  });
-
-  protected readonly chartOptions = computed(() => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: (ctx: { parsed: { y: number } }) => `${ctx.parsed.y.toFixed(3)} tCO₂e`,
-        },
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: false,
-        grid: { color: 'rgba(0,0,0,0.05)' },
-        ticks: {
-          font: { size: 11 },
-          callback: (value: string | number) => `${value}`,
-        },
-      },
-      x: {
-        grid: { display: false },
-        ticks: { font: { size: 12, weight: 'bold' as const } },
-      },
-    },
-  }));
-
   protected readonly nivelesOrden = NIVELES_ORDEN;
+  protected readonly rangosHuella = RANGOS_HUELLA;
 
   protected get slug(): string {
     return this.route.snapshot.paramMap.get('slug') ?? '';
@@ -155,7 +104,7 @@ export class PerfilPublicoPageComponent {
         this.actualizarMetaTags(dto, slug);
         this.cargarCertificaciones(slug);
         this.cargarInsignias(slug);
-        this.cargarEvolucion(slug);
+        this.cargarHuella(slug);
       },
       error: (err: unknown) => {
         if (err instanceof HttpErrorResponse && err.status === 404) {
@@ -163,7 +112,7 @@ export class PerfilPublicoPageComponent {
           this.estado.set('error404');
         } else {
           this.mensajeError.set(
-            'No fue posible cargar el perfil en este momento. Intenta nuevamente más tarde.'
+            'No fue posible cargar el perfil en este momento. Intenta nuevamente mas tarde.'
           );
           this.estado.set('error500');
         }
@@ -185,11 +134,26 @@ export class PerfilPublicoPageComponent {
     });
   }
 
-  private cargarEvolucion(slug: string): void {
-    this.perfilService.obtenerEvolucionHuella(slug).subscribe({
-      next: (ev) => this.evolucion.set(ev),
-      error: () => this.evolucion.set(null),
+  private cargarHuella(slug: string): void {
+    this.huellaEstado.set('cargando');
+    this.perfilService.obtenerEvolucionHuella(slug, this.rangoHuella()).subscribe({
+      next: (huella) => {
+        this.huella.set(huella);
+        this.huellaEstado.set('exito');
+      },
+      error: () => {
+        this.huella.set(null);
+        this.huellaEstado.set('error');
+      },
     });
+  }
+
+  protected cambiarRangoHuella(rango: RangoPeriodoHuella): void {
+    if (this.rangoHuella() === rango) {
+      return;
+    }
+    this.rangoHuella.set(rango);
+    this.cargarHuella(this.slug);
   }
 
   protected reintentar(): void {
@@ -219,20 +183,6 @@ export class PerfilPublicoPageComponent {
     return this.normalizarNivel(this.perfil()?.nivelEcologico);
   });
 
-  protected formatFechaActualizacion(fecha: string | null | undefined): string {
-    if (!fecha) return '';
-    const date = new Date(fecha);
-    return new Intl.DateTimeFormat('es-CR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }).format(date);
-  }
-
-  /**
-   * Normaliza el nivel ecológico del backend (que puede venir en mayúsculas: "ORO")
-   * al formato que usa el frontend ("Oro") para las clases CSS y el mapa de configuración.
-   */
   protected normalizarNivel(nivel: string | null | undefined): string {
     if (!nivel || nivel.trim() === '') return 'Sin nivel';
     const limpio = nivel.trim().toLowerCase();
@@ -254,30 +204,73 @@ export class PerfilPublicoPageComponent {
     return new Intl.NumberFormat('es-CR').format(value);
   }
 
-  protected getEstadoBadgeClass(estado: string): string {
+  protected formatToneladas(value: number | undefined): string {
+    if (value === undefined || value === null) return '0';
+    return new Intl.NumberFormat('es-CR', { maximumFractionDigits: 2 }).format(value);
+  }
+
+  protected formatVariacion(value: number | null | undefined): string {
+    if (value === undefined || value === null) return 'Sin variacion';
+    const prefijo = value > 0 ? '+' : '';
+    return `${prefijo}${new Intl.NumberFormat('es-CR', { maximumFractionDigits: 1 }).format(value)}%`;
+  }
+
+  protected ultimoPuntoHuella(): PuntoHuella | null {
+    const serie = this.huella()?.serie ?? [];
+    return serie.length ? serie[serie.length - 1] : null;
+  }
+
+  protected tendenciaLabel(): string {
+    switch (this.huella()?.tendencia) {
+      case 'reduccion':
+        return 'Disminuyo';
+      case 'aumento':
+        return 'Aumento';
+      default:
+        return 'Se mantuvo';
+    }
+  }
+
+  protected sectorFormateado(): string {
+    return capitalizar(this.perfil()?.sectorIndustrial);
+  }
+
+  protected paisNombre(): string {
+    return nombrePais(this.perfil()?.pais);
+  }
+
+  protected esPaisCostaRica(): boolean {
+    return esCostaRica(this.perfil()?.pais);
+  }
+
+  protected getEstadoBadgeVariant(estado: string): BadgeVariant {
     switch (estado) {
       case 'ACTIVA':
-        return 'badge--vigente';
+        return 'success';
       case 'VENCIDA':
-        return 'badge--vencida';
+        return 'warning';
       case 'REVOCADA':
-        return 'badge--revocada';
+        return 'danger';
       default:
-        return 'badge--neutral';
+        return 'neutral';
     }
   }
 
   protected getEstadoLabel(estado: string): string {
     switch (estado) {
       case 'ACTIVA':
-        return 'VIGENTE';
+        return 'Vigente';
       case 'VENCIDA':
-        return 'VENCIDA';
+        return 'Vencida';
       case 'REVOCADA':
-        return 'REVOCADA';
+        return 'Revocada';
       default:
         return estado;
     }
+  }
+
+  protected esCertificacionActiva(estado: string): boolean {
+    return estado === 'ACTIVA';
   }
 
   protected getAnioVigencia(): string {
@@ -287,11 +280,11 @@ export class PerfilPublicoPageComponent {
   }
 
   private actualizarMetaTags(dto: PerfilPublicoDTO, slug: string): void {
-    this.titleService.setTitle(`${dto.nombreEmpresa} — Reputación Ecológica | CarbonHub`);
+    this.titleService.setTitle(`${dto.nombreEmpresa} - Reputacion Ecologica | CarbonHub`);
     this.meta.updateTag({ property: 'og:title', content: dto.nombreEmpresa });
     this.meta.updateTag({
       property: 'og:description',
-      content: `Perfil de reputación ecológica de ${dto.nombreEmpresa} — Nivel ${dto.nivelEcologico}`,
+      content: `Perfil de reputacion ecologica de ${dto.nombreEmpresa} - Nivel ${dto.nivelEcologico}`,
     });
     this.meta.updateTag({
       property: 'og:image',

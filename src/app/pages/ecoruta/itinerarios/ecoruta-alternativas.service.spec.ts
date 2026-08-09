@@ -58,7 +58,7 @@ describe('EcoRutaAlternativasService', () => {
     generadoParcial: false,
     mensajeParcial: null,
     dias: [],
-    establecimientosEvaluados: null,
+    establecimientosEvaluados: [],
   };
 
   beforeEach(() => {

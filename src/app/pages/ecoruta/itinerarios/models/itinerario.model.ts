@@ -30,13 +30,13 @@ export interface Itinerario {
   estado: string;
   version: number;
   puntuacionAmbientalPreliminar: number | null;
-  ecoScore?: number | null;
-  clasificacionAmbiental?: 'EXCELENTE' | 'BUENA' | 'MODERADA' | 'MEJORABLE' | null;
-  ecoScoreParcial?: boolean;
-  ecoScoreCalculadoEn?: string | null;
+  ecoScore: number | null;
+  clasificacionAmbiental: 'EXCELENTE' | 'BUENA' | 'MODERADA' | 'MEJORABLE' | null;
+  ecoScoreParcial: boolean;
+  ecoScoreCalculadoEn: string | null;
   fechaGeneracion: string;
   generadoParcial: boolean;
   mensajeParcial: string | null;
   dias: ItinerarioDia[];
-  establecimientosEvaluados?: EstablecimientoEcoScore[] | null;
+  establecimientosEvaluados: EstablecimientoEcoScore[] | null;
 }

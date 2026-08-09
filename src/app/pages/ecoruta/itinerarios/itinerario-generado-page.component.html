@@ -21,62 +21,100 @@
     <div class="ch-itinerario-generado">
       <div class="ch-itinerario-generado__contenido">
         <section class="ch-itinerario-generado__principal">
-          <section class="ch-itinerario-generado__resumen" aria-label="Resumen del itinerario">
-            <div class="ch-itinerario-generado__gauge">
-              <svg class="ch-itinerario-generado__gauge-svg" viewBox="0 0 120 120">
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="54"
-                  fill="none"
-                  stroke="var(--ch-border)"
-                  stroke-width="10"
-                />
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="54"
-                  fill="none"
-                  stroke="var(--ch-green)"
-                  stroke-width="10"
-                  stroke-linecap="round"
-                  [attr.stroke-dasharray]="donutDasharray()"
-                  transform="rotate(-90 60 60)"
-                />
-              </svg>
-              <div class="ch-itinerario-generado__gauge-centro">
-                @if (data.puntuacionAmbientalPreliminar !== null) {
-                  <span class="ch-itinerario-generado__gauge-valor">{{
-                    data.puntuacionAmbientalPreliminar
-                  }}</span>
-                  <span class="ch-itinerario-generado__gauge-max">/ 100</span>
+          <p class="ch-itinerario-generado__meta">
+            Generado el {{ data.fechaGeneracion | date: 'dd/MM/yyyy - HH:mm' }} · Inicia el
+            {{ data.fechaInicio | date: 'dd/MM/yyyy' }}
+          </p>
+
+          <section
+            class="ch-itinerario-generado__resumen"
+            aria-label="Resumen del EcoScore del viaje"
+          >
+            <div class="ch-itinerario-generado__gauge-grupo">
+              <div class="ch-itinerario-generado__gauge">
+                <svg class="ch-itinerario-generado__gauge-svg" viewBox="0 0 120 120">
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="54"
+                    fill="none"
+                    stroke="var(--ch-border)"
+                    stroke-width="10"
+                  />
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="54"
+                    fill="none"
+                    class="ch-itinerario-generado__gauge-progreso"
+                    [class]="
+                      'ch-itinerario-generado__gauge-progreso--' + (bandaEcoScore()?.clave ?? '')
+                    "
+                    stroke-width="10"
+                    stroke-linecap="round"
+                    [attr.stroke-dasharray]="donutDasharray()"
+                    transform="rotate(-90 60 60)"
+                  />
+                </svg>
+                <div class="ch-itinerario-generado__gauge-centro">
+                  @if (data.ecoScore !== null) {
+                    <span
+                      class="ch-itinerario-generado__gauge-valor"
+                      [class]="
+                        'ch-itinerario-generado__gauge-valor--' + (bandaEcoScore()?.clave ?? '')
+                      "
+                      >{{ data.ecoScore }}</span
+                    >
+                    <span class="ch-itinerario-generado__gauge-max">/ 100</span>
+                  }
+                </div>
+              </div>
+
+              <div class="ch-itinerario-generado__eco-info">
+                <p class="ch-itinerario-generado__eco-label">EcoScore del viaje</p>
+                @if (bandaEcoScore(); as banda) {
+                  <div
+                    class="ch-itinerario-generado__eco-clase"
+                    [class]="'ch-itinerario-generado__eco-clase--' + banda.clave"
+                  >
+                    <app-icon name="hoja-solida" [size]="18" aria-hidden="true" />
+                    <span>{{ banda.texto }}</span>
+                  </div>
                 }
               </div>
-              <p class="ch-itinerario-generado__gauge-label">ECOSCORE DEL VIAJE</p>
-              @if (bandaEcoScore(); as banda) {
-                <app-badge [variant]="banda.variant">{{ banda.texto }}</app-badge>
+            </div>
+
+            <div class="ch-itinerario-generado__escala" aria-hidden="true">
+              @for (item of escalaEcoScore; track item.clave) {
+                <div
+                  class="ch-itinerario-generado__escala-item"
+                  [class]="'ch-itinerario-generado__escala-item--' + item.clave.toLowerCase()"
+                  [class.is-activo]="data.clasificacionAmbiental === item.clave"
+                >
+                  <span
+                    class="ch-itinerario-generado__escala-punto"
+                    [class]="'ch-itinerario-generado__escala-punto--' + item.clave.toLowerCase()"
+                  ></span>
+                  {{ item.rango }} {{ item.texto }}
+                </div>
               }
             </div>
-            <div class="ch-itinerario-generado__resumen-info">
-              <app-heading
-                level="h1"
-                [text]="'Costa Rica sostenible · ' + data.cantidadDias + ' días'"
-              />
-              <p>
-                Generado el {{ data.fechaGeneracion | date: 'dd/MM/yyyy - HH:mm' }} · Inicia el
-                {{ data.fechaInicio | date: 'dd/MM/yyyy' }}
-              </p>
-              @if (esVersionVigente()) {
-                <app-badge variant="success">Versión vigente</app-badge>
-              }
-            </div>
-            <app-button (click)="volverAMisItinerarios()">Volver a mis itinerarios</app-button>
           </section>
 
           @if (data.generadoParcial && data.mensajeParcial) {
             <div class="ch-itinerario-generado__aviso-parcial" role="status">
               <app-icon name="info" [size]="16" aria-hidden="true" />
               <span>{{ data.mensajeParcial }}</span>
+            </div>
+          }
+
+          @if (data.ecoScoreParcial) {
+            <div class="ch-itinerario-generado__aviso-parcial" role="status">
+              <app-icon name="info" [size]="16" aria-hidden="true" />
+              <span
+                >El EcoScore fue calculado con información parcial por falta de indicadores
+                ambientales.</span
+              >
             </div>
           }
 
@@ -169,6 +207,28 @@
                 </ul>
               }
             </article>
+          }
+
+          @if (establecimientosEvaluados().length > 0) {
+            <section
+              class="ch-itinerario-generado__establecimientos"
+              aria-label="Desglose ambiental por establecimiento"
+            >
+              <app-heading level="h2" text="Desglose por establecimiento" />
+              <ul class="ch-itinerario-generado__establecimientos-lista">
+                @for (
+                  establecimiento of establecimientosEvaluados();
+                  track establecimiento.nombreEstablecimiento
+                ) {
+                  <li class="ch-itinerario-generado__establecimiento">
+                    <span>{{ establecimiento.nombreEstablecimiento }}</span>
+                    <app-puntuacion-ambiental-badge
+                      [puntuacion]="establecimiento.puntuacionAmbiental"
+                    />
+                  </li>
+                }
+              </ul>
+            </section>
           }
         </section>
 

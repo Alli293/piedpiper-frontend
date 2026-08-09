@@ -1,7 +1,7 @@
-import { DatePipe, Location } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
@@ -12,11 +12,11 @@ import {
 } from '../../../shared/components/filter-chips/filter-chips.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
-import { LinkDirective } from '../../../shared/components/link/link.directive';
 import { StateLayoutComponent } from '../../../shared/layouts/state-layout/state-layout.component';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
-import { CertificacionPublica } from '../perfil-publico.models';
+import { CertificacionPublica, PerfilPublicoDTO } from '../perfil-publico.models';
 import { PerfilPublicoService } from '../perfil-publico.service';
+import { PerfilPublicoSeccionHeaderComponent } from '../shared/perfil-publico-seccion-header.component';
 
 type FiltroEstado = 'TODAS' | 'ACTIVA' | 'VENCIDA' | 'REVOCADA';
 
@@ -40,8 +40,7 @@ const ESTADOS: Record<string, { etiqueta: string; variante: BadgeVariant }> = {
     FilterChipsComponent,
     HeadingComponent,
     IconComponent,
-    LinkDirective,
-    RouterLink,
+    PerfilPublicoSeccionHeaderComponent,
     StateLayoutComponent,
   ],
   templateUrl: './certificaciones-publicas-page.component.html',
@@ -49,17 +48,19 @@ const ESTADOS: Record<string, { etiqueta: string; variante: BadgeVariant }> = {
 })
 export class CertificacionesPublicasPageComponent implements OnInit {
   private readonly perfilPublicoService = inject(PerfilPublicoService);
-  private readonly location = inject(Location);
+  private readonly router = inject(Router);
 
   readonly slug = input.required<string>();
 
   protected readonly certificaciones = signal<CertificacionPublica[]>([]);
+  protected readonly perfil = signal<PerfilPublicoDTO | null>(null);
   protected readonly cargando = signal(true);
   protected readonly error = signal(false);
   protected readonly noEncontrado = signal(false);
   protected readonly errorMensaje = signal(MENSAJE_ERROR_CERTIFICACIONES);
   protected readonly filtroEstado = signal<FiltroEstado>('TODAS');
   protected readonly noEncontradoMensaje = MENSAJE_NO_ENCONTRADO;
+  protected readonly codigoCopiado = signal<string | null>(null);
 
   private cargaRequestId = 0;
 
@@ -92,6 +93,7 @@ export class CertificacionesPublicasPageComponent implements OnInit {
 
   ngOnInit(): void {
     void this.cargarCertificaciones();
+    void this.cargarPerfil();
   }
 
   protected seleccionarFiltro(id: string): void {
@@ -107,7 +109,7 @@ export class CertificacionesPublicasPageComponent implements OnInit {
   }
 
   protected volver(): void {
-    this.location.back();
+    void this.router.navigate(['/empresa', this.slug(), 'reputacion']);
   }
 
   protected etiqueta(estado: string): string {
@@ -116,6 +118,29 @@ export class CertificacionesPublicasPageComponent implements OnInit {
 
   protected variante(estado: string): BadgeVariant {
     return ESTADOS[estado]?.variante ?? 'neutral';
+  }
+
+  protected async copiarCodigo(codigo: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(codigo);
+      this.codigoCopiado.set(codigo);
+      setTimeout(() => this.codigoCopiado.set(null), 2000);
+    } catch {
+      // Clipboard API no disponible o permiso denegado: no hay accion de respaldo posible.
+    }
+  }
+
+  protected verificar(codigoVerificacion: string): void {
+    void this.router.navigate(['/verificar', codigoVerificacion]);
+  }
+
+  private async cargarPerfil(): Promise<void> {
+    try {
+      const perfil = await firstValueFrom(this.perfilPublicoService.obtenerPerfil(this.slug()));
+      this.perfil.set(perfil);
+    } catch {
+      // El encabezado degrada a su variante generica; no afecta el resto de la pagina.
+    }
   }
 
   private async cargarCertificaciones(): Promise<void> {

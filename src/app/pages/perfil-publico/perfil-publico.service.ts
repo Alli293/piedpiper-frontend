@@ -6,10 +6,11 @@ import { EnlacePerfilDTO } from './models/enlace-perfil.model';
 import {
   BusquedaPerfilPublicoDTO,
   CertificacionPublica,
-  EvolucionHuellaPublica,
+  EvolucionHuellaDTO,
   InsigniaEmpresa,
   PageResponse,
   PerfilPublicoDTO,
+  RangoPeriodoHuella,
 } from './perfil-publico.models';
 
 @Injectable({ providedIn: 'root' })
@@ -50,6 +51,17 @@ export class PerfilPublicoService {
     );
   }
 
+  obtenerEvolucionHuella(
+    slug: string,
+    rango: RangoPeriodoHuella = 'ultimos_3_anios'
+  ): Observable<EvolucionHuellaDTO> {
+    const params = new HttpParams().set('rango', rango);
+    return this.http.get<EvolucionHuellaDTO>(
+      `${this.baseUrl}/${encodeURIComponent(slug)}/evolucion-huella`,
+      { params }
+    );
+  }
+
   descargarInsigniaJsonLd(urlVerificacionPublica: string): Observable<Blob> {
     return this.http.get(urlVerificacionPublica, { responseType: 'blob' });
   }
@@ -60,11 +72,5 @@ export class PerfilPublicoService {
 
   obtenerEnlaceComparticion(slug: string): Observable<EnlacePerfilDTO> {
     return this.http.get<EnlacePerfilDTO>(`${this.baseUrl}/${encodeURIComponent(slug)}/compartir`);
-  }
-
-  obtenerEvolucionHuella(slug: string): Observable<EvolucionHuellaPublica> {
-    return this.http.get<EvolucionHuellaPublica>(
-      `${this.baseUrl}/${encodeURIComponent(slug)}/evolucion-huella`
-    );
   }
 }

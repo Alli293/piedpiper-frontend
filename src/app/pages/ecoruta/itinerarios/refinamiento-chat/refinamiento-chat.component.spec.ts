@@ -117,7 +117,7 @@ describe('RefinamientoChatComponent — integración con alternativas', () => {
     fechaGeneracion: '2026-07-30T20:00:00Z',
     generadoParcial: false,
     mensajeParcial: null,
-    establecimientosEvaluados: null,
+    establecimientosEvaluados: [],
     dias: [
       {
         numeroDia: 1,
