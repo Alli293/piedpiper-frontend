@@ -4,96 +4,6 @@
 // PUBLIC PROFILE PAGE — Redesigned layout
 // ============================================================
 
-// === Header ===
-.pub-header {
-  background: var(--ch-bg-white);
-  border-bottom: 1px solid var(--ch-border);
-  padding: var(--ch-space-3) var(--ch-space-4);
-
-  &__inner {
-    max-width: 1080px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  &__left {
-    display: flex;
-    align-items: center;
-    gap: var(--ch-space-3);
-  }
-
-  &__badge {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--ch-space-1);
-    padding: var(--ch-space-1) var(--ch-space-2);
-    border-radius: var(--ch-radius-pill);
-    background: var(--ch-green-soft);
-    color: var(--ch-green-dark);
-    font-family: var(--ch-font-body);
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-
-  &__right {
-    display: flex;
-    align-items: center;
-    gap: var(--ch-space-4);
-  }
-
-  &__link {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--ch-space-1);
-    font-family: var(--ch-font-body);
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--ch-text-secondary);
-    text-decoration: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-
-    &:hover {
-      color: var(--ch-text-primary);
-    }
-
-    &:focus-visible {
-      @include mixins.focus-ring;
-      border-radius: var(--ch-radius-sm);
-    }
-  }
-
-  &__btn-compartir {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--ch-space-1);
-    font-family: var(--ch-font-body);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--ch-green-dark);
-    background: var(--ch-bg-white);
-    border: 1px solid var(--ch-green);
-    border-radius: var(--ch-radius-md);
-    padding: var(--ch-space-1) var(--ch-space-3);
-    cursor: pointer;
-    transition:
-      background-color var(--ch-transition),
-      color var(--ch-transition);
-
-    &:hover {
-      background: var(--ch-green-soft);
-    }
-
-    &:focus-visible {
-      @include mixins.focus-ring;
-    }
-  }
-}
-
 // === Loading ===
 .pub-loading {
   display: flex;
@@ -608,18 +518,12 @@
   border: 1px solid var(--ch-border);
   border-radius: var(--ch-radius-md);
   overflow: hidden;
-// === Chart card ===
-.pub-chart-card {
-  display: block;
-  box-shadow: var(--ch-shadow-sm);
-}
 
-.pub-chart-placeholder {
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: var(--ch-space-4);
+    padding: var(--ch-space-4);
     border-bottom: 1px solid var(--ch-border);
     flex-wrap: wrap;
     gap: var(--ch-space-3);
@@ -653,30 +557,6 @@
     font-size: 0.8125rem;
     color: var(--ch-text-secondary);
     flex-wrap: wrap;
-  }
-
-  &__trend {
-    display: inline-flex;
-    align-items: center;
-    min-height: 24px;
-    padding: 0 var(--ch-space-2);
-    border-radius: var(--ch-radius-pill);
-    font-weight: 700;
-  }
-
-  &__trend--reduccion {
-    background: var(--ch-green-soft);
-    color: var(--ch-green-dark);
-  }
-
-  &__trend--aumento {
-    background: color-mix(in srgb, var(--ch-warning) 15%, transparent);
-    color: var(--ch-warning-dark);
-  }
-
-  &__trend--sin-cambio {
-    background: var(--ch-bg-main);
-    color: var(--ch-text-muted);
   }
 
   &__filters {
@@ -713,6 +593,30 @@
     }
   }
 
+  &__trend {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0 var(--ch-space-2);
+    border-radius: var(--ch-radius-pill);
+    font-weight: 700;
+  }
+
+  &__trend--reduccion {
+    background: var(--ch-green-soft);
+    color: var(--ch-green-dark);
+  }
+
+  &__trend--aumento {
+    background: color-mix(in srgb, var(--ch-warning) 15%, transparent);
+    color: var(--ch-warning-dark);
+  }
+
+  &__trend--sin-cambio {
+    background: var(--ch-bg-main);
+    color: var(--ch-text-muted);
+  }
+
   &__state,
   &__message {
     display: flex;
@@ -720,15 +624,6 @@
     justify-content: center;
     min-height: 240px;
     padding: var(--ch-space-6);
-    min-height: 200px;
-    color: var(--ch-text-muted);
-    padding-top: var(--ch-space-6);
-
-    p {
-      font-family: var(--ch-font-body);
-      font-size: 0.875rem;
-      margin: var(--ch-space-3) 0 0;
-    }
   }
 
   &__message {

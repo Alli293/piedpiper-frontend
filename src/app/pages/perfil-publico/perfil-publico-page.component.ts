@@ -1,17 +1,16 @@
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ActivatedRoute } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
-import { CompartirPerfilComponent } from './compartir-perfil/compartir-perfil.component';
-import { EvolucionHuellaChartComponent } from './evolucion-huella-chart.component';
 import { BadgeComponent, BadgeVariant } from '../../shared/components/badge/badge.component';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
+import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
 import { PublicHeaderComponent } from '../../shared/components/public-header/public-header.component';
 import { capitalizar, esCostaRica, nombrePais } from '../../shared/utils/empresa-catalogos.utils';
+import { CompartirPerfilComponent } from './compartir-perfil/compartir-perfil.component';
+import { EvolucionHuellaChartComponent } from './evolucion-huella-chart.component';
 import {
   CertificacionPublica,
   EvolucionHuellaDTO,
@@ -54,7 +53,6 @@ const RANGOS_HUELLA: RangoHuellaOption[] = [
   standalone: true,
   templateUrl: './perfil-publico-page.component.html',
   styleUrl: './perfil-publico-page.component.scss',
-  imports: [IconComponent, LogoComponent, CompartirPerfilComponent, EvolucionHuellaChartComponent],
   imports: [
     RouterLink,
     IconComponent,
@@ -63,8 +61,7 @@ const RANGOS_HUELLA: RangoHuellaOption[] = [
     CardComponent,
     CardStatComponent,
     PublicHeaderComponent,
-    DecimalPipe,
-    BaseChartDirective,
+    EvolucionHuellaChartComponent,
   ],
 })
 export class PerfilPublicoPageComponent {
@@ -186,20 +183,6 @@ export class PerfilPublicoPageComponent {
     return this.normalizarNivel(this.perfil()?.nivelEcologico);
   });
 
-  protected formatFechaActualizacion(fecha: string | null | undefined): string {
-    if (!fecha) return '';
-    const date = new Date(fecha);
-    return new Intl.DateTimeFormat('es-CR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }).format(date);
-  }
-
-  /**
-   * Normaliza el nivel ecológico del backend (que puede venir en mayúsculas: "ORO")
-   * al formato que usa el frontend ("Oro") para las clases CSS y el mapa de configuración.
-   */
   protected normalizarNivel(nivel: string | null | undefined): string {
     if (!nivel || nivel.trim() === '') return 'Sin nivel';
     const limpio = nivel.trim().toLowerCase();
@@ -248,7 +231,6 @@ export class PerfilPublicoPageComponent {
     }
   }
 
-  protected getEstadoBadgeClass(estado: string): string {
   protected sectorFormateado(): string {
     return capitalizar(this.perfil()?.sectorIndustrial);
   }

@@ -1,21 +1,15 @@
 import { Component, input } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
-import { Component, input } from '@angular/core';
-import * as fc from 'fast-check';
 
 import { environment } from '../../../environments/environment';
 import { IconComponent } from '../../shared/components/icon/icon.component';
-import { LogoComponent } from '../../shared/components/logo/logo.component';
-import { CompartirPerfilComponent } from './compartir-perfil/compartir-perfil.component';
 import { EvolucionHuellaChartComponent } from './evolucion-huella-chart.component';
+import { EvolucionHuellaDTO, PerfilPublicoDTO, PuntoHuella } from './perfil-publico.models';
 import { PerfilPublicoPageComponent } from './perfil-publico-page.component';
 import { PerfilPublicoService } from './perfil-publico.service';
-import { EvolucionHuellaDTO, PerfilPublicoDTO, PuntoHuella } from './perfil-publico.models';
-import { environment } from '../../../environments/environment';
 
 @Component({ selector: 'app-icon', template: '', standalone: true })
 class IconStubComponent {
@@ -23,29 +17,15 @@ class IconStubComponent {
   size = input(16);
 }
 
-@Component({ selector: 'app-logo', template: '', standalone: true })
-class LogoStubComponent {
-  variant = input('on-light');
-  iconSize = input(24);
-  textSize = input('18px');
-  gap = input('9px');
-}
-
-@Component({ selector: 'app-compartir-perfil', template: '', standalone: true })
-class CompartirPerfilStubComponent {
-  slug = input.required<string>();
-}
-
 @Component({ selector: 'app-evolucion-huella-chart', template: '', standalone: true })
 class EvolucionHuellaChartStubComponent {
   serie = input<PuntoHuella[]>([]);
 }
 
-// --- Test data ---
 const PERFIL_MOCK: PerfilPublicoDTO = {
   nombreEmpresa: 'EcoTech Solutions',
   logoUrl: 'https://example.com/logo.png',
-  sectorIndustrial: 'Tecnología',
+  sectorIndustrial: 'Tecnologia',
   pais: 'Costa Rica',
   nivelEcologico: 'Oro',
   fechaActualizacionNivel: '2025-03-15T14:30:00Z',
@@ -86,30 +66,15 @@ describe('PerfilPublicoPageComponent', () => {
     })
       .overrideComponent(PerfilPublicoPageComponent, {
         remove: {
-          imports: [
-            IconComponent,
-            LogoComponent,
-            CompartirPerfilComponent,
-            EvolucionHuellaChartComponent,
-          ],
+          imports: [IconComponent, EvolucionHuellaChartComponent],
         },
         add: {
-          imports: [
-            IconStubComponent,
-            LogoStubComponent,
-            CompartirPerfilStubComponent,
-            EvolucionHuellaChartStubComponent,
-          ],
-          imports: [IconComponent],
-        },
-        add: {
-          imports: [IconStubComponent],
+          imports: [IconStubComponent, EvolucionHuellaChartStubComponent],
         },
       })
       .compileComponents();
 
     httpMock = TestBed.inject(HttpTestingController);
-
     fixture = TestBed.createComponent(PerfilPublicoPageComponent);
     component = fixture.componentInstance;
   });
@@ -142,18 +107,19 @@ describe('PerfilPublicoPageComponent', () => {
     expect(el.querySelector('.pub-loading__text')?.textContent).toContain('Cargando perfil');
   });
 
-  it('renderiza nombre, sector, país y nivel cuando la data carga exitosamente', () => {
+  it('renderiza nombre, pais y nivel cuando la data carga exitosamente', () => {
     fixture.detectChanges();
     flushPerfil(PERFIL_MOCK);
 
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('.pub-card__nombre')?.textContent).toContain('EcoTech Solutions');
     expect(el.querySelector('.pub-nivel__nombre')?.textContent).toContain('Oro');
+    expect(el.textContent).toContain('Costa Rica');
   });
 
-  it('renderiza página 404 cuando ocurre un error 404', () => {
+  it('renderiza pagina 404 cuando ocurre un error 404', () => {
     fixture.detectChanges();
-    flushError(404, { mensaje: 'El perfil que buscas no existe o ya no está disponible.' });
+    flushError(404, { mensaje: 'El perfil que buscas no existe o ya no esta disponible.' });
 
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('.pub-error--404')).not.toBeNull();
@@ -167,34 +133,37 @@ describe('PerfilPublicoPageComponent', () => {
     { input: 'PLATA', expected: 'Plata', cssClass: 'pub-nivel--plata' },
     { input: 'BRONCE', expected: 'Bronce', cssClass: 'pub-nivel--bronce' },
     { input: 'PLATINO', expected: 'Platino', cssClass: 'pub-nivel--platino' },
-  ])(
-    'normalizarNivel convierte $input a $expected y aplica clase $cssClass',
-    ({ input, expected, cssClass }) => {
-      fixture.detectChanges();
-      flushPerfil({ ...PERFIL_MOCK, nivelEcologico: input });
-
-      const el = fixture.nativeElement as HTMLElement;
-      expect(el.querySelector(`.${cssClass}`)).not.toBeNull();
-      expect(el.querySelector('.pub-nivel__nombre')?.textContent).toContain(expected);
-    }
-  );
-
-  it('abre el modal de compartir perfil', () => {
+  ])('normaliza $input a $expected y aplica $cssClass', ({ input, expected, cssClass }) => {
     fixture.detectChanges();
-    flushPerfil(PERFIL_MOCK);
+    flushPerfil({ ...PERFIL_MOCK, nivelEcologico: input });
 
-    const boton = fixture.nativeElement.querySelector(
-      '.pub-header__btn-compartir'
-    ) as HTMLButtonElement;
-    boton.click();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector(`.${cssClass}`)).not.toBeNull();
+    expect(el.querySelector('.pub-nivel__nombre')?.textContent).toContain(expected);
+  });
+
+  it('no muestra el boton de compartir del header mientras el perfil esta cargando', () => {
     fixture.detectChanges();
 
     const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('.pub-modal')).not.toBeNull();
-    expect(el.querySelector('app-compartir-perfil')).not.toBeNull();
+    expect(el.querySelector('.ch-public-header__compartir')).toBeNull();
   });
 
-  it('muestra gráfico y tendencia cuando hay varios periodos verificados', () => {
+  it('abre el modal de compartir perfil al hacer clic en compartir del header', () => {
+    fixture.detectChanges();
+    flushPerfil(PERFIL_MOCK);
+
+    const el = fixture.nativeElement as HTMLElement;
+    const botonCompartir: HTMLElement | null = el.querySelector('.ch-public-header__compartir');
+    expect(botonCompartir).not.toBeNull();
+
+    botonCompartir!.click();
+    fixture.detectChanges();
+
+    expect(el.querySelector('.pub-modal__title')?.textContent).toContain('Compartir perfil');
+  });
+
+  it('muestra grafico y tendencia cuando hay varios periodos verificados', () => {
     fixture.detectChanges();
     flushPerfil(PERFIL_MOCK);
 
@@ -232,7 +201,7 @@ describe('PerfilPublicoPageComponent', () => {
     expect(el.querySelector('app-evolucion-huella-chart')).toBeNull();
   });
 
-  it('muestra error inline cuando falla la evolución sin romper el perfil', () => {
+  it('muestra error inline cuando falla la evolucion sin romper el perfil', () => {
     fixture.detectChanges();
     httpMock.expectOne(`${baseUrl}/eco-tech`).flush(PERFIL_MOCK);
     httpMock.match(`${baseUrl}/eco-tech/certificaciones`).forEach((r) => r.flush([]));
@@ -246,24 +215,6 @@ describe('PerfilPublicoPageComponent', () => {
     expect(el.querySelector('.pub-card__nombre')?.textContent).toContain('EcoTech Solutions');
     expect(el.textContent).toContain(
       'No fue posible cargar la evolución de la huella de carbono en este momento.'
-    it.each([
-      { input: 'ORO', expected: 'Oro', cssClass: 'pub-nivel--oro' },
-      { input: 'PLATA', expected: 'Plata', cssClass: 'pub-nivel--plata' },
-      { input: 'BRONCE', expected: 'Bronce', cssClass: 'pub-nivel--bronce' },
-      { input: 'PLATINO', expected: 'Platino', cssClass: 'pub-nivel--platino' },
-    ])(
-      'normalizarNivel convierte $input (mayúsculas backend) a $expected y aplica clase $cssClass',
-      ({ input, expected, cssClass }) => {
-        fixture.detectChanges();
-        flushPerfil({ ...PERFIL_MOCK, nivelEcologico: input });
-
-        const el = fixture.nativeElement as HTMLElement;
-        const nivelCard = el.querySelector(`.${cssClass}`);
-        const nivelText = el.querySelector('.pub-nivel__nombre');
-
-        expect(nivelCard).not.toBeNull();
-        expect(nivelText?.textContent).toContain(expected);
-      }
     );
   });
 
@@ -282,35 +233,7 @@ describe('PerfilPublicoPageComponent', () => {
     req.flush({ ...EVOLUCION_MOCK, rangoPeriodo: 'historico' });
   });
 
-  it('formatea números con locale es-CR', () => {
+  it('formatea numeros con locale es-CR', () => {
     expect(component['formatNumero'](1234567)).toContain('1');
-      const el = fixture.nativeElement as HTMLElement;
-      // Debe mostrar el total y la variación
-      expect(el.querySelector('.pub-chart-placeholder__total')?.textContent).toContain('1.86');
-      expect(el.querySelector('.pub-chart-placeholder__change')?.textContent).toContain('-21');
-      // Debe haber un canvas para chart.js
-      expect(el.querySelector('canvas')).not.toBeNull();
-    });
-
-    it('no muestra el boton de compartir del header mientras el perfil esta cargando', () => {
-      fixture.detectChanges();
-
-      const el = fixture.nativeElement as HTMLElement;
-      expect(el.querySelector('.ch-public-header__compartir')).toBeNull();
-    });
-
-    it('abre el modal de compartir perfil al hacer clic en compartir del header', () => {
-      fixture.detectChanges();
-      flushPerfil(PERFIL_MOCK);
-
-      const el = fixture.nativeElement as HTMLElement;
-      const botonCompartir: HTMLElement | null = el.querySelector('.ch-public-header__compartir');
-      expect(botonCompartir).not.toBeNull();
-
-      botonCompartir!.click();
-      fixture.detectChanges();
-
-      expect(el.querySelector('.pub-modal__title')?.textContent).toContain('Compartir perfil');
-    });
   });
 });
