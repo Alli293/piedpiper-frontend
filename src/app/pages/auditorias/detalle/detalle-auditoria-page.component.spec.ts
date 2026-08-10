@@ -899,6 +899,27 @@ describe('DetalleAuditoriaPageComponent', () => {
   });
 
   /**
+   * La emision de la certificacion corre despues de que el resultado ya quedo guardado, asi que un
+   * fallo ahi devuelve error con la solicitud ya avanzada. Sin refrescar, la pantalla se queda en
+   * el paso anterior y el auditor vuelve a confirmar contra un estado final.
+   */
+  it('si la emision falla refresca el detalle para mostrar el estado real', async () => {
+    await montarCargaReporte('REPORTE_CARGADO');
+    auditoriasService.emitirResultado.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 }))
+    );
+    auditoriasService.obtenerDetalle.mockReturnValue(of(certificada));
+
+    await elegirResultado('aprobada');
+    await escribirVencimiento(2027, 7, 28);
+    botonConfirmarResultado()?.click();
+    await estabilizar();
+
+    expect(auditoriasService.obtenerDetalle).toHaveBeenCalled();
+    expect(raiz().textContent).toContain('Certificación emitida');
+  });
+
+  /**
    * Una devolucion con observaciones no emite certificacion, asi que mandar una vigencia seria
    * publicar la fecha de vencimiento de algo que no existe.
    */

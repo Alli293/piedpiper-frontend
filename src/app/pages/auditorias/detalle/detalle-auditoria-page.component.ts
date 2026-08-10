@@ -641,6 +641,11 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
       );
     } catch (err: unknown) {
       this.errorResultado.set(apiErrorMessage(err) ?? ERROR_RESULTADO);
+      // Un fallo al emitir la certificacion ocurre despues de que el resultado ya quedo guardado,
+      // asi que la solicitud puede haber avanzado aunque la respuesta sea un error. Sin este
+      // refresco la linea de tiempo se queda en el paso anterior y el auditor vuelve a confirmar,
+      // esta vez contra un estado final, y recibe un 409 que no explica nada.
+      await this.refrescar();
     } finally {
       this.enviandoResultado.set(false);
     }
