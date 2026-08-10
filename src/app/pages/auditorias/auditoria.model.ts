@@ -135,9 +135,22 @@ export interface ResponderDecisionRequest {
 
 export type ResultadoAuditoriaRequest = 'aprobada' | 'observaciones';
 
+/** Valor que devuelve el backend en el detalle: Jackson serializa el enum en mayúsculas. */
+export type ResultadoAuditoria = 'APROBADA' | 'OBSERVACIONES';
+
+/**
+ * Los dos campos son condicionales y excluyentes entre sí: al aprobar viaja la vigencia de la
+ * certificación, y al devolver con observaciones viaja el texto. Enviar el que no corresponde no
+ * rompe nada —el servidor ignora el sobrante— pero omitir el que sí corresponde devuelve 422.
+ */
 export interface EmitirResultadoAuditoriaRequest {
   resultado: ResultadoAuditoriaRequest;
+  observaciones?: string;
+  fechaVencimientoCert?: string;
 }
+
+export const MINIMO_CARACTERES_OBSERVACIONES = 20;
+export const MAXIMO_CARACTERES_OBSERVACIONES = 1000;
 
 export const MINIMO_CARACTERES_MOTIVO_RECHAZO = 10;
 export const MAXIMO_CARACTERES_MOTIVO_RECHAZO = 300;

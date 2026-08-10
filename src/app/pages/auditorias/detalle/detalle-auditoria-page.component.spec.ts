@@ -151,6 +151,56 @@ describe('DetalleAuditoriaPageComponent', () => {
     );
   }
 
+  function botonConfirmarResultado(): HTMLButtonElement | null {
+    return raiz().querySelector<HTMLButtonElement>(
+      '.ch-detalle-auditoria__resultado-acciones button'
+    );
+  }
+
+  function inputVencimiento(): HTMLInputElement | null {
+    return raiz().querySelector<HTMLInputElement>(
+      '.ch-detalle-auditoria__resultado-campos app-date-input input'
+    );
+  }
+
+  function textareaObservaciones(): HTMLTextAreaElement | null {
+    return raiz().querySelector<HTMLTextAreaElement>(
+      '.ch-detalle-auditoria__resultado-observaciones textarea'
+    );
+  }
+
+  /** Marca el radio del resultado y deja que el formulario reevalue sus campos condicionales. */
+  async function elegirResultado(valor: 'aprobada' | 'observaciones'): Promise<void> {
+    const radio = raiz().querySelector<HTMLInputElement>(
+      `.ch-detalle-auditoria__resultado-campos input[type="radio"][value="${valor}"]`
+    );
+    if (!radio) throw new Error(`No se encontró la opción de resultado "${valor}"`);
+    radio.checked = true;
+    radio.dispatchEvent(new Event('change', { bubbles: true }));
+    await estabilizar();
+  }
+
+  /**
+   * `app-date-input` es un flatpickr de solo lectura, así que asignarle `value` al input nativo no
+   * cambia nada. El helper compartido recorre el mismo camino que un clic en el calendario.
+   */
+  async function escribirVencimiento(anio: number, mes: number, dia: number): Promise<void> {
+    seleccionarFechaDeInput(
+      fixture,
+      new Date(anio, mes - 1, dia),
+      '.ch-detalle-auditoria__resultado-campos'
+    );
+    await estabilizar();
+  }
+
+  async function escribirObservaciones(texto: string): Promise<void> {
+    const textarea = textareaObservaciones();
+    if (!textarea) throw new Error('No se encontró el campo de observaciones');
+    textarea.value = texto;
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    await estabilizar();
+  }
+
   async function seleccionarReporte(archivo: File): Promise<void> {
     const input = inputReporte();
     if (!input) throw new Error('No se encontró el input de reporte');
@@ -764,22 +814,106 @@ describe('DetalleAuditoriaPageComponent', () => {
     await montarCargaReporte('REPORTE_CARGADO');
 
     expect(raiz().textContent).toContain('Emitir resultado');
-    expect(raiz().textContent).toContain('Aprobar auditor');
-    expect(raiz().textContent).toContain('Observaciones');
+    expect(raiz().textContent).toContain('Aprobada');
+    expect(raiz().textContent).toContain('Observaciones pendientes');
   });
 
-  it('envia el resultado aprobado y actualiza el estado', async () => {
+  /**
+   * Sin resultado elegido no hay campo obligatorio que cumplir, asi que el boton no puede estar
+   * habilitado: enviarlo produciria un 422 evitable.
+   */
+  it('el boton de confirmar arranca deshabilitado', async () => {
     await montarCargaReporte('REPORTE_CARGADO');
 
-    Array.from(raiz().querySelectorAll<HTMLButtonElement>('button'))
-      .find((boton) => boton.textContent?.includes('Aprobar auditor'))
-      ?.click();
+    expect(botonConfirmarResultado()?.disabled).toBe(true);
+  });
+
+  it('al elegir Aprobada pide la fecha de vencimiento y oculta las observaciones', async () => {
+    await montarCargaReporte('REPORTE_CARGADO');
+    await elegirResultado('aprobada');
+
+    expect(inputVencimiento()).not.toBeNull();
+    expect(textareaObservaciones()).toBeNull();
+  });
+
+  it('al elegir Observaciones pendientes pide el texto y oculta la fecha', async () => {
+    await montarCargaReporte('REPORTE_CARGADO');
+    await elegirResultado('observaciones');
+
+    expect(textareaObservaciones()).not.toBeNull();
+    expect(inputVencimiento()).toBeNull();
+  });
+
+  it('con Aprobada elegida pero sin fecha el boton sigue deshabilitado', async () => {
+    await montarCargaReporte('REPORTE_CARGADO');
+    await elegirResultado('aprobada');
+
+    expect(botonConfirmarResultado()?.disabled).toBe(true);
+  });
+
+  it('envia el resultado aprobado con la fecha de vencimiento y actualiza el estado', async () => {
+    await montarCargaReporte('REPORTE_CARGADO');
+    await elegirResultado('aprobada');
+    await escribirVencimiento(2027, 7, 28);
+
+    botonConfirmarResultado()?.click();
     await estabilizar();
 
     expect(auditoriasService.emitirResultado).toHaveBeenCalledWith('sol-1', {
       resultado: 'aprobada',
+      fechaVencimientoCert: '2027-07-28',
     });
     expect(raiz().textContent).toContain('Certificación emitida');
+  });
+
+  /** La auditoria de la solicitud de prueba se realizo el 2026-07-28. */
+  it('una fecha de vencimiento anterior a la auditoria deja el boton deshabilitado', async () => {
+    await montarCargaReporte('REPORTE_CARGADO');
+    await elegirResultado('aprobada');
+    await escribirVencimiento(2026, 7, 1);
+
+    expect(botonConfirmarResultado()?.disabled).toBe(true);
+    expect(auditoriasService.emitirResultado).not.toHaveBeenCalled();
+  });
+
+  it('observaciones de menos de 20 caracteres dejan el boton deshabilitado', async () => {
+    await montarCargaReporte('REPORTE_CARGADO');
+    await elegirResultado('observaciones');
+    await escribirObservaciones('revisar');
+
+    expect(botonConfirmarResultado()?.disabled).toBe(true);
+  });
+
+  it('envia las observaciones recortadas cuando alcanzan el minimo', async () => {
+    await montarCargaReporte('REPORTE_CARGADO');
+    await elegirResultado('observaciones');
+    await escribirObservaciones('  Falta el desglose de alcance 3 y las facturas.  ');
+
+    botonConfirmarResultado()?.click();
+    await estabilizar();
+
+    expect(auditoriasService.emitirResultado).toHaveBeenCalledWith('sol-1', {
+      resultado: 'observaciones',
+      observaciones: 'Falta el desglose de alcance 3 y las facturas.',
+    });
+  });
+
+  /**
+   * Una devolucion con observaciones no emite certificacion, asi que mandar una vigencia seria
+   * publicar la fecha de vencimiento de algo que no existe.
+   */
+  it('al devolver con observaciones no viaja la fecha de vencimiento', async () => {
+    await montarCargaReporte('REPORTE_CARGADO');
+    await elegirResultado('aprobada');
+    await escribirVencimiento(2027, 7, 28);
+    await elegirResultado('observaciones');
+    await escribirObservaciones('Falta el desglose de alcance 3 y las facturas.');
+
+    botonConfirmarResultado()?.click();
+    await estabilizar();
+
+    const enviado = auditoriasService.emitirResultado.mock.calls[0][1];
+    expect(enviado).not.toHaveProperty('fechaVencimientoCert');
   });
 
   /**
