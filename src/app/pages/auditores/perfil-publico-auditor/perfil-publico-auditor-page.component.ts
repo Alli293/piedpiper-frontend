@@ -10,6 +10,10 @@ import {
   ResenaVerificada,
 } from '../../../core/models/perfil-publico-auditor.model';
 import { PerfilPublicoAuditorService } from '../../../core/perfil-auditor/perfil-publico-auditor.service';
+import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
+import { BadgeComponent } from '../../../shared/components/badge/badge.component';
+import { CardComponent } from '../../../shared/components/card/card.component';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { ToastService } from '../../../shared/services/toast.service';
 
 type ErrorTipo = 'none' | '404' | '5xx';
@@ -17,7 +21,13 @@ type ErrorTipo = 'none' | '404' | '5xx';
 @Component({
   selector: 'app-perfil-publico-auditor-page',
   standalone: true,
-  imports: [DatePipe],
+  imports: [
+    DatePipe,
+    AvatarComponent,
+    BadgeComponent,
+    CardComponent,
+    IconComponent,
+  ],
   templateUrl: './perfil-publico-auditor-page.component.html',
   styleUrl: './perfil-publico-auditor-page.component.scss',
 })
@@ -43,6 +53,27 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
     );
   });
 
+  protected readonly iniciales = computed(() => {
+    const perfil = this.perfil();
+    if (!perfil) return '';
+    const partes = perfil.nombre.split(' ').filter(p => p.length > 0);
+    if (partes.length === 0) return '';
+    if (partes.length === 1) return partes[0][0].toUpperCase();
+    return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+  });
+
+  protected readonly certificacionesVencidas = computed(() => {
+    const perfil = this.perfil();
+    if (!perfil) return 0;
+    return perfil.certificaciones.filter(c => c.vencida).length;
+  });
+
+  protected readonly maxSectorPorcentaje = computed(() => {
+    const perfil = this.perfil();
+    if (!perfil || perfil.distribucionSectores.length === 0) return 100;
+    return Math.max(...perfil.distribucionSectores.map(s => s.porcentaje));
+  });
+
   ngOnInit(): void {
     const auditorId = this.route.snapshot.paramMap.get('id') ?? '';
     void this.cargarPerfil(auditorId);
@@ -59,6 +90,14 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
         queryParams: { auditorId: perfil.auditorId },
       });
     }
+  }
+
+  protected generarEstrellas(calificacion: number): boolean[] {
+    const estrellas: boolean[] = [];
+    for (let i = 1; i <= 5; i++) {
+      estrellas.push(i <= Math.round(calificacion));
+    }
+    return estrellas;
   }
 
   private async cargarPerfil(auditorId: string): Promise<void> {

@@ -7,6 +7,7 @@
 
 @if (!cargando() && error() && errorTipo() === '404') {
   <div class="ch-perfil-auditor__error" role="alert">
+    <app-icon name="page-not-found" [size]="64" aria-hidden="true" />
     <p class="ch-perfil-auditor__error-msg">El perfil solicitado no está disponible.</p>
     <button
       class="ch-perfil-auditor__error-btn"
@@ -23,187 +24,262 @@
 }
 
 @if (!cargando() && !error() && perfil()) {
+  <!-- Breadcrumb -->
+  <nav class="ch-perfil-auditor__breadcrumb" aria-label="Navegación de página">
+    <button
+      class="ch-perfil-auditor__back-btn"
+      type="button"
+      (click)="volverAlDirectorio()"
+      aria-label="Volver al directorio de auditores"
+    >
+      <app-icon name="volver" [size]="16" aria-hidden="true" />
+    </button>
+    <span class="ch-perfil-auditor__breadcrumb-text">
+      <span class="ch-perfil-auditor__breadcrumb-link" (click)="volverAlDirectorio()">AUDITORES</span>
+      <span class="ch-perfil-auditor__breadcrumb-sep">›</span>
+      <span>DIRECTORIO DE AUDITORES</span>
+    </span>
+  </nav>
+
+  <h1 class="ch-perfil-auditor__page-title">Perfil del auditor</h1>
+
   <main class="ch-perfil-auditor">
-    <!-- Header -->
-    <section class="ch-perfil-auditor__header" aria-label="Información del auditor">
-      <div class="ch-perfil-auditor__avatar-wrapper">
-        @if (perfil()!.fotoPerfil) {
-          <img
-            class="ch-perfil-auditor__avatar"
-            [src]="perfil()!.fotoPerfil"
-            [alt]="'Foto de ' + perfil()!.nombre"
-          />
-        } @else {
-          <div class="ch-perfil-auditor__avatar-placeholder" aria-hidden="true">
-            <span class="ch-perfil-auditor__avatar-icon">👤</span>
-          </div>
-        }
-      </div>
-      <div class="ch-perfil-auditor__info">
-        <h1 class="ch-perfil-auditor__nombre">{{ perfil()!.nombre }}</h1>
-        <span
-          class="ch-perfil-auditor__disponibilidad"
-          [class.ch-perfil-auditor__disponibilidad--activo]="perfil()!.disponible"
-          [class.ch-perfil-auditor__disponibilidad--inactivo]="!perfil()!.disponible"
-          [attr.aria-label]="perfil()!.disponible ? 'Disponible' : 'No disponible'"
-        >
-          {{ perfil()!.disponible ? 'Disponible' : 'No disponible' }}
-        </span>
-      </div>
-    </section>
-
-    <!-- Botón asignar auditoría (solo admin empresa) -->
-    @if (esAdminEmpresa()) {
-      <section class="ch-perfil-auditor__acciones">
-        <button
-          class="ch-perfil-auditor__btn-asignar"
-          type="button"
-          (click)="irAAsignarAuditoria()"
-        >
-          Asignar auditoría
-        </button>
-      </section>
-    }
-
-    <!-- Descripción profesional -->
-    @if (perfil()!.descripcionProfesional) {
-      <section class="ch-perfil-auditor__seccion" aria-labelledby="desc-title">
-        <h2 class="ch-perfil-auditor__seccion-titulo" id="desc-title">
-          Descripción profesional
-        </h2>
-        <p class="ch-perfil-auditor__descripcion">{{ perfil()!.descripcionProfesional }}</p>
-      </section>
-    }
-
-    <!-- Especialidades -->
-    <section class="ch-perfil-auditor__seccion" aria-labelledby="esp-title">
-      <h2 class="ch-perfil-auditor__seccion-titulo" id="esp-title">Especialidades</h2>
-      @if (perfil()!.especialidades.length > 0) {
-        <ul class="ch-perfil-auditor__lista">
-          @for (especialidad of perfil()!.especialidades; track especialidad) {
-            <li class="ch-perfil-auditor__lista-item">{{ especialidad }}</li>
-          }
-        </ul>
-      } @else {
-        <p class="ch-perfil-auditor__empty">Sin especialidades registradas</p>
-      }
-    </section>
-
-    <!-- Certificaciones -->
-    <section class="ch-perfil-auditor__seccion" aria-labelledby="cert-title">
-      <h2 class="ch-perfil-auditor__seccion-titulo" id="cert-title">Certificaciones</h2>
-      @if (perfil()!.certificaciones.length > 0) {
-        <ul class="ch-perfil-auditor__certificaciones">
-          @for (cert of perfil()!.certificaciones; track cert.nombre) {
-            <li class="ch-perfil-auditor__cert-item">
-              <span class="ch-perfil-auditor__cert-nombre">{{ cert.nombre }}</span>
-              <span class="ch-perfil-auditor__cert-entidad">{{ cert.entidadCertificadora }}</span>
-              @if (cert.fechaVigencia) {
-                <span class="ch-perfil-auditor__cert-fecha">
-                  Vigencia: {{ cert.fechaVigencia | date: 'dd/MM/yyyy' }}
-                </span>
+    <!-- Main content + Sidebar -->
+    <div class="ch-perfil-auditor__grid">
+      <!-- LEFT COLUMN: Main content -->
+      <div class="ch-perfil-auditor__main">
+        <!-- Header card -->
+        <app-card variant="outlined" padding="md" class="ch-perfil-auditor__header-card">
+          <div class="ch-perfil-auditor__header">
+            <div class="ch-perfil-auditor__avatar-wrapper">
+              @if (perfil()!.fotoPerfil) {
+                <img
+                  class="ch-perfil-auditor__avatar-img"
+                  [src]="perfil()!.fotoPerfil"
+                  [alt]="'Foto de ' + perfil()!.nombre"
+                />
+              } @else {
+                <div class="ch-perfil-auditor__avatar-circle" aria-hidden="true">
+                  <span class="ch-perfil-auditor__avatar-initials">{{ iniciales() }}</span>
+                </div>
               }
-              @if (cert.vencida) {
-                <span class="ch-perfil-auditor__cert-badge ch-perfil-auditor__cert-badge--vencida">
-                  Vencida
-                </span>
+            </div>
+            <div class="ch-perfil-auditor__info">
+              <div class="ch-perfil-auditor__name-row">
+                <h2 class="ch-perfil-auditor__nombre">{{ perfil()!.nombre }}</h2>
+                <app-icon
+                  class="ch-perfil-auditor__verified-icon"
+                  name="verificada"
+                  [size]="18"
+                  aria-label="Perfil verificado"
+                />
+              </div>
+              @if (perfil()!.descripcionProfesional) {
+                <p class="ch-perfil-auditor__subtitle">{{ perfil()!.descripcionProfesional }}</p>
               }
-            </li>
-          }
-        </ul>
-      } @else {
-        <p class="ch-perfil-auditor__empty">Sin certificaciones registradas</p>
-      }
-    </section>
-
-    <!-- Métricas -->
-    <section class="ch-perfil-auditor__seccion" aria-labelledby="metricas-title">
-      <h2 class="ch-perfil-auditor__seccion-titulo" id="metricas-title">Métricas</h2>
-      <div class="ch-perfil-auditor__metricas">
-        <div class="ch-perfil-auditor__metrica">
-          <span class="ch-perfil-auditor__metrica-label">Calificación promedio</span>
-          <span class="ch-perfil-auditor__metrica-valor">
-            @if (perfil()!.calificacionPromedio !== null) {
-              {{ perfil()!.calificacionPromedio }} / 5.0
-              @if (perfil()!.totalResenas !== null) {
-                <span class="ch-perfil-auditor__metrica-detalle">
-                  ({{ perfil()!.totalResenas }} reseñas)
-                </span>
+              @if (perfil()!.calificacionPromedio !== null) {
+                <div class="ch-perfil-auditor__rating">
+                  <span class="ch-perfil-auditor__stars" aria-hidden="true">
+                    @for (filled of generarEstrellas(perfil()!.calificacionPromedio!); track $index) {
+                      <span class="ch-perfil-auditor__star" [class.ch-perfil-auditor__star--filled]="filled">★</span>
+                    }
+                  </span>
+                  <span class="ch-perfil-auditor__rating-value">{{ perfil()!.calificacionPromedio }}</span>
+                  @if (perfil()!.totalResenas !== null) {
+                    <span class="ch-perfil-auditor__rating-count">· {{ perfil()!.totalResenas }} reseñas</span>
+                  }
+                </div>
               }
-            } @else {
-              Sin datos suficientes
-            }
-          </span>
-        </div>
-        <div class="ch-perfil-auditor__metrica">
-          <span class="ch-perfil-auditor__metrica-label">Auditorías completadas</span>
-          <span class="ch-perfil-auditor__metrica-valor">
-            @if (perfil()!.auditoriasCompletadas !== null) {
-              {{ perfil()!.auditoriasCompletadas }}
-            } @else {
-              Sin datos suficientes
-            }
-          </span>
-        </div>
-        <div class="ch-perfil-auditor__metrica">
-          <span class="ch-perfil-auditor__metrica-label">Tiempo promedio de respuesta</span>
-          <span class="ch-perfil-auditor__metrica-valor">
-            @if (perfil()!.tiempoPromedioRespuestaDias !== null) {
-              {{ perfil()!.tiempoPromedioRespuestaDias }} días
-            } @else {
-              Sin datos suficientes
-            }
-          </span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Distribución de sectores -->
-    <section class="ch-perfil-auditor__seccion" aria-labelledby="sectores-title">
-      <h2 class="ch-perfil-auditor__seccion-titulo" id="sectores-title">
-        Distribución de sectores
-      </h2>
-      @if (perfil()!.distribucionSectores.length > 0) {
-        <table class="ch-perfil-auditor__tabla" aria-label="Distribución de sectores auditados">
-          <thead>
-            <tr>
-              <th>Sector</th>
-              <th>Porcentaje</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (sector of perfil()!.distribucionSectores; track sector.sector) {
-              <tr>
-                <td>{{ sector.sector }}</td>
-                <td>{{ sector.porcentaje }}%</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      } @else {
-        <p class="ch-perfil-auditor__empty">Sin distribución de sectores disponible</p>
-      }
-    </section>
-
-    <!-- Reseñas verificadas -->
-    <section class="ch-perfil-auditor__seccion" aria-labelledby="resenas-title">
-      <h2 class="ch-perfil-auditor__seccion-titulo" id="resenas-title">Reseñas verificadas</h2>
-      @if (resenasOrdenadas().length > 0) {
-        <ul class="ch-perfil-auditor__resenas">
-          @for (resena of resenasOrdenadas(); track resena.fechaCalificacion) {
-            <li class="ch-perfil-auditor__resena-item">
-              <div class="ch-perfil-auditor__resena-header">
-                <span class="ch-perfil-auditor__resena-calificacion">
-                  {{ resena.calificacion }} / 5.0
+              <div class="ch-perfil-auditor__meta">
+                <span class="ch-perfil-auditor__meta-item">
+                  <app-icon name="ubicacion" [size]="14" aria-hidden="true" />
+                  San José, Costa Rica
                 </span>
-                <span class="ch-perfil-auditor__resena-fecha">
-                  {{ resena.fechaCalificacion | date: 'dd/MM/yyyy' }}
+                <span class="ch-perfil-auditor__meta-item">
+                  <app-icon name="reloj" [size]="14" aria-hidden="true" />
+                  @if (perfil()!.disponible) {
+                    Disponible para auditorías
+                  } @else {
+                    No disponible actualmente
+                  }
                 </span>
               </div>
-              <p class="ch-perfil-auditor__resena-comentario">{{ resena.comentario }}</p>
-            </li>
+            </div>
+          </div>
+        </app-card>
+
+        <!-- Especialidades -->
+        <section class="ch-perfil-auditor__section" aria-labelledby="esp-title">
+          <div class="ch-perfil-auditor__section-header">
+            <app-icon name="sector" [size]="18" aria-hidden="true" />
+            <h2 class="ch-perfil-auditor__section-title" id="esp-title">Especialidades</h2>
+          </div>
+          @if (perfil()!.especialidades.length > 0) {
+            <div class="ch-perfil-auditor__chips">
+              @for (especialidad of perfil()!.especialidades; track especialidad) {
+                <span class="ch-perfil-auditor__chip">{{ especialidad }}</span>
+              }
+            </div>
+          } @else {
+            <p class="ch-perfil-auditor__empty">Sin especialidades registradas</p>
           }
-        </ul>
+        </section>
+
+        <!-- Certificaciones -->
+        <section class="ch-perfil-auditor__section" aria-labelledby="cert-title">
+          <div class="ch-perfil-auditor__section-header">
+            <app-icon name="certificaciones" [size]="18" aria-hidden="true" />
+            <h2 class="ch-perfil-auditor__section-title" id="cert-title">Certificaciones</h2>
+            <span class="ch-perfil-auditor__section-count">{{ perfil()!.certificaciones.length }}</span>
+            @if (certificacionesVencidas() > 0) {
+              <span class="ch-perfil-auditor__section-warning">
+                {{ certificacionesVencidas() }} vencida{{ certificacionesVencidas() > 1 ? 's' : '' }}
+              </span>
+            }
+          </div>
+          @if (perfil()!.certificaciones.length > 0) {
+            <div class="ch-perfil-auditor__cert-list">
+              @for (cert of perfil()!.certificaciones; track cert.nombre) {
+                <div class="ch-perfil-auditor__cert-card">
+                  <div class="ch-perfil-auditor__cert-icon">
+                    <app-icon name="certificaciones" [size]="20" aria-hidden="true" />
+                  </div>
+                  <div class="ch-perfil-auditor__cert-content">
+                    <span class="ch-perfil-auditor__cert-nombre">{{ cert.nombre }}</span>
+                    <span class="ch-perfil-auditor__cert-details">
+                      {{ cert.entidadCertificadora }}
+                      @if (cert.fechaVigencia) {
+                        · Vence {{ cert.fechaVigencia | date: 'MMM yyyy' }}
+                      }
+                    </span>
+                  </div>
+                  <div class="ch-perfil-auditor__cert-status">
+                    @if (cert.vencida) {
+                      <app-badge variant="danger">VENCIDA</app-badge>
+                    } @else {
+                      <app-badge variant="success">VIGENTE</app-badge>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="ch-perfil-auditor__empty">Sin certificaciones registradas</p>
+          }
+        </section>
+      </div>
+
+      <!-- RIGHT COLUMN: Sidebar -->
+      <aside class="ch-perfil-auditor__sidebar">
+        <!-- Métricas de reputación -->
+        <app-card variant="outlined" padding="md" class="ch-perfil-auditor__sidebar-card">
+          <div class="ch-perfil-auditor__sidebar-header">
+            <app-icon name="benchmark" [size]="16" aria-hidden="true" />
+            <h3 class="ch-perfil-auditor__sidebar-title">Métricas de reputación</h3>
+          </div>
+
+          <div class="ch-perfil-auditor__kpis">
+            <div class="ch-perfil-auditor__kpi">
+              <span class="ch-perfil-auditor__kpi-value">
+                {{ perfil()!.auditoriasCompletadas ?? '—' }}
+              </span>
+              <span class="ch-perfil-auditor__kpi-label">Auditorías completadas</span>
+            </div>
+            <div class="ch-perfil-auditor__kpi">
+              <span class="ch-perfil-auditor__kpi-value">
+                @if (perfil()!.tiempoPromedioRespuestaDias !== null) {
+                  {{ perfil()!.tiempoPromedioRespuestaDias }}d
+                } @else {
+                  —
+                }
+              </span>
+              <span class="ch-perfil-auditor__kpi-label">Tiempo promedio respuesta</span>
+            </div>
+          </div>
+
+          @if (perfil()!.distribucionSectores.length > 0) {
+            <div class="ch-perfil-auditor__dist">
+              <span class="ch-perfil-auditor__dist-title">DISTRIBUCIÓN POR SECTOR</span>
+              <div class="ch-perfil-auditor__dist-bars">
+                @for (sector of perfil()!.distribucionSectores; track sector.sector) {
+                  <div class="ch-perfil-auditor__dist-row">
+                    <span class="ch-perfil-auditor__dist-label">{{ sector.sector }}</span>
+                    <div class="ch-perfil-auditor__dist-bar-wrapper">
+                      <div
+                        class="ch-perfil-auditor__dist-bar"
+                        [style.width.%]="(sector.porcentaje / maxSectorPorcentaje()) * 100"
+                      ></div>
+                    </div>
+                    <span class="ch-perfil-auditor__dist-pct">{{ sector.porcentaje }}%</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </app-card>
+
+        <!-- Contratar (solo admin empresa) -->
+        @if (esAdminEmpresa()) {
+          <app-card variant="outlined" padding="md" class="ch-perfil-auditor__sidebar-card">
+            <div class="ch-perfil-auditor__sidebar-header">
+              <app-icon name="auditorias" [size]="16" aria-hidden="true" />
+              <h3 class="ch-perfil-auditor__sidebar-title">Contratar</h3>
+            </div>
+            <p class="ch-perfil-auditor__hire-desc">
+              Selecciona este auditor para iniciar un proceso de auditoría con tu empresa.
+            </p>
+            <button
+              class="ch-perfil-auditor__hire-btn"
+              type="button"
+              (click)="irAAsignarAuditoria()"
+            >
+              Seleccionar para auditoría
+            </button>
+            <span class="ch-perfil-auditor__hire-note">
+              ACCIONES VISIBLES SOLO PARA ADMIN DE EMPRESA
+            </span>
+          </app-card>
+        }
+      </aside>
+    </div>
+
+    <!-- Reseñas verificadas (full width) -->
+    <section class="ch-perfil-auditor__section ch-perfil-auditor__section--full" aria-labelledby="resenas-title">
+      <div class="ch-perfil-auditor__section-header">
+        <app-icon name="auditor-badge" [size]="18" aria-hidden="true" />
+        <h2 class="ch-perfil-auditor__section-title" id="resenas-title">Reseñas verificadas</h2>
+        @if (perfil()!.totalResenas !== null) {
+          <span class="ch-perfil-auditor__section-count">{{ perfil()!.totalResenas }}</span>
+        }
+        @if (perfil()!.calificacionPromedio !== null) {
+          <span class="ch-perfil-auditor__section-avg">promedio {{ perfil()!.calificacionPromedio }}</span>
+        }
+      </div>
+      @if (resenasOrdenadas().length > 0) {
+        <div class="ch-perfil-auditor__resenas-grid">
+          @for (resena of resenasOrdenadas(); track resena.fechaCalificacion) {
+            <app-card variant="outlined" padding="sm" class="ch-perfil-auditor__resena-card">
+              <div class="ch-perfil-auditor__resena-top">
+                <div class="ch-perfil-auditor__resena-reviewer">
+                  <app-avatar size="sm" [initials]="'R'" />
+                  <div class="ch-perfil-auditor__resena-meta">
+                    <span class="ch-perfil-auditor__resena-name">Reseña verificada</span>
+                    <app-badge variant="success" icon="verificada">CONTRATO VERIFICADO</app-badge>
+                  </div>
+                </div>
+                <div class="ch-perfil-auditor__resena-rating-row">
+                  <span class="ch-perfil-auditor__stars ch-perfil-auditor__stars--sm" aria-hidden="true">
+                    @for (filled of generarEstrellas(resena.calificacion); track $index) {
+                      <span class="ch-perfil-auditor__star" [class.ch-perfil-auditor__star--filled]="filled">★</span>
+                    }
+                  </span>
+                  <span class="ch-perfil-auditor__resena-date">{{ resena.fechaCalificacion | date: 'dd/MM/yyyy' }}</span>
+                </div>
+              </div>
+              <p class="ch-perfil-auditor__resena-text">{{ resena.comentario }}</p>
+            </app-card>
+          }
+        </div>
       } @else {
         <p class="ch-perfil-auditor__empty">Este auditor aún no tiene reseñas</p>
       }
