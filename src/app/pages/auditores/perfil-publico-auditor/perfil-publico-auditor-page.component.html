@@ -10,11 +10,7 @@
     <div class="ch-perfil-auditor__error" role="alert">
       <app-icon name="page-not-found" [size]="64" aria-hidden="true" />
       <p class="ch-perfil-auditor__error-msg">El perfil solicitado no está disponible.</p>
-      <button
-        class="ch-perfil-auditor__error-btn"
-        type="button"
-        (click)="volverAlDirectorio()"
-      >
+      <button class="ch-perfil-auditor__error-btn" type="button" (click)="volverAlDirectorio()">
         Volver al directorio
       </button>
     </div>
@@ -62,13 +58,24 @@
                 @if (perfil()!.calificacionPromedio !== null) {
                   <div class="ch-perfil-auditor__rating">
                     <span class="ch-perfil-auditor__stars" aria-hidden="true">
-                      @for (filled of generarEstrellas(perfil()!.calificacionPromedio!); track $index) {
-                        <span class="ch-perfil-auditor__star" [class.ch-perfil-auditor__star--filled]="filled">★</span>
+                      @for (
+                        filled of generarEstrellas(perfil()!.calificacionPromedio!);
+                        track $index
+                      ) {
+                        <span
+                          class="ch-perfil-auditor__star"
+                          [class.ch-perfil-auditor__star--filled]="filled"
+                          >★</span
+                        >
                       }
                     </span>
-                    <span class="ch-perfil-auditor__rating-value">{{ perfil()!.calificacionPromedio }}</span>
+                    <span class="ch-perfil-auditor__rating-value">{{
+                      perfil()!.calificacionPromedio
+                    }}</span>
                     @if (perfil()!.totalResenas !== null) {
-                      <span class="ch-perfil-auditor__rating-count">· {{ perfil()!.totalResenas }} reseñas</span>
+                      <span class="ch-perfil-auditor__rating-count"
+                        >· {{ perfil()!.totalResenas }} reseñas</span
+                      >
                     }
                   </div>
                 }
@@ -99,7 +106,9 @@
             @if (perfil()!.especialidades.length > 0) {
               <div class="ch-perfil-auditor__chips">
                 @for (especialidad of perfil()!.especialidades; track especialidad) {
-                  <span class="ch-perfil-auditor__chip">{{ formatearEspecialidad(especialidad) }}</span>
+                  <span class="ch-perfil-auditor__chip">{{
+                    formatearEspecialidad(especialidad)
+                  }}</span>
                 }
               </div>
             } @else {
@@ -112,10 +121,14 @@
             <div class="ch-perfil-auditor__section-header">
               <app-icon name="certificaciones" [size]="18" aria-hidden="true" />
               <h2 class="ch-perfil-auditor__section-title" id="cert-title">Certificaciones</h2>
-              <span class="ch-perfil-auditor__section-count">{{ perfil()!.certificaciones.length }}</span>
+              <span class="ch-perfil-auditor__section-count">{{
+                perfil()!.certificaciones.length
+              }}</span>
               @if (certificacionesVencidas() > 0) {
                 <span class="ch-perfil-auditor__section-warning">
-                  {{ certificacionesVencidas() }} vencida{{ certificacionesVencidas() > 1 ? 's' : '' }}
+                  {{ certificacionesVencidas() }} vencida{{
+                    certificacionesVencidas() > 1 ? 's' : ''
+                  }}
                 </span>
               }
             </div>
@@ -226,7 +239,10 @@
       </div>
 
       <!-- Reseñas verificadas (full width) -->
-      <section class="ch-perfil-auditor__section ch-perfil-auditor__section--full" aria-labelledby="resenas-title">
+      <section
+        class="ch-perfil-auditor__section ch-perfil-auditor__section--full"
+        aria-labelledby="resenas-title"
+      >
         <div class="ch-perfil-auditor__section-header">
           <app-icon name="auditor-badge" [size]="18" aria-hidden="true" />
           <h2 class="ch-perfil-auditor__section-title" id="resenas-title">Reseñas verificadas</h2>
@@ -234,7 +250,9 @@
             <span class="ch-perfil-auditor__section-count">{{ perfil()!.totalResenas }}</span>
           }
           @if (perfil()!.calificacionPromedio !== null) {
-            <span class="ch-perfil-auditor__section-avg">promedio {{ perfil()!.calificacionPromedio }}</span>
+            <span class="ch-perfil-auditor__section-avg"
+              >promedio {{ perfil()!.calificacionPromedio }}</span
+            >
           }
         </div>
         @if (resenasOrdenadas().length > 0) {
@@ -250,12 +268,21 @@
                     </div>
                   </div>
                   <div class="ch-perfil-auditor__resena-rating-row">
-                    <span class="ch-perfil-auditor__stars ch-perfil-auditor__stars--sm" aria-hidden="true">
+                    <span
+                      class="ch-perfil-auditor__stars ch-perfil-auditor__stars--sm"
+                      aria-hidden="true"
+                    >
                       @for (filled of generarEstrellas(resena.calificacion); track $index) {
-                        <span class="ch-perfil-auditor__star" [class.ch-perfil-auditor__star--filled]="filled">★</span>
+                        <span
+                          class="ch-perfil-auditor__star"
+                          [class.ch-perfil-auditor__star--filled]="filled"
+                          >★</span
+                        >
                       }
                     </span>
-                    <span class="ch-perfil-auditor__resena-date">{{ resena.fechaCalificacion | date: 'dd/MM/yyyy' }}</span>
+                    <span class="ch-perfil-auditor__resena-date">{{
+                      resena.fechaCalificacion | date: 'dd/MM/yyyy'
+                    }}</span>
                   </div>
                 </div>
                 <p class="ch-perfil-auditor__resena-text">{{ resena.comentario }}</p>

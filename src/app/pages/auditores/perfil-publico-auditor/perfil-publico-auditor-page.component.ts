@@ -65,7 +65,7 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   protected readonly iniciales = computed(() => {
     const perfil = this.perfil();
     if (!perfil) return '';
-    const partes = perfil.nombre.split(' ').filter(p => p.length > 0);
+    const partes = perfil.nombre.split(' ').filter((p) => p.length > 0);
     if (partes.length === 0) return '';
     if (partes.length === 1) return partes[0][0].toUpperCase();
     return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
@@ -74,13 +74,13 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   protected readonly certificacionesVencidas = computed(() => {
     const perfil = this.perfil();
     if (!perfil) return 0;
-    return perfil.certificaciones.filter(c => c.vencida).length;
+    return perfil.certificaciones.filter((c) => c.vencida).length;
   });
 
   protected readonly maxSectorPorcentaje = computed(() => {
     const perfil = this.perfil();
     if (!perfil || perfil.distribucionSectores.length === 0) return 100;
-    return Math.max(...perfil.distribucionSectores.map(s => s.porcentaje));
+    return Math.max(...perfil.distribucionSectores.map((s) => s.porcentaje));
   });
 
   ngOnInit(): void {
@@ -123,9 +123,7 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
     this.perfil.set(null);
 
     try {
-      const resultado = await firstValueFrom(
-        this.perfilService.obtenerPerfilPublico(auditorId)
-      );
+      const resultado = await firstValueFrom(this.perfilService.obtenerPerfilPublico(auditorId));
       this.perfil.set(resultado);
     } catch (err: unknown) {
       this.error.set(true);

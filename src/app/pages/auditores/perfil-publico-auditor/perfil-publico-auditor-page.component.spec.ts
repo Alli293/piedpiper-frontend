@@ -242,9 +242,7 @@ describe('PerfilPublicoAuditorPageComponent', () => {
 
   describe('reseñas vacías', () => {
     it('muestra "Este auditor aún no tiene reseñas" cuando la lista está vacía', async () => {
-      perfilService.obtenerPerfilPublico.mockReturnValue(
-        of({ ...PERFIL_COMPLETO, resenas: [] })
-      );
+      perfilService.obtenerPerfilPublico.mockReturnValue(of({ ...PERFIL_COMPLETO, resenas: [] }));
 
       fixture = TestBed.createComponent(PerfilPublicoAuditorPageComponent);
       await estabilizar();
@@ -293,9 +291,7 @@ describe('PerfilPublicoAuditorPageComponent', () => {
       await estabilizar();
 
       const mensajes = toastService.toasts().map((t) => t.title);
-      expect(mensajes).toContain(
-        'No se pudo cargar el perfil del auditor. Intente nuevamente.'
-      );
+      expect(mensajes).toContain('No se pudo cargar el perfil del auditor. Intente nuevamente.');
     });
   });
 
