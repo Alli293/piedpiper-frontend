@@ -82,4 +82,30 @@ describe('ValidacionPendienteAuditorPageComponent', () => {
       'No pudimos cargar el estado de tu solicitud.'
     );
   });
+
+  it('con solicitud rechazada muestra el motivo y no la promesa de revision', async () => {
+    miSolicitudAuditorService.obtener.mockReturnValue(
+      of({
+        estado: 'RECHAZADO',
+        fechaSolicitud: '2026-06-28T00:00:00Z',
+        fechaResolucion: '2026-07-02T00:00:00Z',
+        motivoRechazo: 'Los documentos adjuntos no eran legibles.',
+      } satisfies MiSolicitudAuditor)
+    );
+    fixture = TestBed.createComponent(ValidacionPendienteAuditorPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const texto = (fixture.nativeElement as HTMLElement).textContent;
+    expect(texto).toContain('Tu solicitud fue rechazada');
+    expect(texto).toContain('Los documentos adjuntos no eran legibles.');
+    expect(texto).not.toContain('Tu cuenta está siendo revisada');
+    expect(texto).not.toContain('Te notificaremos');
+    expect(
+      Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button')).find((b) =>
+        b.textContent?.includes('Ir a mis auditorías')
+      )
+    ).toBeUndefined();
+  });
 });

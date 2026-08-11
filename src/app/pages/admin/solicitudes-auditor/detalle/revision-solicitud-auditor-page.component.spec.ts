@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
+import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { RevisionSolicitudAuditorPageComponent } from './revision-solicitud-auditor-page.component';
@@ -14,7 +14,7 @@ describe('RevisionSolicitudAuditorPageComponent', () => {
   let fixture: ComponentFixture<RevisionSolicitudAuditorPageComponent>;
   let component: RevisionSolicitudAuditorPageComponent;
   let toastService: ToastService;
-  let navigateByUrl: ReturnType<typeof vi.spyOn>;
+  let navigate: ReturnType<typeof vi.spyOn>;
   let validacionService: {
     obtenerDetalle: ReturnType<typeof vi.fn>;
     resolver: ReturnType<typeof vi.fn>;
@@ -63,7 +63,7 @@ describe('RevisionSolicitudAuditorPageComponent', () => {
       ],
     }).compileComponents();
 
-    navigateByUrl = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     fixture = TestBed.createComponent(RevisionSolicitudAuditorPageComponent);
     fixture.componentRef.setInput('id', 'sol-1');
     component = fixture.componentInstance;
@@ -137,7 +137,9 @@ describe('RevisionSolicitudAuditorPageComponent', () => {
     await interno().confirmarDecision();
 
     expect(validacionService.resolver).toHaveBeenCalledWith('sol-1', 'aprobado', undefined);
-    expect(navigateByUrl).toHaveBeenCalledWith('/admin/solicitudes-auditor');
+    expect(navigate).toHaveBeenCalledWith(['/admin/solicitudes-auditor'], {
+      queryParams: { pagina: 0 },
+    });
   });
 
   it('rechazar pide confirmacion antes de llamar al backend', () => {
@@ -177,6 +179,127 @@ describe('RevisionSolicitudAuditorPageComponent', () => {
 
     await interno().confirmarDecision();
 
-    expect(navigateByUrl).toHaveBeenCalledWith('/admin/solicitudes-auditor');
+    expect(navigate).toHaveBeenCalledWith(['/admin/solicitudes-auditor'], {
+      queryParams: { pagina: 0 },
+    });
+  });
+});
+
+describe('RevisionSolicitudAuditorPageComponent - solicitud ya resuelta', () => {
+  let fixture: ComponentFixture<RevisionSolicitudAuditorPageComponent>;
+  let validacionService: { obtenerDetalle: ReturnType<typeof vi.fn> };
+
+  const detalleAprobada: SolicitudDetalle = {
+    id: 'sol-2',
+    nombreAuditor: 'Luis Vega',
+    email: 'luis@correo.com',
+    estado: 'APROBADO',
+    fechaSolicitud: '2026-07-01T00:00:00Z',
+    aniosExperiencia: 3,
+    especialidades: [],
+    descripcionProfesional: null,
+    sitioWeb: null,
+    documentos: [],
+  };
+
+  beforeEach(async () => {
+    validacionService = { obtenerDetalle: vi.fn().mockReturnValue(of(detalleAprobada)) };
+
+    await TestBed.configureTestingModule({
+      imports: [RevisionSolicitudAuditorPageComponent],
+      providers: [
+        provideRouter([]),
+        { provide: ValidacionService, useValue: validacionService },
+        ToastService,
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(RevisionSolicitudAuditorPageComponent);
+    fixture.componentRef.setInput('id', 'sol-2');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  });
+
+  it('muestra el badge real y oculta el formulario de decision', () => {
+    const texto = (fixture.nativeElement as HTMLElement).textContent;
+
+    expect(texto).toContain('Aprobada');
+    expect(texto).not.toContain('Pendiente de validación');
+    expect((fixture.nativeElement as HTMLElement).querySelector('form')).toBeNull();
+  });
+});
+
+describe('RevisionSolicitudAuditorPageComponent - pagina de origen', () => {
+  let fixture: ComponentFixture<RevisionSolicitudAuditorPageComponent>;
+  let navigate: ReturnType<typeof vi.spyOn>;
+  let component: RevisionSolicitudAuditorPageComponent;
+  let validacionService: {
+    obtenerDetalle: ReturnType<typeof vi.fn>;
+    resolver: ReturnType<typeof vi.fn>;
+  };
+
+  const detalle: SolicitudDetalle = {
+    id: 'sol-1',
+    nombreAuditor: 'Ana Mora',
+    email: 'ana@correo.com',
+    estado: 'PENDIENTE',
+    fechaSolicitud: '2026-07-14T00:00:00Z',
+    aniosExperiencia: 5,
+    especialidades: [],
+    descripcionProfesional: null,
+    sitioWeb: null,
+    documentos: [],
+  };
+
+  beforeEach(async () => {
+    validacionService = {
+      obtenerDetalle: vi.fn().mockReturnValue(of(detalle)),
+      resolver: vi.fn().mockReturnValue(
+        of({
+          id: 'sol-1',
+          estado: 'APROBADO',
+          estadoAuditor: 'ACTIVO',
+          fechaResolucion: '2026-07-15T00:00:00Z',
+          motivoRechazo: null,
+        })
+      ),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [RevisionSolicitudAuditorPageComponent],
+      providers: [
+        provideRouter([]),
+        { provide: ValidacionService, useValue: validacionService },
+        ToastService,
+        // El admin llegó desde la página 3 del listado (?pagina=3); al resolver debe volver ahí.
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { queryParamMap: { get: (_key: string) => '3' } } },
+        },
+      ],
+    }).compileComponents();
+
+    navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    fixture = TestBed.createComponent(RevisionSolicitudAuditorPageComponent);
+    fixture.componentRef.setInput('id', 'sol-1');
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  });
+
+  it('vuelve a la pagina de la que vino el admin, no siempre a la 0', async () => {
+    const interno = component as unknown as {
+      model: { set(v: { decision: string; motivo: string }): void };
+      confirmarDecision(): Promise<void>;
+    };
+    interno.model.set({ decision: 'aprobado', motivo: '' });
+
+    await interno.confirmarDecision();
+
+    expect(navigate).toHaveBeenCalledWith(['/admin/solicitudes-auditor'], {
+      queryParams: { pagina: 3 },
+    });
   });
 });

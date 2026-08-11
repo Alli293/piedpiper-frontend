@@ -59,6 +59,10 @@ export const rolGuard = (...rolesPermitidos: RolUsuario[]): CanActivateFn => {
  * asignadas, perfil público) mandándolo a la pantalla que le corresponde según en qué paso de su
  * propio onboarding esté — la misma decisión que ya toma `RedirectResolver` en el backend al
  * iniciar sesión, aplicada de nuevo acá para cuando entra por una URL directa en vez de por login.
+ *
+ * Con configuración completa, todo estado no-`ACTIVO` (`PENDIENTE_VALIDACION` o `RECHAZADO`) cae
+ * en `/auditor/validacion-pendiente`: esa pantalla lee el estado real de la solicitud y muestra
+ * el rechazo (con motivo) en vez de repetir el mensaje de "en revisión".
  */
 export const guardAuditorActivo: CanActivateFn = () => {
   const authService = inject(AuthService);

@@ -39,6 +39,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
+  &--rechazado {
+    background: var(--ch-danger-bg);
+    color: var(--ch-danger);
+  }
 }
 
 .validacion-pendiente-auditor__subtitle {

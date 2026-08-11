@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { form, FormField, required, schema, submit, validate } from '@angular/forms/signals';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -68,8 +68,12 @@ export class RevisionSolicitudAuditorPageComponent implements OnInit {
   readonly solicitudId = input.required<string>({ alias: 'id' });
 
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly validacionService = inject(ValidacionService);
   private readonly toastService = inject(ToastService);
+
+  /** Página de la que venía el admin, para volver ahí (no siempre a la página 0) al resolver. */
+  private readonly paginaOrigen = Number(this.route.snapshot.queryParamMap.get('pagina')) || 0;
 
   protected readonly cargando = signal(true);
   protected readonly errorCarga = signal(false);
@@ -193,7 +197,7 @@ export class RevisionSolicitudAuditorPageComponent implements OnInit {
             resuelta.estado === 'APROBADO' ? 'Solicitud aprobada' : 'Solicitud rechazada',
             'El auditor fue notificado por correo.'
           );
-          await this.router.navigateByUrl('/admin/solicitudes-auditor');
+          await this.volverAlListado();
         } catch (err: unknown) {
           this.confirmandoDecision.set(false);
           this.toastService.error(
@@ -201,12 +205,18 @@ export class RevisionSolicitudAuditorPageComponent implements OnInit {
             apiErrorMessage(err) ?? 'Intenta nuevamente.'
           );
           if (err instanceof HttpErrorResponse && err.status === 409) {
-            await this.router.navigateByUrl('/admin/solicitudes-auditor');
+            await this.volverAlListado();
           }
         }
         return undefined;
       },
       onInvalid: (field) => field().markAsTouched(),
+    });
+  }
+
+  private async volverAlListado(): Promise<void> {
+    await this.router.navigate(['/admin/solicitudes-auditor'], {
+      queryParams: { pagina: this.paginaOrigen },
     });
   }
 

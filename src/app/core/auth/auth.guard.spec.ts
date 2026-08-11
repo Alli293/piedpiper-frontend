@@ -138,6 +138,13 @@ describe('guardAuditorActivo', () => {
 
     expect(ejecutarGuard()).toEqual(router.parseUrl('/auditor/validacion-pendiente'));
   });
+
+  it('con solicitud rechazada tambien redirige a la pantalla de espera, que muestra el rechazo', () => {
+    authService.estado.set('RECHAZADO');
+    authService.configuracionCompleta.set(true);
+
+    expect(ejecutarGuard()).toEqual(router.parseUrl('/auditor/validacion-pendiente'));
+  });
 });
 
 describe('noAuthGuard', () => {

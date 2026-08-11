@@ -47,6 +47,7 @@ export class ValidacionPendienteAuditorPageComponent implements OnInit {
   protected readonly solicitud = signal<MiSolicitudAuditor | null>(null);
 
   protected readonly userEmail = computed(() => this.authSessionService.getUserEmail());
+  protected readonly rechazado = computed(() => this.solicitud()?.estado === 'RECHAZADO');
 
   protected readonly pasos = computed<PasoEstado[]>(() => {
     const solicitud = this.solicitud();

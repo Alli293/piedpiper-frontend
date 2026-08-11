@@ -45,7 +45,7 @@
                 <td>{{ solicitud.email }}</td>
                 <td>{{ solicitud.fechaSolicitud | date: 'dd/MM/yyyy' }}</td>
                 <td class="solicitudes__acciones">
-                  <app-button variant="primary" size="sm" (click)="abrirRevision(solicitud)">
+                  <app-button variant="primary" size="sm" (click)="irARevision(solicitud)">
                     <span>Revisar</span>
                     <app-icon name="chevron-derecha" [size]="12" />
                   </app-button>

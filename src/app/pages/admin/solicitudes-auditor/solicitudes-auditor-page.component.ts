@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
@@ -45,13 +45,15 @@ export class SolicitudesAuditorPageComponent {
   private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly cargando = signal(true);
   protected readonly errorCarga = signal(false);
   protected readonly pagina = signal<PaginaSolicitudes | null>(null);
 
   constructor() {
-    this.cargar(0);
+    const paginaInicial = Number(this.route.snapshot.queryParamMap.get('pagina')) || 0;
+    this.cargar(paginaInicial);
   }
 
   protected cargar(numeroPagina: number): void {
@@ -62,6 +64,12 @@ export class SolicitudesAuditorPageComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (pagina) => {
+          // Volver a una página que quedó vacía (se resolvió su última solicitud) manda al admin
+          // de vuelta a la anterior en vez de mostrarle un "cola al día" engañoso.
+          if (pagina.contenido.length === 0 && numeroPagina > 0) {
+            this.cargar(numeroPagina - 1);
+            return;
+          }
           this.pagina.set(pagina);
           this.cargando.set(false);
         },
@@ -76,7 +84,11 @@ export class SolicitudesAuditorPageComponent {
       });
   }
 
-  protected abrirRevision(solicitud: SolicitudPendiente): void {
-    this.router.navigateByUrl(`/admin/solicitudes-auditor/${solicitud.id}`).catch(() => {});
+  protected irARevision(solicitud: SolicitudPendiente): void {
+    this.router
+      .navigate([`/admin/solicitudes-auditor/${solicitud.id}`], {
+        queryParams: { pagina: this.pagina()?.pagina ?? 0 },
+      })
+      .catch(() => {});
   }
 }

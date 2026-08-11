@@ -8,50 +8,71 @@
     </div>
   } @else {
     <div class="validacion-pendiente-auditor">
-      <div class="validacion-pendiente-auditor__icono" aria-hidden="true">
-        <app-icon name="hoja-solida" [size]="28" />
+      <div
+        class="validacion-pendiente-auditor__icono"
+        [class.validacion-pendiente-auditor__icono--rechazado]="rechazado()"
+        aria-hidden="true"
+      >
+        <app-icon [name]="rechazado() ? 'error' : 'hoja-solida'" [size]="28" />
       </div>
 
-      <app-badge variant="warning">En revisión</app-badge>
+      <app-badge [variant]="rechazado() ? 'danger' : 'warning'">{{
+        rechazado() ? 'Rechazada' : 'En revisión'
+      }}</app-badge>
 
-      <app-heading level="h1" text="Tu cuenta está siendo revisada" />
-      <p class="validacion-pendiente-auditor__subtitle">
-        Hemos recibido tu documentación. El equipo de CarbonHub verificará tus credenciales en los
-        próximos <strong>2 a 5 días hábiles</strong>.
-      </p>
-
-      <ol class="validacion-pendiente-auditor__pasos">
-        @for (paso of pasos(); track paso.titulo) {
-          <li class="validacion-pendiente-auditor__paso" [class]="'is-' + paso.estado">
-            <span class="validacion-pendiente-auditor__paso-icono" aria-hidden="true">
-              @if (paso.estado === 'listo') {
-                <app-icon name="success" [size]="16" />
-              } @else if (paso.estado === 'en-progreso') {
-                <app-icon name="reloj-solido" [size]="16" />
-              } @else {
-                <span class="validacion-pendiente-auditor__paso-punto"></span>
-              }
-            </span>
-            <span class="validacion-pendiente-auditor__paso-texto">
-              <span class="validacion-pendiente-auditor__paso-titulo">{{ paso.titulo }}</span>
-              @if (paso.fecha) {
-                <span class="validacion-pendiente-auditor__paso-fecha">{{
-                  paso.fecha | date: 'd MMM y'
-                }}</span>
-              } @else if (paso.detalle) {
-                <span class="validacion-pendiente-auditor__paso-fecha">{{ paso.detalle }}</span>
-              }
-            </span>
-          </li>
-        }
-      </ol>
-
-      <div class="validacion-pendiente-auditor__aviso">
-        <app-icon name="enviar" [size]="16" />
-        <p>
-          Te notificaremos a <strong>{{ userEmail() }}</strong> cuando tu cuenta esté lista.
+      <app-heading
+        level="h1"
+        [text]="rechazado() ? 'Tu solicitud fue rechazada' : 'Tu cuenta está siendo revisada'"
+      />
+      @if (rechazado()) {
+        <p class="validacion-pendiente-auditor__subtitle">
+          El equipo de CarbonHub revisó tu solicitud y no fue aprobada.
+          @if (solicitud()?.motivoRechazo) {
+            <br />
+            <strong>Motivo:</strong> {{ solicitud()!.motivoRechazo }}
+          }
         </p>
-      </div>
+      } @else {
+        <p class="validacion-pendiente-auditor__subtitle">
+          Hemos recibido tu documentación. El equipo de CarbonHub verificará tus credenciales en los
+          próximos <strong>2 a 5 días hábiles</strong>.
+        </p>
+      }
+
+      @if (!rechazado()) {
+        <ol class="validacion-pendiente-auditor__pasos">
+          @for (paso of pasos(); track paso.titulo) {
+            <li class="validacion-pendiente-auditor__paso" [class]="'is-' + paso.estado">
+              <span class="validacion-pendiente-auditor__paso-icono" aria-hidden="true">
+                @if (paso.estado === 'listo') {
+                  <app-icon name="success" [size]="16" />
+                } @else if (paso.estado === 'en-progreso') {
+                  <app-icon name="reloj-solido" [size]="16" />
+                } @else {
+                  <span class="validacion-pendiente-auditor__paso-punto"></span>
+                }
+              </span>
+              <span class="validacion-pendiente-auditor__paso-texto">
+                <span class="validacion-pendiente-auditor__paso-titulo">{{ paso.titulo }}</span>
+                @if (paso.fecha) {
+                  <span class="validacion-pendiente-auditor__paso-fecha">{{
+                    paso.fecha | date: 'd MMM y'
+                  }}</span>
+                } @else if (paso.detalle) {
+                  <span class="validacion-pendiente-auditor__paso-fecha">{{ paso.detalle }}</span>
+                }
+              </span>
+            </li>
+          }
+        </ol>
+
+        <div class="validacion-pendiente-auditor__aviso">
+          <app-icon name="enviar" [size]="16" />
+          <p>
+            Te notificaremos a <strong>{{ userEmail() }}</strong> cuando tu cuenta esté lista.
+          </p>
+        </div>
+      }
 
       <div class="validacion-pendiente-auditor__acciones">
         @if (solicitud()?.estado === 'APROBADO') {

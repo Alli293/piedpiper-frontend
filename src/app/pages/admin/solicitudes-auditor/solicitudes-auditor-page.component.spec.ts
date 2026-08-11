@@ -12,7 +12,7 @@ import { ToastService } from '../../../shared/services/toast.service';
 
 describe('SolicitudesAuditorPageComponent', () => {
   let fixture: ComponentFixture<SolicitudesAuditorPageComponent>;
-  let navigateByUrl: ReturnType<typeof vi.spyOn>;
+  let navigate: ReturnType<typeof vi.spyOn>;
   let validacionService: {
     listarPendientes: ReturnType<typeof vi.fn>;
   };
@@ -43,7 +43,7 @@ describe('SolicitudesAuditorPageComponent', () => {
       ],
     }).compileComponents();
 
-    navigateByUrl = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     fixture = TestBed.createComponent(SolicitudesAuditorPageComponent);
     fixture.detectChanges();
   });
@@ -79,12 +79,27 @@ describe('SolicitudesAuditorPageComponent', () => {
     expect(html.textContent).not.toContain('No hay solicitudes pendientes en este momento.');
   });
 
-  it('al hacer clic en Revisar navega al detalle de la solicitud', () => {
+  it('al hacer clic en Revisar navega al detalle de la solicitud con la pagina actual', () => {
     const boton = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll('button')
     ).find((b) => b.textContent?.includes('Revisar')) as HTMLButtonElement;
     boton.click();
 
-    expect(navigateByUrl).toHaveBeenCalledWith('/admin/solicitudes-auditor/sol-1');
+    expect(navigate).toHaveBeenCalledWith(['/admin/solicitudes-auditor/sol-1'], {
+      queryParams: { pagina: 0 },
+    });
+  });
+
+  it('al resolver la ultima solicitud de una pagina, retrocede a la anterior', () => {
+    validacionService.listarPendientes.mockImplementation((numeroPagina: number) =>
+      numeroPagina === 2
+        ? of({ contenido: [], pagina: 2, totalPaginas: 3, totalElementos: 20 })
+        : of({ contenido: [solicitud], pagina: numeroPagina, totalPaginas: 3, totalElementos: 20 })
+    );
+    const interno = fixture.componentInstance as unknown as { cargar(numeroPagina: number): void };
+
+    interno.cargar(2);
+
+    expect(validacionService.listarPendientes).toHaveBeenLastCalledWith(1);
   });
 });
