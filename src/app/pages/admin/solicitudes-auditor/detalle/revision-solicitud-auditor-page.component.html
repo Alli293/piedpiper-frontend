@@ -11,7 +11,7 @@
         <app-avatar shape="square" size="lg" [initials]="iniciales(s.nombreAuditor)" />
         <div class="revision__header-info">
           <app-heading level="h1" [text]="s.nombreAuditor" />
-          <app-badge variant="warning">Pendiente de validación</app-badge>
+          <app-badge [variant]="varianteEstado(s.estado)">{{ etiquetaEstado(s.estado) }}</app-badge>
         </div>
         <div class="revision__header-fecha">
           <span class="revision__fecha-label">Fecha de solicitud</span>
@@ -45,9 +45,12 @@
                 <div class="revision__dato">
                   <dt>LinkedIn / sitio web</dt>
                   <dd>
-                    <a [href]="s.sitioWeb" target="_blank" rel="noopener noreferrer">{{
-                      s.sitioWeb
-                    }}</a>
+                    <a
+                      [href]="hrefSitioWeb(s.sitioWeb)"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      >{{ s.sitioWeb }}</a
+                    >
                   </dd>
                 </div>
               }
@@ -118,61 +121,69 @@
               <app-icon name="validacion" [size]="16" />
               <app-heading level="h2" text="Decisión de validación" />
             </div>
-            <p class="revision__decision-hint">
-              Revisa los documentos y datos antes de aprobar o rechazar. La decisión notifica al
-              auditor por correo.
-            </p>
+            @if (s.estado === 'PENDIENTE') {
+              <p class="revision__decision-hint">
+                Revisa los documentos y datos antes de aprobar o rechazar. La decisión notifica al
+                auditor por correo.
+              </p>
 
-            <form novalidate (submit)="handleSubmit($event)">
-              <div class="revision__decision-toggle" role="group" aria-label="Decisión">
-                <button
-                  type="button"
-                  class="revision__decision-btn revision__decision-btn--aprobar"
-                  [class.revision__decision-btn--activo]="model().decision === 'aprobado'"
-                  [attr.aria-pressed]="model().decision === 'aprobado'"
-                  [disabled]="enviando()"
-                  (click)="seleccionarDecision('aprobado')"
-                >
-                  <app-icon name="pulgar-arriba" [size]="14" />
-                  <span>Aprobar</span>
-                </button>
-                <button
-                  type="button"
-                  class="revision__decision-btn revision__decision-btn--rechazar"
-                  [class.revision__decision-btn--activo]="model().decision === 'rechazado'"
-                  [attr.aria-pressed]="model().decision === 'rechazado'"
-                  [disabled]="enviando()"
-                  (click)="seleccionarDecision('rechazado')"
-                >
-                  <app-icon
-                    name="pulgar-arriba"
-                    [size]="14"
-                    class="revision__decision-icono--invertido"
+              <form novalidate (submit)="handleSubmit($event)">
+                <div class="revision__decision-toggle" role="group" aria-label="Decisión">
+                  <button
+                    type="button"
+                    class="revision__decision-btn revision__decision-btn--aprobar"
+                    [class.revision__decision-btn--activo]="model().decision === 'aprobado'"
+                    [attr.aria-pressed]="model().decision === 'aprobado'"
+                    [disabled]="enviando()"
+                    (click)="seleccionarDecision('aprobado')"
+                  >
+                    <app-icon name="pulgar-arriba" [size]="14" />
+                    <span>Aprobar</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="revision__decision-btn revision__decision-btn--rechazar"
+                    [class.revision__decision-btn--activo]="model().decision === 'rechazado'"
+                    [attr.aria-pressed]="model().decision === 'rechazado'"
+                    [disabled]="enviando()"
+                    (click)="seleccionarDecision('rechazado')"
+                  >
+                    <app-icon
+                      name="pulgar-arriba"
+                      [size]="14"
+                      class="revision__decision-icono--invertido"
+                    />
+                    <span>Rechazar</span>
+                  </button>
+                </div>
+
+                @if (esRechazo()) {
+                  <app-textarea
+                    label="Motivo del rechazo"
+                    placeholder="Explica por qué se rechaza esta solicitud"
+                    [rows]="4"
+                    [formField]="decisionForm.motivo"
+                    [error]="errorMotivo()"
+                    [hint]="motivoContador()"
                   />
-                  <span>Rechazar</span>
-                </button>
-              </div>
+                }
 
-              @if (esRechazo()) {
-                <app-textarea
-                  label="Motivo del rechazo"
-                  placeholder="Explica por qué se rechaza esta solicitud"
-                  [rows]="4"
-                  [formField]="decisionForm.motivo"
-                  [error]="errorMotivo()"
-                  [hint]="motivoContador()"
-                />
-              }
-
-              <app-button
-                [variant]="esRechazo() ? 'danger' : 'primary'"
-                type="submit"
-                [disabled]="!puedeConfirmar()"
-                [loading]="enviando()"
-              >
-                Confirmar decisión
-              </app-button>
-            </form>
+                <app-button
+                  [variant]="esRechazo() ? 'danger' : 'primary'"
+                  type="submit"
+                  [disabled]="!puedeConfirmar()"
+                  [loading]="enviando()"
+                >
+                  Confirmar decisión
+                </app-button>
+              </form>
+            } @else {
+              <p class="revision__decision-hint">
+                Esta solicitud ya fue
+                {{ s.estado === 'APROBADO' ? 'aprobada' : 'rechazada' }}. No hay ninguna decisión
+                pendiente de tomar.
+              </p>
+            }
           </section>
         </aside>
       </div>

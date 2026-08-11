@@ -35,7 +35,7 @@ export interface SolicitudDetalle {
   id: string;
   nombreAuditor: string;
   email: string;
-  estado: string;
+  estado: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO';
   fechaSolicitud: string;
   aniosExperiencia: number | null;
   especialidades: string[];

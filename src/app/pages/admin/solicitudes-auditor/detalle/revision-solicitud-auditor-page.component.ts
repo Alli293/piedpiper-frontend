@@ -22,6 +22,7 @@ import {
   SolicitudDetalle,
   ValidacionService,
 } from '../../../../core/validacion/validacion.service';
+import { BadgeVariant } from '../../../../shared/components/badge/badge.component';
 
 type DecisionValor = 'aprobado' | 'rechazado' | '';
 
@@ -32,6 +33,12 @@ interface DecisionFormModel {
 
 const MOTIVO_MIN = 10;
 const MOTIVO_MAX = 500;
+
+const ESTADOS: Record<SolicitudDetalle['estado'], { etiqueta: string; variante: BadgeVariant }> = {
+  PENDIENTE: { etiqueta: 'Pendiente de validación', variante: 'warning' },
+  APROBADO: { etiqueta: 'Aprobada', variante: 'success' },
+  RECHAZADO: { etiqueta: 'Rechazada', variante: 'danger' },
+};
 
 @Component({
   selector: 'app-revision-solicitud-auditor-page',
@@ -130,6 +137,18 @@ export class RevisionSolicitudAuditorPageComponent implements OnInit {
   protected seleccionarDecision(decision: DecisionValor): void {
     if (this.enviando()) return;
     this.model.update((m) => ({ ...m, decision }));
+  }
+
+  protected etiquetaEstado(estado: SolicitudDetalle['estado']): string {
+    return ESTADOS[estado].etiqueta;
+  }
+
+  protected varianteEstado(estado: SolicitudDetalle['estado']): BadgeVariant {
+    return ESTADOS[estado].variante;
+  }
+
+  protected hrefSitioWeb(sitioWeb: string): string {
+    return /^https?:\/\//i.test(sitioWeb) ? sitioWeb : `https://${sitioWeb}`;
   }
 
   protected iniciales(nombre: string): string {

@@ -65,7 +65,7 @@ export class ValidacionPendienteAuditorPageComponent implements OnInit {
       },
       {
         titulo: 'Cuenta activada',
-        fecha: aprobado ? new Date(solicitud!.fechaResolucion ?? '') : null,
+        fecha: aprobado && solicitud!.fechaResolucion ? new Date(solicitud!.fechaResolucion) : null,
         estado: aprobado ? 'listo' : 'pendiente',
         detalle: aprobado ? undefined : 'Pendiente',
       },
