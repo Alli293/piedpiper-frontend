@@ -125,6 +125,48 @@ export interface ResumenSolicitudAuditoria {
   cantidadDocumentos: number;
 }
 
+/** Filtros del listado. La página va en base 1, como la ve el usuario. */
+export interface FiltroListadoAuditorias {
+  filtroEstado?: EstadoSolicitudAuditoria[];
+  pagina?: number;
+}
+
+export interface PaginaSolicitudesAuditoria {
+  contenido: ResumenSolicitudAuditoria[];
+  totalResultados: number;
+  paginaActual: number;
+  totalPaginas: number;
+
+  /**
+   * Lo decide el servidor y viaja en la respuesta. La pantalla lo usa para el rango visible
+   * ("26–32 de 60"); tenerlo como constante del cliente dejaba el cálculo mal en silencio si el
+   * backend cambiaba de tamaño.
+   */
+  tamanioPagina: number;
+}
+
+/**
+ * Orden en que se ofrecen los filtros: el del flujo de la auditoría, no el alfabético, para que la
+ * lista de casillas se lea como el recorrido que ya muestra la línea de tiempo.
+ */
+export const ESTADOS_FILTRABLES: readonly EstadoSolicitudAuditoria[] = [
+  'SOLICITUD_ENVIADA',
+  'AUDITOR_ASIGNADO',
+  'EN_REVISION',
+  'REPORTE_CARGADO',
+  'OBSERVACIONES_PENDIENTES',
+  'CERTIFICACION_EMITIDA',
+];
+
+export const ETIQUETAS_ESTADO_AUDITORIA: Record<EstadoSolicitudAuditoria, string> = {
+  SOLICITUD_ENVIADA: 'Solicitud enviada',
+  AUDITOR_ASIGNADO: 'Auditor asignado',
+  EN_REVISION: 'En revisión',
+  REPORTE_CARGADO: 'Reporte cargado',
+  OBSERVACIONES_PENDIENTES: 'Observaciones pendientes',
+  CERTIFICACION_EMITIDA: 'Certificación emitida',
+};
+
 /** Valores que acepta el backend en el cuerpo del POST: su conversión es case-insensitive. */
 export type DecisionAuditorRequest = 'aceptada' | 'rechazada';
 

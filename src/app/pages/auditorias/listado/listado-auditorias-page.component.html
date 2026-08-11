@@ -19,20 +19,68 @@
       }
     </div>
 
+    <div class="ch-listado-auditorias__barra">
+      <app-button
+        variant="secondary"
+        size="sm"
+        [ariaLabel]="'Filtrar por estado'"
+        [attr.aria-expanded]="mostrandoFiltros()"
+        aria-controls="ch-filtros-estado-auditorias"
+        (click)="alternarPanelFiltros()"
+      >
+        Filtrar por estado
+        @if (hayFiltros()) {
+          <span class="ch-listado-auditorias__contador-filtros">{{ cantidadFiltros() }}</span>
+        }
+      </app-button>
+
+      @if (rangoVisible()) {
+        <p class="ch-listado-auditorias__rango" aria-live="polite">{{ rangoVisible() }}</p>
+      }
+    </div>
+
+    @if (mostrandoFiltros()) {
+      <fieldset class="ch-listado-auditorias__filtros" id="ch-filtros-estado-auditorias">
+        <legend class="ch-listado-auditorias__filtros-titulo">Estado de la solicitud</legend>
+        <div class="ch-listado-auditorias__filtros-opciones">
+          @for (estado of estadosFiltrables; track estado) {
+            <app-checkbox
+              [label]="etiquetaDe[estado]"
+              [checked]="estaSeleccionado(estado)"
+              [disabled]="cargando()"
+              (checkedChange)="alternarEstado(estado, $event)"
+            />
+          }
+        </div>
+        @if (hayFiltros()) {
+          <app-button
+            variant="secondary"
+            size="sm"
+            [disabled]="cargando()"
+            (click)="limpiarFiltros()"
+          >
+            Quitar filtros
+          </app-button>
+        }
+      </fieldset>
+    }
+
     @if (cargando()) {
       <p class="ch-listado-auditorias__estado">Cargando auditorías…</p>
     } @else if (error()) {
       <p class="ch-listado-auditorias__error" role="alert">{{ error() }}</p>
-    } @else if (ordenadas().length === 0) {
+    } @else if (solicitudes().length === 0) {
       <div class="ch-listado-auditorias__vacio">
         <p>
-          @if (esEmpresa()) {
-            Todavía no has solicitado ninguna auditoría.
+          @if (hayFiltros()) {
+            Ninguna solicitud coincide con los estados que seleccionaste.
           } @else {
-            No tienes solicitudes asignadas por el momento.
+            Aún no tienes solicitudes de auditoría registradas.
           }
         </p>
-        @if (esEmpresa()) {
+        @if (hayFiltros()) {
+          <app-button variant="secondary" (click)="limpiarFiltros()">Quitar filtros</app-button>
+        } @else if (esEmpresa()) {
           <app-button (click)="nuevaSolicitud()">Crear la primera solicitud</app-button>
         }
       </div>
@@ -42,7 +90,7 @@
           <caption class="ch-listado-auditorias__caption">
             Auditorías,
             {{
-              ordenadas().length
+              totalResultados()
             }}
             en total
           </caption>
@@ -57,7 +105,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (solicitud of ordenadas(); track solicitud.id) {
+            @for (solicitud of solicitudes(); track solicitud.id) {
               <tr [class.ch-listado-auditorias__fila--espera]="esperaRespuesta(solicitud)">
                 <td>
                   <span class="ch-listado-auditorias__periodo">
@@ -92,7 +140,7 @@
                     "
                     (click)="verDetalle(solicitud.id)"
                   >
-                    Ver
+                    Ver detalle
                   </app-button>
                 </td>
               </tr>
@@ -100,6 +148,30 @@
           </tbody>
         </table>
       </div>
+
+      @if (totalPaginas() > 1) {
+        <nav class="ch-listado-auditorias__paginador" aria-label="Paginación de auditorías">
+          <app-button
+            variant="secondary"
+            size="sm"
+            [disabled]="!hayPaginaAnterior() || cargando()"
+            (click)="irAPagina(pagina() - 1)"
+          >
+            Anterior
+          </app-button>
+          <p class="ch-listado-auditorias__pagina-actual" aria-live="polite">
+            Página {{ pagina() }} de {{ totalPaginas() }}
+          </p>
+          <app-button
+            variant="secondary"
+            size="sm"
+            [disabled]="!hayPaginaSiguiente() || cargando()"
+            (click)="irAPagina(pagina() + 1)"
+          >
+            Siguiente
+          </app-button>
+        </nav>
+      }
     }
   </section>
 </app-shell-layout>

@@ -60,6 +60,46 @@ describe('AuditoriasService', () => {
     req.flush({ id: 'sol-2', documentos: [] });
   });
 
+  /**
+   * El punto más frágil de la integración del listado: `@ModelAttribute` arma la lista de estados
+   * a partir de parámetros **repetidos**, no de uno separado por comas. Si esto cambia, el filtro
+   * deja de aplicarse en el servidor sin ningún error visible en el cliente.
+   */
+  it('listar manda cada estado como un parametro filtroEstado repetido', () => {
+    service.listar({ filtroEstado: ['EN_REVISION', 'REPORTE_CARGADO'], pagina: 2 }).subscribe();
+
+    const req = httpMock.expectOne((r) => r.url === baseUrl);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.getAll('filtroEstado')).toEqual(['EN_REVISION', 'REPORTE_CARGADO']);
+    expect(req.request.params.get('pagina')).toBe('2');
+
+    req.flush({
+      contenido: [],
+      totalResultados: 0,
+      paginaActual: 2,
+      totalPaginas: 0,
+      tamanioPagina: 25,
+    });
+  });
+
+  it('listar sin filtros pide la pagina 1 y no manda filtroEstado', () => {
+    service.listar().subscribe();
+
+    const req = httpMock.expectOne((r) => r.url === baseUrl);
+    // getAll devuelve null, no [], cuando el parametro no viaja: es la diferencia entre "sin
+    // filtro" y "filtro vacio", y el backend las trata distinto.
+    expect(req.request.params.getAll('filtroEstado')).toBeNull();
+    expect(req.request.params.get('pagina')).toBe('1');
+
+    req.flush({
+      contenido: [],
+      totalResultados: 0,
+      paginaActual: 1,
+      totalPaginas: 0,
+      tamanioPagina: 25,
+    });
+  });
+
   it('consulta la solicitud con GET al endpoint de la solicitud', () => {
     service.obtenerSolicitud('sol-9').subscribe();
 

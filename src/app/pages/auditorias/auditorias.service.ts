@@ -1,13 +1,14 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AsignarAuditorRequest,
+  FiltroListadoAuditorias,
+  PaginaSolicitudesAuditoria,
   DetalleSolicitudAuditoria,
   EmitirResultadoAuditoriaRequest,
   ResponderDecisionRequest,
-  ResumenSolicitudAuditoria,
   NuevaSolicitudAuditoriaRequest,
   SolicitudAuditoria,
   SolicitudAuditoriaAsignada,
@@ -18,14 +19,20 @@ export class AuditoriasService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/auditorias`;
 
-  /** Solicitudes de la empresa autenticada. El backend resuelve cuál es a partir del usuario. */
-  listarDeMiEmpresa(): Observable<ResumenSolicitudAuditoria[]> {
-    return this.http.get<ResumenSolicitudAuditoria[]>(this.baseUrl);
-  }
+  /**
+   * Listado paginado del usuario autenticado. No recibe de quién: el backend lo resuelve por el
+   * rol del token, así que la misma llamada sirve para la empresa y para el auditor.
+   *
+   * <p>Los estados viajan como parámetros repetidos (`filtroEstado=A&filtroEstado=B`), que es la
+   * forma que `@ModelAttribute` deserializa a una lista en el servidor.</p>
+   */
+  listar(filtros: FiltroListadoAuditorias = {}): Observable<PaginaSolicitudesAuditoria> {
+    let params = new HttpParams().set('pagina', filtros.pagina ?? 1);
+    for (const estado of filtros.filtroEstado ?? []) {
+      params = params.append('filtroEstado', estado);
+    }
 
-  /** Solicitudes asignadas al auditor autenticado. */
-  listarAsignadas(): Observable<ResumenSolicitudAuditoria[]> {
-    return this.http.get<ResumenSolicitudAuditoria[]>(`${this.baseUrl}/asignadas`);
+    return this.http.get<PaginaSolicitudesAuditoria>(this.baseUrl, { params });
   }
 
   crearSolicitud(
