@@ -151,6 +151,30 @@ describe('DetalleAuditoriaPageComponent', () => {
     );
   }
 
+  /** Envía por el `<form>`, que es el camino real: el submit pasa por `submit()`/`onInvalid`. */
+  async function enviarResultado(): Promise<void> {
+    const formulario = raiz().querySelector<HTMLFormElement>(
+      '.ch-detalle-auditoria__resultado-form'
+    );
+    if (!formulario) throw new Error('No se encontró el formulario de resultado');
+    formulario.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await estabilizar();
+  }
+
+  /**
+   * El formulario ahora frena por `onInvalid`, no solo por el `[disabled]` del botón. Enviar con
+   * datos inválidos saltándose el botón tiene que seguir sin llegar al servicio.
+   */
+  it('enviar el formulario con datos invalidos no llama al servicio', async () => {
+    await montarCargaReporte('REPORTE_CARGADO');
+    await elegirResultado('observaciones');
+    await escribirObservaciones('corto');
+
+    await enviarResultado();
+
+    expect(auditoriasService.emitirResultado).not.toHaveBeenCalled();
+  });
+
   function botonConfirmarResultado(): HTMLButtonElement | null {
     return raiz().querySelector<HTMLButtonElement>(
       '.ch-detalle-auditoria__resultado-acciones button'
@@ -856,8 +880,7 @@ describe('DetalleAuditoriaPageComponent', () => {
     await elegirResultado('aprobada');
     await escribirVencimiento(2027, 7, 28);
 
-    botonConfirmarResultado()?.click();
-    await estabilizar();
+    await enviarResultado();
 
     expect(auditoriasService.emitirResultado).toHaveBeenCalledWith('sol-1', {
       resultado: 'aprobada',
@@ -889,8 +912,7 @@ describe('DetalleAuditoriaPageComponent', () => {
     await elegirResultado('observaciones');
     await escribirObservaciones('  Falta el desglose de alcance 3 y las facturas.  ');
 
-    botonConfirmarResultado()?.click();
-    await estabilizar();
+    await enviarResultado();
 
     expect(auditoriasService.emitirResultado).toHaveBeenCalledWith('sol-1', {
       resultado: 'observaciones',
@@ -912,8 +934,7 @@ describe('DetalleAuditoriaPageComponent', () => {
 
     await elegirResultado('aprobada');
     await escribirVencimiento(2027, 7, 28);
-    botonConfirmarResultado()?.click();
-    await estabilizar();
+    await enviarResultado();
 
     expect(auditoriasService.obtenerDetalle).toHaveBeenCalled();
     expect(raiz().textContent).toContain('Certificación emitida');
@@ -930,8 +951,7 @@ describe('DetalleAuditoriaPageComponent', () => {
     await elegirResultado('observaciones');
     await escribirObservaciones('Falta el desglose de alcance 3 y las facturas.');
 
-    botonConfirmarResultado()?.click();
-    await estabilizar();
+    await enviarResultado();
 
     const enviado = auditoriasService.emitirResultado.mock.calls[0][1];
     expect(enviado).not.toHaveProperty('fechaVencimientoCert');

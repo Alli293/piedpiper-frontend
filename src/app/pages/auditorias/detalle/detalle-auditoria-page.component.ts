@@ -608,8 +608,24 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     this.mostrandoReemplazoReporte.set(true);
   }
 
-  protected confirmarResultado(): void {
-    void this.emitirResultado();
+  protected handleSubmitResultado(event: Event): void {
+    event.preventDefault();
+    void this.confirmarResultado();
+  }
+
+  /**
+   * Pasa por `submit()` como los otros dos formularios de la pantalla en vez de leer el modelo a
+   * mano: asi el `[disabled]` del boton deja de ser la unica barrera. Si el binding cambiara en un
+   * refactor, `onInvalid` sigue frenando el envio en vez de mandar datos que no validan.
+   */
+  private async confirmarResultado(): Promise<void> {
+    await submit(this.resultadoForm, {
+      action: async () => {
+        await this.emitirResultado();
+        return undefined;
+      },
+      onInvalid: (field) => field().markAsTouched(),
+    });
   }
 
   /**

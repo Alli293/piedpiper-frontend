@@ -135,9 +135,6 @@ export interface ResponderDecisionRequest {
 
 export type ResultadoAuditoriaRequest = 'aprobada' | 'observaciones';
 
-/** Valor que devuelve el backend en el detalle: Jackson serializa el enum en mayúsculas. */
-export type ResultadoAuditoria = 'APROBADA' | 'OBSERVACIONES';
-
 /**
  * Los dos campos son condicionales y excluyentes entre sí: al aprobar viaja la vigencia de la
  * certificación, y al devolver con observaciones viaja el texto. Enviar el que no corresponde no
