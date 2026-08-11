@@ -14,6 +14,8 @@ import { AvatarComponent } from '../../../shared/components/avatar/avatar.compon
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
+import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
 
 type ErrorTipo = 'none' | '404' | '5xx';
@@ -27,6 +29,7 @@ type ErrorTipo = 'none' | '404' | '5xx';
     BadgeComponent,
     CardComponent,
     IconComponent,
+    ShellLayoutComponent,
   ],
   templateUrl: './perfil-publico-auditor-page.component.html',
   styleUrl: './perfil-publico-auditor-page.component.scss',
@@ -44,6 +47,12 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   protected readonly errorTipo = signal<ErrorTipo>('none');
 
   protected readonly esAdminEmpresa = computed(() => this.authSession.isAdministradorEmpresa());
+
+  protected readonly headerConfig = computed<HeaderConfig>(() => ({
+    sectionLabel: 'AUDITORES · DIRECTORIO DE AUDITORES',
+    pageTitle: 'Perfil del auditor',
+    showNotificationDot: true,
+  }));
 
   protected readonly resenasOrdenadas = computed<ResenaVerificada[]>(() => {
     const perfil = this.perfil();

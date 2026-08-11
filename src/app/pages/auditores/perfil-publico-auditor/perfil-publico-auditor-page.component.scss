@@ -7,12 +7,6 @@
 :host {
   display: block;
   width: 100%;
-  padding: var(--ch-space-6) var(--ch-space-4);
-  background: var(--ch-bg-main);
-
-  @include mixins.desktop-up {
-    padding: var(--ch-space-8) var(--ch-space-6);
-  }
 }
 
 // === Loading & Error states ===
@@ -77,79 +71,6 @@
 
   &:focus-visible {
     @include mixins.focus-ring;
-  }
-}
-
-// === Breadcrumb ===
-.ch-perfil-auditor__breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: var(--ch-space-2);
-  margin-bottom: var(--ch-space-2);
-  max-width: 1120px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.ch-perfil-auditor__back-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--ch-border);
-  border-radius: var(--ch-radius-md);
-  background: var(--ch-bg-white);
-  color: var(--ch-text-secondary);
-  cursor: pointer;
-  transition:
-    background-color var(--ch-transition),
-    color var(--ch-transition);
-
-  &:hover {
-    background: var(--ch-bg-main);
-    color: var(--ch-text-primary);
-  }
-
-  &:focus-visible {
-    @include mixins.focus-ring;
-  }
-}
-
-.ch-perfil-auditor__breadcrumb-text {
-  font-family: var(--ch-font-mono);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--ch-text-muted);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.ch-perfil-auditor__breadcrumb-link {
-  color: var(--ch-green);
-  cursor: pointer;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
-.ch-perfil-auditor__breadcrumb-sep {
-  margin: 0 var(--ch-space-1);
-  color: var(--ch-text-muted);
-}
-
-// === Page title ===
-.ch-perfil-auditor__page-title {
-  font-family: var(--ch-font-heading);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--ch-text-primary);
-  margin: 0 auto var(--ch-space-6);
-  max-width: 1120px;
-
-  @include mixins.desktop-up {
-    font-size: 1.75rem;
   }
 }
 
