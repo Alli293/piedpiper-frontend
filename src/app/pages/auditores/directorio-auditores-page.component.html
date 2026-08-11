@@ -172,8 +172,12 @@
 
                 <footer class="ch-auditor-card__footer">
                   <span class="ch-auditor-card__auditorias">
-                    <strong>{{ tarjeta.auditor.auditoriasCompletadas }}</strong> auditorías
-                    completadas
+                    @if (tarjeta.auditor.auditoriasCompletadas !== null) {
+                      <strong>{{ tarjeta.auditor.auditoriasCompletadas }}</strong> auditorías
+                      completadas
+                    } @else {
+                      <strong>Sin datos</strong>
+                    }
                   </span>
                   <span
                     class="ch-auditor-card__disponible"

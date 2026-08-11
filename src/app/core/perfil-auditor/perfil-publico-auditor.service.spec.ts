@@ -45,8 +45,8 @@ describe('PerfilPublicoAuditorService', () => {
         auditoriasCompletadas: 8,
         tiempoPromedioRespuestaDias: 2.3,
         distribucionSectores: [
-          { sector: 'Energía', porcentaje: 45.0 },
-          { sector: 'Manufactura', porcentaje: 55.0 },
+          { sector: 'Energía', cantidad: 4, porcentaje: 45.0 },
+          { sector: 'Manufactura', cantidad: 5, porcentaje: 55.0 },
         ],
         resenas: [
           {

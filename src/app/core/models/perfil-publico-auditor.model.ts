@@ -7,6 +7,7 @@ export interface CertificacionPublica {
 
 export interface DistribucionSector {
   sector: string;
+  cantidad: number;
   porcentaje: number;
 }
 

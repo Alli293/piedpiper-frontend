@@ -171,8 +171,13 @@
 
             <div class="ch-perfil-auditor__kpis">
               <div class="ch-perfil-auditor__kpi">
-                <span class="ch-perfil-auditor__kpi-value">
-                  {{ perfil()!.auditoriasCompletadas ?? '—' }}
+                <span
+                  class="ch-perfil-auditor__kpi-value"
+                  [class.ch-perfil-auditor__kpi-value--empty]="
+                    perfil()!.auditoriasCompletadas === null
+                  "
+                >
+                  {{ perfil()!.auditoriasCompletadas ?? 'Sin datos' }}
                 </span>
                 <span class="ch-perfil-auditor__kpi-label">Auditorías completadas</span>
               </div>
@@ -181,7 +186,7 @@
                   @if (perfil()!.tiempoPromedioRespuestaDias !== null) {
                     {{ perfil()!.tiempoPromedioRespuestaDias }}d
                   } @else {
-                    —
+                    <span class="ch-perfil-auditor__kpi-value--empty">Sin datos</span>
                   }
                 </span>
                 <span class="ch-perfil-auditor__kpi-label">Tiempo promedio respuesta</span>

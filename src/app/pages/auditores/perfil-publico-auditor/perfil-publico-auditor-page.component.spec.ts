@@ -44,9 +44,9 @@ const PERFIL_COMPLETO: PerfilPublicoAuditorResponse = {
   auditoriasCompletadas: 8,
   tiempoPromedioRespuestaDias: 2.3,
   distribucionSectores: [
-    { sector: 'Energía', porcentaje: 45.0 },
-    { sector: 'Manufactura', porcentaje: 30.0 },
-    { sector: 'Transporte', porcentaje: 25.0 },
+    { sector: 'Energía', cantidad: 4, porcentaje: 45.0 },
+    { sector: 'Manufactura', cantidad: 3, porcentaje: 30.0 },
+    { sector: 'Transporte', cantidad: 2, porcentaje: 25.0 },
   ],
   resenas: [
     {
@@ -191,7 +191,7 @@ describe('PerfilPublicoAuditorPageComponent', () => {
     });
   });
 
-  describe('métricas null muestra "Sin datos suficientes"', () => {
+  describe('métricas null muestra "Sin datos"', () => {
     it('muestra texto indicativo cuando métricas son null', async () => {
       perfilService.obtenerPerfilPublico.mockReturnValue(
         of({
@@ -206,10 +206,9 @@ describe('PerfilPublicoAuditorPageComponent', () => {
       fixture = TestBed.createComponent(PerfilPublicoAuditorPageComponent);
       await estabilizar();
 
-      // Cuando métricas son null, los KPIs muestran "—" (dash)
       const kpis = raiz().querySelectorAll('.ch-perfil-auditor__kpi-value');
       const kpiTexts = Array.from(kpis).map((el) => el.textContent?.trim());
-      expect(kpiTexts.some((t) => t === '—')).toBe(true);
+      expect(kpiTexts).toEqual(['Sin datos', 'Sin datos']);
     });
   });
 
