@@ -1,41 +1,68 @@
-<section class="calificacion-form" aria-labelledby="calificacion-form-titulo">
-  @if (cargando()) {
-    <div class="calificacion-form__loading" role="status" aria-label="Cargando calificación">
-      <span class="calificacion-form__spinner"></span>
-    </div>
-  } @else {
-    <h3 class="calificacion-form__titulo" id="calificacion-form-titulo">
-      {{ modoEdicion() ? 'Editar calificación' : 'Calificar auditor' }}
-    </h3>
-
-    <form novalidate (submit)="handleSubmit($event)">
-      <div class="calificacion-form__campo">
-        <label class="calificacion-form__label">Calificación</label>
+@if (puedeCalificar()) {
+  <section class="calificacion-form" aria-labelledby="calificacion-form-titulo">
+    @if (cargando()) {
+      <div class="calificacion-form__loading" role="status" aria-label="Cargando calificación">
+        <span class="calificacion-form__spinner"></span>
+      </div>
+    } @else if (calificacionExistente() && !editando() && !modoEdicion()) {
+      <!-- Vista lectura: calificación existente con botón de edición -->
+      <div class="calificacion-form__vista">
+        <h3 class="calificacion-form__titulo" id="calificacion-form-titulo">Tu calificación</h3>
         <app-star-rating
-          [value]="model().calificacion"
-          (valueChange)="onCalificacionChange($event)"
-          [readonly]="guardando()"
+          [value]="calificacionExistente()!.calificacion"
+          [readonly]="true"
           label="Calificación del auditor"
         />
-        @if (calificacionError()) {
-          <p class="calificacion-form__error" role="alert">{{ calificacionError() }}</p>
+        @if (calificacionExistente()!.comentario) {
+          <p class="calificacion-form__comentario">{{ calificacionExistente()!.comentario }}</p>
+        }
+        @if (puedeEditar()) {
+          <div class="calificacion-form__actions">
+            <app-button
+              variant="tertiary"
+              size="sm"
+              (click)="iniciarEdicion()"
+              ariaLabel="Editar calificación"
+            >
+              Editar
+            </app-button>
+          </div>
         }
       </div>
+    } @else {
+      <h3 class="calificacion-form__titulo" id="calificacion-form-titulo">
+        {{ modoEdicion() ? 'Editar calificación' : 'Calificar auditor' }}
+      </h3>
 
-      <app-textarea
-        label="Comentario (opcional)"
-        [formField]="calificacionForm.comentario"
-        placeholder="Comparta su experiencia con este auditor..."
-        [rows]="3"
-        [error]="comentarioError()"
-        [hint]="caracteresComentario() + ' / ' + maximoCaracteresComentario + ' caracteres'"
-      />
+      <form novalidate (submit)="handleSubmit($event)">
+        <div class="calificacion-form__campo">
+          <label class="calificacion-form__label">Calificación</label>
+          <app-star-rating
+            [value]="model().calificacion"
+            (valueChange)="onCalificacionChange($event)"
+            [readonly]="guardando()"
+            label="Calificación del auditor"
+          />
+          @if (calificacionError()) {
+            <p class="calificacion-form__error" role="alert">{{ calificacionError() }}</p>
+          }
+        </div>
 
-      <div class="calificacion-form__actions">
-        <app-button type="submit" [disabled]="!puedeGuardar()" [loading]="guardando()">
-          Guardar
-        </app-button>
-      </div>
-    </form>
-  }
-</section>
+        <app-textarea
+          label="Comentario (opcional)"
+          [formField]="calificacionForm.comentario"
+          placeholder="Comparta su experiencia con este auditor..."
+          [rows]="3"
+          [error]="comentarioError()"
+          [hint]="caracteresComentario() + ' / ' + maximoCaracteresComentario + ' caracteres'"
+        />
+
+        <div class="calificacion-form__actions">
+          <app-button type="submit" [disabled]="!puedeGuardar()" [loading]="guardando()">
+            Guardar
+          </app-button>
+        </div>
+      </form>
+    }
+  </section>
+}

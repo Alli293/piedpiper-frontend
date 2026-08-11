@@ -57,8 +57,15 @@ export class CalificacionFormComponent implements OnInit {
   /** Si existe, el componente inicia en modo edición con estos valores precargados. */
   calificacionExistente = input<CalificacionResponse | null>(null);
 
+  /** Estado actual de la auditoría. Controla si la opción de calificar es visible. */
+  estadoAuditoria = input<string>('');
+
+  /** ID de la empresa del usuario autenticado. Controla visibilidad del botón de edición. */
+  empresaIdUsuario = input<string>('');
+
   protected readonly guardando = signal(false);
   protected readonly cargando = signal(false);
+  protected readonly editando = signal(false);
   protected readonly maximoCaracteresComentario = MAXIMO_CARACTERES_COMENTARIO;
 
   /** ID de la calificación para modo edición. */
@@ -67,6 +74,18 @@ export class CalificacionFormComponent implements OnInit {
   protected readonly modoEdicion = computed(
     () => this.calificacionExistente() !== null || this.calificacionId() !== null
   );
+
+  /** Solo permite calificar cuando la auditoría está en estado CERTIFICACION_EMITIDA. */
+  protected readonly puedeCalificar = computed(
+    () => this.estadoAuditoria() === 'CERTIFICACION_EMITIDA'
+  );
+
+  /** Permite editar solo calificaciones que pertenecen a la empresa del usuario autenticado. */
+  protected readonly puedeEditar = computed(() => {
+    const existente = this.calificacionExistente();
+    const empresaUsuario = this.empresaIdUsuario();
+    return existente !== null && empresaUsuario !== '' && existente.empresaId === empresaUsuario;
+  });
 
   protected readonly model = signal<CalificacionFormModel>({
     calificacion: null,
@@ -127,6 +146,15 @@ export class CalificacionFormComponent implements OnInit {
 
   protected onCalificacionChange(valor: number | null): void {
     this.model.update((m) => ({ ...m, calificacion: valor }));
+  }
+
+  /** Transiciona a modo edición cuando el usuario hace clic en el botón Editar. */
+  protected iniciarEdicion(): void {
+    const existente = this.calificacionExistente();
+    if (existente) {
+      this.precargarDatos(existente);
+      this.editando.set(true);
+    }
   }
 
   private precargarDatos(calificacion: CalificacionResponse): void {

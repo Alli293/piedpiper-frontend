@@ -41,6 +41,20 @@
   justify-content: flex-end;
 }
 
+.calificacion-form__vista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-3);
+}
+
+.calificacion-form__comentario {
+  margin: 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.875rem;
+  color: var(--ch-text-secondary);
+  line-height: 1.5;
+}
+
 .calificacion-form__loading {
   display: flex;
   justify-content: center;
