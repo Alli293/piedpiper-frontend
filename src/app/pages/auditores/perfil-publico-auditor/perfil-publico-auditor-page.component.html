@@ -99,7 +99,7 @@
             @if (perfil()!.especialidades.length > 0) {
               <div class="ch-perfil-auditor__chips">
                 @for (especialidad of perfil()!.especialidades; track especialidad) {
-                  <span class="ch-perfil-auditor__chip">{{ especialidad }}</span>
+                  <span class="ch-perfil-auditor__chip">{{ formatearEspecialidad(especialidad) }}</span>
                 }
               </div>
             } @else {

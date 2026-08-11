@@ -101,6 +101,13 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
     }
   }
 
+  protected formatearEspecialidad(valor: string): string {
+    return valor
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
   protected generarEstrellas(calificacion: number): boolean[] {
     const estrellas: boolean[] = [];
     for (let i = 1; i <= 5; i++) {
