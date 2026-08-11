@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthSessionService } from '../../../core/auth-session.service';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -28,6 +28,7 @@ describe('ListadoAuditoriasPageComponent', () => {
       totalResultados: contenido.length,
       paginaActual: 1,
       totalPaginas: contenido.length === 0 ? 0 : 1,
+      tamanioPagina: 25,
       ...extra,
     };
   }
@@ -335,6 +336,101 @@ describe('ListadoAuditoriasPageComponent', () => {
     await estabilizar();
 
     expect(auditoriasService.listar).toHaveBeenLastCalledWith({ filtroEstado: [], pagina: 1 });
+  });
+
+  /**
+   * Los dos pedidos quedan en vuelo a la vez; el primero en salir responde de último. Sin descartar
+   * la respuesta obsoleta, la pantalla pintaría el filtro que el usuario ya abandonó.
+   */
+  /**
+   * Deshabilitar los controles mientras carga achica la ventana pero no la cierra: entre el clic y
+   * el ciclo de detección que aplica el `disabled` todavía cabe un segundo pedido. Por eso el
+   * descarte se prueba llamando a la paginación directamente, que es lo que la UI no deja repetir.
+   */
+  it('descarta la respuesta de un pedido que ya no es el vigente', async () => {
+    const enVuelo: Subject<PaginaSolicitudesAuditoria>[] = [];
+    auditoriasService.listar.mockImplementation(() => {
+      const sujeto = new Subject<PaginaSolicitudesAuditoria>();
+      enVuelo.push(sujeto);
+      return sujeto;
+    });
+
+    fixture = TestBed.createComponent(ListadoAuditoriasPageComponent);
+    await estabilizar();
+    enVuelo[0].next(
+      pagina([enRevision], { paginaActual: 1, totalPaginas: 3, totalResultados: 60 })
+    );
+    enVuelo[0].complete();
+    await estabilizar();
+
+    const componente = fixture.componentInstance as unknown as {
+      irAPagina(numero: number): void;
+    };
+    componente.irAPagina(2);
+    componente.irAPagina(3);
+    await estabilizar();
+
+    expect(enVuelo).toHaveLength(3);
+
+    // El último responde primero; el viejo llega después y no debe pisar nada.
+    enVuelo[2].next(
+      pagina([enRevision], { paginaActual: 3, totalPaginas: 3, totalResultados: 60 })
+    );
+    enVuelo[2].complete();
+    await estabilizar();
+
+    enVuelo[1].next(
+      pagina([esperandoRespuesta, enRevision], {
+        paginaActual: 2,
+        totalPaginas: 3,
+        totalResultados: 60,
+      })
+    );
+    enVuelo[1].complete();
+    await estabilizar();
+
+    expect(filas()).toHaveLength(1);
+    expect(raiz().querySelector('.ch-listado-auditorias__pagina-actual')?.textContent).toContain(
+      'Página 3 de 3'
+    );
+  });
+
+  /** Mientras hay un pedido en vuelo no se pueden disparar más: reduce la ventana de la carrera. */
+  it('deshabilita filtros y paginador mientras carga', async () => {
+    const enVuelo = new Subject<PaginaSolicitudesAuditoria>();
+    auditoriasService.listar.mockReturnValue(enVuelo);
+
+    fixture = TestBed.createComponent(ListadoAuditoriasPageComponent);
+    await estabilizar();
+    abrirFiltros();
+    await estabilizar();
+
+    expect(casillas().every((c) => c.disabled)).toBe(true);
+
+    enVuelo.next(pagina([enRevision]));
+    enVuelo.complete();
+    await estabilizar();
+
+    expect(casillas().every((c) => c.disabled)).toBe(false);
+  });
+
+  /** El tamaño de página lo fija el servidor; el rango tiene que salir de ahí y no de una constante. */
+  it('calcula el rango con el tamanio de pagina que devuelve el backend', async () => {
+    auditoriasService.listar.mockReturnValue(
+      of(
+        pagina([enRevision], {
+          paginaActual: 2,
+          totalPaginas: 3,
+          totalResultados: 30,
+          tamanioPagina: 10,
+        })
+      )
+    );
+    await montar();
+
+    expect(raiz().querySelector('.ch-listado-auditorias__rango')?.textContent).toContain(
+      '11–11 de 30'
+    );
   });
 
   it('muestra el rango de resultados que se esta viendo', async () => {

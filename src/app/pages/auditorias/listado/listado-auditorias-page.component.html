@@ -24,6 +24,8 @@
         variant="secondary"
         size="sm"
         [ariaLabel]="'Filtrar por estado'"
+        [attr.aria-expanded]="mostrandoFiltros()"
+        aria-controls="ch-filtros-estado-auditorias"
         (click)="alternarPanelFiltros()"
       >
         Filtrar por estado
@@ -38,19 +40,25 @@
     </div>
 
     @if (mostrandoFiltros()) {
-      <fieldset class="ch-listado-auditorias__filtros">
+      <fieldset class="ch-listado-auditorias__filtros" id="ch-filtros-estado-auditorias">
         <legend class="ch-listado-auditorias__filtros-titulo">Estado de la solicitud</legend>
         <div class="ch-listado-auditorias__filtros-opciones">
           @for (estado of estadosFiltrables; track estado) {
             <app-checkbox
               [label]="etiquetaDe[estado]"
               [checked]="estaSeleccionado(estado)"
+              [disabled]="cargando()"
               (checkedChange)="alternarEstado(estado, $event)"
             />
           }
         </div>
         @if (hayFiltros()) {
-          <app-button variant="secondary" size="sm" (click)="limpiarFiltros()">
+          <app-button
+            variant="secondary"
+            size="sm"
+            [disabled]="cargando()"
+            (click)="limpiarFiltros()"
+          >
             Quitar filtros
           </app-button>
         }
@@ -146,7 +154,7 @@
           <app-button
             variant="secondary"
             size="sm"
-            [disabled]="!hayPaginaAnterior()"
+            [disabled]="!hayPaginaAnterior() || cargando()"
             (click)="irAPagina(pagina() - 1)"
           >
             Anterior
@@ -157,7 +165,7 @@
           <app-button
             variant="secondary"
             size="sm"
-            [disabled]="!hayPaginaSiguiente()"
+            [disabled]="!hayPaginaSiguiente() || cargando()"
             (click)="irAPagina(pagina() + 1)"
           >
             Siguiente

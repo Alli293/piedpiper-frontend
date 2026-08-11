@@ -15,7 +15,6 @@ import {
   ETIQUETAS_ESTADO_AUDITORIA,
   EstadoSolicitudAuditoria,
   ResumenSolicitudAuditoria,
-  TAMANIO_PAGINA_AUDITORIAS,
 } from '../auditoria.model';
 import { variantePorEstadoAuditoria } from '../auditoria-estado.utils';
 import { AuditoriasService } from '../auditorias.service';
@@ -58,6 +57,15 @@ export class ListadoAuditoriasPageComponent implements OnInit {
     new Set()
   );
   protected readonly mostrandoFiltros = signal(false);
+  protected readonly tamanioPagina = signal(0);
+
+  /**
+   * Identifica al pedido más reciente. Cambiar un filtro o paginar no cancela el pedido anterior,
+   * así que dos pueden estar en vuelo a la vez; si el que llega segundo es el viejo, pintaría un
+   * resultado que el usuario ya abandonó, sin ningún error visible. Solo se aplica la respuesta
+   * cuyo id sigue siendo el vigente.
+   */
+  private ultimoPedido = 0;
 
   protected readonly esEmpresa = computed(() => this.perspectiva() === 'empresa');
   protected readonly estadosFiltrables = ESTADOS_FILTRABLES;
@@ -88,8 +96,8 @@ export class ListadoAuditoriasPageComponent implements OnInit {
    */
   protected readonly rangoVisible = computed(() => {
     const total = this.totalResultados();
-    if (total === 0) return '';
-    const desde = (this.pagina() - 1) * TAMANIO_PAGINA_AUDITORIAS + 1;
+    if (total === 0 || this.tamanioPagina() === 0) return '';
+    const desde = (this.pagina() - 1) * this.tamanioPagina() + 1;
     const hasta = desde + this.solicitudes().length - 1;
     return `${desde}–${hasta} de ${total}`;
   });
@@ -152,23 +160,31 @@ export class ListadoAuditoriasPageComponent implements OnInit {
   }
 
   private async cargar(): Promise<void> {
+    const pedido = ++this.ultimoPedido;
     this.cargando.set(true);
     this.error.set(null);
     try {
-      const pagina = await firstValueFrom(
+      const respuesta = await firstValueFrom(
         this.auditoriasService.listar({
           filtroEstado: [...this.estadosSeleccionados()],
           pagina: this.pagina(),
         })
       );
-      this.solicitudes.set(pagina.contenido);
-      this.totalPaginas.set(pagina.totalPaginas);
-      this.totalResultados.set(pagina.totalResultados);
-      this.pagina.set(pagina.paginaActual);
+      if (pedido !== this.ultimoPedido) return;
+      this.solicitudes.set(respuesta.contenido);
+      this.totalPaginas.set(respuesta.totalPaginas);
+      this.totalResultados.set(respuesta.totalResultados);
+      this.tamanioPagina.set(respuesta.tamanioPagina);
+      this.pagina.set(respuesta.paginaActual);
     } catch (err: unknown) {
+      if (pedido !== this.ultimoPedido) return;
       this.error.set(apiErrorMessage(err) ?? ERROR_CARGA);
     } finally {
-      this.cargando.set(false);
+      // Solo el pedido vigente apaga el indicador: si lo apagara uno viejo, la pantalla diría que
+      // terminó de cargar mientras el actual sigue en vuelo.
+      if (pedido === this.ultimoPedido) {
+        this.cargando.set(false);
+      }
     }
   }
 }

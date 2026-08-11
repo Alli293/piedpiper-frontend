@@ -136,10 +136,14 @@ export interface PaginaSolicitudesAuditoria {
   totalResultados: number;
   paginaActual: number;
   totalPaginas: number;
-}
 
-/** Fijado por el backend; la pantalla lo usa solo para describir el rango que muestra. */
-export const TAMANIO_PAGINA_AUDITORIAS = 25;
+  /**
+   * Lo decide el servidor y viaja en la respuesta. La pantalla lo usa para el rango visible
+   * ("26–32 de 60"); tenerlo como constante del cliente dejaba el cálculo mal en silencio si el
+   * backend cambiaba de tamaño.
+   */
+  tamanioPagina: number;
+}
 
 /**
  * Orden en que se ofrecen los filtros: el del flujo de la auditoría, no el alfabético, para que la
