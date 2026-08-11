@@ -16,6 +16,12 @@ import {
 
 const TOKEN_KEY = 'carbonhub.token';
 
+interface TokenClaims {
+  rol?: string;
+  estado?: string;
+  configuracionCompleta?: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -24,7 +30,11 @@ export class AuthService {
 
   readonly token = signal<string | null>(sessionStorage.getItem(TOKEN_KEY));
 
-  readonly rol = computed(() => this.leerRolDeToken(this.token()));
+  private readonly claims = computed(() => this.leerClaimsDeToken(this.token()));
+
+  readonly rol = computed(() => this.claims()?.rol ?? null);
+  readonly estado = computed(() => this.claims()?.estado ?? null);
+  readonly configuracionCompleta = computed(() => this.claims()?.configuracionCompleta ?? false);
 
   loginConCorreo(email: string, contrasena: string): Observable<AuthResponse> {
     return this.login({ metodo: 'CORREO', email, contrasena });
@@ -155,7 +165,7 @@ export class AuthService {
     this.perfilInicialService.limpiarCache();
   }
 
-  private leerRolDeToken(token: string | null): string | null {
+  private leerClaimsDeToken(token: string | null): TokenClaims | null {
     if (!token) {
       return null;
     }
@@ -168,8 +178,7 @@ export class AuthService {
     try {
       const normalizado = payload.replace(/-/g, '+').replace(/_/g, '/');
       const relleno = normalizado.padEnd(Math.ceil(normalizado.length / 4) * 4, '=');
-      const datos = JSON.parse(atob(relleno)) as { rol?: string };
-      return datos.rol ?? null;
+      return JSON.parse(atob(relleno)) as TokenClaims;
     } catch {
       return null;
     }

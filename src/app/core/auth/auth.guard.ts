@@ -52,4 +52,27 @@ export const rolGuard = (...rolesPermitidos: RolUsuario[]): CanActivateFn => {
   };
 };
 
+/**
+ * Complemento de `guardAuditor`: el rol viaja en el JWT apenas se registra el auditor, antes de
+ * que el administrador lo apruebe, así que un auditor `PENDIENTE_VALIDACION` pasa `rolGuard` sin
+ * problema. Esta guarda cierra esa ventana en las pantallas de negocio real (auditorías
+ * asignadas, perfil público) mandándolo a la pantalla que le corresponde según en qué paso de su
+ * propio onboarding esté — la misma decisión que ya toma `RedirectResolver` en el backend al
+ * iniciar sesión, aplicada de nuevo acá para cuando entra por una URL directa en vez de por login.
+ */
+export const guardAuditorActivo: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (authService.estado() === 'ACTIVO') {
+    return true;
+  }
+
+  return router.parseUrl(
+    authService.configuracionCompleta()
+      ? '/auditor/validacion-pendiente'
+      : '/auditor/configuracion-inicial'
+  );
+};
+
 const esRolConocido = (rol: string): rol is RolUsuario => rol in RUTA_INICIO_POR_ROL;

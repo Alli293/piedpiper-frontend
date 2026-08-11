@@ -1,3 +1,5 @@
+@use '../../../shared/styles/mixins';
+
 :host {
   display: block;
 }
@@ -32,10 +34,41 @@
   font-size: 14px;
 }
 
+.solicitudes__vacio-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ch-space-3);
+  padding: var(--ch-space-8) var(--ch-space-6);
+  text-align: center;
+  color: var(--ch-text-secondary);
+
+  p {
+    max-width: 400px;
+    margin: 0;
+    line-height: 1.55;
+    font-size: 13px;
+  }
+}
+
+.solicitudes__vacio-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  border-radius: var(--ch-radius-full);
+  background: var(--ch-green-soft);
+  color: var(--ch-green);
+}
+
 .solicitudes__tabla-wrap {
+  width: 100%;
   overflow-x: auto;
   border: 1px solid var(--ch-border);
   border-radius: var(--ch-radius-lg);
+  background: var(--ch-bg-white);
+  box-shadow: var(--ch-shadow-sm);
 }
 
 .solicitudes__tabla {
@@ -48,21 +81,31 @@
 .solicitudes__tabla th {
   text-align: left;
   padding: var(--ch-space-3) var(--ch-space-4);
-  background: var(--ch-green-soft);
-  color: var(--ch-green-dark);
-  font-size: 12px;
-  letter-spacing: 0.04em;
+  background: var(--ch-bg-main);
+  color: var(--ch-text-secondary);
+  font-family: var(--ch-font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .solicitudes__tabla td {
   padding: var(--ch-space-3) var(--ch-space-4);
-  border-top: 1px solid var(--ch-border);
+  border-bottom: 1px solid var(--ch-border);
   color: var(--ch-text-primary);
+}
+
+.solicitudes__tabla tr:last-child td {
+  border-bottom: 0;
 }
 
 .solicitudes__acciones {
   text-align: right;
+}
+
+.solicitudes__th-oculto {
+  @include mixins.visually-hidden;
 }
 
 .solicitudes__paginacion {
@@ -76,53 +119,4 @@
 .solicitudes__paginacion-info {
   color: var(--ch-text-secondary);
   font-size: 13px;
-}
-
-.solicitudes__modal-title {
-  margin: 0;
-  font-family: var(--ch-font-heading);
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--ch-text-primary);
-}
-
-.solicitudes__datos {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ch-space-3);
-  margin: 0;
-  padding: var(--ch-space-4);
-  border: 1px solid var(--ch-border);
-  border-radius: var(--ch-radius-lg);
-  background: var(--ch-green-soft);
-}
-
-.solicitudes__dato {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--ch-space-4);
-}
-
-.solicitudes__dato dt {
-  color: var(--ch-text-secondary);
-  font-size: 13px;
-}
-
-.solicitudes__dato dd {
-  margin: 0;
-  color: var(--ch-text-primary);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.solicitudes__form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ch-space-5);
-}
-
-.solicitudes__modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--ch-space-3);
 }

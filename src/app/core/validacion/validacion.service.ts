@@ -25,6 +25,25 @@ export interface SolicitudResuelta {
   motivoRechazo: string | null;
 }
 
+export interface DocumentoCredencialResumen {
+  id: string;
+  nombreArchivo: string;
+  tamanioBytes: number;
+}
+
+export interface SolicitudDetalle {
+  id: string;
+  nombreAuditor: string;
+  email: string;
+  estado: string;
+  fechaSolicitud: string;
+  aniosExperiencia: number | null;
+  especialidades: string[];
+  descripcionProfesional: string | null;
+  sitioWeb: string | null;
+  documentos: DocumentoCredencialResumen[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class ValidacionService {
   private readonly http = inject(HttpClient);
@@ -32,6 +51,16 @@ export class ValidacionService {
 
   listarPendientes(pagina: number): Observable<PaginaSolicitudes> {
     return this.http.get<PaginaSolicitudes>(this.baseUrl, { params: { pagina } });
+  }
+
+  obtenerDetalle(solicitudId: string): Observable<SolicitudDetalle> {
+    return this.http.get<SolicitudDetalle>(`${this.baseUrl}/${solicitudId}`);
+  }
+
+  descargarDocumento(solicitudId: string, documentoId: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${solicitudId}/documentos/${documentoId}`, {
+      responseType: 'blob',
+    });
   }
 
   resolver(

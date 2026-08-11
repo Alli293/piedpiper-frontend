@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { signal } from '@angular/core';
-import { authGuard, noAuthGuard, rolGuard } from './auth.guard';
+import { authGuard, guardAuditorActivo, noAuthGuard, rolGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 
 describe('authGuard', () => {
@@ -92,6 +92,51 @@ describe('rolGuard', () => {
     );
 
     expect(resultado).toBe(true);
+  });
+});
+
+describe('guardAuditorActivo', () => {
+  let authService: {
+    estado: ReturnType<typeof signal<string | null>>;
+    configuracionCompleta: ReturnType<typeof signal<boolean>>;
+  };
+  let router: Router;
+
+  beforeEach(() => {
+    authService = {
+      estado: signal<string | null>(null),
+      configuracionCompleta: signal(false),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [provideRouter([]), { provide: AuthService, useValue: authService }],
+    });
+
+    router = TestBed.inject(Router);
+  });
+
+  function ejecutarGuard() {
+    return TestBed.runInInjectionContext(() => guardAuditorActivo({} as any, {} as any));
+  }
+
+  it('permite el acceso cuando el estado es ACTIVO', () => {
+    authService.estado.set('ACTIVO');
+
+    expect(ejecutarGuard()).toBe(true);
+  });
+
+  it('sin configuracion inicial completa redirige a completarla', () => {
+    authService.estado.set('PENDIENTE_VALIDACION');
+    authService.configuracionCompleta.set(false);
+
+    expect(ejecutarGuard()).toEqual(router.parseUrl('/auditor/configuracion-inicial'));
+  });
+
+  it('con configuracion inicial completa pero sin aprobar redirige a la pantalla de espera', () => {
+    authService.estado.set('PENDIENTE_VALIDACION');
+    authService.configuracionCompleta.set(true);
+
+    expect(ejecutarGuard()).toEqual(router.parseUrl('/auditor/validacion-pendiente'));
   });
 });
 

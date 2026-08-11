@@ -1,0 +1,218 @@
+<app-shell-layout [headerConfig]="headerConfig" activeId="solicitudes-auditor">
+  <main class="revision">
+    @if (cargando()) {
+      <p class="revision__vacio">Cargando solicitud...</p>
+    } @else if (errorCarga() || !solicitud()) {
+      <p class="revision__vacio" role="alert">No pudimos cargar esta solicitud.</p>
+    } @else {
+      @let s = solicitud()!;
+
+      <header class="revision__header">
+        <app-avatar shape="square" size="lg" [initials]="iniciales(s.nombreAuditor)" />
+        <div class="revision__header-info">
+          <app-heading level="h1" [text]="s.nombreAuditor" />
+          <app-badge variant="warning">Pendiente de validación</app-badge>
+        </div>
+        <div class="revision__header-fecha">
+          <span class="revision__fecha-label">Fecha de solicitud</span>
+          <span class="revision__fecha-valor">{{ s.fechaSolicitud | date: 'dd/MM/yyyy' }}</span>
+        </div>
+      </header>
+
+      <div class="revision__layout">
+        <div class="revision__col-principal">
+          <section class="revision__card">
+            <div class="revision__card-titulo">
+              <app-icon name="auditor-badge" [size]="16" />
+              <app-heading level="h2" text="Datos del auditor solicitante" />
+            </div>
+            <dl class="revision__datos">
+              <div class="revision__dato">
+                <dt>Nombre completo</dt>
+                <dd>{{ s.nombreAuditor }}</dd>
+              </div>
+              <div class="revision__dato">
+                <dt>Correo electrónico</dt>
+                <dd>{{ s.email }}</dd>
+              </div>
+              @if (s.aniosExperiencia !== null) {
+                <div class="revision__dato">
+                  <dt>Años de experiencia</dt>
+                  <dd>{{ s.aniosExperiencia }}</dd>
+                </div>
+              }
+              @if (s.sitioWeb) {
+                <div class="revision__dato">
+                  <dt>LinkedIn / sitio web</dt>
+                  <dd>
+                    <a [href]="s.sitioWeb" target="_blank" rel="noopener noreferrer">{{
+                      s.sitioWeb
+                    }}</a>
+                  </dd>
+                </div>
+              }
+            </dl>
+
+            @if (s.especialidades.length > 0) {
+              <div class="revision__especialidades">
+                <span class="revision__especialidades-label">Especialidades</span>
+                <div class="revision__chip-grid">
+                  @for (esp of s.especialidades; track esp) {
+                    <app-badge variant="success">{{ esp }}</app-badge>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (s.descripcionProfesional) {
+              <div class="revision__descripcion">
+                <span class="revision__especialidades-label">Descripción profesional</span>
+                <p>{{ s.descripcionProfesional }}</p>
+              </div>
+            }
+          </section>
+
+          <section class="revision__card">
+            <div class="revision__card-titulo">
+              <app-icon name="documento" [size]="16" />
+              <app-heading
+                level="h2"
+                [text]="'Documentos adjuntos (' + s.documentos.length + ')'"
+              />
+            </div>
+            @if (s.documentos.length === 0) {
+              <p class="revision__vacio">Esta solicitud no tiene documentos adjuntos.</p>
+            } @else {
+              <ul class="revision__documentos">
+                @for (doc of s.documentos; track doc.id) {
+                  <li class="revision__documento">
+                    <span class="revision__documento-icono" aria-hidden="true">
+                      <app-icon name="pdf" [size]="16" />
+                    </span>
+                    <div class="revision__documento-info">
+                      <span class="revision__documento-nombre">{{ doc.nombreArchivo }}</span>
+                      <span class="revision__documento-peso">{{
+                        formatearTamanio(doc.tamanioBytes)
+                      }}</span>
+                    </div>
+                    <app-button
+                      variant="tertiary"
+                      size="sm"
+                      [loading]="documentoAbriendo() === doc.id"
+                      [disabled]="documentoAbriendo() !== null"
+                      (click)="verDocumento(doc.id)"
+                    >
+                      <app-icon name="redirect" [size]="12" />
+                      <span>Abrir en pestaña</span>
+                    </app-button>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+        </div>
+
+        <aside class="revision__col-decision">
+          <section class="revision__card">
+            <div class="revision__card-titulo">
+              <app-icon name="validacion" [size]="16" />
+              <app-heading level="h2" text="Decisión de validación" />
+            </div>
+            <p class="revision__decision-hint">
+              Revisa los documentos y datos antes de aprobar o rechazar. La decisión notifica al
+              auditor por correo.
+            </p>
+
+            <form novalidate (submit)="handleSubmit($event)">
+              <div class="revision__decision-toggle" role="group" aria-label="Decisión">
+                <button
+                  type="button"
+                  class="revision__decision-btn revision__decision-btn--aprobar"
+                  [class.revision__decision-btn--activo]="model().decision === 'aprobado'"
+                  [attr.aria-pressed]="model().decision === 'aprobado'"
+                  [disabled]="enviando()"
+                  (click)="seleccionarDecision('aprobado')"
+                >
+                  <app-icon name="pulgar-arriba" [size]="14" />
+                  <span>Aprobar</span>
+                </button>
+                <button
+                  type="button"
+                  class="revision__decision-btn revision__decision-btn--rechazar"
+                  [class.revision__decision-btn--activo]="model().decision === 'rechazado'"
+                  [attr.aria-pressed]="model().decision === 'rechazado'"
+                  [disabled]="enviando()"
+                  (click)="seleccionarDecision('rechazado')"
+                >
+                  <app-icon
+                    name="pulgar-arriba"
+                    [size]="14"
+                    class="revision__decision-icono--invertido"
+                  />
+                  <span>Rechazar</span>
+                </button>
+              </div>
+
+              @if (esRechazo()) {
+                <app-textarea
+                  label="Motivo del rechazo"
+                  placeholder="Explica por qué se rechaza esta solicitud"
+                  [rows]="4"
+                  [formField]="decisionForm.motivo"
+                  [error]="errorMotivo()"
+                  [hint]="motivoContador()"
+                />
+              }
+
+              <app-button
+                [variant]="esRechazo() ? 'danger' : 'primary'"
+                type="submit"
+                [disabled]="!puedeConfirmar()"
+                [loading]="enviando()"
+              >
+                Confirmar decisión
+              </app-button>
+            </form>
+          </section>
+        </aside>
+      </div>
+
+      @if (confirmandoDecision()) {
+        <app-modal labelledBy="confirmar-decision-title" size="sm" (close)="cerrarConfirmacion()">
+          <h2 id="confirmar-decision-title" class="revision__modal-title">
+            {{ esRechazo() ? '¿Rechazar esta solicitud?' : '¿Aprobar esta solicitud?' }}
+          </h2>
+          <p class="revision__modal-text">
+            @if (esRechazo()) {
+              Vas a rechazar la solicitud de <strong>{{ s.nombreAuditor }}</strong
+              >. Se le notificará por correo con el motivo indicado. Esta acción no se puede
+              deshacer.
+            } @else {
+              Vas a aprobar la solicitud de <strong>{{ s.nombreAuditor }}</strong
+              >. El auditor quedará activo en la plataforma y se le notificará por correo. Esta
+              acción no se puede deshacer.
+            }
+          </p>
+          <div class="revision__modal-actions">
+            <app-button
+              variant="secondary"
+              type="button"
+              [disabled]="enviando()"
+              (click)="cerrarConfirmacion()"
+            >
+              Cancelar
+            </app-button>
+            <app-button
+              [variant]="esRechazo() ? 'danger' : 'primary'"
+              type="button"
+              [loading]="enviando()"
+              (click)="confirmarDecision()"
+            >
+              {{ esRechazo() ? 'Rechazar solicitud' : 'Aprobar solicitud' }}
+            </app-button>
+          </div>
+        </app-modal>
+      }
+    }
+  </main>
+</app-shell-layout>

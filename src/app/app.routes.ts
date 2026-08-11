@@ -1,5 +1,5 @@
 import { CanActivateFn, Routes } from '@angular/router';
-import { authGuard, noAuthGuard, rolGuard } from './core/auth/auth.guard';
+import { authGuard, guardAuditorActivo, noAuthGuard, rolGuard } from './core/auth/auth.guard';
 
 const cargarPlaceholder = () =>
   import('./pages/placeholder/placeholder-page.component').then((m) => m.PlaceholderPageComponent);
@@ -27,16 +27,10 @@ export const guardDetalleAuditoria: CanActivateFn = rolGuard(
   'ADMINISTRADOR_PLATAFORMA'
 );
 
-export const rutasPostAutenticacion = [
-  'auditor/configuracion-inicial',
-  'auditor/panel',
-  'auditor/validacion-pendiente',
-];
+export const rutasPostAutenticacion = ['auditor/panel'];
 
 const rutasPlaceholderConGuard: Record<string, CanActivateFn[]> = {
-  'auditor/configuracion-inicial': [guardAuditor],
   'auditor/panel': [guardAuditor],
-  'auditor/validacion-pendiente': [authGuard],
 };
 
 const rutasPlaceholder = rutasPostAutenticacion.map((path) => ({
@@ -140,6 +134,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'admin/solicitudes-auditor/:id',
+    canActivate: [guardAdmin],
+    loadComponent: () =>
+      import('./pages/admin/solicitudes-auditor/detalle/revision-solicitud-auditor-page.component').then(
+        (m) => m.RevisionSolicitudAuditorPageComponent
+      ),
+  },
+  {
     path: 'ecoruta/preferencias',
     canActivate: [usuarioIndividualGuard],
     loadComponent: () =>
@@ -149,10 +151,26 @@ export const routes: Routes = [
   },
   {
     path: 'auditor/perfil',
-    canActivate: [rolGuard('AUDITOR_CERTIFICADO')],
+    canActivate: [rolGuard('AUDITOR_CERTIFICADO'), guardAuditorActivo],
     loadComponent: () =>
       import('./pages/perfil-auditor/perfil-auditor-page.component').then(
         (m) => m.PerfilAuditorPageComponent
+      ),
+  },
+  {
+    path: 'auditor/configuracion-inicial',
+    canActivate: [guardAuditor],
+    loadComponent: () =>
+      import('./pages/auditor/configuracion-inicial/configuracion-inicial-auditor-page.component').then(
+        (m) => m.ConfiguracionInicialAuditorPageComponent
+      ),
+  },
+  {
+    path: 'auditor/validacion-pendiente',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/auditor/validacion-pendiente/validacion-pendiente-auditor-page.component').then(
+        (m) => m.ValidacionPendienteAuditorPageComponent
       ),
   },
   {
@@ -334,7 +352,7 @@ export const routes: Routes = [
   },
   {
     path: 'auditor/auditorias',
-    canActivate: [guardAuditor],
+    canActivate: [guardAuditor, guardAuditorActivo],
     loadComponent: () =>
       import('./pages/auditorias/listado/listado-auditorias-page.component').then(
         (m) => m.ListadoAuditoriasPageComponent
