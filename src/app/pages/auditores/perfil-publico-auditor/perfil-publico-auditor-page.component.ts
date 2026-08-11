@@ -17,6 +17,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
+import { AuditoresService } from '../auditores.service';
 
 type ErrorTipo = 'none' | '404' | '5xx';
 
@@ -38,6 +39,7 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly perfilService = inject(PerfilPublicoAuditorService);
+  private readonly auditoresService = inject(AuditoresService);
   private readonly toastService = inject(ToastService);
   private readonly authSession = inject(AuthSessionService);
 
@@ -45,6 +47,7 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   protected readonly perfil = signal<PerfilPublicoAuditorResponse | null>(null);
   protected readonly error = signal(false);
   protected readonly errorTipo = signal<ErrorTipo>('none');
+  protected readonly etiquetasZona = signal(new Map<string, string>());
 
   protected readonly esAdminEmpresa = computed(() => this.authSession.isAdministradorEmpresa());
 
@@ -71,6 +74,13 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
     return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
   });
 
+  protected readonly ubicacion = computed(() => {
+    const provincia = this.perfil()?.provincia;
+    if (!provincia) return null;
+    const etiqueta = this.etiquetasZona().get(provincia) ?? provincia;
+    return `${etiqueta}, Costa Rica`;
+  });
+
   protected readonly certificacionesVencidas = computed(() => {
     const perfil = this.perfil();
     if (!perfil) return 0;
@@ -85,6 +95,7 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
 
   ngOnInit(): void {
     const auditorId = this.route.snapshot.paramMap.get('id') ?? '';
+    void this.cargarZonas();
     void this.cargarPerfil(auditorId);
   }
 
@@ -134,6 +145,15 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
       }
     } finally {
       this.cargando.set(false);
+    }
+  }
+
+  private async cargarZonas(): Promise<void> {
+    try {
+      const zonas = await firstValueFrom(this.auditoresService.obtenerZonas());
+      this.etiquetasZona.set(new Map(zonas.map((zona) => [zona.valor, zona.etiqueta])));
+    } catch {
+      this.etiquetasZona.set(new Map());
     }
   }
 }

@@ -14,6 +14,7 @@ import { PerfilPublicoAuditorResponse } from '../../../core/models/perfil-public
 import { PerfilPublicoAuditorService } from '../../../core/perfil-auditor/perfil-publico-auditor.service';
 import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
 import { ToastService } from '../../../shared/services/toast.service';
+import { AuditoresService } from '../auditores.service';
 import { PerfilPublicoAuditorPageComponent } from './perfil-publico-auditor-page.component';
 
 const AUDITOR_ID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
@@ -23,6 +24,7 @@ const PERFIL_COMPLETO: PerfilPublicoAuditorResponse = {
   nombre: 'Carlos Méndez Solano',
   fotoPerfil: 'https://storage.example.com/foto.jpg',
   descripcionProfesional: 'Auditor con 10 años de experiencia en huella de carbono.',
+  provincia: 'SAN_JOSE',
   especialidades: ['HUELLA_CARBONO', 'ENERGIA_RENOVABLE'],
   certificaciones: [
     {
@@ -65,6 +67,7 @@ const PERFIL_COMPLETO: PerfilPublicoAuditorResponse = {
 describe('PerfilPublicoAuditorPageComponent', () => {
   let fixture: ComponentFixture<PerfilPublicoAuditorPageComponent>;
   let perfilService: { obtenerPerfilPublico: ReturnType<typeof vi.fn> };
+  let auditoresService: { obtenerZonas: ReturnType<typeof vi.fn> };
   let toastService: ToastService;
   let authSessionStub: {
     isAdministradorEmpresa: ReturnType<typeof vi.fn>;
@@ -95,6 +98,9 @@ describe('PerfilPublicoAuditorPageComponent', () => {
     perfilService = {
       obtenerPerfilPublico: vi.fn().mockReturnValue(of(PERFIL_COMPLETO)),
     };
+    auditoresService = {
+      obtenerZonas: vi.fn().mockReturnValue(of([{ valor: 'SAN_JOSE', etiqueta: 'San José' }])),
+    };
 
     authSessionStub = {
       isAdministradorEmpresa: vi.fn().mockReturnValue(false),
@@ -116,6 +122,7 @@ describe('PerfilPublicoAuditorPageComponent', () => {
           },
         },
         { provide: PerfilPublicoAuditorService, useValue: perfilService },
+        { provide: AuditoresService, useValue: auditoresService },
         { provide: AuthSessionService, useValue: authSessionStub },
         { provide: AuthService, useValue: { token: signal('fake-token'), cerrarSesion: vi.fn() } },
         { provide: SesionInactividadService, useValue: { reiniciar: vi.fn(), detener: vi.fn() } },
@@ -155,6 +162,10 @@ describe('PerfilPublicoAuditorPageComponent', () => {
 
     it('renderiza descripción profesional', () => {
       expect(raiz().textContent).toContain('Auditor con 10 años de experiencia');
+    });
+
+    it('renderiza la provincia real del perfil', () => {
+      expect(raiz().textContent).toContain('San José, Costa Rica');
     });
 
     it('renderiza especialidades', () => {
@@ -236,6 +247,19 @@ describe('PerfilPublicoAuditorPageComponent', () => {
 
       // Cuando distribucionSectores está vacío, la sección no se renderiza
       expect(raiz().querySelector('.ch-perfil-auditor__dist')).toBeNull();
+    });
+  });
+
+  describe('provincia vacía', () => {
+    it('no muestra ubicación cuando el perfil no trae provincia', async () => {
+      perfilService.obtenerPerfilPublico.mockReturnValue(
+        of({ ...PERFIL_COMPLETO, provincia: null })
+      );
+
+      fixture = TestBed.createComponent(PerfilPublicoAuditorPageComponent);
+      await estabilizar();
+
+      expect(raiz().textContent).not.toContain('San José, Costa Rica');
     });
   });
 

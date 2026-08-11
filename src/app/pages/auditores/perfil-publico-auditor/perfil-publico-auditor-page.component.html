@@ -17,7 +17,7 @@
   }
 
   @if (!cargando() && error() && errorTipo() === '5xx') {
-    <!-- Toast ya mostrado via ToastService; no se necesita contenido inline -->
+    <!-- El toast ya se mostró con ToastService; no hace falta contenido en línea. -->
   }
 
   @if (!cargando() && !error() && perfil()) {
@@ -80,6 +80,14 @@
                   </div>
                 }
                 <div class="ch-perfil-auditor__meta">
+                  <<<<<<< HEAD =======
+                  @if (ubicacion()) {
+                    <span class="ch-perfil-auditor__meta-item">
+                      <app-icon name="ubicacion" [size]="14" aria-hidden="true" />
+                      {{ ubicacion() }}
+                    </span>
+                  }
+                  >>>>>>> 062d5c8 (correcciones)
                   <span class="ch-perfil-auditor__meta-item">
                     <app-icon name="reloj" [size]="14" aria-hidden="true" />
                     @if (perfil()!.disponible) {

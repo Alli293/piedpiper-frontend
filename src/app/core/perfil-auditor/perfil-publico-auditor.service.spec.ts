@@ -30,6 +30,7 @@ describe('PerfilPublicoAuditorService', () => {
         nombre: 'Juan Pérez Solano',
         fotoPerfil: 'https://storage.example.com/foto.jpg',
         descripcionProfesional: 'Auditor con 10 años de experiencia',
+        provincia: 'SAN_JOSE',
         especialidades: ['HUELLA_CARBONO', 'ENERGIA_RENOVABLE'],
         certificaciones: [
           {

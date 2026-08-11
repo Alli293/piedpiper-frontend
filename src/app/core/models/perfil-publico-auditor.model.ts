@@ -22,6 +22,7 @@ export interface PerfilPublicoAuditorResponse {
   nombre: string;
   fotoPerfil: string | null;
   descripcionProfesional: string | null;
+  provincia: string | null;
   especialidades: string[];
   certificaciones: CertificacionPublica[];
   disponible: boolean;
