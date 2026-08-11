@@ -80,14 +80,12 @@
                   </div>
                 }
                 <div class="ch-perfil-auditor__meta">
-                  <<<<<<< HEAD =======
                   @if (ubicacion()) {
                     <span class="ch-perfil-auditor__meta-item">
                       <app-icon name="ubicacion" [size]="14" aria-hidden="true" />
                       {{ ubicacion() }}
                     </span>
                   }
-                  >>>>>>> 062d5c8 (correcciones)
                   <span class="ch-perfil-auditor__meta-item">
                     <app-icon name="reloj" [size]="14" aria-hidden="true" />
                     @if (perfil()!.disponible) {
@@ -302,6 +300,19 @@
           <p class="ch-perfil-auditor__empty">Este auditor aún no tiene reseñas</p>
         }
       </section>
+
+      <!-- Calificación del auditor (solo visible para admin empresa con auditoría calificable) -->
+      @if (esAdminEmpresa() && auditoriaId()) {
+        <section class="ch-perfil-auditor__section ch-perfil-auditor__section--full">
+          <app-calificacion-form
+            [auditoriaId]="auditoriaId()"
+            [auditorId]="perfil()!.auditorId"
+            [calificacionExistente]="calificacionExistente()"
+            [estadoAuditoria]="estadoAuditoria()"
+            [empresaIdUsuario]="empresaIdUsuario()"
+          />
+        </section>
+      }
     </main>
   }
 </app-shell-layout>

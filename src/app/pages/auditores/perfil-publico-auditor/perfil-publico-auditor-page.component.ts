@@ -5,6 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthSessionService } from '../../../core/auth-session.service';
+import { CalificacionResponse } from '../../../core/calificacion/calificacion.models';
+import { CalificacionService } from '../../../core/calificacion/calificacion.service';
 import {
   PerfilPublicoAuditorResponse,
   ResenaVerificada,
@@ -18,6 +20,8 @@ import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.co
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
 import { AuditoresService } from '../auditores.service';
+import { AuditoriasService } from '../../auditorias/auditorias.service';
+import { CalificacionFormComponent } from './calificacion-form/calificacion-form.component';
 
 type ErrorTipo = 'none' | '404' | '5xx';
 
@@ -31,6 +35,7 @@ type ErrorTipo = 'none' | '404' | '5xx';
     CardComponent,
     IconComponent,
     ShellLayoutComponent,
+    CalificacionFormComponent,
   ],
   templateUrl: './perfil-publico-auditor-page.component.html',
   styleUrl: './perfil-publico-auditor-page.component.scss',
@@ -42,12 +47,20 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   private readonly auditoresService = inject(AuditoresService);
   private readonly toastService = inject(ToastService);
   private readonly authSession = inject(AuthSessionService);
+  private readonly auditoriasService = inject(AuditoriasService);
+  private readonly calificacionService = inject(CalificacionService);
 
   protected readonly cargando = signal(true);
   protected readonly perfil = signal<PerfilPublicoAuditorResponse | null>(null);
   protected readonly error = signal(false);
   protected readonly errorTipo = signal<ErrorTipo>('none');
   protected readonly etiquetasZona = signal(new Map<string, string>());
+
+  /** Datos de calificación para el componente CalificacionForm */
+  protected readonly auditoriaId = signal<string>('');
+  protected readonly estadoAuditoria = signal<string>('');
+  protected readonly calificacionExistente = signal<CalificacionResponse | null>(null);
+  protected readonly empresaIdUsuario = signal<string>('');
 
   protected readonly esAdminEmpresa = computed(() => this.authSession.isAdministradorEmpresa());
 
@@ -131,6 +144,10 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
     try {
       const resultado = await firstValueFrom(this.perfilService.obtenerPerfilPublico(auditorId));
       this.perfil.set(resultado);
+
+      if (this.esAdminEmpresa()) {
+        void this.cargarContextoCalificacion(auditorId);
+      }
     } catch (err: unknown) {
       this.error.set(true);
       if (err instanceof HttpErrorResponse && err.status === 404) {
@@ -154,6 +171,37 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
       this.etiquetasZona.set(new Map(zonas.map((zona) => [zona.valor, zona.etiqueta])));
     } catch {
       this.etiquetasZona.set(new Map());
+    }
+  }
+
+  /**
+   * Carga la auditoría con estado CERTIFICACION_EMITIDA del auditor actual
+   * y la calificación existente (si la hay) para alimentar el componente de calificación.
+   */
+  private async cargarContextoCalificacion(auditorId: string): Promise<void> {
+    try {
+      const respuesta = await firstValueFrom(this.auditoriasService.listar());
+      const auditorias = respuesta.contenido;
+      const auditoriaCalificable = auditorias.find(
+        (auditoria) =>
+          auditoria.idAuditor === auditorId && auditoria.estado === 'CERTIFICACION_EMITIDA'
+      );
+
+      if (!auditoriaCalificable) return;
+
+      this.auditoriaId.set(auditoriaCalificable.id);
+      this.estadoAuditoria.set(auditoriaCalificable.estado);
+
+      const calificacion = await firstValueFrom(
+        this.calificacionService.obtenerPorAuditoria(auditoriaCalificable.id)
+      );
+      this.calificacionExistente.set(calificacion);
+      if (calificacion) {
+        this.empresaIdUsuario.set(calificacion.empresaId);
+      }
+    } catch {
+      // Si falla la carga de contexto de calificación, no mostrar el formulario.
+      // No se muestra error al usuario — el formulario simplemente no aparece.
     }
   }
 }
