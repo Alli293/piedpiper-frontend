@@ -139,6 +139,11 @@
   }
 }
 
+.validacion-pendiente-auditor__aviso-card {
+  width: 100%;
+  text-align: left;
+}
+
 .validacion-pendiente-auditor__acciones {
   display: flex;
   gap: var(--ch-space-3);

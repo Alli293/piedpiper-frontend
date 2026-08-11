@@ -73,13 +73,10 @@
           </p>
         </div>
       } @else {
-        <div class="validacion-pendiente-auditor__aviso">
-          <app-icon name="info" [size]="16" />
-          <p>
-            Si crees que esto fue un error, contáctanos a
-            <a appLink href="mailto:carbonhubcr@gmail.com">carbonhubcr&#64;gmail.com</a>.
-          </p>
-        </div>
+        <app-semantic-card variant="info" class="validacion-pendiente-auditor__aviso-card">
+          Si crees que esto fue un error, contáctanos a
+          <a appLink href="mailto:carbonhubcr@gmail.com">carbonhubcr&#64;gmail.com</a>.
+        </app-semantic-card>
       }
 
       <div class="validacion-pendiente-auditor__acciones">
