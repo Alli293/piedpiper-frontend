@@ -121,11 +121,12 @@ describe('ShellLayoutComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     const items = root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item');
-    expect(items.length).toBe(7);
+    expect(items.length).toBe(8);
     expect(menuLabels(root)).toEqual([
       'Dashboard',
       'Mis Emisiones',
       'Certificaciones',
+      'Auditores',
       'Auditorías',
       'Madurez ambiental',
       'Insignias',
@@ -139,11 +140,12 @@ describe('ShellLayoutComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     const items = root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item');
-    expect(items.length).toBe(5);
+    expect(items.length).toBe(6);
     expect(menuLabels(root)).toEqual([
       'Dashboard',
       'Mis Emisiones',
       'Certificaciones',
+      'Auditores',
       'Madurez ambiental',
       'Insignias',
     ]);
@@ -166,7 +168,7 @@ describe('ShellLayoutComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item--active').length).toBe(0);
-    expect(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item').length).toBe(7);
+    expect(root.querySelectorAll('.ch-sidebar__nav .ch-sidebar__item').length).toBe(8);
   });
 
   it('renderiza navegación EcoRuta cuando recibe la variante ecoruta', async () => {

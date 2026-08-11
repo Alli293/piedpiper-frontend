@@ -158,8 +158,8 @@ describe('PerfilPublicoAuditorPageComponent', () => {
     });
 
     it('renderiza especialidades', () => {
-      expect(raiz().textContent).toContain('HUELLA_CARBONO');
-      expect(raiz().textContent).toContain('ENERGIA_RENOVABLE');
+      expect(raiz().textContent).toContain('Huella Carbono');
+      expect(raiz().textContent).toContain('Energia Renovable');
     });
 
     it('renderiza certificaciones con etiqueta vencida', () => {
