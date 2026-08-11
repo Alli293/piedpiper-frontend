@@ -7,6 +7,7 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { LinkDirective } from '../../../shared/components/link/link.directive';
 import { AuthService } from '../../../core/auth/auth.service';
 import { AuthSessionService } from '../../../core/auth-session.service';
 import {
@@ -31,6 +32,7 @@ interface PasoEstado {
     HeadingComponent,
     BadgeComponent,
     IconComponent,
+    LinkDirective,
     DatePipe,
   ],
   templateUrl: './validacion-pendiente-auditor-page.component.html',

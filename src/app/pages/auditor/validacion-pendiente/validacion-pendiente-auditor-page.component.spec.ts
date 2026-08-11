@@ -102,6 +102,11 @@ describe('ValidacionPendienteAuditorPageComponent', () => {
     expect(texto).toContain('Los documentos adjuntos no eran legibles.');
     expect(texto).not.toContain('Tu cuenta está siendo revisada');
     expect(texto).not.toContain('Te notificaremos');
+    expect(texto).toContain('Si crees que esto fue un error');
+    const enlaceContacto = (fixture.nativeElement as HTMLElement).querySelector(
+      'a[href="mailto:carbonhubcr@gmail.com"]'
+    );
+    expect(enlaceContacto).toBeTruthy();
     expect(
       Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button')).find((b) =>
         b.textContent?.includes('Ir a mis auditorías')
