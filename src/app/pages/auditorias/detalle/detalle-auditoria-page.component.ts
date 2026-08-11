@@ -113,7 +113,10 @@ const MENSAJE_MOTIVO_REQUERIDO = 'Indica el motivo del rechazo.';
 const ERROR_DOCUMENTO = 'No se pudo abrir el documento. Intenta nuevamente.';
 const AVISO_VENTANA_BLOQUEADA =
   'Tu navegador bloqueó la ventana emergente. Permítelas para ver el documento.';
-const ESTADOS_TERMINALES: readonly EstadoSolicitudAuditoria[] = ['CERTIFICACION_EMITIDA'];
+const ESTADOS_TERMINALES: readonly EstadoSolicitudAuditoria[] = [
+  'CERTIFICACION_EMITIDA',
+  'OBSERVACIONES_PENDIENTES',
+];
 
 const ZONA_HORARIA_NEGOCIO = 'America/Costa_Rica';
 const FORMATEADOR_FECHA_NEGOCIO = new Intl.DateTimeFormat('en-CA', {
@@ -848,7 +851,7 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     indiceActual: number,
     estadoActual: EstadoSolicitudAuditoria
   ): SituacionPaso {
-    if (ESTADOS_TERMINALES.includes(estadoActual) && indice <= indiceActual) {
+    if (ESTADOS_TERMINALES.includes(estadoActual)) {
       return 'completado';
     }
     if (indice < indiceActual) {

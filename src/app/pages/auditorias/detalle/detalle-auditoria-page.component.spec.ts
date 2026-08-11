@@ -549,6 +549,13 @@ describe('DetalleAuditoriaPageComponent', () => {
     );
     expect(titulos.at(-1)).toBe('Observaciones pendientes');
     expect(titulos).not.toContain('Certificación emitida');
+    expect(situaciones()).toEqual([
+      'completado',
+      'completado',
+      'completado',
+      'completado',
+      'completado',
+    ]);
   });
 
   /**
