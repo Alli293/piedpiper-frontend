@@ -1,4 +1,3 @@
-import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
@@ -16,19 +15,18 @@ interface TarjetaEstadoCertificacion {
   readonly icon: IconName;
   readonly label: string;
   readonly value: number;
-  // El listado (`/empresa/certificaciones/listado`) hoy solo filtra por
-  // VIGENTE/VENCIDA: no tiene un chip para "próxima a vencer". Hasta que
-  // exista, esa tarjeta no navega (ver comentarios de PR #74) para no
-  // prometer un filtro que el destino no puede cumplir.
-  readonly enlazable: boolean;
+  readonly ruta: string;
+  readonly queryParams: Record<string, string>;
 }
 
 const ERROR_POR_DEFECTO = 'No fue posible cargar esta sección. Intenta recargar la página.';
 
 /**
  * Bloque "Estado de certificaciones" (PP-74): conteo de certificaciones
- * activas, próximas a vencer y vencidas de la empresa, cada una con acceso
- * directo al listado filtrado por ese estado.
+ * vigentes, próximas a vencer y vencidas de la empresa. "Vigentes" enlaza al
+ * listado filtrado por ese estado; "Próximas a vencer" y "Vencidas" enlazan
+ * al Centro de Alertas con el filtro de urgencia correspondiente, ya que
+ * ninguna de las dos tiene un chip equivalente en el listado.
  *
  * Presentacional: el fetch y el manejo de error de este bloque viven en la
  * página contenedora (mismo patrón que `ima-panel`/`benchmark-panel` en el
@@ -36,7 +34,7 @@ const ERROR_POR_DEFECTO = 'No fue posible cargar esta sección. Intenta recargar
  */
 @Component({
   selector: 'app-estado-certificaciones-panel',
-  imports: [HeadingComponent, IconComponent, LinkDirective, NgTemplateOutlet, RouterLink],
+  imports: [HeadingComponent, IconComponent, LinkDirective, RouterLink],
   templateUrl: './estado-certificaciones-panel.component.html',
   styleUrl: './estado-certificaciones-panel.component.scss',
 })
@@ -49,31 +47,35 @@ export class EstadoCertificacionesPanelComponent {
 
   protected readonly tarjetas = computed<TarjetaEstadoCertificacion[]>(() => {
     const resumen = this.resumen();
-    return [
+    const tarjetas: TarjetaEstadoCertificacion[] = [
       {
         estado: 'activa',
         tono: 'success',
-        icon: 'success',
-        label: 'Activas',
+        icon: 'verificar',
+        label: 'Vigentes',
         value: resumen?.activas ?? 0,
-        enlazable: true,
+        ruta: '/empresa/certificaciones/listado',
+        queryParams: { estado: 'activa' },
       },
       {
         estado: 'proxima_a_vencer',
         tono: 'warning',
-        icon: 'warning',
+        icon: 'vencida',
         label: 'Próximas a vencer',
         value: resumen?.proximasAVencer ?? 0,
-        enlazable: false,
+        ruta: '/empresa/certificaciones/alertas',
+        queryParams: { filtro: 'PROXIMAS' },
       },
       {
         estado: 'vencida',
         tono: 'danger',
-        icon: 'error',
+        icon: 'danger-solido',
         label: resumen?.vencidas === 1 ? 'Vencida' : 'Vencidas',
         value: resumen?.vencidas ?? 0,
-        enlazable: true,
+        ruta: '/empresa/certificaciones/alertas',
+        queryParams: { filtro: 'VENCIDAS' },
       },
     ];
+    return tarjetas;
   });
 }

@@ -13,6 +13,9 @@
   }
 
   &__ver-todas {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
     margin-left: auto;
     font-size: 13px;
     font-weight: 600;

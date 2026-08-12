@@ -63,27 +63,31 @@ describe('EstadoCertificacionesPanelComponent', () => {
     expect(valores).toEqual(['0', '0', '0']);
   });
 
-  it('las tarjetas "Activas" y "Vencidas" enlazan al listado filtrado por su estado', () => {
+  it('"Vigentes" enlaza al listado filtrado por estado activa', () => {
     componentRef.setInput('resumen', resumen());
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     const links = Array.from(el.querySelectorAll('a.ch-estado-cert__card')) as HTMLAnchorElement[];
-    expect(links.map((link) => link.getAttribute('href'))).toEqual([
-      '/empresa/certificaciones/listado?estado=activa',
-      '/empresa/certificaciones/listado?estado=vencida',
-    ]);
+    expect(links[0].getAttribute('href')).toBe('/empresa/certificaciones/listado?estado=activa');
   });
 
-  it('"Próximas a vencer" no es un enlace porque el listado no tiene ese filtro', () => {
+  it('"Próximas a vencer" y "Vencidas" enlazan al Centro de Alertas con su filtro de urgencia', () => {
     componentRef.setInput('resumen', resumen());
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    const tarjetas = Array.from(el.querySelectorAll('.ch-estado-cert__card'));
-    const proximaAVencer = tarjetas.find((tarjeta) =>
-      tarjeta.textContent?.includes('Próximas a vencer')
+    const links = Array.from(el.querySelectorAll('a.ch-estado-cert__card')) as HTMLAnchorElement[];
+    expect(links[1].getAttribute('href')).toBe('/empresa/certificaciones/alertas?filtro=PROXIMAS');
+    expect(links[2].getAttribute('href')).toBe('/empresa/certificaciones/alertas?filtro=VENCIDAS');
+  });
+
+  it('usa la etiqueta "Vigentes" para la tarjeta de certificaciones activas', () => {
+    componentRef.setInput('resumen', resumen());
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const labels = Array.from(el.querySelectorAll('.ch-estado-cert__card-label')).map((n) =>
+      n.textContent?.trim()
     );
-    expect(proximaAVencer?.tagName).toBe('DIV');
-    expect(proximaAVencer?.hasAttribute('href')).toBe(false);
+    expect(labels[0]).toBe('Vigentes');
   });
 
   it('usa la etiqueta singular "Vencida" cuando el conteo es 1', () => {

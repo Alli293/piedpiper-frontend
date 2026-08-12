@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
@@ -39,8 +39,10 @@ const BADGE_POR_URGENCIA: Record<UrgenciaVencimiento, { variant: BadgeVariant; l
 
 /**
  * Centro de Alertas (PP-76): vista completa de "Alertas de vencimiento",
- * con filtro por urgencia y búsqueda por nombre, a la que enlaza "Ver
- * todas →" del bloque compacto del dashboard de Certificaciones.
+ * con filtro por urgencia y búsqueda por nombre, a la que enlazan el bloque
+ * compacto y las tarjetas de "Estado de certificaciones" del dashboard.
+ * Acepta un query param `filtro` (mismos valores que `FiltroUrgencia`) para
+ * abrir la página con un chip preseleccionado.
  *
  * Reutiliza el mismo `GET /api/dashboard/alertas` que el bloque del
  * dashboard — no hay endpoint ni datos propios de esta pantalla.
@@ -64,13 +66,14 @@ const BADGE_POR_URGENCIA: Record<UrgenciaVencimiento, { variant: BadgeVariant; l
 })
 export class CentroAlertasPageComponent {
   private readonly dashboardService = inject(DashboardService);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly sinAlertasMensaje = SIN_ALERTAS_MENSAJE;
 
   protected readonly cargando = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly alertas = signal<AlertaVencimiento[]>([]);
-  protected readonly filtro = signal<FiltroUrgencia>('TODAS');
+  protected readonly filtro = signal<FiltroUrgencia>(this.filtroInicial());
   protected readonly busqueda = signal('');
 
   protected readonly headerConfig: HeaderConfig = {
@@ -136,6 +139,11 @@ export class CentroAlertasPageComponent {
 
   protected seleccionarFiltro(id: string): void {
     this.filtro.set(esFiltroValido(id) ? id : 'TODAS');
+  }
+
+  private filtroInicial(): FiltroUrgencia {
+    const filtro = this.route.snapshot.queryParamMap.get('filtro');
+    return filtro && esFiltroValido(filtro) ? filtro : 'TODAS';
   }
 
   protected onBusquedaChange(valor: string): void {

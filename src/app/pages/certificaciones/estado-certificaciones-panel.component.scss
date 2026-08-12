@@ -25,6 +25,9 @@
   }
 
   &__ver-todas {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
     margin-left: auto;
     font-size: 13px;
     font-weight: 600;
@@ -54,35 +57,39 @@
   }
 
   &__card {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: var(--ch-space-2);
     padding: var(--ch-space-4);
+    background: var(--ch-bg-white);
     border: 1px solid var(--ch-border);
     border-radius: var(--ch-radius-md);
     text-decoration: none;
     color: inherit;
-    transition: border-color 0.15s ease;
-
-    &:hover,
-    &:focus-visible {
-      border-color: var(--ch-text-secondary);
-    }
+    transition: background-color 0.15s ease;
 
     &--success {
       .ch-estado-cert__card-icon {
         background: var(--ch-green-soft);
         color: var(--ch-green-dark);
       }
+
+      &:hover,
+      &:focus-visible {
+        background: color-mix(in srgb, var(--ch-green) 5%, transparent);
+      }
     }
 
     &--warning {
-      background: var(--ch-warning-bg);
-      border-color: var(--ch-warning);
-
       .ch-estado-cert__card-icon {
-        background: var(--ch-bg-white);
+        background: var(--ch-warning-bg);
         color: var(--ch-warning-dark);
+      }
+
+      &:hover,
+      &:focus-visible {
+        background: color-mix(in srgb, var(--ch-warning) 5%, transparent);
       }
     }
 
@@ -91,16 +98,10 @@
         background: var(--ch-danger-bg);
         color: var(--ch-danger);
       }
-    }
-
-    // Tarjeta sin filtro equivalente en el listado (ver PP-74 / comentarios
-    // de PR): no navega, así que no debe insinuar que es clickeable.
-    &--sin-enlace {
-      cursor: default;
 
       &:hover,
       &:focus-visible {
-        border-color: var(--ch-border);
+        background: color-mix(in srgb, var(--ch-danger) 5%, transparent);
       }
     }
   }
@@ -121,8 +122,11 @@
   }
 
   &__card-arrow {
+    position: absolute;
+    top: var(--ch-space-3);
+    right: var(--ch-space-3);
     color: var(--ch-text-secondary);
-    font-size: 14px;
+    transform: rotate(135deg);
   }
 
   &__card-value {
@@ -134,6 +138,7 @@
 
   &__card-label {
     font-family: var(--ch-font-body);
+    font-weight: 600;
     font-size: 13px;
     color: var(--ch-text-secondary);
   }
