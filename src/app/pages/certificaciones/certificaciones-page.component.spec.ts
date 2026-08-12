@@ -11,10 +11,11 @@ import { PerfilInicialService } from '../../core/services/perfil-inicial.service
 import { PerfilInicial } from '../../core/models/perfil-inicial.model';
 import { EmpresaService } from '../../core/empresa/empresa.service';
 import { InsigniaEmpresa } from '../../core/empresa/empresa.models';
+import { CertificacionResumen } from '../../core/models/certificacion.model';
+import { CertificacionesService } from '../../core/services/certificaciones.service';
 import { CertificacionesPageComponent } from './certificaciones-page.component';
 import { DashboardService } from '../dashboard/dashboard.service';
 import {
-  AlertaVencimiento,
   CalendarioVencimientosResponse,
   RecomendacionRenovacion,
   ResumenCertificacionesDashboardResponse,
@@ -27,11 +28,13 @@ describe('CertificacionesPageComponent', () => {
   let dashboardService: {
     obtenerResumenCertificaciones: ReturnType<typeof vi.fn>;
     obtenerCalendarioVencimientos: ReturnType<typeof vi.fn>;
-    obtenerAlertas: ReturnType<typeof vi.fn>;
     obtenerRecomendacion: ReturnType<typeof vi.fn>;
   };
   let empresaService: {
     listarInsignias: ReturnType<typeof vi.fn>;
+  };
+  let certificacionesService: {
+    listar: ReturnType<typeof vi.fn>;
   };
   let metasService: {
     listarMetas: ReturnType<typeof vi.fn>;
@@ -51,12 +54,18 @@ describe('CertificacionesPageComponent', () => {
     fechaObtencion: '2026-04-12T00:00:00Z',
   };
 
-  const ALERTA: AlertaVencimiento = {
-    idCertificacion: 'c1',
-    nombre: 'Bandera Azul Ecológica 2025',
-    fechaVencimiento: '2026-06-04',
-    diasRestantes: -24,
-    urgencia: 'vencida',
+  const CERTIFICACION: CertificacionResumen = {
+    id: 'c1',
+    idAuditoria: 'a1',
+    idEmpresa: 'e1',
+    idAuditor: 'aud1',
+    tipo: 'CARBONO_NEUTRAL',
+    nombreCertificacion: 'Bandera Azul Ecológica 2025',
+    fechaEmision: '2026-06-04T00:00:00Z',
+    fechaVencimiento: '2027-06-04T00:00:00Z',
+    estado: 'ACTIVA',
+    vigente: true,
+    urlVerificacion: 'https://example.cr/verificar/c1',
   };
 
   const META: MetaReduccion = {
@@ -112,11 +121,13 @@ describe('CertificacionesPageComponent', () => {
     dashboardService = {
       obtenerResumenCertificaciones: vi.fn().mockReturnValue(of(RESUMEN)),
       obtenerCalendarioVencimientos: vi.fn().mockReturnValue(of(CALENDARIO)),
-      obtenerAlertas: vi.fn().mockReturnValue(of([ALERTA])),
       obtenerRecomendacion: vi.fn().mockReturnValue(of(RECOMENDACION)),
     };
     empresaService = {
       listarInsignias: vi.fn().mockReturnValue(of([INSIGNIA])),
+    };
+    certificacionesService = {
+      listar: vi.fn().mockReturnValue(of([CERTIFICACION])),
     };
     metasService = {
       listarMetas: vi.fn().mockReturnValue(of([META])),
@@ -128,6 +139,7 @@ describe('CertificacionesPageComponent', () => {
         provideRouter([]),
         { provide: DashboardService, useValue: dashboardService },
         { provide: EmpresaService, useValue: empresaService },
+        { provide: CertificacionesService, useValue: certificacionesService },
         { provide: MetasService, useValue: metasService },
         {
           provide: AuthSessionService,
@@ -177,7 +189,7 @@ describe('CertificacionesPageComponent', () => {
     expect(el.querySelector('.ch-estado-cert__error')?.textContent).toContain(
       'No fue posible cargar esta sección'
     );
-    expect(el.querySelector('.ch-certificaciones__listado-link')).toBeTruthy();
+    expect(el.querySelector('.ch-cert-recientes-panel')).toBeTruthy();
   });
 
   it('carga el calendario del mes actual al iniciar', async () => {
@@ -239,24 +251,24 @@ describe('CertificacionesPageComponent', () => {
     expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
   });
 
-  it('carga las alertas activas al iniciar', async () => {
+  it('carga las certificaciones recientes al iniciar', async () => {
     fixture = await createFixture();
-    expect(dashboardService.obtenerAlertas).toHaveBeenCalled();
+    expect(certificacionesService.listar).toHaveBeenCalled();
     const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('.ch-alertas-panel__item-nombre strong')?.textContent).toContain(
+    expect(el.querySelector('.ch-cert-recientes-panel__item-copy strong')?.textContent).toContain(
       'Bandera Azul Ecológica 2025'
     );
   });
 
-  it('un fallo en las alertas no afecta a los demás bloques de la página', async () => {
-    dashboardService.obtenerAlertas.mockReturnValue(
+  it('un fallo en las certificaciones recientes no afecta a los demás bloques de la página', async () => {
+    certificacionesService.listar.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 500 }))
     );
 
     fixture = await createFixture();
 
     const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('.ch-alertas-panel__error')?.textContent).toContain(
+    expect(el.querySelector('.ch-cert-recientes-panel__error')?.textContent).toContain(
       'No fue posible cargar esta sección'
     );
     expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);

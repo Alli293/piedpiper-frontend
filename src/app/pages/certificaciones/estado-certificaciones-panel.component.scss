@@ -1,4 +1,10 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
 .ch-estado-cert {
+  height: 100%;
   background: var(--ch-bg-white);
   border: 1px solid var(--ch-border);
   border-radius: var(--ch-radius-lg);
@@ -78,6 +84,7 @@
       &:hover,
       &:focus-visible {
         background: color-mix(in srgb, var(--ch-green) 5%, transparent);
+        border-color: var(--ch-green);
       }
     }
 
@@ -90,6 +97,7 @@
       &:hover,
       &:focus-visible {
         background: color-mix(in srgb, var(--ch-warning) 5%, transparent);
+        border-color: var(--ch-warning);
       }
     }
 
@@ -102,6 +110,7 @@
       &:hover,
       &:focus-visible {
         background: color-mix(in srgb, var(--ch-danger) 5%, transparent);
+        border-color: var(--ch-danger);
       }
     }
   }

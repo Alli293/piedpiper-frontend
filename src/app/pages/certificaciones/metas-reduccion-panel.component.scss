@@ -1,4 +1,10 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
 .ch-metas-panel {
+  height: 100%;
   background: var(--ch-bg-white);
   border: 1px solid var(--ch-border);
   border-radius: var(--ch-radius-lg);

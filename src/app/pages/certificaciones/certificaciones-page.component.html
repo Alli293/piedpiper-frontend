@@ -14,10 +14,10 @@
       />
     }
 
-    <app-alertas-activas-panel
-      [alertas]="alertas()"
-      [loading]="cargandoAlertas()"
-      [error]="alertasError()"
+    <app-certificaciones-recientes-panel
+      [certificaciones]="certificaciones()"
+      [loading]="cargandoCertificaciones()"
+      [error]="certificacionesError()"
     />
 
     <app-insignias-empresa-panel
@@ -39,13 +39,5 @@
       [error]="calendarioError()"
       (mesChange)="onMesCalendarioChange($event)"
     />
-
-    <a
-      appLink
-      routerLink="/empresa/certificaciones/listado"
-      class="ch-certificaciones__listado-link ch-certificaciones__full"
-    >
-      Ver listado completo de certificaciones →
-    </a>
   </section>
 </app-shell-layout>
