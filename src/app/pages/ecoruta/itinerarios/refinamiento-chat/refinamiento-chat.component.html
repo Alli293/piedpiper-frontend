@@ -10,12 +10,30 @@
   </header>
 
   <div class="ch-refinamiento-chat__mensajes">
-    <div class="ch-refinamiento-chat__mensaje ch-refinamiento-chat__mensaje--asistente">
-      <span class="ch-refinamiento-chat__mensaje-icono" aria-hidden="true">
-        <app-icon name="enviar" [size]="14" />
-      </span>
-      <p>{{ mensajeInicial() }}</p>
-    </div>
+    @for (mensaje of mensajesChat(); track $index) {
+      <div
+        class="ch-refinamiento-chat__mensaje"
+        [class.ch-refinamiento-chat__mensaje--asistente]="mensaje.rol === 'ASISTENTE'"
+        [class.ch-refinamiento-chat__mensaje--usuario]="mensaje.rol === 'USUARIO'"
+      >
+        @if (mensaje.rol === 'ASISTENTE') {
+          <span class="ch-refinamiento-chat__mensaje-icono" aria-hidden="true">
+            <app-icon name="enviar" [size]="14" />
+          </span>
+        }
+        <p>{{ mensaje.contenido }}</p>
+      </div>
+    }
+
+    @if (historial().length === 0) {
+      <div class="ch-refinamiento-chat__chips">
+        @for (chip of chipsSugeridos; track chip) {
+          <button type="button" class="ch-refinamiento-chat__chip" (click)="seleccionarChip(chip)">
+            {{ chip }}
+          </button>
+        }
+      </div>
+    }
 
     <!-- Activities list with "Comparar alternativas" buttons -->
     <div class="ch-refinamiento-chat__actividades">
@@ -58,22 +76,42 @@
         />
       </div>
     }
+
+    @if (enviandoMensaje()) {
+      <div
+        class="ch-refinamiento-chat__mensaje ch-refinamiento-chat__mensaje--asistente ch-refinamiento-chat__mensaje--procesando"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="ch-refinamiento-chat__mensaje-icono" aria-hidden="true">
+          <app-icon name="enviar" [size]="14" />
+        </span>
+        <p>
+          <span class="ch-refinamiento-chat__spinner" aria-hidden="true"></span>
+          Espera, estoy procesando tu pedido…
+        </p>
+      </div>
+    }
   </div>
 
-  <form class="ch-refinamiento-chat__form" novalidate>
+  <form class="ch-refinamiento-chat__form" novalidate (submit)="handleSubmit($event)">
     <input
+      #mensajeInput
       type="text"
       class="ch-refinamiento-chat__input"
       placeholder="Ej: Quiero más actividades al aire libre"
-      disabled
+      [value]="mensajeActual()"
+      [disabled]="enviandoMensaje()"
       aria-label="Escribí tu mensaje para el asistente"
+      (input)="onInputMensaje($event)"
     />
-    <button type="submit" class="ch-refinamiento-chat__enviar" disabled aria-label="Enviar mensaje">
+    <button
+      type="submit"
+      class="ch-refinamiento-chat__enviar"
+      [disabled]="enviandoMensaje() || !mensajeActual().trim()"
+      aria-label="Enviar mensaje"
+    >
       <app-icon name="enviar" [size]="16" />
     </button>
   </form>
-  <p class="ch-refinamiento-chat__ayuda">
-    <app-icon name="info" [size]="12" aria-hidden="true" />
-    <span>Disponible próximamente.</span>
-  </p>
 </section>

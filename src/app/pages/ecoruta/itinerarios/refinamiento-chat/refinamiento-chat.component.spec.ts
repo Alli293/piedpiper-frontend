@@ -2,12 +2,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { HttpErrorResponse } from '@angular/common/http';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { RefinamientoChatComponent } from './refinamiento-chat.component';
 import { Itinerario } from '../models/itinerario.model';
 import { EcoRutaAlternativasService } from '../ecoruta-alternativas.service';
+import { EcoRutaItinerariosService } from '../ecoruta-itinerarios.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { ComparacionResponse } from '../models/alternativas.model';
+import { RefinamientoResponse } from '../models/refinamiento.model';
 
 describe('RefinamientoChatComponent', () => {
   let fixture: ComponentFixture<RefinamientoChatComponent>;
@@ -80,13 +82,45 @@ describe('RefinamientoChatComponent', () => {
     expect(mensaje?.textContent).toContain('está listo. ¿Querés ajustar algo?');
   });
 
-  it('el input y el boton de enviar estan deshabilitados', async () => {
+  it('el input esta habilitado y el boton de enviar arranca deshabilitado por estar vacio', async () => {
     fixture = await crearFixture(itinerario);
     const root = fixture.nativeElement as HTMLElement;
 
-    expect(root.querySelector('input')?.disabled).toBe(true);
-    expect(root.querySelector('button')?.disabled).toBe(true);
-    expect(root.textContent).toContain('Disponible próximamente');
+    expect(root.querySelector('input')?.disabled).toBe(false);
+    expect(root.querySelector('button[type="submit"]')?.hasAttribute('disabled')).toBe(true);
+  });
+
+  it('muestra chips de sugerencia antes del primer mensaje del usuario', async () => {
+    fixture = await crearFixture(itinerario);
+    const root = fixture.nativeElement as HTMLElement;
+
+    const chips = root.querySelectorAll('.ch-refinamiento-chat__chip');
+    expect(chips.length).toBeGreaterThan(0);
+    expect(chips[0].textContent).toContain('Quiero más actividades al aire libre.');
+  });
+
+  it('un chip precarga el mensaje en el input sin enviarlo', async () => {
+    fixture = await crearFixture(itinerario);
+    const root = fixture.nativeElement as HTMLElement;
+
+    const chip = root.querySelector<HTMLButtonElement>('.ch-refinamiento-chat__chip');
+    chip!.click();
+    fixture.detectChanges();
+
+    const input = root.querySelector<HTMLInputElement>('input')!;
+    expect(input.value).toBe('Quiero más actividades al aire libre.');
+  });
+
+  it('prellenarMensaje() setea el input y le da foco (usado por "Preguntar sobre esto")', async () => {
+    fixture = await crearFixture(itinerario);
+    const root = fixture.nativeElement as HTMLElement;
+
+    fixture.componentInstance.prellenarMensaje('¿Qué opciones tengo para "Canopy"?');
+    fixture.detectChanges();
+
+    const input = root.querySelector<HTMLInputElement>('input')!;
+    expect(input.value).toBe('¿Qué opciones tengo para "Canopy"?');
+    expect(document.activeElement).toBe(input);
   });
 });
 
@@ -364,5 +398,170 @@ describe('RefinamientoChatComponent — integración con alternativas', () => {
       );
       expect(tarjetas).toBeNull();
     });
+  });
+});
+
+describe('RefinamientoChatComponent — conversación libre (PP-88)', () => {
+  let fixture: ComponentFixture<RefinamientoChatComponent>;
+  let itinerariosService: { refinar: ReturnType<typeof vi.fn> };
+  let toastService: {
+    info: ReturnType<typeof vi.fn>;
+    error: ReturnType<typeof vi.fn>;
+    success: ReturnType<typeof vi.fn>;
+  };
+
+  const itinerarioBase: Itinerario = {
+    id: 'itin-1',
+    cantidadDias: 3,
+    fechaInicio: '2026-09-01',
+    tipoViaje: 'INDIVIDUAL',
+    estado: 'GENERADO',
+    version: 1,
+    puntuacionAmbientalPreliminar: 82,
+    ecoScore: 82,
+    clasificacionAmbiental: 'BUENA',
+    ecoScoreParcial: false,
+    ecoScoreCalculadoEn: '2026-07-30T20:00:00Z',
+    fechaGeneracion: '2026-07-30T20:00:00Z',
+    generadoParcial: false,
+    mensajeParcial: null,
+    dias: [],
+    establecimientosEvaluados: [],
+  };
+
+  async function setup() {
+    itinerariosService = { refinar: vi.fn() };
+    toastService = { info: vi.fn(), error: vi.fn(), success: vi.fn() };
+
+    await TestBed.configureTestingModule({
+      imports: [RefinamientoChatComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: EcoRutaItinerariosService, useValue: itinerariosService },
+        { provide: ToastService, useValue: toastService },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(RefinamientoChatComponent);
+    fixture.componentRef.setInput('itinerario', itinerarioBase);
+    fixture.detectChanges();
+  }
+
+  function escribirYEnviar(texto: string): void {
+    const root = fixture.nativeElement as HTMLElement;
+    const input = root.querySelector<HTMLInputElement>('input')!;
+    input.value = texto;
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    const form = root.querySelector('form')!;
+    form.dispatchEvent(new Event('submit', { cancelable: true }));
+    fixture.detectChanges();
+  }
+
+  it('agrega el mensaje del usuario de inmediato, deshabilita el input y muestra el spinner mientras procesa', async () => {
+    await setup();
+    itinerariosService.refinar.mockReturnValue(new Subject<RefinamientoResponse>());
+
+    escribirYEnviar('Quiero más actividades al aire libre.');
+
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.textContent).toContain('Quiero más actividades al aire libre.');
+    expect(root.querySelector<HTMLInputElement>('input')?.disabled).toBe(true);
+    expect(root.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);
+    expect(root.textContent).toContain('Espera, estoy procesando tu pedido');
+  });
+
+  it('en éxito reemplaza el historial con el del backend, lo muestra y emite el itinerario actualizado', async () => {
+    await setup();
+    const respuesta: RefinamientoResponse = {
+      itinerario: { ...itinerarioBase, version: 2 },
+      respuestaAsistente: 'Listo, agregué una caminata.',
+      historialMensajes: [
+        { rol: 'USUARIO', contenido: 'Quiero más actividades al aire libre.' },
+        { rol: 'ASISTENTE', contenido: 'Listo, agregué una caminata.' },
+      ],
+      actividadParaComparar: null,
+    };
+    itinerariosService.refinar.mockReturnValue(of(respuesta));
+    let itinerarioEmitido: Itinerario | undefined;
+    fixture.componentInstance.itinerarioActualizado.subscribe((it) => (itinerarioEmitido = it));
+
+    escribirYEnviar('Quiero más actividades al aire libre.');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.textContent).toContain('Listo, agregué una caminata.');
+    expect(itinerarioEmitido?.version).toBe(2);
+    expect(root.querySelector<HTMLInputElement>('input')?.disabled).toBe(false);
+  });
+
+  it('en éxito con actividadParaComparar dispara automáticamente la comparación de alternativas', async () => {
+    await setup();
+    const respuesta: RefinamientoResponse = {
+      itinerario: itinerarioBase,
+      respuestaAsistente: 'Te muestro otras opciones de hospedaje.',
+      historialMensajes: [
+        { rol: 'USUARIO', contenido: '¿Hay opciones de hospedaje con menor huella?' },
+        { rol: 'ASISTENTE', contenido: 'Te muestro otras opciones de hospedaje.' },
+      ],
+      actividadParaComparar: 'act-1',
+    };
+    itinerariosService.refinar.mockReturnValue(of(respuesta));
+    const alternativasService = TestBed.inject(EcoRutaAlternativasService);
+    const spy = vi.spyOn(alternativasService, 'obtenerAlternativas').mockReturnValue(
+      of({
+        actividadOriginalNombre: 'Hospedaje',
+        ecoScoreOriginal: 70,
+        categoriaTuristica: 'NATURALEZA',
+        provincia: 'Alajuela',
+        alternativas: [],
+        mensaje: null,
+      })
+    );
+
+    escribirYEnviar('¿Hay opciones de hospedaje con menor huella?');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(spy).toHaveBeenCalledWith(itinerarioBase.id, 'act-1');
+  });
+
+  it('en error 403 muestra el toast exacto de permiso de modificación', async () => {
+    await setup();
+    itinerariosService.refinar.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 403 }))
+    );
+
+    escribirYEnviar('Cámbialo.');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(toastService.error).toHaveBeenCalledWith(
+      'No tienes permiso para modificar este itinerario.',
+      undefined,
+      5000
+    );
+  });
+
+  it('en timeout/error de IA muestra el toast exacto del AC y rehabilita el input', async () => {
+    await setup();
+    itinerariosService.refinar.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 504 }))
+    );
+
+    escribirYEnviar('Cámbialo.');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    expect(toastService.error).toHaveBeenCalledWith(
+      'No fue posible actualizar el itinerario. Intenta nuevamente.',
+      undefined,
+      5000
+    );
+    expect(root.querySelector<HTMLInputElement>('input')?.disabled).toBe(false);
   });
 });

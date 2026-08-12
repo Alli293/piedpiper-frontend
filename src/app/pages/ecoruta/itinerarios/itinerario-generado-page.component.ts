@@ -72,6 +72,7 @@ export class ItinerarioGeneradoPageComponent {
   protected readonly diasExpandidos = signal<Set<number>>(new Set());
 
   private readonly chatPanel = viewChild<ElementRef<HTMLElement>>('chatPanel');
+  private readonly refinamientoChat = viewChild(RefinamientoChatComponent);
 
   private cargaRequestId = 0;
 
@@ -177,8 +178,8 @@ export class ItinerarioGeneradoPageComponent {
     return formatCurrency(actividad.costoAproximado!, actividad.moneda);
   }
 
-  // TODO(PP-88): pasarle el contexto de `actividad` al chat en vez de solo hacer scroll.
   protected preguntarSobreActividad(actividad: ItinerarioActividad): void {
+    this.refinamientoChat()?.prellenarMensaje(`¿Qué opciones tengo para "${actividad.nombre}"?`);
     this.chatPanel()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
