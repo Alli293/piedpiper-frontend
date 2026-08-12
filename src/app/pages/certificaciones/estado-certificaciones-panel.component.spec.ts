@@ -63,6 +63,14 @@ describe('EstadoCertificacionesPanelComponent', () => {
     expect(valores).toEqual(['0', '0', '0']);
   });
 
+  it('"Ver todas" del encabezado enlaza al Centro de Alertas', () => {
+    componentRef.setInput('resumen', resumen());
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const enlace = el.querySelector('.ch-estado-cert__ver-todas') as HTMLAnchorElement;
+    expect(enlace.getAttribute('href')).toBe('/empresa/certificaciones/alertas');
+  });
+
   it('"Vigentes" enlaza al listado filtrado por estado activa', () => {
     componentRef.setInput('resumen', resumen());
     fixture.detectChanges();

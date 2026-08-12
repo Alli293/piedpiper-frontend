@@ -4,7 +4,7 @@
       <app-icon name="certificaciones" [size]="18" />
     </span>
     <app-heading level="h3" text="Estado de certificaciones" />
-    <a appLink routerLink="/empresa/certificaciones/listado" class="ch-estado-cert__ver-todas">
+    <a appLink routerLink="/empresa/certificaciones/alertas" class="ch-estado-cert__ver-todas">
       Ver todas
       <app-icon name="chevron-derecha" [size]="12" aria-hidden="true" />
     </a>
@@ -29,13 +29,13 @@
           <span class="ch-estado-cert__card-arrow" aria-hidden="true">
             <app-icon name="volver" [size]="18" />
           </span>
-          <span class="ch-estado-cert__card-top">
-            <span class="ch-estado-cert__card-icon">
-              <app-icon [name]="tarjeta.icon" [size]="16" />
-            </span>
+          <span class="ch-estado-cert__card-icon">
+            <app-icon [name]="tarjeta.icon" [size]="16" />
           </span>
-          <span class="ch-estado-cert__card-value">{{ tarjeta.value }}</span>
-          <span class="ch-estado-cert__card-label">{{ tarjeta.label }}</span>
+          <span class="ch-estado-cert__card-copy">
+            <span class="ch-estado-cert__card-value">{{ tarjeta.value }}</span>
+            <span class="ch-estado-cert__card-label">{{ tarjeta.label }}</span>
+          </span>
         </a>
       }
     </div>
