@@ -154,7 +154,6 @@ describe('Property 7: Construcción correcta de peticiones HTTP en el servicio',
   }, 30000);
 });
 
-
 /**
  * Feature: PP-56-calificacion-verificada-auditores
  * Property 8: Propagación transparente de errores HTTP

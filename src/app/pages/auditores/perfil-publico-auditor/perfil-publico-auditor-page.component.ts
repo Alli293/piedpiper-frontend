@@ -54,6 +54,7 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   protected readonly perfil = signal<PerfilPublicoAuditorResponse | null>(null);
   protected readonly error = signal(false);
   protected readonly errorTipo = signal<ErrorTipo>('none');
+  protected readonly etiquetasEspecialidad = signal(new Map<string, string>());
   protected readonly etiquetasZona = signal(new Map<string, string>());
 
   /** Datos de calificación para el componente CalificacionForm */
@@ -107,8 +108,13 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const auditorId = this.route.snapshot.paramMap.get('id') ?? '';
-    void this.cargarZonas();
+    const auditorId = this.route.snapshot.paramMap.get('id');
+    void this.cargarCatalogos();
+    if (!auditorId) {
+      this.cargando.set(false);
+      void this.router.navigate(['/auditores']);
+      return;
+    }
     void this.cargarPerfil(auditorId);
   }
 
@@ -120,11 +126,8 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
     void this.router.navigate(['/empresa/auditorias/nueva']);
   }
 
-  protected formatearEspecialidad(valor: string): string {
-    return valor
-      .replace(/_/g, ' ')
-      .toLowerCase()
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+  protected etiquetaEspecialidad(valor: string): string {
+    return this.etiquetasEspecialidad().get(valor) ?? valor;
   }
 
   protected generarEstrellas(calificacion: number): boolean[] {
@@ -162,6 +165,21 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
       }
     } finally {
       this.cargando.set(false);
+    }
+  }
+
+  private async cargarCatalogos(): Promise<void> {
+    await Promise.all([this.cargarEspecialidades(), this.cargarZonas()]);
+  }
+
+  private async cargarEspecialidades(): Promise<void> {
+    try {
+      const especialidades = await firstValueFrom(this.auditoresService.obtenerEspecialidades());
+      this.etiquetasEspecialidad.set(
+        new Map(especialidades.map((especialidad) => [especialidad.valor, especialidad.etiqueta]))
+      );
+    } catch {
+      this.etiquetasEspecialidad.set(new Map());
     }
   }
 

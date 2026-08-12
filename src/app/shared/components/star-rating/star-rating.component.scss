@@ -13,7 +13,9 @@
   line-height: 1;
   cursor: pointer;
   color: var(--ch-text-tertiary, #cbd5e1);
-  transition: color 0.15s ease, transform 0.1s ease;
+  transition:
+    color 0.15s ease,
+    transform 0.1s ease;
   border-radius: var(--ch-radius-sm, 4px);
   padding: var(--ch-space-1, 2px);
 

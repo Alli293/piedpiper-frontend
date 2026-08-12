@@ -17,6 +17,7 @@ import { PerfilPublicoAuditorService } from '../../../core/perfil-auditor/perfil
 import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { AuditoriasService } from '../../auditorias/auditorias.service';
+import { AuditoresService } from '../auditores.service';
 import { PerfilPublicoAuditorPageComponent } from './perfil-publico-auditor-page.component';
 
 const AUDITOR_ID = 'aud-111-222-333';
@@ -29,6 +30,7 @@ const PERFIL_COMPLETO: PerfilPublicoAuditorResponse = {
   nombre: 'María López García',
   fotoPerfil: null,
   descripcionProfesional: 'Auditora senior con experiencia en sostenibilidad.',
+  provincia: null,
   especialidades: ['HUELLA_CARBONO'],
   certificaciones: [],
   disponible: true,
@@ -82,6 +84,10 @@ describe('PerfilPublicoAuditorPage — Integración CalificacionFormComponent', 
   let fixture: ComponentFixture<PerfilPublicoAuditorPageComponent>;
   let toastService: ToastService;
   let perfilService: { obtenerPerfilPublico: ReturnType<typeof vi.fn> };
+  let auditoresService: {
+    obtenerEspecialidades: ReturnType<typeof vi.fn>;
+    obtenerZonas: ReturnType<typeof vi.fn>;
+  };
   let auditoriasService: { listarDeMiEmpresa: ReturnType<typeof vi.fn> };
   let calificacionService: {
     crearCalificacion: ReturnType<typeof vi.fn>;
@@ -125,6 +131,12 @@ describe('PerfilPublicoAuditorPage — Integración CalificacionFormComponent', 
     perfilService = {
       obtenerPerfilPublico: vi.fn().mockReturnValue(of(PERFIL_COMPLETO)),
     };
+    auditoresService = {
+      obtenerEspecialidades: vi
+        .fn()
+        .mockReturnValue(of([{ valor: 'HUELLA_CARBONO', etiqueta: 'Huella carbono' }])),
+      obtenerZonas: vi.fn().mockReturnValue(of([])),
+    };
 
     auditoriasService = {
       listarDeMiEmpresa: vi.fn().mockReturnValue(of([AUDITORIA_CALIFICABLE])),
@@ -154,6 +166,7 @@ describe('PerfilPublicoAuditorPage — Integración CalificacionFormComponent', 
           useValue: { snapshot: { paramMap: { get: () => AUDITOR_ID } } },
         },
         { provide: PerfilPublicoAuditorService, useValue: perfilService },
+        { provide: AuditoresService, useValue: auditoresService },
         { provide: AuditoriasService, useValue: auditoriasService },
         { provide: CalificacionService, useValue: calificacionService },
         { provide: AuthSessionService, useValue: authSessionStub },
@@ -283,9 +296,7 @@ describe('PerfilPublicoAuditorPage — Integración CalificacionFormComponent', 
       const formElement = raiz().querySelector('app-calificacion-form')!;
 
       // Simular selección de estrella clickeando un radio button del star-rating
-      const starButtons = formElement.querySelectorAll<HTMLButtonElement>(
-        'app-star-rating button'
-      );
+      const starButtons = formElement.querySelectorAll<HTMLButtonElement>('app-star-rating button');
 
       if (starButtons.length >= 5) {
         starButtons[4].click();
@@ -317,9 +328,7 @@ describe('PerfilPublicoAuditorPage — Integración CalificacionFormComponent', 
 
       const formElement = raiz().querySelector('app-calificacion-form')!;
 
-      const starButtons = formElement.querySelectorAll<HTMLButtonElement>(
-        'app-star-rating button'
-      );
+      const starButtons = formElement.querySelectorAll<HTMLButtonElement>('app-star-rating button');
 
       if (starButtons.length >= 3) {
         starButtons[2].click();
