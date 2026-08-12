@@ -38,6 +38,7 @@
               <app-checkbox
                 [label]="esp.etiqueta"
                 [checked]="isEspecialidadSeleccionada(esp.valor)"
+                [disabled]="!isEspecialidadSeleccionada(esp.valor) && maxEspecialidadesAlcanzado()"
                 (checkedChange)="toggleEspecialidad(esp.valor)"
               />
             }

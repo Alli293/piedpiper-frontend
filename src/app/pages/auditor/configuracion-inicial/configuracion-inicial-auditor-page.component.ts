@@ -128,6 +128,10 @@ export class ConfiguracionInicialAuditorPageComponent implements OnInit {
     () => `${this.model().descripcionProfesional.length}/${MAX_DESCRIPCION}`
   );
 
+  protected readonly maxEspecialidadesAlcanzado = computed(
+    () => this.especialidadesSeleccionadas().length >= MAX_ESPECIALIDADES
+  );
+
   protected readonly errorEspecialidades = computed(() => {
     if (!this.especialidadesTocado()) return '';
     const seleccionadas = this.especialidadesSeleccionadas();
@@ -146,11 +150,15 @@ export class ConfiguracionInicialAuditorPageComponent implements OnInit {
 
   protected toggleEspecialidad(valor: string): void {
     this.especialidadesTocado.set(true);
-    this.especialidadesSeleccionadas.update((seleccionadas) =>
-      seleccionadas.includes(valor)
-        ? seleccionadas.filter((v) => v !== valor)
-        : [...seleccionadas, valor]
-    );
+    this.especialidadesSeleccionadas.update((seleccionadas) => {
+      if (seleccionadas.includes(valor)) {
+        return seleccionadas.filter((v) => v !== valor);
+      }
+      if (seleccionadas.length >= MAX_ESPECIALIDADES) {
+        return seleccionadas;
+      }
+      return [...seleccionadas, valor];
+    });
   }
 
   protected isEspecialidadSeleccionada(valor: string): boolean {

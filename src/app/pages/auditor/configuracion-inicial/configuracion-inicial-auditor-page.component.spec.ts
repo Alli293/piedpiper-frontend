@@ -126,4 +126,33 @@ describe('ConfiguracionInicialAuditorPageComponent', () => {
     expect(interno().errorGeneral()).toBe('Ya completaste tu configuración inicial.');
     expect(navigateByUrl).not.toHaveBeenCalled();
   });
+
+  it('no permite seleccionar mas de MAX_ESPECIALIDADES y deshabilita el resto de opciones', async () => {
+    const muchasEspecialidades = Array.from({ length: 9 }, (_, i) => ({
+      valor: `ESP_${i}`,
+      etiqueta: `Especialidad ${i}`,
+    }));
+    perfilAuditorService.obtenerEspecialidades.mockReturnValue(of(muchasEspecialidades));
+    fixture = TestBed.createComponent(ConfiguracionInicialAuditorPageComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    for (let i = 0; i < 9; i++) {
+      interno().toggleEspecialidad(`ESP_${i}`);
+    }
+    fixture.detectChanges();
+
+    const seleccionadas = (
+      component as unknown as { especialidadesSeleccionadas: () => string[] }
+    ).especialidadesSeleccionadas();
+    expect(seleccionadas.length).toBe(8);
+    expect(seleccionadas).not.toContain('ESP_8');
+
+    const checkboxes = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('input[type="checkbox"]')
+    ) as HTMLInputElement[];
+    expect(checkboxes[8].disabled).toBe(true);
+  });
 });

@@ -11,6 +11,7 @@ import { SemanticCardComponent } from '../../../shared/components/semantic-card/
 import { LinkDirective } from '../../../shared/components/link/link.directive';
 import { AuthService } from '../../../core/auth/auth.service';
 import { AuthSessionService } from '../../../core/auth-session.service';
+import { ToastService } from '../../../shared/services/toast.service';
 import {
   MiSolicitudAuditor,
   MiSolicitudAuditorService,
@@ -44,6 +45,7 @@ export class ValidacionPendienteAuditorPageComponent implements OnInit {
   private readonly miSolicitudAuditorService = inject(MiSolicitudAuditorService);
   private readonly authService = inject(AuthService);
   private readonly authSessionService = inject(AuthSessionService);
+  private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   protected readonly cargando = signal(true);
@@ -86,8 +88,20 @@ export class ValidacionPendienteAuditorPageComponent implements OnInit {
     this.router.navigateByUrl('/login').catch(() => {});
   }
 
-  protected continuar(): void {
-    this.router.navigateByUrl('/auditor/auditorias').catch(() => {});
+  protected async continuar(): Promise<void> {
+    if (this.authService.estado() === 'ACTIVO') {
+      await this.router.navigateByUrl('/auditor/auditorias');
+      return;
+    }
+
+    // El backend re-emite el JWT en cada llamada autenticada (incluida la que trajo el
+    // "APROBADO" que habilitó este botón), pero no queremos depender en silencio de ese
+    // timing: si el estado local sigue sin reflejarlo, `guardAuditorActivo` rebotaría al
+    // auditor de vuelta acá sin explicación. Preferimos pedirle explícitamente que vuelva
+    // a iniciar sesión.
+    this.authService.cerrarSesion();
+    this.toastService.info('Tu cuenta ya fue aprobada', 'Inicia sesión de nuevo para continuar.');
+    await this.router.navigateByUrl('/login');
   }
 
   private async cargarSolicitud(): Promise<void> {

@@ -93,13 +93,28 @@ describe('SolicitudesAuditorPageComponent', () => {
   it('al resolver la ultima solicitud de una pagina, retrocede a la anterior', () => {
     validacionService.listarPendientes.mockImplementation((numeroPagina: number) =>
       numeroPagina === 2
-        ? of({ contenido: [], pagina: 2, totalPaginas: 3, totalElementos: 20 })
+        ? of({ contenido: [], pagina: 2, totalPaginas: 2, totalElementos: 20 })
         : of({ contenido: [solicitud], pagina: numeroPagina, totalPaginas: 3, totalElementos: 20 })
     );
     const interno = fixture.componentInstance as unknown as { cargar(numeroPagina: number): void };
 
     interno.cargar(2);
 
+    expect(validacionService.listarPendientes).toHaveBeenLastCalledWith(1);
+  });
+
+  it('con un numero de pagina muy adelante (bookmark viejo), salta directo a la ultima pagina con contenido en una sola llamada extra', () => {
+    validacionService.listarPendientes.mockImplementation((numeroPagina: number) =>
+      numeroPagina === 9
+        ? of({ contenido: [], pagina: 9, totalPaginas: 2, totalElementos: 20 })
+        : of({ contenido: [solicitud], pagina: numeroPagina, totalPaginas: 2, totalElementos: 20 })
+    );
+    const interno = fixture.componentInstance as unknown as { cargar(numeroPagina: number): void };
+    validacionService.listarPendientes.mockClear();
+
+    interno.cargar(9);
+
+    expect(validacionService.listarPendientes).toHaveBeenCalledTimes(2);
     expect(validacionService.listarPendientes).toHaveBeenLastCalledWith(1);
   });
 });

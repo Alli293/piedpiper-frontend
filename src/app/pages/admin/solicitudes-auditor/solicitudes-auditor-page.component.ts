@@ -64,10 +64,18 @@ export class SolicitudesAuditorPageComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (pagina) => {
-          // Volver a una página que quedó vacía (se resolvió su última solicitud) manda al admin
-          // de vuelta a la anterior en vez de mostrarle un "cola al día" engañoso.
-          if (pagina.contenido.length === 0 && numeroPagina > 0) {
-            this.cargar(numeroPagina - 1);
+          // Volver a una página que quedó vacía (se resolvió su última solicitud, o llegó por un
+          // enlace/bookmark viejo apuntando muy adelante) manda al admin a la última página con
+          // contenido en vez de mostrarle un "cola al día" engañoso. Salta directo con
+          // `totalPaginas` en lugar de retroceder de a una, para no encadenar una petición HTTP
+          // por cada página vacía intermedia.
+          const ultimaPaginaValida = Math.max(pagina.totalPaginas - 1, 0);
+          if (
+            pagina.contenido.length === 0 &&
+            numeroPagina > 0 &&
+            ultimaPaginaValida !== numeroPagina
+          ) {
+            this.cargar(ultimaPaginaValida);
             return;
           }
           this.pagina.set(pagina);

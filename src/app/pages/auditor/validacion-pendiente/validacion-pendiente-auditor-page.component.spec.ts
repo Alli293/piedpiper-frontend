@@ -10,12 +10,14 @@ import {
 } from '../../../core/validacion/mi-solicitud-auditor.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { AuthSessionService } from '../../../core/auth-session.service';
+import { ToastService } from '../../../shared/services/toast.service';
 
 describe('ValidacionPendienteAuditorPageComponent', () => {
   let fixture: ComponentFixture<ValidacionPendienteAuditorPageComponent>;
   let navigateByUrl: ReturnType<typeof vi.spyOn>;
   let miSolicitudAuditorService: { obtener: ReturnType<typeof vi.fn> };
-  let authService: { cerrarSesion: ReturnType<typeof vi.fn> };
+  let authService: { cerrarSesion: ReturnType<typeof vi.fn>; estado: ReturnType<typeof signal> };
+  let toastService: { info: ReturnType<typeof vi.fn> };
 
   const solicitudPendiente: MiSolicitudAuditor = {
     estado: 'PENDIENTE',
@@ -26,7 +28,8 @@ describe('ValidacionPendienteAuditorPageComponent', () => {
 
   beforeEach(async () => {
     miSolicitudAuditorService = { obtener: vi.fn().mockReturnValue(of(solicitudPendiente)) };
-    authService = { cerrarSesion: vi.fn() };
+    authService = { cerrarSesion: vi.fn(), estado: signal<string | null>('PENDIENTE_VALIDACION') };
+    toastService = { info: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [ValidacionPendienteAuditorPageComponent],
@@ -41,6 +44,7 @@ describe('ValidacionPendienteAuditorPageComponent', () => {
           provide: AuthSessionService,
           useValue: { getUserEmail: vi.fn().mockReturnValue('ana@correo.com') },
         },
+        { provide: ToastService, useValue: toastService },
       ],
     }).compileComponents();
 
@@ -81,6 +85,57 @@ describe('ValidacionPendienteAuditorPageComponent', () => {
     expect((fixture.nativeElement as HTMLElement).textContent).toContain(
       'No pudimos cargar el estado de tu solicitud.'
     );
+  });
+
+  it('con solicitud aprobada y JWT ya sincronizado, continuar navega a auditorias', async () => {
+    miSolicitudAuditorService.obtener.mockReturnValue(
+      of({
+        estado: 'APROBADO',
+        fechaSolicitud: '2026-06-28T00:00:00Z',
+        fechaResolucion: '2026-07-02T00:00:00Z',
+        motivoRechazo: null,
+      } satisfies MiSolicitudAuditor)
+    );
+    authService.estado.set('ACTIVO');
+    fixture = TestBed.createComponent(ValidacionPendienteAuditorPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const boton = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('button')
+    ).find((b) => b.textContent?.includes('Ir a mis auditorías')) as HTMLButtonElement;
+    boton.click();
+    await fixture.whenStable();
+
+    expect(navigateByUrl).toHaveBeenCalledWith('/auditor/auditorias');
+    expect(authService.cerrarSesion).not.toHaveBeenCalled();
+  });
+
+  it('con solicitud aprobada pero JWT local desactualizado, continuar cierra sesion en vez de rebotar en silencio', async () => {
+    miSolicitudAuditorService.obtener.mockReturnValue(
+      of({
+        estado: 'APROBADO',
+        fechaSolicitud: '2026-06-28T00:00:00Z',
+        fechaResolucion: '2026-07-02T00:00:00Z',
+        motivoRechazo: null,
+      } satisfies MiSolicitudAuditor)
+    );
+    authService.estado.set('PENDIENTE_VALIDACION');
+    fixture = TestBed.createComponent(ValidacionPendienteAuditorPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const boton = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('button')
+    ).find((b) => b.textContent?.includes('Ir a mis auditorías')) as HTMLButtonElement;
+    boton.click();
+    await fixture.whenStable();
+
+    expect(authService.cerrarSesion).toHaveBeenCalled();
+    expect(toastService.info).toHaveBeenCalled();
+    expect(navigateByUrl).toHaveBeenCalledWith('/login');
   });
 
   it('con solicitud rechazada muestra el motivo y no la promesa de revision', async () => {
