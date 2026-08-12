@@ -88,7 +88,7 @@ describe('PerfilPublicoAuditorPage — Integración CalificacionFormComponent', 
     obtenerEspecialidades: ReturnType<typeof vi.fn>;
     obtenerZonas: ReturnType<typeof vi.fn>;
   };
-  let auditoriasService: { listarDeMiEmpresa: ReturnType<typeof vi.fn> };
+  let auditoriasService: { listarDeEmpresaAutenticada: ReturnType<typeof vi.fn> };
   let calificacionService: {
     crearCalificacion: ReturnType<typeof vi.fn>;
     editarCalificacion: ReturnType<typeof vi.fn>;
@@ -139,7 +139,7 @@ describe('PerfilPublicoAuditorPage — Integración CalificacionFormComponent', 
     };
 
     auditoriasService = {
-      listarDeMiEmpresa: vi.fn().mockReturnValue(of([AUDITORIA_CALIFICABLE])),
+      listarDeEmpresaAutenticada: vi.fn().mockReturnValue(of([AUDITORIA_CALIFICABLE])),
     };
 
     calificacionService = {
@@ -205,7 +205,7 @@ describe('PerfilPublicoAuditorPage — Integración CalificacionFormComponent', 
 
     it('NO muestra calificacion-form cuando no hay auditoría calificable (lista vacía)', async () => {
       configurarComoAdminEmpresa();
-      auditoriasService.listarDeMiEmpresa.mockReturnValue(of([]));
+      auditoriasService.listarDeEmpresaAutenticada.mockReturnValue(of([]));
 
       fixture = TestBed.createComponent(PerfilPublicoAuditorPageComponent);
       await estabilizar();
@@ -216,7 +216,7 @@ describe('PerfilPublicoAuditorPage — Integración CalificacionFormComponent', 
 
     it('NO muestra calificacion-form cuando la auditoría no tiene estado CERTIFICACION_EMITIDA', async () => {
       configurarComoAdminEmpresa();
-      auditoriasService.listarDeMiEmpresa.mockReturnValue(
+      auditoriasService.listarDeEmpresaAutenticada.mockReturnValue(
         of([{ ...AUDITORIA_CALIFICABLE, estado: 'EN_REVISION' }])
       );
 
@@ -229,7 +229,7 @@ describe('PerfilPublicoAuditorPage — Integración CalificacionFormComponent', 
 
     it('NO muestra calificacion-form cuando la auditoría pertenece a otro auditor', async () => {
       configurarComoAdminEmpresa();
-      auditoriasService.listarDeMiEmpresa.mockReturnValue(
+      auditoriasService.listarDeEmpresaAutenticada.mockReturnValue(
         of([{ ...AUDITORIA_CALIFICABLE, idAuditor: 'otro-auditor-id' }])
       );
 
@@ -404,7 +404,7 @@ describe('PerfilPublicoAuditorPage — Integración CalificacionFormComponent', 
   describe('Manejo de errores en carga de contexto', () => {
     it('no muestra calificacion-form si el servicio de auditorías falla', async () => {
       configurarComoAdminEmpresa();
-      auditoriasService.listarDeMiEmpresa.mockReturnValue(
+      auditoriasService.listarDeEmpresaAutenticada.mockReturnValue(
         throwError(() => new HttpErrorResponse({ status: 500 }))
       );
 
