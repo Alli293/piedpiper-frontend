@@ -90,6 +90,7 @@ export class ItinerarioGeneradoPageComponent {
       : 'Itinerario generado',
     showNotificationDot: false,
     userInitials: this.authSession.getUserInitials(),
+    showBackButton: true,
   }));
 
   protected readonly bandaEcoScore = computed<ClasificacionInfo | null>(() => {
