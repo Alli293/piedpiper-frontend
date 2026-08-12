@@ -24,8 +24,8 @@
         variant="secondary"
         size="sm"
         [ariaLabel]="'Filtrar por estado'"
-        [attr.aria-expanded]="mostrandoFiltros()"
-        aria-controls="ch-filtros-estado-auditorias"
+        [ariaExpanded]="mostrandoFiltros()"
+        ariaControls="ch-filtros-estado-auditorias"
         (click)="alternarPanelFiltros()"
       >
         Filtrar por estado

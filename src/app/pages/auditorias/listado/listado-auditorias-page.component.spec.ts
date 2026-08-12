@@ -217,6 +217,26 @@ describe('ListadoAuditoriasPageComponent', () => {
     ).find((b) => b.textContent?.trim() === texto);
   }
 
+  /**
+   * El estado del panel tiene que quedar en el <button> real: sobre <app-button> cae en un custom
+   * element sin rol, que el lector de pantalla ignora, y el usuario nunca sabe que hay un panel.
+   */
+  it('el boton de filtros anuncia su estado en el boton interno y apunta al panel', async () => {
+    await montar();
+
+    const boton = Array.from(raiz().querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Filtrar por estado')
+    )!;
+    expect(boton.getAttribute('aria-expanded')).toBe('false');
+    expect(boton.getAttribute('aria-controls')).toBe('ch-filtros-estado-auditorias');
+
+    abrirFiltros();
+    await estabilizar();
+
+    expect(boton.getAttribute('aria-expanded')).toBe('true');
+    expect(raiz().querySelector('#ch-filtros-estado-auditorias')).not.toBeNull();
+  });
+
   it('la primera carga pide la pagina 1 sin filtros', async () => {
     await montar();
 
