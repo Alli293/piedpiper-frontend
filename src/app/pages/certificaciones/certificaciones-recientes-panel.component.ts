@@ -10,6 +10,7 @@ import { LinkDirective } from '../../shared/components/link/link.directive';
 const ERROR_POR_DEFECTO = 'No fue posible cargar esta sección. Intenta recargar la página.';
 const SIN_CERTIFICACIONES_MENSAJE =
   'Aún no tienes certificaciones registradas. Cuando tu empresa emita una, aparecerá aquí.';
+const MAX_ITEMS = 4;
 
 /**
  * Bloque "Certificaciones recientes": certificaciones de la empresa
@@ -36,9 +37,9 @@ export class CertificacionesRecientesPanelComponent {
   protected readonly errorMensaje = computed(() => this.error() ?? ERROR_POR_DEFECTO);
 
   protected readonly certificacionesOrdenadas = computed(() =>
-    [...(this.certificaciones() ?? [])].sort(
-      (a, b) => new Date(b.fechaEmision).getTime() - new Date(a.fechaEmision).getTime()
-    )
+    [...(this.certificaciones() ?? [])]
+      .sort((a, b) => new Date(b.fechaEmision).getTime() - new Date(a.fechaEmision).getTime())
+      .slice(0, MAX_ITEMS)
   );
 
   protected etiquetaVigencia(cert: CertificacionResumen): string {

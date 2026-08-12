@@ -64,6 +64,21 @@ describe('CertificacionesRecientesPanelComponent', () => {
     expect(vigencias).toEqual(['Vigente', 'Vencida']);
   });
 
+  it('muestra como máximo 4 certificaciones, las más recientes', async () => {
+    fixture = await createFixture();
+    const certificaciones = Array.from({ length: 6 }, (_, i) => ({
+      ...CERT_RECIENTE,
+      id: `c${i}`,
+      nombreCertificacion: `Certificación ${i}`,
+      fechaEmision: `2026-0${(i % 9) + 1}-01T00:00:00Z`,
+    }));
+    fixture.componentRef.setInput('certificaciones', certificaciones);
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelectorAll('.ch-cert-recientes-panel__item').length).toBe(4);
+  });
+
   it('muestra el mensaje de vacío cuando la lista está vacía', async () => {
     fixture = await createFixture();
     fixture.componentRef.setInput('certificaciones', []);

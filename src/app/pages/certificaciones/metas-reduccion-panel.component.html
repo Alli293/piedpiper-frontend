@@ -1,7 +1,7 @@
 <article class="ch-metas-panel" aria-label="Metas de reducción">
   <header class="ch-metas-panel__header">
     <span class="ch-metas-panel__icon">
-      <app-icon name="hoja" [size]="16" />
+      <app-icon name="goal" [size]="16" />
     </span>
     <app-heading level="h3" text="Metas de reducción" />
     @if (hayMetas()) {
@@ -18,7 +18,7 @@
   } @else if (!hayMetas()) {
     <div class="ch-metas-panel__vacio">
       <span class="ch-metas-panel__vacio-icon" aria-hidden="true">
-        <app-icon name="hoja" [size]="20" />
+        <app-icon name="goal" [size]="20" />
       </span>
       <p>{{ sinMetasMensaje }}</p>
       <app-button (click)="irARegistrarMeta()">+ Agregar meta</app-button>
