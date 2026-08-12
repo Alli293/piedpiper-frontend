@@ -19,7 +19,12 @@ describe('RegistrarMetaPageComponent', () => {
   let component: RegistrarMetaPageComponent;
   let toastService: ToastService;
   let navigateByUrl: ReturnType<typeof vi.spyOn>;
-  let metasService: { crearMeta: ReturnType<typeof vi.fn> };
+  let metasService: {
+    crearMeta: ReturnType<typeof vi.fn>;
+    listarMetas: ReturnType<typeof vi.fn>;
+    actualizarMeta: ReturnType<typeof vi.fn>;
+    eliminarMeta: ReturnType<typeof vi.fn>;
+  };
 
   const metaCreada: MetaReduccion = {
     id: 'm1',
@@ -78,7 +83,12 @@ describe('RegistrarMetaPageComponent', () => {
   }
 
   beforeEach(async () => {
-    metasService = { crearMeta: vi.fn().mockReturnValue(of(metaCreada)) };
+    metasService = {
+      crearMeta: vi.fn().mockReturnValue(of(metaCreada)),
+      listarMetas: vi.fn().mockReturnValue(of([metaCreada])),
+      actualizarMeta: vi.fn().mockReturnValue(of(metaCreada)),
+      eliminarMeta: vi.fn().mockReturnValue(of(undefined)),
+    };
 
     await TestBed.configureTestingModule({
       imports: [RegistrarMetaPageComponent],
@@ -162,5 +172,52 @@ describe('RegistrarMetaPageComponent', () => {
 
     expect(navigateByUrl).not.toHaveBeenCalled();
     expect(ultimoToast()?.title).toContain('No se pudo registrar la meta');
+  });
+
+  it('carga el listado de metas al iniciar', () => {
+    expect(metasService.listarMetas).toHaveBeenCalled();
+    expect((component as unknown as { metas: () => MetaReduccion[] }).metas()).toEqual([
+      metaCreada,
+    ]);
+  });
+
+  it('editar precarga el formulario y actualiza en vez de crear', async () => {
+    (component as unknown as { editar: (m: MetaReduccion) => void }).editar(metaCreada);
+    fixture.detectChanges();
+
+    await enviar();
+
+    expect(metasService.actualizarMeta).toHaveBeenCalledWith('m1', {
+      nombreMeta: 'Reducir huella total',
+      valorObjetivoHuellaT: 50,
+      fechaLimite: '2027-12-31',
+    });
+    expect(metasService.crearMeta).not.toHaveBeenCalled();
+    expect(ultimoToast()?.title).toContain('Meta actualizada.');
+  });
+
+  it('solicitarEliminar seguido de eliminar llama al servicio y recarga el listado', () => {
+    const comp = component as unknown as {
+      solicitarEliminar: (id: string) => void;
+      eliminar: (id: string) => void;
+    };
+
+    comp.solicitarEliminar('m1');
+    comp.eliminar('m1');
+
+    expect(metasService.eliminarMeta).toHaveBeenCalledWith('m1');
+    expect(metasService.listarMetas).toHaveBeenCalledTimes(2);
+    expect(ultimoToast()?.title).toContain('Meta eliminada.');
+  });
+
+  it('muestra un error si falla la eliminacion', () => {
+    metasService.eliminarMeta.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 403 }))
+    );
+    const comp = component as unknown as { eliminar: (id: string) => void };
+
+    comp.eliminar('m1');
+
+    expect(ultimoToast()?.title).toContain('No se pudo eliminar la meta');
   });
 });
