@@ -61,7 +61,7 @@ export class CertificacionesPageComponent {
 
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'CERTIFICACIONES',
-    pageTitle: 'Certificaciones',
+    pageTitle: 'Certificaciones y alertas inteligentes',
     showNotificationDot: false,
   }));
 

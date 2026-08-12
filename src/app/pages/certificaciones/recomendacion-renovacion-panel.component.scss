@@ -63,6 +63,14 @@
     white-space: nowrap;
   }
 
+  &__vacio {
+    font-family: var(--ch-font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ch-text-on-dark-muted);
+    margin: 0;
+  }
+
   &__intro {
     font-family: var(--ch-font-body);
     font-size: 13px;
@@ -90,8 +98,8 @@
     font-weight: 700;
     padding: 4px 10px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.12);
-    color: var(--ch-warning);
+    background: rgba(138, 90, 6, 0.5);
+    color: var(--ch-warning-bg);
   }
 
   &__texto {

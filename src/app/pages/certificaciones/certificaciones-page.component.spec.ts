@@ -306,13 +306,14 @@ describe('CertificacionesPageComponent', () => {
     );
   });
 
-  it('no muestra el bloque de recomendación si no hay certificaciones con alerta activa', async () => {
+  it('muestra el bloque de recomendación con un mensaje de espera si no hay certificaciones con alerta activa', async () => {
     dashboardService.obtenerRecomendacion.mockReturnValue(of(null));
 
     fixture = await createFixture();
 
     const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('.ch-recomendacion-panel')).toBeNull();
+    expect(el.querySelector('.ch-recomendacion-panel__vacio')).toBeTruthy();
+    expect(el.querySelector('.ch-recomendacion-panel__cert')).toBeNull();
     // El resto de la página sigue funcionando normalmente.
     expect(el.querySelectorAll('.ch-estado-cert__card-value').length).toBe(3);
   });

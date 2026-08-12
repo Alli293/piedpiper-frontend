@@ -6,13 +6,11 @@
       [error]="resumenError()"
     />
 
-    @if (cargandoRecomendacion() || recomendacion() || recomendacionError()) {
-      <app-recomendacion-renovacion-panel
-        [recomendacion]="recomendacion()"
-        [loading]="cargandoRecomendacion()"
-        [error]="recomendacionError()"
-      />
-    }
+    <app-recomendacion-renovacion-panel
+      [recomendacion]="recomendacion()"
+      [loading]="cargandoRecomendacion()"
+      [error]="recomendacionError()"
+    />
 
     <app-certificaciones-recientes-panel
       [certificaciones]="certificaciones()"

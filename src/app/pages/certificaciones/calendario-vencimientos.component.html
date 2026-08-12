@@ -6,12 +6,12 @@
     <app-heading level="h3" text="Calendario de vencimientos" />
   </header>
 
-  @if (loading()) {
+  @if (mostrarCargaInicial()) {
     <p class="ch-calendario__loading">Cargando calendario...</p>
-  } @else if (error()) {
+  } @else if (mostrarErrorInicial()) {
     <p class="ch-calendario__error" role="alert">{{ errorMensaje() }}</p>
   } @else {
-    <div class="ch-calendario__nav">
+    <div class="ch-calendario__nav" [attr.aria-busy]="loading()">
       <app-heading level="h4" [text]="tituloMes()" />
       <div class="ch-calendario__nav-buttons">
         <button

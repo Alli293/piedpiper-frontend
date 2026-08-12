@@ -7,15 +7,17 @@ import { RecomendacionRenovacion } from '../dashboard/dashboard.model';
 
 const MENSAJE_NO_DISPONIBLE =
   'No fue posible generar la recomendación en este momento. Intenta recargar la página.';
+const MENSAJE_SIN_ALERTAS =
+  'En cuanto tengas una certificación con alerta activa, tu IA entra en acción: analiza urgencia, vigencia e impacto en tu huella y arma, a medida de tu empresa, la recomendación de cuál conviene renovar primero.';
 
 /**
  * "Recomendación de renovación" (PP-72): certificación con alerta activa
  * que debe renovarse primero, con justificación redactada por IA.
  *
- * A diferencia de los demás bloques del dashboard de Certificaciones, este
- * NO se muestra si no hay recomendación (empresa sin certificaciones con
- * alerta activa) — la página contenedora decide si instanciarlo o no,
- * envolviéndolo en `@if`.
+ * Si la empresa no tiene certificaciones con alerta activa, el bloque se
+ * sigue mostrando (a diferencia de los demás paneles vacíos no se oculta),
+ * pero con un mensaje que explica cuándo va a empezar a mostrar
+ * recomendaciones — así el usuario sabe que la función existe.
  *
  * El fetch vive en `certificaciones-page`, mismo patrón que los demás
  * bloques: una falla acá no afecta al resto de la página.
@@ -32,6 +34,7 @@ export class RecomendacionRenovacionPanelComponent {
   readonly error = input<string | null>(null);
 
   protected readonly mensajeNoDisponible = MENSAJE_NO_DISPONIBLE;
+  protected readonly sinAlertasMensaje = MENSAJE_SIN_ALERTAS;
 
   protected readonly justificacionCompleta = computed(() => {
     const r = this.recomendacion();

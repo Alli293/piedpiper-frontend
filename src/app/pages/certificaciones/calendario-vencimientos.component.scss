@@ -123,11 +123,7 @@
 
     &--con-vencimiento {
       cursor: pointer;
-
-      &:hover,
-      &:focus-visible {
-        border-color: var(--ch-border);
-      }
+      border-color: var(--ch-border);
     }
 
     &--seleccionado {
@@ -136,16 +132,29 @@
 
     &--urgencia-90 {
       background: var(--ch-warning-bg);
+
+      &:hover,
+      &:focus-visible {
+        border-color: var(--ch-warning);
+      }
     }
 
     &--urgencia-30 {
-      background: var(--ch-warning-bg);
-      border-color: var(--ch-warning);
+      background: var(--ch-nivel-bronce-bg-from);
+
+      &:hover,
+      &:focus-visible {
+        border-color: var(--ch-warning-dark);
+      }
     }
 
     &--urgencia-7 {
       background: var(--ch-danger-bg);
-      border-color: var(--ch-danger);
+
+      &:hover,
+      &:focus-visible {
+        border-color: var(--ch-danger);
+      }
     }
 
     &:disabled {

@@ -44,6 +44,18 @@ describe('CalendarioVencimientosComponent', () => {
     );
   });
 
+  it('mantiene la grilla montada al navegar de mes con datos ya cargados, sin volver al mensaje de carga', () => {
+    componentRef.setInput('calendario', CALENDARIO_JULIO_2026);
+    fixture.detectChanges();
+
+    componentRef.setInput('loading', true);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelector('.ch-calendario__loading')).toBeFalsy();
+    expect(el.querySelectorAll('.ch-calendario__day').length).toBeGreaterThan(0);
+  });
+
   it('marca con indicador solo los días que tienen vencimientos', () => {
     componentRef.setInput('calendario', CALENDARIO_JULIO_2026);
     fixture.detectChanges();

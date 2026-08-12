@@ -37,5 +37,18 @@
         <app-icon name="chevron-derecha" [size]="12" aria-hidden="true"
       /></app-button>
     </a>
+  } @else {
+    <header class="ch-recomendacion-panel__header">
+      <span class="ch-recomendacion-panel__icon">
+        <app-icon name="ai" [size]="16" />
+      </span>
+      <app-heading level="h3" text="Recomendación de renovación" />
+      <span class="ch-recomendacion-panel__ia-badge">
+        <app-icon name="ai" [size]="10" />
+        Impulsado por IA
+      </span>
+    </header>
+
+    <p class="ch-recomendacion-panel__vacio">{{ sinAlertasMensaje }}</p>
   }
 </article>

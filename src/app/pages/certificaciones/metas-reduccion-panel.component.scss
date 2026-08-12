@@ -4,6 +4,8 @@
 }
 
 .ch-metas-panel {
+  display: flex;
+  flex-direction: column;
   height: 100%;
   background: var(--ch-bg-white);
   border: 1px solid var(--ch-border);
@@ -15,6 +17,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-shrink: 0;
     margin-bottom: var(--ch-space-5);
   }
 
@@ -51,8 +54,10 @@
 
   &__vacio {
     display: flex;
+    flex: 1;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
     gap: var(--ch-space-3);
     padding: var(--ch-space-8) var(--ch-space-4);
