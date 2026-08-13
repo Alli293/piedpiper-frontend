@@ -8,13 +8,11 @@ import { vi } from 'vitest';
 import { AuthSessionService } from '../../../core/auth-session.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
-import { CalificacionService } from '../../../core/calificacion/calificacion.service';
 import { PerfilInicial } from '../../../core/models/perfil-inicial.model';
 import { PerfilPublicoAuditorResponse } from '../../../core/models/perfil-publico-auditor.model';
 import { PerfilPublicoAuditorService } from '../../../core/perfil-auditor/perfil-publico-auditor.service';
 import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
 import { ToastService } from '../../../shared/services/toast.service';
-import { AuditoriasService } from '../../auditorias/auditorias.service';
 import { AuditoresService } from '../auditores.service';
 import { PerfilPublicoAuditorPageComponent } from './perfil-publico-auditor-page.component';
 
@@ -72,8 +70,6 @@ describe('PerfilPublicoAuditorPageComponent', () => {
     obtenerEspecialidades: ReturnType<typeof vi.fn>;
     obtenerZonas: ReturnType<typeof vi.fn>;
   };
-  let auditoriasService: { listar: ReturnType<typeof vi.fn> };
-  let calificacionService: { obtenerPorAuditoria: ReturnType<typeof vi.fn> };
   let toastService: ToastService;
   let rutaAuditorId: string | null;
   let authSessionStub: {
@@ -115,21 +111,6 @@ describe('PerfilPublicoAuditorPageComponent', () => {
       ),
       obtenerZonas: vi.fn().mockReturnValue(of([{ valor: 'SAN_JOSE', etiqueta: 'San José' }])),
     };
-    auditoriasService = {
-      listar: vi.fn().mockReturnValue(
-        of({
-          contenido: [],
-          totalResultados: 0,
-          paginaActual: 1,
-          totalPaginas: 0,
-          tamanioPagina: 25,
-        })
-      ),
-    };
-    calificacionService = {
-      obtenerPorAuditoria: vi.fn().mockReturnValue(of(null)),
-    };
-
     authSessionStub = {
       isAdministradorEmpresa: vi.fn().mockReturnValue(false),
       getRole: vi.fn().mockReturnValue('usuario_general_empresa'),
@@ -151,8 +132,6 @@ describe('PerfilPublicoAuditorPageComponent', () => {
         },
         { provide: PerfilPublicoAuditorService, useValue: perfilService },
         { provide: AuditoresService, useValue: auditoresService },
-        { provide: AuditoriasService, useValue: auditoriasService },
-        { provide: CalificacionService, useValue: calificacionService },
         { provide: AuthSessionService, useValue: authSessionStub },
         { provide: AuthService, useValue: { token: signal('fake-token'), cerrarSesion: vi.fn() } },
         { provide: SesionInactividadService, useValue: { reiniciar: vi.fn(), detener: vi.fn() } },
