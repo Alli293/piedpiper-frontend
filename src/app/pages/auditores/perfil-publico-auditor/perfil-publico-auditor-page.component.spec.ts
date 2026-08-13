@@ -329,9 +329,7 @@ describe('PerfilPublicoAuditorPageComponent', () => {
       botonAsignar.click();
       await fixture.whenStable();
 
-      expect(navigateSpy).toHaveBeenCalledWith(['/empresa/auditorias/nueva'], {
-        queryParams: { auditorId: AUDITOR_ID },
-      });
+      expect(navigateSpy).toHaveBeenCalledWith(['/empresa/auditorias/nueva']);
     });
   });
 });
