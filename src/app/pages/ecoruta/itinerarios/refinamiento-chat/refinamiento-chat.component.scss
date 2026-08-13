@@ -138,6 +138,11 @@
   transition:
     background 0.2s,
     color 0.2s;
+
+  &:hover {
+    background: var(--ch-green);
+    color: #fff;
+  }
 }
 
 .ch-refinamiento-chat__form {

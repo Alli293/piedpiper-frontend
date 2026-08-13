@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { FiltroItinerarios, Itinerario, PaginaItinerarios } from './models/itinerario.model';
+import { Itinerario } from './models/itinerario.model';
 import { RefinamientoRequest, RefinamientoResponse } from './models/refinamiento.model';
 
 @Injectable({ providedIn: 'root' })
@@ -19,6 +20,7 @@ export class EcoRutaItinerariosService {
     return this.http.get<Itinerario>(`${EcoRutaItinerariosService.URL}/${id}`);
   }
 
+  /** Conversación continua de refinamiento del itinerario (PP-88). */
   /**
    * Conversación continua de refinamiento del itinerario (PP-88). `request.contextoConversacional
    * .historialMensajes` es solo el historial *previo* a este mensaje — el mensaje actual va aparte,

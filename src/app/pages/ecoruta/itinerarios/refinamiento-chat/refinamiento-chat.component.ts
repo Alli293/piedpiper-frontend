@@ -76,6 +76,16 @@ export class RefinamientoChatComponent {
 
   // State for the free-text conversation itself (PP-88)
   protected readonly historial = signal<MensajeConversacion[]>([]);
+  protected readonly mensajeActual = signal('');
+
+  protected readonly mensajeInicial = computed(() => {
+    const itinerario = this.itinerario();
+    const dias = itinerario.cantidadDias;
+    const score = itinerario.ecoScore;
+    const scoreTexto =
+      score !== null && score !== undefined ? ` con un EcoScore de ${Math.round(score)}` : '';
+    return `Tu itinerario de ${dias} día${dias === 1 ? '' : 's'} está listo${scoreTexto}. ¿Querés ajustar algo?`;
+  });
   protected readonly enviandoMensaje = signal(false);
   protected readonly chipsSugeridos = CHIPS_SUGERIDOS;
 
@@ -121,6 +131,12 @@ export class RefinamientoChatComponent {
     ...this.historial(),
   ]);
 
+  /** El mensaje de bienvenida siempre encabeza la conversación; el resto es el historial real. */
+  protected readonly mensajesChat = computed<MensajeConversacion[]>(() => [
+    { rol: 'ASISTENTE', contenido: this.mensajeInicial() },
+    ...this.historial(),
+  ]);
+
   protected readonly actividadOriginalInfo = computed(() => {
     const response = this.comparacionResponse();
     if (!response) return { nombre: '', ecoScore: 0 };
@@ -141,6 +157,7 @@ export class RefinamientoChatComponent {
 
   /** Usado por el padre (botón "Preguntar sobre esto") para precargar el mensaje del chat. */
   prellenarMensaje(texto: string): void {
+    this.mensajeActual.set(texto);
     this.model.update((m) => ({ ...m, mensaje: texto }));
     this.mensajeInputRef()?.nativeElement.focus();
   }
@@ -151,6 +168,15 @@ export class RefinamientoChatComponent {
 
   protected handleSubmit(event: Event): void {
     event.preventDefault();
+    void this.enviarMensaje();
+  }
+
+  protected onInputMensaje(event: Event): void {
+    this.mensajeActual.set((event.target as HTMLInputElement).value);
+  }
+
+  private async enviarMensaje(): Promise<void> {
+    const texto = this.mensajeActual().trim();
     void this.onSubmit();
   }
 
@@ -170,6 +196,7 @@ export class RefinamientoChatComponent {
     const historialPrevio = this.historial();
     const itinerarioActual = this.itinerario();
 
+    this.mensajeActual.set('');
     this.model.set({ mensaje: '' });
     this.enviandoMensaje.set(true);
     // Se muestra de inmediato, de forma optimista, mientras se espera la respuesta del asistente.

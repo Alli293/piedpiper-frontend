@@ -100,12 +100,16 @@
       type="text"
       class="ch-refinamiento-chat__input"
       placeholder="Ej: Quiero más actividades al aire libre"
+      [value]="mensajeActual()"
+      [disabled]="enviandoMensaje()"
       [formField]="chatForm.mensaje"
       aria-label="Escribí tu mensaje para el asistente"
+      (input)="onInputMensaje($event)"
     />
     <button
       type="submit"
       class="ch-refinamiento-chat__enviar"
+      [disabled]="enviandoMensaje() || !mensajeActual().trim()"
       [disabled]="!canEnviar()"
       aria-label="Enviar mensaje"
     >
