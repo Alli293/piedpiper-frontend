@@ -13,6 +13,8 @@ import { ButtonComponent, ButtonSize, ButtonVariant } from './button.component';
       [loading]="loading"
       [type]="type"
       [ariaLabel]="ariaLabel"
+      [ariaExpanded]="ariaExpanded"
+      [ariaControls]="ariaControls"
     >
       Continuar
     </app-button>
@@ -26,6 +28,8 @@ class HostComponent {
   loading = false;
   type: 'button' | 'submit' | 'reset' = 'button';
   ariaLabel: string | undefined;
+  ariaExpanded: boolean | undefined;
+  ariaControls: string | undefined;
 }
 
 describe('ButtonComponent', () => {
@@ -124,5 +128,35 @@ describe('ButtonComponent', () => {
 
     const boton: HTMLButtonElement = fixture.nativeElement.querySelector('button');
     expect(boton.hasAttribute('aria-label')).toBe(false);
+  });
+
+  it('reenvia ariaExpanded() y ariaControls() al boton interno, no al host', () => {
+    const fixture = createFixture({ ariaExpanded: true, ariaControls: 'ch-panel-filtros' });
+
+    const host: HTMLElement = fixture.nativeElement.querySelector('app-button');
+    const boton: HTMLButtonElement = fixture.nativeElement.querySelector('button');
+    expect(boton.getAttribute('aria-expanded')).toBe('true');
+    expect(boton.getAttribute('aria-controls')).toBe('ch-panel-filtros');
+    expect(host.hasAttribute('aria-expanded')).toBe(false);
+    expect(host.hasAttribute('aria-controls')).toBe(false);
+  });
+
+  /**
+   * Un disclosure cerrado tiene que decir aria-expanded="false", no omitir el atributo: sin el
+   * atributo el lector anuncia un boton comun y el usuario no sabe que hay un panel que abrir.
+   */
+  it('mantiene aria-expanded="false" cuando el panel esta cerrado', () => {
+    const fixture = createFixture({ ariaExpanded: false });
+
+    const boton: HTMLButtonElement = fixture.nativeElement.querySelector('button');
+    expect(boton.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('no declara aria-expanded ni aria-controls cuando el boton no controla nada', () => {
+    const fixture = createFixture();
+
+    const boton: HTMLButtonElement = fixture.nativeElement.querySelector('button');
+    expect(boton.hasAttribute('aria-expanded')).toBe(false);
+    expect(boton.hasAttribute('aria-controls')).toBe(false);
   });
 });

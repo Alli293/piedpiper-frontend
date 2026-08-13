@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthSessionService } from '../../../core/auth-session.service';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -10,16 +10,28 @@ import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.
 import { PerfilInicial } from '../../../core/models/perfil-inicial.model';
 import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
 import { ToastService } from '../../../shared/services/toast.service';
-import { ResumenSolicitudAuditoria } from '../auditoria.model';
+import { PaginaSolicitudesAuditoria, ResumenSolicitudAuditoria } from '../auditoria.model';
 import { AuditoriasService } from '../auditorias.service';
 import { ListadoAuditoriasPageComponent } from './listado-auditorias-page.component';
 
 describe('ListadoAuditoriasPageComponent', () => {
   let fixture: ComponentFixture<ListadoAuditoriasPageComponent>;
-  let auditoriasService: {
-    listarDeMiEmpresa: ReturnType<typeof vi.fn>;
-    listarAsignadas: ReturnType<typeof vi.fn>;
-  };
+  let auditoriasService: { listar: ReturnType<typeof vi.fn> };
+
+  /** El backend responde una página; la pantalla no arma listas por su cuenta. */
+  function pagina(
+    contenido: ResumenSolicitudAuditoria[],
+    extra: Partial<PaginaSolicitudesAuditoria> = {}
+  ): PaginaSolicitudesAuditoria {
+    return {
+      contenido,
+      totalResultados: contenido.length,
+      paginaActual: 1,
+      totalPaginas: contenido.length === 0 ? 0 : 1,
+      tamanioPagina: 25,
+      ...extra,
+    };
+  }
 
   const enRevision: ResumenSolicitudAuditoria = {
     id: 'sol-1',
@@ -69,8 +81,7 @@ describe('ListadoAuditoriasPageComponent', () => {
 
   beforeEach(async () => {
     auditoriasService = {
-      listarDeMiEmpresa: vi.fn().mockReturnValue(of([enRevision, esperandoRespuesta])),
-      listarAsignadas: vi.fn().mockReturnValue(of([esperandoRespuesta])),
+      listar: vi.fn().mockReturnValue(of(pagina([esperandoRespuesta, enRevision]))),
     };
 
     await TestBed.configureTestingModule({
@@ -102,16 +113,19 @@ describe('ListadoAuditoriasPageComponent', () => {
   it('la empresa ve sus solicitudes con el auditor de cada una', async () => {
     await montar();
 
-    expect(auditoriasService.listarDeMiEmpresa).toHaveBeenCalled();
+    expect(auditoriasService.listar).toHaveBeenCalled();
     expect(filas()).toHaveLength(2);
     expect(raiz().textContent).toContain('Ana Mora Vargas');
   });
 
-  it('el auditor ve solo las asignadas y no el boton de crear', async () => {
+  /**
+   * El endpoint es el mismo para los dos roles: el backend resuelve de quién es el listado a
+   * partir del token. Lo único que cambia en la pantalla es el encabezado y poder crear.
+   */
+  it('el auditor pide el mismo endpoint y no ve el boton de crear', async () => {
     await montar('auditor');
 
-    expect(auditoriasService.listarAsignadas).toHaveBeenCalled();
-    expect(auditoriasService.listarDeMiEmpresa).not.toHaveBeenCalled();
+    expect(auditoriasService.listar).toHaveBeenCalled();
     expect(
       Array.from(raiz().querySelectorAll('button')).some(
         (b) => b.textContent?.trim() === 'Nueva solicitud'
@@ -120,13 +134,17 @@ describe('ListadoAuditoriasPageComponent', () => {
   });
 
   /**
-   * Las que esperan respuesta llevan un plazo corriendo. Enterrarlas entre las ya respondidas es
-   * como se pierde una por vencimiento, así que van primero aunque sean más viejas.
+   * El orden lo fija el servidor por fecha de creación descendente, que es lo que pide la historia.
+   * La pantalla no reordena: con paginación, reordenar solo la página visible daría un orden que
+   * cambia de página en página.
    */
-  it('las que esperan respuesta del auditor se muestran primero', async () => {
+  it('respeta el orden en que vienen las filas del servidor', async () => {
+    auditoriasService.listar.mockReturnValue(of(pagina([enRevision, esperandoRespuesta])));
+
     await montar();
 
-    expect(filas()[0].textContent).toContain('Solicitud enviada');
+    expect(filas()[0].textContent).toContain('En revisión');
+    expect(filas()[1].textContent).toContain('Solicitud enviada');
   });
 
   it('un clic en Ver abre el detalle de esa solicitud', async () => {
@@ -162,19 +180,292 @@ describe('ListadoAuditoriasPageComponent', () => {
     expect(navegar).toHaveBeenCalledWith('/empresa/auditorias/nueva');
   });
 
-  it('sin solicitudes ofrece crear la primera en vez de una tabla vacia', async () => {
-    auditoriasService.listarDeMiEmpresa.mockReturnValue(of([]));
+  it('sin solicitudes muestra el mensaje de estado vacio y no una tabla', async () => {
+    auditoriasService.listar.mockReturnValue(of(pagina([])));
 
     await montar();
 
     expect(raiz().querySelector('.ch-listado-auditorias__vacio')?.textContent).toContain(
-      'Todavía no has solicitado'
+      'Aún no tienes solicitudes de auditoría registradas.'
     );
     expect(raiz().querySelector('.ch-listado-auditorias__tabla')).toBeNull();
   });
 
+  function abrirFiltros(): void {
+    Array.from(raiz().querySelectorAll('button'))
+      .find((b) => b.textContent?.includes('Filtrar por estado'))
+      ?.click();
+  }
+
+  function casillas(): HTMLInputElement[] {
+    return Array.from(
+      raiz().querySelectorAll<HTMLInputElement>('.ch-listado-auditorias__filtros input')
+    );
+  }
+
+  async function marcarEstado(indice: number): Promise<void> {
+    abrirFiltros();
+    await estabilizar();
+    const casilla = casillas()[indice];
+    casilla.click();
+    await estabilizar();
+  }
+
+  function botonPaginacion(texto: string): HTMLButtonElement | undefined {
+    return Array.from(
+      raiz().querySelectorAll<HTMLButtonElement>('.ch-listado-auditorias__paginador button')
+    ).find((b) => b.textContent?.trim() === texto);
+  }
+
+  /**
+   * El estado del panel tiene que quedar en el <button> real: sobre <app-button> cae en un custom
+   * element sin rol, que el lector de pantalla ignora, y el usuario nunca sabe que hay un panel.
+   */
+  it('el boton de filtros anuncia su estado en el boton interno y apunta al panel', async () => {
+    await montar();
+
+    const boton = Array.from(raiz().querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Filtrar por estado')
+    )!;
+    expect(boton.getAttribute('aria-expanded')).toBe('false');
+    expect(boton.getAttribute('aria-controls')).toBe('ch-filtros-estado-auditorias');
+
+    abrirFiltros();
+    await estabilizar();
+
+    expect(boton.getAttribute('aria-expanded')).toBe('true');
+    expect(raiz().querySelector('#ch-filtros-estado-auditorias')).not.toBeNull();
+  });
+
+  it('la primera carga pide la pagina 1 sin filtros', async () => {
+    await montar();
+
+    expect(auditoriasService.listar).toHaveBeenCalledWith({ filtroEstado: [], pagina: 1 });
+  });
+
+  it('marcar un estado lo envia como filtro al servidor', async () => {
+    await montar();
+    await marcarEstado(2);
+
+    expect(auditoriasService.listar).toHaveBeenLastCalledWith({
+      filtroEstado: ['EN_REVISION'],
+      pagina: 1,
+    });
+  });
+
+  it('se pueden marcar varios estados a la vez', async () => {
+    await montar();
+    await marcarEstado(2);
+    casillas()[3].click();
+    await estabilizar();
+
+    expect(auditoriasService.listar).toHaveBeenLastCalledWith({
+      filtroEstado: ['EN_REVISION', 'REPORTE_CARGADO'],
+      pagina: 1,
+    });
+  });
+
+  it('desmarcar un estado lo quita del filtro', async () => {
+    await montar();
+    await marcarEstado(2);
+    casillas()[2].click();
+    await estabilizar();
+
+    expect(auditoriasService.listar).toHaveBeenLastCalledWith({ filtroEstado: [], pagina: 1 });
+  });
+
+  /**
+   * Es el criterio de la historia: si el usuario está en la página 3 y filtra hasta dejar una sola,
+   * seguiría pidiendo una página que ya no existe y vería la tabla vacía.
+   */
+  it('al aplicar un filtro la paginacion vuelve a la pagina 1', async () => {
+    auditoriasService.listar.mockReturnValue(
+      of(pagina([enRevision], { paginaActual: 2, totalPaginas: 3, totalResultados: 60 }))
+    );
+    await montar();
+
+    botonPaginacion('Siguiente')?.click();
+    await estabilizar();
+    await marcarEstado(2);
+
+    expect(auditoriasService.listar).toHaveBeenLastCalledWith({
+      filtroEstado: ['EN_REVISION'],
+      pagina: 1,
+    });
+  });
+
+  it('el paginador pide la pagina siguiente y la anterior', async () => {
+    auditoriasService.listar.mockReturnValue(
+      of(pagina([enRevision], { paginaActual: 2, totalPaginas: 3, totalResultados: 60 }))
+    );
+    await montar();
+
+    botonPaginacion('Siguiente')?.click();
+    await estabilizar();
+    expect(auditoriasService.listar).toHaveBeenLastCalledWith({ filtroEstado: [], pagina: 3 });
+
+    botonPaginacion('Anterior')?.click();
+    await estabilizar();
+    expect(auditoriasService.listar).toHaveBeenLastCalledWith({ filtroEstado: [], pagina: 1 });
+  });
+
+  it('en la primera pagina el boton Anterior queda deshabilitado', async () => {
+    auditoriasService.listar.mockReturnValue(
+      of(pagina([enRevision], { paginaActual: 1, totalPaginas: 3, totalResultados: 60 }))
+    );
+    await montar();
+
+    expect(botonPaginacion('Anterior')?.disabled).toBe(true);
+    expect(botonPaginacion('Siguiente')?.disabled).toBe(false);
+  });
+
+  it('en la ultima pagina el boton Siguiente queda deshabilitado', async () => {
+    auditoriasService.listar.mockReturnValue(
+      of(pagina([enRevision], { paginaActual: 3, totalPaginas: 3, totalResultados: 60 }))
+    );
+    await montar();
+
+    expect(botonPaginacion('Siguiente')?.disabled).toBe(true);
+  });
+
+  /** Con una sola página el paginador sobra y solo agrega ruido. */
+  it('con una sola pagina no se dibuja el paginador', async () => {
+    await montar();
+
+    expect(raiz().querySelector('.ch-listado-auditorias__paginador')).toBeNull();
+  });
+
+  /** Un vacío por filtro no es lo mismo que no tener auditorías: el mensaje tiene que distinguirlo. */
+  it('si el filtro no deja resultados lo dice y ofrece quitarlo', async () => {
+    await montar();
+    auditoriasService.listar.mockReturnValue(of(pagina([])));
+    await marcarEstado(2);
+
+    const vacio = raiz().querySelector('.ch-listado-auditorias__vacio');
+    expect(vacio?.textContent).toContain('Ninguna solicitud coincide');
+    expect(vacio?.textContent).not.toContain('Aún no tienes solicitudes');
+  });
+
+  it('quitar los filtros vuelve a pedir el listado completo desde la pagina 1', async () => {
+    await montar();
+    await marcarEstado(2);
+
+    Array.from(raiz().querySelectorAll('button'))
+      .find((b) => b.textContent?.trim() === 'Quitar filtros')
+      ?.click();
+    await estabilizar();
+
+    expect(auditoriasService.listar).toHaveBeenLastCalledWith({ filtroEstado: [], pagina: 1 });
+  });
+
+  /**
+   * Los dos pedidos quedan en vuelo a la vez; el primero en salir responde de último. Sin descartar
+   * la respuesta obsoleta, la pantalla pintaría el filtro que el usuario ya abandonó.
+   */
+  /**
+   * Deshabilitar los controles mientras carga achica la ventana pero no la cierra: entre el clic y
+   * el ciclo de detección que aplica el `disabled` todavía cabe un segundo pedido. Por eso el
+   * descarte se prueba llamando a la paginación directamente, que es lo que la UI no deja repetir.
+   */
+  it('descarta la respuesta de un pedido que ya no es el vigente', async () => {
+    const enVuelo: Subject<PaginaSolicitudesAuditoria>[] = [];
+    auditoriasService.listar.mockImplementation(() => {
+      const sujeto = new Subject<PaginaSolicitudesAuditoria>();
+      enVuelo.push(sujeto);
+      return sujeto;
+    });
+
+    fixture = TestBed.createComponent(ListadoAuditoriasPageComponent);
+    await estabilizar();
+    enVuelo[0].next(
+      pagina([enRevision], { paginaActual: 1, totalPaginas: 3, totalResultados: 60 })
+    );
+    enVuelo[0].complete();
+    await estabilizar();
+
+    const componente = fixture.componentInstance as unknown as {
+      irAPagina(numero: number): void;
+    };
+    componente.irAPagina(2);
+    componente.irAPagina(3);
+    await estabilizar();
+
+    expect(enVuelo).toHaveLength(3);
+
+    // El último responde primero; el viejo llega después y no debe pisar nada.
+    enVuelo[2].next(
+      pagina([enRevision], { paginaActual: 3, totalPaginas: 3, totalResultados: 60 })
+    );
+    enVuelo[2].complete();
+    await estabilizar();
+
+    enVuelo[1].next(
+      pagina([esperandoRespuesta, enRevision], {
+        paginaActual: 2,
+        totalPaginas: 3,
+        totalResultados: 60,
+      })
+    );
+    enVuelo[1].complete();
+    await estabilizar();
+
+    expect(filas()).toHaveLength(1);
+    expect(raiz().querySelector('.ch-listado-auditorias__pagina-actual')?.textContent).toContain(
+      'Página 3 de 3'
+    );
+  });
+
+  /** Mientras hay un pedido en vuelo no se pueden disparar más: reduce la ventana de la carrera. */
+  it('deshabilita filtros y paginador mientras carga', async () => {
+    const enVuelo = new Subject<PaginaSolicitudesAuditoria>();
+    auditoriasService.listar.mockReturnValue(enVuelo);
+
+    fixture = TestBed.createComponent(ListadoAuditoriasPageComponent);
+    await estabilizar();
+    abrirFiltros();
+    await estabilizar();
+
+    expect(casillas().every((c) => c.disabled)).toBe(true);
+
+    enVuelo.next(pagina([enRevision]));
+    enVuelo.complete();
+    await estabilizar();
+
+    expect(casillas().every((c) => c.disabled)).toBe(false);
+  });
+
+  /** El tamaño de página lo fija el servidor; el rango tiene que salir de ahí y no de una constante. */
+  it('calcula el rango con el tamanio de pagina que devuelve el backend', async () => {
+    auditoriasService.listar.mockReturnValue(
+      of(
+        pagina([enRevision], {
+          paginaActual: 2,
+          totalPaginas: 3,
+          totalResultados: 30,
+          tamanioPagina: 10,
+        })
+      )
+    );
+    await montar();
+
+    expect(raiz().querySelector('.ch-listado-auditorias__rango')?.textContent).toContain(
+      '11–11 de 30'
+    );
+  });
+
+  it('muestra el rango de resultados que se esta viendo', async () => {
+    auditoriasService.listar.mockReturnValue(
+      of(pagina([enRevision], { paginaActual: 2, totalPaginas: 3, totalResultados: 60 }))
+    );
+    await montar();
+
+    expect(raiz().querySelector('.ch-listado-auditorias__rango')?.textContent).toContain(
+      '26–26 de 60'
+    );
+  });
+
   it('un fallo de carga muestra el error y no una tabla vacia', async () => {
-    auditoriasService.listarDeMiEmpresa.mockReturnValue(
+    auditoriasService.listar.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 500 }))
     );
 
