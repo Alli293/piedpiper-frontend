@@ -195,8 +195,8 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
    */
   private async cargarContextoCalificacion(auditorId: string): Promise<void> {
     try {
-      const auditorias = await firstValueFrom(this.auditoriasService.listarDeMiEmpresa());
-      const auditoriaCalificable = auditorias.find(
+      const pagina = await firstValueFrom(this.auditoriasService.listar());
+      const auditoriaCalificable = pagina.contenido.find(
         (a) => a.idAuditor === auditorId && a.estado === 'CERTIFICACION_EMITIDA'
       );
 
