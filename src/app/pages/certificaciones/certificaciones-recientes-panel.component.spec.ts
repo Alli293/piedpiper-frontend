@@ -18,6 +18,7 @@ describe('CertificacionesRecientesPanelComponent', () => {
     estado: 'ACTIVA',
     vigente: true,
     urlVerificacion: 'https://example.cr/verificar/c1',
+    codigoVerificacion: 'CH-2026-AAAA1111',
   };
 
   const CERT_ANTIGUA: CertificacionResumen = {
@@ -32,6 +33,7 @@ describe('CertificacionesRecientesPanelComponent', () => {
     estado: 'ACTIVA',
     vigente: false,
     urlVerificacion: 'https://example.cr/verificar/c2',
+    codigoVerificacion: 'CH-2025-BBBB2222',
   };
 
   async function createFixture(): Promise<

@@ -85,16 +85,16 @@
     color: inherit;
     transition: background-color 0.15s ease;
 
-    &--success {
+    &--info {
       .ch-estado-cert__card-icon {
-        background: var(--ch-green-soft);
-        color: var(--ch-green-dark);
+        background: var(--ch-info-bg);
+        color: var(--ch-info);
       }
 
       &:hover,
       &:focus-visible {
-        background: color-mix(in srgb, var(--ch-green) 5%, transparent);
-        border-color: var(--ch-green);
+        background: color-mix(in srgb, var(--ch-info) 5%, transparent);
+        border-color: var(--ch-info);
       }
     }
 

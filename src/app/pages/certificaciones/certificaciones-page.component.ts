@@ -9,9 +9,9 @@ import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-la
 import { apiErrorMessage } from '../../shared/utils/http-error.utils';
 import { DashboardService } from '../dashboard/dashboard.service';
 import {
+  AlertaVencimiento,
   CalendarioVencimientosResponse,
   RecomendacionRenovacion,
-  ResumenCertificacionesDashboardResponse,
 } from '../dashboard/dashboard.model';
 import { CalendarioVencimientosComponent } from './calendario-vencimientos.component';
 import { CertificacionesRecientesPanelComponent } from './certificaciones-recientes-panel.component';
@@ -65,9 +65,9 @@ export class CertificacionesPageComponent {
     showNotificationDot: false,
   }));
 
-  protected readonly cargandoResumen = signal(false);
-  protected readonly resumen = signal<ResumenCertificacionesDashboardResponse | null>(null);
-  protected readonly resumenError = signal<string | null>(null);
+  protected readonly cargandoAlertas = signal(false);
+  protected readonly alertas = signal<AlertaVencimiento[]>([]);
+  protected readonly alertasError = signal<string | null>(null);
 
   protected readonly mesCalendario = signal(mesActual());
   protected readonly cargandoCalendario = signal(false);
@@ -91,7 +91,7 @@ export class CertificacionesPageComponent {
   protected readonly recomendacionError = signal<string | null>(null);
 
   constructor() {
-    void this.cargarResumen();
+    void this.cargarAlertas();
     void this.cargarCalendario(this.mesCalendario());
     void this.cargarInsignias();
     void this.cargarCertificaciones();
@@ -104,17 +104,17 @@ export class CertificacionesPageComponent {
     void this.cargarCalendario(mes);
   }
 
-  private async cargarResumen(): Promise<void> {
-    this.cargandoResumen.set(true);
-    this.resumenError.set(null);
+  private async cargarAlertas(): Promise<void> {
+    this.cargandoAlertas.set(true);
+    this.alertasError.set(null);
     try {
-      const resumen = await firstValueFrom(this.dashboardService.obtenerResumenCertificaciones());
-      this.resumen.set(resumen);
+      const alertas = await firstValueFrom(this.dashboardService.obtenerAlertas());
+      this.alertas.set(alertas);
     } catch (err: unknown) {
-      this.resumen.set(null);
-      this.resumenError.set(apiErrorMessage(err) ?? ERROR_RESUMEN_MENSAJE);
+      this.alertas.set([]);
+      this.alertasError.set(apiErrorMessage(err) ?? ERROR_RESUMEN_MENSAJE);
     } finally {
-      this.cargandoResumen.set(false);
+      this.cargandoAlertas.set(false);
     }
   }
 

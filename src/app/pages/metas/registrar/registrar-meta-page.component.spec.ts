@@ -148,7 +148,7 @@ describe('RegistrarMetaPageComponent', () => {
     expect(botonEnviar()?.disabled).toBe(false);
   });
 
-  it('crea la meta con el cuerpo correcto y redirige al dashboard', async () => {
+  it('crea la meta con el cuerpo correcto y redirige a certificaciones', async () => {
     completarFormulario();
 
     await enviar();
@@ -158,7 +158,7 @@ describe('RegistrarMetaPageComponent', () => {
       valorObjetivoHuellaT: 50,
       fechaLimite: '2027-12-31',
     });
-    expect(navigateByUrl).toHaveBeenCalledWith('/empresa/panel');
+    expect(navigateByUrl).toHaveBeenCalledWith('/empresa/certificaciones');
     expect(ultimoToast()?.title).toContain('Meta de reducción registrada.');
   });
 

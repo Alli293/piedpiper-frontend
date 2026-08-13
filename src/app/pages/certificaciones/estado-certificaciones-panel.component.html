@@ -1,7 +1,7 @@
 <article class="ch-estado-cert" aria-label="Estado de certificaciones">
   <header class="ch-estado-cert__header">
     <span class="ch-estado-cert__icon">
-      <app-icon name="certificaciones" [size]="18" />
+      <app-icon name="alert-solid" [size]="18" />
     </span>
     <app-heading level="h3" text="Estado de certificaciones" />
     <a appLink routerLink="/empresa/certificaciones/alertas" class="ch-estado-cert__ver-todas">
@@ -19,7 +19,7 @@
       @for (tarjeta of tarjetas(); track tarjeta.estado) {
         <a
           class="ch-estado-cert__card"
-          [class.ch-estado-cert__card--success]="tarjeta.tono === 'success'"
+          [class.ch-estado-cert__card--info]="tarjeta.tono === 'info'"
           [class.ch-estado-cert__card--warning]="tarjeta.tono === 'warning'"
           [class.ch-estado-cert__card--danger]="tarjeta.tono === 'danger'"
           [routerLink]="tarjeta.ruta"

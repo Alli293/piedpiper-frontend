@@ -233,7 +233,7 @@ export class RegistrarMetaPageComponent {
               undefined,
               DURACION_TOAST_MS
             );
-            await this.router.navigateByUrl('/empresa/panel');
+            await this.router.navigateByUrl('/empresa/certificaciones');
           }
         } catch (err: unknown) {
           const mensajePorDefecto = editingId !== null ? ERROR_ACTUALIZAR : ERROR_GENERICO;

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { EstadoCertificacionesPanelComponent } from './estado-certificaciones-panel.component';
-import { ResumenCertificacionesDashboardResponse } from '../dashboard/dashboard.model';
+import { AlertaVencimiento } from '../dashboard/dashboard.model';
 
 describe('EstadoCertificacionesPanelComponent', () => {
   let componentRef: ComponentRef<EstadoCertificacionesPanelComponent>;
@@ -17,11 +17,24 @@ describe('EstadoCertificacionesPanelComponent', () => {
     componentRef = fixture.componentRef;
   });
 
-  const resumen = (): ResumenCertificacionesDashboardResponse => ({
-    activas: 5,
-    proximasAVencer: 3,
-    vencidas: 1,
+  const alerta = (
+    id: string,
+    urgencia: AlertaVencimiento['urgencia'],
+    diasRestantes: number
+  ): AlertaVencimiento => ({
+    idCertificacion: id,
+    nombre: `Certificación ${id}`,
+    fechaVencimiento: '2026-12-01',
+    diasRestantes,
+    urgencia,
   });
+
+  const alertas = (): AlertaVencimiento[] => [
+    alerta('c1', '90_dias', 88),
+    alerta('c2', '90_dias', 75),
+    alerta('c3', '30_dias', 25),
+    alerta('c4', '7_dias', 3),
+  ];
 
   it('muestra el mensaje de carga cuando loading es true', () => {
     componentRef.setInput('loading', true);
@@ -43,18 +56,18 @@ describe('EstadoCertificacionesPanelComponent', () => {
     expect(errorEl?.textContent).toContain('No fue posible cargar esta sección');
   });
 
-  it('renderiza los tres conteos con sus valores', () => {
-    componentRef.setInput('resumen', resumen());
+  it('renderiza los tres conteos por urgencia (informativas, próximas, urgentes)', () => {
+    componentRef.setInput('alertas', alertas());
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     const valores = Array.from(el.querySelectorAll('.ch-estado-cert__card-value')).map((n) =>
       n.textContent?.trim()
     );
-    expect(valores).toEqual(['5', '3', '1']);
+    expect(valores).toEqual(['2', '1', '1']);
   });
 
-  it('muestra 0 en los tres conteos cuando no hay certificaciones', () => {
-    componentRef.setInput('resumen', { activas: 0, proximasAVencer: 0, vencidas: 0 });
+  it('muestra 0 en los tres conteos cuando no hay alertas', () => {
+    componentRef.setInput('alertas', []);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     const valores = Array.from(el.querySelectorAll('.ch-estado-cert__card-value')).map((n) =>
@@ -64,47 +77,39 @@ describe('EstadoCertificacionesPanelComponent', () => {
   });
 
   it('"Ver todas" del encabezado enlaza al Centro de Alertas', () => {
-    componentRef.setInput('resumen', resumen());
+    componentRef.setInput('alertas', alertas());
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     const enlace = el.querySelector('.ch-estado-cert__ver-todas') as HTMLAnchorElement;
     expect(enlace.getAttribute('href')).toBe('/empresa/certificaciones/alertas');
   });
 
-  it('"Vigentes" enlaza al listado filtrado por estado activa', () => {
-    componentRef.setInput('resumen', resumen());
+  it('"Informativas" y "Próximas a vencer" enlazan al Centro de Alertas con su propio filtro', () => {
+    componentRef.setInput('alertas', alertas());
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     const links = Array.from(el.querySelectorAll('a.ch-estado-cert__card')) as HTMLAnchorElement[];
-    expect(links[0].getAttribute('href')).toBe('/empresa/certificaciones/listado?estado=activa');
-  });
-
-  it('"Próximas a vencer" y "Vencidas" enlazan al Centro de Alertas con su filtro de urgencia', () => {
-    componentRef.setInput('resumen', resumen());
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    const links = Array.from(el.querySelectorAll('a.ch-estado-cert__card')) as HTMLAnchorElement[];
+    expect(links[0].getAttribute('href')).toBe(
+      '/empresa/certificaciones/alertas?filtro=INFORMATIVAS'
+    );
     expect(links[1].getAttribute('href')).toBe('/empresa/certificaciones/alertas?filtro=PROXIMAS');
-    expect(links[2].getAttribute('href')).toBe('/empresa/certificaciones/alertas?filtro=VENCIDAS');
   });
 
-  it('usa la etiqueta "Vigentes" para la tarjeta de certificaciones activas', () => {
-    componentRef.setInput('resumen', resumen());
+  it('"Urgentes" enlaza al Centro de Alertas filtrado por Urgentes', () => {
+    componentRef.setInput('alertas', alertas());
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const links = Array.from(el.querySelectorAll('a.ch-estado-cert__card')) as HTMLAnchorElement[];
+    expect(links[2].getAttribute('href')).toBe('/empresa/certificaciones/alertas?filtro=URGENTES');
+  });
+
+  it('usa las etiquetas Informativas / Próximas a vencer / Urgentes', () => {
+    componentRef.setInput('alertas', alertas());
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     const labels = Array.from(el.querySelectorAll('.ch-estado-cert__card-label')).map((n) =>
       n.textContent?.trim()
     );
-    expect(labels[0]).toBe('Vigentes');
-  });
-
-  it('usa la etiqueta singular "Vencida" cuando el conteo es 1', () => {
-    componentRef.setInput('resumen', { activas: 0, proximasAVencer: 0, vencidas: 1 });
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    const labels = Array.from(el.querySelectorAll('.ch-estado-cert__card-label')).map((n) =>
-      n.textContent?.trim()
-    );
-    expect(labels[2]).toBe('Vencida');
+    expect(labels).toEqual(['Informativas', 'Próximas a vencer', 'Urgentes']);
   });
 });

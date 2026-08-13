@@ -16,9 +16,9 @@ import { CertificacionesService } from '../../core/services/certificaciones.serv
 import { CertificacionesPageComponent } from './certificaciones-page.component';
 import { DashboardService } from '../dashboard/dashboard.service';
 import {
+  AlertaVencimiento,
   CalendarioVencimientosResponse,
   RecomendacionRenovacion,
-  ResumenCertificacionesDashboardResponse,
 } from '../dashboard/dashboard.model';
 import { MetaReduccion } from '../metas/metas.model';
 import { MetasService } from '../metas/metas.service';
@@ -26,7 +26,7 @@ import { MetasService } from '../metas/metas.service';
 describe('CertificacionesPageComponent', () => {
   let fixture: ComponentFixture<CertificacionesPageComponent>;
   let dashboardService: {
-    obtenerResumenCertificaciones: ReturnType<typeof vi.fn>;
+    obtenerAlertas: ReturnType<typeof vi.fn>;
     obtenerCalendarioVencimientos: ReturnType<typeof vi.fn>;
     obtenerRecomendacion: ReturnType<typeof vi.fn>;
   };
@@ -40,11 +40,29 @@ describe('CertificacionesPageComponent', () => {
     listarMetas: ReturnType<typeof vi.fn>;
   };
 
-  const RESUMEN: ResumenCertificacionesDashboardResponse = {
-    activas: 5,
-    proximasAVencer: 3,
-    vencidas: 1,
-  };
+  const ALERTAS: AlertaVencimiento[] = [
+    {
+      idCertificacion: 'c1',
+      nombre: 'Carbono Neutral',
+      fechaVencimiento: '2026-12-01',
+      diasRestantes: 88,
+      urgencia: '90_dias',
+    },
+    {
+      idCertificacion: 'c2',
+      nombre: 'ISO 14001',
+      fechaVencimiento: '2026-10-01',
+      diasRestantes: 25,
+      urgencia: '30_dias',
+    },
+    {
+      idCertificacion: 'c3',
+      nombre: 'GHG Protocol',
+      fechaVencimiento: '2026-09-08',
+      diasRestantes: 3,
+      urgencia: '7_dias',
+    },
+  ];
 
   const INSIGNIA: InsigniaEmpresa = {
     idInsignia: 1,
@@ -66,6 +84,7 @@ describe('CertificacionesPageComponent', () => {
     estado: 'ACTIVA',
     vigente: true,
     urlVerificacion: 'https://example.cr/verificar/c1',
+    codigoVerificacion: 'CH-2026-AAAA1111',
   };
 
   const META: MetaReduccion = {
@@ -119,7 +138,7 @@ describe('CertificacionesPageComponent', () => {
 
   beforeEach(async () => {
     dashboardService = {
-      obtenerResumenCertificaciones: vi.fn().mockReturnValue(of(RESUMEN)),
+      obtenerAlertas: vi.fn().mockReturnValue(of(ALERTAS)),
       obtenerCalendarioVencimientos: vi.fn().mockReturnValue(of(CALENDARIO)),
       obtenerRecomendacion: vi.fn().mockReturnValue(of(RECOMENDACION)),
     };
@@ -168,18 +187,18 @@ describe('CertificacionesPageComponent', () => {
     }).compileComponents();
   });
 
-  it('carga el resumen de certificaciones al iniciar', async () => {
+  it('carga las alertas de certificaciones al iniciar', async () => {
     fixture = await createFixture();
-    expect(dashboardService.obtenerResumenCertificaciones).toHaveBeenCalled();
+    expect(dashboardService.obtenerAlertas).toHaveBeenCalled();
     const el = fixture.nativeElement as HTMLElement;
     const valores = Array.from(el.querySelectorAll('.ch-estado-cert__card-value')).map((n) =>
       n.textContent?.trim()
     );
-    expect(valores).toEqual(['5', '3', '1']);
+    expect(valores).toEqual(['1', '1', '1']);
   });
 
   it('muestra el mensaje de error del bloque sin romper el resto de la página si falla la carga', async () => {
-    dashboardService.obtenerResumenCertificaciones.mockReturnValue(
+    dashboardService.obtenerAlertas.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 500 }))
     );
 

@@ -1,9 +1,9 @@
 <app-shell-layout activeId="certificaciones" [headerConfig]="headerConfig()">
   <section class="ch-certificaciones" aria-label="Certificaciones">
     <app-estado-certificaciones-panel
-      [resumen]="resumen()"
-      [loading]="cargandoResumen()"
-      [error]="resumenError()"
+      [alertas]="alertas()"
+      [loading]="cargandoAlertas()"
+      [error]="alertasError()"
     />
 
     <app-recomendacion-renovacion-panel
