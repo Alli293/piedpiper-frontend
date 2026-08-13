@@ -102,10 +102,7 @@ describe('RecomendacionesAmbientalesComponent', () => {
       const cargando = fixture.nativeElement.querySelector('.ch-recomendaciones__cargando');
       expect(cargando).not.toBeNull();
 
-      flushRecomendaciones({
-        recomendaciones: [],
-        mensaje: 'Tu itinerario ya presenta un excelente desempeño ambiental.',
-      });
+      flushRecomendaciones({ recomendaciones: [], mensaje: 'Tu itinerario ya presenta un excelente desempeño ambiental.' });
       await fixture.whenStable();
     });
   });
@@ -129,6 +126,29 @@ describe('RecomendacionesAmbientalesComponent', () => {
         'Tu itinerario ya presenta un excelente desempeño ambiental.'
       );
       expect(fixture.nativeElement.querySelectorAll('.ch-recomendaciones__item').length).toBe(0);
+    });
+
+    it('muestra el mensaje neutro del backend cuando el itinerario no está en la banda excelente', async () => {
+      // El componente no decide el texto: solo renderiza lo que el backend envía en `mensaje`.
+      // Esto cubre la regresión donde se mostraba "excelente desempeño" con un EcoScore Moderado.
+      fixture = await crearFixture();
+      httpMock = TestBed.inject(HttpTestingController);
+
+      fixture.detectChanges();
+      flushRecomendaciones({
+        recomendaciones: [],
+        mensaje:
+          'No encontramos actividades específicas que sustituir para mejorar tu EcoScore en este momento.',
+      });
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const optimizado = fixture.nativeElement.querySelector('.ch-recomendaciones__optimizado');
+      expect(optimizado).not.toBeNull();
+      expect(optimizado.textContent).toContain(
+        'No encontramos actividades específicas que sustituir para mejorar tu EcoScore en este momento.'
+      );
+      expect(optimizado.textContent).not.toContain('excelente desempeño ambiental');
     });
   });
 

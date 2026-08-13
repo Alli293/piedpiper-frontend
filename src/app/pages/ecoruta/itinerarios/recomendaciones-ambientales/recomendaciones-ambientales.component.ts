@@ -96,11 +96,7 @@ export class RecomendacionesAmbientalesComponent {
           actual.filter((r) => r.actividadId !== actividadId)
         );
         this.itinerarioActualizado.emit(itinerarioActualizado);
-        this.toastService.success(
-          'Recomendación aplicada exitosamente.',
-          undefined,
-          TOAST_DURATION_MS
-        );
+        this.toastService.success('Recomendación aplicada exitosamente.', undefined, TOAST_DURATION_MS);
       },
       error: (err: unknown) => {
         this.actividadAplicandoId.set(null);
