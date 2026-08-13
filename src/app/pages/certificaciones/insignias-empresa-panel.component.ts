@@ -9,6 +9,7 @@ import { LinkDirective } from '../../shared/components/link/link.directive';
 const ERROR_POR_DEFECTO = 'No fue posible cargar esta sección. Intenta recargar la página.';
 const SIN_INSIGNIAS_MENSAJE =
   'Aún no has obtenido insignias. Completa tus certificaciones para comenzar.';
+const MAX_ITEMS = 4;
 
 const NIVEL_LABEL: Record<NivelInsigniaEmpresa, string> = {
   bronce: 'Bronce',
@@ -41,9 +42,9 @@ export class InsigniasEmpresaPanelComponent {
   protected readonly errorMensaje = computed(() => this.error() ?? ERROR_POR_DEFECTO);
 
   protected readonly insigniasOrdenadas = computed(() =>
-    [...(this.insignias() ?? [])].sort(
-      (a, b) => new Date(b.fechaObtencion).getTime() - new Date(a.fechaObtencion).getTime()
-    )
+    [...(this.insignias() ?? [])]
+      .sort((a, b) => new Date(b.fechaObtencion).getTime() - new Date(a.fechaObtencion).getTime())
+      .slice(0, MAX_ITEMS)
   );
 
   protected llave(insignia: InsigniaEmpresa): string {

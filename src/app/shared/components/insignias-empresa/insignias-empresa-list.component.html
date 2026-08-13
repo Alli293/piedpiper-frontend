@@ -9,25 +9,14 @@
 } @else {
   <div class="ch-ie">
     @if (mostrarResumen()) {
-      <section class="ch-ie__resumen" aria-label="Resumen de insignias empresariales">
-        <div class="ch-ie__resumen-icono" aria-hidden="true">
-          <app-icon name="empresa" [size]="20" />
-        </div>
-        <div>
-          <span class="ch-ie__eyebrow">Reconocimientos verificables</span>
-          <app-heading
-            level="h1"
-            [text]="nombreEmpresa() ? titulo() + ' de ' + nombreEmpresa() : titulo()"
-          />
-          <p>{{ descripcion() }}</p>
-        </div>
-        <dl class="ch-ie__metricas">
-          <div>
-            <dt>Insignias activas</dt>
-            <dd>{{ cantidadActivas() }}</dd>
-          </div>
-        </dl>
-      </section>
+      <app-encabezado-resumen
+        icono="insignias"
+        tono="warning"
+        [titulo]="nombreEmpresa() ? titulo() + ' de ' + nombreEmpresa() : titulo()"
+        [subtexto]="descripcion()"
+        [statValor]="cantidadActivas()"
+        statLabel="Insignias activas"
+      />
     }
 
     <app-semantic-card

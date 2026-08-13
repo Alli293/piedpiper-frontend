@@ -51,6 +51,12 @@ export class CalendarioVencimientosComponent {
   protected readonly errorMensaje = computed(() => this.error() ?? ERROR_POR_DEFECTO);
   protected readonly diasSemana = DIAS_SEMANA;
 
+  // Solo se reemplaza toda la tarjeta por el estado de carga/error cuando
+  // todavía no hay datos (primera carga): reemplazarla también al navegar
+  // entre meses colapsaría su alto y movería el scroll de la página.
+  protected readonly mostrarCargaInicial = computed(() => this.loading() && !this.calendario());
+  protected readonly mostrarErrorInicial = computed(() => !!this.error() && !this.calendario());
+
   protected readonly tituloMes = computed(() => this.formatearTitulo(this.mes()));
 
   protected readonly semanas = computed<DiaCalendario[][]>(() =>

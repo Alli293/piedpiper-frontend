@@ -23,6 +23,7 @@ const CERTIFICACION_BASE: Certificacion = {
   vigente: true,
   urlVerificacion: 'https://carbonhub.example/api/certificaciones/cert-1/verificar',
   recienEmitida: false,
+  codigoVerificacion: 'CH-2026-AAAA1111',
 };
 
 describe('CertificacionDetallePageComponent', () => {
