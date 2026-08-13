@@ -42,19 +42,16 @@ describe('Feature: PP-56-calificacion-verificada-auditores, Property 5: Formular
    */
   it('puedeGuardar() es false cuando calificacion es null (sin valor seleccionado)', () => {
     fc.assert(
-      fc.property(
-        fc.string({ minLength: 0, maxLength: 500 }),
-        (comentario) => {
-          createComponent();
+      fc.property(fc.string({ minLength: 0, maxLength: 500 }), (comentario) => {
+        createComponent();
 
-          // Set calificacion to null (not selected) with any valid comentario
-          component['model'].set({ calificacion: null, comentario });
+        // Set calificacion to null (not selected) with any valid comentario
+        component['model'].set({ calificacion: null, comentario });
 
-          fixture.detectChanges();
+        fixture.detectChanges();
 
-          expect(component['puedeGuardar']()).toBe(false);
-        }
-      ),
+        expect(component['puedeGuardar']()).toBe(false);
+      }),
       { numRuns: 100 }
     );
   }, 30000);
@@ -93,19 +90,16 @@ describe('Feature: PP-56-calificacion-verificada-auditores, Property 5: Formular
    */
   it('puedeGuardar() es false cuando calificacion es null Y comentario supera 500 caracteres', () => {
     fc.assert(
-      fc.property(
-        fc.string({ minLength: 501, maxLength: 1000 }),
-        (comentarioLargo) => {
-          createComponent();
+      fc.property(fc.string({ minLength: 501, maxLength: 1000 }), (comentarioLargo) => {
+        createComponent();
 
-          // Both conditions invalid: calificacion null + comentario > 500
-          component['model'].set({ calificacion: null, comentario: comentarioLargo });
+        // Both conditions invalid: calificacion null + comentario > 500
+        component['model'].set({ calificacion: null, comentario: comentarioLargo });
 
-          fixture.detectChanges();
+        fixture.detectChanges();
 
-          expect(component['puedeGuardar']()).toBe(false);
-        }
-      ),
+        expect(component['puedeGuardar']()).toBe(false);
+      }),
       { numRuns: 100 }
     );
   }, 30000);
@@ -136,7 +130,6 @@ describe('Feature: PP-56-calificacion-verificada-auditores, Property 5: Formular
     );
   }, 30000);
 });
-
 
 /**
  * Property 6: Recuperación del formulario tras error
@@ -274,7 +267,6 @@ describe('Feature: PP-56-calificacion-verificada-auditores, Property 6: Recupera
   }, 60000);
 });
 
-
 /**
  * Property 9: Visibilidad de calificación condicionada por estado de auditoría
  * Validates: Requirements 9.3
@@ -350,7 +342,6 @@ describe('Feature: PP-56-calificacion-verificada-auditores, Property 9: Visibili
   }, 30000);
 });
 
-
 /**
  * Property 10: Botón de edición visible solo para calificaciones propias
  * Validates: Requirements 5.4
@@ -382,7 +373,9 @@ describe('Feature: PP-56-calificacion-verificada-auditores, Property 10: Botón 
   }
 
   // Arbitrary: non-empty string to simulate valid empresaId (UUID-like)
-  const empresaIdArb = fc.stringMatching(/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
+  const empresaIdArb = fc.stringMatching(
+    /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/
+  );
 
   // Build a CalificacionResponse object with the given empresaId
   function buildCalificacionExistente(empresaId: string) {
@@ -410,7 +403,10 @@ describe('Feature: PP-56-calificacion-verificada-auditores, Property 10: Botón 
         createComponent();
 
         fixture.componentRef.setInput('empresaIdUsuario', empresaId);
-        fixture.componentRef.setInput('calificacionExistente', buildCalificacionExistente(empresaId));
+        fixture.componentRef.setInput(
+          'calificacionExistente',
+          buildCalificacionExistente(empresaId)
+        );
         fixture.detectChanges();
 
         expect(component['puedeEditar']()).toBe(true);
@@ -427,22 +423,21 @@ describe('Feature: PP-56-calificacion-verificada-auditores, Property 10: Botón 
    */
   it('puedeEditar() es false cuando empresaId del usuario NO coincide con empresaId de la calificación', () => {
     fc.assert(
-      fc.property(
-        empresaIdArb,
-        empresaIdArb,
-        (empresaUsuario, empresaCalificacion) => {
-          // Only test when the IDs are actually different
-          fc.pre(empresaUsuario !== empresaCalificacion);
+      fc.property(empresaIdArb, empresaIdArb, (empresaUsuario, empresaCalificacion) => {
+        // Only test when the IDs are actually different
+        fc.pre(empresaUsuario !== empresaCalificacion);
 
-          createComponent();
+        createComponent();
 
-          fixture.componentRef.setInput('empresaIdUsuario', empresaUsuario);
-          fixture.componentRef.setInput('calificacionExistente', buildCalificacionExistente(empresaCalificacion));
-          fixture.detectChanges();
+        fixture.componentRef.setInput('empresaIdUsuario', empresaUsuario);
+        fixture.componentRef.setInput(
+          'calificacionExistente',
+          buildCalificacionExistente(empresaCalificacion)
+        );
+        fixture.detectChanges();
 
-          expect(component['puedeEditar']()).toBe(false);
-        }
-      ),
+        expect(component['puedeEditar']()).toBe(false);
+      }),
       { numRuns: 100 }
     );
   }, 30000);

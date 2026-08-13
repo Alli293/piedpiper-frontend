@@ -218,7 +218,9 @@ export class CalificacionFormComponent {
       comentario: value.comentario.trim() || undefined,
     };
 
-    const resultado = await firstValueFrom(this.calificacionService.editarCalificacion(id, payload));
+    const resultado = await firstValueFrom(
+      this.calificacionService.editarCalificacion(id, payload)
+    );
     this.calificacionGuardada.set(resultado);
     this.editando.set(false);
     this.toastService.success(MSG_EDICION_EXITOSA, undefined, DURACION_TOAST_MS);

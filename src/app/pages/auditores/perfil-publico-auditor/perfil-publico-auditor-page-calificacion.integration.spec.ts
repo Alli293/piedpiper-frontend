@@ -283,9 +283,7 @@ describe('PerfilPublicoAuditorPage — Integración CalificacionFormComponent', 
       const formElement = raiz().querySelector('app-calificacion-form')!;
 
       // Simular selección de estrella clickeando un radio button del star-rating
-      const starButtons = formElement.querySelectorAll<HTMLButtonElement>(
-        'app-star-rating button'
-      );
+      const starButtons = formElement.querySelectorAll<HTMLButtonElement>('app-star-rating button');
 
       if (starButtons.length >= 5) {
         starButtons[4].click();
@@ -317,9 +315,7 @@ describe('PerfilPublicoAuditorPage — Integración CalificacionFormComponent', 
 
       const formElement = raiz().querySelector('app-calificacion-form')!;
 
-      const starButtons = formElement.querySelectorAll<HTMLButtonElement>(
-        'app-star-rating button'
-      );
+      const starButtons = formElement.querySelectorAll<HTMLButtonElement>('app-star-rating button');
 
       if (starButtons.length >= 3) {
         starButtons[2].click();

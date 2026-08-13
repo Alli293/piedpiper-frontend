@@ -261,11 +261,22 @@
               <app-card variant="outlined" padding="sm" class="ch-perfil-auditor__resena-card">
                 <div class="ch-perfil-auditor__resena-top">
                   <div class="ch-perfil-auditor__resena-reviewer">
-                    <app-avatar size="sm" [initials]="(resena.nombreCalificador || resena.nombreEmpresa || 'R').substring(0, 2).toUpperCase()" />
+                    <app-avatar
+                      size="sm"
+                      [initials]="
+                        (resena.nombreCalificador || resena.nombreEmpresa || 'R')
+                          .substring(0, 2)
+                          .toUpperCase()
+                      "
+                    />
                     <div class="ch-perfil-auditor__resena-meta">
-                      <span class="ch-perfil-auditor__resena-name">{{ resena.nombreCalificador || resena.nombreEmpresa || 'Reseña verificada' }}</span>
+                      <span class="ch-perfil-auditor__resena-name">{{
+                        resena.nombreCalificador || resena.nombreEmpresa || 'Reseña verificada'
+                      }}</span>
                       @if (resena.nombreEmpresa) {
-                        <span class="ch-perfil-auditor__resena-empresa">{{ resena.nombreEmpresa }}</span>
+                        <span class="ch-perfil-auditor__resena-empresa">{{
+                          resena.nombreEmpresa
+                        }}</span>
                       }
                       <app-badge variant="success" icon="verificada">CONTRATO VERIFICADO</app-badge>
                     </div>
@@ -289,7 +300,11 @@
                   </div>
                 </div>
                 <p class="ch-perfil-auditor__resena-text">{{ resena.comentario }}</p>
-                @if (esAdminEmpresa() && resena.empresaId === empresaIdUsuario() && !calificacionExistente()) {
+                @if (
+                  esAdminEmpresa() &&
+                  resena.empresaId === empresaIdUsuario() &&
+                  !calificacionExistente()
+                ) {
                   <div class="ch-perfil-auditor__resena-actions">
                     <button
                       class="ch-perfil-auditor__resena-edit-btn"
@@ -321,7 +336,6 @@
           />
         </section>
       }
-
     </main>
   }
 </app-shell-layout>
