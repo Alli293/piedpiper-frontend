@@ -17,16 +17,16 @@
   }
 
   @if (!cargando() && error() && errorTipo() === '5xx') {
-    <!-- Toast already shown via ToastService; no inline content needed -->
+    <!-- Toast ya mostrado via ToastService; no se necesita contenido inline -->
   }
 
   @if (!cargando() && !error() && perfil()) {
     <main class="ch-perfil-auditor">
-      <!-- Main content + Sidebar -->
+      <!-- Contenido principal + Sidebar -->
       <div class="ch-perfil-auditor__grid">
-        <!-- LEFT COLUMN: Main content -->
+        <!-- COLUMNA IZQUIERDA: Contenido principal -->
         <div class="ch-perfil-auditor__main">
-          <!-- Header card -->
+          <!-- Cabecera -->
           <app-card variant="outlined" padding="md" class="ch-perfil-auditor__header-card">
             <div class="ch-perfil-auditor__header">
               <div class="ch-perfil-auditor__avatar-wrapper">
@@ -164,7 +164,7 @@
           </section>
         </div>
 
-        <!-- RIGHT COLUMN: Sidebar -->
+        <!-- COLUMNA DERECHA: Sidebar -->
         <aside class="ch-perfil-auditor__sidebar">
           <!-- Métricas de reputación -->
           <app-card variant="outlined" padding="md" class="ch-perfil-auditor__sidebar-card">

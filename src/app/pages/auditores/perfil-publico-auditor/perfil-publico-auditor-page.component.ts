@@ -95,7 +95,7 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   protected irAAsignarAuditoria(): void {
     const perfil = this.perfil();
     if (perfil) {
-      void this.router.navigate(['/auditorias/asignar'], {
+      void this.router.navigate(['/empresa/auditorias/nueva'], {
         queryParams: { auditorId: perfil.auditorId },
       });
     }
