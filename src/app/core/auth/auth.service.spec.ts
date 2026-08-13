@@ -87,12 +87,13 @@ describe('AuthService', () => {
     expect(sessionStorage.getItem('carbonhub.token')).toBeNull();
   });
 
-  it('validarTokenReset hace GET a /auth/reset-contrasena con el token como query param', () => {
+  it('validarTokenReset hace POST y mantiene el token fuera de la URL', () => {
     let recibida: { email: string } | undefined;
     service.validarTokenReset('tok-123').subscribe((r) => (recibida = r));
 
-    const req = httpMock.expectOne(`${base}/reset-contrasena?token=tok-123`);
-    expect(req.request.method).toBe('GET');
+    const req = httpMock.expectOne(`${base}/reset-contrasena/validar`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ token: 'tok-123' });
     req.flush({ email: 'ana.perez@example.com' });
 
     expect(recibida!.email).toBe('ana.perez@example.com');
@@ -146,12 +147,13 @@ describe('AuthService', () => {
     expect(service.token()).toBe('jwt-app');
   });
 
-  it('verificarCorreo hace GET a /auth/verificar-correo con el token como query param', () => {
+  it('verificarCorreo hace POST y mantiene el token fuera de la URL', () => {
     let recibida: { mensaje: string } | undefined;
     service.verificarCorreo('tok-123').subscribe((r) => (recibida = r));
 
-    const req = httpMock.expectOne(`${base}/verificar-correo?token=tok-123`);
-    expect(req.request.method).toBe('GET');
+    const req = httpMock.expectOne(`${base}/verificar-correo`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ token: 'tok-123' });
     req.flush({ mensaje: 'Tu correo fue verificado. Ya puedes iniciar sesión.' });
 
     expect(recibida!.mensaje).toBe('Tu correo fue verificado. Ya puedes iniciar sesión.');
@@ -160,7 +162,7 @@ describe('AuthService', () => {
   it('verificarCorreo no guarda ningun token en sessionStorage', () => {
     service.verificarCorreo('tok-123').subscribe();
 
-    const req = httpMock.expectOne(`${base}/verificar-correo?token=tok-123`);
+    const req = httpMock.expectOne(`${base}/verificar-correo`);
     req.flush({ mensaje: 'OK' });
 
     expect(sessionStorage.getItem('carbonhub.token')).toBeNull();

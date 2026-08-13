@@ -20,6 +20,7 @@ import { PasswordInputComponent } from '../../../shared/components/inputs/passwo
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { LinkDirective } from '../../../shared/components/link/link.directive';
 import { AuthService } from '../../../core/auth/auth.service';
+import { EnlaceUnSoloUsoService } from '../../../core/auth/enlace-un-solo-uso.service';
 import {
   CONTRASENA_HINT,
   CONTRASENA_MENSAJE,
@@ -50,9 +51,11 @@ interface RestablecerContrasenaFormModel {
 })
 export class ResetContrasenaPageComponent implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly enlaceUnSoloUso = inject(EnlaceUnSoloUsoService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly token = input('');
+  private readonly tokenLimpio = signal('');
 
   protected readonly cargando = signal(true);
   protected readonly email = signal('');
@@ -96,14 +99,15 @@ export class ResetContrasenaPageComponent implements OnInit {
   protected readonly submitting = computed(() => this.restablecerForm().submitting());
 
   ngOnInit(): void {
-    if (!this.token()) {
+    this.tokenLimpio.set(this.enlaceUnSoloUso.consumir(this.token()));
+    if (!this.tokenLimpio()) {
       this.cargando.set(false);
       this.mensajeInvalido.set('Este enlace no es válido o expiró.');
       return;
     }
 
     this.authService
-      .validarTokenReset(this.token())
+      .validarTokenReset(this.tokenLimpio())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (respuesta) => {
@@ -131,7 +135,7 @@ export class ResetContrasenaPageComponent implements OnInit {
         try {
           const respuesta = await firstValueFrom(
             this.authService.restablecerContrasena(
-              this.token(),
+              this.tokenLimpio(),
               value.contrasena,
               value.confirmarContrasena
             )

@@ -18,6 +18,7 @@ import { SemanticCardComponent } from '../../../shared/components/semantic-card/
 import { TextInputComponent } from '../../../shared/components/inputs/text-input/text-input.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { AuthService } from '../../../core/auth/auth.service';
+import { EnlaceUnSoloUsoService } from '../../../core/auth/enlace-un-solo-uso.service';
 import { EMAIL_MENSAJE, EMAIL_PATTERN } from '../../../shared/utils/email.utils';
 import { fieldError } from '../../../shared/utils/form-field.utils';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
@@ -42,6 +43,7 @@ interface ReenviarVerificacionFormModel {
 })
 export class VerificarCorreoPageComponent implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly enlaceUnSoloUso = inject(EnlaceUnSoloUsoService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly token = input('');
@@ -68,14 +70,15 @@ export class VerificarCorreoPageComponent implements OnInit {
   protected readonly reenviarEnviando = computed(() => this.reenviarForm().submitting());
 
   ngOnInit(): void {
-    if (!this.token()) {
+    const tokenLimpio = this.enlaceUnSoloUso.consumir(this.token());
+    if (!tokenLimpio) {
       this.cargando.set(false);
       this.mensajeInvalido.set('Este enlace de verificación no es válido.');
       return;
     }
 
     this.authService
-      .verificarCorreo(this.token())
+      .verificarCorreo(tokenLimpio)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (respuesta) => {
