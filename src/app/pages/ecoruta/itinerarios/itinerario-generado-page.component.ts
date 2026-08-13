@@ -17,6 +17,7 @@ import { CertificacionesDetalleComponent } from './certificaciones-detalle/certi
 import { EcoRutaItinerariosService } from './ecoruta-itinerarios.service';
 import { Itinerario, ItinerarioActividad, ItinerarioDia } from './models/itinerario.model';
 import { PuntuacionAmbientalBadgeComponent } from './puntuacion-ambiental-badge/puntuacion-ambiental-badge.component';
+import { RecomendacionesAmbientalesComponent } from './recomendaciones-ambientales/recomendaciones-ambientales.component';
 import { RefinamientoChatComponent } from './refinamiento-chat/refinamiento-chat.component';
 import { derivarEtiquetaRuta } from './utils/ruta-diaria.utils';
 
@@ -54,6 +55,7 @@ const TOAST_DURATION_MS = 5000;
     HeadingComponent,
     IconComponent,
     PuntuacionAmbientalBadgeComponent,
+    RecomendacionesAmbientalesComponent,
     RefinamientoChatComponent,
     ShellLayoutComponent,
   ],

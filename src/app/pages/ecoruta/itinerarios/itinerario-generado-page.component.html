@@ -118,6 +118,11 @@
             </div>
           }
 
+          <app-recomendaciones-ambientales
+            [itinerarioId]="data.id"
+            (itinerarioActualizado)="itinerario.set($event)"
+          />
+
           @for (dia of data.dias; track dia.numeroDia) {
             <article class="ch-itinerario-generado__dia">
               <button

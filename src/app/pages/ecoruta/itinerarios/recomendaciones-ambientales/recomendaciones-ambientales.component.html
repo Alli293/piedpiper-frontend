@@ -1,0 +1,42 @@
+<section class="ch-recomendaciones" aria-label="Recomendaciones ambientales para el itinerario">
+  <header class="ch-recomendaciones__header">
+    <app-icon name="hoja-solida" [size]="18" aria-hidden="true" />
+    <h2 class="ch-recomendaciones__titulo">Recomendaciones para mejorar tu EcoScore</h2>
+  </header>
+
+  @if (cargando()) {
+    <div class="ch-recomendaciones__cargando" aria-live="polite">
+      <span class="ch-recomendaciones__spinner" aria-hidden="true"></span>
+      <p>Analizando tu itinerario en busca de mejoras...</p>
+    </div>
+  } @else if (itinerarioOptimizado()) {
+    <p class="ch-recomendaciones__optimizado" role="status">
+      <app-icon name="success" [size]="16" aria-hidden="true" />
+      <span>{{ mensaje() }}</span>
+    </p>
+  } @else {
+    <ul class="ch-recomendaciones__lista">
+      @for (recomendacion of recomendaciones(); track recomendacion.actividadId) {
+        <li class="ch-recomendaciones__item">
+          <div class="ch-recomendaciones__item-info">
+            <p class="ch-recomendaciones__descripcion">{{ recomendacion.descripcion }}</p>
+            <span class="ch-recomendaciones__incremento">
+              <app-icon name="hoja" [size]="14" aria-hidden="true" />
+              +{{ recomendacion.incrementoEstimado | number: '1.0-1' }} EcoScore estimado
+            </span>
+          </div>
+          @if (recomendacion.alternativa) {
+            <button
+              type="button"
+              class="ch-recomendaciones__boton-aplicar"
+              [disabled]="aplicando(recomendacion)"
+              (click)="aplicar(recomendacion)"
+            >
+              {{ aplicando(recomendacion) ? 'Aplicando...' : 'Aplicar' }}
+            </button>
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>

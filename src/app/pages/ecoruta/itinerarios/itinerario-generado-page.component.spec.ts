@@ -8,6 +8,7 @@ import { PerfilInicial } from '../../../core/models/perfil-inicial.model';
 import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { EcoRutaItinerariosService } from './ecoruta-itinerarios.service';
+import { EcoRutaRecomendacionesService } from './ecoruta-recomendaciones.service';
 import { Itinerario } from './models/itinerario.model';
 import { ItinerarioGeneradoPageComponent } from './itinerario-generado-page.component';
 
@@ -112,11 +113,24 @@ describe('ItinerarioGeneradoPageComponent', () => {
     httpMock.verify();
   });
 
+  /**
+   * `<app-recomendaciones-ambientales>` (PP-93) se activa apenas el itinerario carga con éxito y
+   * dispara su propio GET; estos tests solo verifican el comportamiento de la página, así que la
+   * petición se drena con una respuesta neutral (sin recomendaciones) en vez de aserirla acá.
+   */
+  function flushRecomendaciones(): void {
+    httpMock
+      .match(`${EcoRutaRecomendacionesService.URL}/${ITINERARIO_ID}/recomendaciones`)
+      .forEach((req) => req.flush({ recomendaciones: [], mensaje: null }));
+  }
+
   it('carga el itinerario, ordena dias y actividades, y muestra el EcoScore', async () => {
     await crearFixture();
     httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush(ITINERARIO_BASE);
     await fixture.whenStable();
     fixture.detectChanges();
+    flushRecomendaciones();
+    await fixture.whenStable();
 
     const texto = fixture.nativeElement.textContent as string;
     expect(texto).toContain('85');
@@ -160,6 +174,8 @@ describe('ItinerarioGeneradoPageComponent', () => {
     });
     await fixture.whenStable();
     fixture.detectChanges();
+    flushRecomendaciones();
+    await fixture.whenStable();
 
     expect(fixture.nativeElement.textContent).toContain('itinerario parcial');
   });
@@ -172,6 +188,8 @@ describe('ItinerarioGeneradoPageComponent', () => {
     });
     await fixture.whenStable();
     fixture.detectChanges();
+    flushRecomendaciones();
+    await fixture.whenStable();
 
     expect(fixture.nativeElement.textContent).toContain(
       'El EcoScore fue calculado con información parcial'
@@ -189,6 +207,8 @@ describe('ItinerarioGeneradoPageComponent', () => {
     });
     await fixture.whenStable();
     fixture.detectChanges();
+    flushRecomendaciones();
+    await fixture.whenStable();
 
     expect(errorSpy).toHaveBeenCalledWith(
       'No fue posible calcular el impacto ambiental del itinerario.',
@@ -217,6 +237,8 @@ describe('ItinerarioGeneradoPageComponent', () => {
     });
     await fixture.whenStable();
     fixture.detectChanges();
+    flushRecomendaciones();
+    await fixture.whenStable();
 
     const texto = fixture.nativeElement.textContent as string;
     expect(texto).toContain('Desglose por establecimiento');
@@ -231,6 +253,8 @@ describe('ItinerarioGeneradoPageComponent', () => {
     });
     await fixture.whenStable();
     fixture.detectChanges();
+    flushRecomendaciones();
+    await fixture.whenStable();
 
     expect(fixture.nativeElement.textContent).not.toContain('Desglose por establecimiento');
     expect(fixture.nativeElement.textContent).toContain('85');
@@ -256,6 +280,8 @@ describe('ItinerarioGeneradoPageComponent', () => {
     httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush(ITINERARIO_BASE);
     await fixture.whenStable();
     fixture.detectChanges();
+    flushRecomendaciones();
+    await fixture.whenStable();
 
     expect(fixture.nativeElement.textContent).toContain('Excelente');
   });
@@ -283,6 +309,8 @@ describe('ItinerarioGeneradoPageComponent', () => {
     httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush(ITINERARIO_BASE);
     await fixture.whenStable();
     fixture.detectChanges();
+    flushRecomendaciones();
+    await fixture.whenStable();
 
     const root = fixture.nativeElement as HTMLElement;
     const headerDia1 = root.querySelectorAll<HTMLButtonElement>(
@@ -309,6 +337,8 @@ describe('ItinerarioGeneradoPageComponent', () => {
     httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush(ITINERARIO_BASE);
     await fixture.whenStable();
     fixture.detectChanges();
+    flushRecomendaciones();
+    await fixture.whenStable();
 
     const root = fixture.nativeElement as HTMLElement;
     const panel = root.querySelector<HTMLElement>('.ch-itinerario-generado__lateral')!;
