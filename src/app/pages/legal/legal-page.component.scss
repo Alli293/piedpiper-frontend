@@ -22,11 +22,11 @@
 .ch-legal__entradilla {
   margin: var(--ch-space-4) 0 var(--ch-space-6);
   padding: var(--ch-space-4);
-  border-left: 3px solid var(--ch-color-warning, var(--ch-border));
+  border-left: 3px solid var(--ch-warning);
   border-radius: var(--ch-radius-sm);
   background: var(--ch-green-soft);
-  color: var(--ch-color-text);
-  font-size: var(--ch-font-size-sm);
+  color: var(--ch-text-primary);
+  font-size: 0.875rem;
   line-height: 1.6;
 }
 
@@ -57,8 +57,8 @@
   margin-top: var(--ch-space-8);
   padding-top: var(--ch-space-4);
   border-top: 1px solid var(--ch-border);
-  color: var(--ch-color-text-muted);
-  font-size: var(--ch-font-size-sm);
+  color: var(--ch-text-muted);
+  font-size: 0.875rem;
 
   p {
     margin: 0;
