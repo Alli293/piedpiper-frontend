@@ -8,7 +8,7 @@ import {
   rutasPostAutenticacion,
   usuarioIndividualGuard,
 } from './app.routes';
-import { authGuard } from './core/auth/auth.guard';
+import { authGuard, guardAuditorActivo } from './core/auth/auth.guard';
 
 describe('app.routes', () => {
   const redirectsBackend = [
@@ -120,6 +120,34 @@ describe('app.routes', () => {
   it('ui-kit no queda expuesto sin rol de administrador de plataforma', () => {
     const ruta = routes.find((r) => r.path === 'ui-kit');
     expect(ruta?.canActivate).toEqual([guardAdmin]);
+  });
+
+  /**
+   * El rol de auditor viaja en el JWT desde el registro, antes de que el administrador lo
+   * apruebe. guardAuditor por si solo dejaria pasar a un auditor PENDIENTE_VALIDACION a estas
+   * pantallas de negocio real; guardAuditorActivo cierra esa ventana exigiendo ademas
+   * estado === ACTIVO.
+   */
+  it('las pantallas de negocio del auditor exigen ademas estado activo', () => {
+    const rutasNegocioAuditor = ['auditor/auditorias', 'auditor/perfil'];
+    for (const path of rutasNegocioAuditor) {
+      const ruta = routes.find((r) => r.path === path);
+      expect(ruta?.canActivate).toContain(guardAuditorActivo);
+    }
+  });
+
+  /**
+   * El detalle de auditoria es negocio real del auditor (acepta/rechaza, sube el reporte), y la
+   * ruta la comparten empresa/auditor/admin via guardDetalleAuditoria. Sin guardAuditorActivo acá,
+   * un auditor PENDIENTE_VALIDACION o RECHAZADO podia entrar por cualquiera de las dos URLs sin
+   * pasar por su onboarding.
+   */
+  it('el detalle de auditoria exige estado activo para el auditor, en ambas rutas', () => {
+    const rutasDetalleAuditoria = ['empresa/auditorias/:id', 'auditor/auditorias/:id'];
+    for (const path of rutasDetalleAuditoria) {
+      const ruta = routes.find((r) => r.path === path);
+      expect(ruta?.canActivate).toContain(guardAuditorActivo);
+    }
   });
 
   it('auditor/validacion-pendiente solo exige sesion iniciada, sin exigir el rol final', () => {

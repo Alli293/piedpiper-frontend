@@ -1,0 +1,339 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute, provideRouter, Router } from '@angular/router';
+import { of, throwError } from 'rxjs';
+import { vi } from 'vitest';
+import { RevisionSolicitudAuditorPageComponent } from './revision-solicitud-auditor-page.component';
+import {
+  SolicitudDetalle,
+  ValidacionService,
+} from '../../../../core/validacion/validacion.service';
+import { ToastService } from '../../../../shared/services/toast.service';
+
+describe('RevisionSolicitudAuditorPageComponent', () => {
+  let fixture: ComponentFixture<RevisionSolicitudAuditorPageComponent>;
+  let component: RevisionSolicitudAuditorPageComponent;
+  let toastService: ToastService;
+  let navigate: ReturnType<typeof vi.spyOn>;
+  let validacionService: {
+    obtenerDetalle: ReturnType<typeof vi.fn>;
+    resolver: ReturnType<typeof vi.fn>;
+    descargarDocumento: ReturnType<typeof vi.fn>;
+  };
+
+  const detalle: SolicitudDetalle = {
+    id: 'sol-1',
+    nombreAuditor: 'Ana Mora',
+    email: 'ana@correo.com',
+    estado: 'PENDIENTE',
+    fechaSolicitud: '2026-07-14T00:00:00Z',
+    aniosExperiencia: 5,
+    especialidades: ['AGROINDUSTRIA'],
+    descripcionProfesional: 'Auditora con experiencia en agroindustria.',
+    sitioWeb: null,
+    documentos: [{ id: 'doc-1', nombreArchivo: 'certificado.pdf', tamanioBytes: 2048 }],
+  };
+
+  function interno() {
+    return component as unknown as {
+      model: {
+        (): { decision: string; motivo: string };
+        set(v: { decision: string; motivo: string }): void;
+      };
+      confirmarDecision(): Promise<void>;
+      puedeConfirmar(): boolean;
+      errorMotivo(): string;
+      confirmandoDecision(): boolean;
+    };
+  }
+
+  beforeEach(async () => {
+    validacionService = {
+      obtenerDetalle: vi.fn().mockReturnValue(of(detalle)),
+      resolver: vi.fn(),
+      descargarDocumento: vi.fn(),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [RevisionSolicitudAuditorPageComponent],
+      providers: [
+        provideRouter([]),
+        { provide: ValidacionService, useValue: validacionService },
+        ToastService,
+      ],
+    }).compileComponents();
+
+    navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    fixture = TestBed.createComponent(RevisionSolicitudAuditorPageComponent);
+    fixture.componentRef.setInput('id', 'sol-1');
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  });
+
+  it('muestra los datos del auditor y sus documentos', () => {
+    const texto = (fixture.nativeElement as HTMLElement).textContent;
+
+    expect(texto).toContain('Ana Mora');
+    expect(texto).toContain('ana@correo.com');
+    expect(texto).toContain('certificado.pdf');
+  });
+
+  it('el campo de motivo aparece solo al rechazar', () => {
+    interno().model.set({ decision: 'aprobado', motivo: '' });
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('app-textarea')).toBeNull();
+
+    interno().model.set({ decision: 'rechazado', motivo: '' });
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('app-textarea')).toBeTruthy();
+  });
+
+  it('sin decision seleccionada el boton confirmar queda deshabilitado', () => {
+    expect(interno().puedeConfirmar()).toBe(false);
+
+    interno().model.set({ decision: 'aprobado', motivo: '' });
+    expect(interno().puedeConfirmar()).toBe(true);
+  });
+
+  it('el boton confirmar se habilita segun la longitud del motivo', () => {
+    interno().model.set({ decision: 'rechazado', motivo: 'corto' });
+    expect(interno().puedeConfirmar()).toBe(false);
+
+    interno().model.set({
+      decision: 'rechazado',
+      motivo: 'Motivo de rechazo con largo suficiente.',
+    });
+    expect(interno().puedeConfirmar()).toBe(true);
+
+    interno().model.set({ decision: 'rechazado', motivo: 'x'.repeat(501) });
+    expect(interno().puedeConfirmar()).toBe(false);
+  });
+
+  it('confirmar con motivo invalido no llama al backend y marca el error', async () => {
+    interno().model.set({ decision: 'rechazado', motivo: 'corto' });
+
+    await interno().confirmarDecision();
+    fixture.detectChanges();
+
+    expect(validacionService.resolver).not.toHaveBeenCalled();
+    expect(interno().errorMotivo()).toBe('El motivo debe tener entre 10 y 500 caracteres.');
+  });
+
+  it('aprobar resuelve, notifica y vuelve al listado', async () => {
+    validacionService.resolver.mockReturnValue(
+      of({
+        id: 'sol-1',
+        estado: 'APROBADO',
+        estadoAuditor: 'ACTIVO',
+        fechaResolucion: '2026-07-15T00:00:00Z',
+        motivoRechazo: null,
+      })
+    );
+    toastService = TestBed.inject(ToastService);
+    interno().model.set({ decision: 'aprobado', motivo: '' });
+
+    await interno().confirmarDecision();
+
+    expect(validacionService.resolver).toHaveBeenCalledWith('sol-1', 'aprobado', undefined);
+    expect(navigate).toHaveBeenCalledWith(['/admin/solicitudes-auditor'], {
+      queryParams: { pagina: 0 },
+    });
+  });
+
+  it('rechazar pide confirmacion antes de llamar al backend', () => {
+    interno().model.set({ decision: 'rechazado', motivo: 'Motivo suficientemente largo.' });
+    fixture.detectChanges();
+
+    fixture.nativeElement.querySelector('form')?.dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+
+    expect(interno().confirmandoDecision()).toBe(true);
+    expect(validacionService.resolver).not.toHaveBeenCalled();
+  });
+
+  it('aprobar tambien pide confirmacion antes de llamar al backend', () => {
+    interno().model.set({ decision: 'aprobado', motivo: '' });
+    fixture.detectChanges();
+
+    fixture.nativeElement.querySelector('form')?.dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+
+    expect(interno().confirmandoDecision()).toBe(true);
+    expect(validacionService.resolver).not.toHaveBeenCalled();
+  });
+
+  it('un 409 muestra el toast y vuelve al listado', async () => {
+    validacionService.resolver.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { message: 'Esta solicitud ya fue procesada por otro administrador.' },
+          })
+      )
+    );
+    toastService = TestBed.inject(ToastService);
+    interno().model.set({ decision: 'aprobado', motivo: '' });
+
+    await interno().confirmarDecision();
+
+    expect(navigate).toHaveBeenCalledWith(['/admin/solicitudes-auditor'], {
+      queryParams: { pagina: 0 },
+    });
+  });
+
+  /**
+   * descargarDocumento() usa responseType: 'blob', asi que un error del backend llega como Blob
+   * en vez de JSON ya parseado. apiErrorMessage() ignora los Blob y devuelve undefined; hace
+   * falta apiErrorMessageAsync(), que primero lee el texto del blob, para mostrar el mensaje real.
+   */
+  it('un error al abrir un documento (blob) muestra el mensaje real del backend', async () => {
+    const pestanaAbierta = { close: vi.fn(), location: { href: '' }, addEventListener: vi.fn() };
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue(pestanaAbierta as unknown as Window);
+    validacionService.descargarDocumento.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 404,
+            error: new Blob([JSON.stringify({ message: 'Documento no encontrado.' })], {
+              type: 'application/json',
+            }),
+          })
+      )
+    );
+    toastService = TestBed.inject(ToastService);
+    const errorSpy = vi.spyOn(toastService, 'error');
+
+    await (component as unknown as { verDocumento(id: string): Promise<void> }).verDocumento(
+      'doc-1'
+    );
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      'No se pudo abrir el documento',
+      'Documento no encontrado.'
+    );
+    expect(pestanaAbierta.close).toHaveBeenCalled();
+    openSpy.mockRestore();
+  });
+});
+
+describe('RevisionSolicitudAuditorPageComponent - solicitud ya resuelta', () => {
+  let fixture: ComponentFixture<RevisionSolicitudAuditorPageComponent>;
+  let validacionService: { obtenerDetalle: ReturnType<typeof vi.fn> };
+
+  const detalleAprobada: SolicitudDetalle = {
+    id: 'sol-2',
+    nombreAuditor: 'Luis Vega',
+    email: 'luis@correo.com',
+    estado: 'APROBADO',
+    fechaSolicitud: '2026-07-01T00:00:00Z',
+    aniosExperiencia: 3,
+    especialidades: [],
+    descripcionProfesional: null,
+    sitioWeb: null,
+    documentos: [],
+  };
+
+  beforeEach(async () => {
+    validacionService = { obtenerDetalle: vi.fn().mockReturnValue(of(detalleAprobada)) };
+
+    await TestBed.configureTestingModule({
+      imports: [RevisionSolicitudAuditorPageComponent],
+      providers: [
+        provideRouter([]),
+        { provide: ValidacionService, useValue: validacionService },
+        ToastService,
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(RevisionSolicitudAuditorPageComponent);
+    fixture.componentRef.setInput('id', 'sol-2');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  });
+
+  it('muestra el badge real y oculta el formulario de decision', () => {
+    const texto = (fixture.nativeElement as HTMLElement).textContent;
+
+    expect(texto).toContain('Aprobada');
+    expect(texto).not.toContain('Pendiente de validación');
+    expect((fixture.nativeElement as HTMLElement).querySelector('form')).toBeNull();
+  });
+});
+
+describe('RevisionSolicitudAuditorPageComponent - pagina de origen', () => {
+  let fixture: ComponentFixture<RevisionSolicitudAuditorPageComponent>;
+  let navigate: ReturnType<typeof vi.spyOn>;
+  let component: RevisionSolicitudAuditorPageComponent;
+  let validacionService: {
+    obtenerDetalle: ReturnType<typeof vi.fn>;
+    resolver: ReturnType<typeof vi.fn>;
+  };
+
+  const detalle: SolicitudDetalle = {
+    id: 'sol-1',
+    nombreAuditor: 'Ana Mora',
+    email: 'ana@correo.com',
+    estado: 'PENDIENTE',
+    fechaSolicitud: '2026-07-14T00:00:00Z',
+    aniosExperiencia: 5,
+    especialidades: [],
+    descripcionProfesional: null,
+    sitioWeb: null,
+    documentos: [],
+  };
+
+  beforeEach(async () => {
+    validacionService = {
+      obtenerDetalle: vi.fn().mockReturnValue(of(detalle)),
+      resolver: vi.fn().mockReturnValue(
+        of({
+          id: 'sol-1',
+          estado: 'APROBADO',
+          estadoAuditor: 'ACTIVO',
+          fechaResolucion: '2026-07-15T00:00:00Z',
+          motivoRechazo: null,
+        })
+      ),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [RevisionSolicitudAuditorPageComponent],
+      providers: [
+        provideRouter([]),
+        { provide: ValidacionService, useValue: validacionService },
+        ToastService,
+        // El admin llegó desde la página 3 del listado (?pagina=3); al resolver debe volver ahí.
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { queryParamMap: { get: (_key: string) => '3' } } },
+        },
+      ],
+    }).compileComponents();
+
+    navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    fixture = TestBed.createComponent(RevisionSolicitudAuditorPageComponent);
+    fixture.componentRef.setInput('id', 'sol-1');
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  });
+
+  it('vuelve a la pagina de la que vino el admin, no siempre a la 0', async () => {
+    const interno = component as unknown as {
+      model: { set(v: { decision: string; motivo: string }): void };
+      confirmarDecision(): Promise<void>;
+    };
+    interno.model.set({ decision: 'aprobado', motivo: '' });
+
+    await interno.confirmarDecision();
+
+    expect(navigate).toHaveBeenCalledWith(['/admin/solicitudes-auditor'], {
+      queryParams: { pagina: 3 },
+    });
+  });
+});

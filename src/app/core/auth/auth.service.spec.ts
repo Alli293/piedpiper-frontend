@@ -268,10 +268,36 @@ describe('AuthService', () => {
 
     expect(service.rol()).toBeNull();
   });
+
+  it('estado y configuracionCompleta derivan sus claims del token JWT', () => {
+    service.loginConCorreo('auditor@carbonhub.cr', 'secreta').subscribe();
+
+    const req = httpMock.expectOne(`${base}/login`);
+    req.flush({
+      ...respuesta,
+      token: jwtConClaims({
+        rol: 'AUDITOR_CERTIFICADO',
+        estado: 'PENDIENTE_VALIDACION',
+        configuracionCompleta: false,
+      }),
+    });
+
+    expect(service.estado()).toBe('PENDIENTE_VALIDACION');
+    expect(service.configuracionCompleta()).toBe(false);
+  });
+
+  it('configuracionCompleta es false por defecto cuando no hay token', () => {
+    expect(service.configuracionCompleta()).toBe(false);
+    expect(service.estado()).toBeNull();
+  });
 });
 
 function jwtConRol(rol: string): string {
-  const payload = btoa(JSON.stringify({ rol }))
+  return jwtConClaims({ rol });
+}
+
+function jwtConClaims(claims: Record<string, unknown>): string {
+  const payload = btoa(JSON.stringify(claims))
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '');
