@@ -119,7 +119,10 @@ export const routes: Routes = [
   {
     path: 'auditores/:id',
     canActivate: [guardDirectorioAuditores],
-    loadComponent: cargarPlaceholder,
+    loadComponent: () =>
+      import('./pages/auditores/perfil-publico-auditor/perfil-publico-auditor-page.component').then(
+        (m) => m.PerfilPublicoAuditorPageComponent
+      ),
   },
   {
     /**
