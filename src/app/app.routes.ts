@@ -112,6 +112,16 @@ export const routes: Routes = [
       ),
   },
   {
+    // Antes que 'auditores/:id' a propósito: si fuera después, ':id' capturaría "recomendaciones"
+    // y la pantalla nunca se alcanzaría.
+    path: 'auditores/recomendaciones',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/auditores/recomendaciones/recomendaciones-auditores-page.component').then(
+        (m) => m.RecomendacionesAuditoresPageComponent
+      ),
+  },
+  {
     path: 'auditores/:id',
     canActivate: [authGuard],
     loadComponent: cargarPlaceholder,
