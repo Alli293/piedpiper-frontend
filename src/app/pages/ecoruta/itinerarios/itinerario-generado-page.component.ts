@@ -5,7 +5,6 @@ import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from '../../../core/auth-session.service';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
@@ -15,6 +14,7 @@ import { formatCurrency } from '../../../shared/utils/currency.utils';
 import { PROVINCIA_OPTIONS } from '../models/preferencias-viaje.model';
 import { CertificacionesDetalleComponent } from './certificaciones-detalle/certificaciones-detalle.component';
 import { EcoRutaItinerariosService } from './ecoruta-itinerarios.service';
+import { EstablecimientosEvaluadosComponent } from './establecimientos-evaluados/establecimientos-evaluados.component';
 import { Itinerario, ItinerarioActividad, ItinerarioDia } from './models/itinerario.model';
 import { PuntuacionAmbientalBadgeComponent } from './puntuacion-ambiental-badge/puntuacion-ambiental-badge.component';
 import { RecomendacionesAmbientalesComponent } from './recomendaciones-ambientales/recomendaciones-ambientales.component';
@@ -52,7 +52,7 @@ const TOAST_DURATION_MS = 5000;
     ButtonComponent,
     CertificacionesDetalleComponent,
     DatePipe,
-    HeadingComponent,
+    EstablecimientosEvaluadosComponent,
     IconComponent,
     PuntuacionAmbientalBadgeComponent,
     RecomendacionesAmbientalesComponent,
