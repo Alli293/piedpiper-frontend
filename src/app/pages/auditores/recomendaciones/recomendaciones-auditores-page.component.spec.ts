@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/auth/auth.service';
 import { AuthSessionService } from '../../../core/auth-session.service';
@@ -108,6 +108,42 @@ describe('RecomendacionesAuditoresPageComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges();
   }
+
+  /**
+   * La historia lo pide explícitamente: mientras se generan las recomendaciones se muestra un
+   * spinner y el botón queda deshabilitado. Sin eso, dos clics seguidos disparan dos búsquedas y
+   * la segunda respuesta puede pisar a la primera.
+   */
+  it('mientras carga muestra el spinner y deshabilita el botón', async () => {
+    await montar();
+    const enVuelo = new Subject<RecomendacionAuditores>();
+    auditoresService.recomendar.mockReturnValue(enVuelo);
+
+    comp().model.set({
+      tipoAuditoria: 'MANUFACTURA',
+      especialidadBuscada: 'MANUFACTURA',
+      zonaGeografica: 'SAN_JOSE',
+      soloDisponibles: true,
+    });
+    fixture.detectChanges();
+    comp().handleSubmit(new Event('submit'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const boton = raiz().querySelector<HTMLButtonElement>('button[type=submit]');
+    expect(boton?.disabled).toBe(true);
+    expect(raiz().querySelector('.ch-recomendaciones__estado')?.textContent).toContain(
+      'Buscando auditores'
+    );
+
+    enVuelo.next({ recomendaciones: [auditorBase], iaDisponible: true });
+    enVuelo.complete();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(raiz().querySelector<HTMLButtonElement>('button[type=submit]')?.disabled).toBe(false);
+    expect(raiz().querySelector('.ch-recomendaciones__estado')).toBeNull();
+  });
 
   it('al entrar carga los catálogos de especialidades y zonas', async () => {
     await montar();
