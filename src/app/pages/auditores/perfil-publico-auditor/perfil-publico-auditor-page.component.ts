@@ -129,6 +129,35 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
     return estrellas;
   }
 
+  /** Signal que indica si se está editando inline en el perfil público. */
+  protected readonly editandoResenaInline = signal(false);
+
+  /**
+   * Activa el formulario de edición inline dentro del perfil público.
+   */
+  protected editarResena(resena: ResenaVerificada): void {
+    if (this.auditoriaId()) {
+      const calificacionFromResena: CalificacionResponse = {
+        id: resena.id,
+        auditoriaId: this.auditoriaId(),
+        auditorId: this.perfil()?.auditorId ?? '',
+        empresaId: resena.empresaId,
+        calificacion: resena.calificacion,
+        comentario: resena.comentario,
+        creadoEn: resena.fechaCalificacion,
+        actualizadoEn: resena.fechaCalificacion,
+      };
+      this.calificacionExistente.set(calificacionFromResena);
+      this.empresaIdUsuario.set(resena.empresaId);
+      this.editandoResenaInline.set(true);
+
+      setTimeout(() => {
+        const formSection = document.querySelector('app-calificacion-form');
+        formSection?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+  }
+
   private async cargarPerfil(auditorId: string): Promise<void> {
     this.cargando.set(true);
     this.error.set(false);
@@ -162,6 +191,7 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   /**
    * Carga la auditoría con estado CERTIFICACION_EMITIDA del auditor actual
    * y la calificación existente (si la hay) para alimentar el componente de calificación.
+   * También establece empresaIdUsuario para comparar con reseñas del perfil público.
    */
   private async cargarContextoCalificacion(auditorId: string): Promise<void> {
     try {

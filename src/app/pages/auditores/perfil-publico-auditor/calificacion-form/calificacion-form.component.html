@@ -4,17 +4,17 @@
       <div class="calificacion-form__loading" role="status" aria-label="Cargando calificación">
         <span class="calificacion-form__spinner"></span>
       </div>
-    } @else if (calificacionExistente() && !editando() && !modoEdicion()) {
+    } @else if (calificacionActual() && !editando()) {
       <!-- Vista lectura: calificación existente con botón de edición -->
       <div class="calificacion-form__vista">
         <h3 class="calificacion-form__titulo" id="calificacion-form-titulo">Tu calificación</h3>
         <app-star-rating
-          [value]="calificacionExistente()!.calificacion"
+          [value]="calificacionActual()!.calificacion"
           [readonly]="true"
           label="Calificación del auditor"
         />
-        @if (calificacionExistente()!.comentario) {
-          <p class="calificacion-form__comentario">{{ calificacionExistente()!.comentario }}</p>
+        @if (calificacionActual()!.comentario) {
+          <p class="calificacion-form__comentario">{{ calificacionActual()!.comentario }}</p>
         }
         @if (puedeEditar()) {
           <div class="calificacion-form__actions">

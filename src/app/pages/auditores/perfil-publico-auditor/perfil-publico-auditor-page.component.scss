@@ -538,10 +538,6 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--ch-space-4);
-
-  @include mixins.desktop-up {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 
 .ch-perfil-auditor__resena-card {
@@ -593,6 +589,34 @@
   color: var(--ch-text-secondary);
   line-height: 1.6;
   margin: 0;
+}
+
+.ch-perfil-auditor__resena-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--ch-space-2);
+}
+
+.ch-perfil-auditor__resena-edit-btn {
+  font-family: var(--ch-font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ch-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--ch-space-1) var(--ch-space-2);
+  border-radius: var(--ch-radius-sm);
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--ch-bg-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ch-primary);
+    outline-offset: 2px;
+  }
 }
 
 // === Empty state ===

@@ -16,6 +16,8 @@ import {
 import { EMPTY, Subject, Subscription, firstValueFrom, timer } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { AUDITOR_CERTIFICADO, AuthSessionService } from '../../../core/auth-session.service';
+import { CalificacionResponse } from '../../../core/calificacion/calificacion.models';
+import { CalificacionService } from '../../../core/calificacion/calificacion.service';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
@@ -45,6 +47,7 @@ import {
 } from '../auditoria.model';
 import { variantePorEstadoAuditoria } from '../auditoria-estado.utils';
 import { AuditoriasService } from '../auditorias.service';
+import { CalificacionFormComponent } from '../../auditores/perfil-publico-auditor/calificacion-form/calificacion-form.component';
 
 type SituacionPaso = 'completado' | 'en-curso' | 'pendiente';
 
@@ -120,6 +123,7 @@ function esErrorPermanente(err: unknown): boolean {
   imports: [
     BadgeComponent,
     ButtonComponent,
+    CalificacionFormComponent,
     DatePipe,
     DateInputComponent,
     HeadingComponent,
@@ -137,6 +141,7 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
 
   private readonly auditoriasService = inject(AuditoriasService);
   private readonly authSession = inject(AuthSessionService);
+  private readonly calificacionService = inject(CalificacionService);
   private readonly toastService = inject(ToastService);
 
   private readonly visibilidad = new Subject<boolean>();
@@ -269,6 +274,17 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     const detalle = this.detalle();
     return detalle?.auditor?.id === this.authSession.getUserId();
   });
+
+  // === Calificación ===
+  protected readonly calificacionExistente = signal<CalificacionResponse | null>(null);
+  protected readonly empresaIdUsuario = computed(() => {
+    const cal = this.calificacionExistente();
+    return cal?.empresaId ?? '';
+  });
+
+  protected readonly esCertificacionEmitida = computed(
+    () => this.detalle()?.estado === 'CERTIFICACION_EMITIDA'
+  );
 
   protected readonly estadoPermiteReporte = computed(() => {
     const estado = this.detalle()?.estado;
@@ -630,6 +646,18 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
         await firstValueFrom(this.auditoriasService.obtenerDetalle(this.idSolicitud()))
       );
       this.ahora.set(Date.now());
+
+      // Cargar calificación existente si la auditoría está completada
+      if (this.esCertificacionEmitida() && !this.esAuditorAsignado()) {
+        try {
+          const cal = await firstValueFrom(
+            this.calificacionService.obtenerPorAuditoria(this.idSolicitud())
+          );
+          this.calificacionExistente.set(cal);
+        } catch {
+          // No bloquear la vista si falla la carga de calificación
+        }
+      }
     } catch (err: unknown) {
       this.errorCarga.set(this.mensajeDeError(err));
       this.accesoDescartado = esErrorPermanente(err);

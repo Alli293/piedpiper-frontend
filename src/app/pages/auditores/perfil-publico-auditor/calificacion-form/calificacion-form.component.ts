@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import {
   disabled,
   form,
@@ -44,7 +44,7 @@ interface CalificacionFormModel {
   templateUrl: './calificacion-form.component.html',
   styleUrl: './calificacion-form.component.scss',
 })
-export class CalificacionFormComponent implements OnInit {
+export class CalificacionFormComponent {
   private readonly calificacionService = inject(CalificacionService);
   private readonly toastService = inject(ToastService);
 
@@ -71,8 +71,16 @@ export class CalificacionFormComponent implements OnInit {
   /** ID de la calificación para modo edición. */
   private calificacionId = signal<string | null>(null);
 
+  /** Calificación actualizada tras guardar (sobreescribe el input). */
+  private calificacionGuardada = signal<CalificacionResponse | null>(null);
+
+  /** Calificación actual: usa la guardada si existe, sino el input. */
+  protected readonly calificacionActual = computed(
+    () => this.calificacionGuardada() ?? this.calificacionExistente()
+  );
+
   protected readonly modoEdicion = computed(
-    () => this.calificacionExistente() !== null || this.calificacionId() !== null
+    () => this.calificacionActual() !== null || this.calificacionId() !== null
   );
 
   /** Solo permite calificar cuando la auditoría está en estado CERTIFICACION_EMITIDA. */
@@ -82,7 +90,7 @@ export class CalificacionFormComponent implements OnInit {
 
   /** Permite editar solo calificaciones que pertenecen a la empresa del usuario autenticado. */
   protected readonly puedeEditar = computed(() => {
-    const existente = this.calificacionExistente();
+    const existente = this.calificacionActual();
     const empresaUsuario = this.empresaIdUsuario();
     return existente !== null && empresaUsuario !== '' && existente.empresaId === empresaUsuario;
   });
@@ -132,11 +140,13 @@ export class CalificacionFormComponent implements OnInit {
     () => this.calificacionForm().valid() && !this.guardando() && !this.cargando()
   );
 
-  ngOnInit(): void {
-    const existente = this.calificacionExistente();
-    if (existente) {
-      this.precargarDatos(existente);
-    }
+  constructor() {
+    effect(() => {
+      const existente = this.calificacionExistente();
+      if (existente) {
+        this.precargarDatos(existente);
+      }
+    });
   }
 
   protected handleSubmit(event: Event): void {
@@ -150,7 +160,7 @@ export class CalificacionFormComponent implements OnInit {
 
   /** Transiciona a modo edición cuando el usuario hace clic en el botón Editar. */
   protected iniciarEdicion(): void {
-    const existente = this.calificacionExistente();
+    const existente = this.calificacionActual();
     if (existente) {
       this.precargarDatos(existente);
       this.editando.set(true);
@@ -208,8 +218,13 @@ export class CalificacionFormComponent implements OnInit {
       comentario: value.comentario.trim() || undefined,
     };
 
-    await firstValueFrom(this.calificacionService.editarCalificacion(id, payload));
+    const resultado = await firstValueFrom(this.calificacionService.editarCalificacion(id, payload));
+    this.calificacionGuardada.set(resultado);
+    this.editando.set(false);
     this.toastService.success(MSG_EDICION_EXITOSA, undefined, DURACION_TOAST_MS);
+
+    // Recargar la página para reflejar el promedio actualizado
+    setTimeout(() => window.location.reload(), 1500);
   }
 
   private manejarError(err: unknown): void {
