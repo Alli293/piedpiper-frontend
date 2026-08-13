@@ -50,7 +50,6 @@ export class MisItinerariosPageComponent implements OnInit {
   protected readonly pagina = signal(1);
   protected readonly totalPaginas = signal(0);
   protected readonly totalResultados = signal(0);
-  protected readonly tamanioPagina = signal(0);
 
   protected readonly confirmTarget = signal<ItinerarioResumen | null>(null);
   protected readonly deletingId = signal<string | null>(null);
@@ -119,6 +118,13 @@ export class MisItinerariosPageComponent implements OnInit {
       this.totalResultados.update((total) => Math.max(0, total - 1));
       this.toastService.success('Itinerario eliminado.');
       this.confirmTarget.set(null);
+      // Si esa era la última fila visible en una página distinta a la primera, retroceder y
+      // volver a pedir esa página en vez de mostrar el estado vacío general con datos aún
+      // existentes en páginas anteriores.
+      if (this.itinerarios().length === 0 && this.pagina() > 1) {
+        this.pagina.update((numero) => numero - 1);
+        await this.cargar();
+      }
     } catch (error: unknown) {
       this.manejarErrorEliminacion(error);
     } finally {
@@ -138,7 +144,6 @@ export class MisItinerariosPageComponent implements OnInit {
       this.itinerarios.set(respuesta.contenido);
       this.totalPaginas.set(respuesta.totalPaginas);
       this.totalResultados.set(respuesta.totalResultados);
-      this.tamanioPagina.set(respuesta.tamanioPagina);
       this.pagina.set(respuesta.paginaActual);
     } catch (err: unknown) {
       if (pedido !== this.ultimoPedido) return;

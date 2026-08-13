@@ -58,10 +58,15 @@ describe('MisItinerariosPageComponent', () => {
     fixture.detectChanges();
   }
 
-  async function montar(): Promise<void> {
-    itinerariosService = { listar: vi.fn(), eliminar: vi.fn() };
-    toastService = { success: vi.fn(), error: vi.fn() };
-    itinerariosService.listar.mockReturnValue(of(pagina([itinerario('itin-1')])));
+  async function montar(opciones?: {
+    listar?: ReturnType<typeof vi.fn>;
+    toastService?: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
+  }): Promise<void> {
+    itinerariosService = {
+      listar: opciones?.listar ?? vi.fn().mockReturnValue(of(pagina([itinerario('itin-1')]))),
+      eliminar: vi.fn(),
+    };
+    toastService = opciones?.toastService ?? { success: vi.fn(), error: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [MisItinerariosPageComponent],
@@ -97,52 +102,15 @@ describe('MisItinerariosPageComponent', () => {
   });
 
   it('muestra el estado vacio cuando no hay itinerarios', async () => {
-    itinerariosService = { listar: vi.fn().mockReturnValue(of(pagina([]))), eliminar: vi.fn() };
-    await TestBed.configureTestingModule({
-      imports: [MisItinerariosPageComponent],
-      providers: [
-        provideRouter([]),
-        { provide: EcoRutaItinerariosService, useValue: itinerariosService },
-        { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
-        {
-          provide: AuthSessionService,
-          useValue: { getUserInitials: () => 'MS', isAdministradorEmpresa: () => false },
-        },
-        {
-          provide: PerfilInicialService,
-          useValue: { perfil: () => null, obtener: () => of({ empresa: null } as PerfilInicial) },
-        },
-      ],
-    }).compileComponents();
-    fixture = TestBed.createComponent(MisItinerariosPageComponent);
-    await estabilizar();
+    await montar({ listar: vi.fn().mockReturnValue(of(pagina([]))) });
 
     expect(raiz().textContent).toContain('Todavía no tenés itinerarios guardados.');
   });
 
   it('muestra un mensaje de error cuando falla la carga', async () => {
-    itinerariosService = {
+    await montar({
       listar: vi.fn().mockReturnValue(throwError(() => new HttpErrorResponse({ status: 500 }))),
-      eliminar: vi.fn(),
-    };
-    await TestBed.configureTestingModule({
-      imports: [MisItinerariosPageComponent],
-      providers: [
-        provideRouter([]),
-        { provide: EcoRutaItinerariosService, useValue: itinerariosService },
-        { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
-        {
-          provide: AuthSessionService,
-          useValue: { getUserInitials: () => 'MS', isAdministradorEmpresa: () => false },
-        },
-        {
-          provide: PerfilInicialService,
-          useValue: { perfil: () => null, obtener: () => of({ empresa: null } as PerfilInicial) },
-        },
-      ],
-    }).compileComponents();
-    fixture = TestBed.createComponent(MisItinerariosPageComponent);
-    await estabilizar();
+    });
 
     expect(raiz().querySelector('[role="alert"]')?.textContent).toContain(
       'No fue posible recuperar la información solicitada.'
@@ -150,28 +118,12 @@ describe('MisItinerariosPageComponent', () => {
   });
 
   it('pagina hacia adelante y hacia atras', async () => {
-    itinerariosService = { listar: vi.fn(), eliminar: vi.fn() };
-    itinerariosService.listar.mockReturnValueOnce(
-      of(pagina([itinerario('itin-1')], { totalPaginas: 2, paginaActual: 1 }))
-    );
-    await TestBed.configureTestingModule({
-      imports: [MisItinerariosPageComponent],
-      providers: [
-        provideRouter([]),
-        { provide: EcoRutaItinerariosService, useValue: itinerariosService },
-        { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
-        {
-          provide: AuthSessionService,
-          useValue: { getUserInitials: () => 'MS', isAdministradorEmpresa: () => false },
-        },
-        {
-          provide: PerfilInicialService,
-          useValue: { perfil: () => null, obtener: () => of({ empresa: null } as PerfilInicial) },
-        },
-      ],
-    }).compileComponents();
-    fixture = TestBed.createComponent(MisItinerariosPageComponent);
-    await estabilizar();
+    const listar = vi
+      .fn()
+      .mockReturnValueOnce(
+        of(pagina([itinerario('itin-1')], { totalPaginas: 2, paginaActual: 1 }))
+      );
+    await montar({ listar });
 
     itinerariosService.listar.mockReturnValueOnce(
       of(pagina([itinerario('itin-2')], { totalPaginas: 2, paginaActual: 2 }))
@@ -265,6 +217,31 @@ describe('MisItinerariosPageComponent', () => {
       expect(toastService.error).toHaveBeenCalledWith(
         'No tienes permiso para modificar este itinerario.'
       );
+    });
+
+    it('al eliminar la ultima tarjeta de una pagina distinta a la primera, retrocede de pagina en vez de mostrar el estado vacio', async () => {
+      const listar = vi
+        .fn()
+        .mockReturnValueOnce(
+          of(pagina([itinerario('itin-2')], { totalPaginas: 2, paginaActual: 2 }))
+        );
+      await montar({ listar });
+      itinerariosService.eliminar.mockReturnValue(of(undefined));
+      itinerariosService.listar.mockReturnValueOnce(
+        of(pagina([itinerario('itin-1')], { totalPaginas: 1, paginaActual: 1 }))
+      );
+
+      raiz().querySelector<HTMLButtonElement>('.ch-mis-itinerarios__eliminar')?.click();
+      await estabilizar();
+      const confirmar = Array.from(raiz().querySelectorAll('button')).find(
+        (b) => b.textContent?.trim() === 'Eliminar'
+      );
+      confirmar?.click();
+      await estabilizar();
+
+      expect(itinerariosService.listar).toHaveBeenLastCalledWith({ pagina: 1 });
+      expect(raiz().textContent).not.toContain('Todavía no tenés itinerarios guardados.');
+      expect(raiz().textContent).toContain('San José');
     });
   });
 });
