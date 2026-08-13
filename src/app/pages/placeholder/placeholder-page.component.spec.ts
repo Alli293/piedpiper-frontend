@@ -59,11 +59,27 @@ describe('PlaceholderPageComponent', () => {
     expect(enlace().getAttribute('href')).toBe('/login');
   });
 
-  it('el texto cambia segun haya sesion o no', async () => {
+  it('el texto cambia segun haya panel al que volver', async () => {
     await montar('token-valido', 'USUARIO_INDIVIDUAL');
-    expect(fixture.nativeElement.textContent).toContain('podés seguir usando el resto');
+    expect(fixture.nativeElement.textContent).toContain('puedes seguir usando el resto');
 
     await montar(null, null);
     expect(fixture.nativeElement.textContent).toContain('Tu autenticación fue exitosa');
+  });
+
+  /**
+   * Texto y destino salen del mismo cálculo, así que no pueden contradecirse. Antes el texto
+   * dependía de "hay token" y el destino de "el rol es conocido": con un token presente pero un
+   * rol que el front no reconoce, el botón decía "Volver a mi panel" y llevaba al login.
+   */
+  it.each([
+    ['token-valido', 'ROL_INVENTADO'],
+    ['token-corrupto', null],
+  ])('con token %s y rol %s el texto no promete un panel que no existe', async (token, rol) => {
+    await montar(token, rol);
+
+    expect(enlace().getAttribute('href')).toBe('/login');
+    expect(enlace().textContent?.trim()).toBe('Volver al inicio de sesión');
+    expect(fixture.nativeElement.textContent).not.toContain('puedes seguir usando el resto');
   });
 });

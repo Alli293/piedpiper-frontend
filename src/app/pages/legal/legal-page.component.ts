@@ -2,6 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HeadingComponent } from '../../shared/components/heading/heading.component';
+import { LinkDirective } from '../../shared/components/link/link.directive';
 import { LogoComponent } from '../../shared/components/logo/logo.component';
 import {
   CONTENIDOS_LEGALES,
@@ -27,7 +28,7 @@ import {
  */
 @Component({
   selector: 'app-legal-page',
-  imports: [HeadingComponent, LogoComponent, RouterLink],
+  imports: [HeadingComponent, LinkDirective, LogoComponent, RouterLink],
   templateUrl: './legal-page.component.html',
   styleUrl: './legal-page.component.scss',
 })

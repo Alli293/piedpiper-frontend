@@ -32,9 +32,9 @@
       <p>Última actualización: {{ ultimaActualizacion }}</p>
       <!-- Enlace cruzado: quien abre uno de los dos documentos suele querer leer el otro. -->
       @if (documentoActual() === 'terminos') {
-        <a routerLink="/privacidad">Ver la política de privacidad</a>
+        <a routerLink="/privacidad" appLink>Ver la política de privacidad</a>
       } @else {
-        <a routerLink="/terminos">Ver los términos de uso</a>
+        <a routerLink="/terminos" appLink>Ver los términos de uso</a>
       }
     </footer>
   </article>

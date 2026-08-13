@@ -15,6 +15,10 @@ export interface DocumentoLegal {
 /**
  * Fecha de última revisión de ambos documentos. Se muestra al pie: un texto legal sin fecha no le
  * dice al usuario si lo que está leyendo sigue vigente.
+ *
+ * <p><b>Actualizar junto con cualquier cambio a {@link CONTENIDOS_LEGALES}.</b> Nada obliga a
+ * hacerlo, así que es fácil que quede desfasada y termine diciendo que un texto se revisó en una
+ * fecha en la que ya no era ese texto.</p>
  */
 export const ULTIMA_ACTUALIZACION = 'agosto de 2026';
 

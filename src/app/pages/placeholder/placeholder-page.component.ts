@@ -6,9 +6,16 @@ import { RUTA_INICIO_POR_ROL, RolUsuario } from '../../core/models/perfil-inicia
 /**
  * Pantalla de "próximamente" para las rutas que todavía no tienen implementación.
  *
- * <p>El destino del botón depende de si hay sesión: a estas rutas se llega desde el menú lateral
- * estando dentro, y ofrecerle "volver al inicio de sesión" a alguien que ya inició sesión lo manda
- * fuera de donde estaba. Sin sesión sí corresponde el login, porque es la única salida útil.</p>
+ * <p>El destino del botón depende de si se puede resolver un panel para el rol de la sesión: a
+ * estas rutas se llega desde el menú lateral estando dentro, y ofrecerle "volver al inicio de
+ * sesión" a alguien que ya inició sesión lo manda fuera de donde estaba. Cuando no hay panel al
+ * que volver, el login es la única salida útil.</p>
+ *
+ * <p><b>Un solo cálculo decide el destino y el texto.</b> Antes el texto salía de "hay token" y el
+ * destino de "el rol es conocido", que son dos preguntas distintas: con un token presente pero un
+ * rol que el front no reconoce —o un token corrupto, donde {@code rol()} devuelve nulo— el botón
+ * decía "Volver a mi panel" y navegaba al login. Es el mismo tipo de contradicción entre texto y
+ * destino que esta pantalla existe para no tener.</p>
  */
 @Component({
   selector: 'app-placeholder-page',
@@ -19,7 +26,8 @@ import { RUTA_INICIO_POR_ROL, RolUsuario } from '../../core/models/perfil-inicia
 export class PlaceholderPageComponent {
   private readonly authService = inject(AuthService);
 
-  protected readonly haySesion = computed(() => this.authService.token() !== null);
+  /** Única fuente de verdad: si es falso, no hay panel al que volver y todo apunta al login. */
+  protected readonly hayPanelPropio = computed(() => esRolConocido(this.authService.rol()));
 
   protected readonly rutaVolver = computed(() => {
     const rol = this.authService.rol();
@@ -27,7 +35,7 @@ export class PlaceholderPageComponent {
   });
 
   protected readonly textoVolver = computed(() =>
-    this.haySesion() ? 'Volver a mi panel' : 'Volver al inicio de sesión'
+    this.hayPanelPropio() ? 'Volver a mi panel' : 'Volver al inicio de sesión'
   );
 }
 
