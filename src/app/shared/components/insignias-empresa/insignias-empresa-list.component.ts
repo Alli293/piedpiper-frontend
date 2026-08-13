@@ -3,6 +3,7 @@ import { Component, computed, effect, input, output, signal, untracked } from '@
 import { InsigniaEmpresa, NivelInsigniaEmpresa } from '../../../core/empresa/empresa.models';
 import { BadgeComponent } from '../badge/badge.component';
 import { ButtonComponent } from '../button/button.component';
+import { EncabezadoResumenComponent } from '../encabezado-resumen/encabezado-resumen.component';
 import { HeadingComponent } from '../heading/heading.component';
 import { IconComponent } from '../icon/icon.component';
 import { IconName } from '../icon/icon-registry';
@@ -14,6 +15,7 @@ import { SemanticCardComponent } from '../semantic-card/semantic-card.component'
     BadgeComponent,
     ButtonComponent,
     DatePipe,
+    EncabezadoResumenComponent,
     HeadingComponent,
     IconComponent,
     SemanticCardComponent,

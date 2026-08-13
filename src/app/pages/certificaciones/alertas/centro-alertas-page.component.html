@@ -4,24 +4,14 @@
   backRoute="/empresa/certificaciones"
 >
   <section class="ch-centro-alertas" aria-label="Centro de Alertas">
-    <app-card class="ch-centro-alertas__intro">
-      <div class="ch-centro-alertas__intro-icon" aria-hidden="true">
-        <app-icon name="notificacion" [size]="20" />
-      </div>
-      <div class="ch-centro-alertas__intro-copy">
-        <app-heading level="h2" text="Alertas de vencimiento" />
-        <p>
-          Todas las certificaciones con vencimiento próximo o ya vencidas, ordenadas de la más
-          urgente a la menos urgente.
-        </p>
-      </div>
-      @if (requierenAccionInmediata() > 0) {
-        <div class="ch-centro-alertas__accion-inmediata">
-          <strong>{{ requierenAccionInmediata() }}</strong>
-          <span>requieren<br />acción inmediata</span>
-        </div>
-      }
-    </app-card>
+    <app-encabezado-resumen
+      icono="alert-solid"
+      tono="danger"
+      titulo="Alertas de vencimiento"
+      subtexto="Todas las certificaciones con vencimiento próximo o ya vencidas, ordenadas de la más urgente a la menos urgente."
+      [statValor]="requierenAccionInmediata() > 0 ? requierenAccionInmediata() : null"
+      statLabel="Requieren acción inmediata"
+    />
 
     <div class="ch-centro-alertas__controles">
       <app-filter-chips
@@ -42,80 +32,329 @@
       <p class="ch-centro-alertas__loading">Cargando alertas...</p>
     } @else if (error()) {
       <p class="ch-centro-alertas__error" role="alert">{{ error() }}</p>
-    } @else if (sinResultados()) {
+    } @else if (sinAlertas()) {
       <app-card class="ch-centro-alertas__vacio">
-        <span class="ch-centro-alertas__vacio-icon" aria-hidden="true">
-          <app-icon name="success" [size]="24" />
-        </span>
-        <app-heading level="h3" text="Todo en regla" />
-        <p>{{ sinAlertasMensaje }}</p>
+        <div class="ch-centro-alertas__vacio-inner">
+          <span class="ch-centro-alertas__vacio-icon" aria-hidden="true">
+            <app-icon name="verificada" [size]="24" />
+          </span>
+          <app-heading level="h3" text="Todo en regla" />
+          <p>{{ sinAlertasMensaje }}</p>
+        </div>
+      </app-card>
+    } @else if (sinCoincidencias()) {
+      <app-card class="ch-centro-alertas__vacio ch-centro-alertas__vacio--filtro">
+        <div class="ch-centro-alertas__vacio-inner">
+          <span class="ch-centro-alertas__vacio-icon" aria-hidden="true">
+            <app-icon name="verificada" [size]="24" />
+          </span>
+          <app-heading level="h3" text="Sin coincidencias" />
+          <p>{{ sinCoincidenciasMensaje }}</p>
+          <app-button variant="tertiary" size="sm" (click)="limpiarFiltros()">Ver todas</app-button>
+        </div>
       </app-card>
     } @else {
-      @if (vencidas().length > 0) {
-        <h3 class="ch-centro-alertas__grupo-titulo ch-centro-alertas__grupo-titulo--vencidas">
-          <app-icon name="error" [size]="14" aria-hidden="true" />
-          Vencidas · requieren renovación inmediata
-        </h3>
-        <ul class="ch-centro-alertas__lista">
-          @for (alerta of vencidas(); track alerta.idCertificacion) {
-            <li class="ch-centro-alertas__fila ch-centro-alertas__fila--vencida">
-              <span class="ch-centro-alertas__fila-icon" aria-hidden="true">
-                <app-icon name="error" [size]="16" />
-              </span>
-              <span class="ch-centro-alertas__fila-nombre">{{ alerta.nombre }}</span>
-              <span class="ch-centro-alertas__fila-fecha">
-                {{ alerta.fechaVencimiento | date: 'dd/MM/yyyy' }}
-              </span>
-              <span class="ch-centro-alertas__fila-dias">
-                <strong>{{ alerta.diasRestantes }}</strong>
-                <small>días</small>
-              </span>
-              <app-badge [variant]="badge(alerta.urgencia).variant">
-                {{ badge(alerta.urgencia).label }}
-              </app-badge>
-              <a
-                [routerLink]="['/empresa/certificaciones', alerta.idCertificacion]"
-                class="ch-centro-alertas__ver-detalle"
-              >
-                <app-button variant="secondary" size="sm">Ver detalle →</app-button>
-              </a>
-            </li>
-          }
-        </ul>
-      }
+      <div class="ch-centro-alertas__tabla-wrap">
+        <table>
+          <colgroup>
+            <col class="ch-centro-alertas__col-cert" />
+            <col class="ch-centro-alertas__col-fecha" />
+            <col class="ch-centro-alertas__col-dias" />
+            <col class="ch-centro-alertas__col-urgencia" />
+            <col class="ch-centro-alertas__col-accion" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col">Certificación</th>
+              <th scope="col">Vence</th>
+              <th scope="col" class="ch-centro-alertas__th-numerica">Días</th>
+              <th scope="col">Urgencia</th>
+              <th scope="col"><span class="ch-centro-alertas__th-accion-label">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (vencidas().length > 0) {
+              <tr class="ch-centro-alertas__grupo-fila ch-centro-alertas__grupo-fila--vencidas">
+                <td colspan="5">
+                  <span class="ch-centro-alertas__grupo-fila-label">
+                    <app-icon name="danger-solido" [size]="12" aria-hidden="true" />
+                    Vencidas · requieren renovación inmediata
+                  </span>
+                </td>
+              </tr>
+              @for (alerta of vencidas(); track alerta.idCertificacion) {
+                <tr
+                  class="ch-centro-alertas__fila ch-centro-alertas__fila--{{
+                    claseFila(alerta.urgencia)
+                  }}"
+                >
+                  <td>
+                    <div class="ch-centro-alertas__cert-cell">
+                      <span class="ch-centro-alertas__cert-icono" aria-hidden="true">
+                        <app-icon [name]="iconoFila(alerta.urgencia)" [size]="16" />
+                      </span>
+                      <div>
+                        <strong>{{ alerta.nombre }}</strong>
+                        @if (alerta.codigoVerificacion) {
+                          <button
+                            type="button"
+                            class="ch-centro-alertas__codigo"
+                            (click)="copiarCodigo(alerta.codigoVerificacion)"
+                            [attr.aria-label]="
+                              'Copiar código de verificación ' + alerta.codigoVerificacion
+                            "
+                          >
+                            <app-icon name="copiar" [size]="10" />
+                            {{ alerta.codigoVerificacion }}
+                          </button>
+                          @if (codigoCopiado() === alerta.codigoVerificacion) {
+                            <span class="ch-centro-alertas__codigo-tooltip" role="status"
+                              >Código copiado</span
+                            >
+                          }
+                        }
+                      </div>
+                    </div>
+                  </td>
+                  <td class="ch-centro-alertas__fecha">
+                    {{ alerta.fechaVencimiento | date: 'dd/MM/yyyy' }}
+                  </td>
+                  <td class="ch-centro-alertas__dias">
+                    <strong>{{ alerta.diasRestantes }}</strong>
+                    <small>días</small>
+                  </td>
+                  <td>
+                    <app-badge [variant]="badge(alerta.urgencia).variant">
+                      {{ badge(alerta.urgencia).label }}
+                    </app-badge>
+                  </td>
+                  <td class="ch-centro-alertas__accion">
+                    <a
+                      [routerLink]="['/empresa/certificaciones', alerta.idCertificacion]"
+                      class="ch-centro-alertas__ver-detalle"
+                    >
+                      <app-button variant="tertiary" size="md">
+                        Ver detalle
+                        <app-icon name="chevron-derecha" [size]="14" aria-hidden="true" />
+                      </app-button>
+                    </a>
+                  </td>
+                </tr>
+              }
+            }
 
-      @if (proximasAVencer().length > 0) {
-        <h3 class="ch-centro-alertas__grupo-titulo">
-          <app-icon name="reloj" [size]="14" aria-hidden="true" />
-          Próximas a vencer
-        </h3>
-        <ul class="ch-centro-alertas__lista">
-          @for (alerta of proximasAVencer(); track alerta.idCertificacion) {
-            <li class="ch-centro-alertas__fila">
-              <span class="ch-centro-alertas__fila-icon" aria-hidden="true">
-                <app-icon name="reloj" [size]="16" />
-              </span>
-              <span class="ch-centro-alertas__fila-nombre">{{ alerta.nombre }}</span>
-              <span class="ch-centro-alertas__fila-fecha">
-                {{ alerta.fechaVencimiento | date: 'dd/MM/yyyy' }}
-              </span>
-              <span class="ch-centro-alertas__fila-dias">
-                <strong>{{ alerta.diasRestantes }}</strong>
-                <small>días</small>
-              </span>
-              <app-badge [variant]="badge(alerta.urgencia).variant">
-                {{ badge(alerta.urgencia).label }}
-              </app-badge>
-              <a
-                [routerLink]="['/empresa/certificaciones', alerta.idCertificacion]"
-                class="ch-centro-alertas__ver-detalle"
-              >
-                <app-button variant="secondary" size="sm">Ver detalle →</app-button>
-              </a>
-            </li>
-          }
-        </ul>
-      }
+            @if (urgentes().length > 0) {
+              <tr class="ch-centro-alertas__grupo-fila ch-centro-alertas__grupo-fila--urgentes">
+                <td colspan="5">
+                  <span class="ch-centro-alertas__grupo-fila-label">
+                    <app-icon name="danger-solido" [size]="12" aria-hidden="true" />
+                    Urgentes
+                  </span>
+                </td>
+              </tr>
+              @for (alerta of urgentes(); track alerta.idCertificacion) {
+                <tr
+                  class="ch-centro-alertas__fila ch-centro-alertas__fila--{{
+                    claseFila(alerta.urgencia)
+                  }}"
+                >
+                  <td>
+                    <div class="ch-centro-alertas__cert-cell">
+                      <span class="ch-centro-alertas__cert-icono" aria-hidden="true">
+                        <app-icon [name]="iconoFila(alerta.urgencia)" [size]="16" />
+                      </span>
+                      <div>
+                        <strong>{{ alerta.nombre }}</strong>
+                        @if (alerta.codigoVerificacion) {
+                          <button
+                            type="button"
+                            class="ch-centro-alertas__codigo"
+                            (click)="copiarCodigo(alerta.codigoVerificacion)"
+                            [attr.aria-label]="
+                              'Copiar código de verificación ' + alerta.codigoVerificacion
+                            "
+                          >
+                            <app-icon name="copiar" [size]="10" />
+                            {{ alerta.codigoVerificacion }}
+                          </button>
+                          @if (codigoCopiado() === alerta.codigoVerificacion) {
+                            <span class="ch-centro-alertas__codigo-tooltip" role="status"
+                              >Código copiado</span
+                            >
+                          }
+                        }
+                      </div>
+                    </div>
+                  </td>
+                  <td class="ch-centro-alertas__fecha">
+                    {{ alerta.fechaVencimiento | date: 'dd/MM/yyyy' }}
+                  </td>
+                  <td class="ch-centro-alertas__dias">
+                    <strong>{{ alerta.diasRestantes }}</strong>
+                    <small>días</small>
+                  </td>
+                  <td>
+                    <app-badge [variant]="badge(alerta.urgencia).variant">
+                      {{ badge(alerta.urgencia).label }}
+                    </app-badge>
+                  </td>
+                  <td class="ch-centro-alertas__accion">
+                    <a
+                      [routerLink]="['/empresa/certificaciones', alerta.idCertificacion]"
+                      class="ch-centro-alertas__ver-detalle"
+                    >
+                      <app-button variant="tertiary" size="md">
+                        Ver detalle
+                        <app-icon name="chevron-derecha" [size]="14" aria-hidden="true" />
+                      </app-button>
+                    </a>
+                  </td>
+                </tr>
+              }
+            }
+
+            @if (proximasAVencer().length > 0) {
+              <tr class="ch-centro-alertas__grupo-fila ch-centro-alertas__grupo-fila--proximas">
+                <td colspan="5">
+                  <span class="ch-centro-alertas__grupo-fila-label">
+                    <app-icon name="vencida" [size]="12" aria-hidden="true" />
+                    Próximas a vencer
+                  </span>
+                </td>
+              </tr>
+              @for (alerta of proximasAVencer(); track alerta.idCertificacion) {
+                <tr
+                  class="ch-centro-alertas__fila ch-centro-alertas__fila--{{
+                    claseFila(alerta.urgencia)
+                  }}"
+                >
+                  <td>
+                    <div class="ch-centro-alertas__cert-cell">
+                      <span class="ch-centro-alertas__cert-icono" aria-hidden="true">
+                        <app-icon [name]="iconoFila(alerta.urgencia)" [size]="16" />
+                      </span>
+                      <div>
+                        <strong>{{ alerta.nombre }}</strong>
+                        @if (alerta.codigoVerificacion) {
+                          <button
+                            type="button"
+                            class="ch-centro-alertas__codigo"
+                            (click)="copiarCodigo(alerta.codigoVerificacion)"
+                            [attr.aria-label]="
+                              'Copiar código de verificación ' + alerta.codigoVerificacion
+                            "
+                          >
+                            <app-icon name="copiar" [size]="10" />
+                            {{ alerta.codigoVerificacion }}
+                          </button>
+                          @if (codigoCopiado() === alerta.codigoVerificacion) {
+                            <span class="ch-centro-alertas__codigo-tooltip" role="status"
+                              >Código copiado</span
+                            >
+                          }
+                        }
+                      </div>
+                    </div>
+                  </td>
+                  <td class="ch-centro-alertas__fecha">
+                    {{ alerta.fechaVencimiento | date: 'dd/MM/yyyy' }}
+                  </td>
+                  <td class="ch-centro-alertas__dias">
+                    <strong>{{ alerta.diasRestantes }}</strong>
+                    <small>días</small>
+                  </td>
+                  <td>
+                    <app-badge [variant]="badge(alerta.urgencia).variant">
+                      {{ badge(alerta.urgencia).label }}
+                    </app-badge>
+                  </td>
+                  <td class="ch-centro-alertas__accion">
+                    <a
+                      [routerLink]="['/empresa/certificaciones', alerta.idCertificacion]"
+                      class="ch-centro-alertas__ver-detalle"
+                    >
+                      <app-button variant="tertiary" size="md">
+                        Ver detalle
+                        <app-icon name="chevron-derecha" [size]="14" aria-hidden="true" />
+                      </app-button>
+                    </a>
+                  </td>
+                </tr>
+              }
+            }
+
+            @if (informativas().length > 0) {
+              <tr class="ch-centro-alertas__grupo-fila ch-centro-alertas__grupo-fila--informativas">
+                <td colspan="5">
+                  <span class="ch-centro-alertas__grupo-fila-label">
+                    <app-icon name="info" [size]="12" aria-hidden="true" />
+                    Informativas
+                  </span>
+                </td>
+              </tr>
+              @for (alerta of informativas(); track alerta.idCertificacion) {
+                <tr
+                  class="ch-centro-alertas__fila ch-centro-alertas__fila--{{
+                    claseFila(alerta.urgencia)
+                  }}"
+                >
+                  <td>
+                    <div class="ch-centro-alertas__cert-cell">
+                      <span class="ch-centro-alertas__cert-icono" aria-hidden="true">
+                        <app-icon [name]="iconoFila(alerta.urgencia)" [size]="16" />
+                      </span>
+                      <div>
+                        <strong>{{ alerta.nombre }}</strong>
+                        @if (alerta.codigoVerificacion) {
+                          <button
+                            type="button"
+                            class="ch-centro-alertas__codigo"
+                            (click)="copiarCodigo(alerta.codigoVerificacion)"
+                            [attr.aria-label]="
+                              'Copiar código de verificación ' + alerta.codigoVerificacion
+                            "
+                          >
+                            <app-icon name="copiar" [size]="10" />
+                            {{ alerta.codigoVerificacion }}
+                          </button>
+                          @if (codigoCopiado() === alerta.codigoVerificacion) {
+                            <span class="ch-centro-alertas__codigo-tooltip" role="status"
+                              >Código copiado</span
+                            >
+                          }
+                        }
+                      </div>
+                    </div>
+                  </td>
+                  <td class="ch-centro-alertas__fecha">
+                    {{ alerta.fechaVencimiento | date: 'dd/MM/yyyy' }}
+                  </td>
+                  <td class="ch-centro-alertas__dias">
+                    <strong>{{ alerta.diasRestantes }}</strong>
+                    <small>días</small>
+                  </td>
+                  <td>
+                    <app-badge [variant]="badge(alerta.urgencia).variant">
+                      {{ badge(alerta.urgencia).label }}
+                    </app-badge>
+                  </td>
+                  <td class="ch-centro-alertas__accion">
+                    <a
+                      [routerLink]="['/empresa/certificaciones', alerta.idCertificacion]"
+                      class="ch-centro-alertas__ver-detalle"
+                    >
+                      <app-button variant="tertiary" size="md">
+                        Ver detalle
+                        <app-icon name="chevron-derecha" [size]="14" aria-hidden="true" />
+                      </app-button>
+                    </a>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
     }
   </section>
 </app-shell-layout>

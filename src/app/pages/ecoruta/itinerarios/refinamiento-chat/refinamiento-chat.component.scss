@@ -241,15 +241,16 @@
     background 0.2s,
     color 0.2s;
 
-  &:hover {
-    background: var(--ch-green);
-    color: #fff;
-  }
-
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
+}
+
+.ch-refinamiento-chat__chip:hover,
+.ch-refinamiento-chat__btn-comparar:hover {
+  background: var(--ch-green);
+  color: #fff;
 }
 
 .ch-refinamiento-chat__alternativas-mensaje {

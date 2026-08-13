@@ -235,7 +235,7 @@
         <div class="ch-itinerario-generado__lateral" #chatPanel>
           <app-refinamiento-chat
             [itinerario]="data"
-            (itinerarioActualizado)="itinerario.set($event)"
+            (itinerarioActualizado)="onItinerarioActualizado($event)"
           />
         </div>
       </div>

@@ -247,6 +247,18 @@ describe('DirectorioAuditoresPageComponent', () => {
     expect(html.querySelector('.ch-auditor-card')?.getAttribute('href')).toBe('/auditores/aud-1');
   });
 
+  it('muestra contexto cuando las auditorias completadas no tienen datos', async () => {
+    await montar();
+    comp().resultado.set({
+      ...paginaBase,
+      contenido: [{ ...auditor, auditoriasCompletadas: null }],
+    });
+    pintar();
+
+    const texto = ((fixture.nativeElement as HTMLElement).textContent ?? '').replace(/\s+/g, ' ');
+    expect(texto).toContain('Sin datos auditorías completadas');
+  });
+
   it('con lista vacia muestra el texto de sin resultados', async () => {
     await montar();
     comp().resultado.set({ contenido: [], totalResultados: 0, paginaActual: 0, totalPaginas: 0 });

@@ -3,15 +3,26 @@ import {
   Component,
   ElementRef,
   computed,
+  effect,
   inject,
   input,
   output,
   signal,
   viewChild,
 } from '@angular/core';
+import {
+  disabled,
+  form,
+  FormField,
+  maxLength,
+  required,
+  schema,
+  submit,
+} from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
 import { IconComponent } from '../../../../shared/components/icon/icon.component';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { apiErrorMessage } from '../../../../shared/utils/http-error.utils';
 import { AlternativasComparacionComponent } from '../alternativas-comparacion/alternativas-comparacion.component';
 import { EcoRutaAlternativasService } from '../ecoruta-alternativas.service';
 import { EcoRutaItinerariosService } from '../ecoruta-itinerarios.service';
@@ -30,13 +41,20 @@ const CHIPS_SUGERIDOS: readonly string[] = [
   'Prefiero lugares cerca de San José.',
 ];
 
+/** Mismo tope que el backend le exige a `mensajeUsuario` (RefinamientoItinerarioRequestDTO). */
+const MENSAJE_MAX_LENGTH = 1000;
+
 const ERROR_REFINAMIENTO = 'No fue posible actualizar el itinerario. Intenta nuevamente.';
 const ERROR_ACCESO_DENEGADO = 'No tienes permiso para modificar este itinerario.';
 const TOAST_DURATION_MS = 5000;
 
+interface RefinamientoFormModel {
+  mensaje: string;
+}
+
 @Component({
   selector: 'app-refinamiento-chat',
-  imports: [IconComponent, AlternativasComparacionComponent],
+  imports: [IconComponent, AlternativasComparacionComponent, FormField],
   templateUrl: './refinamiento-chat.component.html',
   styleUrl: './refinamiento-chat.component.scss',
 })
@@ -59,8 +77,6 @@ export class RefinamientoChatComponent {
   // State for the free-text conversation itself (PP-88)
   protected readonly historial = signal<MensajeConversacion[]>([]);
   protected readonly mensajeActual = signal('');
-  protected readonly enviandoMensaje = signal(false);
-  protected readonly chipsSugeridos = CHIPS_SUGERIDOS;
 
   protected readonly mensajeInicial = computed(() => {
     const itinerario = this.itinerario();
@@ -70,6 +86,50 @@ export class RefinamientoChatComponent {
       score !== null && score !== undefined ? ` con un EcoScore de ${Math.round(score)}` : '';
     return `Tu itinerario de ${dias} día${dias === 1 ? '' : 's'} está listo${scoreTexto}. ¿Querés ajustar algo?`;
   });
+  protected readonly enviandoMensaje = signal(false);
+  protected readonly chipsSugeridos = CHIPS_SUGERIDOS;
+
+  protected readonly model = signal<RefinamientoFormModel>({ mensaje: '' });
+  protected readonly chatForm = form(
+    this.model,
+    schema<RefinamientoFormModel>((path) => {
+      required(path.mensaje, { message: 'Escribí un mensaje para el asistente.' });
+      maxLength(path.mensaje, MENSAJE_MAX_LENGTH, {
+        message: `El mensaje no puede superar ${MENSAJE_MAX_LENGTH} caracteres.`,
+      });
+      disabled(path.mensaje, { when: () => this.enviandoMensaje() });
+    })
+  );
+  protected readonly canEnviar = computed(() => this.chatForm().valid() && !this.enviandoMensaje());
+
+  /**
+   * Saludo inicial del chat. A propósito NO es un `computed()` sobre `itinerario()`: cada
+   * refinamiento o sustitución exitosa hace que el padre vuelva a bajar un `itinerario` nuevo
+   * (`itinerario.set($event)`), y un `computed` habría reescrito retroactivamente el primer
+   * mensaje ya leído por el usuario (ej. "EcoScore de 82" pasando a "85" solo). Se captura una
+   * sola vez, la primera vez que llega el itinerario.
+   */
+  protected readonly mensajeInicial = signal('');
+
+  constructor() {
+    effect(() => {
+      const itinerario = this.itinerario();
+      if (this.mensajeInicial()) return;
+      const dias = itinerario.cantidadDias;
+      const score = itinerario.ecoScore;
+      const scoreTexto =
+        score !== null && score !== undefined ? ` con un EcoScore de ${Math.round(score)}` : '';
+      this.mensajeInicial.set(
+        `Tu itinerario de ${dias} día${dias === 1 ? '' : 's'} está listo${scoreTexto}. ¿Querés ajustar algo?`
+      );
+    });
+  }
+
+  /** El mensaje de bienvenida siempre encabeza la conversación; el resto es el historial real. */
+  protected readonly mensajesChat = computed<MensajeConversacion[]>(() => [
+    { rol: 'ASISTENTE', contenido: this.mensajeInicial() },
+    ...this.historial(),
+  ]);
 
   /** El mensaje de bienvenida siempre encabeza la conversación; el resto es el historial real. */
   protected readonly mensajesChat = computed<MensajeConversacion[]>(() => [
@@ -98,6 +158,7 @@ export class RefinamientoChatComponent {
   /** Usado por el padre (botón "Preguntar sobre esto") para precargar el mensaje del chat. */
   prellenarMensaje(texto: string): void {
     this.mensajeActual.set(texto);
+    this.model.update((m) => ({ ...m, mensaje: texto }));
     this.mensajeInputRef()?.nativeElement.focus();
   }
 
@@ -116,12 +177,27 @@ export class RefinamientoChatComponent {
 
   private async enviarMensaje(): Promise<void> {
     const texto = this.mensajeActual().trim();
+    void this.onSubmit();
+  }
+
+  private async onSubmit(): Promise<void> {
+    await submit(this.chatForm, {
+      action: async (field) => {
+        await this.enviarMensaje(field().value().mensaje.trim());
+        return undefined;
+      },
+      onInvalid: (field) => field().markAsTouched(),
+    });
+  }
+
+  private async enviarMensaje(texto: string): Promise<void> {
     if (!texto || this.enviandoMensaje()) return;
 
     const historialPrevio = this.historial();
     const itinerarioActual = this.itinerario();
 
     this.mensajeActual.set('');
+    this.model.set({ mensaje: '' });
     this.enviandoMensaje.set(true);
     // Se muestra de inmediato, de forma optimista, mientras se espera la respuesta del asistente.
     this.historial.update((actual) => [...actual, { rol: 'USUARIO', contenido: texto }]);
@@ -150,7 +226,11 @@ export class RefinamientoChatComponent {
       if (error instanceof HttpErrorResponse && error.status === 403) {
         this.toastService.error(ERROR_ACCESO_DENEGADO, undefined, TOAST_DURATION_MS);
       } else {
-        this.toastService.error(ERROR_REFINAMIENTO, undefined, TOAST_DURATION_MS);
+        this.toastService.error(
+          apiErrorMessage(error) ?? ERROR_REFINAMIENTO,
+          undefined,
+          TOAST_DURATION_MS
+        );
       }
     } finally {
       this.enviandoMensaje.set(false);
