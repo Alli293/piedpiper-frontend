@@ -102,7 +102,10 @@ describe('RecomendacionesAmbientalesComponent', () => {
       const cargando = fixture.nativeElement.querySelector('.ch-recomendaciones__cargando');
       expect(cargando).not.toBeNull();
 
-      flushRecomendaciones({ recomendaciones: [], mensaje: 'Tu itinerario ya presenta un excelente desempeño ambiental.' });
+      flushRecomendaciones({
+        recomendaciones: [],
+        mensaje: 'Tu itinerario ya presenta un excelente desempeño ambiental.',
+      });
       await fixture.whenStable();
     });
   });

@@ -99,7 +99,9 @@ describe('EcoRutaRecomendacionesService', () => {
       req.flush(respuestaOptimizada);
 
       expect(resultado?.recomendaciones).toEqual([]);
-      expect(resultado?.mensaje).toBe('Tu itinerario ya presenta un excelente desempeño ambiental.');
+      expect(resultado?.mensaje).toBe(
+        'Tu itinerario ya presenta un excelente desempeño ambiental.'
+      );
     });
   });
 
