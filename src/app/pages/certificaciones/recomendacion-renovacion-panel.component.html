@@ -31,7 +31,7 @@
       </p>
     }
 
-    <a [routerLink]="['/empresa/certificaciones', r.idCertificacion]">
+    <a routerLink="/empresa/certificaciones/listado" [queryParams]="{ id: r.idCertificacion }">
       <app-button
         >Ver detalle de la certificación
         <app-icon name="chevron-derecha" [size]="12" aria-hidden="true"

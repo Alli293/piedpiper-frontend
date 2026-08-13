@@ -121,9 +121,18 @@ describe('InsigniasEmpresaPageComponent', () => {
     expect(toastService.error).toHaveBeenCalledWith('No tienes permiso para ver estas insignias.');
   });
 
+  function abrirDetalle(root: HTMLElement): void {
+    const boton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find((b) =>
+      b.textContent?.includes('Ver detalle')
+    );
+    boton?.click();
+  }
+
   it('no muestra el boton de descarga JSON-LD en el detalle', async () => {
     const fixture = await crear();
     const root = fixture.nativeElement as HTMLElement;
+    abrirDetalle(root);
+    fixture.detectChanges();
     const boton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find((b) =>
       b.textContent?.includes('Descargar JSON-LD')
     );
@@ -132,22 +141,60 @@ describe('InsigniasEmpresaPageComponent', () => {
     expect(empresaService.descargarInsigniaJsonLd).not.toHaveBeenCalled();
   });
 
-  it('no muestra los botones de descargar JWT y compartir en LinkedIn', async () => {
+  it('muestra los botones de descargar JWT y compartir en el contexto privado', async () => {
     const fixture = await crear();
     const root = fixture.nativeElement as HTMLElement;
+    abrirDetalle(root);
+    fixture.detectChanges();
 
-    expect(root.textContent).not.toContain('Descargar .JWT');
-    expect(root.textContent).not.toContain('Compartir en LinkedIn');
+    expect(root.textContent).toContain('Descargar (JWT)');
+    expect(root.textContent).toContain('Compartir');
   });
 
-  it('navega a /verificar/:codigo al hacer clic en Verificar con OpenBadges 3.0', async () => {
+  it('descarga el JWT de la insignia al hacer clic en Descargar (JWT)', async () => {
+    const fixture = await crear();
+    const root = fixture.nativeElement as HTMLElement;
+    abrirDetalle(root);
+    fixture.detectChanges();
+    const boton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find((b) =>
+      b.textContent?.includes('Descargar (JWT)')
+    );
+
+    boton?.click();
+    await fixture.whenStable();
+
+    expect(empresaService.descargarInsigniaJwt).toHaveBeenCalledWith(INSIGNIA.urlVerificacionJwt);
+  });
+
+  it('abre LinkedIn al hacer clic en Compartir', async () => {
+    const fixture = await crear();
+    const root = fixture.nativeElement as HTMLElement;
+    abrirDetalle(root);
+    fixture.detectChanges();
+    const abrirVentana = vi.spyOn(window, 'open').mockReturnValue(null);
+    const boton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find((b) =>
+      b.textContent?.includes('Compartir')
+    );
+
+    boton?.click();
+
+    expect(abrirVentana).toHaveBeenCalledWith(
+      INSIGNIA.urlLinkedIn,
+      '_blank',
+      'noopener,noreferrer'
+    );
+  });
+
+  it('navega a /verificar/:codigo al hacer clic en Verificar', async () => {
     const fixture = await crear();
     const router = TestBed.inject(Router);
     const navegar = vi.spyOn(router, 'navigate').mockResolvedValue(true);
     const root = fixture.nativeElement as HTMLElement;
+    abrirDetalle(root);
+    fixture.detectChanges();
     const botones = Array.from(root.querySelectorAll<HTMLButtonElement>('button'));
 
-    botones.find((b) => b.textContent?.includes('Verificar con OpenBadges 3.0'))?.click();
+    botones.find((b) => b.textContent?.trim() === 'Verificar')?.click();
 
     expect(navegar).toHaveBeenCalledWith(['/verificar', 'CH-2026-8F4A19KD']);
   });

@@ -90,6 +90,16 @@ describe('ModalComponent', () => {
     expect(fixture.componentInstance.cerrado).toBe(1);
   });
 
+  it('emite close al hacer click en el boton de cerrar', async () => {
+    const fixture = await createFixture();
+
+    const boton: HTMLButtonElement = fixture.nativeElement.querySelector('.ch-modal__close');
+    boton.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.cerrado).toBe(1);
+  });
+
   it('no emite close al hacer click dentro del diálogo', async () => {
     const fixture = await createFixture();
 

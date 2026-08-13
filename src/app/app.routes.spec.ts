@@ -179,6 +179,27 @@ describe('app.routes', () => {
     expect(ruta?.canActivate).toBeUndefined();
   });
 
+  it('empresa/certificaciones/:id (ruta de detalle previa al modal) redirige al listado con ?id=', () => {
+    const indiceId = routes.findIndex((r) => r.path === 'empresa/certificaciones/:id');
+    const indiceListado = routes.findIndex((r) => r.path === 'empresa/certificaciones/listado');
+    const indiceAlertas = routes.findIndex((r) => r.path === 'empresa/certificaciones/alertas');
+
+    expect(indiceId).toBeGreaterThan(-1);
+    // :id debe evaluarse despues de los paths literales del mismo prefijo, o los capturaria
+    // a ellos como si fueran un id (el router prueba las rutas en orden y usa la primera que matchea).
+    expect(indiceId).toBeGreaterThan(indiceListado);
+    expect(indiceId).toBeGreaterThan(indiceAlertas);
+
+    const ruta = routes[indiceId];
+    expect(typeof ruta.redirectTo).toBe('function');
+    const redirectTo = ruta.redirectTo as (redirectData: {
+      params: Record<string, string>;
+    }) => string;
+    expect(redirectTo({ params: { id: 'abc123' } })).toBe(
+      '/empresa/certificaciones/listado?id=abc123'
+    );
+  });
+
   // Los legales se enlazan desde el registro y el pie, o sea desde pantallas sin sesion: pedir
   // token ahi dejaria al usuario sin poder leer lo que se le pide aceptar.
   it('la ruta publica de terminos no exige sesion', () => {
