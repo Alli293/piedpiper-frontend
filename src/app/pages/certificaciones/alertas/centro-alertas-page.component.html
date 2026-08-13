@@ -130,7 +130,8 @@
                   </td>
                   <td class="ch-centro-alertas__accion">
                     <a
-                      [routerLink]="['/empresa/certificaciones', alerta.idCertificacion]"
+                      routerLink="/empresa/certificaciones/listado"
+                      [queryParams]="{ id: alerta.idCertificacion }"
                       class="ch-centro-alertas__ver-detalle"
                     >
                       <app-button variant="tertiary" size="md">
@@ -200,7 +201,8 @@
                   </td>
                   <td class="ch-centro-alertas__accion">
                     <a
-                      [routerLink]="['/empresa/certificaciones', alerta.idCertificacion]"
+                      routerLink="/empresa/certificaciones/listado"
+                      [queryParams]="{ id: alerta.idCertificacion }"
                       class="ch-centro-alertas__ver-detalle"
                     >
                       <app-button variant="tertiary" size="md">
@@ -270,7 +272,8 @@
                   </td>
                   <td class="ch-centro-alertas__accion">
                     <a
-                      [routerLink]="['/empresa/certificaciones', alerta.idCertificacion]"
+                      routerLink="/empresa/certificaciones/listado"
+                      [queryParams]="{ id: alerta.idCertificacion }"
                       class="ch-centro-alertas__ver-detalle"
                     >
                       <app-button variant="tertiary" size="md">
@@ -340,7 +343,8 @@
                   </td>
                   <td class="ch-centro-alertas__accion">
                     <a
-                      [routerLink]="['/empresa/certificaciones', alerta.idCertificacion]"
+                      routerLink="/empresa/certificaciones/listado"
+                      [queryParams]="{ id: alerta.idCertificacion }"
                       class="ch-centro-alertas__ver-detalle"
                     >
                       <app-button variant="tertiary" size="md">

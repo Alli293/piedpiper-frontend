@@ -8,11 +8,13 @@ import {
   output,
   viewChild,
 } from '@angular/core';
+import { IconComponent } from '../icon/icon.component';
 
 export type ModalSize = 'sm' | 'md';
 
 @Component({
   selector: 'app-modal',
+  imports: [IconComponent],
   templateUrl: './modal.component.html',
   styleUrl: './modal.component.scss',
 })
@@ -40,7 +42,7 @@ export class ModalComponent {
     });
   }
 
-  protected onBackdropClick(): void {
+  protected cerrar(): void {
     this.close.emit();
   }
 

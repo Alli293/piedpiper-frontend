@@ -220,6 +220,7 @@ describe('CentroAlertasPageComponent', () => {
     fixture = await createFixture();
     const el = fixture.nativeElement as HTMLElement;
     const enlace = el.querySelector('.ch-centro-alertas__ver-detalle') as HTMLAnchorElement;
-    expect(enlace.getAttribute('href')).toBe('/empresa/certificaciones/c1');
+    expect(enlace.getAttribute('href')).toContain('/empresa/certificaciones/listado');
+    expect(enlace.getAttribute('href')).toContain('id=c1');
   });
 });

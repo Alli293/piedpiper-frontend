@@ -99,7 +99,8 @@ describe('CertificacionesRecientesPanelComponent', () => {
 
     const el = fixture.nativeElement as HTMLElement;
     const enlace = el.querySelector('.ch-cert-recientes-panel__item') as HTMLAnchorElement;
-    expect(enlace.getAttribute('href')).toBe('/empresa/certificaciones/c1');
+    expect(enlace.getAttribute('href')).toContain('/empresa/certificaciones/listado');
+    expect(enlace.getAttribute('href')).toContain('id=c1');
   });
 
   it('"Ver todas" enlaza al listado completo de certificaciones', async () => {

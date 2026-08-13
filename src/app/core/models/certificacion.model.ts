@@ -21,4 +21,5 @@ export interface CertificacionResumen {
 
 export interface Certificacion extends CertificacionResumen {
   recienEmitida: boolean;
+  nombreAuditor: string;
 }
