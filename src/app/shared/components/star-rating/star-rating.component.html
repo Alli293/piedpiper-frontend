@@ -12,5 +12,7 @@
     [tabindex]="isChecked(star) || (!value() && star === 1) ? 0 : -1"
     (click)="onStarClick(star)"
     (keydown)="onKeydown($event, star)"
-  >★</button>
+  >
+    ★
+  </button>
 }
