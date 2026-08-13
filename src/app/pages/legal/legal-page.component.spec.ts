@@ -7,7 +7,7 @@ import { CONTENIDOS_LEGALES, TipoDocumentoLegal } from './legal.content';
 describe('LegalPageComponent', () => {
   let fixture: ComponentFixture<LegalPageComponent>;
 
-  async function montar(documento: TipoDocumentoLegal) {
+  async function montar(documento: TipoDocumentoLegal | string | undefined) {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [LegalPageComponent],
@@ -84,4 +84,22 @@ describe('LegalPageComponent', () => {
 
     expect(texto()).toContain('Última actualización');
   });
+
+  /**
+   * Una ruta mal configurada (sin `documento`, o con uno que no está en el catálogo) buscaba un
+   * contenido inexistente y la pantalla reventaba en el primer binding. Ahora cae a los términos y
+   * avisa por consola a quien configuró la ruta.
+   */
+  it.each([undefined, 'cookies'])(
+    'una ruta con documento=%s cae a los terminos en vez de reventar',
+    async (documento) => {
+      const aviso = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      await montar(documento);
+
+      expect(texto()).toContain('Términos de uso');
+      expect(aviso).toHaveBeenCalled();
+      aviso.mockRestore();
+    }
+  );
 });

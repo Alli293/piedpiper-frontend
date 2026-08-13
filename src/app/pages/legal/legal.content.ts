@@ -45,8 +45,8 @@ export const CONTENIDOS_LEGALES: Record<TipoDocumentoLegal, DocumentoLegal> = {
       {
         titulo: '2. Tu cuenta',
         parrafos: [
-          'Sos responsable de la veracidad de los datos que registrás y de mantener tu contraseña ' +
-            'en resguardo. Si detectás un uso no autorizado de tu cuenta, cambiá tu contraseña de ' +
+          'Eres responsable de la veracidad de los datos que registras y de mantener tu contraseña ' +
+            'en resguardo. Si detectas un uso no autorizado de tu cuenta, cambia tu contraseña de ' +
             'inmediato desde la pantalla de recuperación.',
           'Podemos suspender una cuenta que incumpla estos términos o que se use para registrar ' +
             'información falsa con el fin de obtener una certificación.',
@@ -91,7 +91,7 @@ export const CONTENIDOS_LEGALES: Record<TipoDocumentoLegal, DocumentoLegal> = {
           'De tu cuenta: nombre, apellidos, correo electrónico, rol y método de autenticación.',
           'De tu empresa: nombre, cédula jurídica, sector, país, cantidad de empleados, correo ' +
             'corporativo y sitio web.',
-          'De tu actividad: los registros de emisiones que cargás, las solicitudes de auditoría y ' +
+          'De tu actividad: los registros de emisiones que cargas, las solicitudes de auditoría y ' +
             'sus documentos de respaldo.',
         ],
       },
@@ -99,7 +99,7 @@ export const CONTENIDOS_LEGALES: Record<TipoDocumentoLegal, DocumentoLegal> = {
         titulo: '2. Cómo protegemos tu contraseña',
         parrafos: [
           'Tu contraseña nunca se guarda en texto plano: se almacena su huella criptográfica, así ' +
-            'que ni siquiera el equipo de desarrollo puede leerla. Si iniciás sesión con Google, no ' +
+            'que ni siquiera el equipo de desarrollo puede leerla. Si inicias sesión con Google, no ' +
             'guardamos contraseña alguna.',
         ],
       },
@@ -110,9 +110,9 @@ export const CONTENIDOS_LEGALES: Record<TipoDocumentoLegal, DocumentoLegal> = {
             'servicios de terceros:',
         ],
         lista: [
-          'Google, si elegís iniciar sesión con tu cuenta, únicamente para verificar tu identidad.',
+          'Google, si eliges iniciar sesión con tu cuenta, únicamente para verificar tu identidad.',
           'Climatiq, para calcular factores de emisión a partir de los datos de actividad que ' +
-            'registrás.',
+            'registras.',
           'Google Gemini, para redactar los textos orientativos de la plataforma. A ese servicio se ' +
             'le envía solo la información pública necesaria para redactar; nunca el nombre de tu ' +
             'empresa, su identificador ni datos de otras organizaciones.',
@@ -125,13 +125,13 @@ export const CONTENIDOS_LEGALES: Record<TipoDocumentoLegal, DocumentoLegal> = {
         parrafos: [
           'El perfil público de tu empresa y las certificaciones que decidas publicar son ' +
             'accesibles sin iniciar sesión, porque su propósito es que un tercero pueda verificarlas. ' +
-            'Vos controlás qué se publica desde la configuración de tu perfil.',
+            'Tú controlas qué se publica desde la configuración de tu perfil.',
         ],
       },
       {
         titulo: '5. Tus derechos',
         parrafos: [
-          'Podés consultar, corregir o solicitar la eliminación de tus datos escribiendo al equipo ' +
+          'Puedes consultar, corregir o solicitar la eliminación de tus datos escribiendo al equipo ' +
             'del proyecto. Como es un entorno académico, los datos se eliminan al finalizar el curso.',
         ],
       },

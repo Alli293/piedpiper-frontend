@@ -23,13 +23,19 @@ export class PlaceholderPageComponent {
 
   protected readonly rutaVolver = computed(() => {
     const rol = this.authService.rol();
-    if (!rol || !(rol in RUTA_INICIO_POR_ROL)) {
-      return '/login';
-    }
-    return `/${RUTA_INICIO_POR_ROL[rol as RolUsuario]}`;
+    return esRolConocido(rol) ? `/${RUTA_INICIO_POR_ROL[rol]}` : '/login';
   });
 
   protected readonly textoVolver = computed(() =>
     this.haySesion() ? 'Volver a mi panel' : 'Volver al inicio de sesión'
   );
+}
+
+/**
+ * El rol llega como texto desde el token, así que puede ser cualquier cosa: un rol nuevo del backend
+ * que el front todavía no conoce, o un token viejo. Como predicado de tipo, el compilador exige que
+ * la comprobación pase antes de indexar el mapa, en vez de confiar en un cast que no verifica nada.
+ */
+function esRolConocido(rol: string | null): rol is RolUsuario {
+  return rol !== null && rol in RUTA_INICIO_POR_ROL;
 }
