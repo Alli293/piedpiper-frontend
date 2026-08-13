@@ -7,6 +7,7 @@ import {
   FormField,
   maxDate,
   maxLength,
+  minDate,
   minLength,
   required,
   schema,
@@ -22,6 +23,8 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { DateInputComponent } from '../../../shared/components/inputs/date-input/date-input.component';
 import { FileDropComponent } from '../../../shared/components/inputs/file-drop/file-drop.component';
+import { RadioGroupFieldComponent } from '../../../shared/components/inputs/radio-group-field/radio-group-field.component';
+import { SelectOption } from '../../../shared/components/inputs/select-input/select-input.component';
 import { TextareaComponent } from '../../../shared/components/inputs/textarea/textarea.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
@@ -33,12 +36,15 @@ import { fieldError } from '../../../shared/utils/form-field.utils';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import {
   DetalleSolicitudAuditoria,
+  EmitirResultadoAuditoriaRequest,
   EstadoSolicitudAuditoria,
   HORAS_PARA_RESPONDER,
   INTERVALO_SONDEO_DETALLE_MS,
   MAXIMO_CARACTERES_MOTIVO_RECHAZO,
+  MAXIMO_CARACTERES_OBSERVACIONES,
   MAXIMO_BYTES_REPORTE_AUDITORIA,
   MINIMO_CARACTERES_MOTIVO_RECHAZO,
+  MINIMO_CARACTERES_OBSERVACIONES,
   PASOS_AUDITORIA,
   ResponderDecisionRequest,
   ResultadoAuditoriaRequest,
@@ -55,6 +61,17 @@ interface RechazoFormModel {
 interface CargaReporteFormModel {
   fechaAuditoriaRealizada: Date | null;
   reporteAuditoria: File[];
+}
+
+/**
+ * Los dos campos conviven en el modelo aunque solo uno se muestre a la vez: cambiar de opción no
+ * borra lo que el auditor ya había escrito en la otra, así que volver atrás no le cuesta reescribir.
+ * La validación de cada uno se apaga cuando su opción no está seleccionada.
+ */
+interface ResultadoFormModel {
+  resultado: ResultadoAuditoriaRequest | null;
+  observaciones: string;
+  fechaVencimientoCert: Date | null;
 }
 
 interface PasoLineaTiempo {
@@ -109,6 +126,17 @@ const HORAS_POR_DIA = 24;
 const MENSAJE_RESULTADO_APROBADO = 'Resultado aprobado. La certificación fue emitida.';
 const MENSAJE_RESULTADO_OBSERVACIONES =
   'Resultado emitido con observaciones. La empresa debe corregir la documentación.';
+const MENSAJE_RESULTADO_REQUERIDO = 'Selecciona el resultado de la auditoría.';
+const MENSAJE_OBSERVACIONES_REQUERIDAS = `Describe las observaciones con al menos ${MINIMO_CARACTERES_OBSERVACIONES} caracteres.`;
+const MENSAJE_OBSERVACIONES_LARGAS = `Las observaciones no pueden superar los ${MAXIMO_CARACTERES_OBSERVACIONES} caracteres.`;
+const MENSAJE_VENCIMIENTO_REQUERIDO = 'Selecciona la fecha de vencimiento de la certificación.';
+const MENSAJE_VENCIMIENTO_INVALIDO =
+  'La fecha de vencimiento debe ser posterior a la fecha de la auditoría.';
+
+const OPCIONES_RESULTADO: SelectOption[] = [
+  { value: 'aprobada', label: 'Aprobada' },
+  { value: 'observaciones', label: 'Observaciones pendientes' },
+];
 
 /** 403 y 404 son definitivos: reintentar no los cambia. El resto puede ser un fallo pasajero. */
 function esErrorPermanente(err: unknown): boolean {
@@ -126,6 +154,7 @@ function esErrorPermanente(err: unknown): boolean {
     IconComponent,
     FileDropComponent,
     FormField,
+    RadioGroupFieldComponent,
     ShellLayoutComponent,
     TextareaComponent,
   ],
@@ -196,6 +225,11 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     fechaAuditoriaRealizada: null,
     reporteAuditoria: [],
   });
+  protected readonly modeloResultado = signal<ResultadoFormModel>({
+    resultado: null,
+    observaciones: '',
+    fechaVencimientoCert: null,
+  });
 
   protected readonly rechazoForm = form(
     this.modeloRechazo,
@@ -234,6 +268,82 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
       disabled(path.fechaAuditoriaRealizada, { when: () => !this.puedeEditarReporte() });
       disabled(path.reporteAuditoria, { when: () => !this.puedeEditarReporte() });
     })
+  );
+
+  /**
+   * Cada campo condicional valida solo cuando su opción está seleccionada. Con `required` a secas
+   * el formulario nunca llegaría a válido, porque los dos resultados no pueden cumplirse a la vez.
+   */
+  protected readonly resultadoForm = form(
+    this.modeloResultado,
+    schema<ResultadoFormModel>((path) => {
+      validate(path.resultado, ({ value }) =>
+        value() === null
+          ? { kind: 'resultadoRequerido', message: MENSAJE_RESULTADO_REQUERIDO }
+          : undefined
+      );
+
+      validate(path.observaciones, ({ value }) => {
+        if (!this.pideObservaciones()) return undefined;
+        const texto = value().trim();
+        if (texto.length < MINIMO_CARACTERES_OBSERVACIONES) {
+          return { kind: 'observacionesCortas', message: MENSAJE_OBSERVACIONES_REQUERIDAS };
+        }
+        if (texto.length > MAXIMO_CARACTERES_OBSERVACIONES) {
+          return { kind: 'observacionesLargas', message: MENSAJE_OBSERVACIONES_LARGAS };
+        }
+        return undefined;
+      });
+
+      validate(path.fechaVencimientoCert, ({ value }) =>
+        this.pideVencimiento() && value() === null
+          ? { kind: 'vencimientoRequerido', message: MENSAJE_VENCIMIENTO_REQUERIDO }
+          : undefined
+      );
+
+      /**
+       * Declarado como `minDate` y no como un `validate` a mano para que el propio calendario
+       * deshabilite los días anteriores: la directiva propaga el mínimo al input nativo.
+       */
+      minDate(path.fechaVencimientoCert, () => this.fechaMinimaVencimiento(), {
+        message: MENSAJE_VENCIMIENTO_INVALIDO,
+      });
+    })
+  );
+
+  protected readonly opcionesResultado = OPCIONES_RESULTADO;
+  protected readonly minimoObservaciones = MINIMO_CARACTERES_OBSERVACIONES;
+  protected readonly maximoObservaciones = MAXIMO_CARACTERES_OBSERVACIONES;
+
+  protected readonly pideObservaciones = computed(
+    () => this.modeloResultado().resultado === 'observaciones'
+  );
+  protected readonly pideVencimiento = computed(
+    () => this.modeloResultado().resultado === 'aprobada'
+  );
+
+  protected readonly caracteresObservaciones = computed(
+    () => this.modeloResultado().observaciones.trim().length
+  );
+
+  /**
+   * Un día después de la auditoría: el backend exige que la vigencia sea posterior, así que el
+   * mismo día que se auditó tampoco sirve y el calendario ya no lo ofrece.
+   */
+  protected readonly fechaMinimaVencimiento = computed<Date | undefined>(() => {
+    const realizada = this.detalle()?.fechaAuditoriaRealizada;
+    if (!realizada) return undefined;
+    const minima = new Date(`${realizada}T00:00:00Z`);
+    minima.setUTCDate(minima.getUTCDate() + 1);
+    return minima;
+  });
+
+  protected readonly resultadoError = computed(() => fieldError(this.resultadoForm.resultado()));
+  protected readonly observacionesError = computed(() =>
+    fieldError(this.resultadoForm.observaciones())
+  );
+  protected readonly vencimientoError = computed(() =>
+    fieldError(this.resultadoForm.fechaVencimientoCert())
   );
 
   protected readonly caracteresMotivo = computed(
@@ -283,6 +393,7 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     () => this.puedeEditarReporte() && this.cargaReporteForm().valid() && !this.enviandoReporte()
   );
 
+  /** Si el formulario se muestra. El botón de confirmar tiene su propia condición más estricta. */
   protected readonly puedeEmitirResultado = computed(() => {
     const detalle = this.detalle();
     return (
@@ -292,6 +403,14 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
       !this.enviandoResultado()
     );
   });
+
+  /**
+   * El botón queda deshabilitado hasta que el campo obligatorio de la opción elegida sea válido.
+   * El backend valida lo mismo; esto solo evita que el auditor llegue a un 422 evitable.
+   */
+  protected readonly puedeConfirmarResultado = computed(
+    () => this.puedeEmitirResultado() && this.resultadoForm().valid()
+  );
 
   protected readonly muestraFormularioReporte = computed(
     () =>
@@ -489,28 +608,60 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     this.mostrandoReemplazoReporte.set(true);
   }
 
-  protected aprobarAuditoria(): void {
-    void this.emitirResultado('aprobada', MENSAJE_RESULTADO_APROBADO);
+  protected handleSubmitResultado(event: Event): void {
+    event.preventDefault();
+    void this.confirmarResultado();
   }
 
-  protected registrarObservaciones(): void {
-    void this.emitirResultado('observaciones', MENSAJE_RESULTADO_OBSERVACIONES);
+  /**
+   * Pasa por `submit()` como los otros dos formularios de la pantalla en vez de leer el modelo a
+   * mano: asi el `[disabled]` del boton deja de ser la unica barrera. Si el binding cambiara en un
+   * refactor, `onInvalid` sigue frenando el envio en vez de mandar datos que no validan.
+   */
+  private async confirmarResultado(): Promise<void> {
+    await submit(this.resultadoForm, {
+      action: async () => {
+        await this.emitirResultado();
+        return undefined;
+      },
+      onInvalid: (field) => field().markAsTouched(),
+    });
   }
 
-  private async emitirResultado(
-    resultado: ResultadoAuditoriaRequest,
-    mensajeExito: string
-  ): Promise<void> {
+  /**
+   * Envía solo el campo que corresponde al resultado elegido. Mandar los dos haría que el auditor
+   * publicara una vigencia de certificación en una devolución con observaciones, donde no hay
+   * certificación que vencer.
+   */
+  private async emitirResultado(): Promise<void> {
+    const { resultado, observaciones, fechaVencimientoCert } = this.modeloResultado();
+    if (resultado === null) return;
+
+    const aprueba = resultado === 'aprobada';
+    if (aprueba && fechaVencimientoCert === null) return;
+
+    const peticion: EmitirResultadoAuditoriaRequest =
+      aprueba && fechaVencimientoCert !== null
+        ? { resultado, fechaVencimientoCert: toIsoDateString(fechaVencimientoCert) }
+        : { resultado, observaciones: observaciones.trim() };
+
     this.enviandoResultado.set(true);
     this.errorResultado.set(null);
     try {
       const detalle = await firstValueFrom(
-        this.auditoriasService.emitirResultado(this.idSolicitud(), { resultado })
+        this.auditoriasService.emitirResultado(this.idSolicitud(), peticion)
       );
       this.detalle.set(detalle);
-      this.toastService.success(mensajeExito);
+      this.toastService.success(
+        aprueba ? MENSAJE_RESULTADO_APROBADO : MENSAJE_RESULTADO_OBSERVACIONES
+      );
     } catch (err: unknown) {
       this.errorResultado.set(apiErrorMessage(err) ?? ERROR_RESULTADO);
+      // Un fallo al emitir la certificacion ocurre despues de que el resultado ya quedo guardado,
+      // asi que la solicitud puede haber avanzado aunque la respuesta sea un error. Sin este
+      // refresco la linea de tiempo se queda en el paso anterior y el auditor vuelve a confirmar,
+      // esta vez contra un estado final, y recibe un 409 que no explica nada.
+      await this.refrescar();
     } finally {
       this.enviandoResultado.set(false);
     }

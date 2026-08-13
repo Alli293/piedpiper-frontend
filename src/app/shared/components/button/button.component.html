@@ -2,6 +2,8 @@
   class="ch-button__inner"
   [attr.id]="id()"
   [attr.aria-label]="ariaLabel() ?? null"
+  [attr.aria-expanded]="ariaExpanded() ?? null"
+  [attr.aria-controls]="ariaControls() ?? null"
   [type]="type()"
   [disabled]="disabled() || loading()"
   [attr.aria-busy]="loading() ? 'true' : null"
