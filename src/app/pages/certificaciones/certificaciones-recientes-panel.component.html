@@ -26,7 +26,8 @@
         <li>
           <a
             class="ch-cert-recientes-panel__item"
-            [routerLink]="['/empresa/certificaciones', cert.id]"
+            routerLink="/empresa/certificaciones/listado"
+            [queryParams]="{ id: cert.id }"
             [attr.aria-label]="'Ver detalle de ' + cert.nombreCertificacion"
           >
             <span class="ch-cert-recientes-panel__item-icon" aria-hidden="true">

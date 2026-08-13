@@ -228,12 +228,14 @@ export const routes: Routes = [
       ),
   },
   {
+    /**
+     * `empresa/certificaciones/:id` fue la ruta del detalle antes de que se moviera a un modal
+     * (`?id=` sobre el listado). Se mantiene como redirect por si quedó compartida en alertas,
+     * notificaciones o bookmarks de sesiones anteriores.
+     */
     path: 'empresa/certificaciones/:id',
-    canActivate: [guardEmpresa],
-    loadComponent: () =>
-      import('./pages/certificaciones/detalle/certificacion-detalle-page.component').then(
-        (m) => m.CertificacionDetallePageComponent
-      ),
+    redirectTo: (redirectData) =>
+      `/empresa/certificaciones/listado?id=${redirectData.params['id']}`,
   },
   {
     path: 'empresa/benchmark',

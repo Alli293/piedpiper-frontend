@@ -1,4 +1,4 @@
-<div class="ch-modal__backdrop" role="presentation" (click)="onBackdropClick()">
+<div class="ch-modal__backdrop" role="presentation" (click)="cerrar()">
   <div
     #dialog
     class="ch-modal ch-modal--{{ size() }}"
@@ -10,6 +10,9 @@
     (click)="$event.stopPropagation()"
     (keydown)="onKeydown($event)"
   >
+    <button type="button" class="ch-modal__close" aria-label="Cerrar" (click)="cerrar()">
+      <app-icon name="cerrar" [size]="16" />
+    </button>
     <ng-content />
   </div>
 </div>
