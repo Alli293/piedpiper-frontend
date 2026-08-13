@@ -16,7 +16,7 @@ import { ShellLayoutComponent } from '../../../../shared/layouts/shell-layout/sh
 import { HeaderConfig } from '../../../../shared/layouts/page-layout/page-layout.component';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { fieldError } from '../../../../shared/utils/form-field.utils';
-import { apiErrorMessage } from '../../../../shared/utils/http-error.utils';
+import { apiErrorMessage, apiErrorMessageAsync } from '../../../../shared/utils/http-error.utils';
 import { previsualizarBlobEnPestana } from '../../../../shared/utils/download.utils';
 import {
   SolicitudDetalle,
@@ -131,7 +131,7 @@ export class RevisionSolicitudAuditorPageComponent implements OnInit {
     } catch (err: unknown) {
       this.toastService.error(
         'No se pudo abrir el documento',
-        apiErrorMessage(err) ?? 'Intenta nuevamente.'
+        (await apiErrorMessageAsync(err)) ?? 'Intenta nuevamente.'
       );
     } finally {
       this.documentoAbriendo.set(null);
@@ -166,17 +166,29 @@ export class RevisionSolicitudAuditorPageComponent implements OnInit {
 
   protected handleSubmit(event: Event): void {
     event.preventDefault();
-    if (!this.decisionForm().valid()) {
-      this.decisionForm().markAsTouched();
-      return;
-    }
-    this.confirmandoDecision.set(true);
+    void this.validarYAbrirConfirmacion();
   }
 
   protected cerrarConfirmacion(): void {
     if (!this.enviando()) {
       this.confirmandoDecision.set(false);
     }
+  }
+
+  /**
+   * El submit del `<form>` solo valida y abre el modal de confirmación; la decisión real la
+   * envía `confirmarDecision()`, disparada por un botón fuera del form. Se pasa igual por
+   * `submit()` (en vez de chequear `decisionForm().valid()` a mano) para reusar su manejo de
+   * `onInvalid`, el mismo que usa `confirmarDecision()` más abajo.
+   */
+  private async validarYAbrirConfirmacion(): Promise<void> {
+    await submit(this.decisionForm, {
+      action: async () => {
+        this.confirmandoDecision.set(true);
+        return undefined;
+      },
+      onInvalid: (field) => field().markAsTouched(),
+    });
   }
 
   protected async confirmarDecision(): Promise<void> {

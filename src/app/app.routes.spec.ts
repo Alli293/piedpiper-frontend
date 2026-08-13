@@ -136,6 +136,20 @@ describe('app.routes', () => {
     }
   });
 
+  /**
+   * El detalle de auditoria es negocio real del auditor (acepta/rechaza, sube el reporte), y la
+   * ruta la comparten empresa/auditor/admin via guardDetalleAuditoria. Sin guardAuditorActivo acá,
+   * un auditor PENDIENTE_VALIDACION o RECHAZADO podia entrar por cualquiera de las dos URLs sin
+   * pasar por su onboarding.
+   */
+  it('el detalle de auditoria exige estado activo para el auditor, en ambas rutas', () => {
+    const rutasDetalleAuditoria = ['empresa/auditorias/:id', 'auditor/auditorias/:id'];
+    for (const path of rutasDetalleAuditoria) {
+      const ruta = routes.find((r) => r.path === path);
+      expect(ruta?.canActivate).toContain(guardAuditorActivo);
+    }
+  });
+
   it('auditor/validacion-pendiente solo exige sesion iniciada, sin exigir el rol final', () => {
     const ruta = routes.find((r) => r.path === 'auditor/validacion-pendiente');
     expect(ruta?.canActivate).toEqual([authGuard]);

@@ -20,12 +20,17 @@ export const guardDirectorioAuditores: CanActivateFn = rolGuard(
  * dueña, el auditor asignado y el administrador de plataforma. El backend abre el endpoint a los
  * tres y decide por relación con la solicitud; restringir la ruta solo a la empresa dejaría al
  * auditor sin poder abrir la pantalla desde la que responde.
+ *
+ * Es negocio real del auditor (acepta/rechaza la auditoría, sube el reporte), así que también
+ * necesita `guardAuditorActivo`: sin ella, un auditor `PENDIENTE_VALIDACION` o `RECHAZADO` podría
+ * entrar por URL directa a `empresa/auditorias/:id` o `auditor/auditorias/:id` sin pasar por el
+ * onboarding. `guardAuditorActivo` se ignora a sí misma para empresa/admin, así que es seguro
+ * agregarla acá aunque la ruta la compartan los tres roles.
  */
-export const guardDetalleAuditoria: CanActivateFn = rolGuard(
-  'ADMINISTRADOR_EMPRESA',
-  'AUDITOR_CERTIFICADO',
-  'ADMINISTRADOR_PLATAFORMA'
-);
+export const guardDetalleAuditoria: CanActivateFn[] = [
+  rolGuard('ADMINISTRADOR_EMPRESA', 'AUDITOR_CERTIFICADO', 'ADMINISTRADOR_PLATAFORMA'),
+  guardAuditorActivo,
+];
 
 export const rutasPostAutenticacion = ['auditor/panel'];
 
@@ -369,7 +374,7 @@ export const routes: Routes = [
   },
   {
     path: 'empresa/auditorias/:id',
-    canActivate: [guardDetalleAuditoria],
+    canActivate: guardDetalleAuditoria,
     loadComponent: () =>
       import('./pages/auditorias/detalle/detalle-auditoria-page.component').then(
         (m) => m.DetalleAuditoriaPageComponent
@@ -377,7 +382,7 @@ export const routes: Routes = [
   },
   {
     path: 'auditor/auditorias/:id',
-    canActivate: [guardDetalleAuditoria],
+    canActivate: guardDetalleAuditoria,
     loadComponent: () =>
       import('./pages/auditorias/detalle/detalle-auditoria-page.component').then(
         (m) => m.DetalleAuditoriaPageComponent

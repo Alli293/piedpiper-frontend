@@ -183,6 +183,40 @@ describe('RevisionSolicitudAuditorPageComponent', () => {
       queryParams: { pagina: 0 },
     });
   });
+
+  /**
+   * descargarDocumento() usa responseType: 'blob', asi que un error del backend llega como Blob
+   * en vez de JSON ya parseado. apiErrorMessage() ignora los Blob y devuelve undefined; hace
+   * falta apiErrorMessageAsync(), que primero lee el texto del blob, para mostrar el mensaje real.
+   */
+  it('un error al abrir un documento (blob) muestra el mensaje real del backend', async () => {
+    const pestanaAbierta = { close: vi.fn(), location: { href: '' }, addEventListener: vi.fn() };
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue(pestanaAbierta as unknown as Window);
+    validacionService.descargarDocumento.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 404,
+            error: new Blob([JSON.stringify({ message: 'Documento no encontrado.' })], {
+              type: 'application/json',
+            }),
+          })
+      )
+    );
+    toastService = TestBed.inject(ToastService);
+    const errorSpy = vi.spyOn(toastService, 'error');
+
+    await (component as unknown as { verDocumento(id: string): Promise<void> }).verDocumento(
+      'doc-1'
+    );
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      'No se pudo abrir el documento',
+      'Documento no encontrado.'
+    );
+    expect(pestanaAbierta.close).toHaveBeenCalled();
+    openSpy.mockRestore();
+  });
 });
 
 describe('RevisionSolicitudAuditorPageComponent - solicitud ya resuelta', () => {

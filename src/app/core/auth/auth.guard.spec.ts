@@ -97,6 +97,7 @@ describe('rolGuard', () => {
 
 describe('guardAuditorActivo', () => {
   let authService: {
+    rol: ReturnType<typeof signal<string | null>>;
     estado: ReturnType<typeof signal<string | null>>;
     configuracionCompleta: ReturnType<typeof signal<boolean>>;
   };
@@ -104,6 +105,7 @@ describe('guardAuditorActivo', () => {
 
   beforeEach(() => {
     authService = {
+      rol: signal<string | null>('AUDITOR_CERTIFICADO'),
       estado: signal<string | null>(null),
       configuracionCompleta: signal(false),
     };
@@ -144,6 +146,37 @@ describe('guardAuditorActivo', () => {
     authService.configuracionCompleta.set(true);
 
     expect(ejecutarGuard()).toEqual(router.parseUrl('/auditor/validacion-pendiente'));
+  });
+
+  /**
+   * Un JWT emitido antes de que estos claims existieran (sesion iniciada previa al deploy) no
+   * trae `estado` ni `configuracionCompleta`; AuthService los deja en sus valores por defecto
+   * (null / false) hasta que el interceptor de refresh los actualice en la siguiente llamada
+   * HTTP. La guarda se evalua antes de eso, asi que un auditor ya ACTIVO con token viejo rebota
+   * una vez a configuracion-inicial. Documentado como limitacion conocida, no como bug: el mismo
+   * camino que "sin configuracion inicial completa", solo que llegando por token viejo en vez de
+   * por PENDIENTE_VALIDACION explicito.
+   */
+  it('con claims por defecto (token emitido antes del deploy) redirige a completar configuracion', () => {
+    authService.estado.set(null);
+    authService.configuracionCompleta.set(false);
+
+    expect(ejecutarGuard()).toEqual(router.parseUrl('/auditor/configuracion-inicial'));
+  });
+
+  /**
+   * `guardDetalleAuditoria` comparte `empresa/auditorias/:id` y `auditor/auditorias/:id` entre
+   * empresa, auditor y administrador de plataforma, y le agrega esta guarda para cerrar la
+   * ventana del auditor no-activo. Si no se ignorara a si misma para los otros roles, una empresa
+   * o un administrador (sin claim `estado` en su JWT) quedarian rebotados a pantallas de
+   * onboarding de auditor que no les corresponden.
+   */
+  it('ignora el chequeo de estado cuando el rol activo no es auditor', () => {
+    authService.rol.set('ADMINISTRADOR_EMPRESA');
+    authService.estado.set(null);
+    authService.configuracionCompleta.set(false);
+
+    expect(ejecutarGuard()).toBe(true);
   });
 });
 

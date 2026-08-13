@@ -3,6 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { PerfilInicialService } from '../services/perfil-inicial.service';
+import { RolUsuario } from '../models/perfil-inicial.model';
 import {
   AuthResponse,
   LoginRequest,
@@ -16,9 +17,12 @@ import {
 
 const TOKEN_KEY = 'carbonhub.token';
 
+/** Estado de la cuenta del auditor, distinto del `estado` de una solicitud individual. */
+export type EstadoAuditorCuenta = 'ACTIVO' | 'PENDIENTE_VALIDACION' | 'RECHAZADO';
+
 interface TokenClaims {
-  rol?: string;
-  estado?: string;
+  rol?: RolUsuario;
+  estado?: EstadoAuditorCuenta;
   configuracionCompleta?: boolean;
 }
 

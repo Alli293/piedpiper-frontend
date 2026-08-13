@@ -40,7 +40,7 @@ export const rolGuard = (...rolesPermitidos: RolUsuario[]): CanActivateFn => {
       return router.parseUrl('/login');
     }
 
-    if (rolesPermitidos.includes(rol as RolUsuario)) {
+    if (rolesPermitidos.includes(rol)) {
       return true;
     }
 
@@ -63,12 +63,17 @@ export const rolGuard = (...rolesPermitidos: RolUsuario[]): CanActivateFn => {
  * Con configuración completa, todo estado no-`ACTIVO` (`PENDIENTE_VALIDACION` o `RECHAZADO`) cae
  * en `/auditor/validacion-pendiente`: esa pantalla lee el estado real de la solicitud y muestra
  * el rechazo (con motivo) en vez de repetir el mensaje de "en revisión".
+ *
+ * Se ignora a sí misma cuando el rol activo no es `AUDITOR_CERTIFICADO`, para poder componerse
+ * con guardas que ya comparten ruta entre varios roles (`guardDetalleAuditoria`) sin rebotar a la
+ * empresa o al administrador de plataforma hacia pantallas de onboarding de auditor que no les
+ * corresponden.
  */
 export const guardAuditorActivo: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (authService.estado() === 'ACTIVO') {
+  if (authService.rol() !== 'AUDITOR_CERTIFICADO' || authService.estado() === 'ACTIVO') {
     return true;
   }
 
