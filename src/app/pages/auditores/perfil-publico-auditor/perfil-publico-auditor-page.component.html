@@ -81,10 +81,6 @@
                 }
                 <div class="ch-perfil-auditor__meta">
                   <span class="ch-perfil-auditor__meta-item">
-                    <app-icon name="ubicacion" [size]="14" aria-hidden="true" />
-                    San José, Costa Rica
-                  </span>
-                  <span class="ch-perfil-auditor__meta-item">
                     <app-icon name="reloj" [size]="14" aria-hidden="true" />
                     @if (perfil()!.disponible) {
                       Disponible para auditorías
@@ -228,7 +224,7 @@
                 type="button"
                 (click)="irAAsignarAuditoria()"
               >
-                Seleccionar para auditoría
+                Iniciar solicitud de auditoría
               </button>
               <span class="ch-perfil-auditor__hire-note">
                 ACCIONES VISIBLES SOLO PARA ADMIN DE EMPRESA

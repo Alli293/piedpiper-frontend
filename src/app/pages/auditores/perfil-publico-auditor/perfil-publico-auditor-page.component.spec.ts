@@ -235,7 +235,7 @@ describe('PerfilPublicoAuditorPageComponent', () => {
       fixture = TestBed.createComponent(PerfilPublicoAuditorPageComponent);
       await estabilizar();
 
-      // When distribucionSectores is empty, the dist section should not render
+      // Cuando distribucionSectores está vacío, la sección no se renderiza
       expect(raiz().querySelector('.ch-perfil-auditor__dist')).toBeNull();
     });
   });
