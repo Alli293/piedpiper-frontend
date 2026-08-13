@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { RUTA_INICIO_POR_ROL } from '../../core/models/perfil-inicial.model';
 import { PlaceholderPageComponent } from './placeholder-page.component';
 
 describe('PlaceholderPageComponent', () => {
@@ -39,11 +40,16 @@ describe('PlaceholderPageComponent', () => {
     expect(enlace().textContent?.trim()).toBe('Volver a mi panel');
   });
 
-  it('lleva a cada rol a su propia pantalla de inicio', async () => {
-    await montar('token-valido', 'AUDITOR_CERTIFICADO');
+  /** Parametrizado sobre el mapa entero: si mañana se agrega un rol, este test lo cubre solo. */
+  it.each(Object.entries(RUTA_INICIO_POR_ROL))(
+    'el rol %s lleva a su propia pantalla de inicio',
+    async (rol, destino) => {
+      await montar('token-valido', rol);
 
-    expect(enlace().getAttribute('href')).toBe('/auditor/auditorias');
-  });
+      expect(enlace().getAttribute('href')).toBe(`/${destino}`);
+      expect(enlace().textContent?.trim()).toBe('Volver a mi panel');
+    }
+  );
 
   it('sin sesion mantiene el enlace al inicio de sesion', async () => {
     await montar(null, null);
@@ -75,6 +81,10 @@ describe('PlaceholderPageComponent', () => {
   it.each([
     ['token-valido', 'ROL_INVENTADO'],
     ['token-corrupto', null],
+    // 'toString' y 'constructor' existen en todo objeto por herencia: con el operador `in` pasaban
+    // por roles válidos y el enlace terminaba en '/function toString() { [native code] }'.
+    ['token-manipulado', 'toString'],
+    ['token-manipulado', 'constructor'],
   ])('con token %s y rol %s el texto no promete un panel que no existe', async (token, rol) => {
     await montar(token, rol);
 

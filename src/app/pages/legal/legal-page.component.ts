@@ -55,7 +55,13 @@ export class LegalPageComponent {
   );
 }
 
-/** El catálogo es la única fuente de verdad: si el documento no está ahí, no se puede mostrar. */
+/**
+ * El catálogo es la única fuente de verdad: si el documento no está ahí, no se puede mostrar.
+ *
+ * <p>Se comprueba con {@code Object.hasOwn} y no con {@code in}, que también encuentra lo heredado
+ * de {@code Object.prototype}: una ruta con {@code documento: 'toString'} pasaba el guard y se
+ * saltaba el fallback seguro a los términos, que es justo lo que este predicado protege.</p>
+ */
 function esTipoDocumentoLegal(valor: unknown): valor is TipoDocumentoLegal {
-  return typeof valor === 'string' && valor in CONTENIDOS_LEGALES;
+  return typeof valor === 'string' && Object.hasOwn(CONTENIDOS_LEGALES, valor);
 }

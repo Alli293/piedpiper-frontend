@@ -41,9 +41,15 @@ export class PlaceholderPageComponent {
 
 /**
  * El rol llega como texto desde el token, así que puede ser cualquier cosa: un rol nuevo del backend
- * que el front todavía no conoce, o un token viejo. Como predicado de tipo, el compilador exige que
- * la comprobación pase antes de indexar el mapa, en vez de confiar en un cast que no verifica nada.
+ * que el front todavía no conoce, un token viejo o uno manipulado. Como predicado de tipo, el
+ * compilador exige que la comprobación pase antes de indexar el mapa, en vez de confiar en un cast
+ * que no verifica nada.
+ *
+ * <p><b>Se comprueba con {@code Object.hasOwn} y no con {@code in}.</b> El operador {@code in}
+ * también encuentra lo que el mapa hereda de {@code Object.prototype}, así que un rol
+ * {@code 'toString'} lo daba por bueno y el enlace terminaba apuntando a
+ * {@code /function toString() { [native code] }}.</p>
  */
 function esRolConocido(rol: string | null): rol is RolUsuario {
-  return rol !== null && rol in RUTA_INICIO_POR_ROL;
+  return rol !== null && Object.hasOwn(RUTA_INICIO_POR_ROL, rol);
 }

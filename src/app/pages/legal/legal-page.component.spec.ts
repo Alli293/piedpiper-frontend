@@ -90,7 +90,7 @@ describe('LegalPageComponent', () => {
    * contenido inexistente y la pantalla reventaba en el primer binding. Ahora cae a los términos y
    * avisa por consola a quien configuró la ruta.
    */
-  it.each([undefined, 'cookies'])(
+  it.each([undefined, 'cookies', 'toString', 'constructor'])(
     'una ruta con documento=%s cae a los terminos en vez de reventar',
     async (documento) => {
       const aviso = vi.spyOn(console, 'warn').mockImplementation(() => {});
