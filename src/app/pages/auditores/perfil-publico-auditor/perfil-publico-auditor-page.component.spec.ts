@@ -1,7 +1,6 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { vi } from 'vitest';
@@ -14,6 +13,7 @@ import { PerfilPublicoAuditorResponse } from '../../../core/models/perfil-public
 import { PerfilPublicoAuditorService } from '../../../core/perfil-auditor/perfil-publico-auditor.service';
 import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
 import { ToastService } from '../../../shared/services/toast.service';
+import { AuditoresService } from '../auditores.service';
 import { PerfilPublicoAuditorPageComponent } from './perfil-publico-auditor-page.component';
 
 const AUDITOR_ID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
@@ -23,6 +23,7 @@ const PERFIL_COMPLETO: PerfilPublicoAuditorResponse = {
   nombre: 'Carlos Méndez Solano',
   fotoPerfil: 'https://storage.example.com/foto.jpg',
   descripcionProfesional: 'Auditor con 10 años de experiencia en huella de carbono.',
+  provincia: 'SAN_JOSE',
   especialidades: ['HUELLA_CARBONO', 'ENERGIA_RENOVABLE'],
   certificaciones: [
     {
@@ -44,9 +45,9 @@ const PERFIL_COMPLETO: PerfilPublicoAuditorResponse = {
   auditoriasCompletadas: 8,
   tiempoPromedioRespuestaDias: 2.3,
   distribucionSectores: [
-    { sector: 'Energía', porcentaje: 45.0 },
-    { sector: 'Manufactura', porcentaje: 30.0 },
-    { sector: 'Transporte', porcentaje: 25.0 },
+    { sector: 'Energía', cantidad: 4, porcentaje: 45.0 },
+    { sector: 'Manufactura', cantidad: 3, porcentaje: 30.0 },
+    { sector: 'Transporte', cantidad: 2, porcentaje: 25.0 },
   ],
   resenas: [
     {
@@ -65,7 +66,12 @@ const PERFIL_COMPLETO: PerfilPublicoAuditorResponse = {
 describe('PerfilPublicoAuditorPageComponent', () => {
   let fixture: ComponentFixture<PerfilPublicoAuditorPageComponent>;
   let perfilService: { obtenerPerfilPublico: ReturnType<typeof vi.fn> };
+  let auditoresService: {
+    obtenerEspecialidades: ReturnType<typeof vi.fn>;
+    obtenerZonas: ReturnType<typeof vi.fn>;
+  };
   let toastService: ToastService;
+  let rutaAuditorId: string | null;
   let authSessionStub: {
     isAdministradorEmpresa: ReturnType<typeof vi.fn>;
     getRole: ReturnType<typeof vi.fn>;
@@ -92,10 +98,19 @@ describe('PerfilPublicoAuditorPageComponent', () => {
   }
 
   beforeEach(async () => {
+    rutaAuditorId = AUDITOR_ID;
     perfilService = {
       obtenerPerfilPublico: vi.fn().mockReturnValue(of(PERFIL_COMPLETO)),
     };
-
+    auditoresService = {
+      obtenerEspecialidades: vi.fn().mockReturnValue(
+        of([
+          { valor: 'HUELLA_CARBONO', etiqueta: 'Huella carbono' },
+          { valor: 'ENERGIA_RENOVABLE', etiqueta: 'Energia renovable' },
+        ])
+      ),
+      obtenerZonas: vi.fn().mockReturnValue(of([{ valor: 'SAN_JOSE', etiqueta: 'San José' }])),
+    };
     authSessionStub = {
       isAdministradorEmpresa: vi.fn().mockReturnValue(false),
       getRole: vi.fn().mockReturnValue('usuario_general_empresa'),
@@ -112,10 +127,11 @@ describe('PerfilPublicoAuditorPageComponent', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            snapshot: { paramMap: { get: (_key: string) => AUDITOR_ID } },
+            snapshot: { paramMap: { get: (_key: string) => rutaAuditorId } },
           },
         },
         { provide: PerfilPublicoAuditorService, useValue: perfilService },
+        { provide: AuditoresService, useValue: auditoresService },
         { provide: AuthSessionService, useValue: authSessionStub },
         { provide: AuthService, useValue: { token: signal('fake-token'), cerrarSesion: vi.fn() } },
         { provide: SesionInactividadService, useValue: { reiniciar: vi.fn(), detener: vi.fn() } },
@@ -157,9 +173,16 @@ describe('PerfilPublicoAuditorPageComponent', () => {
       expect(raiz().textContent).toContain('Auditor con 10 años de experiencia');
     });
 
-    it('renderiza especialidades', () => {
-      expect(raiz().textContent).toContain('Huella Carbono');
-      expect(raiz().textContent).toContain('Energia Renovable');
+    it('renderiza la provincia real del perfil', async () => {
+      await vi.waitFor(() => expect(raiz().textContent).toContain('San José, Costa Rica'));
+    });
+
+    it('renderiza especialidades', async () => {
+      expect(auditoresService.obtenerEspecialidades).toHaveBeenCalled();
+      await vi.waitFor(() => {
+        expect(raiz().textContent).toContain('Huella carbono');
+        expect(raiz().textContent).toContain('Energia renovable');
+      });
     });
 
     it('renderiza certificaciones con etiqueta vencida', () => {
@@ -191,7 +214,7 @@ describe('PerfilPublicoAuditorPageComponent', () => {
     });
   });
 
-  describe('métricas null muestra "Sin datos suficientes"', () => {
+  describe('métricas null muestra "Sin datos"', () => {
     it('muestra texto indicativo cuando métricas son null', async () => {
       perfilService.obtenerPerfilPublico.mockReturnValue(
         of({
@@ -206,10 +229,9 @@ describe('PerfilPublicoAuditorPageComponent', () => {
       fixture = TestBed.createComponent(PerfilPublicoAuditorPageComponent);
       await estabilizar();
 
-      // Cuando métricas son null, los KPIs muestran "—" (dash)
       const kpis = raiz().querySelectorAll('.ch-perfil-auditor__kpi-value');
       const kpiTexts = Array.from(kpis).map((el) => el.textContent?.trim());
-      expect(kpiTexts.some((t) => t === '—')).toBe(true);
+      expect(kpiTexts).toEqual(['Sin datos', 'Sin datos']);
     });
   });
 
@@ -237,6 +259,19 @@ describe('PerfilPublicoAuditorPageComponent', () => {
 
       // Cuando distribucionSectores está vacío, la sección no se renderiza
       expect(raiz().querySelector('.ch-perfil-auditor__dist')).toBeNull();
+    });
+  });
+
+  describe('provincia vacía', () => {
+    it('no muestra ubicación cuando el perfil no trae provincia', async () => {
+      perfilService.obtenerPerfilPublico.mockReturnValue(
+        of({ ...PERFIL_COMPLETO, provincia: null })
+      );
+
+      fixture = TestBed.createComponent(PerfilPublicoAuditorPageComponent);
+      await estabilizar();
+
+      expect(raiz().textContent).not.toContain('San José, Costa Rica');
     });
   });
 
@@ -271,6 +306,59 @@ describe('PerfilPublicoAuditorPageComponent', () => {
       const botonVolver = raiz().querySelector('.ch-perfil-auditor__error-btn') as HTMLElement;
       expect(botonVolver).not.toBeNull();
       expect(botonVolver.textContent).toContain('Volver al directorio');
+    });
+  });
+
+  describe('parámetro de ruta ausente', () => {
+    it('vuelve al directorio sin llamar el perfil cuando falta el id', async () => {
+      rutaAuditorId = null;
+      const router = TestBed.inject(Router);
+      const navegar = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+      fixture = TestBed.createComponent(PerfilPublicoAuditorPageComponent);
+      await estabilizar();
+
+      expect(perfilService.obtenerPerfilPublico).not.toHaveBeenCalled();
+      expect(auditoresService.obtenerEspecialidades).not.toHaveBeenCalled();
+      expect(auditoresService.obtenerZonas).not.toHaveBeenCalled();
+      expect(navegar).toHaveBeenCalledWith(['/auditores']);
+    });
+  });
+
+  describe('errores de catálogos', () => {
+    it('muestra toast y usa códigos cuando falla el catálogo de especialidades', async () => {
+      auditoresService.obtenerEspecialidades.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 503,
+              error: { message: 'No se pudieron cargar las especialidades.' },
+            })
+        )
+      );
+
+      fixture = TestBed.createComponent(PerfilPublicoAuditorPageComponent);
+      await estabilizar();
+
+      const mensajes = toastService.toasts().map((t) => t.title);
+      expect(mensajes).toContain('No se pudieron cargar las especialidades.');
+      expect(raiz().textContent).toContain('HUELLA_CARBONO');
+      expect(raiz().textContent).toContain('ENERGIA_RENOVABLE');
+    });
+
+    it('muestra toast y usa código de provincia cuando falla el catálogo de zonas', async () => {
+      auditoresService.obtenerZonas.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 }))
+      );
+
+      fixture = TestBed.createComponent(PerfilPublicoAuditorPageComponent);
+      await estabilizar();
+
+      const mensajes = toastService.toasts().map((t) => t.title);
+      expect(mensajes).toContain(
+        'No se pudo cargar el catálogo de zonas. Se mostrará el código de provincia.'
+      );
+      expect(raiz().textContent).toContain('SAN_JOSE, Costa Rica');
     });
   });
 

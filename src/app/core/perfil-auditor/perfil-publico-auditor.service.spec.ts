@@ -30,6 +30,7 @@ describe('PerfilPublicoAuditorService', () => {
         nombre: 'Juan Pérez Solano',
         fotoPerfil: 'https://storage.example.com/foto.jpg',
         descripcionProfesional: 'Auditor con 10 años de experiencia',
+        provincia: 'SAN_JOSE',
         especialidades: ['HUELLA_CARBONO', 'ENERGIA_RENOVABLE'],
         certificaciones: [
           {
@@ -45,8 +46,8 @@ describe('PerfilPublicoAuditorService', () => {
         auditoriasCompletadas: 8,
         tiempoPromedioRespuestaDias: 2.3,
         distribucionSectores: [
-          { sector: 'Energía', porcentaje: 45.0 },
-          { sector: 'Manufactura', porcentaje: 55.0 },
+          { sector: 'Energía', cantidad: 4, porcentaje: 45.0 },
+          { sector: 'Manufactura', cantidad: 5, porcentaje: 55.0 },
         ],
         resenas: [
           {

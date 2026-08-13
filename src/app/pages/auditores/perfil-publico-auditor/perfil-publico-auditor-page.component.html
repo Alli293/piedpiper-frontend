@@ -16,11 +16,7 @@
     </div>
   }
 
-  @if (!cargando() && error() && errorTipo() === '5xx') {
-    <!-- Toast ya mostrado via ToastService; no se necesita contenido inline -->
-  }
-
-  @if (!cargando() && !error() && perfil()) {
+  @if (!cargando() && !error() && perfil(); as perfil) {
     <main class="ch-perfil-auditor">
       <!-- Contenido principal + Sidebar -->
       <div class="ch-perfil-auditor__grid">
@@ -30,11 +26,11 @@
           <app-card variant="outlined" padding="md" class="ch-perfil-auditor__header-card">
             <div class="ch-perfil-auditor__header">
               <div class="ch-perfil-auditor__avatar-wrapper">
-                @if (perfil()!.fotoPerfil) {
+                @if (perfil.fotoPerfil) {
                   <img
                     class="ch-perfil-auditor__avatar-img"
-                    [src]="perfil()!.fotoPerfil"
-                    [alt]="'Foto de ' + perfil()!.nombre"
+                    [src]="perfil.fotoPerfil"
+                    [alt]="'Foto de ' + perfil.nombre"
                   />
                 } @else {
                   <div class="ch-perfil-auditor__avatar-circle" aria-hidden="true">
@@ -44,7 +40,7 @@
               </div>
               <div class="ch-perfil-auditor__info">
                 <div class="ch-perfil-auditor__name-row">
-                  <h2 class="ch-perfil-auditor__nombre">{{ perfil()!.nombre }}</h2>
+                  <h2 class="ch-perfil-auditor__nombre">{{ perfil.nombre }}</h2>
                   <app-icon
                     class="ch-perfil-auditor__verified-icon"
                     name="verificada"
@@ -52,16 +48,13 @@
                     aria-label="Perfil verificado"
                   />
                 </div>
-                @if (perfil()!.descripcionProfesional) {
-                  <p class="ch-perfil-auditor__subtitle">{{ perfil()!.descripcionProfesional }}</p>
+                @if (perfil.descripcionProfesional) {
+                  <p class="ch-perfil-auditor__subtitle">{{ perfil.descripcionProfesional }}</p>
                 }
-                @if (perfil()!.calificacionPromedio !== null) {
+                @if (perfil.calificacionPromedio !== null) {
                   <div class="ch-perfil-auditor__rating">
                     <span class="ch-perfil-auditor__stars" aria-hidden="true">
-                      @for (
-                        filled of generarEstrellas(perfil()!.calificacionPromedio!);
-                        track $index
-                      ) {
+                      @for (filled of generarEstrellas(perfil.calificacionPromedio); track $index) {
                         <span
                           class="ch-perfil-auditor__star"
                           [class.ch-perfil-auditor__star--filled]="filled"
@@ -70,19 +63,25 @@
                       }
                     </span>
                     <span class="ch-perfil-auditor__rating-value">{{
-                      perfil()!.calificacionPromedio
+                      perfil.calificacionPromedio
                     }}</span>
-                    @if (perfil()!.totalResenas !== null) {
+                    @if (perfil.totalResenas !== null) {
                       <span class="ch-perfil-auditor__rating-count"
-                        >· {{ perfil()!.totalResenas }} reseñas</span
+                        >· {{ perfil.totalResenas }} reseñas</span
                       >
                     }
                   </div>
                 }
                 <div class="ch-perfil-auditor__meta">
+                  @if (ubicacion()) {
+                    <span class="ch-perfil-auditor__meta-item">
+                      <app-icon name="ubicacion" [size]="14" aria-hidden="true" />
+                      {{ ubicacion() }}
+                    </span>
+                  }
                   <span class="ch-perfil-auditor__meta-item">
                     <app-icon name="reloj" [size]="14" aria-hidden="true" />
-                    @if (perfil()!.disponible) {
+                    @if (perfil.disponible) {
                       Disponible para auditorías
                     } @else {
                       No disponible actualmente
@@ -99,11 +98,11 @@
               <app-icon name="sector" [size]="18" aria-hidden="true" />
               <h2 class="ch-perfil-auditor__section-title" id="esp-title">Especialidades</h2>
             </div>
-            @if (perfil()!.especialidades.length > 0) {
+            @if (perfil.especialidades.length > 0) {
               <div class="ch-perfil-auditor__chips">
-                @for (especialidad of perfil()!.especialidades; track especialidad) {
+                @for (especialidad of perfil.especialidades; track especialidad) {
                   <span class="ch-perfil-auditor__chip">{{
-                    formatearEspecialidad(especialidad)
+                    etiquetaEspecialidad(especialidad)
                   }}</span>
                 }
               </div>
@@ -118,7 +117,7 @@
               <app-icon name="certificaciones" [size]="18" aria-hidden="true" />
               <h2 class="ch-perfil-auditor__section-title" id="cert-title">Certificaciones</h2>
               <span class="ch-perfil-auditor__section-count">{{
-                perfil()!.certificaciones.length
+                perfil.certificaciones.length
               }}</span>
               @if (certificacionesVencidas() > 0) {
                 <span class="ch-perfil-auditor__section-warning">
@@ -128,9 +127,9 @@
                 </span>
               }
             </div>
-            @if (perfil()!.certificaciones.length > 0) {
+            @if (perfil.certificaciones.length > 0) {
               <div class="ch-perfil-auditor__cert-list">
-                @for (cert of perfil()!.certificaciones; track cert.nombre) {
+                @for (cert of perfil.certificaciones; track cert.nombre) {
                   <div class="ch-perfil-auditor__cert-card">
                     <div class="ch-perfil-auditor__cert-icon">
                       <app-icon name="certificaciones" [size]="20" aria-hidden="true" />
@@ -171,28 +170,38 @@
 
             <div class="ch-perfil-auditor__kpis">
               <div class="ch-perfil-auditor__kpi">
-                <span class="ch-perfil-auditor__kpi-value">
-                  {{ perfil()!.auditoriasCompletadas ?? '—' }}
+                <span
+                  class="ch-perfil-auditor__kpi-value"
+                  [class.ch-perfil-auditor__kpi-value--empty]="
+                    perfil.auditoriasCompletadas === null
+                  "
+                >
+                  {{ perfil.auditoriasCompletadas ?? 'Sin datos' }}
                 </span>
                 <span class="ch-perfil-auditor__kpi-label">Auditorías completadas</span>
               </div>
               <div class="ch-perfil-auditor__kpi">
-                <span class="ch-perfil-auditor__kpi-value">
-                  @if (perfil()!.tiempoPromedioRespuestaDias !== null) {
-                    {{ perfil()!.tiempoPromedioRespuestaDias }}d
-                  } @else {
-                    —
-                  }
+                <span
+                  class="ch-perfil-auditor__kpi-value"
+                  [class.ch-perfil-auditor__kpi-value--empty]="
+                    perfil.tiempoPromedioRespuestaDias === null
+                  "
+                >
+                  {{
+                    perfil.tiempoPromedioRespuestaDias !== null
+                      ? perfil.tiempoPromedioRespuestaDias + 'd'
+                      : 'Sin datos'
+                  }}
                 </span>
                 <span class="ch-perfil-auditor__kpi-label">Tiempo promedio respuesta</span>
               </div>
             </div>
 
-            @if (perfil()!.distribucionSectores.length > 0) {
+            @if (perfil.distribucionSectores.length > 0) {
               <div class="ch-perfil-auditor__dist">
                 <span class="ch-perfil-auditor__dist-title">DISTRIBUCIÓN POR SECTOR</span>
                 <div class="ch-perfil-auditor__dist-bars">
-                  @for (sector of perfil()!.distribucionSectores; track sector.sector) {
+                  @for (sector of perfil.distribucionSectores; track sector.sector) {
                     <div class="ch-perfil-auditor__dist-row">
                       <span class="ch-perfil-auditor__dist-label">{{ sector.sector }}</span>
                       <div class="ch-perfil-auditor__dist-bar-wrapper">
@@ -242,12 +251,12 @@
         <div class="ch-perfil-auditor__section-header">
           <app-icon name="auditor-badge" [size]="18" aria-hidden="true" />
           <h2 class="ch-perfil-auditor__section-title" id="resenas-title">Reseñas verificadas</h2>
-          @if (perfil()!.totalResenas !== null) {
-            <span class="ch-perfil-auditor__section-count">{{ perfil()!.totalResenas }}</span>
+          @if (perfil.totalResenas !== null) {
+            <span class="ch-perfil-auditor__section-count">{{ perfil.totalResenas }}</span>
           }
-          @if (perfil()!.calificacionPromedio !== null) {
+          @if (perfil.calificacionPromedio !== null) {
             <span class="ch-perfil-auditor__section-avg"
-              >promedio {{ perfil()!.calificacionPromedio }}</span
+              >promedio {{ perfil.calificacionPromedio }}</span
             >
           }
         </div>
