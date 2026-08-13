@@ -308,6 +308,21 @@ export const routes: Routes = [
         (m) => m.VerificacionPublicaPageComponent
       ),
   },
+  // Públicas y sin guard a propósito: se enlazan desde el registro, donde todavía no hay sesión.
+  // El documento se elige por `data` y no por la URL, así una ruta nueva no puede caer en la
+  // pantalla sin declarar qué texto muestra.
+  {
+    path: 'terminos',
+    data: { documento: 'terminos' },
+    loadComponent: () =>
+      import('./pages/legal/legal-page.component').then((m) => m.LegalPageComponent),
+  },
+  {
+    path: 'privacidad',
+    data: { documento: 'privacidad' },
+    loadComponent: () =>
+      import('./pages/legal/legal-page.component').then((m) => m.LegalPageComponent),
+  },
   {
     path: 'empresa/emisiones',
     canActivate: [guardEmpresa],

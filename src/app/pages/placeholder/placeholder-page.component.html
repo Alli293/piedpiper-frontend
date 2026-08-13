@@ -3,9 +3,14 @@
     <span class="placeholder__badge">Próximamente</span>
     <h1 class="placeholder__title">Estamos construyendo esta sección</h1>
     <p class="placeholder__text">
-      Tu autenticación fue exitosa. Esta pantalla llega en un ticket aparte, muy pronto vas a poder
-      continuar desde aquí.
+      @if (haySesion()) {
+        Esta pantalla llega en un ticket aparte. Mientras tanto, podés seguir usando el resto de la
+        plataforma.
+      } @else {
+        Tu autenticación fue exitosa. Esta pantalla llega en un ticket aparte, muy pronto vas a
+        poder continuar desde aquí.
+      }
     </p>
-    <a class="placeholder__link" routerLink="/login">Volver al inicio de sesión</a>
+    <a class="placeholder__link" [routerLink]="rutaVolver()">{{ textoVolver() }}</a>
   </div>
 </main>

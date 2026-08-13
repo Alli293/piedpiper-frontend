@@ -1,0 +1,39 @@
+<main class="ch-legal">
+  <a class="ch-legal__marca" routerLink="/" aria-label="Ir al inicio de CarbonHub">
+    <app-logo />
+  </a>
+
+  <article class="ch-legal__documento">
+    <app-heading level="h1" [text]="documento().titulo" />
+
+    <p class="ch-legal__entradilla">{{ documento().entradilla }}</p>
+
+    @for (seccion of documento().secciones; track seccion.titulo) {
+      <section class="ch-legal__seccion">
+        <app-heading level="h2" [text]="seccion.titulo" />
+
+        @for (parrafo of seccion.parrafos; track parrafo) {
+          <p class="ch-legal__parrafo">{{ parrafo }}</p>
+        }
+
+        @if (seccion.lista) {
+          <ul class="ch-legal__lista">
+            @for (item of seccion.lista; track item) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
+    <footer class="ch-legal__pie">
+      <p>Última actualización: {{ ultimaActualizacion }}</p>
+      <!-- Enlace cruzado: quien abre uno de los dos documentos suele querer leer el otro. -->
+      @if (documentoActual() === 'terminos') {
+        <a routerLink="/privacidad">Ver la política de privacidad</a>
+      } @else {
+        <a routerLink="/terminos">Ver los términos de uso</a>
+      }
+    </footer>
+  </article>
+</main>

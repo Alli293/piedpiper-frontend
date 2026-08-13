@@ -1,0 +1,66 @@
+.ch-legal {
+  min-height: 100vh;
+  padding: var(--ch-space-6);
+  background: var(--ch-green-soft);
+}
+
+.ch-legal__marca {
+  display: inline-flex;
+  margin-bottom: var(--ch-space-5);
+}
+
+.ch-legal__documento {
+  // Ancho acotado a propósito: un texto legal a todo el ancho de la pantalla es ilegible.
+  max-width: 68ch;
+  margin: 0 auto;
+  padding: var(--ch-space-8);
+  background: var(--ch-bg-white);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-lg);
+}
+
+.ch-legal__entradilla {
+  margin: var(--ch-space-4) 0 var(--ch-space-6);
+  padding: var(--ch-space-4);
+  border-left: 3px solid var(--ch-color-warning, var(--ch-border));
+  border-radius: var(--ch-radius-sm);
+  background: var(--ch-green-soft);
+  color: var(--ch-color-text);
+  font-size: var(--ch-font-size-sm);
+  line-height: 1.6;
+}
+
+.ch-legal__seccion {
+  margin-top: var(--ch-space-6);
+}
+
+.ch-legal__parrafo {
+  margin: var(--ch-space-2) 0 0;
+  line-height: 1.7;
+}
+
+.ch-legal__lista {
+  margin: var(--ch-space-3) 0 0;
+  padding-left: var(--ch-space-5);
+  line-height: 1.7;
+
+  li + li {
+    margin-top: var(--ch-space-2);
+  }
+}
+
+.ch-legal__pie {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--ch-space-3);
+  margin-top: var(--ch-space-8);
+  padding-top: var(--ch-space-4);
+  border-top: 1px solid var(--ch-border);
+  color: var(--ch-color-text-muted);
+  font-size: var(--ch-font-size-sm);
+
+  p {
+    margin: 0;
+  }
+}
