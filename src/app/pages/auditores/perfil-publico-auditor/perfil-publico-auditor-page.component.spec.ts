@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -314,6 +314,24 @@ describe('PerfilPublicoAuditorPageComponent', () => {
 
       const botonAsignar = raiz().querySelector('.ch-perfil-auditor__hire-btn');
       expect(botonAsignar).toBeNull();
+    });
+
+    it('al hacer click en el botón navega a /empresa/auditorias/nueva con auditorId', async () => {
+      configurarAuthSession(true);
+
+      fixture = TestBed.createComponent(PerfilPublicoAuditorPageComponent);
+      await estabilizar();
+
+      const router = TestBed.inject(Router);
+      const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+      const botonAsignar = raiz().querySelector('.ch-perfil-auditor__hire-btn') as HTMLElement;
+      botonAsignar.click();
+      await fixture.whenStable();
+
+      expect(navigateSpy).toHaveBeenCalledWith(['/empresa/auditorias/nueva'], {
+        queryParams: { auditorId: AUDITOR_ID },
+      });
     });
   });
 });
