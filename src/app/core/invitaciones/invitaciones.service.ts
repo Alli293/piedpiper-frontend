@@ -14,7 +14,7 @@ export interface Invitacion {
 }
 
 export interface InvitacionPublica {
-  email: string;
+  emailEnmascarado: string;
   nombreEmpresa: string;
 }
 
@@ -36,6 +36,9 @@ export class InvitacionesService {
   }
 
   resolver(token: string): Observable<InvitacionPublica> {
-    return this.http.get<InvitacionPublica>(`${environment.apiBaseUrl}/auth/invitaciones/${token}`);
+    return this.http.post<InvitacionPublica>(
+      `${environment.apiBaseUrl}/auth/invitaciones/resolver`,
+      { token }
+    );
   }
 }

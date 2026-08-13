@@ -309,23 +309,55 @@
                 </p>
               }
 
-              <div class="ch-detalle-auditoria__resultado-acciones">
-                <app-button
-                  type="button"
-                  variant="secondary"
-                  [disabled]="enviandoResultado()"
-                  (click)="registrarObservaciones()"
-                >
-                  Observaciones
-                </app-button>
-                <app-button
-                  type="button"
-                  [loading]="enviandoResultado()"
-                  (click)="aprobarAuditoria()"
-                >
-                  Aprobar auditoría
-                </app-button>
-              </div>
+              <form
+                class="ch-detalle-auditoria__resultado-form"
+                novalidate
+                (submit)="handleSubmitResultado($event)"
+              >
+                <div class="ch-detalle-auditoria__resultado-campos">
+                  <app-radio-group-field
+                    label="Resultado"
+                    [options]="opcionesResultado"
+                    [formField]="resultadoForm.resultado"
+                    [error]="resultadoError()"
+                  />
+
+                  @if (pideVencimiento()) {
+                    <app-date-input
+                      label="Vencimiento de la certificación"
+                      [formField]="resultadoForm.fechaVencimientoCert"
+                      [error]="vencimientoError()"
+                      hint="Debe ser posterior a la fecha en que realizaste la auditoría."
+                    />
+                  }
+
+                  @if (pideObservaciones()) {
+                    <div class="ch-detalle-auditoria__resultado-observaciones">
+                      <app-textarea
+                        label="Observaciones"
+                        [formField]="resultadoForm.observaciones"
+                        [rows]="5"
+                        [error]="observacionesError()"
+                        placeholder="Describe qué debe corregir la empresa para volver a solicitar la auditoría."
+                      />
+                      <p class="ch-detalle-auditoria__contador" aria-live="polite">
+                        {{ caracteresObservaciones() }} / {{ maximoObservaciones }} caracteres
+                        (mínimo {{ minimoObservaciones }})
+                      </p>
+                    </div>
+                  }
+                </div>
+
+                <div class="ch-detalle-auditoria__resultado-acciones">
+                  <app-button
+                    type="submit"
+                    [disabled]="!puedeConfirmarResultado()"
+                    [loading]="enviandoResultado()"
+                  >
+                    Confirmar resultado
+                  </app-button>
+                </div>
+              </form>
             </article>
           }
 

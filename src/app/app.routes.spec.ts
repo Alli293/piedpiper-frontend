@@ -2,6 +2,8 @@ import {
   guardAuditor,
   guardEmpresa,
   guardEmpresaAdmin,
+  guardDirectorioAuditores,
+  guardAdmin,
   routes,
   rutasPostAutenticacion,
   usuarioIndividualGuard,
@@ -106,6 +108,18 @@ describe('app.routes', () => {
       const ruta = routes.find((r) => r.path === path);
       expect(ruta?.canActivate).toContain(guardAuditor);
     }
+  });
+
+  it('el directorio de auditores solo admite los roles autorizados por el backend', () => {
+    for (const path of ['auditores', 'auditores/:id']) {
+      const ruta = routes.find((r) => r.path === path);
+      expect(ruta?.canActivate).toEqual([guardDirectorioAuditores]);
+    }
+  });
+
+  it('ui-kit no queda expuesto sin rol de administrador de plataforma', () => {
+    const ruta = routes.find((r) => r.path === 'ui-kit');
+    expect(ruta?.canActivate).toEqual([guardAdmin]);
   });
 
   it('auditor/validacion-pendiente solo exige sesion iniciada, sin exigir el rol final', () => {
