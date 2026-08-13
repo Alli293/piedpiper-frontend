@@ -1,0 +1,128 @@
+<app-shell-layout
+  activeId="ecoruta-itinerarios"
+  variant="ecoruta"
+  companyName="EcoRuta"
+  companyRole="Viajes sostenibles"
+  companyInitials="ER"
+  [headerConfig]="headerConfig()"
+>
+  <section class="ch-mis-itinerarios" aria-label="Mis itinerarios">
+    <div class="ch-mis-itinerarios__intro">
+      <div>
+        <app-heading level="h2" text="Mis itinerarios" />
+        <p class="ch-mis-itinerarios__descripcion">
+          @if (totalResultados() > 0) {
+            {{ totalResultados() }} itinerario{{ totalResultados() === 1 ? '' : 's' }} guardado{{
+              totalResultados() === 1 ? '' : 's'
+            }}
+          } @else {
+            Todavía no tenés itinerarios guardados.
+          }
+        </p>
+      </div>
+      <app-button (click)="nuevoItinerario()">+ Nuevo itinerario</app-button>
+    </div>
+
+    @if (cargando()) {
+      <p class="ch-mis-itinerarios__estado">Cargando tus itinerarios…</p>
+    } @else if (error()) {
+      <p class="ch-mis-itinerarios__error" role="alert">{{ error() }}</p>
+    } @else if (itinerarios().length === 0) {
+      <div class="ch-mis-itinerarios__vacio">
+        <p>Todavía no tenés itinerarios guardados.</p>
+        <app-button (click)="nuevoItinerario()">Planificar mi primer viaje</app-button>
+      </div>
+    } @else {
+      <div class="ch-mis-itinerarios__grid">
+        @for (item of itinerarios(); track item.id) {
+          <article class="ch-mis-itinerarios__tarjeta">
+            <div class="ch-mis-itinerarios__portada" aria-hidden="true">
+              <app-icon name="ubicacion" [size]="28" />
+            </div>
+            <div class="ch-mis-itinerarios__contenido">
+              <div class="ch-mis-itinerarios__meta">
+                @if (item.ecoScore !== null) {
+                  <app-badge [variant]="varianteDe(item)">
+                    {{ item.ecoScore | number: '1.0-0' }} {{ textoClasificacion(item) }}
+                  </app-badge>
+                }
+                <button
+                  type="button"
+                  class="ch-mis-itinerarios__eliminar"
+                  [attr.aria-label]="'Eliminar itinerario ' + tituloDe(item)"
+                  (click)="solicitarEliminar(item)"
+                >
+                  <app-icon name="delete" [size]="16" />
+                </button>
+              </div>
+              <h3 class="ch-mis-itinerarios__titulo">{{ tituloDe(item) }}</h3>
+              <p class="ch-mis-itinerarios__detalle">
+                {{ item.cantidadDias }} día{{ item.cantidadDias === 1 ? '' : 's' }} ·
+                {{ item.fechaInicio | date: 'd MMM y' }}
+              </p>
+              <app-button variant="secondary" size="sm" (click)="abrir(item.id)">
+                Abrir →
+              </app-button>
+            </div>
+          </article>
+        }
+      </div>
+
+      @if (totalPaginas() > 1) {
+        <nav class="ch-mis-itinerarios__paginador" aria-label="Paginación de itinerarios">
+          <app-button
+            variant="secondary"
+            size="sm"
+            [disabled]="!hayPaginaAnterior() || cargando()"
+            (click)="irAPagina(pagina() - 1)"
+          >
+            Anterior
+          </app-button>
+          <p class="ch-mis-itinerarios__pagina-actual" aria-live="polite">
+            Página {{ pagina() }} de {{ totalPaginas() }}
+          </p>
+          <app-button
+            variant="secondary"
+            size="sm"
+            [disabled]="!hayPaginaSiguiente() || cargando()"
+            (click)="irAPagina(pagina() + 1)"
+          >
+            Siguiente
+          </app-button>
+        </nav>
+      }
+    }
+  </section>
+
+  @if (confirmTarget(); as item) {
+    <app-modal labelledBy="eliminar-itinerario-title" (close)="cancelarEliminar()">
+      <div class="ch-mis-itinerarios__modal-icon" aria-hidden="true">
+        <app-icon name="delete" [size]="18" />
+      </div>
+      <div class="ch-mis-itinerarios__modal-copy">
+        <app-heading
+          id="eliminar-itinerario-title"
+          level="h2"
+          appearance="h4"
+          text="¿Eliminar este itinerario?"
+        />
+        <p>
+          Esta acción no se puede deshacer. Se eliminará "{{ tituloDe(item) }}" permanentemente.
+        </p>
+      </div>
+      <div class="ch-mis-itinerarios__modal-actions">
+        <app-button type="button" variant="secondary" (click)="cancelarEliminar()">
+          Cancelar
+        </app-button>
+        <app-button
+          type="button"
+          variant="danger"
+          [loading]="deletingId() === item.id"
+          (click)="confirmarEliminar()"
+        >
+          Eliminar
+        </app-button>
+      </div>
+    </app-modal>
+  }
+</app-shell-layout>

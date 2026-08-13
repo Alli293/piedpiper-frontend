@@ -255,7 +255,10 @@ export const routes: Routes = [
   {
     path: 'ecoruta/itinerarios',
     canActivate: [usuarioIndividualGuard],
-    loadComponent: cargarPlaceholder,
+    loadComponent: () =>
+      import('./pages/ecoruta/itinerarios/mis-itinerarios/mis-itinerarios-page.component').then(
+        (m) => m.MisItinerariosPageComponent
+      ),
   },
   {
     path: 'ecoruta/itinerarios/:id',

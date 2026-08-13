@@ -40,3 +40,31 @@ export interface Itinerario {
   dias: ItinerarioDia[];
   establecimientosEvaluados: EstablecimientoEcoScore[] | null;
 }
+
+/** Fila liviana del listado de "Mis itinerarios" (PP-89) — sin `dias` completo. */
+export interface ItinerarioResumen {
+  id: string;
+  cantidadDias: number;
+  fechaInicio: string;
+  tipoViaje: string;
+  ecoScore: number | null;
+  clasificacionAmbiental: Itinerario['clasificacionAmbiental'];
+  ecoScoreParcial: boolean;
+  provinciasVisitadas: string[];
+  fechaGeneracion: string;
+  actualizadoEn: string;
+}
+
+/** Nombre genérico a propósito: PP-90 (favoritos, fuera de esta ronda) solo suma un campo acá. */
+export interface FiltroItinerarios {
+  pagina?: number;
+}
+
+/** Misma forma que la paginación de solicitudes de auditoría, para paginar igual en toda la app. */
+export interface PaginaItinerarios {
+  contenido: ItinerarioResumen[];
+  totalResultados: number;
+  paginaActual: number;
+  totalPaginas: number;
+  tamanioPagina: number;
+}
