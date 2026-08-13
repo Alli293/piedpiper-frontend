@@ -132,12 +132,14 @@
       } @else if (errorDetalle() || !detalle()) {
         <p role="alert">No fue posible cargar esta certificación.</p>
       } @else if (detalle(); as cert) {
-        <app-detalle-panel
-          [dato]="datoDetalle(cert)"
-          [acciones]="accionesDetalle(cert)"
-          tituloId="detalle-cert-titulo"
-          (accionClick)="onAccionDetalle($event, cert)"
-        />
+        @if (datoDetalleActual(); as dato) {
+          <app-detalle-panel
+            [dato]="dato"
+            [acciones]="accionesDetalleActual()"
+            tituloId="detalle-cert-titulo"
+            (accionClick)="onAccionDetalle($event, cert)"
+          />
+        }
       }
     </app-modal>
   }

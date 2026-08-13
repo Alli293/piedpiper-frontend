@@ -158,9 +158,18 @@ export class CertificacionesListadoPageComponent implements OnInit {
     this.detalleAbiertoId.set(null);
     this.detalle.set(null);
     this.errorDetalle.set(false);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { id: null },
+      queryParamsHandling: 'merge',
+    });
   }
 
-  protected datoDetalle(cert: Certificacion): DetallePanelDato {
+  // computed() en vez de un método llamado desde el template: `detalle()` solo cambia cuando
+  // termina de cargar, así que esto no reconstruye dato/acciones en cada ciclo de detección.
+  protected readonly datoDetalleActual = computed<DetallePanelDato | null>(() => {
+    const cert = this.detalle();
+    if (!cert) return null;
     return {
       icono: 'certificaciones',
       titulo: cert.nombreCertificacion,
@@ -192,9 +201,11 @@ export class CertificacionesListadoPageComponent implements OnInit {
           'Esta certificación es una credencial verificable. Comprueba su autenticidad e integridad con un verificador compatible con OpenBadges 3.0.',
       },
     };
-  }
+  });
 
-  protected accionesDetalle(cert: Certificacion): DetallePanelAccion[] {
+  protected readonly accionesDetalleActual = computed<DetallePanelAccion[]>(() => {
+    const cert = this.detalle();
+    if (!cert) return [];
     return [
       {
         id: 'descargar',
@@ -212,7 +223,7 @@ export class CertificacionesListadoPageComponent implements OnInit {
       },
       { id: 'compartir', etiqueta: 'Compartir', icono: 'linkedin', variant: 'primary' },
     ];
-  }
+  });
 
   protected onAccionDetalle(id: string, cert: Certificacion): void {
     switch (id) {

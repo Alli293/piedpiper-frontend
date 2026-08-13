@@ -238,4 +238,27 @@ describe('CertificacionesListadoPageComponent - detalle en modal', () => {
 
     expect(root.querySelector('app-modal')).toBeNull();
   });
+
+  it('al cerrar el modal limpia el ?id= de la URL', async () => {
+    idQueryParam = 'c1';
+    fixture = TestBed.createComponent(CertificacionesListadoPageComponent);
+    fixture.detectChanges();
+    httpMock.expectOne(baseUrl).flush([CERT_RESUMEN]);
+    await fixture.whenStable();
+    await flushMicrotasks();
+    fixture.detectChanges();
+    httpMock.expectOne(`${baseUrl}/c1`).flush(CERT_DETALLE);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const router = TestBed.inject(Router);
+    const navegar = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    (fixture.componentInstance as any).cerrarDetalle();
+
+    expect(navegar).toHaveBeenCalledWith(
+      [],
+      expect.objectContaining({ queryParams: { id: null }, queryParamsHandling: 'merge' })
+    );
+  });
 });
