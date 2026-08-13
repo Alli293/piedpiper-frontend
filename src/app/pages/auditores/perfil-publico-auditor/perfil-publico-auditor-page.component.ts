@@ -18,6 +18,7 @@ import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.co
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
 import { AuditoresService } from '../auditores.service';
+import { cargarCatalogoAuditor, mapaEtiquetasCatalogo } from '../catalogo-auditores.utils';
 
 type ErrorTipo = 'none' | '404' | '5xx';
 
@@ -96,12 +97,12 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
 
   ngOnInit(): void {
     const auditorId = this.route.snapshot.paramMap.get('id');
-    void this.cargarCatalogos();
     if (!auditorId) {
       this.cargando.set(false);
       void this.router.navigate(['/auditores']);
       return;
     }
+    void this.cargarCatalogos();
     void this.cargarPerfil(auditorId);
   }
 
@@ -156,22 +157,20 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   }
 
   private async cargarEspecialidades(): Promise<void> {
-    try {
-      const especialidades = await firstValueFrom(this.auditoresService.obtenerEspecialidades());
-      this.etiquetasEspecialidad.set(
-        new Map(especialidades.map((especialidad) => [especialidad.valor, especialidad.etiqueta]))
-      );
-    } catch {
-      this.etiquetasEspecialidad.set(new Map());
-    }
+    const resultado = await cargarCatalogoAuditor(
+      this.auditoresService.obtenerEspecialidades(),
+      this.toastService,
+      'No se pudo cargar el catálogo de especialidades. Se mostrarán los códigos del perfil.'
+    );
+    this.etiquetasEspecialidad.set(mapaEtiquetasCatalogo(resultado.items));
   }
 
   private async cargarZonas(): Promise<void> {
-    try {
-      const zonas = await firstValueFrom(this.auditoresService.obtenerZonas());
-      this.etiquetasZona.set(new Map(zonas.map((zona) => [zona.valor, zona.etiqueta])));
-    } catch {
-      this.etiquetasZona.set(new Map());
-    }
+    const resultado = await cargarCatalogoAuditor(
+      this.auditoresService.obtenerZonas(),
+      this.toastService,
+      'No se pudo cargar el catálogo de zonas. Se mostrará el código de provincia.'
+    );
+    this.etiquetasZona.set(mapaEtiquetasCatalogo(resultado.items));
   }
 }

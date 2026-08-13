@@ -173,14 +173,16 @@ describe('PerfilPublicoAuditorPageComponent', () => {
       expect(raiz().textContent).toContain('Auditor con 10 años de experiencia');
     });
 
-    it('renderiza la provincia real del perfil', () => {
-      expect(raiz().textContent).toContain('San José, Costa Rica');
+    it('renderiza la provincia real del perfil', async () => {
+      await vi.waitFor(() => expect(raiz().textContent).toContain('San José, Costa Rica'));
     });
 
-    it('renderiza especialidades', () => {
+    it('renderiza especialidades', async () => {
       expect(auditoresService.obtenerEspecialidades).toHaveBeenCalled();
-      expect(raiz().textContent).toContain('Huella carbono');
-      expect(raiz().textContent).toContain('Energia renovable');
+      await vi.waitFor(() => {
+        expect(raiz().textContent).toContain('Huella carbono');
+        expect(raiz().textContent).toContain('Energia renovable');
+      });
     });
 
     it('renderiza certificaciones con etiqueta vencida', () => {
@@ -317,7 +319,46 @@ describe('PerfilPublicoAuditorPageComponent', () => {
       await estabilizar();
 
       expect(perfilService.obtenerPerfilPublico).not.toHaveBeenCalled();
+      expect(auditoresService.obtenerEspecialidades).not.toHaveBeenCalled();
+      expect(auditoresService.obtenerZonas).not.toHaveBeenCalled();
       expect(navegar).toHaveBeenCalledWith(['/auditores']);
+    });
+  });
+
+  describe('errores de catálogos', () => {
+    it('muestra toast y usa códigos cuando falla el catálogo de especialidades', async () => {
+      auditoresService.obtenerEspecialidades.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 503,
+              error: { message: 'No se pudieron cargar las especialidades.' },
+            })
+        )
+      );
+
+      fixture = TestBed.createComponent(PerfilPublicoAuditorPageComponent);
+      await estabilizar();
+
+      const mensajes = toastService.toasts().map((t) => t.title);
+      expect(mensajes).toContain('No se pudieron cargar las especialidades.');
+      expect(raiz().textContent).toContain('HUELLA_CARBONO');
+      expect(raiz().textContent).toContain('ENERGIA_RENOVABLE');
+    });
+
+    it('muestra toast y usa código de provincia cuando falla el catálogo de zonas', async () => {
+      auditoresService.obtenerZonas.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 }))
+      );
+
+      fixture = TestBed.createComponent(PerfilPublicoAuditorPageComponent);
+      await estabilizar();
+
+      const mensajes = toastService.toasts().map((t) => t.title);
+      expect(mensajes).toContain(
+        'No se pudo cargar el catálogo de zonas. Se mostrará el código de provincia.'
+      );
+      expect(raiz().textContent).toContain('SAN_JOSE, Costa Rica');
     });
   });
 

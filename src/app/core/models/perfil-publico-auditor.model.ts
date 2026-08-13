@@ -7,6 +7,7 @@ export interface CertificacionPublica {
 
 export interface DistribucionSector {
   sector: string;
+  /** Conteo recibido del backend; PP-55 renderiza la barra con el porcentaje calculado. */
   cantidad: number;
   porcentaje: number;
 }
