@@ -4,12 +4,9 @@ import { IconComponent } from '../../../../shared/components/icon/icon.component
 import { ToastService } from '../../../../shared/services/toast.service';
 import { AlternativasComparacionComponent } from '../alternativas-comparacion/alternativas-comparacion.component';
 import { EcoRutaAlternativasService } from '../ecoruta-alternativas.service';
-import {
-  AlternativaDTO,
-  ComparacionResponse,
-  SustitucionRequest,
-} from '../models/alternativas.model';
+import { AlternativaDTO, ComparacionResponse } from '../models/alternativas.model';
 import { Itinerario, ItinerarioActividad } from '../models/itinerario.model';
+import { crearSustitucionRequest } from '../utils/sustitucion.utils';
 
 @Component({
   selector: 'app-refinamiento-chat',
@@ -95,16 +92,11 @@ export class RefinamientoChatComponent {
     const actividadId = this.actividadSeleccionadaId();
     if (!actividadId) return;
 
-    const body: SustitucionRequest = {
-      nombre: alternativa.nombre,
-      descripcion: alternativa.descripcion,
-      costoAproximado: alternativa.costoAproximado,
-      moneda: alternativa.moneda,
-      establecimientoRecomendado: alternativa.establecimientoRecomendado,
-      ecoScore: alternativa.ecoScore,
-      categoriaTuristica: this.comparacionResponse()!.categoriaTuristica,
-      provincia: this.comparacionResponse()!.provincia,
-    };
+    const body = crearSustitucionRequest(
+      alternativa,
+      this.comparacionResponse()!.categoriaTuristica,
+      this.comparacionResponse()!.provincia
+    );
 
     this.cargandoSustitucion.set(true);
 

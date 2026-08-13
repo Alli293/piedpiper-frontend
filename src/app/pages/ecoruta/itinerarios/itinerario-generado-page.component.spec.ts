@@ -207,8 +207,10 @@ describe('ItinerarioGeneradoPageComponent', () => {
     });
     await fixture.whenStable();
     fixture.detectChanges();
-    flushRecomendaciones();
-    await fixture.whenStable();
+
+    // Sin EcoScore, el panel de recomendaciones no debe montarse: el backend de recomendaciones
+    // exige EcoScore calculado y respondería 422, duplicando el error que ya se muestra acá.
+    httpMock.expectNone(`${EcoRutaRecomendacionesService.URL}/${ITINERARIO_ID}/recomendaciones`);
 
     expect(errorSpy).toHaveBeenCalledWith(
       'No fue posible calcular el impacto ambiental del itinerario.',
