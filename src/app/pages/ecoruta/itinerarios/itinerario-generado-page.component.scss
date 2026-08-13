@@ -31,7 +31,7 @@
 
 .ch-itinerario-generado__contenido {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) 400px;
   gap: var(--ch-space-5);
   align-items: start;
 }
@@ -46,6 +46,16 @@
 .ch-itinerario-generado__lateral {
   position: sticky;
   top: 0;
+  // El chat ahora es una conversación real (PP-88), no solo un panel de comparación puntual —
+  // se acerca al tamaño del wireframe ocupando la altura visible completa, en vez de un
+  // min-height fijo pequeño.
+  height: calc(100vh - var(--ch-space-5) * 2);
+  max-height: 720px;
+}
+
+.ch-itinerario-generado__lateral app-refinamiento-chat {
+  display: block;
+  height: 100%;
 }
 
 .ch-itinerario-generado__meta {

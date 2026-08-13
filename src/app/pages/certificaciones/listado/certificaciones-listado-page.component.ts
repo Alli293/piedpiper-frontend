@@ -7,6 +7,7 @@ import { CertificacionesService } from '../../../core/services/certificaciones.s
 import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { CardComponent } from '../../../shared/components/card/card.component';
+import { EncabezadoResumenComponent } from '../../../shared/components/encabezado-resumen/encabezado-resumen.component';
 import {
   FilterChip,
   FilterChipsComponent,
@@ -30,6 +31,7 @@ const ERROR_MENSAJE = 'No fue posible cargar las certificaciones en este momento
     ButtonComponent,
     CardComponent,
     DatePipe,
+    EncabezadoResumenComponent,
     FilterChipsComponent,
     HeadingComponent,
     IconComponent,
@@ -49,6 +51,7 @@ export class CertificacionesListadoPageComponent implements OnInit {
   protected readonly cargando = signal(true);
   protected readonly error = signal(false);
   protected readonly filtro = signal<FiltroVigencia>('TODAS');
+  protected readonly codigoCopiado = signal<string | null>(null);
 
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'CERTIFICACIONES',
@@ -110,6 +113,16 @@ export class CertificacionesListadoPageComponent implements OnInit {
 
   protected varianteVigencia(cert: CertificacionResumen): BadgeVariant {
     return cert.vigente ? 'success' : 'warning';
+  }
+
+  protected async copiarCodigo(codigo: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(codigo);
+      this.codigoCopiado.set(codigo);
+      setTimeout(() => this.codigoCopiado.set(null), 2000);
+    } catch {
+      // Clipboard API no disponible o permiso denegado: no hay accion de respaldo posible.
+    }
   }
 
   private async cargarCertificaciones(): Promise<void> {

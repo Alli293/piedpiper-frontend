@@ -1,6 +1,7 @@
 .ch-refinamiento-chat {
   display: flex;
   flex-direction: column;
+  height: 100%;
   min-height: 420px;
   border: 1px solid var(--ch-border);
   border-radius: var(--ch-radius-md);
@@ -85,6 +86,60 @@
   line-height: 1.5;
 }
 
+.ch-refinamiento-chat__mensaje--usuario {
+  align-self: flex-end;
+
+  p {
+    background: var(--ch-green);
+    color: #fff;
+  }
+}
+
+.ch-refinamiento-chat__mensaje--procesando p {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+  color: var(--ch-text-secondary);
+}
+
+.ch-refinamiento-chat__spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  border: 2px solid var(--ch-border);
+  border-top-color: var(--ch-green);
+  border-radius: 50%;
+  animation: ch-refinamiento-chat-spin 900ms linear infinite;
+}
+
+@keyframes ch-refinamiento-chat-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ch-refinamiento-chat__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ch-space-2);
+}
+
+.ch-refinamiento-chat__chip {
+  padding: var(--ch-space-1) var(--ch-space-3);
+  border: 1px solid var(--ch-green);
+  border-radius: var(--ch-radius-pill);
+  background: var(--ch-green-soft);
+  color: var(--ch-green-dark);
+  font-family: var(--ch-font-body);
+  font-size: 0.76rem;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
 .ch-refinamiento-chat__form {
   display: flex;
   gap: var(--ch-space-2);
@@ -121,22 +176,20 @@
   flex: 0 0 auto;
   border: none;
   border-radius: var(--ch-radius-full);
-  background: var(--ch-border);
-  color: var(--ch-text-muted);
+  background: var(--ch-green);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled) {
+    background: var(--ch-green-dark);
+  }
 
   &:disabled {
+    background: var(--ch-border);
+    color: var(--ch-text-muted);
     cursor: not-allowed;
   }
-}
-
-.ch-refinamiento-chat__ayuda {
-  display: flex;
-  align-items: center;
-  gap: var(--ch-space-1);
-  margin: 0;
-  padding: 0 var(--ch-space-4) var(--ch-space-3);
-  color: var(--ch-text-muted);
-  font-size: 0.72rem;
 }
 
 .ch-refinamiento-chat__actividades {
@@ -183,15 +236,16 @@
     background 0.2s,
     color 0.2s;
 
-  &:hover {
-    background: var(--ch-green);
-    color: #fff;
-  }
-
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
+}
+
+.ch-refinamiento-chat__chip:hover,
+.ch-refinamiento-chat__btn-comparar:hover {
+  background: var(--ch-green);
+  color: #fff;
 }
 
 .ch-refinamiento-chat__alternativas-mensaje {

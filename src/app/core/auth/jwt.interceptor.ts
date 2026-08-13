@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 import { SesionInactividadService } from './sesion-inactividad.service';
 
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
-  if (!req.url.startsWith(environment.apiBaseUrl)) {
+  if (!perteneceAlBackend(req.url)) {
     return next(req);
   }
 
@@ -20,3 +20,15 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }));
 };
+
+function perteneceAlBackend(url: string): boolean {
+  const origenActual = window.location.origin;
+  const api = new URL(environment.apiBaseUrl, origenActual);
+  const destino = new URL(url, origenActual);
+  const rutaApi = api.pathname.replace(/\/$/, '');
+
+  return (
+    destino.origin === api.origin &&
+    (destino.pathname === rutaApi || destino.pathname.startsWith(`${rutaApi}/`))
+  );
+}

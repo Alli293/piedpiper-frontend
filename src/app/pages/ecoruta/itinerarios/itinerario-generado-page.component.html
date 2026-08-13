@@ -5,6 +5,7 @@
   companyRole="Viajes sostenibles"
   companyInitials="ER"
   [headerConfig]="headerConfig()"
+  backRoute="/ecoruta/itinerarios"
 >
   @if (cargando()) {
     <section class="ch-itinerario-generado__estado" aria-live="polite">
@@ -198,7 +199,6 @@
                       </div>
                       @if (actividad.costoAproximado !== null) {
                         <span class="ch-itinerario-generado__actividad-costo">
-                          <app-icon name="costo" [size]="12" aria-hidden="true" />
                           {{ formatearCosto(actividad) }}
                         </span>
                       }
@@ -235,7 +235,7 @@
         <div class="ch-itinerario-generado__lateral" #chatPanel>
           <app-refinamiento-chat
             [itinerario]="data"
-            (itinerarioActualizado)="itinerario.set($event)"
+            (itinerarioActualizado)="onItinerarioActualizado($event)"
           />
         </div>
       </div>

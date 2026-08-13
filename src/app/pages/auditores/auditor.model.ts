@@ -26,7 +26,7 @@ export interface AuditorResumen {
   calificacionPromedio: number | null;
   totalResenas: number;
   disponible: boolean;
-  auditoriasCompletadas: number;
+  auditoriasCompletadas: number | null;
   aniosExperiencia: number | null;
   provincia: string | null;
 }

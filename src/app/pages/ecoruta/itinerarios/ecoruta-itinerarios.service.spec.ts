@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { EcoRutaItinerariosService } from './ecoruta-itinerarios.service';
 import { Itinerario } from './models/itinerario.model';
+import { RefinamientoRequest, RefinamientoResponse } from './models/refinamiento.model';
 
 describe('EcoRutaItinerariosService', () => {
   let service: EcoRutaItinerariosService;
@@ -60,5 +61,35 @@ describe('EcoRutaItinerariosService', () => {
     req.flush(itinerario);
 
     expect(resultado).toEqual(itinerario);
+  });
+
+  it('refinar hace POST a /ecoruta/itinerarios/{id}/mensajes con el body correcto', () => {
+    const request: RefinamientoRequest = {
+      mensajeUsuario: 'Quiero más actividades al aire libre.',
+      contextoConversacional: {
+        itinerarioId: itinerario.id,
+        historialMensajes: [],
+        versionItinerario: 1,
+      },
+    };
+    const respuesta: RefinamientoResponse = {
+      itinerario,
+      respuestaAsistente: 'Listo, agregué una caminata.',
+      historialMensajes: [
+        { rol: 'USUARIO', contenido: request.mensajeUsuario },
+        { rol: 'ASISTENTE', contenido: 'Listo, agregué una caminata.' },
+      ],
+      actividadParaComparar: null,
+    };
+
+    let resultado: RefinamientoResponse | undefined;
+    service.refinar(itinerario.id, request).subscribe((response) => (resultado = response));
+
+    const req = httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${itinerario.id}/mensajes`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(request);
+    req.flush(respuesta);
+
+    expect(resultado).toEqual(respuesta);
   });
 });

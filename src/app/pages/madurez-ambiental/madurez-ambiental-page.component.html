@@ -1,11 +1,5 @@
 <app-shell-layout activeId="benchmark" [headerConfig]="headerConfig()">
   <section class="ch-madurez" aria-label="Índice de Madurez Ambiental">
-    <nav class="ch-madurez__breadcrumbs" aria-label="Breadcrumb">
-      <span class="ch-madurez__breadcrumb">MADUREZ AMBIENTAL</span>
-      <span class="ch-madurez__breadcrumb-separator">›</span>
-      <span class="ch-madurez__breadcrumb ch-madurez__breadcrumb--active">BENCHMARK SECTORIAL</span>
-    </nav>
-
     <app-heading level="h1" text="Índice de Madurez Ambiental (IMA)" />
 
     <!-- Sección 1: IMA actual y sus dimensiones -->
@@ -52,7 +46,7 @@
             <aside class="ch-ima-ia__step">
               <span class="ch-ima-ia__step-label">● SIGUIENTE PASO RECOMENDADO</span>
               <p class="ch-ima-ia__step-text">{{ ima.siguientePaso }}</p>
-              <a routerLink="/limites" class="ch-ima-ia__step-btn">
+              <a routerLink="/empresa/metas/registrar" class="ch-ima-ia__step-btn">
                 <svg
                   aria-hidden="true"
                   width="14"
@@ -132,7 +126,9 @@
       } @else {
         <app-ima-tendencia-chart [serie]="serie()" [eventos]="eventos()" />
 
-        @if (sinDatosSectoriales()) {
+        @if (completandoTendencia()) {
+          <p class="ch-madurez-card__aviso" role="status">{{ completandoTendenciaMensaje }}</p>
+        } @else if (sinDatosSectoriales()) {
           <p class="ch-madurez-card__aviso">{{ sinSectorMensaje }}</p>
         }
       }

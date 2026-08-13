@@ -3,6 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { PerfilInicialService } from '../services/perfil-inicial.service';
+import { RolUsuario } from '../models/perfil-inicial.model';
 import {
   AuthResponse,
   LoginRequest,
@@ -16,6 +17,15 @@ import {
 
 const TOKEN_KEY = 'carbonhub.token';
 
+/** Estado de la cuenta del auditor, distinto del `estado` de una solicitud individual. */
+export type EstadoAuditorCuenta = 'ACTIVO' | 'PENDIENTE_VALIDACION' | 'RECHAZADO';
+
+interface TokenClaims {
+  rol?: RolUsuario;
+  estado?: EstadoAuditorCuenta;
+  configuracionCompleta?: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -24,7 +34,11 @@ export class AuthService {
 
   readonly token = signal<string | null>(sessionStorage.getItem(TOKEN_KEY));
 
-  readonly rol = computed(() => this.leerRolDeToken(this.token()));
+  private readonly claims = computed(() => this.leerClaimsDeToken(this.token()));
+
+  readonly rol = computed(() => this.claims()?.rol ?? null);
+  readonly estado = computed(() => this.claims()?.estado ?? null);
+  readonly configuracionCompleta = computed(() => this.claims()?.configuracionCompleta ?? false);
 
   loginConCorreo(email: string, contrasena: string): Observable<AuthResponse> {
     return this.login({ metodo: 'CORREO', email, contrasena });
@@ -107,8 +121,8 @@ export class AuthService {
   }
 
   validarTokenReset(token: string): Observable<ValidarTokenResetResponse> {
-    return this.http.get<ValidarTokenResetResponse>(`${this.baseUrl}/reset-contrasena`, {
-      params: { token },
+    return this.http.post<ValidarTokenResetResponse>(`${this.baseUrl}/reset-contrasena/validar`, {
+      token,
     });
   }
 
@@ -125,9 +139,7 @@ export class AuthService {
   }
 
   verificarCorreo(token: string): Observable<MensajeResponse> {
-    return this.http.get<MensajeResponse>(`${this.baseUrl}/verificar-correo`, {
-      params: { token },
-    });
+    return this.http.post<MensajeResponse>(`${this.baseUrl}/verificar-correo`, { token });
   }
 
   reenviarVerificacion(email: string): Observable<MensajeResponse> {
@@ -157,7 +169,7 @@ export class AuthService {
     this.perfilInicialService.limpiarCache();
   }
 
-  private leerRolDeToken(token: string | null): string | null {
+  private leerClaimsDeToken(token: string | null): TokenClaims | null {
     if (!token) {
       return null;
     }
@@ -170,8 +182,7 @@ export class AuthService {
     try {
       const normalizado = payload.replace(/-/g, '+').replace(/_/g, '/');
       const relleno = normalizado.padEnd(Math.ceil(normalizado.length / 4) * 4, '=');
-      const datos = JSON.parse(atob(relleno)) as { rol?: string };
-      return datos.rol ?? null;
+      return JSON.parse(atob(relleno)) as TokenClaims;
     } catch {
       return null;
     }
