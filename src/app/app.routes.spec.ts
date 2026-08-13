@@ -199,4 +199,20 @@ describe('app.routes', () => {
       '/empresa/certificaciones/listado?id=abc123'
     );
   });
+
+  // Los legales se enlazan desde el registro y el pie, o sea desde pantallas sin sesion: pedir
+  // token ahi dejaria al usuario sin poder leer lo que se le pide aceptar.
+  it('la ruta publica de terminos no exige sesion', () => {
+    const ruta = routes.find((r) => r.path === 'terminos');
+    expect(ruta).toBeDefined();
+    expect(ruta?.canActivate).toBeUndefined();
+    expect(ruta?.data?.['documento']).toBe('terminos');
+  });
+
+  it('la ruta publica de privacidad no exige sesion', () => {
+    const ruta = routes.find((r) => r.path === 'privacidad');
+    expect(ruta).toBeDefined();
+    expect(ruta?.canActivate).toBeUndefined();
+    expect(ruta?.data?.['documento']).toBe('privacidad');
+  });
 });
