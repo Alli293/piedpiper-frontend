@@ -91,14 +91,19 @@ describe('InsigniasPublicasPageComponent', () => {
     expect(root.textContent).not.toContain('Compartir en LinkedIn');
   });
 
-  it('navega a /verificar/:codigo al hacer clic en Verificar con OpenBadges 3.0', async () => {
+  it('navega a /verificar/:codigo al hacer clic en Verificar', async () => {
     const fixture = await crear();
     const router = TestBed.inject(Router);
     const navegar = vi.spyOn(router, 'navigate').mockResolvedValue(true);
     const root = fixture.nativeElement as HTMLElement;
-    const botones = Array.from(root.querySelectorAll<HTMLButtonElement>('button'));
 
-    botones.find((button) => button.textContent?.includes('Verificar con OpenBadges 3.0'))?.click();
+    Array.from(root.querySelectorAll<HTMLButtonElement>('button'))
+      .find((button) => button.textContent?.includes('Ver detalle'))
+      ?.click();
+    fixture.detectChanges();
+
+    const botones = Array.from(root.querySelectorAll<HTMLButtonElement>('button'));
+    botones.find((button) => button.textContent?.trim() === 'Verificar')?.click();
 
     expect(navegar).toHaveBeenCalledWith(['/verificar', 'CH-2026-8F4A19KD']);
   });

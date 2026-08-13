@@ -20,4 +20,12 @@ export class MetasService {
     if (anio !== undefined) params = params.set('anio', anio);
     return this.http.get<MetaReduccion[]>(this.baseUrl, { params });
   }
+
+  actualizarMeta(id: string, request: CrearMetaRequest): Observable<MetaReduccion> {
+    return this.http.put<MetaReduccion>(`${this.baseUrl}/${id}`, request);
+  }
+
+  eliminarMeta(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
 }

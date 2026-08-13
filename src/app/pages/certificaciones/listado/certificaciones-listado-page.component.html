@@ -27,13 +27,14 @@
         </p>
       </app-card>
     } @else {
-      <header class="certificaciones-listado-page__header">
-        <app-heading level="h1" text="Mis certificaciones" />
-        <div class="certificaciones-listado-page__conteo">
-          <strong>{{ certificaciones().length }}</strong>
-          <span>Certificaciones registradas</span>
-        </div>
-      </header>
+      <app-encabezado-resumen
+        icono="certificaciones"
+        tono="success"
+        titulo="Mis certificaciones"
+        subtexto="Certificaciones registradas por tu empresa, con su vigencia y acceso al detalle de cada una."
+        [statValor]="certificaciones().length"
+        statLabel="Certificaciones registradas"
+      />
 
       <div class="certificaciones-listado-page__toolbar">
         <span class="certificaciones-listado-page__filtro-label">
@@ -77,7 +78,29 @@
                       </span>
                       <div>
                         <strong>{{ cert.nombreCertificacion }}</strong>
-                        <span class="certificaciones-listado-page__cert-tipo">{{ cert.tipo }}</span>
+                        @if (cert.codigoVerificacion) {
+                          <button
+                            type="button"
+                            class="certificaciones-listado-page__cert-tipo"
+                            (click)="copiarCodigo(cert.codigoVerificacion)"
+                            [attr.aria-label]="
+                              'Copiar código de verificación ' + cert.codigoVerificacion
+                            "
+                          >
+                            <app-icon name="copiar" [size]="10" />
+                            {{ cert.codigoVerificacion }}
+                          </button>
+                          @if (codigoCopiado() === cert.codigoVerificacion) {
+                            <span class="certificaciones-listado-page__codigo-tooltip" role="status"
+                              >Código copiado</span
+                            >
+                          }
+                        } @else {
+                          <span
+                            class="certificaciones-listado-page__cert-tipo certificaciones-listado-page__cert-tipo--vacio"
+                            >Sin código</span
+                          >
+                        }
                       </div>
                     </div>
                   </td>
@@ -89,7 +112,9 @@
                     }}</app-badge>
                   </td>
                   <td>
-                    <a appLink [routerLink]="['/empresa/certificaciones', cert.id]">Ver detalle</a>
+                    <app-button variant="tertiary" size="sm" (click)="abrirDetalle(cert.id)">
+                      Ver detalle
+                    </app-button>
                   </td>
                 </tr>
               }
@@ -99,4 +124,23 @@
       }
     }
   </div>
+
+  @if (detalleAbiertoId()) {
+    <app-modal size="md" labelledBy="detalle-cert-titulo" (close)="cerrarDetalle()">
+      @if (cargandoDetalle()) {
+        <p role="status">Cargando certificación...</p>
+      } @else if (errorDetalle() || !detalle()) {
+        <p role="alert">No fue posible cargar esta certificación.</p>
+      } @else if (detalle(); as cert) {
+        @if (datoDetalleActual(); as dato) {
+          <app-detalle-panel
+            [dato]="dato"
+            [acciones]="accionesDetalleActual()"
+            tituloId="detalle-cert-titulo"
+            (accionClick)="onAccionDetalle($event, cert)"
+          />
+        }
+      }
+    </app-modal>
+  }
 </app-shell-layout>

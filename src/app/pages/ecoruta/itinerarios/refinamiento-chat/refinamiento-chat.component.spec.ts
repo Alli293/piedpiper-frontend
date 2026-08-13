@@ -122,6 +122,38 @@ describe('RefinamientoChatComponent', () => {
     expect(input.value).toBe('¿Qué opciones tengo para "Canopy"?');
     expect(document.activeElement).toBe(input);
   });
+
+  it('el input tiene maxlength de 1000 (mismo tope que el backend)', async () => {
+    fixture = await crearFixture(itinerario);
+    const root = fixture.nativeElement as HTMLElement;
+
+    const input = root.querySelector<HTMLInputElement>('input')!;
+    expect(input.maxLength).toBe(1000);
+  });
+
+  it('un mensaje de más de 1000 caracteres deja el formulario invalido y el boton deshabilitado', async () => {
+    fixture = await crearFixture(itinerario);
+    const root = fixture.nativeElement as HTMLElement;
+
+    const input = root.querySelector<HTMLInputElement>('input')!;
+    input.value = 'a'.repeat(1001);
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(root.querySelector('button[type="submit"]')?.hasAttribute('disabled')).toBe(true);
+  });
+
+  it('el mensaje inicial no cambia retroactivamente si el itinerario de entrada se actualiza', async () => {
+    fixture = await crearFixture(itinerario);
+    fixture.componentRef.setInput('itinerario', { ...itinerario, ecoScore: 95 });
+    fixture.detectChanges();
+
+    const mensaje = (fixture.nativeElement as HTMLElement).querySelector(
+      '.ch-refinamiento-chat__mensaje p'
+    );
+    expect(mensaje?.textContent).toContain('EcoScore de 82');
+    expect(mensaje?.textContent).not.toContain('EcoScore de 95');
+  });
 });
 
 describe('RefinamientoChatComponent — integración con alternativas', () => {

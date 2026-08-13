@@ -18,6 +18,7 @@ describe('buildSidebarConfig', () => {
       'dashboard',
       'emissions',
       'certificaciones',
+      'auditores',
       'benchmark',
       'insignias-empresa',
     ]);

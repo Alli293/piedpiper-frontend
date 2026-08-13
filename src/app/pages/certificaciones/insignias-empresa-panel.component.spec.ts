@@ -50,6 +50,21 @@ describe('InsigniasEmpresaPanelComponent', () => {
     expect(niveles).toEqual(['Oro', 'Bronce']);
   });
 
+  it('muestra como máximo 4 insignias, las más recientes', async () => {
+    fixture = await createFixture();
+    const insignias = Array.from({ length: 6 }, (_, i) => ({
+      ...INSIGNIA_RECIENTE,
+      idInsignia: i,
+      nombre: `Insignia ${i}`,
+      fechaObtencion: `2026-0${(i % 9) + 1}-01T00:00:00Z`,
+    }));
+    fixture.componentRef.setInput('insignias', insignias);
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelectorAll('.ch-insignias-panel__item').length).toBe(4);
+  });
+
   it('muestra el mensaje de vacío cuando la lista está vacía', async () => {
     fixture = await createFixture();
     fixture.componentRef.setInput('insignias', []);

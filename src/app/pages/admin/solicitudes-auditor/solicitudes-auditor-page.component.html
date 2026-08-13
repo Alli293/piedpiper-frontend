@@ -17,16 +17,25 @@
         </app-button>
       </div>
     } @else if (!pagina() || pagina()!.contenido.length === 0) {
-      <p class="solicitudes__vacio">No hay solicitudes pendientes en este momento.</p>
+      <app-card class="solicitudes__vacio-card">
+        <span class="solicitudes__vacio-icono" aria-hidden="true">
+          <app-icon name="verificada" [size]="16" />
+        </span>
+        <app-heading level="h2" text="Cola al día" />
+        <p>
+          No hay solicitudes pendientes en este momento. Las nuevas solicitudes de registro de
+          auditores aparecerán aquí en orden de llegada.
+        </p>
+      </app-card>
     } @else {
       <div class="solicitudes__tabla-wrap">
         <table class="solicitudes__tabla">
           <thead>
             <tr>
-              <th>Auditor</th>
-              <th>Correo</th>
-              <th>Fecha de solicitud</th>
-              <th></th>
+              <th scope="col">Auditor</th>
+              <th scope="col">Correo</th>
+              <th scope="col">Fecha de solicitud</th>
+              <th scope="col"><span class="solicitudes__th-oculto">Acciones</span></th>
             </tr>
           </thead>
           <tbody>
@@ -36,8 +45,9 @@
                 <td>{{ solicitud.email }}</td>
                 <td>{{ solicitud.fechaSolicitud | date: 'dd/MM/yyyy' }}</td>
                 <td class="solicitudes__acciones">
-                  <app-button variant="tertiary" size="sm" (click)="abrirRevision(solicitud)">
-                    Revisar
+                  <app-button variant="primary" size="sm" (click)="irARevision(solicitud)">
+                    <span>Revisar</span>
+                    <app-icon name="chevron-derecha" [size]="12" />
                   </app-button>
                 </td>
               </tr>
@@ -69,65 +79,6 @@
           </app-button>
         </div>
       }
-    }
-
-    @if (solicitudEnRevision(); as solicitud) {
-      <app-modal labelledBy="revisar-solicitud-title" size="md" (close)="cerrarRevision()">
-        <h2 id="revisar-solicitud-title" class="solicitudes__modal-title">Revisar solicitud</h2>
-
-        <dl class="solicitudes__datos">
-          <div class="solicitudes__dato">
-            <dt>Auditor</dt>
-            <dd>{{ solicitud.nombreAuditor }}</dd>
-          </div>
-          <div class="solicitudes__dato">
-            <dt>Correo</dt>
-            <dd>{{ solicitud.email }}</dd>
-          </div>
-          <div class="solicitudes__dato">
-            <dt>Fecha de solicitud</dt>
-            <dd>{{ solicitud.fechaSolicitud | date: 'dd/MM/yyyy HH:mm' }}</dd>
-          </div>
-        </dl>
-
-        <form class="solicitudes__form" novalidate (submit)="handleSubmit($event)">
-          <app-radio-group-field
-            label="Decisión"
-            [options]="decisionOptions"
-            [formField]="decisionForm.decision"
-            [disabled]="enviando()"
-          />
-
-          @if (esRechazo()) {
-            <app-textarea
-              label="Motivo del rechazo"
-              placeholder="Explica por qué se rechaza esta solicitud (mínimo 10 caracteres)"
-              [rows]="3"
-              [formField]="decisionForm.motivo"
-              [error]="errorMotivo()"
-            />
-          }
-
-          <div class="solicitudes__modal-actions">
-            <app-button
-              variant="secondary"
-              type="button"
-              [disabled]="enviando()"
-              (click)="cerrarRevision()"
-            >
-              Cancelar
-            </app-button>
-            <app-button
-              variant="primary"
-              type="submit"
-              [disabled]="!puedeConfirmar()"
-              [loading]="enviando()"
-            >
-              Confirmar decisión
-            </app-button>
-          </div>
-        </form>
-      </app-modal>
     }
   </main>
 </app-shell-layout>

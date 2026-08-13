@@ -1,4 +1,10 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
 .ch-insignias-panel {
+  height: 100%;
   background: var(--ch-bg-white);
   border: 1px solid var(--ch-border);
   border-radius: var(--ch-radius-lg);
@@ -25,6 +31,9 @@
   }
 
   &__ver-todas {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
     margin-left: auto;
     font-size: 13px;
     font-weight: 600;
@@ -86,12 +95,16 @@
     background: var(--ch-bg-main);
     color: var(--ch-green);
 
+    &--bronce {
+      color: var(--ch-nivel-bronce-accent);
+    }
+
     &--plata {
-      color: var(--ch-blue-mid);
+      color: var(--ch-nivel-plata-accent);
     }
 
     &--oro {
-      color: var(--ch-warning-dark);
+      color: var(--ch-nivel-oro-accent);
     }
   }
 
@@ -129,14 +142,19 @@
     background: var(--ch-green-soft);
     color: var(--ch-green-dark);
 
+    &--bronce {
+      background: color-mix(in srgb, var(--ch-nivel-bronce-accent) 16%, var(--ch-bg-white));
+      color: var(--ch-nivel-bronce-text);
+    }
+
     &--plata {
-      background: color-mix(in srgb, var(--ch-blue-mid) 16%, var(--ch-bg-white));
-      color: var(--ch-blue-mid);
+      background: color-mix(in srgb, var(--ch-nivel-plata-accent) 16%, var(--ch-bg-white));
+      color: var(--ch-nivel-plata-text);
     }
 
     &--oro {
-      background: var(--ch-warning-bg);
-      color: var(--ch-warning-dark);
+      background: color-mix(in srgb, var(--ch-nivel-oro-accent) 16%, var(--ch-bg-white));
+      color: var(--ch-nivel-oro-text);
     }
   }
 }

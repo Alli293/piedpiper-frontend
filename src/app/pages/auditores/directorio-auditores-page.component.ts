@@ -1,15 +1,7 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import {
-  catchError,
-  debounceTime,
-  distinctUntilChanged,
-  firstValueFrom,
-  of,
-  switchMap,
-  tap,
-} from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, of, switchMap, tap } from 'rxjs';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -37,6 +29,7 @@ import {
   OrdenamientoAuditores,
   PaginaAuditores,
 } from './auditor.model';
+import { cargarCatalogoAuditor, mapaEtiquetasCatalogo } from './catalogo-auditores.utils';
 
 const TOTAL_ESTRELLAS = 5;
 const MENSAJE_ERROR_DIRECTORIO =
@@ -143,13 +136,11 @@ export class DirectorioAuditoresPageComponent {
     return valor === null ? '' : String(valor);
   });
 
-  private readonly etiquetasEspecialidad = computed(
-    () => new Map(this.especialidadesCatalogo().map((item) => [item.valor, item.etiqueta]))
+  private readonly etiquetasEspecialidad = computed(() =>
+    mapaEtiquetasCatalogo(this.especialidadesCatalogo())
   );
 
-  private readonly etiquetasZona = computed(
-    () => new Map(this.zonasCatalogo().map((item) => [item.valor, item.etiqueta]))
-  );
+  private readonly etiquetasZona = computed(() => mapaEtiquetasCatalogo(this.zonasCatalogo()));
 
   protected readonly chipsActivos = computed<ChipFiltro[]>(() => {
     const modelo = this.modelo();
@@ -357,37 +348,25 @@ export class DirectorioAuditoresPageComponent {
   }
 
   private async cargarEspecialidades(): Promise<void> {
-    try {
-      this.especialidadesCatalogo.set(
-        await firstValueFrom(this.auditoresService.obtenerEspecialidades())
-      );
-    } catch (err: unknown) {
-      this.especialidadesDeshabilitadas.set(true);
-      this.toastService.error(
-        apiErrorMessage(err) ??
-          'No se pudo cargar el catálogo de especialidades. Los demás filtros están disponibles.',
-        undefined,
-        5000
-      );
-    } finally {
-      this.especialidadesCargando.set(false);
-    }
+    const resultado = await cargarCatalogoAuditor(
+      this.auditoresService.obtenerEspecialidades(),
+      this.toastService,
+      'No se pudo cargar el catálogo de especialidades. Los demás filtros están disponibles.'
+    );
+    this.especialidadesCatalogo.set(resultado.items);
+    this.especialidadesDeshabilitadas.set(!resultado.disponible);
+    this.especialidadesCargando.set(false);
   }
 
   private async cargarZonas(): Promise<void> {
-    try {
-      this.zonasCatalogo.set(await firstValueFrom(this.auditoresService.obtenerZonas()));
-    } catch (err: unknown) {
-      this.zonasDeshabilitadas.set(true);
-      this.toastService.error(
-        apiErrorMessage(err) ??
-          'No se pudo cargar el catálogo de zonas. Los demás filtros están disponibles.',
-        undefined,
-        5000
-      );
-    } finally {
-      this.zonasCargando.set(false);
-    }
+    const resultado = await cargarCatalogoAuditor(
+      this.auditoresService.obtenerZonas(),
+      this.toastService,
+      'No se pudo cargar el catálogo de zonas. Los demás filtros están disponibles.'
+    );
+    this.zonasCatalogo.set(resultado.items);
+    this.zonasDeshabilitadas.set(!resultado.disponible);
+    this.zonasCargando.set(false);
   }
 
   private terminoNormalizado(terminoBusqueda: string): string {

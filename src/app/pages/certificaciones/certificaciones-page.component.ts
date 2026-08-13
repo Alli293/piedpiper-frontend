@@ -1,21 +1,20 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { EmpresaService } from '../../core/empresa/empresa.service';
 import { InsigniaEmpresa } from '../../core/empresa/empresa.models';
+import { CertificacionResumen } from '../../core/models/certificacion.model';
+import { CertificacionesService } from '../../core/services/certificaciones.service';
 import { HeaderConfig } from '../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../shared/layouts/shell-layout/shell-layout.component';
-import { LinkDirective } from '../../shared/components/link/link.directive';
 import { apiErrorMessage } from '../../shared/utils/http-error.utils';
 import { DashboardService } from '../dashboard/dashboard.service';
 import {
   AlertaVencimiento,
   CalendarioVencimientosResponse,
   RecomendacionRenovacion,
-  ResumenCertificacionesDashboardResponse,
 } from '../dashboard/dashboard.model';
-import { AlertasActivasPanelComponent } from './alertas-activas-panel.component';
 import { CalendarioVencimientosComponent } from './calendario-vencimientos.component';
+import { CertificacionesRecientesPanelComponent } from './certificaciones-recientes-panel.component';
 import { EstadoCertificacionesPanelComponent } from './estado-certificaciones-panel.component';
 import { InsigniasEmpresaPanelComponent } from './insignias-empresa-panel.component';
 import { MetasReduccionPanelComponent } from './metas-reduccion-panel.component';
@@ -33,23 +32,22 @@ function mesActual(): string {
 
 /**
  * Pantalla de Certificaciones. Aloja el bloque "Estado de certificaciones"
- * (PP-74), "Recomendación de renovación" (PP-72), "Alertas activas"
- * (PP-76), "Insignias activas" (PP-75), "Metas de reducción" (PP-78), el
- * "Calendario de vencimientos" (PP-77) y un enlace al listado completo con
- * filtros (PP-59).
+ * (PP-74), "Recomendación de renovación" (PP-72), "Certificaciones
+ * recientes", "Insignias activas" (PP-75), "Metas de reducción" (PP-78) y
+ * el "Calendario de vencimientos" (PP-77). Las alertas de vencimiento
+ * (PP-76) se acceden desde las tarjetas de "Estado de certificaciones" o
+ * el Centro de Alertas, no desde un bloque propio en este dashboard.
  */
 @Component({
   selector: 'app-certificaciones-page',
   imports: [
     ShellLayoutComponent,
-    AlertasActivasPanelComponent,
+    CertificacionesRecientesPanelComponent,
     EstadoCertificacionesPanelComponent,
     CalendarioVencimientosComponent,
     InsigniasEmpresaPanelComponent,
     MetasReduccionPanelComponent,
     RecomendacionRenovacionPanelComponent,
-    LinkDirective,
-    RouterLink,
   ],
   templateUrl: './certificaciones-page.component.html',
   styleUrl: './certificaciones-page.component.scss',
@@ -57,18 +55,19 @@ function mesActual(): string {
 export class CertificacionesPageComponent {
   private readonly dashboardService = inject(DashboardService);
   private readonly empresaService = inject(EmpresaService);
+  private readonly certificacionesService = inject(CertificacionesService);
   private readonly metasService = inject(MetasService);
   private solicitudCalendario = 0;
 
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'CERTIFICACIONES',
-    pageTitle: 'Certificaciones',
+    pageTitle: 'Certificaciones y alertas inteligentes',
     showNotificationDot: false,
   }));
 
-  protected readonly cargandoResumen = signal(false);
-  protected readonly resumen = signal<ResumenCertificacionesDashboardResponse | null>(null);
-  protected readonly resumenError = signal<string | null>(null);
+  protected readonly cargandoAlertas = signal(false);
+  protected readonly alertas = signal<AlertaVencimiento[]>([]);
+  protected readonly alertasError = signal<string | null>(null);
 
   protected readonly mesCalendario = signal(mesActual());
   protected readonly cargandoCalendario = signal(false);
@@ -79,9 +78,9 @@ export class CertificacionesPageComponent {
   protected readonly insignias = signal<InsigniaEmpresa[]>([]);
   protected readonly insigniasError = signal<string | null>(null);
 
-  protected readonly cargandoAlertas = signal(false);
-  protected readonly alertas = signal<AlertaVencimiento[]>([]);
-  protected readonly alertasError = signal<string | null>(null);
+  protected readonly cargandoCertificaciones = signal(false);
+  protected readonly certificaciones = signal<CertificacionResumen[]>([]);
+  protected readonly certificacionesError = signal<string | null>(null);
 
   protected readonly cargandoMetas = signal(false);
   protected readonly metas = signal<MetaReduccion[]>([]);
@@ -92,10 +91,10 @@ export class CertificacionesPageComponent {
   protected readonly recomendacionError = signal<string | null>(null);
 
   constructor() {
-    void this.cargarResumen();
+    void this.cargarAlertas();
     void this.cargarCalendario(this.mesCalendario());
     void this.cargarInsignias();
-    void this.cargarAlertas();
+    void this.cargarCertificaciones();
     void this.cargarMetas();
     void this.cargarRecomendacion();
   }
@@ -105,17 +104,17 @@ export class CertificacionesPageComponent {
     void this.cargarCalendario(mes);
   }
 
-  private async cargarResumen(): Promise<void> {
-    this.cargandoResumen.set(true);
-    this.resumenError.set(null);
+  private async cargarAlertas(): Promise<void> {
+    this.cargandoAlertas.set(true);
+    this.alertasError.set(null);
     try {
-      const resumen = await firstValueFrom(this.dashboardService.obtenerResumenCertificaciones());
-      this.resumen.set(resumen);
+      const alertas = await firstValueFrom(this.dashboardService.obtenerAlertas());
+      this.alertas.set(alertas);
     } catch (err: unknown) {
-      this.resumen.set(null);
-      this.resumenError.set(apiErrorMessage(err) ?? ERROR_RESUMEN_MENSAJE);
+      this.alertas.set([]);
+      this.alertasError.set(apiErrorMessage(err) ?? ERROR_RESUMEN_MENSAJE);
     } finally {
-      this.cargandoResumen.set(false);
+      this.cargandoAlertas.set(false);
     }
   }
 
@@ -154,17 +153,17 @@ export class CertificacionesPageComponent {
     }
   }
 
-  private async cargarAlertas(): Promise<void> {
-    this.cargandoAlertas.set(true);
-    this.alertasError.set(null);
+  private async cargarCertificaciones(): Promise<void> {
+    this.cargandoCertificaciones.set(true);
+    this.certificacionesError.set(null);
     try {
-      const alertas = await firstValueFrom(this.dashboardService.obtenerAlertas());
-      this.alertas.set(alertas);
+      const certificaciones = await firstValueFrom(this.certificacionesService.listar());
+      this.certificaciones.set(certificaciones);
     } catch (err: unknown) {
-      this.alertas.set([]);
-      this.alertasError.set(apiErrorMessage(err) ?? ERROR_RESUMEN_MENSAJE);
+      this.certificaciones.set([]);
+      this.certificacionesError.set(apiErrorMessage(err) ?? ERROR_RESUMEN_MENSAJE);
     } finally {
-      this.cargandoAlertas.set(false);
+      this.cargandoCertificaciones.set(false);
     }
   }
 

@@ -1,0 +1,64 @@
+<div class="ch-detalle-panel">
+  <div class="ch-detalle-panel__hero">
+    <span
+      class="ch-detalle-panel__icono"
+      [class.ch-detalle-panel__icono--bronce]="dato().iconoModificador === 'bronce'"
+      [class.ch-detalle-panel__icono--plata]="dato().iconoModificador === 'plata'"
+      [class.ch-detalle-panel__icono--oro]="dato().iconoModificador === 'oro'"
+      [class.ch-detalle-panel__icono--generico]="!dato().iconoModificador"
+      aria-hidden="true"
+    >
+      <app-icon [name]="dato().icono" [size]="38" />
+    </span>
+    <app-heading level="h2" [id]="tituloId()" [text]="dato().titulo" />
+    <app-badge [variant]="dato().heroBadge.variant" [icon]="dato().heroBadge.icono ?? null">
+      {{ dato().heroBadge.etiqueta }}
+    </app-badge>
+  </div>
+
+  <div class="ch-detalle-panel__cuerpo">
+    <span class="ch-detalle-panel__eyebrow">{{ dato().eyebrow }}</span>
+
+    <dl class="ch-detalle-panel__lista">
+      @for (campo of dato().campos; track campo.etiqueta) {
+        <div>
+          <dt>
+            <app-icon [name]="campo.icono" [size]="13" aria-hidden="true" />
+            {{ campo.etiqueta }}
+          </dt>
+          <dd>{{ campo.valor }}</dd>
+        </div>
+      }
+    </dl>
+
+    <section class="ch-detalle-panel__credencial" aria-label="Reconocimiento verificable">
+      <div class="ch-detalle-panel__credencial-heading">
+        <span aria-hidden="true">
+          <app-icon name="verificar" [size]="18" />
+        </span>
+        <div>
+          <strong>{{ dato().credencial.titulo }}</strong>
+          <small>{{ dato().credencial.subtitulo }}</small>
+        </div>
+      </div>
+      <p>{{ dato().credencial.descripcion }}</p>
+    </section>
+
+    @if (acciones().length > 0) {
+      <div class="ch-detalle-panel__acciones">
+        @for (accion of acciones(); track accion.id) {
+          <app-button
+            [variant]="accion.variant"
+            size="sm"
+            [disabled]="accion.disabled ?? false"
+            [loading]="accion.loading ?? false"
+            (click)="accionClick.emit(accion.id)"
+          >
+            <app-icon [name]="accion.icono" [size]="14" />
+            <span>{{ accion.etiqueta }}</span>
+          </app-button>
+        }
+      </div>
+    }
+  </div>
+</div>

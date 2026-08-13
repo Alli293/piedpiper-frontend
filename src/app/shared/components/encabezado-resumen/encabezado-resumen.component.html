@@ -1,0 +1,17 @@
+<section class="ch-encabezado-resumen" [class]="'ch-encabezado-resumen--' + tono()">
+  <div class="ch-encabezado-resumen__icono" aria-hidden="true">
+    <app-icon [name]="icono()" [size]="20" />
+  </div>
+  <div class="ch-encabezado-resumen__copy">
+    <app-heading level="h1" [text]="titulo()" />
+    @if (subtexto()) {
+      <p>{{ subtexto() }}</p>
+    }
+  </div>
+  @if (statValor() !== null) {
+    <div class="ch-encabezado-resumen__stat">
+      <strong>{{ statValor() }}</strong>
+      <span>{{ statLabel() }}</span>
+    </div>
+  }
+</section>

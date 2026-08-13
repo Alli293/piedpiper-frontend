@@ -8,7 +8,7 @@ import {
   rutasPostAutenticacion,
   usuarioIndividualGuard,
 } from './app.routes';
-import { authGuard } from './core/auth/auth.guard';
+import { authGuard, guardAuditorActivo } from './core/auth/auth.guard';
 
 describe('app.routes', () => {
   const redirectsBackend = [
@@ -122,6 +122,34 @@ describe('app.routes', () => {
     expect(ruta?.canActivate).toEqual([guardAdmin]);
   });
 
+  /**
+   * El rol de auditor viaja en el JWT desde el registro, antes de que el administrador lo
+   * apruebe. guardAuditor por si solo dejaria pasar a un auditor PENDIENTE_VALIDACION a estas
+   * pantallas de negocio real; guardAuditorActivo cierra esa ventana exigiendo ademas
+   * estado === ACTIVO.
+   */
+  it('las pantallas de negocio del auditor exigen ademas estado activo', () => {
+    const rutasNegocioAuditor = ['auditor/auditorias', 'auditor/perfil'];
+    for (const path of rutasNegocioAuditor) {
+      const ruta = routes.find((r) => r.path === path);
+      expect(ruta?.canActivate).toContain(guardAuditorActivo);
+    }
+  });
+
+  /**
+   * El detalle de auditoria es negocio real del auditor (acepta/rechaza, sube el reporte), y la
+   * ruta la comparten empresa/auditor/admin via guardDetalleAuditoria. Sin guardAuditorActivo acá,
+   * un auditor PENDIENTE_VALIDACION o RECHAZADO podia entrar por cualquiera de las dos URLs sin
+   * pasar por su onboarding.
+   */
+  it('el detalle de auditoria exige estado activo para el auditor, en ambas rutas', () => {
+    const rutasDetalleAuditoria = ['empresa/auditorias/:id', 'auditor/auditorias/:id'];
+    for (const path of rutasDetalleAuditoria) {
+      const ruta = routes.find((r) => r.path === path);
+      expect(ruta?.canActivate).toContain(guardAuditorActivo);
+    }
+  });
+
   it('auditor/validacion-pendiente solo exige sesion iniciada, sin exigir el rol final', () => {
     const ruta = routes.find((r) => r.path === 'auditor/validacion-pendiente');
     expect(ruta?.canActivate).toEqual([authGuard]);
@@ -149,5 +177,26 @@ describe('app.routes', () => {
     const ruta = routes.find((r) => r.path === 'empresa/:slug/reputacion/insignias');
     expect(ruta).toBeDefined();
     expect(ruta?.canActivate).toBeUndefined();
+  });
+
+  it('empresa/certificaciones/:id (ruta de detalle previa al modal) redirige al listado con ?id=', () => {
+    const indiceId = routes.findIndex((r) => r.path === 'empresa/certificaciones/:id');
+    const indiceListado = routes.findIndex((r) => r.path === 'empresa/certificaciones/listado');
+    const indiceAlertas = routes.findIndex((r) => r.path === 'empresa/certificaciones/alertas');
+
+    expect(indiceId).toBeGreaterThan(-1);
+    // :id debe evaluarse despues de los paths literales del mismo prefijo, o los capturaria
+    // a ellos como si fueran un id (el router prueba las rutas en orden y usa la primera que matchea).
+    expect(indiceId).toBeGreaterThan(indiceListado);
+    expect(indiceId).toBeGreaterThan(indiceAlertas);
+
+    const ruta = routes[indiceId];
+    expect(typeof ruta.redirectTo).toBe('function');
+    const redirectTo = ruta.redirectTo as (redirectData: {
+      params: Record<string, string>;
+    }) => string;
+    expect(redirectTo({ params: { id: 'abc123' } })).toBe(
+      '/empresa/certificaciones/listado?id=abc123'
+    );
   });
 });

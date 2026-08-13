@@ -172,6 +172,15 @@ export class ItinerarioGeneradoPageComponent {
   }
 
   /**
+   * El chat de refinamiento (PP-88) emite el itinerario ya actualizado tras cada ajuste o
+   * sustitución. Pasa por la misma normalización que la carga inicial (`ordenar()`) en vez de
+   * asignarse directo — no hay garantía de que el backend devuelva días/actividades ya ordenados.
+   */
+  protected onItinerarioActualizado(itinerario: Itinerario): void {
+    this.itinerario.set(this.ordenar(itinerario));
+  }
+
+  /**
    * Ordena defensivamente días y actividades — no se asume que el backend garantice el orden.
    */
   private ordenar(itinerario: Itinerario): Itinerario {
