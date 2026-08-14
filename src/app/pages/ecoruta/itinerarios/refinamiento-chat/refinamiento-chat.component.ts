@@ -25,6 +25,7 @@ import { ToastService } from '../../../../shared/services/toast.service';
 import { apiErrorMessage } from '../../../../shared/utils/http-error.utils';
 import { AlternativasComparacionComponent } from '../alternativas-comparacion/alternativas-comparacion.component';
 import { EcoRutaAlternativasService } from '../ecoruta-alternativas.service';
+import { crearSustitucionRequest } from '../utils/sustitucion.utils';
 import { EcoRutaItinerariosService } from '../ecoruta-itinerarios.service';
 import {
   AlternativaDTO,
@@ -248,16 +249,11 @@ export class RefinamientoChatComponent {
     const actividadId = this.actividadSeleccionadaId();
     if (!actividadId) return;
 
-    const body: SustitucionRequest = {
-      nombre: alternativa.nombre,
-      descripcion: alternativa.descripcion,
-      costoAproximado: alternativa.costoAproximado,
-      moneda: alternativa.moneda,
-      establecimientoRecomendado: alternativa.establecimientoRecomendado,
-      ecoScore: alternativa.ecoScore,
-      categoriaTuristica: this.comparacionResponse()!.categoriaTuristica,
-      provincia: this.comparacionResponse()!.provincia,
-    };
+    const body = crearSustitucionRequest(
+      alternativa,
+      this.comparacionResponse()!.categoriaTuristica,
+      this.comparacionResponse()!.provincia
+    );
 
     this.cargandoSustitucion.set(true);
     // Reproduce la secuencia del wireframe: confirmación del usuario + mensaje transitorio del
