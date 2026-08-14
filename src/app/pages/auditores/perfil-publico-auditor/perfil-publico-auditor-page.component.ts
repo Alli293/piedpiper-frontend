@@ -139,7 +139,9 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
     return estrellas;
   }
 
-  protected onCalificacionActualizada(_cal: CalificacionResponse): void {
+  protected onCalificacionActualizada(cal: CalificacionResponse): void {
+    this.calificacionExistente.set(cal);
+    this.empresaIdUsuario.set(cal.empresaId);
     const auditorId = this.route.snapshot.paramMap.get('id') ?? '';
     void this.cargarPerfil(auditorId);
   }

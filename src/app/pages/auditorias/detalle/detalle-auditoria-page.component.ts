@@ -793,7 +793,8 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected onCalificacionActualizada(_cal: CalificacionResponse): void {
+  protected onCalificacionActualizada(cal: CalificacionResponse): void {
+    this.calificacionExistente.set(cal);
     void this.refrescar();
   }
 
