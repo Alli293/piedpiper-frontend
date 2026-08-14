@@ -139,33 +139,9 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
     return estrellas;
   }
 
-  /** Signal que indica si se está editando inline en el perfil público. */
-  protected readonly editandoResenaInline = signal(false);
-
-  /**
-   * Activa el formulario de edición inline dentro del perfil público.
-   */
-  protected editarResena(resena: ResenaVerificada): void {
-    if (this.auditoriaId()) {
-      const calificacionFromResena: CalificacionResponse = {
-        id: resena.id,
-        auditoriaId: this.auditoriaId(),
-        auditorId: this.perfil()?.auditorId ?? '',
-        empresaId: resena.empresaId,
-        calificacion: resena.calificacion,
-        comentario: resena.comentario,
-        creadoEn: resena.fechaCalificacion,
-        actualizadoEn: resena.fechaCalificacion,
-      };
-      this.calificacionExistente.set(calificacionFromResena);
-      this.empresaIdUsuario.set(resena.empresaId);
-      this.editandoResenaInline.set(true);
-
-      setTimeout(() => {
-        const formSection = document.querySelector('app-calificacion-form');
-        formSection?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      });
-    }
+  protected onCalificacionActualizada(_cal: CalificacionResponse): void {
+    const auditorId = this.route.snapshot.paramMap.get('id') ?? '';
+    void this.cargarPerfil(auditorId);
   }
 
   private async cargarPerfil(auditorId: string): Promise<void> {
@@ -205,7 +181,9 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
    */
   private async cargarContextoCalificacion(auditorId: string): Promise<void> {
     try {
-      const pagina = await firstValueFrom(this.auditoriasService.listar());
+      const pagina = await firstValueFrom(
+        this.auditoriasService.listar({ filtroEstado: ['CERTIFICACION_EMITIDA'] })
+      );
       const auditoriaCalificable = pagina.contenido.find(
         (a) => a.idAuditor === auditorId && a.estado === 'CERTIFICACION_EMITIDA'
       );

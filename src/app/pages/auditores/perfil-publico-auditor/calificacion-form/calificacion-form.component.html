@@ -1,23 +1,23 @@
 @if (puedeCalificar()) {
-  <section class="calificacion-form" aria-labelledby="calificacion-form-titulo">
+  <section class="ch-calificacion-form" aria-labelledby="calificacion-form-titulo">
     @if (cargando()) {
-      <div class="calificacion-form__loading" role="status" aria-label="Cargando calificación">
-        <span class="calificacion-form__spinner"></span>
+      <div class="ch-calificacion-form__loading" role="status" aria-label="Cargando calificación">
+        <span class="ch-calificacion-form__spinner"></span>
       </div>
     } @else if (calificacionActual() && !editando()) {
       <!-- Vista lectura: calificación existente con botón de edición -->
-      <div class="calificacion-form__vista">
-        <h3 class="calificacion-form__titulo" id="calificacion-form-titulo">Tu calificación</h3>
+      <div class="ch-calificacion-form__vista">
+        <h3 class="ch-calificacion-form__titulo" id="calificacion-form-titulo">Tu calificación</h3>
         <app-star-rating
           [value]="calificacionActual()!.calificacion"
           [readonly]="true"
           label="Calificación del auditor"
         />
         @if (calificacionActual()!.comentario) {
-          <p class="calificacion-form__comentario">{{ calificacionActual()!.comentario }}</p>
+          <p class="ch-calificacion-form__comentario">{{ calificacionActual()!.comentario }}</p>
         }
         @if (puedeEditar()) {
-          <div class="calificacion-form__actions">
+          <div class="ch-calificacion-form__actions">
             <app-button
               variant="secondary"
               size="sm"
@@ -30,13 +30,13 @@
         }
       </div>
     } @else {
-      <h3 class="calificacion-form__titulo" id="calificacion-form-titulo">
+      <h3 class="ch-calificacion-form__titulo" id="calificacion-form-titulo">
         {{ modoEdicion() ? 'Editar calificación' : 'Calificar auditor' }}
       </h3>
 
       <form novalidate (submit)="handleSubmit($event)">
-        <div class="calificacion-form__campo">
-          <label class="calificacion-form__label">Calificación</label>
+        <div class="ch-calificacion-form__campo">
+          <label class="ch-calificacion-form__label">Calificación</label>
           <app-star-rating
             [value]="model().calificacion"
             (valueChange)="onCalificacionChange($event)"
@@ -44,7 +44,7 @@
             label="Calificación del auditor"
           />
           @if (calificacionError()) {
-            <p class="calificacion-form__error" role="alert">{{ calificacionError() }}</p>
+            <p class="ch-calificacion-form__error" role="alert">{{ calificacionError() }}</p>
           }
         </div>
 
@@ -57,7 +57,7 @@
           [hint]="caracteresComentario() + ' / ' + maximoCaracteresComentario + ' caracteres'"
         />
 
-        <div class="calificacion-form__actions">
+        <div class="ch-calificacion-form__actions">
           <app-button type="submit" [disabled]="!puedeGuardar()" [loading]="guardando()">
             Guardar
           </app-button>

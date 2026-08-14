@@ -417,6 +417,7 @@
             [calificacionExistente]="calificacionExistente()"
             [estadoAuditoria]="detalle()!.estado"
             [empresaIdUsuario]="empresaIdUsuario()"
+            (calificacionActualizada)="onCalificacionActualizada($event)"
           />
         </section>
       }

@@ -793,6 +793,10 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  protected onCalificacionActualizada(_cal: CalificacionResponse): void {
+    void this.refrescar();
+  }
+
   private async cargaInicial(): Promise<void> {
     this.cargando.set(true);
     this.errorCarga.set(null);

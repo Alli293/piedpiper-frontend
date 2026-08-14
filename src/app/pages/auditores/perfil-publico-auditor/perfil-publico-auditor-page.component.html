@@ -1,3 +1,4 @@
+<!-- TODO: Reemplazar h2/h3 crudos por app-heading según FRONTEND_STANDARDS.md §2 -->
 <app-shell-layout [headerConfig]="headerConfig()">
   @if (cargando()) {
     <div class="ch-perfil-auditor__loading" aria-live="polite" aria-label="Cargando perfil">
@@ -305,22 +306,6 @@
                   </div>
                 </div>
                 <p class="ch-perfil-auditor__resena-text">{{ resena.comentario }}</p>
-                @if (
-                  esAdminEmpresa() &&
-                  resena.empresaId === empresaIdUsuario() &&
-                  !calificacionExistente()
-                ) {
-                  <div class="ch-perfil-auditor__resena-actions">
-                    <button
-                      class="ch-perfil-auditor__resena-edit-btn"
-                      type="button"
-                      (click)="editarResena(resena)"
-                      aria-label="Editar reseña"
-                    >
-                      Editar
-                    </button>
-                  </div>
-                }
               </app-card>
             }
           </div>
@@ -334,10 +319,11 @@
         <section class="ch-perfil-auditor__section ch-perfil-auditor__section--full">
           <app-calificacion-form
             [auditoriaId]="auditoriaId()"
-            [auditorId]="perfil()!.auditorId"
+            [auditorId]="perfil.auditorId"
             [calificacionExistente]="calificacionExistente()"
             [estadoAuditoria]="estadoAuditoria()"
             [empresaIdUsuario]="empresaIdUsuario()"
+            (calificacionActualizada)="onCalificacionActualizada($event)"
           />
         </section>
       }

@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import {
   disabled,
   form,
@@ -62,6 +62,9 @@ export class CalificacionFormComponent {
 
   /** ID de la empresa del usuario autenticado. Controla visibilidad del botón de edición. */
   empresaIdUsuario = input<string>('');
+
+  /** Emitida tras editar exitosamente para que el padre refresque datos sin recargar la página. */
+  calificacionActualizada = output<CalificacionResponse>();
 
   protected readonly guardando = signal(false);
   protected readonly cargando = signal(false);
@@ -208,6 +211,7 @@ export class CalificacionFormComponent {
 
     const resultado = await firstValueFrom(this.calificacionService.crearCalificacion(payload));
     this.calificacionId.set(resultado.id);
+    this.calificacionGuardada.set(resultado);
     this.toastService.success(MSG_CREACION_EXITOSA, undefined, DURACION_TOAST_MS);
   }
 
@@ -224,9 +228,7 @@ export class CalificacionFormComponent {
     this.calificacionGuardada.set(resultado);
     this.editando.set(false);
     this.toastService.success(MSG_EDICION_EXITOSA, undefined, DURACION_TOAST_MS);
-
-    // Recargar la página para reflejar el promedio actualizado
-    setTimeout(() => window.location.reload(), 1500);
+    this.calificacionActualizada.emit(resultado);
   }
 
   private manejarError(err: unknown): void {
@@ -237,8 +239,18 @@ export class CalificacionFormComponent {
 
     switch (err.status) {
       case 403:
+        this.toastService.error(
+          'No tiene permiso para calificar esta auditoría.',
+          undefined,
+          DURACION_TOAST_MS
+        );
+        break;
       case 422:
-        this.toastService.error(MSG_ERROR_PERMISO, undefined, DURACION_TOAST_MS);
+        this.toastService.error(
+          'No es posible calificar esta auditoría.',
+          undefined,
+          DURACION_TOAST_MS
+        );
         break;
       case 404:
         this.toastService.error(MSG_ERROR_NO_ENCONTRADA, undefined, DURACION_TOAST_MS);
