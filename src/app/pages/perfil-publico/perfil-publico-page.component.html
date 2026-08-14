@@ -96,7 +96,9 @@
                 </span>
                 <div class="pub-nivel__info">
                   <span class="pub-nivel__nombre">{{ nivelNormalizado() }}</span>
-                  <span class="pub-nivel__vigencia">Vigente {{ getAnioVigencia() }}</span>
+                  @if (nivelNormalizado() !== 'Sin nivel' && perfil()?.fechaActualizacionNivel) {
+                    <span class="pub-nivel__vigencia">Vigente {{ getAnioVigencia() }}</span>
+                  }
                 </div>
               </div>
 

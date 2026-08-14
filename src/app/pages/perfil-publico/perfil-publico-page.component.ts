@@ -269,7 +269,7 @@ export class PerfilPublicoPageComponent {
 
   protected getAnioVigencia(): string {
     const fecha = this.perfil()?.fechaActualizacionNivel;
-    if (!fecha) return new Date().getFullYear().toString();
+    if (!fecha) return '';
     return new Date(fecha).getFullYear().toString();
   }
 
