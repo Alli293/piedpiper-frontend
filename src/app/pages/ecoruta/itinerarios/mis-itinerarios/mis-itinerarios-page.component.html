@@ -50,7 +50,11 @@
               : 'Todavía no tenés itinerarios guardados.'
           }}
         </p>
-        <app-button (click)="nuevoItinerario()">Planificar mi primer viaje</app-button>
+        @if (soloFavoritos()) {
+          <app-button (click)="verTodosItinerarios()">Ver todos los itinerarios</app-button>
+        } @else {
+          <app-button (click)="nuevoItinerario()">Planificar mi primer viaje</app-button>
+        }
       </div>
     } @else {
       <div class="ch-mis-itinerarios__grid">

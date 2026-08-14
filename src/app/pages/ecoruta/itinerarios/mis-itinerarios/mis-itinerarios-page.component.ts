@@ -94,6 +94,13 @@ export class MisItinerariosPageComponent implements OnInit {
     void this.cargar();
   }
 
+  protected verTodosItinerarios(): void {
+    if (!this.soloFavoritos()) return;
+    this.soloFavoritos.set(false);
+    this.pagina.set(1);
+    void this.cargar();
+  }
+
   protected async alternarFavorito(item: ItinerarioResumen): Promise<void> {
     if (this.favoritosActualizando().has(item.id)) return;
 

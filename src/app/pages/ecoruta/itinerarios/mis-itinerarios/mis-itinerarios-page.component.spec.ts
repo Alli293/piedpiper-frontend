@@ -366,6 +366,28 @@ describe('MisItinerariosPageComponent', () => {
       expect(raiz().textContent).toContain('Todavía no tenés itinerarios favoritos.');
     });
 
+    it('desde el vacio de favoritos vuelve al listado general de itinerarios', async () => {
+      await montar(pagina([itinerario('itin-1')]));
+      itinerariosService.listar.mockReturnValueOnce(of(pagina([])));
+      itinerariosService.listar.mockReturnValueOnce(of(pagina([itinerario('itin-1')])));
+      const navigateSpy = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+
+      raiz().querySelector<HTMLButtonElement>('.ch-mis-itinerarios__favoritos-toggle')?.click();
+      await estabilizar();
+      const botonVerTodos = Array.from(raiz().querySelectorAll('button')).find(
+        (button) => button.textContent?.trim() === 'Ver todos los itinerarios'
+      );
+      botonVerTodos?.click();
+      await estabilizar();
+
+      expect(itinerariosService.listar).toHaveBeenLastCalledWith({
+        pagina: 1,
+        soloFavoritos: undefined,
+      });
+      expect(navigateSpy).not.toHaveBeenCalledWith('/ecoruta/preferencias');
+      expect(raiz().textContent).toContain('San José');
+    });
+
     it('permite actualizar otro itinerario mientras uno distinto esta en vuelo', async () => {
       const primeraRespuesta = new Subject<{ id: string; favorito: boolean }>();
       await montar(pagina([itinerario('itin-1'), itinerario('itin-2')]));
