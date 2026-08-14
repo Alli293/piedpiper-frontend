@@ -1,0 +1,21 @@
+@if (banner(); as data) {
+  <span
+    class="ch-origen-banner"
+    role="img"
+    [attr.aria-label]="'Origen: ' + (data.nombrePais ?? data.codigoIso)"
+  >
+    @if (data.banderaUrlSvg && !svgFallo()) {
+      <img
+        class="ch-origen-banner__bandera"
+        [src]="data.banderaUrlSvg"
+        [alt]="'Bandera de ' + (data.nombrePais ?? data.codigoIso)"
+        (error)="onSvgError()"
+      />
+    } @else if (data.banderaEmoji) {
+      <span class="ch-origen-banner__emoji" aria-hidden="true">{{ data.banderaEmoji }}</span>
+    }
+    @if (data.nombrePais) {
+      <span class="ch-origen-banner__pais">{{ data.nombrePais }}</span>
+    }
+  </span>
+}

@@ -1,0 +1,28 @@
+.ch-origen-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-1);
+  padding: 2px var(--ch-space-2);
+  border-radius: var(--ch-radius-pill);
+  background: var(--ch-bg-main);
+  color: var(--ch-text-secondary);
+  font-size: 0.72rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ch-origen-banner__bandera {
+  width: 16px;
+  height: 12px;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.ch-origen-banner__emoji {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.ch-origen-banner__pais {
+  line-height: 1;
+}

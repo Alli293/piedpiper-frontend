@@ -1,0 +1,33 @@
+@if (establecimientos().length > 0) {
+  <section
+    class="ch-establecimientos-evaluados"
+    aria-label="Desglose ambiental por establecimiento"
+  >
+    <app-heading level="h2" text="Desglose por establecimiento" />
+
+    @if (chipsPais().length > 1) {
+      <app-filter-chips
+        class="ch-establecimientos-evaluados__filtro"
+        [chips]="chipsPais()"
+        [activeId]="filtroPais()"
+        ariaLabel="Filtrar establecimientos por país de origen"
+        (chipSelected)="onFiltroChange($event)"
+      />
+    }
+
+    <ul class="ch-establecimientos-evaluados__lista">
+      @for (
+        establecimiento of establecimientosFiltrados();
+        track establecimiento.nombreEstablecimiento
+      ) {
+        <li class="ch-establecimientos-evaluados__item">
+          <div class="ch-establecimientos-evaluados__item-info">
+            <span>{{ establecimiento.nombreEstablecimiento }}</span>
+            <app-origen-banner [banner]="bannerDe(establecimiento)" />
+          </div>
+          <app-puntuacion-ambiental-badge [puntuacion]="establecimiento.puntuacionAmbiental" />
+        </li>
+      }
+    </ul>
+  </section>
+}

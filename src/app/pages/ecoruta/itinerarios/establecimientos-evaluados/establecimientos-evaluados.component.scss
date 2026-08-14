@@ -1,0 +1,40 @@
+.ch-establecimientos-evaluados {
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-white);
+  box-shadow: var(--ch-shadow-sm);
+  padding: var(--ch-space-4);
+}
+
+.ch-establecimientos-evaluados__filtro {
+  margin-top: var(--ch-space-3);
+}
+
+.ch-establecimientos-evaluados__lista {
+  display: flex;
+  flex-direction: column;
+  margin: var(--ch-space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ch-establecimientos-evaluados__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ch-space-3);
+  padding: var(--ch-space-3) 0;
+  color: var(--ch-text-primary);
+  font-size: 0.86rem;
+
+  & + & {
+    border-top: 1px solid var(--ch-border);
+  }
+}
+
+.ch-establecimientos-evaluados__item-info {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+  min-width: 0;
+}
