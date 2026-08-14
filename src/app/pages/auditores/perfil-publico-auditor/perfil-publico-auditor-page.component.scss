@@ -121,17 +121,17 @@
 }
 
 .ch-perfil-auditor__avatar-img {
-  width: 72px;
-  height: 72px;
-  border-radius: var(--ch-radius-full);
+  width: 96px;
+  height: 96px;
+  border-radius: var(--ch-radius-lg);
   object-fit: cover;
   border: 2px solid var(--ch-border);
 }
 
 .ch-perfil-auditor__avatar-circle {
-  width: 72px;
-  height: 72px;
-  border-radius: var(--ch-radius-full);
+  width: 96px;
+  height: 96px;
+  border-radius: var(--ch-radius-lg);
   background: var(--ch-green);
   display: flex;
   align-items: center;
@@ -141,7 +141,7 @@
 .ch-perfil-auditor__avatar-initials {
   font-family: var(--ch-font-heading);
   font-weight: 700;
-  font-size: 1.375rem;
+  font-size: 1.75rem;
   color: var(--ch-text-on-dark);
   text-transform: uppercase;
 }
@@ -173,7 +173,7 @@
 }
 
 .ch-perfil-auditor__verified-icon {
-  color: var(--ch-green);
+  color: var(--ch-blue-mid);
   flex-shrink: 0;
 }
 
@@ -524,18 +524,6 @@
   &:focus-visible {
     @include mixins.focus-ring;
   }
-}
-
-.ch-perfil-auditor__hire-note {
-  display: block;
-  margin-top: var(--ch-space-3);
-  font-family: var(--ch-font-mono);
-  font-size: 0.5625rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--ch-text-muted);
-  text-align: center;
 }
 
 // === Reseñas ===
