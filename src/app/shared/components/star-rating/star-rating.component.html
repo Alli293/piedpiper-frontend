@@ -1,0 +1,18 @@
+@for (star of stars; track star) {
+  <button
+    type="button"
+    class="ch-star-rating__star"
+    [class.ch-star-rating__star--filled]="isFilled(star)"
+    [class.ch-star-rating__star--readonly]="readonly()"
+    [attr.aria-label]="starAriaLabel(star)"
+    [attr.aria-checked]="isChecked(star)"
+    [attr.data-star]="star"
+    [disabled]="readonly()"
+    role="radio"
+    [tabindex]="isChecked(star) || (!value() && star === 1) ? 0 : -1"
+    (click)="onStarClick(star)"
+    (keydown)="onKeydown($event, star)"
+  >
+    ★
+  </button>
+}

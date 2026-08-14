@@ -1,3 +1,4 @@
+<!-- TODO: Reemplazar h2/h3 crudos por app-heading según FRONTEND_STANDARDS.md §2 -->
 <app-shell-layout [headerConfig]="headerConfig()">
   @if (cargando()) {
     <div class="ch-perfil-auditor__loading" aria-live="polite" aria-label="Cargando perfil">
@@ -262,13 +263,27 @@
         </div>
         @if (resenasOrdenadas().length > 0) {
           <div class="ch-perfil-auditor__resenas-grid">
-            @for (resena of resenasOrdenadas(); track resena.fechaCalificacion) {
+            @for (resena of resenasOrdenadas(); track resena.id) {
               <app-card variant="outlined" padding="sm" class="ch-perfil-auditor__resena-card">
                 <div class="ch-perfil-auditor__resena-top">
                   <div class="ch-perfil-auditor__resena-reviewer">
-                    <app-avatar size="sm" [initials]="'R'" />
+                    <app-avatar
+                      size="sm"
+                      [initials]="
+                        (resena.nombreCalificador || resena.nombreEmpresa || 'R')
+                          .substring(0, 2)
+                          .toUpperCase()
+                      "
+                    />
                     <div class="ch-perfil-auditor__resena-meta">
-                      <span class="ch-perfil-auditor__resena-name">Reseña verificada</span>
+                      <span class="ch-perfil-auditor__resena-name">{{
+                        resena.nombreCalificador || resena.nombreEmpresa || 'Reseña verificada'
+                      }}</span>
+                      @if (resena.nombreEmpresa) {
+                        <span class="ch-perfil-auditor__resena-empresa">{{
+                          resena.nombreEmpresa
+                        }}</span>
+                      }
                       <app-badge variant="success" icon="verificada">CONTRATO VERIFICADO</app-badge>
                     </div>
                   </div>
@@ -298,6 +313,20 @@
           <p class="ch-perfil-auditor__empty">Este auditor aún no tiene reseñas</p>
         }
       </section>
+
+      <!-- Formulario inline de edición de calificación — visible siempre si hay calificación -->
+      @if (esAdminEmpresa() && auditoriaId() && calificacionExistente()) {
+        <section class="ch-perfil-auditor__section ch-perfil-auditor__section--full">
+          <app-calificacion-form
+            [auditoriaId]="auditoriaId()"
+            [auditorId]="perfil.auditorId"
+            [calificacionExistente]="calificacionExistente()"
+            [estadoAuditoria]="estadoAuditoria()"
+            [empresaIdUsuario]="empresaIdUsuario()"
+            (calificacionActualizada)="onCalificacionActualizada($event)"
+          />
+        </section>
+      }
     </main>
   }
 </app-shell-layout>

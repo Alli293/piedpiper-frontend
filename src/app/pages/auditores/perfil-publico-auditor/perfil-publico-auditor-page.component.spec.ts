@@ -51,11 +51,15 @@ const PERFIL_COMPLETO: PerfilPublicoAuditorResponse = {
   ],
   resenas: [
     {
+      id: 'cal-001',
+      empresaId: 'empresa-abc',
       calificacion: 5.0,
       comentario: 'Excelente trabajo, muy profesional.',
       fechaCalificacion: '2025-06-01',
     },
     {
+      id: 'cal-002',
+      empresaId: 'empresa-xyz',
       calificacion: 4.0,
       comentario: 'Buen servicio, puntual.',
       fechaCalificacion: '2025-03-15',
