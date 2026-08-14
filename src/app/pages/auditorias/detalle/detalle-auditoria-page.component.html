@@ -1,4 +1,8 @@
-<app-shell-layout [headerConfig]="headerConfig" [backRoute]="rutaVolver()">
+<app-shell-layout
+  [activeId]="activeIdAuditoria()"
+  [headerConfig]="headerConfig"
+  [backRoute]="rutaVolver()"
+>
   <section class="ch-detalle-auditoria" aria-label="Detalle de la auditoría">
     @if (cargando()) {
       <p class="ch-detalle-auditoria__estado-carga">Cargando el detalle de la auditoría...</p>
@@ -394,7 +398,8 @@
                       [ariaLabel]="'Ver ' + documento.nombreArchivo + ' en una pestaña nueva'"
                       (click)="verDocumento(documento.id)"
                     >
-                      Ver PDF
+                      <app-icon name="redirect" [size]="12" />
+                      <span>Ver PDF</span>
                     </app-button>
                   </li>
                 }

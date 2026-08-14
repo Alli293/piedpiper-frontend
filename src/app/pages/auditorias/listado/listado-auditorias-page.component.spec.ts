@@ -128,7 +128,7 @@ describe('ListadoAuditoriasPageComponent', () => {
     expect(auditoriasService.listar).toHaveBeenCalled();
     expect(
       Array.from(raiz().querySelectorAll('button')).some(
-        (b) => b.textContent?.trim() === 'Nueva solicitud'
+        (b) => b.textContent?.trim() === '+ Nueva solicitud'
       )
     ).toBe(false);
   });
@@ -173,7 +173,7 @@ describe('ListadoAuditoriasPageComponent', () => {
     await montar();
 
     Array.from(raiz().querySelectorAll('button'))
-      .find((b) => b.textContent?.trim() === 'Nueva solicitud')
+      .find((b) => b.textContent?.trim() === '+ Nueva solicitud')
       ?.click();
     await estabilizar();
 
@@ -191,23 +191,23 @@ describe('ListadoAuditoriasPageComponent', () => {
     expect(raiz().querySelector('.ch-listado-auditorias__tabla')).toBeNull();
   });
 
-  function abrirFiltros(): void {
-    Array.from(raiz().querySelectorAll('button'))
-      .find((b) => b.textContent?.includes('Filtrar por estado'))
-      ?.click();
-  }
-
-  function casillas(): HTMLInputElement[] {
+  /** Los chips viven en `app-filter-chips`; el primero es "Todos" y luego uno por estado filtrable. */
+  function chipsEstado(): HTMLButtonElement[] {
     return Array.from(
-      raiz().querySelectorAll<HTMLInputElement>('.ch-listado-auditorias__filtros input')
+      raiz().querySelectorAll<HTMLButtonElement>(
+        '.ch-listado-auditorias__barra app-filter-chips button'
+      )
     );
   }
 
-  async function marcarEstado(indice: number): Promise<void> {
-    abrirFiltros();
+  /** `indice` es la posicion del estado dentro de `ESTADOS_FILTRABLES` (0 = SOLICITUD_ENVIADA). */
+  async function seleccionarEstado(indice: number): Promise<void> {
+    chipsEstado()[indice + 1].click();
     await estabilizar();
-    const casilla = casillas()[indice];
-    casilla.click();
+  }
+
+  async function seleccionarTodos(): Promise<void> {
+    chipsEstado()[0].click();
     await estabilizar();
   }
 
@@ -217,35 +217,15 @@ describe('ListadoAuditoriasPageComponent', () => {
     ).find((b) => b.textContent?.trim() === texto);
   }
 
-  /**
-   * El estado del panel tiene que quedar en el <button> real: sobre <app-button> cae en un custom
-   * element sin rol, que el lector de pantalla ignora, y el usuario nunca sabe que hay un panel.
-   */
-  it('el boton de filtros anuncia su estado en el boton interno y apunta al panel', async () => {
-    await montar();
-
-    const boton = Array.from(raiz().querySelectorAll('button')).find((b) =>
-      b.textContent?.includes('Filtrar por estado')
-    )!;
-    expect(boton.getAttribute('aria-expanded')).toBe('false');
-    expect(boton.getAttribute('aria-controls')).toBe('ch-filtros-estado-auditorias');
-
-    abrirFiltros();
-    await estabilizar();
-
-    expect(boton.getAttribute('aria-expanded')).toBe('true');
-    expect(raiz().querySelector('#ch-filtros-estado-auditorias')).not.toBeNull();
-  });
-
   it('la primera carga pide la pagina 1 sin filtros', async () => {
     await montar();
 
     expect(auditoriasService.listar).toHaveBeenCalledWith({ filtroEstado: [], pagina: 1 });
   });
 
-  it('marcar un estado lo envia como filtro al servidor', async () => {
+  it('elegir un estado lo envia como filtro al servidor', async () => {
     await montar();
-    await marcarEstado(2);
+    await seleccionarEstado(2);
 
     expect(auditoriasService.listar).toHaveBeenLastCalledWith({
       filtroEstado: ['EN_REVISION'],
@@ -253,23 +233,21 @@ describe('ListadoAuditoriasPageComponent', () => {
     });
   });
 
-  it('se pueden marcar varios estados a la vez', async () => {
+  it('elegir otro estado reemplaza el filtro anterior', async () => {
     await montar();
-    await marcarEstado(2);
-    casillas()[3].click();
-    await estabilizar();
+    await seleccionarEstado(2);
+    await seleccionarEstado(3);
 
     expect(auditoriasService.listar).toHaveBeenLastCalledWith({
-      filtroEstado: ['EN_REVISION', 'REPORTE_CARGADO'],
+      filtroEstado: ['REPORTE_CARGADO'],
       pagina: 1,
     });
   });
 
-  it('desmarcar un estado lo quita del filtro', async () => {
+  it('volver a "Todos" quita el filtro', async () => {
     await montar();
-    await marcarEstado(2);
-    casillas()[2].click();
-    await estabilizar();
+    await seleccionarEstado(2);
+    await seleccionarTodos();
 
     expect(auditoriasService.listar).toHaveBeenLastCalledWith({ filtroEstado: [], pagina: 1 });
   });
@@ -286,7 +264,7 @@ describe('ListadoAuditoriasPageComponent', () => {
 
     botonPaginacion('Siguiente')?.click();
     await estabilizar();
-    await marcarEstado(2);
+    await seleccionarEstado(2);
 
     expect(auditoriasService.listar).toHaveBeenLastCalledWith({
       filtroEstado: ['EN_REVISION'],
@@ -339,16 +317,17 @@ describe('ListadoAuditoriasPageComponent', () => {
   it('si el filtro no deja resultados lo dice y ofrece quitarlo', async () => {
     await montar();
     auditoriasService.listar.mockReturnValue(of(pagina([])));
-    await marcarEstado(2);
+    await seleccionarEstado(2);
 
     const vacio = raiz().querySelector('.ch-listado-auditorias__vacio');
     expect(vacio?.textContent).toContain('Ninguna solicitud coincide');
     expect(vacio?.textContent).not.toContain('Aún no tienes solicitudes');
   });
 
-  it('quitar los filtros vuelve a pedir el listado completo desde la pagina 1', async () => {
+  it('el boton "Quitar filtros" del estado vacio vuelve a pedir el listado completo', async () => {
     await montar();
-    await marcarEstado(2);
+    auditoriasService.listar.mockReturnValue(of(pagina([])));
+    await seleccionarEstado(2);
 
     Array.from(raiz().querySelectorAll('button'))
       .find((b) => b.textContent?.trim() === 'Quitar filtros')
@@ -413,25 +392,6 @@ describe('ListadoAuditoriasPageComponent', () => {
     expect(raiz().querySelector('.ch-listado-auditorias__pagina-actual')?.textContent).toContain(
       'Página 3 de 3'
     );
-  });
-
-  /** Mientras hay un pedido en vuelo no se pueden disparar más: reduce la ventana de la carrera. */
-  it('deshabilita filtros y paginador mientras carga', async () => {
-    const enVuelo = new Subject<PaginaSolicitudesAuditoria>();
-    auditoriasService.listar.mockReturnValue(enVuelo);
-
-    fixture = TestBed.createComponent(ListadoAuditoriasPageComponent);
-    await estabilizar();
-    abrirFiltros();
-    await estabilizar();
-
-    expect(casillas().every((c) => c.disabled)).toBe(true);
-
-    enVuelo.next(pagina([enRevision]));
-    enVuelo.complete();
-    await estabilizar();
-
-    expect(casillas().every((c) => c.disabled)).toBe(false);
   });
 
   /** El tamaño de página lo fija el servidor; el rango tiene que salir de ahí y no de una constante. */
