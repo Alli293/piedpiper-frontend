@@ -206,7 +206,6 @@ export class DashboardPageComponent {
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'PANEL EMPRESARIAL',
     pageTitle: 'Dashboard',
-    showNotificationDot: true,
   }));
 
   protected readonly periodoSelectorAriaLabel = computed(

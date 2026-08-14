@@ -138,7 +138,6 @@ export class PerfilAuditorPageComponent implements OnInit {
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'PERFIL AUDITOR',
     pageTitle: 'Mi Perfil de Auditor',
-    showNotificationDot: false,
     userInitials: this.userInitials(),
   }));
 

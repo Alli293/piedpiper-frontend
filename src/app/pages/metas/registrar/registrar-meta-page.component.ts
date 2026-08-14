@@ -129,7 +129,6 @@ export class RegistrarMetaPageComponent {
   protected readonly headerConfig: HeaderConfig = {
     sectionLabel: 'PANEL EMPRESARIAL',
     pageTitle: 'Metas de reducción',
-    showNotificationDot: false,
     showBackButton: true,
   };
 

@@ -77,39 +77,6 @@
   gap: var(--ch-space-2);
 }
 
-.ch-header__icon-button {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: var(--ch-radius-md);
-  background: transparent;
-  color: var(--ch-text-secondary);
-  cursor: pointer;
-  transition: background-color var(--ch-transition);
-
-  &:hover {
-    background: var(--ch-bg-main);
-  }
-
-  &:focus-visible {
-    @include mixins.focus-ring;
-  }
-}
-
-.ch-header__notification-dot {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--ch-danger);
-}
-
 .ch-header__profile-button {
   display: inline-flex;
   border: none;

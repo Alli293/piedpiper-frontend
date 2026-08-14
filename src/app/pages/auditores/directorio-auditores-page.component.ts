@@ -122,7 +122,6 @@ export class DirectorioAuditoresPageComponent {
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'AUDITORES',
     pageTitle: 'Directorio de Auditores',
-    showNotificationDot: true,
   }));
 
   protected readonly avisoBusqueda = computed(() =>

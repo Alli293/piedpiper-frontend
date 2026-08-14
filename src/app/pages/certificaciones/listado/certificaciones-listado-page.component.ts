@@ -74,7 +74,6 @@ export class CertificacionesListadoPageComponent implements OnInit {
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'CERTIFICACIONES',
     pageTitle: 'Mis certificaciones',
-    showNotificationDot: true,
     showBackButton: true,
   }));
 

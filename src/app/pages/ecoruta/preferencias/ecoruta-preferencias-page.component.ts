@@ -194,7 +194,6 @@ export class EcoRutaPreferenciasPageComponent implements OnInit {
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'ECORUTA',
     pageTitle: 'Planificar viaje',
-    showNotificationDot: false,
     userInitials: this.authSession.getUserInitials(),
   }));
 

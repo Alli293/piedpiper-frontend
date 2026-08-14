@@ -77,7 +77,6 @@ export class ItinerarioGeneradoPageComponent {
     pageTitle: this.itinerario()
       ? `Costa Rica sostenible · ${this.itinerario()!.cantidadDias} días`
       : 'Itinerario generado',
-    showNotificationDot: false,
     userInitials: this.authSession.getUserInitials(),
     showBackButton: true,
   }));

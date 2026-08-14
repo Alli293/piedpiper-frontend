@@ -66,7 +66,6 @@ export class ConfiguracionPageComponent implements OnInit {
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: this.i18n.t('config.seccion').toUpperCase(),
     pageTitle: this.i18n.t('config.titulo'),
-    showNotificationDot: false,
   }));
 
   ngOnInit(): void {

@@ -69,7 +69,6 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'AUDITORES · DIRECTORIO DE AUDITORES',
     pageTitle: 'Perfil del auditor',
-    showNotificationDot: true,
   }));
 
   protected readonly resenasOrdenadas = computed<ResenaVerificada[]>(() => {
