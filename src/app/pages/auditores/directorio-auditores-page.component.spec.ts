@@ -188,7 +188,7 @@ describe('DirectorioAuditoresPageComponent', () => {
     pintar();
 
     expect((fixture.nativeElement as HTMLElement).textContent).toContain(
-      'No hay auditores que cumplan con los filtros seleccionados. Intente ampliar los criterios.'
+      'No hay auditores certificados con los filtros seleccionados. Intenta ampliarlos.'
     );
   });
 
