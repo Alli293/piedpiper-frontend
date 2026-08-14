@@ -81,28 +81,34 @@
 
             <div
               class="pub-nivel"
-              [class.pub-nivel--sin-nivel]="nivelConfig().clase === 'sin-nivel'"
-              [class.pub-nivel--bronce]="nivelConfig().clase === 'bronce'"
-              [class.pub-nivel--plata]="nivelConfig().clase === 'plata'"
-              [class.pub-nivel--oro]="nivelConfig().clase === 'oro'"
-              [class.pub-nivel--platino]="nivelConfig().clase === 'platino'"
+              [class.pub-nivel--sin-nivel]="nivelClase() === 'sin-nivel'"
+              [class.pub-nivel--bronce]="nivelClase() === 'bronce'"
+              [class.pub-nivel--plata]="nivelClase() === 'plata'"
+              [class.pub-nivel--oro]="nivelClase() === 'oro'"
+              [class.pub-nivel--platino]="nivelClase() === 'platino'"
               aria-label="Nivel ecológico"
             >
               <span class="pub-nivel__label">NIVEL ECOLÓGICO</span>
-              <span class="pub-nivel__nombre">
-                <app-icon [name]="nivelConfig().icono" [size]="20" aria-hidden="true" />
-                {{ nivelNormalizado() }}
-              </span>
-              <span class="pub-nivel__vigencia">Vigente {{ getAnioVigencia() }}</span>
+
+              <div class="pub-nivel__main">
+                <span class="pub-nivel__icon-badge" aria-hidden="true">
+                  <app-icon name="certificaciones" [size]="22" />
+                </span>
+                <div class="pub-nivel__info">
+                  <span class="pub-nivel__nombre">{{ nivelNormalizado() }}</span>
+                  @if (nivelNormalizado() !== 'Sin nivel' && perfil()?.fechaActualizacionNivel) {
+                    <span class="pub-nivel__vigencia">Vigente {{ getAnioVigencia() }}</span>
+                  }
+                </div>
+              </div>
 
               <div class="pub-nivel__progress" aria-hidden="true">
                 @for (nivel of nivelesOrden; track nivel; let i = $index) {
                   <div
                     class="pub-nivel__step"
-                    [class.pub-nivel__step--active]="i <= nivelIndex()"
                     [class.pub-nivel__step--current]="i === nivelIndex()"
                   >
-                    <span class="pub-nivel__step-dot"></span>
+                    <span class="pub-nivel__step-bar"></span>
                     <span class="pub-nivel__step-label">{{ nivel }}</span>
                   </div>
                 }
@@ -239,6 +245,14 @@
               <h2 class="pub-section__title" id="evolucion-title">
                 Evolución de la huella de carbono
               </h2>
+              <span
+                class="pub-section__subtitle-inline pub-section__subtitle-inline--info"
+                tabindex="0"
+                title="Solo se muestran periodos con una auditoría externa completada y una certificación vigente. Para que tu historial aparezca aquí, solicita una auditoría desde tu panel de empresa."
+              >
+                <app-icon name="info" [size]="14" aria-hidden="true" />
+                datos verificados por auditores
+              </span>
             </div>
           </div>
 
@@ -284,7 +298,9 @@
               @case ('exito') {
                 @if ((huella()?.serie?.length ?? 0) === 0) {
                   <p class="pub-huella__message">
-                    Esta empresa aún no cuenta con datos de huella de carbono verificados.
+                    Esta empresa aún no cuenta con periodos de huella de carbono verificados por un
+                    auditor externo. El historial aparece aquí una vez que la empresa completa una
+                    auditoría y obtiene una certificación vigente para ese periodo.
                   </p>
                 } @else {
                   <div class="pub-huella__summary">

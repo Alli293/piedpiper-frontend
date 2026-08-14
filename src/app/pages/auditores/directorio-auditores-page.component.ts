@@ -5,6 +5,8 @@ import { catchError, debounceTime, distinctUntilChanged, of, switchMap, tap } fr
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { HeadingComponent } from '../../shared/components/heading/heading.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 import { CheckboxComponent } from '../../shared/components/inputs/checkbox/checkbox.component';
 import { RadioComponent } from '../../shared/components/inputs/radio/radio.component';
 import { RadioGroupDirective } from '../../shared/components/inputs/radio/radio-group.directive';
@@ -83,6 +85,8 @@ interface TarjetaAuditor {
     AvatarComponent,
     BadgeComponent,
     ButtonComponent,
+    HeadingComponent,
+    IconComponent,
   ],
   templateUrl: './directorio-auditores-page.component.html',
   styleUrl: './directorio-auditores-page.component.scss',
