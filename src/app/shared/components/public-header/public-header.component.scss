@@ -1,0 +1,65 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  box-sizing: border-box;
+  padding: 0 var(--ch-space-6);
+  background: var(--ch-bg-white);
+  border-bottom: 1px solid var(--ch-border);
+}
+
+.ch-public-header__left {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-3);
+}
+
+.ch-public-header__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-1);
+  padding: var(--ch-space-1) var(--ch-space-2);
+  border-radius: var(--ch-radius-pill);
+  background: var(--ch-green-soft);
+  color: var(--ch-green-dark);
+  font-family: var(--ch-font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ch-public-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-5);
+}
+
+.ch-public-header__compartir {
+  // El botón "link" usa estos tokens para su color por defecto y hover:
+  // se sobrescriben aquí solo para que combine con el resto del header.
+  --ch-sky: var(--ch-text-secondary);
+  --ch-blue-mid: var(--ch-text-primary);
+}
+
+.ch-public-header__compartir-content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-1);
+}
+
+.ch-public-header__help {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-1);
+  font-family: var(--ch-font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ch-text-secondary);
+}
+
+.ch-public-header__login {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-1);
+  font-size: 0.875rem;
+}

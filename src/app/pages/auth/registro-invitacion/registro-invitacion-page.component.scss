@@ -1,0 +1,84 @@
+:host {
+  display: block;
+}
+
+.invitacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-5);
+}
+
+.invitacion__estado {
+  margin: 0;
+  color: var(--ch-text-muted);
+  font-size: 14px;
+}
+
+.invitacion__badge {
+  margin-bottom: var(--ch-space-4);
+}
+
+.invitacion__texto {
+  margin: var(--ch-space-2) 0 0;
+  color: var(--ch-text-secondary);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.invitacion__divisor {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-3);
+  color: var(--ch-text-muted);
+  font-size: 13px;
+}
+
+.invitacion__divisor::before,
+.invitacion__divisor::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--ch-border);
+}
+
+.invitacion__google {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.invitacion__google--bloqueado {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.invitacion__terms {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ch-text-secondary);
+}
+
+.invitacion__error {
+  margin: 0;
+  color: var(--ch-danger);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.invitacion__enlace {
+  color: var(--ch-blue-mid);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.invitacion__enlace:hover {
+  text-decoration: underline;
+}
+
+.invitacion__bloqueo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-4);
+}

@@ -1,0 +1,84 @@
+<app-shell-layout [headerConfig]="headerConfig" activeId="solicitudes-auditor">
+  <main class="solicitudes">
+    <header class="solicitudes__header">
+      <h1 class="solicitudes__title">Solicitudes de auditores</h1>
+      <p class="solicitudes__subtitle">
+        Revisa las solicitudes pendientes y aprueba o rechaza el ingreso de auditores certificados.
+      </p>
+    </header>
+
+    @if (cargando()) {
+      <p class="solicitudes__vacio">Cargando solicitudes...</p>
+    } @else if (errorCarga()) {
+      <div class="solicitudes__vacio" role="alert">
+        <p>No pudimos cargar las solicitudes. Intenta nuevamente.</p>
+        <app-button variant="secondary" size="sm" (click)="cargar(pagina()?.pagina ?? 0)">
+          Reintentar
+        </app-button>
+      </div>
+    } @else if (!pagina() || pagina()!.contenido.length === 0) {
+      <app-card class="solicitudes__vacio-card">
+        <span class="solicitudes__vacio-icono" aria-hidden="true">
+          <app-icon name="verificada" [size]="16" />
+        </span>
+        <app-heading level="h2" text="Cola al día" />
+        <p>
+          No hay solicitudes pendientes en este momento. Las nuevas solicitudes de registro de
+          auditores aparecerán aquí en orden de llegada.
+        </p>
+      </app-card>
+    } @else {
+      <div class="solicitudes__tabla-wrap">
+        <table class="solicitudes__tabla">
+          <thead>
+            <tr>
+              <th scope="col">Auditor</th>
+              <th scope="col">Correo</th>
+              <th scope="col">Fecha de solicitud</th>
+              <th scope="col"><span class="solicitudes__th-oculto">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (solicitud of pagina()!.contenido; track solicitud.id) {
+              <tr>
+                <td>{{ solicitud.nombreAuditor }}</td>
+                <td>{{ solicitud.email }}</td>
+                <td>{{ solicitud.fechaSolicitud | date: 'dd/MM/yyyy' }}</td>
+                <td class="solicitudes__acciones">
+                  <app-button variant="primary" size="sm" (click)="irARevision(solicitud)">
+                    <span>Revisar</span>
+                    <app-icon name="chevron-derecha" [size]="12" />
+                  </app-button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (pagina()!.totalPaginas > 1) {
+        <div class="solicitudes__paginacion">
+          <app-button
+            variant="secondary"
+            size="sm"
+            [disabled]="pagina()!.pagina === 0"
+            (click)="cargar(pagina()!.pagina - 1)"
+          >
+            Anterior
+          </app-button>
+          <span class="solicitudes__paginacion-info">
+            Página {{ pagina()!.pagina + 1 }} de {{ pagina()!.totalPaginas }}
+          </span>
+          <app-button
+            variant="secondary"
+            size="sm"
+            [disabled]="pagina()!.pagina + 1 >= pagina()!.totalPaginas"
+            (click)="cargar(pagina()!.pagina + 1)"
+          >
+            Siguiente
+          </app-button>
+        </div>
+      }
+    }
+  </main>
+</app-shell-layout>

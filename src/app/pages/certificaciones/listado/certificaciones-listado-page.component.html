@@ -1,0 +1,146 @@
+<app-shell-layout
+  activeId="certificaciones"
+  [headerConfig]="headerConfig()"
+  backRoute="/empresa/certificaciones"
+>
+  <div class="certificaciones-listado-page">
+    @if (cargando()) {
+      <section class="certificaciones-listado-page__estado" role="status">
+        <span class="certificaciones-listado-page__loader" aria-hidden="true"></span>
+        <p>Cargando certificaciones...</p>
+      </section>
+    } @else if (error()) {
+      <section class="certificaciones-listado-page__estado" role="alert">
+        <app-icon name="warning" [size]="32" />
+        <p>No fue posible cargar las certificaciones en este momento.</p>
+        <app-button variant="secondary" size="sm" (click)="reintentar()">Reintentar</app-button>
+      </section>
+    } @else if (certificaciones().length === 0) {
+      <app-card class="certificaciones-listado-page__vacio">
+        <span class="certificaciones-listado-page__vacio-icono" aria-hidden="true">
+          <app-icon name="certificaciones" [size]="34" />
+        </span>
+        <app-heading level="h1" text="Sin certificaciones registradas" />
+        <p>
+          Cuando tu empresa obtenga y verifique su primera certificación con un auditor en
+          CarbonHub, aparecerá aquí.
+        </p>
+      </app-card>
+    } @else {
+      <app-encabezado-resumen
+        icono="certificaciones"
+        tono="success"
+        titulo="Mis certificaciones"
+        subtexto="Certificaciones registradas por tu empresa, con su vigencia y acceso al detalle de cada una."
+        [statValor]="certificaciones().length"
+        statLabel="Certificaciones registradas"
+      />
+
+      <div class="certificaciones-listado-page__toolbar">
+        <span class="certificaciones-listado-page__filtro-label">
+          <app-icon name="config" [size]="13" />
+          Filtrar por vigencia
+        </span>
+        <app-filter-chips
+          ariaLabel="Filtrar por vigencia"
+          [chips]="chipsVigencia()"
+          [activeId]="filtro()"
+          (chipSelected)="seleccionarFiltro($event)"
+        />
+      </div>
+
+      @if (certificacionesFiltradas().length === 0) {
+        <app-card class="certificaciones-listado-page__vacio-filtro">
+          <p>No hay certificaciones con esta vigencia.</p>
+          <app-button variant="tertiary" size="sm" (click)="verTodas()">Ver todas</app-button>
+        </app-card>
+      } @else {
+        <div class="certificaciones-listado-page__table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Certificación</th>
+                <th scope="col">Emitida</th>
+                <th scope="col">Vence</th>
+                <th scope="col">Estado</th>
+                <th scope="col">
+                  <span class="certificaciones-listado-page__th-oculto">Acciones</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (cert of certificacionesFiltradas(); track cert.id) {
+                <tr>
+                  <td>
+                    <div class="certificaciones-listado-page__cert-cell">
+                      <span class="certificaciones-listado-page__cert-icono" aria-hidden="true">
+                        <app-icon name="certificaciones" [size]="16" />
+                      </span>
+                      <div>
+                        <strong>{{ cert.nombreCertificacion }}</strong>
+                        @if (cert.codigoVerificacion) {
+                          <button
+                            type="button"
+                            class="certificaciones-listado-page__cert-tipo"
+                            (click)="copiarCodigo(cert.codigoVerificacion)"
+                            [attr.aria-label]="
+                              'Copiar código de verificación ' + cert.codigoVerificacion
+                            "
+                          >
+                            <app-icon name="copiar" [size]="10" />
+                            {{ cert.codigoVerificacion }}
+                          </button>
+                          @if (codigoCopiado() === cert.codigoVerificacion) {
+                            <span class="certificaciones-listado-page__codigo-tooltip" role="status"
+                              >Código copiado</span
+                            >
+                          }
+                        } @else {
+                          <span
+                            class="certificaciones-listado-page__cert-tipo certificaciones-listado-page__cert-tipo--vacio"
+                            >Sin código</span
+                          >
+                        }
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ cert.fechaEmision | date: 'dd/MM/yyyy' : 'UTC' }}</td>
+                  <td>{{ cert.fechaVencimiento | date: 'dd/MM/yyyy' : 'UTC' }}</td>
+                  <td>
+                    <app-badge [variant]="varianteVigencia(cert)">{{
+                      etiquetaVigencia(cert)
+                    }}</app-badge>
+                  </td>
+                  <td>
+                    <app-button variant="tertiary" size="sm" (click)="abrirDetalle(cert.id)">
+                      Ver detalle
+                    </app-button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </div>
+
+  @if (detalleAbiertoId()) {
+    <app-modal size="md" labelledBy="detalle-cert-titulo" (close)="cerrarDetalle()">
+      @if (cargandoDetalle()) {
+        <p role="status">Cargando certificación...</p>
+      } @else if (errorDetalle() || !detalle()) {
+        <p role="alert">No fue posible cargar esta certificación.</p>
+      } @else if (detalle(); as cert) {
+        @if (datoDetalleActual(); as dato) {
+          <app-detalle-panel
+            [dato]="dato"
+            [acciones]="accionesDetalleActual()"
+            tituloId="detalle-cert-titulo"
+            (accionClick)="onAccionDetalle($event, cert)"
+          />
+        }
+      }
+    </app-modal>
+  }
+</app-shell-layout>

@@ -1,0 +1,75 @@
+<form class="registro-invitacion-correo-form__form" novalidate (submit)="handleSubmit($event)">
+  <app-text-input
+    id="txtCorreo"
+    label="Correo electrónico"
+    type="email"
+    [value]="email()"
+    [disabled]="true"
+  />
+
+  <app-text-input
+    id="txtNombre"
+    label="Nombre"
+    autocomplete="given-name"
+    placeholder="Tu nombre"
+    [formField]="registroForm.nombre"
+    [error]="errorNombre()"
+  />
+
+  <app-text-input
+    id="txtApellidos"
+    label="Apellidos"
+    autocomplete="family-name"
+    placeholder="Tus apellidos"
+    [formField]="registroForm.apellidos"
+    [error]="errorApellidos()"
+  />
+
+  <app-password-input
+    id="txtContrasena"
+    label="Contraseña"
+    autocomplete="new-password"
+    placeholder="Tu contraseña"
+    [formField]="registroForm.contrasena"
+    [error]="errorContrasena()"
+    [hint]="contrasenaHint"
+  />
+
+  <app-password-input
+    id="txtConfirmarContrasena"
+    label="Confirmar contraseña"
+    autocomplete="new-password"
+    placeholder="Repite tu contraseña"
+    [formField]="registroForm.confirmarContrasena"
+    [error]="errorConfirmacion()"
+  />
+
+  <app-checkbox
+    id="chkAceptaTerminos"
+    [formField]="registroForm.aceptaTerminos"
+    [error]="errorTerminos()"
+  >
+    Acepto los <a routerLink="/terminos" appLink>Términos de servicio</a> y la
+    <a routerLink="/privacidad" appLink>Política de privacidad</a> de CarbonHub
+  </app-checkbox>
+
+  @if (error()) {
+    <p class="registro-invitacion-correo-form__error" role="alert">{{ error() }}</p>
+  }
+  @if (cuentaExistente()) {
+    <a class="registro-invitacion-correo-form__enlace" routerLink="/login" appLink
+      >Iniciar sesión</a
+    >
+  }
+
+  <app-button
+    id="btnCrearCuenta"
+    variant="primary"
+    size="lg"
+    type="submit"
+    [loading]="submitting()"
+    [disabled]="submitting()"
+  >
+    Crear cuenta →
+  </app-button>
+</form>

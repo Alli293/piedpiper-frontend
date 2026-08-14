@@ -1,0 +1,219 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.ch-metas-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--ch-bg-white);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-lg);
+  padding: var(--ch-space-6);
+  box-shadow: var(--ch-shadow-sm);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    margin-bottom: var(--ch-space-5);
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    flex-shrink: 0;
+    background: var(--ch-green-soft);
+    color: var(--ch-green-dark);
+  }
+
+  &__gestionar {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  &__loading,
+  &__error {
+    font-family: var(--ch-font-body);
+    font-size: 13px;
+    color: var(--ch-text-secondary);
+    margin: 0;
+  }
+
+  &__error {
+    color: var(--ch-danger);
+  }
+
+  &__vacio {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: var(--ch-space-3);
+    padding: var(--ch-space-8) var(--ch-space-4);
+    background: var(--ch-bg-main);
+    border: 1px dashed var(--ch-border);
+    border-radius: var(--ch-radius-md);
+
+    p {
+      font-family: var(--ch-font-body);
+      font-size: 14px;
+      color: var(--ch-text-secondary);
+      margin: 0 0 var(--ch-space-2);
+    }
+  }
+
+  &__vacio-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--ch-bg-white);
+    border: 1px solid var(--ch-border);
+    color: var(--ch-text-secondary);
+  }
+
+  &__lista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ch-space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item {
+    padding-bottom: var(--ch-space-5);
+    border-bottom: 1px solid var(--ch-border);
+
+    &:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+  }
+
+  &__item-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ch-space-3);
+    margin-bottom: var(--ch-space-3);
+  }
+
+  &__item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    flex-shrink: 0;
+    background: var(--ch-green-soft);
+    color: var(--ch-green-dark);
+
+    .ch-metas-panel__item--vencida & {
+      background: var(--ch-danger-bg);
+      color: var(--ch-danger);
+    }
+  }
+
+  &__item-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+
+    strong {
+      font-family: var(--ch-font-heading);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ch-text-primary);
+    }
+
+    small {
+      font-family: var(--ch-font-body);
+      font-size: 12px;
+      color: var(--ch-text-secondary);
+    }
+  }
+
+  &__estado {
+    flex-shrink: 0;
+    font-family: var(--ch-font-body);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--ch-green-soft);
+    color: var(--ch-green-dark);
+    white-space: nowrap;
+
+    &--vencida {
+      background: var(--ch-danger-bg);
+      color: var(--ch-danger);
+    }
+  }
+
+  &__progreso {
+    display: flex;
+    align-items: center;
+    gap: var(--ch-space-3);
+
+    strong {
+      font-family: var(--ch-font-heading);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ch-text-primary);
+      flex-shrink: 0;
+      min-width: 42px;
+      text-align: right;
+    }
+  }
+
+  &__track {
+    flex: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--ch-bg-main);
+    overflow: hidden;
+  }
+
+  &__fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--ch-green);
+
+    .ch-metas-panel__item--vencida & {
+      background: var(--ch-danger);
+    }
+  }
+
+  &__fecha-limite,
+  &__vencida-detalle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--ch-font-body);
+    font-size: 12px;
+    color: var(--ch-text-secondary);
+    margin: var(--ch-space-2) 0 0;
+  }
+
+  &__vencida-detalle {
+    color: var(--ch-danger);
+    font-weight: 600;
+  }
+}

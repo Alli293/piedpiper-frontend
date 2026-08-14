@@ -1,0 +1,329 @@
+@use '../../../shared/styles/mixins';
+
+.ch-centro-alertas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-5);
+
+  &__controles {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ch-space-4);
+    flex-wrap: wrap;
+  }
+
+  &__buscador {
+    min-width: 240px;
+    max-width: 320px;
+    flex: 1;
+  }
+
+  &__loading,
+  &__error {
+    font-family: var(--ch-font-body);
+    font-size: 14px;
+    color: var(--ch-text-secondary);
+  }
+
+  &__error {
+    color: var(--ch-danger);
+  }
+
+  &__vacio {
+    padding: var(--ch-space-4);
+  }
+
+  &__vacio-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--ch-space-2);
+    padding: var(--ch-space-8) var(--ch-space-4);
+
+    p {
+      font-family: var(--ch-font-body);
+      font-size: 14px;
+      color: var(--ch-text-secondary);
+      margin: 0;
+      max-width: 420px;
+    }
+  }
+
+  &__vacio-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--ch-green-soft);
+    color: var(--ch-green-dark);
+    margin-bottom: var(--ch-space-2);
+  }
+
+  &__vacio--filtro &__vacio-icon {
+    background: var(--ch-bg-main);
+    color: var(--ch-text-secondary);
+  }
+
+  &__tabla-wrap {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: clip;
+    border: 1px solid var(--ch-border);
+    border-radius: var(--ch-radius-lg);
+    background: var(--ch-bg-white);
+    box-shadow: var(--ch-shadow-sm);
+
+    table {
+      width: 100%;
+      min-width: 720px;
+      // table-layout: fixed + <colgroup> es necesario para que las filas de
+      // grupo (con colspan) midan exactamente lo mismo que el resto de
+      // filas: con "auto" el navegador podía calcular anchos de columna
+      // distintos para el thead/las filas normales y las filas con colspan,
+      // desalineando el encabezado y encogiendo la columna de acciones (el
+      // botón "Ver detalle" terminaba envolviendo texto y desbordando).
+      table-layout: fixed;
+      border-collapse: collapse;
+    }
+
+    // Anchos en porcentaje que suman 100%: ninguna columna queda en "auto",
+    // que es lo que producía el descuadre (ver nota arriba).
+    .ch-centro-alertas__col-cert {
+      width: 35%;
+    }
+
+    .ch-centro-alertas__col-fecha {
+      width: 13%;
+    }
+
+    .ch-centro-alertas__col-dias {
+      width: 9%;
+    }
+
+    .ch-centro-alertas__col-urgencia {
+      width: 23%;
+    }
+
+    .ch-centro-alertas__col-accion {
+      width: 20%;
+    }
+
+    th,
+    td {
+      padding: var(--ch-space-3) var(--ch-space-4);
+      border-bottom: 1px solid var(--ch-border);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: var(--ch-bg-main);
+      color: var(--ch-text-secondary);
+      font-family: var(--ch-font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+  }
+
+  &__th-numerica {
+    text-align: right;
+  }
+
+  &__th-accion-label {
+    @include mixins.visually-hidden;
+  }
+
+  &__grupo-fila {
+    td {
+      // No display:flex aquí: un <td> con display:flex deja de comportarse
+      // como celda de tabla (se vuelve un bloque independiente que se ajusta
+      // a su contenido), lo que rompía el colspan y desalineaba las columnas
+      // del resto de filas. El layout de icono + texto va en el <span> hijo.
+      padding-top: var(--ch-space-2);
+      padding-bottom: var(--ch-space-2);
+      background: var(--ch-bg-main);
+      color: var(--ch-text-secondary);
+    }
+
+    &-label {
+      display: flex;
+      align-items: center;
+      gap: var(--ch-space-2);
+      font-family: var(--ch-font-mono);
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    &--vencidas td,
+    &--urgentes td {
+      background: var(--ch-danger-bg);
+      color: var(--ch-danger);
+    }
+
+    &--proximas td {
+      background: var(--ch-warning-bg);
+      color: var(--ch-warning-dark);
+    }
+
+    &--informativas td {
+      background: var(--ch-info-bg);
+      color: var(--ch-info);
+    }
+  }
+
+  &__fila {
+    // La barra de acento de 4px va como box-shadow inset en la primera celda,
+    // no como ::before posicionado en el <tr>: un pseudo-elemento
+    // absolutamente posicionado sobre una fila de tabla (display: table-row)
+    // no es fiable — en este motor de render terminaba rompiendo el cálculo
+    // de columnas de toda la tabla (desalineaba el resto de filas).
+    td:first-child {
+      box-shadow: inset 4px 0 0 var(--ch-info);
+    }
+
+    &--proxima td:first-child {
+      box-shadow: inset 4px 0 0 var(--ch-warning);
+    }
+
+    &--urgente td:first-child,
+    &--vencida td:first-child {
+      box-shadow: inset 4px 0 0 var(--ch-danger);
+    }
+  }
+
+  &__cert-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--ch-space-3);
+    min-width: 0;
+
+    > div {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+  }
+
+  &__cert-cell strong {
+    color: var(--ch-dark);
+    font-weight: 700;
+    font-size: 0.86rem;
+  }
+
+  &__codigo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ch-space-1);
+    width: fit-content;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--ch-text-muted);
+    font-family: var(--ch-font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+  }
+
+  &__codigo:hover {
+    color: var(--ch-text-secondary);
+  }
+
+  &__codigo-tooltip {
+    position: absolute;
+    top: calc(100% + var(--ch-space-1));
+    left: 0;
+    white-space: nowrap;
+    padding: var(--ch-space-1) var(--ch-space-2);
+    border-radius: var(--ch-radius-sm);
+    background: var(--ch-text-primary);
+    color: var(--ch-text-on-dark);
+    font-family: var(--ch-font-body);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    box-shadow: var(--ch-shadow-md);
+    z-index: 1;
+  }
+
+  &__cert-icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--ch-radius-md);
+    background: var(--ch-info-bg);
+    color: var(--ch-info);
+
+    .ch-centro-alertas__fila--proxima & {
+      background: var(--ch-warning-bg);
+      color: var(--ch-warning-dark);
+    }
+
+    .ch-centro-alertas__fila--urgente &,
+    .ch-centro-alertas__fila--vencida & {
+      background: var(--ch-danger-bg);
+      color: var(--ch-danger);
+    }
+  }
+
+  &__fecha {
+    color: var(--ch-text-muted);
+    font-family: var(--ch-font-mono);
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  &__dias {
+    text-align: right;
+    white-space: nowrap;
+
+    strong {
+      font-family: var(--ch-font-heading);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ch-info);
+
+      .ch-centro-alertas__fila--proxima & {
+        color: var(--ch-warning-dark);
+      }
+
+      .ch-centro-alertas__fila--urgente &,
+      .ch-centro-alertas__fila--vencida & {
+        color: var(--ch-danger);
+      }
+    }
+
+    small {
+      margin-left: var(--ch-space-1);
+      font-family: var(--ch-font-body);
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      color: var(--ch-text-secondary);
+    }
+  }
+
+  &__accion {
+    text-align: right;
+  }
+
+  &__ver-detalle {
+    display: inline-block;
+    text-decoration: none;
+  }
+}

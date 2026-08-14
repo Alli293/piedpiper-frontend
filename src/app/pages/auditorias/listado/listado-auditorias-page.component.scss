@@ -1,0 +1,153 @@
+.ch-listado-auditorias {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-4);
+}
+
+.ch-listado-auditorias__intro {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ch-space-3);
+  justify-content: space-between;
+}
+
+.ch-listado-auditorias__descripcion {
+  color: var(--ch-text-muted);
+  font-size: 0.85rem;
+  margin-top: var(--ch-space-1);
+}
+
+.ch-listado-auditorias__estado {
+  color: var(--ch-text-muted);
+  font-size: 0.85rem;
+}
+
+.ch-listado-auditorias__error {
+  color: var(--ch-danger);
+  font-size: 0.9rem;
+}
+
+.ch-listado-auditorias__vacio {
+  align-items: center;
+  background: var(--ch-bg-white);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  color: var(--ch-text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-3);
+  padding: var(--ch-space-8) var(--ch-space-4);
+  text-align: center;
+}
+
+.ch-listado-auditorias__tabla-marco {
+  background: var(--ch-bg-white);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-lg);
+  box-shadow: var(--ch-shadow-sm);
+  /* La tabla scrollea dentro de su marco para que la página nunca scrollee en horizontal. */
+  overflow-x: auto;
+}
+
+.ch-listado-auditorias__tabla {
+  border-collapse: collapse;
+  min-width: 640px;
+  width: 100%;
+}
+
+.ch-listado-auditorias__caption {
+  clip: rect(0 0 0 0);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.ch-listado-auditorias__oculto {
+  clip: rect(0 0 0 0);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.ch-listado-auditorias__tabla th {
+  background: var(--ch-bg-main);
+  border-bottom: 1px solid var(--ch-border);
+  color: var(--ch-text-secondary);
+  font-family: var(--ch-font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: var(--ch-space-3) var(--ch-space-4);
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.ch-listado-auditorias__tabla td {
+  border-bottom: 1px solid var(--ch-border);
+  font-size: 0.85rem;
+  padding: var(--ch-space-3) var(--ch-space-4);
+  vertical-align: middle;
+}
+
+.ch-listado-auditorias__tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ch-listado-auditorias__periodo {
+  font-weight: 600;
+}
+
+.ch-listado-auditorias__aviso {
+  color: var(--ch-text-muted);
+  display: block;
+  font-family: var(--ch-font-mono);
+  font-size: 0.65rem;
+  margin-top: 2px;
+}
+
+.ch-listado-auditorias__acciones {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ch-listado-auditorias__barra {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ch-space-3);
+}
+
+.ch-listado-auditorias__filtro-label {
+  align-items: center;
+  color: var(--ch-text-secondary);
+  display: inline-flex;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  gap: var(--ch-space-1);
+}
+
+.ch-listado-auditorias__rango {
+  color: var(--ch-text-muted);
+  font-size: 0.8rem;
+  margin: 0 0 0 auto;
+}
+
+.ch-listado-auditorias__paginador {
+  align-items: center;
+  display: flex;
+  gap: var(--ch-space-3);
+  justify-content: center;
+}
+
+.ch-listado-auditorias__pagina-actual {
+  color: var(--ch-text-muted);
+  font-size: 0.85rem;
+  margin: 0;
+  min-width: 9rem;
+  text-align: center;
+}

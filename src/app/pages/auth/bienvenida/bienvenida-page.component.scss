@@ -1,0 +1,111 @@
+:host {
+  display: block;
+}
+
+.bienvenida {
+  display: flex;
+  flex-direction: column;
+}
+
+.bienvenida__header {
+  margin-bottom: var(--ch-space-6);
+}
+
+.bienvenida__subtitle {
+  margin: var(--ch-space-2) 0 0;
+  color: var(--ch-text-secondary);
+  font-size: 15px;
+}
+
+.bienvenida__roles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-3);
+}
+
+.bienvenida__role {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-4);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-lg);
+  text-decoration: none;
+  transition:
+    border-color var(--ch-transition),
+    background var(--ch-transition);
+}
+
+.bienvenida__role:hover {
+  border-color: var(--ch-green);
+  background: var(--ch-green-soft);
+}
+
+.bienvenida__role-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-green-soft);
+  color: var(--ch-green);
+}
+
+.bienvenida__role:hover .bienvenida__role-icon {
+  background: var(--ch-green);
+  color: var(--ch-bg-white);
+}
+
+.bienvenida__role-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bienvenida__role-title {
+  font-family: var(--ch-font-heading);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ch-text-primary);
+}
+
+.bienvenida__role-desc {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ch-text-secondary);
+}
+
+.bienvenida__role-chevron {
+  margin-left: auto;
+  font-size: 22px;
+  color: var(--ch-text-muted);
+}
+
+.bienvenida__terms {
+  margin: var(--ch-space-6) 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ch-text-secondary);
+}
+
+.bienvenida__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-4);
+  margin: var(--ch-space-5) 0;
+  color: var(--ch-text-muted);
+  font-size: 13px;
+}
+
+.bienvenida__divider::before,
+.bienvenida__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--ch-border);
+}

@@ -1,0 +1,26 @@
+<app-shell-layout activeId="insignias-empresa" [headerConfig]="headerConfig()">
+  @if (cargando()) {
+    <section class="ch-insignias-empresa-page__estado" aria-live="polite">
+      <span class="ch-insignias-empresa-page__loader" aria-hidden="true"></span>
+      <p>Cargando insignias empresariales...</p>
+    </section>
+  } @else if (errorCarga()) {
+    <section class="ch-insignias-empresa-page__estado" role="alert">
+      <app-icon name="warning" [size]="32" />
+      <p>No se pudieron cargar las insignias empresariales.</p>
+      <app-button variant="secondary" (click)="cargarInsignias()">Reintentar</app-button>
+    </section>
+  } @else {
+    <app-insignias-empresa-list
+      titulo="Insignias activas"
+      descripcion="Reconocimientos automáticos por certificaciones activas y requisitos verificados."
+      [insignias]="insignias()"
+      [seleccionInicial]="seleccionInicial()"
+      [accionesPrivadas]="true"
+      (descargarJsonLd)="descargarJsonLd($event)"
+      (verificarOpenBadges)="verificarOpenBadges($event)"
+      (descargarJwt)="descargarJwt($event)"
+      (compartirLinkedIn)="compartirLinkedIn($event)"
+    />
+  }
+</app-shell-layout>

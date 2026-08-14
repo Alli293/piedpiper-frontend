@@ -1,0 +1,52 @@
+<app-auth-layout>
+  <div class="invitacion">
+    @if (cargando()) {
+      <p class="invitacion__estado">Validando tu invitación...</p>
+    } @else if (mensajePantalla()) {
+      <div class="invitacion__bloqueo" role="alert">
+        <app-heading level="h1" text="Invitación no disponible" />
+        <p class="invitacion__texto">{{ mensajePantalla() }}</p>
+        <a class="invitacion__enlace" routerLink="/login" appLink>Ir al inicio de sesión</a>
+      </div>
+    } @else if (invitacion(); as datos) {
+      <app-semantic-card variant="success" title="Invitación válida">
+        Enviada por <strong>{{ datos.nombreEmpresa }}</strong> · Rol: colaborador de empresa
+      </app-semantic-card>
+
+      <header class="invitacion__header">
+        <app-badge class="invitacion__badge" variant="success">Invitación de empresa</app-badge>
+        <app-heading level="h1" [text]="'Únete a ' + datos.nombreEmpresa" />
+        <p class="invitacion__texto">
+          Tu correo ya viene prellenado desde la invitación. Solo necesitas ingresar tu nombre y
+          elegir una contraseña.
+        </p>
+      </header>
+
+      <app-registro-invitacion-correo-form
+        [email]="datos.emailEnmascarado"
+        [token]="tokenLimpio()"
+      />
+
+      <div class="invitacion__divisor"><span>o</span></div>
+
+      <div
+        class="invitacion__google"
+        [class.invitacion__google--bloqueado]="registrando()"
+        #googleButton
+      ></div>
+
+      <p class="invitacion__terms">
+        Al registrarte aceptas nuestros
+        <a routerLink="/terminos" appLink>Términos de uso</a> y la
+        <a routerLink="/privacidad" appLink>Política de privacidad</a>.
+      </p>
+
+      @if (error()) {
+        <p class="invitacion__error" role="alert">{{ error() }}</p>
+      }
+      @if (cuentaExistente()) {
+        <a class="invitacion__enlace" routerLink="/login" appLink>Iniciar sesión</a>
+      }
+    }
+  </div>
+</app-auth-layout>

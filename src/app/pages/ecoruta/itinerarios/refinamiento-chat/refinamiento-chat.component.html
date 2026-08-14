@@ -1,0 +1,115 @@
+<section class="ch-refinamiento-chat" aria-label="Refinar itinerario con el asistente">
+  <header class="ch-refinamiento-chat__header">
+    <span class="ch-refinamiento-chat__header-icono" aria-hidden="true">
+      <app-icon name="enviar" [size]="16" />
+    </span>
+    <div>
+      <strong>Refinar con el asistente</strong>
+      <p>Pedí cambios y recalculá tu EcoScore</p>
+    </div>
+  </header>
+
+  <div class="ch-refinamiento-chat__mensajes">
+    @for (mensaje of mensajesChat(); track $index) {
+      <div
+        class="ch-refinamiento-chat__mensaje"
+        [class.ch-refinamiento-chat__mensaje--asistente]="mensaje.rol === 'ASISTENTE'"
+        [class.ch-refinamiento-chat__mensaje--usuario]="mensaje.rol === 'USUARIO'"
+      >
+        @if (mensaje.rol === 'ASISTENTE') {
+          <span class="ch-refinamiento-chat__mensaje-icono" aria-hidden="true">
+            <app-icon name="enviar" [size]="14" />
+          </span>
+        }
+        <p>{{ mensaje.contenido }}</p>
+      </div>
+    }
+
+    @if (historial().length === 0) {
+      <div class="ch-refinamiento-chat__chips">
+        @for (chip of chipsSugeridos; track chip) {
+          <button type="button" class="ch-refinamiento-chat__chip" (click)="seleccionarChip(chip)">
+            {{ chip }}
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Lista de actividades con botones "Comparar alternativas" -->
+    <div class="ch-refinamiento-chat__actividades">
+      @for (item of actividades(); track item.actividadIndex + '-' + item.diaNumero) {
+        <div class="ch-refinamiento-chat__actividad-item">
+          <span class="ch-refinamiento-chat__actividad-nombre">
+            Día {{ item.diaNumero }} — {{ item.actividad.nombre }}
+          </span>
+          @if (item.actividad.id) {
+            <button
+              type="button"
+              class="ch-refinamiento-chat__btn-comparar"
+              [disabled]="cargandoAlternativas() || cargandoSustitucion()"
+              (click)="compararAlternativas(item.actividad.id!)"
+            >
+              Comparar alternativas
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Tarjetas de comparación de alternativas (se muestran como un mensaje especial del chat) -->
+    @if (cargandoAlternativas()) {
+      <div class="ch-refinamiento-chat__mensaje ch-refinamiento-chat__mensaje--asistente">
+        <span class="ch-refinamiento-chat__mensaje-icono" aria-hidden="true">
+          <app-icon name="enviar" [size]="14" />
+        </span>
+        <p>Buscando alternativas más sostenibles…</p>
+      </div>
+    }
+
+    @if (comparacionResponse(); as response) {
+      <div class="ch-refinamiento-chat__alternativas-mensaje">
+        <app-alternativas-comparacion
+          [alternativas]="response.alternativas"
+          [actividadOriginal]="actividadOriginalInfo()"
+          [cargando]="cargandoSustitucion()"
+          (reemplazar)="onReemplazar($event)"
+        />
+      </div>
+    }
+
+    @if (enviandoMensaje()) {
+      <div
+        class="ch-refinamiento-chat__mensaje ch-refinamiento-chat__mensaje--asistente ch-refinamiento-chat__mensaje--procesando"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="ch-refinamiento-chat__mensaje-icono" aria-hidden="true">
+          <app-icon name="enviar" [size]="14" />
+        </span>
+        <p>
+          <span class="ch-refinamiento-chat__spinner" aria-hidden="true"></span>
+          Espera, estoy procesando tu pedido…
+        </p>
+      </div>
+    }
+  </div>
+
+  <form class="ch-refinamiento-chat__form" novalidate (submit)="handleSubmit($event)">
+    <input
+      #mensajeInput
+      type="text"
+      class="ch-refinamiento-chat__input"
+      placeholder="Ej: Quiero más actividades al aire libre"
+      [formField]="chatForm.mensaje"
+      aria-label="Escribí tu mensaje para el asistente"
+    />
+    <button
+      type="submit"
+      class="ch-refinamiento-chat__enviar"
+      [disabled]="!canEnviar()"
+      aria-label="Enviar mensaje"
+    >
+      <app-icon name="enviar" [size]="16" />
+    </button>
+  </form>
+</section>

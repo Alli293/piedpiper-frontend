@@ -1,0 +1,12 @@
+@if (icon()) {
+  <span class="ch-card-stat__icon" aria-hidden="true">
+    <app-icon [name]="icon()!" [size]="16" />
+  </span>
+}
+<span class="ch-card-stat__body">
+  <span class="ch-card-stat__label">{{ label() }}</span>
+  <span class="ch-card-stat__value">{{ value() }}</span>
+  @if (delta()) {
+    <p class="ch-card-stat__sub">{{ delta() }}</p>
+  }
+</span>

@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.registro-invitacion-correo-form__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-5);
+}
+
+.registro-invitacion-correo-form__error {
+  margin: calc(-1 * var(--ch-space-2)) 0 0;
+  color: var(--ch-danger);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.registro-invitacion-correo-form__enlace {
+  color: var(--ch-blue-mid);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.registro-invitacion-correo-form__enlace:hover {
+  text-decoration: underline;
+}

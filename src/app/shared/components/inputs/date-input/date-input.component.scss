@@ -1,0 +1,95 @@
+@use '../../../styles/mixins';
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-2);
+}
+
+.ch-text-input__label {
+  font-family: var(--ch-font-body);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--ch-text-primary);
+}
+
+.ch-text-input__field {
+  height: 40px;
+  padding: 0 var(--ch-space-4);
+  border-radius: var(--ch-radius-md);
+  border: 2px solid var(--ch-border);
+  font-family: var(--ch-font-body);
+  font-size: 1rem;
+  color: var(--ch-text-primary);
+  background: var(--ch-bg-white);
+  transition: border-color var(--ch-transition);
+
+  &:focus-visible {
+    @include mixins.focus-ring;
+    border-color: var(--ch-border-focus);
+  }
+
+  &:disabled {
+    background: var(--ch-bg-main);
+    color: var(--ch-text-muted);
+  }
+
+  &--error {
+    border-color: var(--ch-danger);
+  }
+}
+
+.ch-date-input__wrapper {
+  position: relative;
+  display: flex;
+}
+
+.ch-date-input__field {
+  flex: 1;
+  min-width: 0;
+  padding-right: var(--ch-space-10);
+  cursor: pointer;
+  background: var(--ch-bg-white);
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.ch-date-input__icon {
+  position: absolute;
+  top: 50%;
+  right: var(--ch-space-3);
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--ch-text-muted);
+  cursor: pointer;
+
+  &:focus-visible {
+    @include mixins.focus-ring;
+    border-radius: var(--ch-radius-sm);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.ch-text-input__hint {
+  margin: 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.75rem;
+  color: var(--ch-text-muted);
+}
+
+.ch-text-input__error {
+  margin: 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.75rem;
+  color: var(--ch-danger);
+}

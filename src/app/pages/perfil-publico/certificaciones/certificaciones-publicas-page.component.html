@@ -1,0 +1,139 @@
+<app-state-layout align="start">
+  <div class="ch-certificaciones-publicas">
+    <app-perfil-publico-seccion-header
+      [perfil]="perfil()"
+      [slug]="slug()"
+      seccionLabel="Certificaciones verificadas"
+      eyebrow="Historial verificado"
+      titulo="Certificaciones verificadas"
+      subtitulo="Todas las certificaciones emitidas y verificadas por auditores certificados de CarbonHub. Información pública."
+      [conteo]="certificaciones().length"
+      conteoLabel="Certificaciones registradas"
+      (volver)="volver()"
+    />
+
+    @if (cargando()) {
+      <section class="ch-certificaciones-publicas__estado" role="status">
+        <span class="ch-certificaciones-publicas__loader" aria-hidden="true"></span>
+        <p>Cargando certificaciones...</p>
+      </section>
+    } @else if (noEncontrado()) {
+      <section class="ch-certificaciones-publicas__estado" role="alert">
+        <app-icon name="warning" [size]="32" />
+        <app-heading level="h1" text="Perfil no disponible" />
+        <p>{{ noEncontradoMensaje }}</p>
+      </section>
+    } @else if (error()) {
+      <section class="ch-certificaciones-publicas__estado" role="alert">
+        <app-icon name="warning" [size]="32" />
+        <p>{{ errorMensaje() }}</p>
+        <app-button variant="secondary" size="sm" (click)="reintentar()">Reintentar</app-button>
+      </section>
+    } @else if (certificaciones().length === 0) {
+      <app-card class="ch-certificaciones-publicas__vacio">
+        <span class="ch-certificaciones-publicas__vacio-icono" aria-hidden="true">
+          <app-icon name="certificaciones" [size]="34" />
+        </span>
+        <app-heading level="h1" text="Sin certificaciones registradas" />
+        <p>
+          Esta empresa aún no tiene certificaciones registradas. Cuando obtenga y verifique su
+          primera certificación con un auditor en CarbonHub, aparecerá aquí.
+        </p>
+      </app-card>
+    } @else {
+      <div class="ch-certificaciones-publicas__toolbar">
+        <span class="ch-certificaciones-publicas__filtro-label">
+          <app-icon name="config" [size]="13" />
+          Filtrar por estado
+        </span>
+        <app-filter-chips
+          ariaLabel="Filtrar por estado"
+          [chips]="chipsEstado()"
+          [activeId]="filtroEstado()"
+          (chipSelected)="seleccionarFiltro($event)"
+        />
+      </div>
+
+      @if (certificacionesFiltradas().length === 0) {
+        <app-card class="ch-certificaciones-publicas__vacio-filtro">
+          <p>No hay certificaciones con este estado.</p>
+          <app-button variant="tertiary" size="sm" (click)="verTodas()">Ver todas</app-button>
+        </app-card>
+      } @else {
+        <div class="ch-certificaciones-publicas__table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Certificación</th>
+                <th scope="col">Auditor verificador</th>
+                <th scope="col">Período verificado</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Verificación</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (cert of certificacionesFiltradas(); track cert.id) {
+                <tr>
+                  <td>
+                    <div class="ch-certificaciones-publicas__cert-cell">
+                      <span class="ch-certificaciones-publicas__cert-icono" aria-hidden="true">
+                        <app-icon name="certificaciones" [size]="16" />
+                      </span>
+                      <div>
+                        <strong>{{ cert.nombreCertificacion }}</strong>
+                        @if (cert.codigoVerificacion) {
+                          <button
+                            type="button"
+                            class="ch-certificaciones-publicas__codigo"
+                            (click)="copiarCodigo(cert.codigoVerificacion)"
+                            [attr.aria-label]="
+                              'Copiar código de verificación ' + cert.codigoVerificacion
+                            "
+                          >
+                            <app-icon name="copiar" [size]="11" />
+                            {{ cert.codigoVerificacion }}
+                          </button>
+                          @if (codigoCopiado() === cert.codigoVerificacion) {
+                            <span class="ch-certificaciones-publicas__codigo-tooltip" role="status"
+                              >Código copiado</span
+                            >
+                          }
+                        } @else {
+                          <span
+                            class="ch-certificaciones-publicas__codigo ch-certificaciones-publicas__codigo--vacio"
+                            >Sin código</span
+                          >
+                        }
+                      </div>
+                    </div>
+                  </td>
+                  <td class="ch-certificaciones-publicas__auditor">{{ cert.nombreAuditor }}</td>
+                  <td class="ch-certificaciones-publicas__periodo">
+                    {{ cert.fechaEmision | date: 'dd/MM/yyyy' : 'UTC' }} →
+                    {{ cert.fechaVencimiento | date: 'dd/MM/yyyy' : 'UTC' }}
+                  </td>
+                  <td>
+                    <app-badge [variant]="variante(cert.estado)">{{
+                      etiqueta(cert.estado)
+                    }}</app-badge>
+                  </td>
+                  <td>
+                    <app-button
+                      variant="primary"
+                      size="sm"
+                      [disabled]="!cert.codigoVerificacion"
+                      (click)="verificar(cert.codigoVerificacion)"
+                    >
+                      <app-icon name="redirect" [size]="12" />
+                      Verificar
+                    </app-button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </div>
+</app-state-layout>

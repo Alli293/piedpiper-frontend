@@ -1,0 +1,307 @@
+<app-shell-layout
+  activeId="emissions"
+  [headerConfig]="headerConfig()"
+  backRoute="/empresa/emisiones"
+>
+  <div class="register-emission-page">
+    <form class="register-emission-page__card" novalidate (submit)="handleSubmit($event)">
+      <header class="register-emission-page__header">
+        <span
+          class="register-emission-page__header-icon"
+          [class.register-emission-page__header-icon--flight]="activeCategory() === 'vuelo'"
+          aria-hidden="true"
+        >
+          @if (activeCategory() === 'vuelo') {
+            <app-icon name="vuelos" [size]="24" />
+          } @else if (activeCategory() === 'flota') {
+            <app-icon name="flota-vehicular" [size]="24" />
+          } @else if (activeCategory() === 'envio') {
+            <app-icon name="envios-carga" [size]="24" />
+          } @else {
+            <app-icon name="electricidad" [size]="24" />
+          }
+        </span>
+        @if (activeCategory() === 'vuelo') {
+          <div>
+            <app-heading level="h2" text="Viaje aéreo" />
+            <p class="register-emission-page__subtitle">
+              Registra los trayectos del vuelo para calcular su huella de carbono.
+            </p>
+          </div>
+        } @else if (activeCategory() === 'flota') {
+          <div>
+            <app-heading level="h2" text="Flota vehicular" />
+            <p class="register-emission-page__subtitle">
+              Registra el uso de un vehículo de la flota para calcular su huella de carbono.
+            </p>
+          </div>
+        } @else if (activeCategory() === 'envio') {
+          <div>
+            <app-heading level="h2" text="Envíos de carga" />
+            <p class="register-emission-page__subtitle">
+              Registra un envío para calcular su huella de carbono.
+            </p>
+          </div>
+        } @else {
+          <div>
+            <app-heading level="h2" text="Consumo eléctrico" />
+            <p class="register-emission-page__subtitle">
+              Registra el consumo de una sede para calcular su huella de carbono.
+            </p>
+          </div>
+        }
+      </header>
+
+      <app-emission-category-tabs
+        [tabs]="categoryTabs"
+        [activeId]="activeCategory()"
+        (categorySelected)="onCategorySelected($event)"
+      />
+
+      @if (!hasSession()) {
+        <div class="register-emission-page__auth-warning">
+          <app-icon name="warning" [size]="16" />
+          <span>Inicie sesión para consultar, registrar o editar emisiones.</span>
+        </div>
+      }
+
+      @if (activeCategory() === 'electricidad') {
+        <div class="register-emission-page__row">
+          <app-number-input
+            class="register-emission-page__field--grow"
+            label="Consumo del periodo"
+            placeholder="0"
+            step="0.001"
+            [formField]="registerForm.electricityValue"
+            [error]="electricityValueError()"
+          />
+
+          <app-radio-group-field
+            label="Unidad"
+            [options]="electricityUnitOptions"
+            [formField]="registerForm.electricityUnit"
+            [error]="electricityUnitError()"
+          />
+        </div>
+
+        <app-date-input
+          label="Fecha del registro"
+          [formField]="registerForm.fechaActividad"
+          [error]="fechaActividadError()"
+        />
+
+        <app-textarea
+          label="Detalle"
+          placeholder="Ej. Planta de tueste - Heredia"
+          [formField]="registerForm.titulo"
+          [error]="tituloError()"
+        />
+      } @else if (activeCategory() === 'flota') {
+        <div class="register-emission-page__field">
+          <app-select-input
+            label="Tipo de vehículo"
+            placeholder="Seleccionar..."
+            [options]="tipoVehiculoOptions()"
+            [formField]="flotaForm.tipoVehiculo"
+            [error]="tipoVehiculoError()"
+          />
+          @if (catalogoError()) {
+            <p class="register-emission-page__field-error" role="alert">
+              {{ catalogoError() }}
+              <app-button variant="link" size="sm" type="button" (click)="retryLoadTiposVehiculo()">
+                Reintentar
+              </app-button>
+            </p>
+          }
+        </div>
+
+        <app-select-input
+          label="Combustible"
+          placeholder="Seleccionar..."
+          hint="Promedio: usa el factor de emisión promedio del país cuando no conoces el combustible exacto"
+          [options]="combustibleOptions()"
+          [formField]="flotaForm.combustible"
+          [error]="combustibleError()"
+        />
+
+        <div class="register-emission-page__row">
+          <app-number-input
+            class="register-emission-page__field--grow"
+            label="Distancia recorrida"
+            placeholder="0"
+            step="0.001"
+            [formField]="flotaForm.distanceValue"
+            [error]="distanceValueError()"
+          />
+
+          <app-radio-group-field
+            label="Unidad"
+            [options]="distanceUnitOptions"
+            [formField]="flotaForm.distanceUnit"
+            [error]="distanceUnitError()"
+          />
+        </div>
+
+        <app-date-input
+          label="Fecha de la actividad"
+          [formField]="flotaForm.fechaActividad"
+          [error]="flotaFechaActividadError()"
+        />
+
+        <app-textarea
+          label="Detalle"
+          placeholder="Ej. Ruta de reparto — San José"
+          [formField]="flotaForm.titulo"
+          [error]="flotaTituloError()"
+        />
+      } @else if (activeCategory() === 'vuelo') {
+        <div class="register-emission-page__row">
+          <app-number-input
+            class="register-emission-page__field--grow"
+            label="Pasajeros"
+            step="1"
+            [formField]="flightForm.passengers"
+            [error]="flightPassengersError()"
+          />
+
+          <app-select-input
+            label="Unidad distancia"
+            [options]="distanceUnitOptions"
+            [formField]="flightForm.distanceUnit"
+          />
+        </div>
+
+        <app-date-input
+          label="Fecha del viaje"
+          [formField]="flightForm.fechaActividad"
+          [error]="flightFechaActividadError()"
+        />
+
+        <div class="register-emission-page__legs">
+          <div class="register-emission-page__legs-header">
+            <span class="register-emission-page__field-label">Trayectos</span>
+            <div class="register-emission-page__legs-actions">
+              <button class="register-emission-page__link-button" type="button" (click)="addLeg()">
+                + Agregar trayecto
+              </button>
+              <button
+                class="register-emission-page__link-button"
+                type="button"
+                [disabled]="!canAddReturnLeg()"
+                (click)="addReturnLeg()"
+              >
+                + Agregar vuelta
+              </button>
+            </div>
+          </div>
+          @if (flightLegsError()) {
+            <p class="register-emission-page__field-error" role="alert">{{ flightLegsError() }}</p>
+          }
+
+          @for (leg of flightForm.legs; track $index) {
+            <div class="register-emission-page__leg">
+              <div class="register-emission-page__leg-title">Trayecto {{ $index + 1 }}</div>
+              <app-text-input
+                label="Origen"
+                placeholder="SJO"
+                [formField]="leg.departureAirport"
+                [error]="fieldError(leg.departureAirport())"
+              />
+
+              <app-text-input
+                label="Destino"
+                placeholder="YYZ"
+                [formField]="leg.destinationAirport"
+                [error]="fieldError(leg.destinationAirport())"
+              />
+
+              <app-select-input
+                label="Cabina"
+                [options]="cabinClassOptions"
+                [formField]="leg.cabinClass"
+                [error]="fieldError(leg.cabinClass())"
+              />
+
+              <button
+                class="register-emission-page__remove-button"
+                type="button"
+                (click)="removeLeg($index)"
+                title="Eliminar trayecto"
+              >
+                Eliminar
+              </button>
+            </div>
+          }
+        </div>
+      } @else if (activeCategory() === 'envio') {
+        <div class="register-emission-page__row">
+          <app-number-input
+            class="register-emission-page__field--grow"
+            label="Peso del envío"
+            placeholder="0"
+            step="0.001"
+            [formField]="envioForm.weightValue"
+            [error]="envioWeightValueError()"
+          />
+
+          <app-radio-group-field
+            label="Unidad"
+            [options]="weightUnitOptions"
+            [formField]="envioForm.weightUnit"
+            [error]="envioWeightUnitError()"
+          />
+        </div>
+
+        <div class="register-emission-page__row">
+          <app-number-input
+            class="register-emission-page__field--grow"
+            label="Distancia recorrida"
+            placeholder="0"
+            step="0.001"
+            [formField]="envioForm.distanceValue"
+            [error]="envioDistanceValueError()"
+          />
+
+          <app-radio-group-field
+            label="Unidad"
+            [options]="distanceUnitOptions"
+            [formField]="envioForm.distanceUnit"
+            [error]="envioDistanceUnitError()"
+          />
+        </div>
+
+        <app-radio-group-field
+          label="Método de transporte"
+          [options]="transportMethodOptions"
+          [formField]="envioForm.transportMethod"
+          [error]="envioTransportMethodError()"
+        />
+
+        <app-date-input
+          label="Fecha del registro"
+          [formField]="envioForm.fechaActividad"
+          [error]="envioFechaActividadError()"
+        />
+
+        <app-textarea
+          label="Detalle"
+          placeholder="Ej. Envío de café a puerto — Limón"
+          [formField]="envioForm.titulo"
+          [error]="envioTituloError()"
+        />
+      }
+
+      <div class="register-emission-page__actions">
+        <app-button variant="secondary" type="button" (click)="onCancel()">Cancelar</app-button>
+        <app-button
+          variant="primary"
+          type="submit"
+          [loading]="submitting()"
+          [disabled]="!canSubmit()"
+        >
+          Calcular y guardar
+        </app-button>
+      </div>
+    </form>
+  </div>
+</app-shell-layout>

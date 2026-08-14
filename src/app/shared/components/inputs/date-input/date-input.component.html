@@ -1,0 +1,38 @@
+@if (label()) {
+  <label class="ch-text-input__label" [for]="inputId">
+    {{ label() }}
+    @if (required()) {
+      <span aria-hidden="true"> *</span>
+    }
+  </label>
+}
+<div class="ch-date-input__wrapper">
+  <input
+    #field
+    class="ch-text-input__field ch-date-input__field"
+    [class.ch-text-input__field--error]="hasError()"
+    [id]="inputId"
+    type="text"
+    placeholder="dd/mm/aaaa"
+    readonly
+    [disabled]="effectiveDisabled()"
+    [required]="required()"
+    [attr.aria-invalid]="hasError() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+  />
+  <button
+    type="button"
+    class="ch-date-input__icon"
+    tabindex="-1"
+    aria-label="Abrir selector de fecha"
+    [disabled]="effectiveDisabled()"
+    (click)="openPicker()"
+  >
+    <app-icon name="calendario" [size]="18" />
+  </button>
+</div>
+@if (hasError()) {
+  <p class="ch-text-input__error" [id]="errorId">{{ error() }}</p>
+} @else if (hint()) {
+  <p class="ch-text-input__hint" [id]="hintId">{{ hint() }}</p>
+}

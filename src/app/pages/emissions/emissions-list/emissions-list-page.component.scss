@@ -1,0 +1,357 @@
+.ch-emissions-list-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-4);
+  width: 100%;
+  font-family: var(--ch-font-body);
+}
+
+.ch-emissions-list-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+}
+
+.ch-emissions-list-page__controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-4);
+  width: 100%;
+}
+
+.ch-emissions-list-page__select-filters {
+  display: flex;
+  align-items: flex-end;
+  align-self: flex-end;
+  gap: var(--ch-space-2);
+  min-width: 0;
+}
+
+.ch-emissions-list-page__filter-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-width: 144px;
+}
+
+.ch-emissions-list-page__filter-select app-icon {
+  position: absolute;
+  left: var(--ch-space-3);
+  z-index: 1;
+  color: var(--ch-text-secondary);
+  pointer-events: none;
+}
+
+.ch-emissions-list-page__delete {
+  border: 1px solid var(--ch-border);
+  background: var(--ch-bg-white);
+  color: var(--ch-text-primary);
+  font: inherit;
+}
+
+.ch-emissions-list-page__select {
+  width: 100%;
+  min-width: 144px;
+}
+
+.ch-emissions-list-page__filter-select ::ng-deep .ch-select-input__field {
+  height: 34px;
+  padding-right: var(--ch-space-8);
+  padding-left: var(--ch-space-8);
+  border-width: 1px;
+  border-radius: var(--ch-radius-md);
+  color: var(--ch-text-primary);
+  font-size: 0.82rem;
+}
+
+.ch-emissions-list-page__register-plus {
+  color: #ffffff;
+  font-size: 1.18rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.ch-emissions-list-page__table-panel {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-white);
+  box-shadow: var(--ch-shadow-sm);
+}
+
+.ch-emissions-list-page__table-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ch-space-2);
+  padding: 15px var(--ch-space-5);
+  border-bottom: 1px solid var(--ch-border);
+}
+
+.ch-emissions-list-page__table-header span {
+  color: var(--ch-text-secondary);
+  font-size: 0.78rem;
+}
+
+.ch-emissions-list-page__table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ch-emissions-list-page table {
+  width: 100%;
+  min-width: 820px;
+  border-collapse: collapse;
+}
+
+.ch-emissions-list-page th,
+.ch-emissions-list-page td {
+  padding: 14px var(--ch-space-5);
+  border-bottom: 1px solid var(--ch-border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.ch-emissions-list-page th {
+  background: #f6f8fa;
+  color: var(--ch-text-secondary);
+  font-family: var(--ch-font-heading);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.ch-emissions-list-page td {
+  color: var(--ch-text-primary);
+  font-size: 0.86rem;
+}
+
+.ch-emissions-list-page tr:last-child td {
+  border-bottom: 0;
+}
+
+.ch-emissions-list-page tr:nth-child(odd) {
+  background: #fffafa;
+}
+
+.ch-emissions-list-page__category {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 154px;
+  color: var(--ch-text-primary);
+  font-weight: 800;
+}
+
+.ch-emissions-list-page__category app-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--ch-green-soft);
+  color: var(--ch-green-dark);
+}
+
+.ch-emissions-list-page__category--flota app-icon,
+.ch-emissions-list-page__category--vuelo app-icon {
+  background: #dff3ff;
+  color: #075985;
+}
+
+.ch-emissions-list-page__category--envio app-icon {
+  background: #dff3e8;
+  color: #0f6b43;
+}
+
+.ch-emissions-list-page__date {
+  color: var(--ch-text-secondary);
+  font-family: var(--ch-font-mono);
+  white-space: nowrap;
+}
+
+.ch-emissions-list-page__detail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 420px;
+}
+
+.ch-emissions-list-page__detail strong {
+  color: var(--ch-text-primary);
+  font-weight: 600;
+}
+
+.ch-emissions-list-page__detail span {
+  color: var(--ch-text-secondary);
+  font-size: 0.76rem;
+}
+
+.ch-emissions-list-page__carbon {
+  color: var(--ch-text-primary);
+  font-family: var(--ch-font-heading);
+  font-size: 1.02rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.ch-emissions-list-page__carbon span {
+  color: var(--ch-text-secondary);
+  font-size: 0.72rem;
+}
+
+.ch-emissions-list-page__delete {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-color: rgba(239, 68, 68, 0.42);
+  border-radius: 8px;
+  background: #fff7f7;
+  color: #ef4444;
+  cursor: pointer;
+}
+
+.ch-emissions-list-page__delete:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.ch-emissions-list-page__empty {
+  padding: var(--ch-space-8) var(--ch-space-5);
+  color: var(--ch-text-secondary);
+  text-align: center;
+}
+
+.ch-emissions-list-page__modal-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #fff5f5;
+  color: #ef4444;
+}
+
+.ch-emissions-list-page__modal-copy p {
+  margin: 0;
+}
+
+.ch-emissions-list-page__modal-copy p {
+  margin-top: 6px;
+  color: var(--ch-text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.ch-emissions-list-page__modal-record {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--ch-space-3);
+  padding: 12px;
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: #f8fbfa;
+}
+
+.ch-emissions-list-page__modal-record-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--ch-green-soft);
+  color: var(--ch-green-dark);
+}
+
+.ch-emissions-list-page__modal-record-icon--flota,
+.ch-emissions-list-page__modal-record-icon--vuelo {
+  background: #dff3ff;
+  color: #075985;
+}
+
+.ch-emissions-list-page__modal-record-icon--envio {
+  background: #dff3e8;
+  color: #0f6b43;
+}
+
+.ch-emissions-list-page__modal-record-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ch-emissions-list-page__modal-record-copy strong {
+  overflow: hidden;
+  color: var(--ch-text-primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ch-emissions-list-page__modal-record-copy span {
+  overflow: hidden;
+  color: var(--ch-text-secondary);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ch-emissions-list-page__modal-record-carbon {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  color: var(--ch-text-primary);
+  font-family: var(--ch-font-heading);
+}
+
+.ch-emissions-list-page__modal-record-carbon strong {
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.ch-emissions-list-page__modal-record-carbon span {
+  color: var(--ch-text-secondary);
+  font-size: 0.62rem;
+}
+
+.ch-emissions-list-page__modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ch-space-2);
+  padding-top: 0;
+}
+
+.ch-emissions-list-page__modal-actions app-button {
+  width: auto;
+}
+
+@media (max-width: 1100px) {
+  .ch-emissions-list-page__select-filters {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 640px) {
+  .ch-emissions-list-page__select,
+  .ch-emissions-list-page__select-filters app-button {
+    width: 100%;
+  }
+
+  .ch-emissions-list-page__select-filters {
+    width: 100%;
+  }
+
+  .ch-emissions-list-page__modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .ch-emissions-list-page__modal-actions app-button {
+    width: 100%;
+  }
+}

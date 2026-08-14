@@ -1,0 +1,43 @@
+<article class="ch-estado-cert" aria-label="Estado de certificaciones">
+  <header class="ch-estado-cert__header">
+    <span class="ch-estado-cert__icon">
+      <app-icon name="alert-solid" [size]="18" />
+    </span>
+    <app-heading level="h3" text="Estado de certificaciones" />
+    <a appLink routerLink="/empresa/certificaciones/alertas" class="ch-estado-cert__ver-todas">
+      Ver todas
+      <app-icon name="chevron-derecha" [size]="12" aria-hidden="true" />
+    </a>
+  </header>
+
+  @if (loading()) {
+    <p class="ch-estado-cert__loading">Cargando estado de certificaciones...</p>
+  } @else if (error()) {
+    <p class="ch-estado-cert__error" role="alert">{{ errorMensaje() }}</p>
+  } @else {
+    <div class="ch-estado-cert__grid">
+      @for (tarjeta of tarjetas(); track tarjeta.estado) {
+        <a
+          class="ch-estado-cert__card"
+          [class.ch-estado-cert__card--info]="tarjeta.tono === 'info'"
+          [class.ch-estado-cert__card--warning]="tarjeta.tono === 'warning'"
+          [class.ch-estado-cert__card--danger]="tarjeta.tono === 'danger'"
+          [routerLink]="tarjeta.ruta"
+          [queryParams]="tarjeta.queryParams"
+          [attr.aria-label]="tarjeta.label + ': ' + tarjeta.value + ' certificaciones'"
+        >
+          <span class="ch-estado-cert__card-arrow" aria-hidden="true">
+            <app-icon name="volver" [size]="18" />
+          </span>
+          <span class="ch-estado-cert__card-icon">
+            <app-icon [name]="tarjeta.icon" [size]="16" />
+          </span>
+          <span class="ch-estado-cert__card-copy">
+            <span class="ch-estado-cert__card-value">{{ tarjeta.value }}</span>
+            <span class="ch-estado-cert__card-label">{{ tarjeta.label }}</span>
+          </span>
+        </a>
+      }
+    </div>
+  }
+</article>

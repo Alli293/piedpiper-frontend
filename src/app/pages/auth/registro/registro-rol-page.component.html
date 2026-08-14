@@ -1,0 +1,105 @@
+<app-auth-layout>
+  @if (config(); as c) {
+    <div class="registro">
+      <a class="registro__back" routerLink="/registro" appLink>&lt; Cambiar tipo de cuenta</a>
+      <app-badge class="registro__badge" variant="success" [icon]="c.icon">{{ c.badge }}</app-badge>
+
+      <header class="registro__header">
+        <app-heading level="h1" [text]="c.titulo" />
+        <p class="registro__subtitle">{{ c.subtitulo }}</p>
+      </header>
+
+      @if (c.card; as card) {
+        <app-semantic-card [variant]="card.variant" [title]="card.title" [text]="card.text ?? ''">
+          @if (card.steps; as steps) {
+            <ol class="registro__card-steps">
+              @for (step of steps; track step) {
+                <li>{{ step }}</li>
+              }
+            </ol>
+          }
+        </app-semantic-card>
+      }
+
+      <form class="registro__form" novalidate (submit)="handleSubmit($event)">
+        <app-text-input
+          label="Nombre"
+          autocomplete="given-name"
+          placeholder="Tu nombre"
+          [formField]="registroForm.nombre"
+          [error]="errorNombre()"
+        />
+
+        <app-text-input
+          label="Apellidos"
+          autocomplete="family-name"
+          placeholder="Tus apellidos"
+          [formField]="registroForm.apellidos"
+          [error]="errorApellidos()"
+        />
+
+        <app-text-input
+          label="Correo electrónico"
+          type="email"
+          autocomplete="email"
+          [placeholder]="c.emailPlaceholder"
+          [formField]="registroForm.email"
+          [error]="errorEmail()"
+        />
+
+        <app-password-input
+          label="Contraseña"
+          autocomplete="new-password"
+          placeholder="Tu contraseña"
+          [formField]="registroForm.contrasena"
+          [error]="errorContrasena()"
+          [hint]="contrasenaHint"
+        />
+
+        <app-password-input
+          label="Confirmar contraseña"
+          autocomplete="new-password"
+          placeholder="Repite tu contraseña"
+          [formField]="registroForm.confirmarContrasena"
+          [error]="errorConfirmacion()"
+        />
+
+        <app-checkbox [formField]="registroForm.aceptaTerminos" [error]="errorTerminos()">
+          Acepto los <a routerLink="/terminos" appLink>Términos de servicio</a> y la
+          <a routerLink="/privacidad" appLink>Política de privacidad</a> de CarbonHub
+        </app-checkbox>
+
+        <app-button
+          variant="primary"
+          size="lg"
+          type="submit"
+          [loading]="submitting()"
+          [disabled]="submitting()"
+        >
+          Crear cuenta →
+        </app-button>
+      </form>
+
+      <div class="registro__divider">
+        <span>o</span>
+      </div>
+
+      <div class="registro__google" #googleButton></div>
+
+      @if (error()) {
+        <p class="registro__error" role="alert">{{ error() }}</p>
+      }
+
+      <p class="registro__terms">
+        Al registrarte aceptas nuestros
+        <a routerLink="/terminos" appLink>Términos de uso</a> y la
+        <a routerLink="/privacidad" appLink>Política de privacidad</a>.
+      </p>
+
+      <p class="registro__login">
+        ¿Ya tienes cuenta?
+        <a routerLink="/login" appLink>Inicia sesión</a>
+      </p>
+    </div>
+  }
+</app-auth-layout>

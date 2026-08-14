@@ -1,0 +1,91 @@
+:host {
+  display: block;
+}
+
+.registro {
+  display: flex;
+  flex-direction: column;
+}
+
+.registro__back {
+  align-self: flex-start;
+  margin-bottom: var(--ch-space-5);
+  font-size: 14px;
+}
+
+.registro__badge {
+  align-self: flex-start;
+}
+
+.registro__header {
+  margin: var(--ch-space-5) 0 var(--ch-space-4);
+}
+
+.registro__subtitle {
+  margin: var(--ch-space-2) 0 0;
+  color: var(--ch-text-secondary);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+app-semantic-card {
+  margin: 0 0 var(--ch-space-5);
+}
+
+.registro__card-steps {
+  list-style: decimal;
+  margin: var(--ch-space-2) 0 0;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.registro__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-2);
+}
+
+.registro__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-4);
+  margin: var(--ch-space-5) 0;
+  color: var(--ch-text-muted);
+  font-size: 13px;
+}
+
+.registro__divider::before,
+.registro__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--ch-border);
+}
+
+.registro__google {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.registro__error {
+  margin: var(--ch-space-4) 0 0;
+  color: var(--ch-danger);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.registro__terms {
+  margin: var(--ch-space-5) 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ch-text-secondary);
+}
+
+.registro__login {
+  margin: var(--ch-space-8) 0 0;
+  text-align: center;
+  color: var(--ch-text-secondary);
+  font-size: 14px;
+}

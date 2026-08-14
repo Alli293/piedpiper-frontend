@@ -1,0 +1,69 @@
+<article class="ch-metas-panel" aria-label="Metas de reducción">
+  <header class="ch-metas-panel__header">
+    <span class="ch-metas-panel__icon">
+      <app-icon name="goal" [size]="16" />
+    </span>
+    <app-heading level="h3" text="Metas de reducción" />
+    @if (hayMetas()) {
+      <a appLink [routerLink]="rutaRegistrarMeta" class="ch-metas-panel__gestionar">
+        Gestionar metas
+        <app-icon name="chevron-derecha" [size]="12" aria-hidden="true" />
+      </a>
+    }
+  </header>
+
+  @if (loading()) {
+    <p class="ch-metas-panel__loading">Cargando metas...</p>
+  } @else if (error()) {
+    <p class="ch-metas-panel__error" role="alert">{{ errorMensaje() }}</p>
+  } @else if (!hayMetas()) {
+    <div class="ch-metas-panel__vacio">
+      <span class="ch-metas-panel__vacio-icon" aria-hidden="true">
+        <app-icon name="goal" [size]="20" />
+      </span>
+      <p>{{ sinMetasMensaje }}</p>
+      <app-button (click)="irARegistrarMeta()">+ Agregar meta</app-button>
+    </div>
+  } @else {
+    <ul class="ch-metas-panel__lista">
+      @for (meta of metas(); track meta.id) {
+        <li class="ch-metas-panel__item" [class.ch-metas-panel__item--vencida]="meta.vencida">
+          <div class="ch-metas-panel__item-header">
+            <span class="ch-metas-panel__item-icon" aria-hidden="true">
+              <app-icon [name]="meta.vencida ? 'danger-solido' : 'hoja-solida'" [size]="18" />
+            </span>
+            <div class="ch-metas-panel__item-copy">
+              <strong>{{ meta.nombreMeta }}</strong>
+              <small>Objetivo: {{ meta.valorObjetivoHuellaT }} tCO₂e</small>
+            </div>
+            <span
+              class="ch-metas-panel__estado"
+              [class.ch-metas-panel__estado--vencida]="meta.vencida"
+            >
+              {{ meta.vencida ? 'Vencida' : 'En progreso' }}
+            </span>
+          </div>
+
+          <div class="ch-metas-panel__progreso">
+            <div class="ch-metas-panel__track">
+              <span class="ch-metas-panel__fill" [style.width.%]="barraAncho(meta)"></span>
+            </div>
+            <strong>{{ meta.progresoPorcentaje }}%</strong>
+          </div>
+
+          @if (meta.vencida) {
+            <p class="ch-metas-panel__vencida-detalle">
+              <app-icon name="error" [size]="14" />
+              Venció el {{ meta.fechaLimite | date: 'dd/MM/yyyy' }} · sin completar
+            </p>
+          } @else {
+            <p class="ch-metas-panel__fecha-limite">
+              <app-icon name="calendario" [size]="14" />
+              Fecha límite: {{ meta.fechaLimite | date: 'dd/MM/yyyy' }}
+            </p>
+          }
+        </li>
+      }
+    </ul>
+  }
+</article>

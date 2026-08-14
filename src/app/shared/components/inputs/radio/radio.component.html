@@ -1,0 +1,21 @@
+<label
+  class="ch-radio__wrapper"
+  [class.ch-radio__wrapper--disabled]="effectiveDisabled()"
+  [for]="inputId"
+>
+  <input
+    type="radio"
+    class="ch-radio__input"
+    [id]="inputId"
+    [name]="name()"
+    [value]="value()"
+    [checked]="checked()"
+    [disabled]="effectiveDisabled()"
+    (change)="onChange()"
+  />
+  @if (label()) {
+    <span class="ch-radio__label">{{ label() }}</span>
+  } @else {
+    <span class="ch-radio__label"><ng-content /></span>
+  }
+</label>

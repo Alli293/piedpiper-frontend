@@ -1,0 +1,388 @@
+<!-- ===== Header ===== -->
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" routerLink="/" aria-label="CarbonHub — inicio">
+      <app-logo variant="on-dark" [iconSize]="32" textSize="19px" gap="11px" />
+    </a>
+    <nav class="nav-links" aria-label="Secciones">
+      <button type="button" class="nav-link" (click)="irASeccion('para-quien')">
+        Para empresas
+      </button>
+      <button type="button" class="nav-link" (click)="irASeccion('para-quien')">Auditores</button>
+      <button type="button" class="nav-link" (click)="irASeccion('funcionalidades')">
+        EcoRuta
+      </button>
+      <a class="nav-link" routerLink="/empresas-verificadas"> Empresas verificadas </a>
+    </nav>
+    <div class="nav-right">
+      <a class="nav-signin" routerLink="/login">
+        <app-icon class="landing-icon" name="login" [size]="17" />Iniciar sesión
+      </a>
+      <a class="btn btn-primary btn-sm" routerLink="/registro/empresa">
+        <app-icon class="landing-icon" name="empresa" [size]="19" />Registrar mi empresa
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ===== Hero ===== -->
+<section class="hero">
+  <div class="hero-grid-ovl" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">
+        <span class="landing-icon" aria-hidden="true"
+          ><svg
+            viewBox="0 -960 960 960"
+            width="1em"
+            height="1em"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M450-80q-33 0-66.5-7.5T315-109q12-121 70-226t149-185q-110 56-190.5 148T231-162q-4-3-7.5-6.5L216-176q-47-47-71.5-105T120-402q0-68 27-130t75-110q81-81 210-105.5t362-4.5q18 239-6 364.5T684-182q-49 49-109.5 75.5T450-80Z"
+            /></svg></span
+        >Plataforma costarricense de gestión de carbono
+      </div>
+      <h1>
+        Medí, reducí y
+        <span class="hl"
+          >certificá<svg
+            class="uline"
+            viewBox="0 0 240 18"
+            preserveAspectRatio="none"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M6 12C72 4 166 3 234 9"
+              stroke="#7AD3A5"
+              stroke-width="5"
+              stroke-linecap="round"
+            />
+            <path
+              d="M10 15C76 9 158 9 230 13"
+              stroke="#1F8A5B"
+              stroke-width="3"
+              stroke-linecap="round"
+              opacity="0.5"
+            /></svg
+        ></span>
+        la huella de carbono de tu empresa.
+      </h1>
+      <div class="hero-sub">
+        Registrá tus emisiones, visualizá tu huella en dashboards claros y obtené certificaciones
+        ambientales verificables, auditadas por profesionales certificados.
+      </div>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" routerLink="/registro/empresa">
+          <app-icon class="landing-icon" name="empresa" [size]="19" />Registrar mi empresa
+        </a>
+        <a class="btn btn-ghost-d" routerLink="/empresas-verificadas">
+          <span class="landing-icon" aria-hidden="true"
+            ><svg
+              viewBox="0 -960 960 960"
+              width="1em"
+              height="1em"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M324-111.5Q251-143 197-197t-85.5-127Q80-397 80-480t31.5-156Q143-709 197-763t127-85.5Q397-880 480-880t156 31.5Q709-817 763-763t85.5 127Q880-563 880-480t-31.5 156Q817-251 763-197t-127 85.5Q563-80 480-80t-156-31.5ZM440-162v-78q-33 0-56.5-23.5T360-320v-40L168-552q-3 18-5.5 36t-2.5 36q0 121 79.5 212T440-162Zm276-102q41-45 62.5-100.5T800-480q0-98-54.5-179T600-776v16q0 33-23.5 56.5T520-680h-80v80q0 17-11.5 28.5T400-560h-80v80h240q17 0 28.5 11.5T600-440v120h40q26 0 47 15.5t29 40.5Z"
+              /></svg></span
+          >Ver una empresa verificada
+        </a>
+      </div>
+      <div class="hero-trust">
+        <span class="trust-item">
+          <span class="landing-icon" aria-hidden="true"
+            ><svg
+              viewBox="0 -960 960 960"
+              width="1em"
+              height="1em"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m344-60-76-128-144-32 14-148-98-112 98-112-14-148 144-32 76-128 136 58 136-58 76 128 144 32-14 148 98 112-98 112 14 148-144 32-76 128-136-58-136 58Zm94-278 226-226-56-58-170 170-86-84-56 56 142 142Z"
+              /></svg></span
+          >Auditorías por profesionales certificados
+        </span>
+        <span class="trust-item">
+          <span class="landing-icon" aria-hidden="true"
+            ><svg
+              viewBox="0 -960 960 960"
+              width="1em"
+              height="1em"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m387-412 35-114-92-74h114l36-112 36 112h114l-93 74 35 114-92-71-93 71ZM240-40v-309q-38-42-59-96t-21-115q0-134 93-227t227-93q134 0 227 93t93 227q0 61-21 115t-59 96v309l-240-80-240 80Zm410-350q70-70 70-170t-70-170q-70-70-170-70t-170 70q-70 70-70 170t70 170q70 70 170 70t170-70Z"
+              /></svg></span
+          >Credenciales verificables (OpenBadges)
+        </span>
+      </div>
+    </div>
+
+    <div class="hero-art">
+      <svg
+        viewBox="0 0 520 560"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-label="Ilustración de un árbol estilizado de CarbonHub"
+      >
+        <circle cx="62" cy="92" r="44" fill="#1F8A5B" opacity="0.12" />
+        <circle cx="480" cy="60" r="20" fill="#7AD3A5" opacity="0.2" />
+        <circle cx="488" cy="444" r="38" fill="#14603F" opacity="0.16" />
+        <path
+          d="M116 116c10-9 21-9 31 0c10-9 21-9 31 0"
+          fill="none"
+          stroke="#7AD3A5"
+          stroke-width="3"
+          stroke-linecap="round"
+          opacity="0.85"
+        />
+        <path
+          d="M84 150c6-6 13-6 19 0c6-6 13-6 19 0"
+          fill="none"
+          stroke="#7AD3A5"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          opacity="0.65"
+        />
+        <path
+          d="M262 58C374 50 452 120 470 232C486 332 450 432 358 488C298 524 198 524 136 470C68 414 50 300 78 208C100 126 168 66 262 58Z"
+          fill="#F6F1E3"
+        />
+        <path
+          d="M262 80C360 74 432 136 448 234C462 326 430 414 346 466C292 498 204 498 150 450C90 400 74 298 96 216C116 142 178 88 262 80Z"
+          fill="none"
+          stroke="#D8E6CE"
+          stroke-width="2"
+          stroke-dasharray="2 9"
+          stroke-linecap="round"
+          opacity="0.8"
+        />
+        <circle cx="362" cy="148" r="46" fill="#F2DA98" />
+        <circle
+          cx="362"
+          cy="148"
+          r="46"
+          fill="none"
+          stroke="#E7C977"
+          stroke-width="2"
+          opacity="0.5"
+        />
+        <ellipse cx="262" cy="490" rx="176" ry="24" fill="#A6D8BC" opacity="0.6" />
+        <ellipse cx="262" cy="482" rx="146" ry="22" fill="#BFE3CE" />
+        <path
+          d="M252 354C236 344 228 330 228 308"
+          fill="none"
+          stroke="#7A5230"
+          stroke-width="10"
+          stroke-linecap="round"
+        />
+        <path
+          d="M272 352C290 342 300 330 302 310"
+          fill="none"
+          stroke="#7A5230"
+          stroke-width="10"
+          stroke-linecap="round"
+        />
+        <path
+          d="M244 480C238 422 238 362 250 300L274 300C286 362 286 422 280 480Z"
+          fill="#7A5230"
+        />
+        <path
+          d="M244 480C238 422 238 362 250 300L260 300C256 362 256 422 260 480Z"
+          fill="#5E3E22"
+        />
+        <path
+          d="M263 470C259 416 259 360 264 306"
+          fill="none"
+          stroke="#9A6E40"
+          stroke-width="3"
+          stroke-linecap="round"
+        />
+        <g>
+          <circle cx="267" cy="247" r="62" fill="#14603F" />
+          <circle cx="215" cy="185" r="70" fill="#14603F" />
+          <circle cx="307" cy="185" r="66" fill="#14603F" />
+          <circle cx="263" cy="155" r="62" fill="#14603F" />
+          <circle cx="201" cy="221" r="52" fill="#14603F" />
+          <circle cx="329" cy="219" r="52" fill="#14603F" />
+          <circle cx="267" cy="221" r="64" fill="#14603F" />
+          <circle cx="262" cy="240" r="56" fill="#1F8A5B" />
+          <circle cx="210" cy="178" r="64" fill="#1F8A5B" />
+          <circle cx="302" cy="178" r="60" fill="#1F8A5B" />
+          <circle cx="258" cy="148" r="56" fill="#1F8A5B" />
+          <circle cx="196" cy="214" r="46" fill="#1F8A5B" />
+          <circle cx="324" cy="212" r="46" fill="#1F8A5B" />
+          <circle cx="262" cy="214" r="58" fill="#1F8A5B" />
+          <circle cx="245.2" cy="221.5" r="32.5" fill="#3FAE78" />
+          <circle cx="190.8" cy="156.9" r="37.1" fill="#3FAE78" />
+          <circle cx="284.0" cy="158.2" r="34.8" fill="#3FAE78" />
+          <circle cx="241.2" cy="129.5" r="32.5" fill="#3FAE78" />
+          <circle cx="182.2" cy="198.8" r="26.7" fill="#3FAE78" />
+          <circle cx="310.2" cy="196.8" r="26.7" fill="#3FAE78" />
+          <circle cx="244.6" cy="194.9" r="33.6" fill="#3FAE78" />
+          <path
+            d="M0 0C-30-44-26-108 0-150 26-108 30-44 0 0Z"
+            transform="translate(178,180) rotate(-54) scale(0.3)"
+            fill="#2E9E5B"
+          />
+          <path
+            d="M0 0C-30-44-26-108 0-150 26-108 30-44 0 0Z"
+            transform="translate(348,182) rotate(52) scale(0.3)"
+            fill="#2E9E5B"
+          />
+          <path
+            d="M0 0C-30-44-26-108 0-150 26-108 30-44 0 0Z"
+            transform="translate(258,106) rotate(-4) scale(0.26)"
+            fill="#2E9E5B"
+          />
+          <path
+            d="M0 0C-30-44-26-108 0-150 26-108 30-44 0 0Z"
+            transform="translate(300,116) rotate(30) scale(0.2)"
+            fill="#34A56F"
+          />
+          <path
+            d="M0 0C-30-44-26-108 0-150 26-108 30-44 0 0Z"
+            transform="translate(222,116) rotate(-30) scale(0.2)"
+            fill="#34A56F"
+          />
+          <circle cx="224" cy="206" r="5" fill="#E0A100" />
+          <circle cx="300" cy="216" r="5" fill="#E0A100" />
+          <circle cx="266" cy="180" r="4.5" fill="#F2C94C" />
+        </g>
+        <path
+          d="M0 0C-30-44-26-108 0-150 26-108 30-44 0 0Z"
+          transform="translate(452,308) rotate(38) scale(0.4)"
+          fill="#7AD3A5"
+        />
+        <path
+          d="M0 0C-30-44-26-108 0-150 26-108 30-44 0 0Z"
+          transform="translate(74,330) rotate(-30) scale(0.44)"
+          fill="#2E9E5B"
+        />
+        <path
+          d="M0 0C-30-44-26-108 0-150 26-108 30-44 0 0Z"
+          transform="translate(402,96) rotate(62) scale(0.28)"
+          fill="#7AD3A5"
+        />
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- category strip -->
+<div class="cat-strip">
+  <div class="wrap">
+    <span class="cat-strip-lbl">Registrá y certificá tus emisiones de:</span>
+    <span class="cat-pill">
+      <app-icon class="landing-icon" name="electricidad" [size]="18" />Electricidad
+    </span>
+    <span class="cat-pill">
+      <app-icon class="landing-icon" name="flota-vehicular" [size]="18" />Flota vehicular
+    </span>
+    <span class="cat-pill">
+      <app-icon class="landing-icon" name="vuelos" [size]="18" />Vuelos
+    </span>
+    <span class="cat-pill">
+      <app-icon class="landing-icon" name="envios-carga" [size]="18" />Envíos de carga
+    </span>
+  </div>
+</div>
+
+<!-- ===== Para quién es ===== -->
+<app-landing-para-quien />
+
+<!-- ===== Cómo funciona (dark) ===== -->
+<app-landing-como-funciona />
+
+<!-- ===== Funcionalidades (bento) ===== -->
+<app-landing-funcionalidades />
+
+<!-- ===== CTA final ===== -->
+<app-landing-cta />
+
+<!-- ===== Footer ===== -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <app-logo variant="on-dark" [iconSize]="32" textSize="19px" gap="11px" />
+        <div class="foot-tagline">
+          Plataforma de gestión de huella de carbono y certificación ambiental para empresas,
+          auditores y viajeros.
+        </div>
+        <div class="foot-cr"><span class="flag" aria-hidden="true"></span>Hecho en Costa Rica</div>
+      </div>
+      <div>
+        <div class="foot-col-t">Producto</div>
+        <button type="button" class="foot-link" (click)="irASeccion('para-quien')">
+          Para empresas
+        </button>
+        <button type="button" class="foot-link" (click)="irASeccion('para-quien')">
+          Para auditores
+        </button>
+        <button type="button" class="foot-link" (click)="irASeccion('funcionalidades')">
+          EcoRuta
+        </button>
+        <a class="foot-link" routerLink="/empresas-verificadas">Empresas verificadas</a>
+      </div>
+      <div>
+        <div class="foot-col-t">Plataforma</div>
+        <button type="button" class="foot-link" (click)="irASeccion('como-funciona')">
+          Cómo funciona
+        </button>
+        <span class="foot-link">Certificaciones</span>
+        <span class="foot-link">Directorio de auditores</span>
+        <span class="foot-link">Verificar una credencial</span>
+      </div>
+      <div>
+        <div class="foot-col-t">Recursos</div>
+        <span class="foot-link">Centro de ayuda</span>
+        <span class="foot-link">Contacto</span>
+        <span class="foot-link">Términos y privacidad</span>
+        <a class="foot-link" routerLink="/login">Iniciar sesión</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span class="foot-copy"
+        >© 2026 CarbonHub · Plataforma costarricense de gestión ambiental</span
+      >
+      <div class="foot-social">
+        <span class="foot-soc">
+          <span class="landing-icon" aria-hidden="true"
+            ><svg
+              viewBox="0 -960 960 960"
+              width="1em"
+              height="1em"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M325-111.5q-73-31.5-127.5-86t-86-127.5Q80-398 80-480.5t31.5-155q31.5-72.5 86-127t127.5-86Q398-880 480.5-880t155 31.5q72.5 31.5 127 86t86 127Q880-563 880-480.5T848.5-325q-31.5 73-86 127.5t-127 86Q563-80 480.5-80T325-111.5ZM480-162q26-36 45-75t31-83H404q12 44 31 83t45 75Zm-104-16q-18-33-31.5-68.5T322-320H204q29 50 72.5 87t99.5 55Zm208 0q56-18 99.5-55t72.5-87H638q-9 38-22.5 73.5T584-178ZM170-400h136q-3-20-4.5-39.5T300-480q0-21 1.5-40.5T306-560H170q-5 20-7.5 39.5T160-480q0 21 2.5 40.5T170-400Zm216 0h188q3-20 4.5-39.5T580-480q0-21-1.5-40.5T574-560H386q-3 20-4.5 39.5T380-480q0 21 1.5 40.5T386-400Zm268 0h136q5-20 7.5-39.5T800-480q0-21-2.5-40.5T790-560H654q3 20 4.5 39.5T660-480q0 21-1.5 40.5T654-400Zm-16-240h118q-29-50-72.5-87T584-782q18 33 31.5 68.5T638-640Zm-234 0h152q-12-44-31-83t-45-75q-26 36-45 75t-31 83Zm-200 0h118q9-38 22.5-73.5T376-782q-56 18-99.5 55T204-640Z"
+              /></svg
+          ></span>
+        </span>
+        <span class="foot-soc">
+          <span class="landing-icon" aria-hidden="true"
+            ><svg
+              viewBox="0 -960 960 960"
+              width="1em"
+              height="1em"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z"
+              /></svg
+          ></span>
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>

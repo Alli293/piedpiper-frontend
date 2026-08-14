@@ -1,0 +1,61 @@
+@use '../../../shared/styles/mixins';
+
+:host {
+  display: block;
+}
+
+.ecoruta-preferencias-page {
+  display: grid;
+  width: min(100%, 760px);
+  margin: 0 auto;
+  gap: var(--ch-space-5);
+  font-family: var(--ch-font-body);
+
+  form {
+    display: grid;
+    gap: var(--ch-space-5);
+  }
+}
+
+.ecoruta-preferencias-page__section {
+  display: grid;
+  padding: var(--ch-space-5);
+  gap: var(--ch-space-4);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-white);
+  box-shadow: var(--ch-shadow-sm);
+}
+
+.ecoruta-preferencias-page__row {
+  display: grid;
+  gap: var(--ch-space-4);
+
+  @include mixins.desktop-up {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.ecoruta-preferencias-page__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+// Narrowly-scoped override: these two selects sit alongside pill-shaped chips
+// and toggle switches, so they're restyled to match instead of using the
+// shared component's default rectangular look used elsewhere in the app.
+.ecoruta-preferencias-page__select {
+  ::ng-deep .ch-select-input__field {
+    border-radius: var(--ch-radius-pill);
+    padding-right: var(--ch-space-8);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--ch-space-4) center;
+    background-size: 12px;
+
+    &:focus-visible {
+      border-color: var(--ch-green);
+    }
+  }
+}

@@ -1,0 +1,431 @@
+<app-shell-layout
+  [activeId]="activeIdAuditoria()"
+  [headerConfig]="headerConfig"
+  [backRoute]="rutaVolver()"
+>
+  <section class="ch-detalle-auditoria" aria-label="Detalle de la auditoría">
+    @if (cargando()) {
+      <p class="ch-detalle-auditoria__estado-carga">Cargando el detalle de la auditoría...</p>
+    } @else if (errorCarga()) {
+      <p class="ch-detalle-auditoria__error" role="alert">{{ errorCarga() }}</p>
+    } @else if (detalle(); as auditoria) {
+      @if (errorSondeo(); as aviso) {
+        <p class="ch-detalle-auditoria__aviso" role="status" aria-live="polite">{{ aviso }}</p>
+      }
+
+      <article class="ch-detalle-auditoria__cabecera">
+        <div class="ch-detalle-auditoria__cabecera-superior">
+          <div class="ch-detalle-auditoria__cabecera-principal">
+            <div class="ch-detalle-auditoria__titulo-fila">
+              <app-heading
+                level="h2"
+                [text]="'Auditoría ambiental · ' + (auditoria.periodoInicio | date: 'y')"
+              />
+              <app-badge [variant]="variantePorEstado()">{{
+                auditoria.estadoDescripcion
+              }}</app-badge>
+            </div>
+            <p class="ch-detalle-auditoria__subtitulo">
+              {{ auditoria.nombreEmpresa }} · Solicitud enviada el
+              {{ auditoria.fechaCreacion | date: 'd MMM y' }}
+            </p>
+          </div>
+
+          <div class="ch-detalle-auditoria__identificador">
+            <span class="ch-detalle-auditoria__etiqueta">ID de solicitud</span>
+            <span class="ch-detalle-auditoria__valor-id">{{ auditoria.id }}</span>
+          </div>
+        </div>
+
+        <dl class="ch-detalle-auditoria__datos">
+          <div class="ch-detalle-auditoria__celda">
+            <dt class="ch-detalle-auditoria__etiqueta">Empresa</dt>
+            <dd class="ch-detalle-auditoria__valor">{{ auditoria.nombreEmpresa }}</dd>
+          </div>
+          <div class="ch-detalle-auditoria__celda">
+            <dt class="ch-detalle-auditoria__etiqueta">Año fiscal</dt>
+            <dd class="ch-detalle-auditoria__valor">
+              {{ auditoria.periodoInicio | date: 'y' }}
+            </dd>
+          </div>
+          <div class="ch-detalle-auditoria__celda">
+            <dt class="ch-detalle-auditoria__etiqueta">Auditor asignado</dt>
+            <dd class="ch-detalle-auditoria__valor">
+              {{ nombreAuditor() ?? 'Sin auditor asignado' }}
+            </dd>
+          </div>
+          <div class="ch-detalle-auditoria__celda">
+            <dt class="ch-detalle-auditoria__etiqueta">Fecha de aceptación</dt>
+            <dd class="ch-detalle-auditoria__valor">
+              {{ auditoria.fechaAceptacion ? (auditoria.fechaAceptacion | date: 'd MMM y') : '-' }}
+            </dd>
+          </div>
+        </dl>
+      </article>
+
+      @if (puedeResponder()) {
+        <article class="ch-detalle-auditoria__decision" aria-label="Respuesta a la solicitud">
+          <div class="ch-detalle-auditoria__decision-cabecera">
+            <div>
+              <app-heading
+                level="h3"
+                class="ch-detalle-auditoria__tarjeta-titulo"
+                text="Esta solicitud espera tu respuesta"
+              />
+              <p
+                class="ch-detalle-auditoria__plazo"
+                [class.ch-detalle-auditoria__plazo--vencido]="plazoVencido()"
+                role="status"
+              >
+                {{ tiempoRestante() }}
+              </p>
+            </div>
+            @if (!mostrandoRechazo()) {
+              <div class="ch-detalle-auditoria__decision-botones">
+                <app-button
+                  variant="secondary"
+                  [disabled]="enviandoDecision()"
+                  (click)="abrirRechazo()"
+                >
+                  Rechazar
+                </app-button>
+                <app-button [loading]="enviandoDecision()" (click)="aceptar()">Aceptar</app-button>
+              </div>
+            }
+          </div>
+
+          @if (mostrandoRechazo()) {
+            <form
+              class="ch-detalle-auditoria__rechazo"
+              novalidate
+              (submit)="confirmarRechazo($event)"
+            >
+              <app-textarea
+                label="Motivo del rechazo"
+                [formField]="rechazoForm.motivoRechazo"
+                placeholder="Explica por qué no puedes tomar esta auditoría."
+                [rows]="3"
+                [hint]="caracteresMotivo() + ' / ' + maximoMotivo + ' caracteres'"
+              />
+              <div class="ch-detalle-auditoria__decision-botones">
+                <app-button
+                  type="button"
+                  variant="secondary"
+                  [disabled]="enviandoDecision()"
+                  (click)="cancelarRechazo()"
+                >
+                  Cancelar
+                </app-button>
+                <app-button
+                  type="submit"
+                  variant="danger"
+                  [disabled]="!motivoValido() || enviandoDecision()"
+                  [loading]="enviandoDecision()"
+                >
+                  Confirmar rechazo
+                </app-button>
+              </div>
+            </form>
+          }
+        </article>
+      }
+
+      <div class="ch-detalle-auditoria__contenido">
+        <article class="ch-detalle-auditoria__tarjeta">
+          <header class="ch-detalle-auditoria__tarjeta-cabecera">
+            <app-icon name="auditorias" [size]="18" aria-hidden="true" />
+            <app-heading
+              level="h3"
+              class="ch-detalle-auditoria__tarjeta-titulo"
+              text="Historial de la solicitud"
+            />
+          </header>
+          <ol class="ch-detalle-auditoria__linea" aria-live="polite">
+            @for (paso of pasos(); track paso.estado) {
+              <li
+                class="ch-detalle-auditoria__paso"
+                [class.ch-detalle-auditoria__paso--completado]="paso.situacion === 'completado'"
+                [class.ch-detalle-auditoria__paso--en-curso]="paso.situacion === 'en-curso'"
+                [class.ch-detalle-auditoria__paso--pendiente]="paso.situacion === 'pendiente'"
+              >
+                <span class="ch-detalle-auditoria__nodo" aria-hidden="true">
+                  @if (paso.situacion === 'pendiente') {
+                    <app-icon name="reloj" [size]="14" />
+                  } @else {
+                    <app-icon name="success" [size]="14" />
+                  }
+                </span>
+                <div class="ch-detalle-auditoria__paso-cuerpo">
+                  <div class="ch-detalle-auditoria__paso-cabecera">
+                    <div>
+                      <p class="ch-detalle-auditoria__paso-titulo">{{ paso.titulo }}</p>
+                      <p class="ch-detalle-auditoria__paso-meta">
+                        @if (paso.fecha) {
+                          {{ paso.fecha | date: 'dd MMM y - HH:mm' }}
+                        } @else {
+                          Pendiente
+                        }
+                      </p>
+                    </div>
+                    @switch (paso.situacion) {
+                      @case ('completado') {
+                        <app-badge variant="success">COMPLETADO</app-badge>
+                      }
+                      @case ('en-curso') {
+                        <app-badge variant="info">EN CURSO</app-badge>
+                      }
+                      @default {
+                        <app-badge variant="neutral">PENDIENTE</app-badge>
+                      }
+                    }
+                  </div>
+                  @if (paso.responsable) {
+                    <p class="ch-detalle-auditoria__paso-nota">
+                      Registrado por {{ paso.responsable }}
+                    </p>
+                  }
+                </div>
+              </li>
+            }
+          </ol>
+        </article>
+
+        <aside class="ch-detalle-auditoria__lateral">
+          @if (esAuditorAsignado()) {
+            <article class="ch-detalle-auditoria__tarjeta ch-detalle-auditoria__reporte">
+              <header class="ch-detalle-auditoria__reporte-cabecera">
+                <app-heading
+                  level="h3"
+                  class="ch-detalle-auditoria__tarjeta-titulo"
+                  text="Cargar reporte de auditoría"
+                />
+                <p class="ch-detalle-auditoria__reporte-ayuda">
+                  @if (auditoria.reporteAuditoria) {
+                    Ya existe un reporte cargado para esta solicitud.
+                  } @else {
+                    Sube el PDF con los resultados oficiales. Quedará visible para la empresa.
+                  }
+                </p>
+              </header>
+
+              <div class="ch-detalle-auditoria__reporte-cuerpo">
+                @if (errorReporteGeneral(); as error) {
+                  <p class="ch-detalle-auditoria__reporte-alerta" role="alert">
+                    {{ error }}
+                  </p>
+                }
+
+                @if (auditoria.reporteAuditoria && estadoPermiteReporte()) {
+                  <div class="ch-detalle-auditoria__reporte-actual" aria-live="polite">
+                    <app-icon name="certificaciones" [size]="18" aria-hidden="true" />
+                    <div>
+                      <p class="ch-detalle-auditoria__documento-nombre">
+                        {{ auditoria.reporteAuditoria.nombreArchivo }}
+                      </p>
+                      <p class="ch-detalle-auditoria__documento-peso">
+                        {{ pesoLegible(auditoria.reporteAuditoria.tamanioBytes) }}
+                        @if (auditoria.fechaCargaReporte) {
+                          - cargado el {{ auditoria.fechaCargaReporte | date: 'd MMM y - HH:mm' }}
+                        }
+                      </p>
+                    </div>
+                  </div>
+
+                  @if (estadoPermiteReporte() && !mostrandoReemplazoReporte()) {
+                    <app-button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      (click)="abrirReemplazoReporte()"
+                    >
+                      Reemplazar archivo
+                    </app-button>
+                  }
+                }
+
+                @if (muestraFormularioReporte()) {
+                  @if (auditoria.reporteAuditoria) {
+                    <p class="ch-detalle-auditoria__reporte-nota" role="status">
+                      Reemplazar el archivo no cambia el estado de la solicitud.
+                    </p>
+                  }
+
+                  <form
+                    class="ch-detalle-auditoria__reporte-form"
+                    novalidate
+                    (submit)="handleCargaReporte($event)"
+                  >
+                    <app-file-drop
+                      label="Archivo del reporte"
+                      accept="application/pdf"
+                      hint="PDF, max. 25 MB"
+                      [maxArchivos]="1"
+                      [maxTamanioBytes]="maximoBytesReporte"
+                      [disabled]="!puedeEditarReporte()"
+                      [archivos]="modeloCargaReporte().reporteAuditoria"
+                      [error]="reporteError()"
+                      (archivosChange)="actualizarReporte($event)"
+                    />
+
+                    <app-date-input
+                      label="Fecha en que se realizó la auditoría"
+                      [formField]="cargaReporteForm.fechaAuditoriaRealizada"
+                      [error]="fechaReporteError()"
+                    />
+
+                    <app-button
+                      type="submit"
+                      [disabled]="!puedeEnviarReporte()"
+                      [loading]="enviandoReporte()"
+                    >
+                      Cargar reporte
+                    </app-button>
+                  </form>
+                } @else if (!estadoPermiteReporte()) {
+                  <div class="ch-detalle-auditoria__reporte-bloqueado" role="status">
+                    <span class="ch-detalle-auditoria__reporte-bloqueado-icono" aria-hidden="true">
+                      <app-icon name="reloj" [size]="18" />
+                    </span>
+                    <strong>Carga no disponible</strong>
+                    <span>{{ mensajeCargaDeshabilitada }}</span>
+                  </div>
+                }
+              </div>
+            </article>
+          }
+
+          @if (puedeEmitirResultado()) {
+            <article class="ch-detalle-auditoria__tarjeta ch-detalle-auditoria__resultado">
+              <header class="ch-detalle-auditoria__reporte-cabecera">
+                <app-heading
+                  level="h3"
+                  class="ch-detalle-auditoria__tarjeta-titulo"
+                  text="Emitir resultado"
+                />
+                <p class="ch-detalle-auditoria__reporte-ayuda">
+                  Cierra la revisión con el dictamen final de la auditoría.
+                </p>
+              </header>
+
+              @if (errorResultado(); as error) {
+                <p class="ch-detalle-auditoria__reporte-alerta" role="alert">
+                  {{ error }}
+                </p>
+              }
+
+              <form
+                class="ch-detalle-auditoria__resultado-form"
+                novalidate
+                (submit)="handleSubmitResultado($event)"
+              >
+                <div class="ch-detalle-auditoria__resultado-campos">
+                  <app-radio-group-field
+                    label="Resultado"
+                    [options]="opcionesResultado"
+                    [formField]="resultadoForm.resultado"
+                    [error]="resultadoError()"
+                  />
+
+                  @if (pideVencimiento()) {
+                    <app-date-input
+                      label="Vencimiento de la certificación"
+                      [formField]="resultadoForm.fechaVencimientoCert"
+                      [error]="vencimientoError()"
+                      hint="Debe ser posterior a la fecha en que realizaste la auditoría."
+                    />
+                  }
+
+                  @if (pideObservaciones()) {
+                    <div class="ch-detalle-auditoria__resultado-observaciones">
+                      <app-textarea
+                        label="Observaciones"
+                        [formField]="resultadoForm.observaciones"
+                        [rows]="5"
+                        [error]="observacionesError()"
+                        placeholder="Describe qué debe corregir la empresa para volver a solicitar la auditoría."
+                      />
+                      <p class="ch-detalle-auditoria__contador" aria-live="polite">
+                        {{ caracteresObservaciones() }} / {{ maximoObservaciones }} caracteres
+                        (mínimo {{ minimoObservaciones }})
+                      </p>
+                    </div>
+                  }
+                </div>
+
+                <div class="ch-detalle-auditoria__resultado-acciones">
+                  <app-button
+                    type="submit"
+                    [disabled]="!puedeConfirmarResultado()"
+                    [loading]="enviandoResultado()"
+                  >
+                    Confirmar resultado
+                  </app-button>
+                </div>
+              </form>
+            </article>
+          }
+
+          <article class="ch-detalle-auditoria__tarjeta ch-detalle-auditoria__tarjeta--documentos">
+            <header class="ch-detalle-auditoria__tarjeta-cabecera">
+              <app-icon name="certificaciones" [size]="18" aria-hidden="true" />
+              <app-heading
+                level="h3"
+                class="ch-detalle-auditoria__tarjeta-titulo"
+                text="Documentos adjuntos"
+              />
+              <span class="ch-detalle-auditoria__conteo">
+                {{ auditoria.documentos.length }}
+                {{ auditoria.documentos.length === 1 ? 'archivo' : 'archivos' }}
+              </span>
+            </header>
+            @if (auditoria.documentos.length) {
+              <ul class="ch-detalle-auditoria__documentos">
+                @for (documento of auditoria.documentos; track documento.id) {
+                  <li class="ch-detalle-auditoria__documento">
+                    <app-icon name="certificaciones" [size]="18" aria-hidden="true" />
+                    <div class="ch-detalle-auditoria__documento-datos">
+                      <p class="ch-detalle-auditoria__documento-nombre">
+                        {{ documento.nombreArchivo }}
+                      </p>
+                      <p class="ch-detalle-auditoria__documento-peso">
+                        {{ pesoLegible(documento.tamanioBytes) }}
+                      </p>
+                    </div>
+                    <app-button
+                      variant="tertiary"
+                      size="sm"
+                      [loading]="documentoAbriendo() === documento.id"
+                      [ariaLabel]="'Ver ' + documento.nombreArchivo + ' en una pestaña nueva'"
+                      (click)="verDocumento(documento.id)"
+                    >
+                      <app-icon name="redirect" [size]="12" />
+                      <span>Ver PDF</span>
+                    </app-button>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="ch-detalle-auditoria__sin-documentos">
+                Esta solicitud no tiene documentos adjuntos.
+              </p>
+            }
+          </article>
+        </aside>
+      </div>
+
+      <!-- Sección de calificación: solo para admin empresa y auditoría completada -->
+      @if (esCertificacionEmitida() && !esAuditorAsignado()) {
+        <section class="ch-detalle-auditoria__calificacion" aria-labelledby="calificacion-title">
+          <app-calificacion-form
+            [auditoriaId]="idSolicitud()"
+            [auditorId]="detalle()!.auditor!.id"
+            [calificacionExistente]="calificacionExistente()"
+            [estadoAuditoria]="detalle()!.estado"
+            [empresaIdUsuario]="empresaIdUsuario()"
+            (calificacionActualizada)="onCalificacionActualizada($event)"
+          />
+        </section>
+      }
+    }
+  </section>
+</app-shell-layout>

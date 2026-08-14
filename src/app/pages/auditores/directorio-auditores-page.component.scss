@@ -1,0 +1,336 @@
+@use '../../shared/styles/mixins';
+
+:host {
+  display: block;
+}
+
+.ch-directorio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-5);
+}
+
+.ch-directorio__toolbar {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--ch-space-4);
+}
+
+.ch-directorio__buscador {
+  flex: 1;
+}
+
+.ch-directorio__orden {
+  width: 260px;
+  flex-shrink: 0;
+}
+
+.ch-directorio__estado {
+  margin: 0;
+  padding: var(--ch-space-8) 0;
+  text-align: center;
+  color: var(--ch-text-secondary);
+  font-size: 15px;
+
+  &--error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ch-space-3);
+    color: var(--ch-text-primary);
+  }
+}
+
+.ch-directorio__vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ch-space-3);
+  padding: var(--ch-space-8) var(--ch-space-4);
+  text-align: center;
+}
+
+.ch-directorio__vacio-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--ch-radius-full);
+  background: var(--ch-bg-main);
+  color: var(--ch-text-muted);
+  margin-bottom: var(--ch-space-1);
+}
+
+.ch-directorio__vacio-texto {
+  margin: 0;
+  max-width: 360px;
+  color: var(--ch-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ch-directorio__layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: var(--ch-space-5);
+  align-items: start;
+}
+
+.ch-directorio__filtros {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-5);
+  padding: var(--ch-space-5);
+  background: var(--ch-bg-white);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-lg);
+}
+
+.ch-filtro-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-2);
+  margin: 0;
+  padding: 0;
+  border: none;
+
+  &__titulo {
+    font-family: var(--ch-font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ch-text-muted);
+    margin-bottom: var(--ch-space-1);
+    padding: 0;
+  }
+
+  &__vacio {
+    margin: 0;
+    font-size: 12px;
+    color: var(--ch-text-muted);
+  }
+
+  &__radios {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ch-space-2);
+  }
+}
+
+.ch-directorio__contenido {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-5);
+  min-width: 0;
+}
+
+.ch-directorio__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ch-space-2);
+}
+
+.ch-directorio__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  &-quitar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: none;
+    border-radius: var(--ch-radius-full);
+    background: var(--ch-info-bg);
+    color: var(--ch-info);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+
+    &:focus-visible {
+      @include mixins.focus-ring;
+    }
+  }
+}
+
+.ch-directorio__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--ch-space-5);
+}
+
+.ch-directorio__paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ch-space-2);
+  flex-wrap: wrap;
+}
+
+.ch-directorio__conteo {
+  margin: 0;
+  text-align: center;
+  font-family: var(--ch-font-mono);
+  font-size: 11px;
+  color: var(--ch-text-muted);
+}
+
+.ch-auditor-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-5);
+  background: var(--ch-bg-white);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-lg);
+  box-shadow: var(--ch-shadow-sm);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    box-shadow var(--ch-transition),
+    border-color var(--ch-transition);
+
+  &:hover {
+    box-shadow: var(--ch-shadow-md);
+    border-color: var(--ch-green-light);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: var(--ch-space-3);
+  }
+
+  &__id {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__nombre {
+    font-family: var(--ch-font-heading);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ch-text-primary);
+  }
+
+  &__ubicacion {
+    font-size: 12px;
+    color: var(--ch-text-secondary);
+  }
+
+  &__rating {
+    display: flex;
+    align-items: center;
+    gap: var(--ch-space-2);
+  }
+
+  &__estrellas {
+    color: var(--ch-border);
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  &__estrella--llena {
+    color: var(--ch-warning);
+  }
+
+  &__nota {
+    font-size: 12px;
+    color: var(--ch-text-secondary);
+  }
+
+  &__especialidades {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ch-space-2);
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ch-space-3);
+  }
+
+  &__auditorias {
+    font-size: 13px;
+    color: var(--ch-text-secondary);
+
+    strong {
+      color: var(--ch-text-primary);
+    }
+  }
+
+  &__disponible {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ch-text-muted);
+
+    &::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: var(--ch-radius-full);
+      background: var(--ch-text-muted);
+    }
+
+    &--activo {
+      color: var(--ch-green-dark);
+
+      &::before {
+        background: var(--ch-green);
+      }
+    }
+  }
+
+  &__perfil {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ch-space-2);
+    margin-top: auto;
+    padding: 10px;
+    text-align: center;
+    border-radius: var(--ch-radius-md);
+    background: var(--ch-green);
+    color: var(--ch-text-on-dark);
+    font-family: var(--ch-font-body);
+    font-weight: 700;
+    font-size: 14px;
+  }
+}
+
+.ch-auditor-card:hover .ch-auditor-card__perfil {
+  background: var(--ch-green-dark);
+}
+
+@media (max-width: 992px) {
+  .ch-directorio__layout {
+    grid-template-columns: 1fr;
+  }
+  .ch-directorio__filtros {
+    flex-flow: row wrap;
+  }
+}
+
+@media (max-width: 720px) {
+  .ch-directorio__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ch-directorio__orden {
+    width: 100%;
+  }
+  .ch-directorio__grid {
+    grid-template-columns: 1fr;
+  }
+}

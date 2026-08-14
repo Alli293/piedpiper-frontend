@@ -1,0 +1,152 @@
+<app-shell-layout
+  [activeId]="activeIdAuditoria()"
+  [headerConfig]="headerConfig()"
+  [backRoute]="rutaInicio()"
+>
+  <section class="ch-listado-auditorias" aria-label="Listado de auditorías">
+    <div class="ch-listado-auditorias__intro">
+      <div>
+        <app-heading
+          level="h2"
+          [text]="esEmpresa() ? 'Auditorías de tu empresa' : 'Solicitudes asignadas'"
+        />
+        <p class="ch-listado-auditorias__descripcion">
+          @if (esEmpresa()) {
+            Da seguimiento a cada solicitud de auditoría y consulta su estado.
+          } @else {
+            Responde las solicitudes que te asignaron y da seguimiento a las que ya aceptaste.
+          }
+        </p>
+      </div>
+      @if (esEmpresa()) {
+        <app-button (click)="nuevaSolicitud()">+ Nueva solicitud</app-button>
+      }
+    </div>
+
+    <div class="ch-listado-auditorias__barra">
+      <span class="ch-listado-auditorias__filtro-label">
+        <app-icon name="config" [size]="13" />
+        Filtrar por estado
+      </span>
+      <app-filter-chips
+        ariaLabel="Filtrar por estado"
+        [chips]="chipsEstado()"
+        [activeId]="filtroActivo()"
+        (chipSelected)="seleccionarFiltro($event)"
+      />
+
+      @if (rangoVisible()) {
+        <p class="ch-listado-auditorias__rango" aria-live="polite">{{ rangoVisible() }}</p>
+      }
+    </div>
+
+    @if (cargando()) {
+      <p class="ch-listado-auditorias__estado">Cargando auditorías…</p>
+    } @else if (error()) {
+      <p class="ch-listado-auditorias__error" role="alert">{{ error() }}</p>
+    } @else if (solicitudes().length === 0) {
+      <div class="ch-listado-auditorias__vacio">
+        <p>
+          @if (hayFiltros()) {
+            Ninguna solicitud coincide con los estados que seleccionaste.
+          } @else {
+            Aún no tienes solicitudes de auditoría registradas.
+          }
+        </p>
+        @if (hayFiltros()) {
+          <app-button variant="secondary" (click)="limpiarFiltros()">Quitar filtros</app-button>
+        } @else if (esEmpresa()) {
+          <app-button (click)="nuevaSolicitud()">Crear la primera solicitud</app-button>
+        }
+      </div>
+    } @else {
+      <div class="ch-listado-auditorias__tabla-marco">
+        <table class="ch-listado-auditorias__tabla">
+          <caption class="ch-listado-auditorias__caption">
+            Auditorías,
+            {{
+              totalResultados()
+            }}
+            en total
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Período</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Enviada</th>
+              <th scope="col">{{ esEmpresa() ? 'Auditor' : 'Empresa' }}</th>
+              <th scope="col">Adjuntos</th>
+              <th scope="col"><span class="ch-listado-auditorias__oculto">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (solicitud of solicitudes(); track solicitud.id) {
+              <tr>
+                <td>
+                  <span class="ch-listado-auditorias__periodo">
+                    {{ solicitud.periodoInicio | date: 'MMM y' }} –
+                    {{ solicitud.periodoFin | date: 'MMM y' }}
+                  </span>
+                  @if (esperaRespuesta(solicitud) && !esEmpresa()) {
+                    <span class="ch-listado-auditorias__aviso">Espera tu respuesta</span>
+                  }
+                </td>
+                <td>
+                  <app-badge [variant]="varianteDe(solicitud.estado)">
+                    {{ solicitud.estadoDescripcion }}
+                  </app-badge>
+                </td>
+                <td>{{ solicitud.fechaCreacion | date: 'd MMM y' }}</td>
+                <td>
+                  @if (esEmpresa()) {
+                    {{ solicitud.nombreAuditor ?? 'Sin asignar' }}
+                  } @else {
+                    {{ solicitud.nombreEmpresa }}
+                  }
+                </td>
+                <td>{{ solicitud.cantidadDocumentos }}</td>
+                <td class="ch-listado-auditorias__acciones">
+                  <app-button
+                    variant="secondary"
+                    size="sm"
+                    [ariaLabel]="
+                      'Ver el detalle de la auditoría del período ' +
+                      (solicitud.periodoInicio | date: 'MMMM y')
+                    "
+                    (click)="verDetalle(solicitud.id)"
+                  >
+                    Ver detalle
+                  </app-button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPaginas() > 1) {
+        <nav class="ch-listado-auditorias__paginador" aria-label="Paginación de auditorías">
+          <app-button
+            variant="secondary"
+            size="sm"
+            [disabled]="!hayPaginaAnterior() || cargando()"
+            (click)="irAPagina(pagina() - 1)"
+          >
+            Anterior
+          </app-button>
+          <p class="ch-listado-auditorias__pagina-actual" aria-live="polite">
+            Página {{ pagina() }} de {{ totalPaginas() }}
+          </p>
+          <app-button
+            variant="secondary"
+            size="sm"
+            [disabled]="!hayPaginaSiguiente() || cargando()"
+            (click)="irAPagina(pagina() + 1)"
+          >
+            Siguiente
+          </app-button>
+        </nav>
+      }
+    }
+  </section>
+</app-shell-layout>

@@ -1,0 +1,24 @@
+.validacion {
+  text-align: center;
+}
+
+.validacion__badge {
+  margin-bottom: var(--ch-space-4);
+}
+
+.validacion__text {
+  margin: var(--ch-space-3) 0 var(--ch-space-6);
+  color: var(--ch-text-secondary);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.validacion__link {
+  color: var(--ch-blue-mid);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.validacion__link:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,12 @@
+@if (valorMostrado() !== null) {
+  @let valor = valorMostrado()!;
+  <span
+    class="ch-puntuacion-badge"
+    [class]="badgeClass()"
+    [attr.aria-label]="'Puntuación ambiental: ' + (valor | number: '1.0-0') + ' de 100'"
+  >
+    <app-icon name="hoja" [size]="14" aria-hidden="true" />
+    <span class="ch-puntuacion-badge__valor" aria-hidden="true">{{ valor | number: '1.0-0' }}</span>
+    <span class="ch-puntuacion-badge__max" aria-hidden="true">/100</span>
+  </span>
+}

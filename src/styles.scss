@@ -1,1 +1,19 @@
 /* You can add global styles to this file, and also import other style files */
+
+@use 'app/shared/styles/reset';
+@use 'app/shared/styles/tokens';
+@use 'app/shared/styles/typography';
+@use 'app/shared/styles/annual-limit-panel';
+@use 'app/shared/styles/flatpickr-theme';
+@use 'app/shared/styles/insignias-empresa-list';
+@use 'app/pages/landing/landing.shared';
+
+body {
+  font-family: var(--ch-font-body);
+  color: var(--ch-text-primary);
+}
+
+app-root {
+  display: block;
+  min-height: 100vh;
+}

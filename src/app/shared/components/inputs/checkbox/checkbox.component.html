@@ -1,0 +1,25 @@
+<label
+  class="ch-checkbox__wrapper"
+  [class.ch-checkbox__wrapper--disabled]="effectiveDisabled()"
+  [for]="inputId()"
+>
+  <input
+    type="checkbox"
+    class="ch-checkbox__input"
+    [class.ch-checkbox__input--error]="hasError()"
+    [id]="inputId()"
+    [checked]="checked()"
+    [disabled]="effectiveDisabled()"
+    [attr.aria-invalid]="hasError() ? 'true' : null"
+    (change)="onInputChange($event)"
+    (blur)="onBlur()"
+  />
+  @if (label()) {
+    <span class="ch-checkbox__label">{{ label() }}</span>
+  } @else {
+    <span class="ch-checkbox__label"><ng-content /></span>
+  }
+</label>
+@if (hasError()) {
+  <p class="ch-checkbox__error">{{ error() }}</p>
+}

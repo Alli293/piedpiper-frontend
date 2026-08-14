@@ -1,0 +1,17 @@
+<button
+  class="ch-button__inner"
+  [attr.id]="id()"
+  [attr.aria-label]="ariaLabel() ?? null"
+  [attr.aria-expanded]="ariaExpanded() ?? null"
+  [attr.aria-controls]="ariaControls() ?? null"
+  [type]="type()"
+  [disabled]="disabled() || loading()"
+  [attr.aria-busy]="loading() ? 'true' : null"
+>
+  @if (loading()) {
+    <span class="ch-button__spinner" aria-hidden="true"></span>
+  }
+  <span class="ch-button__label" [style.visibility]="loading() ? 'hidden' : 'visible'">
+    <ng-content />
+  </span>
+</button>

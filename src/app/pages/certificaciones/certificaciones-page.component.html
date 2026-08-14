@@ -1,0 +1,41 @@
+<app-shell-layout activeId="certificaciones" [headerConfig]="headerConfig()">
+  <section class="ch-certificaciones" aria-label="Certificaciones">
+    <app-estado-certificaciones-panel
+      [alertas]="alertas()"
+      [loading]="cargandoAlertas()"
+      [error]="alertasError()"
+    />
+
+    <app-recomendacion-renovacion-panel
+      [recomendacion]="recomendacion()"
+      [loading]="cargandoRecomendacion()"
+      [error]="recomendacionError()"
+    />
+
+    <app-certificaciones-recientes-panel
+      [certificaciones]="certificaciones()"
+      [loading]="cargandoCertificaciones()"
+      [error]="certificacionesError()"
+    />
+
+    <app-insignias-empresa-panel
+      [insignias]="insignias()"
+      [loading]="cargandoInsignias()"
+      [error]="insigniasError()"
+    />
+
+    <app-metas-reduccion-panel
+      [metas]="metas()"
+      [loading]="cargandoMetas()"
+      [error]="metasError()"
+    />
+
+    <app-calendario-vencimientos
+      [mes]="mesCalendario()"
+      [calendario]="calendario()"
+      [loading]="cargandoCalendario()"
+      [error]="calendarioError()"
+      (mesChange)="onMesCalendarioChange($event)"
+    />
+  </section>
+</app-shell-layout>

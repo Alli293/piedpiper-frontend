@@ -1,0 +1,25 @@
+<app-sidebar
+  [menuItems]="sidebarConfig().menuItems"
+  [bottomItems]="sidebarConfig().bottomItems"
+  [companyName]="sidebarConfig().companyName"
+  [companyRole]="sidebarConfig().companyRole"
+  [companyInitials]="sidebarConfig().companyInitials"
+  (menuItemClicked)="menuItemClicked.emit($event)"
+/>
+
+<div class="ch-page-layout__main">
+  <app-header
+    [sectionLabel]="headerConfig().sectionLabel"
+    [pageTitle]="headerConfig().pageTitle"
+    [userInitials]="headerConfig().userInitials ?? ''"
+    [showBackButton]="headerConfig().showBackButton ?? false"
+    (profileClicked)="profileClicked.emit()"
+    (backClicked)="backClicked.emit()"
+  >
+    <ng-content select="[pageHeaderActions]" />
+  </app-header>
+
+  <main class="ch-page-layout__content">
+    <ng-content />
+  </main>
+</div>

@@ -1,0 +1,196 @@
+@use '../../../shared/styles/mixins';
+
+.certificaciones-listado-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-4);
+}
+
+.certificaciones-listado-page__estado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-8);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-white);
+  color: var(--ch-text-secondary);
+  text-align: center;
+}
+
+.certificaciones-listado-page__loader {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--ch-radius-full);
+  border: 3px solid var(--ch-border);
+  border-top-color: var(--ch-green);
+  animation: certificaciones-listado-page-spin 900ms linear infinite;
+}
+
+.certificaciones-listado-page__vacio,
+.certificaciones-listado-page__vacio-filtro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-8);
+  text-align: center;
+  color: var(--ch-text-secondary);
+}
+
+.certificaciones-listado-page__vacio p,
+.certificaciones-listado-page__vacio-filtro p {
+  max-width: 420px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.certificaciones-listado-page__vacio-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 74px;
+  height: 74px;
+  border-radius: var(--ch-radius-full);
+  background: var(--ch-bg-main);
+  color: var(--ch-text-muted);
+}
+
+.certificaciones-listado-page__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ch-space-3);
+}
+
+.certificaciones-listado-page__filtro-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-1);
+  color: var(--ch-text-secondary);
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+.certificaciones-listado-page__table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-lg);
+  background: var(--ch-bg-white);
+  box-shadow: var(--ch-shadow-sm);
+}
+
+.certificaciones-listado-page__table-wrap table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+}
+
+.certificaciones-listado-page__table-wrap th,
+.certificaciones-listado-page__table-wrap td {
+  padding: var(--ch-space-3) var(--ch-space-4);
+  border-bottom: 1px solid var(--ch-border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.certificaciones-listado-page__table-wrap th {
+  background: var(--ch-bg-main);
+  color: var(--ch-text-secondary);
+  font-family: var(--ch-font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.certificaciones-listado-page__table-wrap tr:last-child td {
+  border-bottom: 0;
+}
+
+.certificaciones-listado-page__cert-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-3);
+}
+
+.certificaciones-listado-page__cert-cell > div {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.certificaciones-listado-page__cert-cell strong {
+  color: var(--ch-dark);
+  font-weight: 700;
+  font-size: 0.86rem;
+}
+
+.certificaciones-listado-page__cert-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-green-soft);
+  color: var(--ch-green-dark);
+}
+
+.certificaciones-listado-page__cert-tipo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ch-space-1);
+  width: fit-content;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ch-text-secondary);
+  font-family: var(--ch-font-mono);
+  font-size: 0.66rem;
+  cursor: pointer;
+}
+
+.certificaciones-listado-page__cert-tipo:hover {
+  color: var(--ch-dark);
+}
+
+.certificaciones-listado-page__cert-tipo--vacio {
+  cursor: default;
+}
+
+.certificaciones-listado-page__cert-tipo--vacio:hover {
+  color: var(--ch-text-secondary);
+}
+
+.certificaciones-listado-page__codigo-tooltip {
+  position: absolute;
+  top: calc(100% + var(--ch-space-1));
+  left: 0;
+  white-space: nowrap;
+  padding: var(--ch-space-1) var(--ch-space-2);
+  border-radius: var(--ch-radius-sm);
+  background: var(--ch-text-primary);
+  color: var(--ch-text-on-dark);
+  font-family: var(--ch-font-body);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  box-shadow: var(--ch-shadow-md);
+  z-index: 1;
+}
+
+.certificaciones-listado-page__th-oculto {
+  @include mixins.visually-hidden;
+}
+
+@keyframes certificaciones-listado-page-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

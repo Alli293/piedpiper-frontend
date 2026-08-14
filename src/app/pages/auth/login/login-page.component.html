@@ -1,0 +1,46 @@
+<app-auth-layout>
+  <div class="login">
+    <header class="login__header">
+      <app-heading level="h1" text="Iniciar sesión" />
+      <p class="login__subtitle">Ingresa con tu cuenta CarbonHub.</p>
+    </header>
+
+    <div class="login__google" #googleButton></div>
+
+    <div class="login__divider">
+      <span>o continúa con correo electrónico</span>
+    </div>
+
+    <form class="login__form" novalidate (submit)="enviar($event)">
+      <app-text-input
+        label="Correo electrónico"
+        type="email"
+        autocomplete="email"
+        placeholder="tucorreo@empresa.com"
+        [formField]="loginForm.email"
+      />
+
+      <app-password-input
+        label="Contraseña"
+        autocomplete="current-password"
+        placeholder="Tu contraseña"
+        [formField]="loginForm.contrasena"
+      />
+
+      @if (error()) {
+        <p class="login__error" role="alert">{{ error() }}</p>
+      }
+
+      <a class="login__forgot" routerLink="/recuperar-contrasena">¿Olvidaste tu contraseña?</a>
+
+      <app-button variant="primary" size="lg" type="submit" [loading]="cargando()">
+        Iniciar sesión
+      </app-button>
+    </form>
+
+    <p class="login__signup">
+      ¿No tienes cuenta?
+      <a routerLink="/registro">Regístrate aquí</a>
+    </p>
+  </div>
+</app-auth-layout>

@@ -1,0 +1,121 @@
+<app-shell-layout [headerConfig]="headerConfig" activeId="auditores" backRoute="/auditores">
+  <section class="ch-recomendaciones" aria-label="Recomendaciones de auditores">
+    <div class="ch-recomendaciones__intro">
+      <app-heading level="h2" text="Auditores recomendados para tu solicitud" />
+      <p class="ch-recomendaciones__descripcion">
+        Contanos qué necesitás y te sugerimos hasta 5 auditores, con una explicación de por qué
+        encaja cada uno.
+      </p>
+    </div>
+
+    <form class="ch-recomendaciones__filtros" novalidate (submit)="handleSubmit($event)">
+      <app-select-input
+        label="Tipo de auditoría"
+        placeholder="Seleccioná el tipo"
+        [formField]="recomendacionForm.tipoAuditoria"
+        [options]="opcionesEspecialidad()"
+        [error]="tipoAuditoriaError()"
+      />
+
+      <app-select-input
+        label="Especialidad buscada"
+        placeholder="Seleccioná la especialidad"
+        [formField]="recomendacionForm.especialidadBuscada"
+        [options]="opcionesEspecialidad()"
+        [error]="especialidadError()"
+      />
+
+      <app-select-input
+        label="Zona geográfica"
+        placeholder="Seleccioná la zona"
+        [formField]="recomendacionForm.zonaGeografica"
+        [options]="opcionesZona()"
+        [error]="zonaError()"
+      />
+
+      <app-checkbox
+        label="Solo auditores disponibles"
+        [formField]="recomendacionForm.soloDisponibles"
+      />
+
+      <app-button type="submit" [disabled]="cargando()" [loading]="cargando()">
+        Obtener recomendaciones
+      </app-button>
+    </form>
+
+    @if (error()) {
+      <p class="ch-recomendaciones__error" role="alert">{{ error() }}</p>
+    }
+
+    @if (cargando()) {
+      <p class="ch-recomendaciones__estado" aria-live="polite">Buscando auditores…</p>
+    }
+
+    <!-- Aviso en pantalla y no toast: se lee mientras se revisan las tarjetas. -->
+    @if (avisoIaNoDisponible()) {
+      <p class="ch-recomendaciones__aviso-ia" role="status">
+        Las justificaciones de IA no están disponibles en este momento. Puedes revisar el perfil
+        completo de cada auditor.
+      </p>
+    }
+
+    @if (sinResultados()) {
+      <div class="ch-recomendaciones__vacio">
+        <p>
+          No encontramos auditores que coincidan con tu solicitud. Intenta ajustar los filtros o
+          busca en el directorio completo.
+        </p>
+        <app-button variant="secondary" (click)="explorarDirectorio()">
+          Explorar directorio
+        </app-button>
+      </div>
+    }
+
+    @if (!cargando() && recomendaciones().length > 0) {
+      <ul class="ch-recomendaciones__lista">
+        @for (auditor of recomendaciones(); track auditor.auditorId) {
+          <li class="ch-recomendaciones__tarjeta">
+            <div class="ch-recomendaciones__encabezado">
+              <app-avatar shape="square" [imageUrl]="auditor.fotoPerfil ?? ''" />
+              <div>
+                <p class="ch-recomendaciones__nombre">{{ auditor.nombre }}</p>
+                <p class="ch-recomendaciones__metricas">
+                  @if (auditor.calificacionPromedio !== null) {
+                    <span>{{ auditor.calificacionPromedio }}/5</span>
+                  } @else {
+                    <span>Sin calificaciones</span>
+                  }
+                  <span aria-hidden="true">·</span>
+                  <span>{{ auditor.auditoriasCompletadas }} auditorías</span>
+                </p>
+              </div>
+              <app-badge [variant]="auditor.disponible ? 'success' : 'neutral'">
+                {{ auditor.disponible ? 'Disponible' : 'No disponible' }}
+              </app-badge>
+            </div>
+
+            <ul class="ch-recomendaciones__especialidades">
+              @for (especialidad of auditor.especialidades; track especialidad) {
+                <li>{{ especialidad }}</li>
+              }
+            </ul>
+
+            <!-- Sin justificación la tarjeta sale sin ese bloque, no con un hueco vacío. -->
+            @if (auditor.justificacion) {
+              <p class="ch-recomendaciones__justificacion">{{ auditor.justificacion }}</p>
+            }
+
+            <app-button
+              variant="secondary"
+              size="sm"
+              [ariaLabel]="'Ver el perfil completo de ' + auditor.nombre"
+              (click)="verPerfil(auditor.auditorId)"
+            >
+              Ver perfil completo
+            </app-button>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</app-shell-layout>

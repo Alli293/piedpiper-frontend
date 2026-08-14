@@ -1,0 +1,54 @@
+<article class="ch-recomendacion-panel" aria-label="Recomendación de renovación">
+  @if (loading()) {
+    <p class="ch-recomendacion-panel__loading">Generando recomendación...</p>
+  } @else if (error()) {
+    <p class="ch-recomendacion-panel__error" role="alert">{{ error() }}</p>
+  } @else if (recomendacion(); as r) {
+    <header class="ch-recomendacion-panel__header">
+      <span class="ch-recomendacion-panel__icon">
+        <app-icon name="ai" [size]="16" />
+      </span>
+      <app-heading level="h3" text="Recomendación de renovación" />
+      <span class="ch-recomendacion-panel__ia-badge">
+        <app-icon name="ai" [size]="10" />
+        Generado por IA
+      </span>
+    </header>
+
+    <p class="ch-recomendacion-panel__intro">Según urgencia, vigencia e impacto en tu huella:</p>
+
+    <div class="ch-recomendacion-panel__cert">
+      <app-icon name="hoja-solida" [size]="20" />
+      <strong>{{ r.nombreCertificacion }}</strong>
+      <span class="ch-recomendacion-panel__renova-primero">Renová primero</span>
+    </div>
+
+    @if (justificacionCompleta(); as texto) {
+      <p class="ch-recomendacion-panel__texto">{{ texto }}</p>
+    } @else {
+      <p class="ch-recomendacion-panel__texto ch-recomendacion-panel__texto--no-disponible">
+        {{ mensajeNoDisponible }}
+      </p>
+    }
+
+    <a routerLink="/empresa/certificaciones/listado" [queryParams]="{ id: r.idCertificacion }">
+      <app-button
+        >Ver detalle de la certificación
+        <app-icon name="chevron-derecha" [size]="12" aria-hidden="true"
+      /></app-button>
+    </a>
+  } @else {
+    <header class="ch-recomendacion-panel__header">
+      <span class="ch-recomendacion-panel__icon">
+        <app-icon name="ai" [size]="16" />
+      </span>
+      <app-heading level="h3" text="Recomendación de renovación" />
+      <span class="ch-recomendacion-panel__ia-badge">
+        <app-icon name="ai" [size]="10" />
+        Impulsado por IA
+      </span>
+    </header>
+
+    <p class="ch-recomendacion-panel__vacio">{{ sinAlertasMensaje }}</p>
+  }
+</article>

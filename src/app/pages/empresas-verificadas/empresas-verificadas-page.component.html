@@ -1,0 +1,176 @@
+<div class="ch-empresas-verificadas">
+  <!-- Header + Hero with gradient background -->
+  <div class="ch-empresas-verificadas__hero-area">
+    <!-- Header nav -->
+    <header class="ch-empresas-verificadas__header">
+      <div class="ch-empresas-verificadas__header-wrap">
+        <a class="ch-empresas-verificadas__brand" routerLink="/" aria-label="CarbonHub — inicio">
+          <app-logo variant="on-dark" [iconSize]="28" textSize="17px" gap="9px" />
+        </a>
+        <nav class="ch-empresas-verificadas__header-nav" aria-label="Secciones">
+          <a class="ch-empresas-verificadas__header-link" routerLink="/">Para empresas</a>
+          <a class="ch-empresas-verificadas__header-link" routerLink="/">Auditores</a>
+          <a class="ch-empresas-verificadas__header-link" routerLink="/">EcoRuta</a>
+          <a
+            class="ch-empresas-verificadas__header-link ch-empresas-verificadas__header-link--active"
+            routerLink="/empresas-verificadas"
+            >Empresas verificadas</a
+          >
+        </nav>
+        <div class="ch-empresas-verificadas__header-right">
+          <a class="ch-empresas-verificadas__header-signin" routerLink="/login">
+            <app-icon name="login" [size]="16" /> Iniciar sesión
+          </a>
+          <a class="ch-empresas-verificadas__header-register" routerLink="/registro/empresa">
+            <app-icon name="empresa" [size]="16" /> Registrar mi empresa
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero section -->
+    <section class="ch-empresas-verificadas__hero">
+      <div class="ch-empresas-verificadas__hero-content">
+        <h1 class="ch-empresas-verificadas__title">Empresas verificadas</h1>
+        <p class="ch-empresas-verificadas__subtitle">
+          Explorá el catálogo de empresas con reputación ecológica verificada en CarbonHub. Buscá
+          por nombre y conocé su nivel de compromiso ambiental.
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <!-- Search section -->
+  <section class="ch-empresas-verificadas__search" aria-label="Búsqueda de empresas">
+    <div class="ch-empresas-verificadas__search-wrapper">
+      <input
+        type="text"
+        class="ch-empresas-verificadas__input"
+        placeholder="Buscar empresa por nombre..."
+        [value]="termino()"
+        (input)="onInput($event)"
+        aria-label="Buscar empresa por nombre"
+      />
+      @if (cargando()) {
+        <span class="ch-empresas-verificadas__spinner" aria-hidden="true"></span>
+      }
+    </div>
+    @if (!buscado() && resultados().length === 0) {
+      <p class="ch-empresas-verificadas__hint">
+        Busca una empresa por nombre para encontrar su perfil de reputación ecológica.
+      </p>
+    }
+  </section>
+
+  <!-- Error message -->
+  @if (error()) {
+    <p class="ch-empresas-verificadas__error-msg" role="alert">
+      {{ error() }}
+    </p>
+  }
+
+  <!-- Results grid -->
+  @if (resultados().length > 0) {
+    <section class="ch-empresas-verificadas__results" aria-label="Resultados de búsqueda">
+      <div class="ch-empresas-verificadas__grid">
+        @for (empresa of resultados(); track empresa.slug) {
+          <article class="ch-empresas-verificadas__card">
+            <div class="ch-empresas-verificadas__card-body">
+              <h2 class="ch-empresas-verificadas__card-nombre">{{ empresa.nombreEmpresa }}</h2>
+              <p class="ch-empresas-verificadas__card-sector">{{ empresa.sectorIndustrial }}</p>
+              <span
+                class="ch-empresas-verificadas__badge ch-empresas-verificadas__badge--{{
+                  getNivelClase(empresa.nivelEcologico)
+                }}"
+              >
+                {{ empresa.nivelEcologico }}
+              </span>
+            </div>
+            <a
+              class="ch-empresas-verificadas__card-link"
+              [routerLink]="['/empresa', empresa.slug, 'reputacion']"
+            >
+              Ver perfil →
+            </a>
+          </article>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- No results -->
+  @if (buscado() && resultados().length === 0 && !cargando()) {
+    <p class="ch-empresas-verificadas__empty" role="status">No se encontraron empresas.</p>
+  }
+
+  <!-- Introductory section (only when no results loaded yet) -->
+  @if (resultados().length === 0 && !cargando()) {
+    <section class="ch-empresas-verificadas__intro">
+      <div class="ch-empresas-verificadas__intro-grid">
+        <div class="ch-empresas-verificadas__intro-card">
+          <h3 class="ch-empresas-verificadas__intro-title">¿Qué es una empresa verificada?</h3>
+          <p class="ch-empresas-verificadas__intro-text">
+            Son organizaciones que han registrado y certificado su huella de carbono a través de
+            CarbonHub, con auditorías realizadas por profesionales certificados.
+          </p>
+        </div>
+        <div class="ch-empresas-verificadas__intro-card">
+          <h3 class="ch-empresas-verificadas__intro-title">Niveles ecológicos</h3>
+          <p class="ch-empresas-verificadas__intro-text">
+            Cada empresa obtiene un nivel (Bronce, Plata, Oro o Platino) según su compromiso con la
+            reducción de emisiones y sus certificaciones vigentes.
+          </p>
+        </div>
+        <div class="ch-empresas-verificadas__intro-card">
+          <h3 class="ch-empresas-verificadas__intro-title">Transparencia ambiental</h3>
+          <p class="ch-empresas-verificadas__intro-text">
+            Los perfiles públicos permiten a consumidores, inversionistas y aliados conocer el
+            desempeño ambiental real de cada empresa.
+          </p>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Footer -->
+  <footer class="ch-empresas-verificadas__footer">
+    <div class="ch-empresas-verificadas__footer-wrap">
+      <div class="ch-empresas-verificadas__footer-top">
+        <div class="ch-empresas-verificadas__footer-brand">
+          <app-logo variant="on-dark" [iconSize]="28" textSize="17px" gap="9px" />
+          <p class="ch-empresas-verificadas__footer-tagline">
+            Plataforma de gestión de huella de carbono y certificación ambiental para empresas,
+            auditores y viajeros.
+          </p>
+          <span class="ch-empresas-verificadas__footer-cr">🇨🇷 Hecho en Costa Rica</span>
+        </div>
+        <div class="ch-empresas-verificadas__footer-col">
+          <span class="ch-empresas-verificadas__footer-col-t">Producto</span>
+          <a class="ch-empresas-verificadas__footer-link" routerLink="/">Para empresas</a>
+          <a class="ch-empresas-verificadas__footer-link" routerLink="/">Para auditores</a>
+          <a class="ch-empresas-verificadas__footer-link" routerLink="/">EcoRuta</a>
+          <a class="ch-empresas-verificadas__footer-link" routerLink="/empresas-verificadas"
+            >Empresas verificadas</a
+          >
+        </div>
+        <div class="ch-empresas-verificadas__footer-col">
+          <span class="ch-empresas-verificadas__footer-col-t">Plataforma</span>
+          <span class="ch-empresas-verificadas__footer-link">Cómo funciona</span>
+          <span class="ch-empresas-verificadas__footer-link">Certificaciones</span>
+          <span class="ch-empresas-verificadas__footer-link">Directorio de auditores</span>
+          <span class="ch-empresas-verificadas__footer-link">Verificar una credencial</span>
+        </div>
+        <div class="ch-empresas-verificadas__footer-col">
+          <span class="ch-empresas-verificadas__footer-col-t">Recursos</span>
+          <span class="ch-empresas-verificadas__footer-link">Centro de ayuda</span>
+          <span class="ch-empresas-verificadas__footer-link">Contacto</span>
+          <span class="ch-empresas-verificadas__footer-link">Términos y privacidad</span>
+          <a class="ch-empresas-verificadas__footer-link" routerLink="/login">Iniciar sesión</a>
+        </div>
+      </div>
+      <div class="ch-empresas-verificadas__footer-bottom">
+        <span>© 2026 CarbonHub · Plataforma costarricense de gestión ambiental</span>
+      </div>
+    </div>
+  </footer>
+</div>

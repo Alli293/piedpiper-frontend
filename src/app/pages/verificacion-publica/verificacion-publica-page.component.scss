@@ -1,0 +1,298 @@
+.ch-verificacion-publica {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ch-space-8);
+  width: min(600px, 100%);
+  margin: 0 auto;
+  font-family: var(--ch-font-body);
+}
+
+.ch-verificacion-publica__intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ch-space-3);
+  text-align: center;
+}
+
+.ch-verificacion-publica__intro-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border-radius: var(--ch-radius-lg);
+  background: var(--ch-dark);
+  color: var(--ch-text-on-dark);
+}
+
+.ch-verificacion-publica__intro-sub {
+  max-width: 480px;
+  margin: 0;
+  color: var(--ch-text-secondary);
+  line-height: 1.6;
+}
+
+.ch-verificacion-publica__estado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-8);
+  width: 100%;
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-white);
+  color: var(--ch-text-secondary);
+  text-align: center;
+}
+
+.ch-verificacion-publica__loader {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--ch-radius-full);
+  border: 3px solid var(--ch-border);
+  border-top-color: var(--ch-green);
+  animation: ch-verificacion-publica-spin 900ms linear infinite;
+}
+
+// === Parte 1: formulario ===
+
+.ch-verificacion-publica__formulario {
+  width: 100%;
+}
+
+.ch-verificacion-publica__form-title {
+  margin: 0 0 var(--ch-space-1);
+  font-family: var(--ch-font-heading);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--ch-text-primary);
+}
+
+.ch-verificacion-publica__form-sub {
+  margin: 0 0 var(--ch-space-6);
+  color: var(--ch-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.ch-verificacion-publica__formulario form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-6);
+}
+
+// === Parte 2: tarjeta de resultado ===
+
+.ch-verificacion-publica__rc {
+  width: 100%;
+  text-align: left;
+}
+
+.ch-verificacion-publica__rc-top {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-5);
+  border-radius: var(--ch-radius-lg) var(--ch-radius-lg) 0 0;
+}
+
+// Un tono mas claro que los tokens *-soft/*-bg: esos mismos tokens son el
+// fondo del app-badge (rc-tag) que va encima, asi que usarlos aqui tal cual
+// hacia que la etiqueta desapareciera contra el encabezado.
+.ch-verificacion-publica__rc-top--success {
+  background: color-mix(in srgb, var(--ch-green-soft) 50%, white);
+}
+
+.ch-verificacion-publica__rc-top--warning {
+  background: color-mix(in srgb, var(--ch-warning-bg) 50%, white);
+}
+
+.ch-verificacion-publica__rc-top--danger {
+  background: color-mix(in srgb, var(--ch-danger-bg) 50%, white);
+}
+
+.ch-verificacion-publica__rc-top--neutral {
+  background: color-mix(in srgb, var(--ch-bg-main) 50%, white);
+}
+
+.ch-verificacion-publica__rc-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--ch-radius-lg);
+  background: var(--ch-bg-white);
+  box-shadow: var(--ch-shadow-sm);
+}
+
+.ch-verificacion-publica__rc-top--success .ch-verificacion-publica__rc-badge {
+  color: var(--ch-green-dark);
+}
+
+.ch-verificacion-publica__rc-top--warning .ch-verificacion-publica__rc-badge {
+  color: var(--ch-warning-dark);
+}
+
+.ch-verificacion-publica__rc-top--danger .ch-verificacion-publica__rc-badge {
+  color: var(--ch-danger);
+}
+
+.ch-verificacion-publica__rc-top--neutral .ch-verificacion-publica__rc-badge {
+  color: var(--ch-text-muted);
+}
+
+.ch-verificacion-publica__rc-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ch-space-2);
+  min-width: 0;
+}
+
+.ch-verificacion-publica__rc-title {
+  margin: 0;
+  font-family: var(--ch-font-heading);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--ch-text-primary);
+}
+
+.ch-verificacion-publica__rc-top--success .ch-verificacion-publica__rc-title {
+  color: var(--ch-green-dark);
+}
+
+.ch-verificacion-publica__rc-top--warning .ch-verificacion-publica__rc-title {
+  color: var(--ch-warning-dark);
+}
+
+.ch-verificacion-publica__rc-top--danger .ch-verificacion-publica__rc-title {
+  color: var(--ch-danger);
+}
+
+.ch-verificacion-publica__rc-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-5);
+}
+
+.ch-verificacion-publica__cred-name {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+  margin: 0;
+  font-weight: 700;
+  font-family: var(--ch-font-heading);
+}
+
+.ch-verificacion-publica__cred-name-icon {
+  display: inline-flex;
+  color: var(--ch-green);
+}
+
+.ch-verificacion-publica__cred-name-text {
+  color: var(--ch-text-primary);
+}
+
+.ch-verificacion-publica__cred-kind {
+  margin: calc(var(--ch-space-3) * -1) 0 0;
+  padding-left: calc(14px + var(--ch-space-2));
+  color: var(--ch-text-secondary);
+  font-family: var(--ch-font-mono);
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+}
+
+.ch-verificacion-publica__revoke-box {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ch-verificacion-publica__rc-msg {
+  margin: 0;
+  color: var(--ch-text-secondary);
+  line-height: 1.6;
+}
+
+.ch-verificacion-publica__dl {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0;
+}
+
+.ch-verificacion-publica__dl-row {
+  display: grid;
+  grid-template-columns: 104px 1fr;
+  gap: var(--ch-space-3);
+  padding: var(--ch-space-3) 0;
+  border-top: 1px solid var(--ch-border);
+}
+
+.ch-verificacion-publica__dl-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.ch-verificacion-publica__dl-row dt {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-1);
+  color: var(--ch-text-secondary);
+  font-size: 0.8125rem;
+}
+
+.ch-verificacion-publica__dl-row dd {
+  margin: 0;
+  color: var(--ch-text-primary);
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.ch-verificacion-publica__periodo {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+  flex-wrap: wrap;
+}
+
+.ch-verificacion-publica__mono {
+  font-family: var(--ch-font-mono);
+  font-size: 0.8125rem;
+}
+
+.ch-verificacion-publica__mono--vencida {
+  color: var(--ch-danger);
+  font-weight: 700;
+}
+
+.ch-verificacion-publica__sep {
+  color: var(--ch-text-muted);
+}
+
+.ch-verificacion-publica__accion {
+  align-self: center;
+}
+
+.ch-verificacion-publica__consulta {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-1);
+  margin: 0;
+  color: var(--ch-text-muted);
+  font-family: var(--ch-font-mono);
+  font-size: 0.7rem;
+}
+
+@keyframes ch-verificacion-publica-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

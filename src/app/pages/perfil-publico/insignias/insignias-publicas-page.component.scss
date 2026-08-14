@@ -1,0 +1,32 @@
+.ch-insignias-publicas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-4);
+  width: min(1140px, 100%);
+  font-family: var(--ch-font-body);
+}
+
+.ch-insignias-publicas__estado {
+  display: grid;
+  justify-items: center;
+  gap: var(--ch-space-3);
+  max-width: 520px;
+  margin: 0 auto;
+  text-align: center;
+  color: var(--ch-text-secondary);
+}
+
+.ch-insignias-publicas__loader {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--ch-radius-full);
+  border: 3px solid var(--ch-border);
+  border-top-color: var(--ch-green);
+  animation: ch-insignias-publicas-spin 900ms linear infinite;
+}
+
+@keyframes ch-insignias-publicas-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

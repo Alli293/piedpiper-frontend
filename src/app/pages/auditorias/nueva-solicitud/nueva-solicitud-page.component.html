@@ -1,0 +1,60 @@
+<app-shell-layout
+  activeId="auditorias-empresa"
+  [headerConfig]="headerConfig"
+  backRoute="/empresa/auditorias"
+>
+  <div class="nueva-solicitud">
+    <section class="nueva-solicitud__card" aria-labelledby="nueva-solicitud-titulo">
+      <div class="nueva-solicitud__intro">
+        <app-heading
+          level="h2"
+          id="nueva-solicitud-titulo"
+          text="Solicitud de auditoría ambiental"
+        />
+        <p>
+          Indique el período que desea auditar y adjunte la documentación PDF que respalda la
+          solicitud.
+        </p>
+      </div>
+
+      <form novalidate (submit)="handleSubmit($event)">
+        <div class="nueva-solicitud__periodo">
+          <app-date-input
+            label="Inicio del período"
+            [formField]="solicitudForm.periodoInicio"
+            [error]="periodoInicioError()"
+          />
+          <app-date-input
+            label="Fin del período"
+            [formField]="solicitudForm.periodoFin"
+            [error]="periodoFinError()"
+          />
+        </div>
+
+        <app-textarea
+          label="Descripción de la solicitud (opcional)"
+          [formField]="solicitudForm.descripcionSolicitud"
+          placeholder="Describa el alcance o los objetivos de la auditoría."
+          [rows]="4"
+          [error]="descripcionError()"
+          [hint]="caracteresDescripcion() + ' / ' + maximoCaracteresDescripcion + ' caracteres'"
+        />
+
+        <app-file-drop
+          label="Documentación de respaldo (PDF)"
+          accept="application/pdf"
+          [maxArchivos]="maximoDocumentos"
+          [maxTamanioBytes]="maximoBytesDocumento"
+          [disabled]="enviando()"
+          [(archivos)]="documentos"
+        />
+
+        <div class="nueva-solicitud__actions">
+          <app-button type="submit" [disabled]="!puedeEnviar()" [loading]="enviando()">
+            + Crear solicitud
+          </app-button>
+        </div>
+      </form>
+    </section>
+  </div>
+</app-shell-layout>

@@ -1,0 +1,10 @@
+<app-icon class="ch-semantic-card__icon" [name]="effectiveIcon()" [size]="20" />
+<div class="ch-semantic-card__content">
+  @if (title()) {
+    <p class="ch-semantic-card__title">{{ title() }}</p>
+  }
+  @if (text()) {
+    <p class="ch-semantic-card__text">{{ text() }}</p>
+  }
+  <ng-content />
+</div>

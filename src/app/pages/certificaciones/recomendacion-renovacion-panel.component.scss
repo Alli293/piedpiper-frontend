@@ -1,0 +1,121 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.ch-recomendacion-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-6);
+  border-radius: var(--ch-radius-lg);
+  background: linear-gradient(135deg, var(--ch-green-dark) 0%, #0c3327 100%);
+  color: var(--ch-text-on-dark);
+  box-shadow: var(--ch-shadow-sm);
+
+  &__loading,
+  &__error {
+    font-family: var(--ch-font-body);
+    font-size: 13px;
+    color: var(--ch-text-on-dark-muted);
+    margin: 0;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    // ::ng-deep acotado al wrapper: app-heading fija su propio color
+    // internamente (--ch-text-primary), no lo hereda del contenedor.
+    ::ng-deep app-heading .ch-heading--h3 {
+      color: var(--ch-text-on-dark);
+    }
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--ch-green-light);
+  }
+
+  &__ia-badge {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--ch-font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: var(--ch-green-light);
+    white-space: nowrap;
+  }
+
+  &__vacio {
+    font-family: var(--ch-font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ch-text-on-dark-muted);
+    margin: 0;
+  }
+
+  &__intro {
+    font-family: var(--ch-font-body);
+    font-size: 13px;
+    color: var(--ch-text-on-dark-muted);
+    margin: 0;
+  }
+
+  &__cert {
+    display: flex;
+    align-items: center;
+    gap: var(--ch-space-3);
+    flex-wrap: wrap;
+
+    strong {
+      font-family: var(--ch-font-heading);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--ch-text-on-dark);
+    }
+  }
+
+  &__renova-primero {
+    font-family: var(--ch-font-body);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(138, 90, 6, 0.5);
+    color: var(--ch-warning-bg);
+  }
+
+  &__texto {
+    font-family: var(--ch-font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ch-text-on-dark-muted);
+    margin: 0;
+
+    &--no-disponible {
+      font-style: italic;
+    }
+  }
+
+  a {
+    align-self: flex-start;
+    text-decoration: none;
+  }
+}
