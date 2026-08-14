@@ -213,6 +213,7 @@ export class CalificacionFormComponent {
     this.calificacionId.set(resultado.id);
     this.calificacionGuardada.set(resultado);
     this.toastService.success(MSG_CREACION_EXITOSA, undefined, DURACION_TOAST_MS);
+    this.calificacionActualizada.emit(resultado);
   }
 
   private async editarCalificacion(value: CalificacionFormModel): Promise<void> {
