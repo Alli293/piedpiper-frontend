@@ -6,12 +6,12 @@
     <app-heading level="h3" text="Calendario de vencimientos" />
   </header>
 
-  @if (loading()) {
+  @if (mostrarCargaInicial()) {
     <p class="ch-calendario__loading">Cargando calendario...</p>
-  } @else if (error()) {
+  } @else if (mostrarErrorInicial()) {
     <p class="ch-calendario__error" role="alert">{{ errorMensaje() }}</p>
   } @else {
-    <div class="ch-calendario__nav">
+    <div class="ch-calendario__nav" [attr.aria-busy]="loading()">
       <app-heading level="h4" [text]="tituloMes()" />
       <div class="ch-calendario__nav-buttons">
         <button
@@ -52,9 +52,8 @@
               [class.ch-calendario__day--seleccionado]="fechaSeleccionada() === dia.fecha"
               [class.ch-calendario__day--urgencia-90]="urgenciaDelDia(dia) === '90_dias'"
               [class.ch-calendario__day--urgencia-30]="urgenciaDelDia(dia) === '30_dias'"
-              [class.ch-calendario__day--urgencia-7]="
-                urgenciaDelDia(dia) === '7_dias' || urgenciaDelDia(dia) === 'vencida'
-              "
+              [class.ch-calendario__day--urgencia-7]="urgenciaDelDia(dia) === '7_dias'"
+              [class.ch-calendario__day--vencida]="urgenciaDelDia(dia) === 'vencida'"
               [disabled]="dia.fueraDeMes || dia.vencimientos.length === 0"
               [attr.aria-pressed]="
                 dia.vencimientos.length > 0 ? fechaSeleccionada() === dia.fecha : null
@@ -103,6 +102,10 @@
       <span class="ch-calendario__leyenda-item">
         <span class="ch-calendario__leyenda-dot ch-calendario__leyenda-dot--7"></span>
         7 días o menos
+      </span>
+      <span class="ch-calendario__leyenda-item">
+        <span class="ch-calendario__leyenda-dot ch-calendario__leyenda-dot--vencida"></span>
+        Vencidas
       </span>
     </div>
   }

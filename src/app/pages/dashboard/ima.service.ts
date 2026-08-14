@@ -36,6 +36,8 @@ export interface ImaTendenciaResponse {
   serie: ImaTendenciaPunto[];
   sinDatosSectoriales: boolean;
   eventos: ImaEvento[];
+  /** true si hay meses con emisiones sin snapshot: el backend los está calculando en segundo plano. */
+  completando: boolean;
 }
 
 export type PosicionBenchmark = 'POR_ENCIMA' | 'EN_LINEA' | 'POR_DEBAJO';

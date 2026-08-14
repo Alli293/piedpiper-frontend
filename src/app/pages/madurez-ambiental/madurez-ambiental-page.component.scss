@@ -8,27 +8,6 @@
   gap: var(--ch-space-4);
 }
 
-.ch-madurez__breadcrumbs {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--ch-font-mono);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ch-text-secondary);
-}
-
-.ch-madurez__breadcrumb-separator {
-  color: var(--ch-text-secondary);
-  opacity: 0.5;
-}
-
-.ch-madurez__breadcrumb--active {
-  color: var(--ch-text-primary);
-}
-
 .ch-madurez__loading {
   color: var(--ch-text-secondary);
   font-size: 0.875rem;

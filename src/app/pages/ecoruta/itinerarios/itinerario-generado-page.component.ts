@@ -74,6 +74,7 @@ export class ItinerarioGeneradoPageComponent {
   protected readonly diasExpandidos = signal<Set<number>>(new Set());
 
   private readonly chatPanel = viewChild<ElementRef<HTMLElement>>('chatPanel');
+  private readonly refinamientoChat = viewChild(RefinamientoChatComponent);
 
   private cargaRequestId = 0;
 
@@ -91,6 +92,7 @@ export class ItinerarioGeneradoPageComponent {
       : 'Itinerario generado',
     showNotificationDot: false,
     userInitials: this.authSession.getUserInitials(),
+    showBackButton: true,
   }));
 
   protected readonly bandaEcoScore = computed<ClasificacionInfo | null>(() => {
@@ -179,9 +181,18 @@ export class ItinerarioGeneradoPageComponent {
     return formatCurrency(actividad.costoAproximado!, actividad.moneda);
   }
 
-  // TODO(PP-88): pasarle el contexto de `actividad` al chat en vez de solo hacer scroll.
   protected preguntarSobreActividad(actividad: ItinerarioActividad): void {
+    this.refinamientoChat()?.prellenarMensaje(`¿Qué opciones tengo para "${actividad.nombre}"?`);
     this.chatPanel()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /**
+   * El chat de refinamiento (PP-88) emite el itinerario ya actualizado tras cada ajuste o
+   * sustitución. Pasa por la misma normalización que la carga inicial (`ordenar()`) en vez de
+   * asignarse directo — no hay garantía de que el backend devuelva días/actividades ya ordenados.
+   */
+  protected onItinerarioActualizado(itinerario: Itinerario): void {
+    this.itinerario.set(this.ordenar(itinerario));
   }
 
   /**

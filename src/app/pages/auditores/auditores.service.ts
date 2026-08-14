@@ -5,9 +5,11 @@ import { environment } from '../../../environments/environment';
 import {
   CatalogoItem,
   FiltrosDirectorio,
+  FiltrosRecomendacion,
   LONGITUD_MAXIMA_BUSQUEDA,
   LONGITUD_MINIMA_BUSQUEDA,
   PaginaAuditores,
+  RecomendacionAuditores,
   TAMANIO_PAGINA_DIRECTORIO,
 } from './auditor.model';
 
@@ -39,6 +41,10 @@ export class AuditoresService {
     }
 
     return this.http.get<PaginaAuditores>(this.baseUrl, { params });
+  }
+
+  recomendar(filtros: FiltrosRecomendacion): Observable<RecomendacionAuditores> {
+    return this.http.post<RecomendacionAuditores>(`${this.baseUrl}/recomendaciones`, filtros);
   }
 
   obtenerEspecialidades(): Observable<CatalogoItem[]> {

@@ -1,0 +1,116 @@
+.ch-recomendaciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ch-space-6);
+}
+
+.ch-recomendaciones__descripcion {
+  margin: var(--ch-space-1) 0 0;
+  color: var(--ch-color-text-muted);
+  font-size: var(--ch-font-size-sm);
+}
+
+.ch-recomendaciones__filtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: end;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-5);
+  border: 1px solid var(--ch-color-border);
+  border-radius: var(--ch-radius-lg);
+  background: var(--ch-color-surface);
+}
+
+.ch-recomendaciones__estado,
+.ch-recomendaciones__error,
+.ch-recomendaciones__aviso-ia {
+  margin: 0;
+  font-size: var(--ch-font-size-sm);
+}
+
+.ch-recomendaciones__error {
+  color: var(--ch-color-danger);
+}
+
+.ch-recomendaciones__aviso-ia {
+  padding: var(--ch-space-3) var(--ch-space-4);
+  border: 1px solid var(--ch-color-warning);
+  border-radius: var(--ch-radius-md);
+  color: var(--ch-color-text);
+}
+
+.ch-recomendaciones__vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-6);
+  border: 1px dashed var(--ch-color-border);
+  border-radius: var(--ch-radius-lg);
+}
+
+.ch-recomendaciones__lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--ch-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ch-recomendaciones__tarjeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ch-space-3);
+  padding: var(--ch-space-5);
+  border: 1px solid var(--ch-color-border);
+  border-radius: var(--ch-radius-lg);
+  background: var(--ch-color-surface);
+}
+
+.ch-recomendaciones__encabezado {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-3);
+  width: 100%;
+}
+
+.ch-recomendaciones__nombre {
+  margin: 0;
+  font-weight: var(--ch-font-weight-semibold);
+}
+
+// En una sola linea: partir "1 auditorías" entre dos renglones se lee como si fueran dos datos
+// distintos. Si no cabe, prefiero que la tarjeta crezca a que el dato quede cortado.
+.ch-recomendaciones__metricas {
+  display: flex;
+  gap: var(--ch-space-2);
+  margin: var(--ch-space-1) 0 0;
+  color: var(--ch-color-text-muted);
+  font-size: var(--ch-font-size-xs);
+  white-space: nowrap;
+}
+
+// El bloque de texto tiene que poder encogerse; si no, empuja la insignia fuera de la tarjeta.
+.ch-recomendaciones__encabezado > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.ch-recomendaciones__especialidades {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ch-space-2);
+  margin: 0;
+  padding: 0;
+  color: var(--ch-color-text-muted);
+  font-size: var(--ch-font-size-xs);
+  list-style: none;
+}
+
+.ch-recomendaciones__justificacion {
+  margin: 0;
+  font-size: var(--ch-font-size-sm);
+  line-height: 1.5;
+}

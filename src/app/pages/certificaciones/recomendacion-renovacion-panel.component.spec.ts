@@ -60,14 +60,19 @@ describe('RecomendacionRenovacionPanelComponent', () => {
     );
   });
 
-  it('no muestra el bloque si no hay recomendación (sin alertas)', async () => {
+  it('muestra un mensaje explicando cuándo aparecerán recomendaciones cuando no hay alertas activas', async () => {
     fixture = await createFixture();
     fixture.detectChanges();
 
     const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('.ch-recomendacion-panel__header')).toBeNull();
+    expect(el.querySelector('.ch-recomendacion-panel__header')).toBeTruthy();
     expect(el.querySelector('.ch-recomendacion-panel__cert')).toBeNull();
-    expect(el.textContent?.trim()).toBe('');
+    expect(el.querySelector('.ch-recomendacion-panel__vacio')?.textContent).toContain(
+      'En cuanto tengas una certificación con alerta activa'
+    );
+    expect(el.querySelector('.ch-recomendacion-panel__ia-badge')?.textContent).toContain(
+      'Impulsado por IA'
+    );
   });
 
   it('el enlace de detalle apunta a la certificación prioritaria', async () => {
@@ -77,6 +82,7 @@ describe('RecomendacionRenovacionPanelComponent', () => {
 
     const el = fixture.nativeElement as HTMLElement;
     const enlace = el.querySelector('a') as HTMLAnchorElement;
-    expect(enlace.getAttribute('href')).toBe('/empresa/certificaciones/c1');
+    expect(enlace.getAttribute('href')).toContain('/empresa/certificaciones/listado');
+    expect(enlace.getAttribute('href')).toContain('id=c1');
   });
 });

@@ -1,4 +1,4 @@
-﻿@if (insigniasOrdenadas().length === 0) {
+@if (insigniasOrdenadas().length === 0) {
   <section class="ch-ie__vacio">
     <span class="ch-ie__vacio-icono" aria-hidden="true">
       <app-icon name="insignias" [size]="34" />
@@ -9,25 +9,14 @@
 } @else {
   <div class="ch-ie">
     @if (mostrarResumen()) {
-      <section class="ch-ie__resumen" aria-label="Resumen de insignias empresariales">
-        <div class="ch-ie__resumen-icono" aria-hidden="true">
-          <app-icon name="empresa" [size]="20" />
-        </div>
-        <div>
-          <span class="ch-ie__eyebrow">Reconocimientos verificables</span>
-          <app-heading
-            level="h1"
-            [text]="nombreEmpresa() ? titulo() + ' de ' + nombreEmpresa() : titulo()"
-          />
-          <p>{{ descripcion() }}</p>
-        </div>
-        <dl class="ch-ie__metricas">
-          <div>
-            <dt>Insignias activas</dt>
-            <dd>{{ cantidadActivas() }}</dd>
-          </div>
-        </dl>
-      </section>
+      <app-encabezado-resumen
+        icono="insignias"
+        tono="warning"
+        [titulo]="nombreEmpresa() ? titulo() + ' de ' + nombreEmpresa() : titulo()"
+        [subtexto]="descripcion()"
+        [statValor]="cantidadActivas()"
+        statLabel="Insignias activas"
+      />
     }
 
     <app-semantic-card
@@ -35,169 +24,63 @@
       text="Todas las insignias se emiten como credenciales OpenBadges 3.0, un estándar abierto de credenciales verificables. Cualquier persona puede comprobar su autenticidad de forma independiente."
     />
 
-    <div class="ch-ie__contenido">
-      <section class="ch-ie__principal">
-        <div class="ch-ie__seccion-titulo">
-          <span>Insignias activas</span>
-          <strong>{{ cantidadActivas() }}</strong>
-        </div>
+    <section class="ch-ie__principal">
+      <div class="ch-ie__seccion-titulo">
+        <span>Insignias activas</span>
+        <strong>{{ cantidadActivas() }}</strong>
+      </div>
 
-        <div class="ch-ie__grid">
-          @for (insignia of insigniasOrdenadas(); track llave(insignia)) {
-            <article class="ch-ie__card" [class.ch-ie__card--activa]="esSeleccionada(insignia)">
-              @if (esSeleccionada(insignia)) {
-                <span
-                  class="ch-ie__card-status"
-                  aria-label="Insignia seleccionada"
-                  title="Insignia seleccionada"
-                >
-                  <app-icon name="success" [size]="16" />
-                </span>
-              } @else if (insignia.codigoVerificacion) {
-                <button
-                  type="button"
-                  class="ch-ie__card-status ch-ie__card-status--link"
-                  aria-label="Verificar con OpenBadges 3.0"
-                  title="Verificar con OpenBadges 3.0"
-                  (click)="verificarOpenBadges.emit(insignia); $event.stopPropagation()"
-                >
-                  <app-icon name="redirect" [size]="16" />
-                </button>
-              }
-
-              <button
-                type="button"
-                class="ch-ie__card-main"
-                [attr.aria-label]="'Ver detalle de ' + insignia.nombre"
-                (click)="seleccionar(insignia)"
-              >
-                <span
-                  class="ch-ie__card-icono"
-                  [class.ch-ie__card-icono--bronce]="insignia.nivelInsignia === 'bronce'"
-                  [class.ch-ie__card-icono--plata]="insignia.nivelInsignia === 'plata'"
-                  [class.ch-ie__card-icono--oro]="insignia.nivelInsignia === 'oro'"
-                  aria-hidden="true"
-                >
-                  <app-icon name="insignias" [size]="28" />
-                </span>
-
-                <span class="ch-ie__card-copy">
-                  <strong>{{ insignia.nombre }}</strong>
-                  <span>{{ emisor(insignia) }}</span>
-                  <small>
-                    <app-icon name="calendario" [size]="12" aria-hidden="true" />
-                    {{ insignia.fechaObtencion | date: 'dd/MM/yyyy' }}
-                  </small>
-                </span>
-
-                <app-badge class="ch-ie__openbadges" variant="neutral" icon="verificada"
-                  >OpenBadges 3.0</app-badge
-                >
-              </button>
-            </article>
-          }
-        </div>
-      </section>
-
-      @if (insigniaSeleccionada(); as insignia) {
-        <aside class="ch-ie__detalle" aria-label="Detalle de verificacion">
-          <div class="ch-ie__seccion-titulo">
-            <span>Detalle de verificacion</span>
-          </div>
-
-          <div class="ch-ie__detalle-panel">
-            <div class="ch-ie__detalle-hero">
+      <div class="ch-ie__grid">
+        @for (insignia of insigniasOrdenadas(); track llave(insignia)) {
+          <article class="ch-ie__card">
+            <div class="ch-ie__card-main">
               <span
-                class="ch-ie__detalle-icono"
-                [class.ch-ie__detalle-icono--bronce]="insignia.nivelInsignia === 'bronce'"
-                [class.ch-ie__detalle-icono--plata]="insignia.nivelInsignia === 'plata'"
-                [class.ch-ie__detalle-icono--oro]="insignia.nivelInsignia === 'oro'"
+                class="ch-ie__card-icono"
+                [class.ch-ie__card-icono--bronce]="insignia.nivelInsignia === 'bronce'"
+                [class.ch-ie__card-icono--plata]="insignia.nivelInsignia === 'plata'"
+                [class.ch-ie__card-icono--oro]="insignia.nivelInsignia === 'oro'"
                 aria-hidden="true"
               >
-                <app-icon name="insignias" [size]="38" />
+                <app-icon name="insignias" [size]="28" />
               </span>
-              <app-heading level="h2" [text]="insignia.nombre" />
-              <app-badge variant="success" icon="success">Insignia activa</app-badge>
-            </div>
 
-            <div class="ch-ie__detalle-cuerpo">
-              <span class="ch-ie__detalle-eyebrow">Información de emisión</span>
-
-              <dl class="ch-ie__detalle-lista">
-                <div>
-                  <dt>
-                    <app-icon name="insignias" [size]="13" aria-hidden="true" />
-                    Insignia
-                  </dt>
-                  <dd>
-                    <strong>{{ insignia.nombre }}</strong>
-                  </dd>
-                </div>
-                <div>
-                  <dt>
-                    <app-icon
-                      [name]="nivelIcono(insignia.nivelInsignia)"
-                      [size]="13"
-                      aria-hidden="true"
-                    />
-                    Nivel
-                  </dt>
-                  <dd>{{ nivelLabel(insignia.nivelInsignia) }}</dd>
-                </div>
-                <div>
-                  <dt>
-                    <app-icon name="empresa" [size]="13" aria-hidden="true" />
-                    Emisor
-                  </dt>
-                  <dd>
-                    <strong>{{ emisor(insignia) }}</strong>
-                  </dd>
-                </div>
-                <div>
-                  <dt>
-                    <app-icon name="calendario" [size]="13" aria-hidden="true" />
-                    Obtenida
-                  </dt>
-                  <dd>{{ insignia.fechaObtencion | date: 'dd/MM/yyyy' }}</dd>
-                </div>
-                <div>
-                  <dt>
-                    <app-icon name="success" [size]="13" aria-hidden="true" />
-                    Criterios
-                  </dt>
-                  <dd>{{ criterios(insignia) }}</dd>
-                </div>
-              </dl>
-
-              <section class="ch-ie__credencial" aria-label="Reconocimiento verificable">
-                <div class="ch-ie__credencial-heading">
-                  <span aria-hidden="true">
-                    <app-icon name="verificar" [size]="18" />
-                  </span>
-                  <div>
-                    <strong>Credencial verificable</strong>
-                    <small>Estandar OpenBadges 3.0</small>
-                  </div>
-                </div>
-                <p>
-                  Esta insignia es una credencial verificable. Comprueba su autenticidad e
-                  integridad de forma con un verificador compatible con OpenBadges 3.0.
-                </p>
-                @if (insignia.codigoVerificacion) {
-                  <app-button variant="primary" (click)="verificarOpenBadges.emit(insignia)">
-                    <app-icon name="redirect" [size]="16" />
-                    <span>Verificar con OpenBadges 3.0</span>
-                  </app-button>
-                }
-
-                <small class="ch-ie__verificacion-nota">
-                  Verificación independiente · estándar abierto
+              <span class="ch-ie__card-copy">
+                <strong>{{ insignia.nombre }}</strong>
+                <span>{{ emisor(insignia) }}</span>
+                <small>
+                  <app-icon name="calendario" [size]="12" aria-hidden="true" />
+                  {{ insignia.fechaObtencion | date: 'dd/MM/yyyy' }}
                 </small>
-              </section>
+              </span>
+
+              <app-badge class="ch-ie__openbadges" variant="neutral" icon="verificada"
+                >OpenBadges 3.0</app-badge
+              >
             </div>
-          </div>
-        </aside>
-      }
-    </div>
+
+            <app-button
+              variant="tertiary"
+              size="sm"
+              class="ch-ie__card-detalle"
+              [attr.aria-label]="'Ver detalle de ' + insignia.nombre"
+              (click)="abrirDetalle(insignia)"
+            >
+              Ver detalle
+            </app-button>
+          </article>
+        }
+      </div>
+    </section>
   </div>
+
+  @if (insigniaSeleccionada(); as insignia) {
+    <app-modal size="md" labelledBy="detalle-insignia-titulo" (close)="cerrarDetalle()">
+      <app-detalle-panel
+        [dato]="datoDetalle(insignia)"
+        [acciones]="accionesDetalle(insignia)"
+        tituloId="detalle-insignia-titulo"
+        (accionClick)="onAccionDetalle($event, insignia)"
+      />
+    </app-modal>
+  }
 }

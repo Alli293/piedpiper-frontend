@@ -1,0 +1,50 @@
+<article class="ch-cert-recientes-panel" aria-label="Certificaciones recientes">
+  <header class="ch-cert-recientes-panel__header">
+    <span class="ch-cert-recientes-panel__icon">
+      <app-icon name="certificaciones" [size]="16" />
+    </span>
+    <app-heading level="h3" text="Certificaciones recientes" />
+    <a
+      appLink
+      routerLink="/empresa/certificaciones/listado"
+      class="ch-cert-recientes-panel__ver-todas"
+    >
+      Ver todas
+      <app-icon name="chevron-derecha" [size]="12" aria-hidden="true" />
+    </a>
+  </header>
+
+  @if (loading()) {
+    <p class="ch-cert-recientes-panel__loading">Cargando certificaciones...</p>
+  } @else if (error()) {
+    <p class="ch-cert-recientes-panel__error" role="alert">{{ errorMensaje() }}</p>
+  } @else if (certificacionesOrdenadas().length === 0) {
+    <p class="ch-cert-recientes-panel__vacio">{{ sinCertificacionesMensaje }}</p>
+  } @else {
+    <ul class="ch-cert-recientes-panel__lista">
+      @for (cert of certificacionesOrdenadas(); track cert.id) {
+        <li>
+          <a
+            class="ch-cert-recientes-panel__item"
+            routerLink="/empresa/certificaciones/listado"
+            [queryParams]="{ id: cert.id }"
+            [attr.aria-label]="'Ver detalle de ' + cert.nombreCertificacion"
+          >
+            <span class="ch-cert-recientes-panel__item-icon" aria-hidden="true">
+              <app-icon name="certificaciones" [size]="18" />
+            </span>
+
+            <span class="ch-cert-recientes-panel__item-copy">
+              <strong>{{ cert.nombreCertificacion }}</strong>
+              <small>Emitida {{ cert.fechaEmision | date: 'dd/MM/yyyy' : 'UTC' }}</small>
+            </span>
+
+            <app-badge class="ch-cert-recientes-panel__badge" [variant]="varianteVigencia(cert)">
+              {{ etiquetaVigencia(cert) }}
+            </app-badge>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</article>

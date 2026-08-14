@@ -22,7 +22,10 @@
         </p>
       </header>
 
-      <app-registro-invitacion-correo-form [email]="datos.email" [token]="token()" />
+      <app-registro-invitacion-correo-form
+        [email]="datos.emailEnmascarado"
+        [token]="tokenLimpio()"
+      />
 
       <div class="invitacion__divisor"><span>o</span></div>
 

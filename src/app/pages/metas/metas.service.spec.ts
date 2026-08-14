@@ -80,4 +80,42 @@ describe('MetasService', () => {
 
     req.flush([]);
   });
+
+  it('hace PUT a /metas/{id} con el cuerpo correcto', () => {
+    service
+      .actualizarMeta('m1', {
+        nombreMeta: 'Meta renombrada',
+        valorObjetivoHuellaT: 80,
+        fechaLimite: '2028-01-31',
+      })
+      .subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/metas/m1`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({
+      nombreMeta: 'Meta renombrada',
+      valorObjetivoHuellaT: 80,
+      fechaLimite: '2028-01-31',
+    });
+
+    req.flush({
+      id: 'm1',
+      nombreMeta: 'Meta renombrada',
+      valorObjetivoHuellaT: 80,
+      fechaLimite: '2028-01-31',
+      huellaActualT: 30,
+      progresoPorcentaje: 37,
+      vencida: false,
+      fechaCreacion: '2026-08-06T00:00:00Z',
+    });
+  });
+
+  it('hace DELETE a /metas/{id}', () => {
+    service.eliminarMeta('m1').subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/metas/m1`);
+    expect(req.request.method).toBe('DELETE');
+
+    req.flush(null);
+  });
 });

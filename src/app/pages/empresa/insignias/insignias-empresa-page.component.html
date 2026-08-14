@@ -16,8 +16,11 @@
       descripcion="Reconocimientos automáticos por certificaciones activas y requisitos verificados."
       [insignias]="insignias()"
       [seleccionInicial]="seleccionInicial()"
+      [accionesPrivadas]="true"
       (descargarJsonLd)="descargarJsonLd($event)"
       (verificarOpenBadges)="verificarOpenBadges($event)"
+      (descargarJwt)="descargarJwt($event)"
+      (compartirLinkedIn)="compartirLinkedIn($event)"
     />
   }
 </app-shell-layout>

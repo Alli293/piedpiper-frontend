@@ -1,0 +1,87 @@
+<app-configuracion-inicial-layout rolLabel="Auditor certificado" rolIcon="auditor">
+  <div class="configuracion-auditor">
+    <header class="configuracion-auditor__header">
+      <app-heading level="h1" text="Cuéntanos sobre tu experiencia" />
+      <p class="configuracion-auditor__subtitle">
+        Completa estos datos y adjunta tus credenciales para que el equipo de CarbonHub pueda
+        validar tu cuenta.
+      </p>
+    </header>
+
+    @if (cargandoCatalogo()) {
+      <p class="configuracion-auditor__cargando">Cargando...</p>
+    } @else if (errorCatalogo()) {
+      <p class="configuracion-auditor__error" role="alert">
+        No se pudo cargar el catálogo de especialidades. Recarga la página.
+      </p>
+    } @else {
+      <form class="configuracion-auditor__form" novalidate (submit)="handleSubmit($event)">
+        <app-text-input
+          label="Años de experiencia"
+          type="number"
+          placeholder="5"
+          [formField]="configuracionForm.aniosExperiencia"
+          [error]="errorAniosExperiencia()"
+        />
+
+        <app-text-input
+          label="LinkedIn o sitio web (opcional)"
+          placeholder="https://linkedin.com/in/tuperfil"
+          [formField]="configuracionForm.sitioWeb"
+          [error]="errorSitioWeb()"
+        />
+
+        <fieldset class="configuracion-auditor__fieldset">
+          <legend class="configuracion-auditor__legend">Áreas de especialidad</legend>
+          <div class="configuracion-auditor__chip-grid">
+            @for (esp of especialidadesDisponibles(); track esp.valor) {
+              <app-checkbox
+                [label]="esp.etiqueta"
+                [checked]="isEspecialidadSeleccionada(esp.valor)"
+                [disabled]="!isEspecialidadSeleccionada(esp.valor) && maxEspecialidadesAlcanzado()"
+                (checkedChange)="toggleEspecialidad(esp.valor)"
+              />
+            }
+          </div>
+          @if (errorEspecialidades()) {
+            <p class="configuracion-auditor__field-error" role="alert">
+              {{ errorEspecialidades() }}
+            </p>
+          }
+        </fieldset>
+
+        <app-textarea
+          label="Descripción profesional (opcional)"
+          placeholder="Cuéntanos sobre tu experiencia como auditor..."
+          [rows]="4"
+          [formField]="configuracionForm.descripcionProfesional"
+          [error]="errorDescripcion()"
+          [hint]="descripcionContador()"
+        />
+
+        <div class="configuracion-auditor__documentos">
+          <app-file-drop
+            label="Documentos que respaldan tu credencial"
+            hint="PDF · máx. 15 MB por archivo · hasta 10 archivos"
+            [disabled]="enviando()"
+            [(archivos)]="documentos"
+          />
+        </div>
+
+        @if (errorGeneral()) {
+          <p class="configuracion-auditor__error" role="alert">{{ errorGeneral() }}</p>
+        }
+
+        <app-button
+          variant="primary"
+          size="lg"
+          type="submit"
+          [loading]="submitting() || enviando()"
+          [disabled]="submitting() || enviando()"
+        >
+          Enviar para revisión
+        </app-button>
+      </form>
+    }
+  </div>
+</app-configuracion-inicial-layout>

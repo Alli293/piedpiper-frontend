@@ -155,6 +155,7 @@ export class ShellLayoutComponent {
       dashboard: '/empresa/panel',
       emissions: '/empresa/emisiones',
       certificaciones: '/empresa/certificaciones',
+      auditores: '/auditores',
       'auditorias-empresa': '/empresa/auditorias',
       'insignias-empresa': '/empresa/insignias',
       colaboradores: '/empresa/invitaciones',

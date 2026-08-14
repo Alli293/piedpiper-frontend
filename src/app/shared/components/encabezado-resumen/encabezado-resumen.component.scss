@@ -1,0 +1,94 @@
+.ch-encabezado-resumen {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--ch-space-4);
+  padding: var(--ch-space-5);
+  border: 1px solid var(--ch-border);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-bg-white);
+  box-shadow: var(--ch-shadow-sm);
+}
+
+.ch-encabezado-resumen__icono {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--ch-radius-md);
+}
+
+.ch-encabezado-resumen__copy {
+  min-width: 0;
+}
+
+.ch-encabezado-resumen__copy p {
+  margin: var(--ch-space-1) 0 0;
+  font-family: var(--ch-font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--ch-text-secondary);
+}
+
+.ch-encabezado-resumen__stat {
+  display: grid;
+  gap: var(--ch-space-1);
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.ch-encabezado-resumen__stat strong {
+  color: var(--ch-sky);
+  font-family: var(--ch-font-heading);
+  font-size: 1.7rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ch-encabezado-resumen__stat span {
+  color: var(--ch-text-secondary);
+  font-family: var(--ch-font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ch-encabezado-resumen--success .ch-encabezado-resumen__icono {
+  color: var(--ch-green);
+  background: var(--ch-green-soft);
+}
+
+.ch-encabezado-resumen--warning .ch-encabezado-resumen__icono {
+  color: var(--ch-warning-dark);
+  background: var(--ch-warning-bg);
+}
+
+.ch-encabezado-resumen--danger .ch-encabezado-resumen__icono {
+  color: var(--ch-danger);
+  background: var(--ch-danger-bg);
+}
+
+.ch-encabezado-resumen--info .ch-encabezado-resumen__icono {
+  color: var(--ch-info);
+  background: var(--ch-info-bg);
+}
+
+.ch-encabezado-resumen--new .ch-encabezado-resumen__icono {
+  color: var(--ch-new);
+  background: var(--ch-new-bg);
+}
+
+@media (max-width: 640px) {
+  .ch-encabezado-resumen {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .ch-encabezado-resumen__stat {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+}

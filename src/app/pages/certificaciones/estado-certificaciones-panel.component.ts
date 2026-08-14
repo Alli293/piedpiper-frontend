@@ -1,14 +1,13 @@
-import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
 import { HeadingComponent } from '../../shared/components/heading/heading.component';
 import { LinkDirective } from '../../shared/components/link/link.directive';
-import { ResumenCertificacionesDashboardResponse } from '../dashboard/dashboard.model';
+import { AlertaVencimiento, UrgenciaVencimiento } from '../dashboard/dashboard.model';
 
-export type EstadoCertificacionFiltro = 'activa' | 'proxima_a_vencer' | 'vencida';
+export type EstadoCertificacionFiltro = 'informativa' | 'proxima_a_vencer' | 'urgente';
 
-type TonoCertificacion = 'success' | 'warning' | 'danger';
+type TonoCertificacion = 'info' | 'warning' | 'danger';
 
 interface TarjetaEstadoCertificacion {
   readonly estado: EstadoCertificacionFiltro;
@@ -16,19 +15,19 @@ interface TarjetaEstadoCertificacion {
   readonly icon: IconName;
   readonly label: string;
   readonly value: number;
-  // El listado (`/empresa/certificaciones/listado`) hoy solo filtra por
-  // VIGENTE/VENCIDA: no tiene un chip para "próxima a vencer". Hasta que
-  // exista, esa tarjeta no navega (ver comentarios de PR #74) para no
-  // prometer un filtro que el destino no puede cumplir.
-  readonly enlazable: boolean;
+  readonly ruta: string;
+  readonly queryParams: Record<string, string>;
 }
 
 const ERROR_POR_DEFECTO = 'No fue posible cargar esta sección. Intenta recargar la página.';
 
 /**
- * Bloque "Estado de certificaciones" (PP-74): conteo de certificaciones
- * activas, próximas a vencer y vencidas de la empresa, cada una con acceso
- * directo al listado filtrado por ese estado.
+ * Bloque "Estado de certificaciones" (PP-74): conteo de alertas de
+ * vencimiento por urgencia (informativas a 90 días, próximas a vencer a 30
+ * días, urgentes a 7 días o menos), usando la misma escala de colores
+ * semánticos (info/warning/danger) que el Centro de Alertas y el calendario
+ * de vencimientos. Todas las tarjetas enlazan al Centro de Alertas con el
+ * chip de urgencia correspondiente.
  *
  * Presentacional: el fetch y el manejo de error de este bloque viven en la
  * página contenedora (mismo patrón que `ima-panel`/`benchmark-panel` en el
@@ -36,43 +35,48 @@ const ERROR_POR_DEFECTO = 'No fue posible cargar esta sección. Intenta recargar
  */
 @Component({
   selector: 'app-estado-certificaciones-panel',
-  imports: [HeadingComponent, IconComponent, LinkDirective, NgTemplateOutlet, RouterLink],
+  imports: [HeadingComponent, IconComponent, LinkDirective, RouterLink],
   templateUrl: './estado-certificaciones-panel.component.html',
   styleUrl: './estado-certificaciones-panel.component.scss',
 })
 export class EstadoCertificacionesPanelComponent {
-  readonly resumen = input<ResumenCertificacionesDashboardResponse | null>(null);
+  readonly alertas = input<AlertaVencimiento[]>([]);
   readonly loading = input(false);
   readonly error = input<string | null>(null);
 
   protected readonly errorMensaje = computed(() => this.error() ?? ERROR_POR_DEFECTO);
 
   protected readonly tarjetas = computed<TarjetaEstadoCertificacion[]>(() => {
-    const resumen = this.resumen();
+    const contar = (urgencia: UrgenciaVencimiento) =>
+      this.alertas().filter((alerta) => alerta.urgencia === urgencia).length;
+
     return [
       {
-        estado: 'activa',
-        tono: 'success',
-        icon: 'success',
-        label: 'Activas',
-        value: resumen?.activas ?? 0,
-        enlazable: true,
+        estado: 'informativa',
+        tono: 'info',
+        icon: 'info',
+        label: 'Informativas',
+        value: contar('90_dias'),
+        ruta: '/empresa/certificaciones/alertas',
+        queryParams: { filtro: 'INFORMATIVAS' },
       },
       {
         estado: 'proxima_a_vencer',
         tono: 'warning',
-        icon: 'warning',
+        icon: 'vencida',
         label: 'Próximas a vencer',
-        value: resumen?.proximasAVencer ?? 0,
-        enlazable: false,
+        value: contar('30_dias'),
+        ruta: '/empresa/certificaciones/alertas',
+        queryParams: { filtro: 'PROXIMAS' },
       },
       {
-        estado: 'vencida',
+        estado: 'urgente',
         tono: 'danger',
-        icon: 'error',
-        label: resumen?.vencidas === 1 ? 'Vencida' : 'Vencidas',
-        value: resumen?.vencidas ?? 0,
-        enlazable: true,
+        icon: 'danger-solido',
+        label: 'Urgentes',
+        value: contar('7_dias'),
+        ruta: '/empresa/certificaciones/alertas',
+        queryParams: { filtro: 'URGENTES' },
       },
     ];
   });

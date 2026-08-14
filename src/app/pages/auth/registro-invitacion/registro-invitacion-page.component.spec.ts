@@ -17,7 +17,7 @@ describe('RegistroInvitacionPageComponent', () => {
     invitacionesService = {
       resolver: vi
         .fn()
-        .mockReturnValue(of({ email: 'colab@correo.com', nombreEmpresa: 'Acme S.A.' })),
+        .mockReturnValue(of({ emailEnmascarado: 'c***@correo.com', nombreEmpresa: 'Acme S.A.' })),
     };
     authService = { registrarConInvitacion: vi.fn() };
     googleIdentity = { renderizarBoton: vi.fn().mockResolvedValue(undefined) };
@@ -48,7 +48,7 @@ describe('RegistroInvitacionPageComponent', () => {
     expect(root.textContent).toContain('Acme S.A.');
 
     const correoInput = root.querySelector<HTMLInputElement>('input[type="email"]');
-    expect(correoInput?.value).toBe('colab@correo.com');
+    expect(correoInput?.value).toBe('c***@correo.com');
     expect(correoInput?.disabled).toBe(true);
   });
 
@@ -59,7 +59,7 @@ describe('RegistroInvitacionPageComponent', () => {
     );
 
     expect(formulario).not.toBeNull();
-    expect(formulario.componentInstance.email()).toBe('colab@correo.com');
+    expect(formulario.componentInstance.email()).toBe('c***@correo.com');
     expect(formulario.componentInstance.token()).toBe('tok-456');
   });
 

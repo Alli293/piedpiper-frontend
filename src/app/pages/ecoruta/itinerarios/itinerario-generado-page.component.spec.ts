@@ -352,7 +352,14 @@ describe('ItinerarioGeneradoPageComponent', () => {
     const botones = Array.from(root.querySelectorAll('button'));
     const preguntar = botones.find((boton) => boton.textContent?.includes('Preguntar sobre esto'));
     preguntar?.click();
+    fixture.detectChanges();
 
     expect(scrollSpy).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+    // El botón corresponde a la primera actividad tras ordenar (día 1, "Caminata" a las 08:00) —
+    // TODO(PP-88) cerrado: ahora también precarga el chat con el contexto de esa actividad.
+    const inputChat = root.querySelector<HTMLInputElement>(
+      '.ch-refinamiento-chat input[type="text"]'
+    );
+    expect(inputChat?.value).toBe('¿Qué opciones tengo para "Caminata"?');
   });
 });

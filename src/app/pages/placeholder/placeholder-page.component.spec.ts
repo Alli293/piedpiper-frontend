@@ -1,0 +1,95 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
+import { RUTA_INICIO_POR_ROL } from '../../core/models/perfil-inicial.model';
+import { PlaceholderPageComponent } from './placeholder-page.component';
+
+describe('PlaceholderPageComponent', () => {
+  let fixture: ComponentFixture<PlaceholderPageComponent>;
+
+  async function montar(token: string | null, rol: string | null) {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [PlaceholderPageComponent],
+      providers: [
+        provideRouter([]),
+        {
+          provide: AuthService,
+          useValue: { token: signal(token), rol: signal(rol) },
+        },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(PlaceholderPageComponent);
+    fixture.detectChanges();
+  }
+
+  function enlace(): HTMLAnchorElement {
+    return fixture.nativeElement.querySelector('.placeholder__link');
+  }
+
+  /**
+   * El caso que motivó el arreglo: a estas rutas se llega desde el menú lateral estando dentro, y
+   * el único botón mandaba al login, o sea fuera de donde el usuario estaba.
+   */
+  it('con sesion abierta ofrece volver al panel del rol y no al login', async () => {
+    await montar('token-valido', 'ADMINISTRADOR_EMPRESA');
+
+    expect(enlace().getAttribute('href')).toBe('/empresa/panel');
+    expect(enlace().textContent?.trim()).toBe('Volver a mi panel');
+  });
+
+  /** Parametrizado sobre el mapa entero: si mañana se agrega un rol, este test lo cubre solo. */
+  it.each(Object.entries(RUTA_INICIO_POR_ROL))(
+    'el rol %s lleva a su propia pantalla de inicio',
+    async (rol, destino) => {
+      await montar('token-valido', rol);
+
+      expect(enlace().getAttribute('href')).toBe(`/${destino}`);
+      expect(enlace().textContent?.trim()).toBe('Volver a mi panel');
+    }
+  );
+
+  it('sin sesion mantiene el enlace al inicio de sesion', async () => {
+    await montar(null, null);
+
+    expect(enlace().getAttribute('href')).toBe('/login');
+    expect(enlace().textContent?.trim()).toBe('Volver al inicio de sesión');
+  });
+
+  /** Un rol que el frontend no conozca no puede dejar el botón apuntando a undefined. */
+  it('con un rol desconocido cae al login en vez de romper el enlace', async () => {
+    await montar('token-valido', 'ROL_INVENTADO');
+
+    expect(enlace().getAttribute('href')).toBe('/login');
+  });
+
+  it('el texto cambia segun haya panel al que volver', async () => {
+    await montar('token-valido', 'USUARIO_INDIVIDUAL');
+    expect(fixture.nativeElement.textContent).toContain('puedes seguir usando el resto');
+
+    await montar(null, null);
+    expect(fixture.nativeElement.textContent).toContain('Tu autenticación fue exitosa');
+  });
+
+  /**
+   * Texto y destino salen del mismo cálculo, así que no pueden contradecirse. Antes el texto
+   * dependía de "hay token" y el destino de "el rol es conocido": con un token presente pero un
+   * rol que el front no reconoce, el botón decía "Volver a mi panel" y llevaba al login.
+   */
+  it.each([
+    ['token-valido', 'ROL_INVENTADO'],
+    ['token-corrupto', null],
+    // 'toString' y 'constructor' existen en todo objeto por herencia: con el operador `in` pasaban
+    // por roles válidos y el enlace terminaba en '/function toString() { [native code] }'.
+    ['token-manipulado', 'toString'],
+    ['token-manipulado', 'constructor'],
+  ])('con token %s y rol %s el texto no promete un panel que no existe', async (token, rol) => {
+    await montar(token, rol);
+
+    expect(enlace().getAttribute('href')).toBe('/login');
+    expect(enlace().textContent?.trim()).toBe('Volver al inicio de sesión');
+    expect(fixture.nativeElement.textContent).not.toContain('puedes seguir usando el resto');
+  });
+});

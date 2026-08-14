@@ -6,6 +6,8 @@ import { Subject, of, throwError } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { SesionInactividadService } from '../../core/auth/sesion-inactividad.service';
 import { AuthSessionService } from '../../core/auth-session.service';
+import { PerfilInicial } from '../../core/models/perfil-inicial.model';
+import { PerfilInicialService } from '../../core/services/perfil-inicial.service';
 import { ToastService } from '../../shared/services/toast.service';
 import {
   ImaEvento,
@@ -16,8 +18,11 @@ import {
 } from '../dashboard/ima.service';
 import { ImaTendenciaChartComponent } from './ima-tendencia-chart.component';
 import {
+  COMPLETANDO_TENDENCIA_MENSAJE,
   ERROR_BENCHMARK_MENSAJE,
   ERROR_TENDENCIA_MENSAJE,
+  INTERVALO_SONDEO_INTERPRETACION_MS,
+  INTERVALO_SONDEO_TENDENCIA_MS,
   MadurezAmbientalPageComponent,
   SIN_HISTORIAL_MENSAJE,
   SIN_SECTOR_MENSAJE,
@@ -77,8 +82,15 @@ describe('MadurezAmbientalPageComponent', () => {
 
   const respuesta = (
     serie: ImaTendenciaPunto[],
-    sinDatosSectoriales = false
-  ): ImaTendenciaResponse => ({ mesesAtras: 12, serie, sinDatosSectoriales, eventos: [] });
+    sinDatosSectoriales = false,
+    completando = false
+  ): ImaTendenciaResponse => ({
+    mesesAtras: 12,
+    serie,
+    sinDatosSectoriales,
+    eventos: [],
+    completando,
+  });
 
   const html = () => (fixture.nativeElement as HTMLElement).textContent ?? '';
   const el = () => fixture.nativeElement as HTMLElement;
@@ -91,6 +103,10 @@ describe('MadurezAmbientalPageComponent', () => {
         { provide: ImaService, useValue: imaService },
         { provide: AuthService, useValue: { token: signal('fake-token'), cerrarSesion: vi.fn() } },
         { provide: SesionInactividadService, useValue: { reiniciar: vi.fn(), detener: vi.fn() } },
+        {
+          provide: PerfilInicialService,
+          useValue: { perfil: () => null, obtener: () => of({ empresa: null } as PerfilInicial) },
+        },
         {
           provide: AuthSessionService,
           useValue: {
@@ -199,6 +215,58 @@ describe('MadurezAmbientalPageComponent', () => {
     expect(html()).not.toContain('Cargando IMA...');
   });
 
+  describe('sondeo de la interpretación IA', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('sondea en segundo plano y actualiza el panel cuando la interpretación llega', async () => {
+      vi.useFakeTimers();
+      imaService.obtenerIma.mockReturnValue(of(imaNoDisponible()));
+      await crearComponente();
+      expect(imaService.obtenerIma).toHaveBeenCalledTimes(1);
+      expect(html()).toContain('La interpretación con IA no está disponible en este momento.');
+
+      imaService.obtenerIma.mockReturnValue(of(imaCompleto()));
+      await vi.advanceTimersByTimeAsync(INTERVALO_SONDEO_INTERPRETACION_MS);
+      fixture.detectChanges();
+
+      expect(imaService.obtenerIma).toHaveBeenCalledTimes(2);
+      expect(html()).toContain('Tu empresa tiene buen desempeño ambiental.');
+    });
+
+    it('no sondea cuando la interpretación ya llegó disponible', async () => {
+      vi.useFakeTimers();
+      await crearComponente();
+      expect(imaService.obtenerIma).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(INTERVALO_SONDEO_INTERPRETACION_MS * 3);
+
+      expect(imaService.obtenerIma).toHaveBeenCalledTimes(1);
+    });
+
+    it('cancela el sondeo del período anterior al cambiar de período', async () => {
+      vi.useFakeTimers();
+      imaService.obtenerIma.mockReturnValue(of(imaNoDisponible()));
+      await crearComponente();
+      imaService.obtenerIma.mockClear();
+      imaService.obtenerIma.mockReturnValue(of(imaCompleto()));
+
+      (
+        fixture.componentInstance as unknown as {
+          onImaPeriodoChange: (e: { anio: number; mes: number }) => void;
+        }
+      ).onImaPeriodoChange({ anio: 2025, mes: 3 });
+      await vi.advanceTimersByTimeAsync(0);
+      fixture.detectChanges();
+      imaService.obtenerIma.mockClear();
+
+      await vi.advanceTimersByTimeAsync(INTERVALO_SONDEO_INTERPRETACION_MS * 3);
+
+      expect(imaService.obtenerIma).not.toHaveBeenCalled();
+    });
+  });
+
   // --- Evolución histórica del IMA ---
 
   it('solicita la ventana de 12 meses por defecto al iniciar', async () => {
@@ -234,6 +302,58 @@ describe('MadurezAmbientalPageComponent', () => {
     await crearComponente();
 
     expect(html()).not.toContain(SIN_SECTOR_MENSAJE);
+  });
+
+  describe('sondeo de meses pendientes de la tendencia', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('avisa que sigue completando y sondea hasta que el backend termina', async () => {
+      vi.useFakeTimers();
+      imaService.obtenerTendencia.mockReturnValue(of(respuesta(SERIE_SIN_HISTORIAL, false, true)));
+      await crearComponente();
+      expect(imaService.obtenerTendencia).toHaveBeenCalledTimes(1);
+      expect(html()).toContain(COMPLETANDO_TENDENCIA_MENSAJE);
+      // completando=true evita el estado "sin historial" aunque la serie venga toda en null.
+      expect(html()).not.toContain(SIN_HISTORIAL_MENSAJE);
+
+      imaService.obtenerTendencia.mockReturnValue(of(respuesta(SERIE_CON_DATOS, false, false)));
+      await vi.advanceTimersByTimeAsync(INTERVALO_SONDEO_TENDENCIA_MS);
+      fixture.detectChanges();
+
+      expect(imaService.obtenerTendencia).toHaveBeenCalledTimes(2);
+      expect(html()).not.toContain(COMPLETANDO_TENDENCIA_MENSAJE);
+    });
+
+    it('no sondea cuando la tendencia ya llegó completa', async () => {
+      vi.useFakeTimers();
+      await crearComponente();
+      expect(imaService.obtenerTendencia).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(INTERVALO_SONDEO_TENDENCIA_MS * 3);
+
+      expect(imaService.obtenerTendencia).toHaveBeenCalledTimes(1);
+    });
+
+    it('cancela el sondeo de la ventana anterior al cambiar de ventana', async () => {
+      vi.useFakeTimers();
+      imaService.obtenerTendencia.mockReturnValue(of(respuesta(SERIE_SIN_HISTORIAL, false, true)));
+      await crearComponente();
+      imaService.obtenerTendencia.mockClear();
+      imaService.obtenerTendencia.mockReturnValue(of(respuesta(SERIE_CON_DATOS, false, false)));
+
+      (
+        fixture.componentInstance as unknown as { onVentanaChange: (v: string) => void }
+      ).onVentanaChange('6');
+      await vi.advanceTimersByTimeAsync(0);
+      fixture.detectChanges();
+      imaService.obtenerTendencia.mockClear();
+
+      await vi.advanceTimersByTimeAsync(INTERVALO_SONDEO_TENDENCIA_MS * 3);
+
+      expect(imaService.obtenerTendencia).not.toHaveBeenCalled();
+    });
   });
 
   it('recarga la tendencia al cambiar la ventana', async () => {

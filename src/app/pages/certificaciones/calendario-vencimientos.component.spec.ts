@@ -44,6 +44,18 @@ describe('CalendarioVencimientosComponent', () => {
     );
   });
 
+  it('mantiene la grilla montada al navegar de mes con datos ya cargados, sin volver al mensaje de carga', () => {
+    componentRef.setInput('calendario', CALENDARIO_JULIO_2026);
+    fixture.detectChanges();
+
+    componentRef.setInput('loading', true);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelector('.ch-calendario__loading')).toBeFalsy();
+    expect(el.querySelectorAll('.ch-calendario__day').length).toBeGreaterThan(0);
+  });
+
   it('marca con indicador solo los días que tienen vencimientos', () => {
     componentRef.setInput('calendario', CALENDARIO_JULIO_2026);
     fixture.detectChanges();
@@ -86,7 +98,7 @@ describe('CalendarioVencimientosComponent', () => {
     expect(detalle?.textContent).toContain('Inventario de GEI');
   });
 
-  it('trata "vencida" con el mismo tono visual que 7_dias', () => {
+  it('"vencida" tiene su propio tono visual, distinto de 7_dias', () => {
     componentRef.setInput('calendario', {
       mesVisualizado: '2026-07',
       vencimientosPorFecha: {
@@ -99,7 +111,8 @@ describe('CalendarioVencimientosComponent', () => {
     const dia3 = Array.from(el.querySelectorAll('.ch-calendario__day')).find(
       (d) => d.querySelector('.ch-calendario__day-number')?.textContent?.trim() === '3'
     );
-    expect(dia3?.classList.contains('ch-calendario__day--urgencia-7')).toBe(true);
+    expect(dia3?.classList.contains('ch-calendario__day--vencida')).toBe(true);
+    expect(dia3?.classList.contains('ch-calendario__day--urgencia-7')).toBe(false);
   });
 
   it('mes sin vencimientos no marca ningún día con indicador', () => {
