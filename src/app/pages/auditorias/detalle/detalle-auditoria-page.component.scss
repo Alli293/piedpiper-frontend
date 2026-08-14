@@ -161,6 +161,10 @@
   padding: var(--ch-space-3) var(--ch-space-4);
 }
 
+.ch-detalle-auditoria__tarjeta-cabecera app-icon {
+  color: var(--ch-green);
+}
+
 .ch-detalle-auditoria__tarjeta-titulo {
   flex: 1;
   font-size: 0.9rem;
@@ -289,6 +293,10 @@
   padding: var(--ch-space-2) var(--ch-space-3);
 }
 
+.ch-detalle-auditoria__documento > app-icon {
+  color: var(--ch-green);
+}
+
 .ch-detalle-auditoria__documento-datos {
   display: flex;
   flex-direction: column;
@@ -381,6 +389,10 @@
   display: flex;
   gap: var(--ch-space-2);
   padding: var(--ch-space-2) var(--ch-space-3);
+}
+
+.ch-detalle-auditoria__reporte-actual app-icon {
+  color: var(--ch-green);
 }
 
 .ch-detalle-auditoria__reporte-form {
@@ -488,30 +500,4 @@
   height: 42px;
   justify-content: center;
   width: 42px;
-}
-
-.ch-detalle-auditoria__ver-pdf {
-  align-items: center;
-  background: var(--ch-bg-white);
-  cursor: pointer;
-  border: 1px solid var(--ch-border);
-  border-radius: var(--ch-radius-sm);
-  color: var(--ch-text-muted);
-  display: inline-flex;
-  flex-shrink: 0;
-  font-size: 0.75rem;
-  font-weight: 600;
-  gap: var(--ch-space-1);
-  padding: var(--ch-space-1) var(--ch-space-2);
-  text-decoration: none;
-}
-
-.ch-detalle-auditoria__ver-pdf:hover:not(:disabled) {
-  border-color: var(--ch-green);
-  color: var(--ch-green);
-}
-
-.ch-detalle-auditoria__ver-pdf:disabled {
-  cursor: progress;
-  opacity: 0.6;
 }

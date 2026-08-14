@@ -30,6 +30,7 @@ import { SelectOption } from '../../../shared/components/inputs/select-input/sel
 import { TextareaComponent } from '../../../shared/components/inputs/textarea/textarea.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
+import { AuditorSidebarNavId, SidebarNavId } from '../../../shared/layouts/page-layout/sidebar-nav';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
 import { todayUtcMidnight, toIsoDateString } from '../../../shared/utils/date.utils';
@@ -220,6 +221,10 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
     this.authSession.getRole() === AUDITOR_CERTIFICADO
       ? '/auditor/auditorias'
       : '/empresa/auditorias'
+  );
+
+  protected readonly activeIdAuditoria = computed<SidebarNavId | AuditorSidebarNavId>(() =>
+    this.authSession.getRole() === AUDITOR_CERTIFICADO ? 'auditorias' : 'auditorias-empresa'
   );
 
   protected readonly headerConfig: HeaderConfig = {

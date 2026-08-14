@@ -5,9 +5,14 @@ import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from '../../../core/auth-session.service';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { CheckboxComponent } from '../../../shared/components/inputs/checkbox/checkbox.component';
+import {
+  FilterChip,
+  FilterChipsComponent,
+} from '../../../shared/components/filter-chips/filter-chips.component';
 import { HeadingComponent } from '../../../shared/components/heading/heading.component';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
+import { AuditorSidebarNavId, SidebarNavId } from '../../../shared/layouts/page-layout/sidebar-nav';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import {
@@ -22,14 +27,17 @@ import { AuditoriasService } from '../auditorias.service';
 const ERROR_CARGA =
   'No fue posible cargar tus solicitudes de auditoría. Intenta recargar la página.';
 
+const FILTRO_TODOS = 'todos';
+
 @Component({
   selector: 'app-listado-auditorias-page',
   imports: [
     BadgeComponent,
     ButtonComponent,
-    CheckboxComponent,
     DatePipe,
+    FilterChipsComponent,
     HeadingComponent,
+    IconComponent,
     ShellLayoutComponent,
   ],
   templateUrl: './listado-auditorias-page.component.html',
@@ -53,10 +61,7 @@ export class ListadoAuditoriasPageComponent implements OnInit {
   protected readonly pagina = signal(1);
   protected readonly totalPaginas = signal(0);
   protected readonly totalResultados = signal(0);
-  protected readonly estadosSeleccionados = signal<ReadonlySet<EstadoSolicitudAuditoria>>(
-    new Set()
-  );
-  protected readonly mostrandoFiltros = signal(false);
+  protected readonly filtroActivo = signal<string>(FILTRO_TODOS);
   protected readonly tamanioPagina = signal(0);
 
   /**
@@ -78,12 +83,20 @@ export class ListadoAuditoriasPageComponent implements OnInit {
     userInitials: this.authSession.getUserInitials(),
   }));
 
+  protected readonly activeIdAuditoria = computed<SidebarNavId | AuditorSidebarNavId>(() =>
+    this.esEmpresa() ? 'auditorias-empresa' : 'auditorias'
+  );
+
   protected readonly rutaInicio = computed(() =>
     this.esEmpresa() ? '/empresa/panel' : '/auditor/panel'
   );
 
-  protected readonly cantidadFiltros = computed(() => this.estadosSeleccionados().size);
-  protected readonly hayFiltros = computed(() => this.cantidadFiltros() > 0);
+  protected readonly chipsEstado = computed<FilterChip[]>(() => [
+    { id: FILTRO_TODOS, label: 'Todos' },
+    ...this.estadosFiltrables.map((estado) => ({ id: estado, label: this.etiquetaDe[estado] })),
+  ]);
+
+  protected readonly hayFiltros = computed(() => this.filtroActivo() !== FILTRO_TODOS);
 
   protected readonly hayPaginaAnterior = computed(() => this.pagina() > 1);
   protected readonly hayPaginaSiguiente = computed(() => this.pagina() < this.totalPaginas());
@@ -110,34 +123,18 @@ export class ListadoAuditoriasPageComponent implements OnInit {
     await this.cargar();
   }
 
-  protected estaSeleccionado(estado: EstadoSolicitudAuditoria): boolean {
-    return this.estadosSeleccionados().has(estado);
-  }
-
   /**
    * Cambiar un filtro vuelve a la página 1: si el usuario estaba en la página 3 y filtra hasta
    * dejar una sola página, quedaría mirando una página que ya no existe.
    */
-  protected alternarEstado(estado: EstadoSolicitudAuditoria, marcado: boolean): void {
-    const siguientes = new Set(this.estadosSeleccionados());
-    if (marcado) {
-      siguientes.add(estado);
-    } else {
-      siguientes.delete(estado);
-    }
-    this.estadosSeleccionados.set(siguientes);
+  protected seleccionarFiltro(id: string): void {
+    this.filtroActivo.set(id);
     this.pagina.set(1);
     void this.cargar();
   }
 
   protected limpiarFiltros(): void {
-    this.estadosSeleccionados.set(new Set());
-    this.pagina.set(1);
-    void this.cargar();
-  }
-
-  protected alternarPanelFiltros(): void {
-    this.mostrandoFiltros.update((abierto) => !abierto);
+    this.seleccionarFiltro(FILTRO_TODOS);
   }
 
   protected irAPagina(numero: number): void {
@@ -163,9 +160,10 @@ export class ListadoAuditoriasPageComponent implements OnInit {
     this.cargando.set(true);
     this.error.set(null);
     try {
+      const filtro = this.filtroActivo();
       const respuesta = await firstValueFrom(
         this.auditoriasService.listar({
-          filtroEstado: [...this.estadosSeleccionados()],
+          filtroEstado: filtro === FILTRO_TODOS ? [] : [filtro as EstadoSolicitudAuditoria],
           pagina: this.pagina(),
         })
       );

@@ -1,4 +1,8 @@
-<app-shell-layout [headerConfig]="headerConfig()" [backRoute]="rutaInicio()">
+<app-shell-layout
+  [activeId]="activeIdAuditoria()"
+  [headerConfig]="headerConfig()"
+  [backRoute]="rutaInicio()"
+>
   <section class="ch-listado-auditorias" aria-label="Listado de auditorías">
     <div class="ch-listado-auditorias__intro">
       <div>
@@ -15,55 +19,26 @@
         </p>
       </div>
       @if (esEmpresa()) {
-        <app-button (click)="nuevaSolicitud()">Nueva solicitud</app-button>
+        <app-button (click)="nuevaSolicitud()">+ Nueva solicitud</app-button>
       }
     </div>
 
     <div class="ch-listado-auditorias__barra">
-      <app-button
-        variant="secondary"
-        size="sm"
-        [ariaLabel]="'Filtrar por estado'"
-        [ariaExpanded]="mostrandoFiltros()"
-        ariaControls="ch-filtros-estado-auditorias"
-        (click)="alternarPanelFiltros()"
-      >
+      <span class="ch-listado-auditorias__filtro-label">
+        <app-icon name="config" [size]="13" />
         Filtrar por estado
-        @if (hayFiltros()) {
-          <span class="ch-listado-auditorias__contador-filtros">{{ cantidadFiltros() }}</span>
-        }
-      </app-button>
+      </span>
+      <app-filter-chips
+        ariaLabel="Filtrar por estado"
+        [chips]="chipsEstado()"
+        [activeId]="filtroActivo()"
+        (chipSelected)="seleccionarFiltro($event)"
+      />
 
       @if (rangoVisible()) {
         <p class="ch-listado-auditorias__rango" aria-live="polite">{{ rangoVisible() }}</p>
       }
     </div>
-
-    @if (mostrandoFiltros()) {
-      <fieldset class="ch-listado-auditorias__filtros" id="ch-filtros-estado-auditorias">
-        <legend class="ch-listado-auditorias__filtros-titulo">Estado de la solicitud</legend>
-        <div class="ch-listado-auditorias__filtros-opciones">
-          @for (estado of estadosFiltrables; track estado) {
-            <app-checkbox
-              [label]="etiquetaDe[estado]"
-              [checked]="estaSeleccionado(estado)"
-              [disabled]="cargando()"
-              (checkedChange)="alternarEstado(estado, $event)"
-            />
-          }
-        </div>
-        @if (hayFiltros()) {
-          <app-button
-            variant="secondary"
-            size="sm"
-            [disabled]="cargando()"
-            (click)="limpiarFiltros()"
-          >
-            Quitar filtros
-          </app-button>
-        }
-      </fieldset>
-    }
 
     @if (cargando()) {
       <p class="ch-listado-auditorias__estado">Cargando auditorías…</p>
@@ -106,7 +81,7 @@
           </thead>
           <tbody>
             @for (solicitud of solicitudes(); track solicitud.id) {
-              <tr [class.ch-listado-auditorias__fila--espera]="esperaRespuesta(solicitud)">
+              <tr>
                 <td>
                   <span class="ch-listado-auditorias__periodo">
                     {{ solicitud.periodoInicio | date: 'MMM y' }} –
