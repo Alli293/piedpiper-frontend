@@ -1,4 +1,4 @@
-<app-shell-layout [headerConfig]="headerConfig" backRoute="/auditores">
+<app-shell-layout [headerConfig]="headerConfig" activeId="auditores" backRoute="/auditores">
   <section class="ch-recomendaciones" aria-label="Recomendaciones de auditores">
     <div class="ch-recomendaciones__intro">
       <app-heading level="h2" text="Auditores recomendados para tu solicitud" />
@@ -76,7 +76,7 @@
         @for (auditor of recomendaciones(); track auditor.auditorId) {
           <li class="ch-recomendaciones__tarjeta">
             <div class="ch-recomendaciones__encabezado">
-              <app-avatar [imageUrl]="auditor.fotoPerfil ?? ''" />
+              <app-avatar shape="square" [imageUrl]="auditor.fotoPerfil ?? ''" />
               <div>
                 <p class="ch-recomendaciones__nombre">{{ auditor.nombre }}</p>
                 <p class="ch-recomendaciones__metricas">
