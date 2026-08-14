@@ -88,10 +88,12 @@ export class RefinamientoChatComponent {
       maxLength(path.mensaje, MENSAJE_MAX_LENGTH, {
         message: `El mensaje no puede superar ${MENSAJE_MAX_LENGTH} caracteres.`,
       });
-      disabled(path.mensaje, { when: () => this.enviandoMensaje() });
+      disabled(path.mensaje, { when: () => this.enviandoMensaje() || this.cargandoSustitucion() });
     })
   );
-  protected readonly canEnviar = computed(() => this.chatForm().valid() && !this.enviandoMensaje());
+  protected readonly canEnviar = computed(
+    () => this.chatForm().valid() && !this.enviandoMensaje() && !this.cargandoSustitucion()
+  );
 
   /**
    * Saludo inicial del chat. A propósito NO es un `computed()` sobre `itinerario()`: cada
@@ -166,7 +168,7 @@ export class RefinamientoChatComponent {
   }
 
   private async enviarMensaje(texto: string): Promise<void> {
-    if (!texto || this.enviandoMensaje()) return;
+    if (!texto || this.enviandoMensaje() || this.cargandoSustitucion()) return;
 
     const historialPrevio = this.historial();
     const itinerarioActual = this.itinerario();
