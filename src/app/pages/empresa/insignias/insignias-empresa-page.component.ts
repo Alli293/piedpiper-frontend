@@ -81,6 +81,27 @@ export class InsigniasEmpresaPageComponent {
     }
   }
 
+  protected async descargarJwt(insignia: InsigniaEmpresa): Promise<void> {
+    if (!insignia.urlVerificacionJwt) {
+      this.toastService.error(ERROR_DESCARGA);
+      return;
+    }
+
+    try {
+      const blob = await firstValueFrom(
+        this.empresaService.descargarInsigniaJwt(insignia.urlVerificacionJwt)
+      );
+      descargarBlob(blob, `${this.nombreArchivo(insignia).replace(/\.jsonld$/, '')}.jwt`);
+    } catch {
+      this.toastService.error(ERROR_DESCARGA);
+    }
+  }
+
+  protected compartirLinkedIn(insignia: InsigniaEmpresa): void {
+    if (!insignia.urlLinkedIn) return;
+    window.open(insignia.urlLinkedIn, '_blank', 'noopener,noreferrer');
+  }
+
   private mensajeError(err: unknown): string {
     if (err instanceof HttpErrorResponse && err.status === 403) {
       return apiErrorMessage(err) ?? 'No tenés permiso para ver estas insignias.';

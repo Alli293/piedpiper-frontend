@@ -31,7 +31,7 @@
 
 .ch-itinerario-generado__contenido {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) 400px;
   gap: var(--ch-space-5);
   align-items: start;
 }
@@ -46,6 +46,16 @@
 .ch-itinerario-generado__lateral {
   position: sticky;
   top: 0;
+  // El chat ahora es una conversación real (PP-88), no solo un panel de comparación puntual —
+  // se acerca al tamaño del wireframe ocupando la altura visible completa, en vez de un
+  // min-height fijo pequeño.
+  height: calc(100vh - var(--ch-space-5) * 2);
+  max-height: 720px;
+}
+
+.ch-itinerario-generado__lateral app-refinamiento-chat {
+  display: block;
+  height: 100%;
 }
 
 .ch-itinerario-generado__meta {
@@ -423,36 +433,6 @@
   font-weight: 700;
   font-size: 0.82rem;
   white-space: nowrap;
-}
-
-.ch-itinerario-generado__establecimientos {
-  border: 1px solid var(--ch-border);
-  border-radius: var(--ch-radius-md);
-  background: var(--ch-bg-white);
-  box-shadow: var(--ch-shadow-sm);
-  padding: var(--ch-space-4);
-}
-
-.ch-itinerario-generado__establecimientos-lista {
-  display: flex;
-  flex-direction: column;
-  margin: var(--ch-space-3) 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.ch-itinerario-generado__establecimiento {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--ch-space-3);
-  padding: var(--ch-space-3) 0;
-  color: var(--ch-text-primary);
-  font-size: 0.86rem;
-
-  & + & {
-    border-top: 1px solid var(--ch-border);
-  }
 }
 
 @keyframes ch-itinerario-spin {

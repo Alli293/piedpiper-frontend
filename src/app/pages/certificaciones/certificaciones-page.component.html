@@ -1,23 +1,21 @@
 <app-shell-layout activeId="certificaciones" [headerConfig]="headerConfig()">
   <section class="ch-certificaciones" aria-label="Certificaciones">
     <app-estado-certificaciones-panel
-      [resumen]="resumen()"
-      [loading]="cargandoResumen()"
-      [error]="resumenError()"
-    />
-
-    @if (cargandoRecomendacion() || recomendacion() || recomendacionError()) {
-      <app-recomendacion-renovacion-panel
-        [recomendacion]="recomendacion()"
-        [loading]="cargandoRecomendacion()"
-        [error]="recomendacionError()"
-      />
-    }
-
-    <app-alertas-activas-panel
       [alertas]="alertas()"
       [loading]="cargandoAlertas()"
       [error]="alertasError()"
+    />
+
+    <app-recomendacion-renovacion-panel
+      [recomendacion]="recomendacion()"
+      [loading]="cargandoRecomendacion()"
+      [error]="recomendacionError()"
+    />
+
+    <app-certificaciones-recientes-panel
+      [certificaciones]="certificaciones()"
+      [loading]="cargandoCertificaciones()"
+      [error]="certificacionesError()"
     />
 
     <app-insignias-empresa-panel
@@ -39,13 +37,5 @@
       [error]="calendarioError()"
       (mesChange)="onMesCalendarioChange($event)"
     />
-
-    <a
-      appLink
-      routerLink="/empresa/certificaciones/listado"
-      class="ch-certificaciones__listado-link ch-certificaciones__full"
-    >
-      Ver listado completo de certificaciones →
-    </a>
   </section>
 </app-shell-layout>

@@ -5,6 +5,7 @@
   companyRole="Viajes sostenibles"
   companyInitials="ER"
   [headerConfig]="headerConfig()"
+  backRoute="/ecoruta/itinerarios"
 >
   @if (cargando()) {
     <section class="ch-itinerario-generado__estado" aria-live="polite">
@@ -118,6 +119,11 @@
             </div>
           }
 
+          <app-recomendaciones-ambientales
+            [itinerarioId]="data.id"
+            (itinerarioActualizado)="itinerario.set($event)"
+          />
+
           @for (dia of data.dias; track dia.numeroDia) {
             <article class="ch-itinerario-generado__dia">
               <button
@@ -198,7 +204,6 @@
                       </div>
                       @if (actividad.costoAproximado !== null) {
                         <span class="ch-itinerario-generado__actividad-costo">
-                          <app-icon name="costo" [size]="12" aria-hidden="true" />
                           {{ formatearCosto(actividad) }}
                         </span>
                       }
@@ -209,33 +214,13 @@
             </article>
           }
 
-          @if (establecimientosEvaluados().length > 0) {
-            <section
-              class="ch-itinerario-generado__establecimientos"
-              aria-label="Desglose ambiental por establecimiento"
-            >
-              <app-heading level="h2" text="Desglose por establecimiento" />
-              <ul class="ch-itinerario-generado__establecimientos-lista">
-                @for (
-                  establecimiento of establecimientosEvaluados();
-                  track establecimiento.nombreEstablecimiento
-                ) {
-                  <li class="ch-itinerario-generado__establecimiento">
-                    <span>{{ establecimiento.nombreEstablecimiento }}</span>
-                    <app-puntuacion-ambiental-badge
-                      [puntuacion]="establecimiento.puntuacionAmbiental"
-                    />
-                  </li>
-                }
-              </ul>
-            </section>
-          }
+          <app-establecimientos-evaluados [establecimientos]="establecimientosEvaluados()" />
         </section>
 
         <div class="ch-itinerario-generado__lateral" #chatPanel>
           <app-refinamiento-chat
             [itinerario]="data"
-            (itinerarioActualizado)="itinerario.set($event)"
+            (itinerarioActualizado)="onItinerarioActualizado($event)"
           />
         </div>
       </div>

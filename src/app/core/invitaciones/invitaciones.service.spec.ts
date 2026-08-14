@@ -52,11 +52,12 @@ describe('InvitacionesService', () => {
     req.flush({ ...invitacion, estado: 'REVOCADA' });
   });
 
-  it('resolver hace GET al endpoint publico con el token', () => {
+  it('resolver hace POST y mantiene el token fuera de la URL', () => {
     service.resolver('tok-123').subscribe((r) => expect(r.nombreEmpresa).toBe('Acme S.A.'));
 
-    const req = httpMock.expectOne(`${environment.apiBaseUrl}/auth/invitaciones/tok-123`);
-    expect(req.request.method).toBe('GET');
-    req.flush({ email: 'colab@correo.com', nombreEmpresa: 'Acme S.A.' });
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/auth/invitaciones/resolver`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ token: 'tok-123' });
+    req.flush({ emailEnmascarado: 'c***@correo.com', nombreEmpresa: 'Acme S.A.' });
   });
 });

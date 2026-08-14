@@ -20,6 +20,8 @@ import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.co
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
 import { AuditoriasService } from '../../auditorias/auditorias.service';
+import { AuditoresService } from '../auditores.service';
+import { cargarCatalogoAuditor, mapaEtiquetasCatalogo } from '../catalogo-auditores.utils';
 import { CalificacionFormComponent } from './calificacion-form/calificacion-form.component';
 
 type ErrorTipo = 'none' | '404' | '5xx';
@@ -43,6 +45,7 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly perfilService = inject(PerfilPublicoAuditorService);
+  private readonly auditoresService = inject(AuditoresService);
   private readonly toastService = inject(ToastService);
   private readonly authSession = inject(AuthSessionService);
   private readonly auditoriasService = inject(AuditoriasService);
@@ -52,6 +55,8 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   protected readonly perfil = signal<PerfilPublicoAuditorResponse | null>(null);
   protected readonly error = signal(false);
   protected readonly errorTipo = signal<ErrorTipo>('none');
+  protected readonly etiquetasEspecialidad = signal(new Map<string, string>());
+  protected readonly etiquetasZona = signal(new Map<string, string>());
 
   /** Datos de calificación para el componente CalificacionForm */
   protected readonly auditoriaId = signal<string>('');
@@ -84,6 +89,13 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
     return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
   });
 
+  protected readonly ubicacion = computed(() => {
+    const provincia = this.perfil()?.provincia;
+    if (!provincia) return null;
+    const etiqueta = this.etiquetasZona().get(provincia) ?? provincia;
+    return `${etiqueta}, Costa Rica`;
+  });
+
   protected readonly certificacionesVencidas = computed(() => {
     const perfil = this.perfil();
     if (!perfil) return 0;
@@ -97,7 +109,13 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const auditorId = this.route.snapshot.paramMap.get('id') ?? '';
+    const auditorId = this.route.snapshot.paramMap.get('id');
+    if (!auditorId) {
+      this.cargando.set(false);
+      void this.router.navigate(['/auditores']);
+      return;
+    }
+    void this.cargarCatalogos();
     void this.cargarPerfil(auditorId);
   }
 
@@ -106,19 +124,11 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   }
 
   protected irAAsignarAuditoria(): void {
-    const perfil = this.perfil();
-    if (perfil) {
-      void this.router.navigate(['/auditorias/asignar'], {
-        queryParams: { auditorId: perfil.auditorId },
-      });
-    }
+    void this.router.navigate(['/empresa/auditorias/nueva']);
   }
 
-  protected formatearEspecialidad(valor: string): string {
-    return valor
-      .replace(/_/g, ' ')
-      .toLowerCase()
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+  protected etiquetaEspecialidad(valor: string): string {
+    return this.etiquetasEspecialidad().get(valor) ?? valor;
   }
 
   protected generarEstrellas(calificacion: number): boolean[] {
@@ -214,7 +224,28 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
       }
     } catch {
       // Si falla la carga de contexto de calificación, no mostrar el formulario.
-      // No se muestra error al usuario — el formulario simplemente no aparece.
     }
+  }
+
+  private async cargarCatalogos(): Promise<void> {
+    await Promise.all([this.cargarEspecialidades(), this.cargarZonas()]);
+  }
+
+  private async cargarEspecialidades(): Promise<void> {
+    const resultado = await cargarCatalogoAuditor(
+      this.auditoresService.obtenerEspecialidades(),
+      this.toastService,
+      'No se pudo cargar el catálogo de especialidades. Se mostrarán los códigos del perfil.'
+    );
+    this.etiquetasEspecialidad.set(mapaEtiquetasCatalogo(resultado.items));
+  }
+
+  private async cargarZonas(): Promise<void> {
+    const resultado = await cargarCatalogoAuditor(
+      this.auditoresService.obtenerZonas(),
+      this.toastService,
+      'No se pudo cargar el catálogo de zonas. Se mostrará el código de provincia.'
+    );
+    this.etiquetasZona.set(mapaEtiquetasCatalogo(resultado.items));
   }
 }

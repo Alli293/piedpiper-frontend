@@ -14,8 +14,12 @@ export interface CertificacionResumen {
   // fechaVencimiento contra hoy en cada consulta.
   vigente: boolean;
   urlVerificacion: string;
+  // Código público de verificación. `null` en certificaciones emitidas antes
+  // de que el código existiera.
+  codigoVerificacion: string | null;
 }
 
 export interface Certificacion extends CertificacionResumen {
   recienEmitida: boolean;
+  nombreAuditor: string;
 }

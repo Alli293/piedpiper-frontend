@@ -1,12 +1,13 @@
 <article class="ch-metas-panel" aria-label="Metas de reducción">
   <header class="ch-metas-panel__header">
     <span class="ch-metas-panel__icon">
-      <app-icon name="hoja" [size]="16" />
+      <app-icon name="goal" [size]="16" />
     </span>
     <app-heading level="h3" text="Metas de reducción" />
     @if (hayMetas()) {
       <a appLink [routerLink]="rutaRegistrarMeta" class="ch-metas-panel__gestionar">
-        Gestionar metas →
+        Gestionar metas
+        <app-icon name="chevron-derecha" [size]="12" aria-hidden="true" />
       </a>
     }
   </header>
@@ -18,7 +19,7 @@
   } @else if (!hayMetas()) {
     <div class="ch-metas-panel__vacio">
       <span class="ch-metas-panel__vacio-icon" aria-hidden="true">
-        <app-icon name="hoja" [size]="20" />
+        <app-icon name="goal" [size]="20" />
       </span>
       <p>{{ sinMetasMensaje }}</p>
       <app-button (click)="irARegistrarMeta()">+ Agregar meta</app-button>
@@ -29,7 +30,7 @@
         <li class="ch-metas-panel__item" [class.ch-metas-panel__item--vencida]="meta.vencida">
           <div class="ch-metas-panel__item-header">
             <span class="ch-metas-panel__item-icon" aria-hidden="true">
-              <app-icon [name]="meta.vencida ? 'danger' : 'hoja'" [size]="18" />
+              <app-icon [name]="meta.vencida ? 'danger-solido' : 'hoja-solida'" [size]="18" />
             </span>
             <div class="ch-metas-panel__item-copy">
               <strong>{{ meta.nombreMeta }}</strong>

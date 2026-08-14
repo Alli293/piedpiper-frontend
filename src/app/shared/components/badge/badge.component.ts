@@ -1,7 +1,8 @@
 import { Component, computed, input } from '@angular/core';
 import { IconComponent, IconName } from '../icon/icon.component';
 
-export type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'new' | 'neutral';
+export type BadgeVariant =
+  'success' | 'warning' | 'danger' | 'danger-solid' | 'info' | 'new' | 'neutral';
 
 @Component({
   selector: 'app-badge',

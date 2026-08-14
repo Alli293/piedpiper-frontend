@@ -9,6 +9,8 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { SesionInactividadService } from '../../../core/auth/sesion-inactividad.service';
 import { PerfilInicialService } from '../../../core/services/perfil-inicial.service';
 import { PerfilInicial } from '../../../core/models/perfil-inicial.model';
+import { CertificacionResumen } from '../../../core/models/certificacion.model';
+import { CertificacionesService } from '../../../core/services/certificaciones.service';
 import { DashboardService } from '../../dashboard/dashboard.service';
 import { AlertaVencimiento } from '../../dashboard/dashboard.model';
 import { CentroAlertasPageComponent } from './centro-alertas-page.component';
@@ -16,6 +18,7 @@ import { CentroAlertasPageComponent } from './centro-alertas-page.component';
 describe('CentroAlertasPageComponent', () => {
   let fixture: ComponentFixture<CentroAlertasPageComponent>;
   let dashboardService: { obtenerAlertas: ReturnType<typeof vi.fn> };
+  let certificacionesService: { listar: ReturnType<typeof vi.fn> };
 
   const VENCIDA: AlertaVencimiento = {
     idCertificacion: 'c1',
@@ -41,6 +44,26 @@ describe('CentroAlertasPageComponent', () => {
     urgencia: '30_dias',
   };
 
+  function certificacionResumen(
+    id: string,
+    codigoVerificacion: string | null
+  ): CertificacionResumen {
+    return {
+      id,
+      idAuditoria: 'auditoria-1',
+      idEmpresa: 'empresa-1',
+      idAuditor: 'auditor-1',
+      tipo: 'CARBONO_NEUTRAL',
+      nombreCertificacion: 'Carbono Neutral',
+      fechaEmision: '2026-01-01T00:00:00Z',
+      fechaVencimiento: '2026-07-28',
+      estado: 'ACTIVA',
+      vigente: true,
+      urlVerificacion: `https://carbonhub.example/verificar/${id}`,
+      codigoVerificacion,
+    };
+  }
+
   async function createFixture(): Promise<ComponentFixture<CentroAlertasPageComponent>> {
     const created = TestBed.createComponent(CentroAlertasPageComponent);
     created.detectChanges();
@@ -53,12 +76,24 @@ describe('CentroAlertasPageComponent', () => {
     dashboardService = {
       obtenerAlertas: vi.fn().mockReturnValue(of([VENCIDA, URGENTE, PROXIMA])),
     };
+    certificacionesService = {
+      listar: vi
+        .fn()
+        .mockReturnValue(
+          of([
+            certificacionResumen('c1', 'CH-2025-AAAA1111'),
+            certificacionResumen('c2', 'CH-2025-BBBB2222'),
+            certificacionResumen('c3', null),
+          ])
+        ),
+    };
 
     await TestBed.configureTestingModule({
       imports: [CentroAlertasPageComponent],
       providers: [
         provideRouter([]),
         { provide: DashboardService, useValue: dashboardService },
+        { provide: CertificacionesService, useValue: certificacionesService },
         {
           provide: AuthSessionService,
           useValue: {
@@ -90,14 +125,40 @@ describe('CentroAlertasPageComponent', () => {
     fixture = await createFixture();
     const el = fixture.nativeElement as HTMLElement;
 
-    const nombres = Array.from(el.querySelectorAll('.ch-centro-alertas__fila-nombre')).map((n) =>
-      n.textContent?.trim()
-    );
+    const nombres = Array.from(
+      el.querySelectorAll('.ch-centro-alertas__fila .ch-centro-alertas__cert-cell strong')
+    ).map((n) => n.textContent?.trim());
     expect(nombres).toEqual([
       'Bandera Azul Ecológica 2025',
       'GHG Protocol — Corporate Standard',
       'Carbono Neutral — PPCN 2026',
     ]);
+  });
+
+  it('muestra el código de verificación de la certificación cuando existe', async () => {
+    fixture = await createFixture();
+    const el = fixture.nativeElement as HTMLElement;
+
+    const codigos = Array.from(el.querySelectorAll('.ch-centro-alertas__codigo')).map((n) =>
+      n.textContent?.trim()
+    );
+    expect(codigos).toEqual(['CH-2025-AAAA1111', 'CH-2025-BBBB2222']);
+  });
+
+  it('copia el código de verificación al portapapeles y muestra el tooltip al hacer clic', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+    fixture = await createFixture();
+    const el = fixture.nativeElement as HTMLElement;
+
+    const boton = el.querySelector('.ch-centro-alertas__codigo') as HTMLButtonElement;
+    expect(boton.textContent).toContain('CH-2025-AAAA1111');
+    boton.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(writeText).toHaveBeenCalledWith('CH-2025-AAAA1111');
+    expect(el.textContent).toContain('Código copiado');
   });
 
   it('filtra por urgencia al seleccionar un chip', async () => {
@@ -110,9 +171,9 @@ describe('CentroAlertasPageComponent', () => {
     chipVencidas?.click();
     fixture.detectChanges();
 
-    const nombres = Array.from(el.querySelectorAll('.ch-centro-alertas__fila-nombre')).map((n) =>
-      n.textContent?.trim()
-    );
+    const nombres = Array.from(
+      el.querySelectorAll('.ch-centro-alertas__fila .ch-centro-alertas__cert-cell strong')
+    ).map((n) => n.textContent?.trim());
     expect(nombres).toEqual(['Bandera Azul Ecológica 2025']);
   });
 
@@ -127,9 +188,9 @@ describe('CentroAlertasPageComponent', () => {
     buscador.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    const nombres = Array.from(el.querySelectorAll('.ch-centro-alertas__fila-nombre')).map((n) =>
-      n.textContent?.trim()
-    );
+    const nombres = Array.from(
+      el.querySelectorAll('.ch-centro-alertas__fila .ch-centro-alertas__cert-cell strong')
+    ).map((n) => n.textContent?.trim());
     expect(nombres).toEqual(['GHG Protocol — Corporate Standard']);
   });
 
@@ -159,6 +220,7 @@ describe('CentroAlertasPageComponent', () => {
     fixture = await createFixture();
     const el = fixture.nativeElement as HTMLElement;
     const enlace = el.querySelector('.ch-centro-alertas__ver-detalle') as HTMLAnchorElement;
-    expect(enlace.getAttribute('href')).toBe('/empresa/certificaciones/c1');
+    expect(enlace.getAttribute('href')).toContain('/empresa/certificaciones/listado');
+    expect(enlace.getAttribute('href')).toContain('id=c1');
   });
 });

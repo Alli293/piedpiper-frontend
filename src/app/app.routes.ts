@@ -1,5 +1,5 @@
 import { CanActivateFn, Routes } from '@angular/router';
-import { authGuard, noAuthGuard, rolGuard } from './core/auth/auth.guard';
+import { authGuard, guardAuditorActivo, noAuthGuard, rolGuard } from './core/auth/auth.guard';
 
 const cargarPlaceholder = () =>
   import('./pages/placeholder/placeholder-page.component').then((m) => m.PlaceholderPageComponent);
@@ -8,29 +8,34 @@ export const guardEmpresa: CanActivateFn = rolGuard('ADMINISTRADOR_EMPRESA', 'US
 export const guardEmpresaAdmin: CanActivateFn = rolGuard('ADMINISTRADOR_EMPRESA');
 export const guardAuditor: CanActivateFn = rolGuard('AUDITOR_CERTIFICADO');
 export const guardAdmin: CanActivateFn = rolGuard('ADMINISTRADOR_PLATAFORMA');
+// El backend excluye deliberadamente al administrador de plataforma de este directorio.
+export const guardDirectorioAuditores: CanActivateFn = rolGuard(
+  'ADMINISTRADOR_EMPRESA',
+  'USUARIO_GENERAL',
+  'AUDITOR_CERTIFICADO'
+);
 
 /**
  * El detalle de una auditoría lo consultan los tres roles que participan del proceso: la empresa
  * dueña, el auditor asignado y el administrador de plataforma. El backend abre el endpoint a los
  * tres y decide por relación con la solicitud; restringir la ruta solo a la empresa dejaría al
  * auditor sin poder abrir la pantalla desde la que responde.
+ *
+ * Es negocio real del auditor (acepta/rechaza la auditoría, sube el reporte), así que también
+ * necesita `guardAuditorActivo`: sin ella, un auditor `PENDIENTE_VALIDACION` o `RECHAZADO` podría
+ * entrar por URL directa a `empresa/auditorias/:id` o `auditor/auditorias/:id` sin pasar por el
+ * onboarding. `guardAuditorActivo` se ignora a sí misma para empresa/admin, así que es seguro
+ * agregarla acá aunque la ruta la compartan los tres roles.
  */
-export const guardDetalleAuditoria: CanActivateFn = rolGuard(
-  'ADMINISTRADOR_EMPRESA',
-  'AUDITOR_CERTIFICADO',
-  'ADMINISTRADOR_PLATAFORMA'
-);
-
-export const rutasPostAutenticacion = [
-  'auditor/configuracion-inicial',
-  'auditor/panel',
-  'auditor/validacion-pendiente',
+export const guardDetalleAuditoria: CanActivateFn[] = [
+  rolGuard('ADMINISTRADOR_EMPRESA', 'AUDITOR_CERTIFICADO', 'ADMINISTRADOR_PLATAFORMA'),
+  guardAuditorActivo,
 ];
 
+export const rutasPostAutenticacion = ['auditor/panel'];
+
 const rutasPlaceholderConGuard: Record<string, CanActivateFn[]> = {
-  'auditor/configuracion-inicial': [guardAuditor],
   'auditor/panel': [guardAuditor],
-  'auditor/validacion-pendiente': [authGuard],
 };
 
 const rutasPlaceholder = rutasPostAutenticacion.map((path) => ({
@@ -105,15 +110,25 @@ export const routes: Routes = [
   },
   {
     path: 'auditores',
-    canActivate: [authGuard],
+    canActivate: [guardDirectorioAuditores],
     loadComponent: () =>
       import('./pages/auditores/directorio-auditores-page.component').then(
         (m) => m.DirectorioAuditoresPageComponent
       ),
   },
   {
-    path: 'auditores/:id',
+    // Antes que 'auditores/:id' a propósito: si fuera después, ':id' capturaría "recomendaciones"
+    // y la pantalla nunca se alcanzaría.
+    path: 'auditores/recomendaciones',
     canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/auditores/recomendaciones/recomendaciones-auditores-page.component').then(
+        (m) => m.RecomendacionesAuditoresPageComponent
+      ),
+  },
+  {
+    path: 'auditores/:id',
+    canActivate: [guardDirectorioAuditores],
     loadComponent: () =>
       import('./pages/auditores/perfil-publico-auditor/perfil-publico-auditor-page.component').then(
         (m) => m.PerfilPublicoAuditorPageComponent
@@ -137,6 +152,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'admin/solicitudes-auditor/:id',
+    canActivate: [guardAdmin],
+    loadComponent: () =>
+      import('./pages/admin/solicitudes-auditor/detalle/revision-solicitud-auditor-page.component').then(
+        (m) => m.RevisionSolicitudAuditorPageComponent
+      ),
+  },
+  {
     path: 'ecoruta/preferencias',
     canActivate: [usuarioIndividualGuard],
     loadComponent: () =>
@@ -146,10 +169,26 @@ export const routes: Routes = [
   },
   {
     path: 'auditor/perfil',
-    canActivate: [rolGuard('AUDITOR_CERTIFICADO')],
+    canActivate: [guardAuditor, guardAuditorActivo],
     loadComponent: () =>
       import('./pages/perfil-auditor/perfil-auditor-page.component').then(
         (m) => m.PerfilAuditorPageComponent
+      ),
+  },
+  {
+    path: 'auditor/configuracion-inicial',
+    canActivate: [guardAuditor],
+    loadComponent: () =>
+      import('./pages/auditor/configuracion-inicial/configuracion-inicial-auditor-page.component').then(
+        (m) => m.ConfiguracionInicialAuditorPageComponent
+      ),
+  },
+  {
+    path: 'auditor/validacion-pendiente',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/auditor/validacion-pendiente/validacion-pendiente-auditor-page.component').then(
+        (m) => m.ValidacionPendienteAuditorPageComponent
       ),
   },
   {
@@ -199,12 +238,14 @@ export const routes: Routes = [
       ),
   },
   {
+    /**
+     * `empresa/certificaciones/:id` fue la ruta del detalle antes de que se moviera a un modal
+     * (`?id=` sobre el listado). Se mantiene como redirect por si quedó compartida en alertas,
+     * notificaciones o bookmarks de sesiones anteriores.
+     */
     path: 'empresa/certificaciones/:id',
-    canActivate: [guardEmpresa],
-    loadComponent: () =>
-      import('./pages/certificaciones/detalle/certificacion-detalle-page.component').then(
-        (m) => m.CertificacionDetallePageComponent
-      ),
+    redirectTo: (redirectData) =>
+      `/empresa/certificaciones/listado?id=${redirectData.params['id']}`,
   },
   {
     path: 'empresa/benchmark',
@@ -277,13 +318,6 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'empresa/:slug/reputacion',
-    loadComponent: () =>
-      import('./pages/perfil-publico/perfil-publico-page.component').then(
-        (m) => m.PerfilPublicoPageComponent
-      ),
-  },
-  {
     path: 'empresa/:slug/reputacion/certificaciones',
     loadComponent: () =>
       import('./pages/perfil-publico/certificaciones/certificaciones-publicas-page.component').then(
@@ -310,6 +344,21 @@ export const routes: Routes = [
       import('./pages/verificacion-publica/verificacion-publica-page.component').then(
         (m) => m.VerificacionPublicaPageComponent
       ),
+  },
+  // Públicas y sin guard a propósito: se enlazan desde el registro, donde todavía no hay sesión.
+  // El documento se elige por `data` y no por la URL, así una ruta nueva no puede caer en la
+  // pantalla sin declarar qué texto muestra.
+  {
+    path: 'terminos',
+    data: { documento: 'terminos' },
+    loadComponent: () =>
+      import('./pages/legal/legal-page.component').then((m) => m.LegalPageComponent),
+  },
+  {
+    path: 'privacidad',
+    data: { documento: 'privacidad' },
+    loadComponent: () =>
+      import('./pages/legal/legal-page.component').then((m) => m.LegalPageComponent),
   },
   {
     path: 'empresa/emisiones',
@@ -338,7 +387,7 @@ export const routes: Routes = [
   },
   {
     path: 'auditor/auditorias',
-    canActivate: [guardAuditor],
+    canActivate: [guardAuditor, guardAuditorActivo],
     loadComponent: () =>
       import('./pages/auditorias/listado/listado-auditorias-page.component').then(
         (m) => m.ListadoAuditoriasPageComponent
@@ -355,7 +404,7 @@ export const routes: Routes = [
   },
   {
     path: 'empresa/auditorias/:id',
-    canActivate: [guardDetalleAuditoria],
+    canActivate: guardDetalleAuditoria,
     loadComponent: () =>
       import('./pages/auditorias/detalle/detalle-auditoria-page.component').then(
         (m) => m.DetalleAuditoriaPageComponent
@@ -363,7 +412,7 @@ export const routes: Routes = [
   },
   {
     path: 'auditor/auditorias/:id',
-    canActivate: [guardDetalleAuditoria],
+    canActivate: guardDetalleAuditoria,
     loadComponent: () =>
       import('./pages/auditorias/detalle/detalle-auditoria-page.component').then(
         (m) => m.DetalleAuditoriaPageComponent
@@ -396,6 +445,7 @@ export const routes: Routes = [
   },
   {
     path: 'ui-kit',
+    canActivate: [guardAdmin],
     loadComponent: () =>
       import('./pages/ui-kit/ui-kit-page.component').then((m) => m.UiKitPageComponent),
   },

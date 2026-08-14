@@ -80,6 +80,17 @@ describe('DetalleAuditoriaPageComponent', () => {
     ...enRevision,
     estado: 'CERTIFICACION_EMITIDA',
     estadoDescripcion: 'Certificación emitida',
+    historial: [
+      ...enRevision.historial,
+      {
+        estadoAnterior: 'REPORTE_CARGADO',
+        estadoNuevo: 'CERTIFICACION_EMITIDA',
+        evento: 'RESULTADO_APROBADA',
+        actor: 'AUDITOR',
+        responsable: 'Guillermo Murillo Salas',
+        fecha: '2026-06-12T11:20:00Z',
+      },
+    ],
   };
 
   /** Con lo minimo que el helper realmente usa: si le falta algo, el test tiene que enterarse. */
@@ -408,7 +419,7 @@ describe('DetalleAuditoriaPageComponent', () => {
     await estabilizar();
 
     expect(auditoriasService.obtenerDetalle).toHaveBeenCalledTimes(2);
-    expect(situaciones().at(-1)).toBe('en-curso');
+    expect(situaciones().at(-1)).toBe('completado');
   });
 
   it('detiene el sondeo cuando la pestaña pierde el foco y lo reanuda al recuperarlo', async () => {
@@ -538,6 +549,13 @@ describe('DetalleAuditoriaPageComponent', () => {
     );
     expect(titulos.at(-1)).toBe('Observaciones pendientes');
     expect(titulos).not.toContain('Certificación emitida');
+    expect(situaciones()).toEqual([
+      'completado',
+      'completado',
+      'completado',
+      'completado',
+      'completado',
+    ]);
   });
 
   /**
@@ -570,7 +588,7 @@ describe('DetalleAuditoriaPageComponent', () => {
     await estabilizar();
 
     expect(auditoriasService.obtenerDetalle).toHaveBeenCalledTimes(2);
-    expect(situaciones().at(-1)).toBe('en-curso');
+    expect(situaciones().at(-1)).toBe('completado');
   });
 
   it('muestra un guion cuando el tamano del documento no es un numero utilizable', async () => {

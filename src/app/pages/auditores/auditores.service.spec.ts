@@ -95,4 +95,49 @@ describe('AuditoresService', () => {
     expect(zonas.request.method).toBe('GET');
     zonas.flush([{ valor: 'SAN_JOSE', etiqueta: 'San José' }]);
   });
+
+  it('pide las recomendaciones por POST con los filtros en el cuerpo', () => {
+    service
+      .recomendar({
+        tipoAuditoria: 'MANUFACTURA',
+        especialidadBuscada: 'MANUFACTURA',
+        zonaGeografica: 'SAN_JOSE',
+        soloDisponibles: true,
+      })
+      .subscribe();
+
+    const req = httpMock.expectOne(`${baseUrl}/recomendaciones`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      tipoAuditoria: 'MANUFACTURA',
+      especialidadBuscada: 'MANUFACTURA',
+      zonaGeografica: 'SAN_JOSE',
+      soloDisponibles: true,
+    });
+    req.flush({ recomendaciones: [], iaDisponible: true });
+  });
+
+  /**
+   * El sector y el id de la empresa los resuelve el backend desde el token. Si el cliente los
+   * mandara, cualquiera pediría recomendaciones haciéndose pasar por otra empresa.
+   */
+  it('no envia el sector ni el id de la empresa en el cuerpo', () => {
+    service
+      .recomendar({
+        tipoAuditoria: 'MANUFACTURA',
+        especialidadBuscada: 'MANUFACTURA',
+        zonaGeografica: 'SAN_JOSE',
+        soloDisponibles: false,
+      })
+      .subscribe();
+
+    const req = httpMock.expectOne(`${baseUrl}/recomendaciones`);
+    expect(Object.keys(req.request.body)).toEqual([
+      'tipoAuditoria',
+      'especialidadBuscada',
+      'zonaGeografica',
+      'soloDisponibles',
+    ]);
+    req.flush({ recomendaciones: [], iaDisponible: true });
+  });
 });

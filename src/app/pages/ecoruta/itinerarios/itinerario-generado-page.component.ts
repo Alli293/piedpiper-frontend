@@ -5,7 +5,6 @@ import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from '../../../core/auth-session.service';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { HeadingComponent } from '../../../shared/components/heading/heading.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
@@ -15,8 +14,10 @@ import { formatCurrency } from '../../../shared/utils/currency.utils';
 import { PROVINCIA_OPTIONS } from '../models/preferencias-viaje.model';
 import { CertificacionesDetalleComponent } from './certificaciones-detalle/certificaciones-detalle.component';
 import { EcoRutaItinerariosService } from './ecoruta-itinerarios.service';
+import { EstablecimientosEvaluadosComponent } from './establecimientos-evaluados/establecimientos-evaluados.component';
 import { Itinerario, ItinerarioActividad, ItinerarioDia } from './models/itinerario.model';
 import { PuntuacionAmbientalBadgeComponent } from './puntuacion-ambiental-badge/puntuacion-ambiental-badge.component';
+import { RecomendacionesAmbientalesComponent } from './recomendaciones-ambientales/recomendaciones-ambientales.component';
 import { RefinamientoChatComponent } from './refinamiento-chat/refinamiento-chat.component';
 import { derivarEtiquetaRuta } from './utils/ruta-diaria.utils';
 
@@ -51,9 +52,10 @@ const TOAST_DURATION_MS = 5000;
     ButtonComponent,
     CertificacionesDetalleComponent,
     DatePipe,
-    HeadingComponent,
+    EstablecimientosEvaluadosComponent,
     IconComponent,
     PuntuacionAmbientalBadgeComponent,
+    RecomendacionesAmbientalesComponent,
     RefinamientoChatComponent,
     ShellLayoutComponent,
   ],
@@ -72,6 +74,7 @@ export class ItinerarioGeneradoPageComponent {
   protected readonly diasExpandidos = signal<Set<number>>(new Set());
 
   private readonly chatPanel = viewChild<ElementRef<HTMLElement>>('chatPanel');
+  private readonly refinamientoChat = viewChild(RefinamientoChatComponent);
 
   private cargaRequestId = 0;
 
@@ -89,6 +92,7 @@ export class ItinerarioGeneradoPageComponent {
       : 'Itinerario generado',
     showNotificationDot: false,
     userInitials: this.authSession.getUserInitials(),
+    showBackButton: true,
   }));
 
   protected readonly bandaEcoScore = computed<ClasificacionInfo | null>(() => {
@@ -177,9 +181,18 @@ export class ItinerarioGeneradoPageComponent {
     return formatCurrency(actividad.costoAproximado!, actividad.moneda);
   }
 
-  // TODO(PP-88): pasarle el contexto de `actividad` al chat en vez de solo hacer scroll.
   protected preguntarSobreActividad(actividad: ItinerarioActividad): void {
+    this.refinamientoChat()?.prellenarMensaje(`¿Qué opciones tengo para "${actividad.nombre}"?`);
     this.chatPanel()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /**
+   * El chat de refinamiento (PP-88) emite el itinerario ya actualizado tras cada ajuste o
+   * sustitución. Pasa por la misma normalización que la carga inicial (`ordenar()`) en vez de
+   * asignarse directo — no hay garantía de que el backend devuelva días/actividades ya ordenados.
+   */
+  protected onItinerarioActualizado(itinerario: Itinerario): void {
+    this.itinerario.set(this.ordenar(itinerario));
   }
 
   /**

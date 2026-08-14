@@ -1,7 +1,7 @@
 @use '../../../shared/styles/mixins';
 
 // ============================================================
-// PERFIL PÚBLICO AUDITOR — Redesigned layout
+// PERFIL PÚBLICO AUDITOR — Diseño principal
 // ============================================================
 
 :host {
@@ -421,6 +421,11 @@
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--ch-text-primary);
+}
+
+.ch-perfil-auditor__kpi-value--empty {
+  font-size: 0.875rem;
+  color: var(--ch-text-muted);
 }
 
 .ch-perfil-auditor__kpi-label {
