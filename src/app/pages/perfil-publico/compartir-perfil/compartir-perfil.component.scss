@@ -189,6 +189,12 @@
     border-radius: var(--ch-radius-md);
     margin-bottom: var(--ch-space-3);
     overflow: auto;
+
+    // Esto es solo una previsualización de como se ve el sello embebido, no debe
+    // funcionar como enlace real dentro de esta página.
+    a {
+      pointer-events: none;
+    }
   }
 
   &__code-row {

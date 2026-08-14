@@ -196,7 +196,7 @@ describe('PerfilPublicoPageComponent', () => {
 
     const el = fixture.nativeElement as HTMLElement;
     expect(el.textContent).toContain(
-      'Esta empresa aún no cuenta con datos de huella de carbono verificados.'
+      'Esta empresa aún no cuenta con periodos de huella de carbono verificados por un'
     );
     expect(el.querySelector('app-evolucion-huella-chart')).toBeNull();
   });
