@@ -13,9 +13,13 @@ export interface DistribucionSector {
 }
 
 export interface ResenaVerificada {
+  id: string;
+  empresaId: string;
   calificacion: number;
   comentario: string;
   fechaCalificacion: string;
+  nombreCalificador?: string;
+  nombreEmpresa?: string;
 }
 
 export interface PerfilPublicoAuditorResponse {

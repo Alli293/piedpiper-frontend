@@ -1,0 +1,68 @@
+@if (puedeCalificar()) {
+  <section class="ch-calificacion-form" aria-labelledby="calificacion-form-titulo">
+    @if (cargando()) {
+      <div class="ch-calificacion-form__loading" role="status" aria-label="Cargando calificación">
+        <span class="ch-calificacion-form__spinner"></span>
+      </div>
+    } @else if (calificacionActual() && !editando()) {
+      <!-- Vista lectura: calificación existente con botón de edición -->
+      <div class="ch-calificacion-form__vista">
+        <h3 class="ch-calificacion-form__titulo" id="calificacion-form-titulo">Tu calificación</h3>
+        <app-star-rating
+          [value]="calificacionActual()!.calificacion"
+          [readonly]="true"
+          label="Calificación del auditor"
+        />
+        @if (calificacionActual()!.comentario) {
+          <p class="ch-calificacion-form__comentario">{{ calificacionActual()!.comentario }}</p>
+        }
+        @if (puedeEditar()) {
+          <div class="ch-calificacion-form__actions">
+            <app-button
+              variant="secondary"
+              size="sm"
+              (click)="iniciarEdicion()"
+              ariaLabel="Editar calificación"
+            >
+              Editar
+            </app-button>
+          </div>
+        }
+      </div>
+    } @else {
+      <h3 class="ch-calificacion-form__titulo" id="calificacion-form-titulo">
+        {{ modoEdicion() ? 'Editar calificación' : 'Calificar auditor' }}
+      </h3>
+
+      <form novalidate (submit)="handleSubmit($event)">
+        <div class="ch-calificacion-form__campo">
+          <label class="ch-calificacion-form__label">Calificación</label>
+          <app-star-rating
+            [value]="model().calificacion"
+            (valueChange)="onCalificacionChange($event)"
+            [readonly]="guardando()"
+            label="Calificación del auditor"
+          />
+          @if (calificacionError()) {
+            <p class="ch-calificacion-form__error" role="alert">{{ calificacionError() }}</p>
+          }
+        </div>
+
+        <app-textarea
+          label="Comentario (opcional)"
+          [formField]="calificacionForm.comentario"
+          placeholder="Comparta su experiencia con este auditor..."
+          [rows]="3"
+          [error]="comentarioError()"
+          [hint]="caracteresComentario() + ' / ' + maximoCaracteresComentario + ' caracteres'"
+        />
+
+        <div class="ch-calificacion-form__actions">
+          <app-button type="submit" [disabled]="!puedeGuardar()" [loading]="guardando()">
+            Guardar
+          </app-button>
+        </div>
+      </form>
+    }
+  </section>
+}

@@ -25,6 +25,7 @@ import { ToastService } from '../../../../shared/services/toast.service';
 import { apiErrorMessage } from '../../../../shared/utils/http-error.utils';
 import { AlternativasComparacionComponent } from '../alternativas-comparacion/alternativas-comparacion.component';
 import { EcoRutaAlternativasService } from '../ecoruta-alternativas.service';
+import { crearSustitucionRequest } from '../utils/sustitucion.utils';
 import { EcoRutaItinerariosService } from '../ecoruta-itinerarios.service';
 import {
   AlternativaDTO,
@@ -87,10 +88,12 @@ export class RefinamientoChatComponent {
       maxLength(path.mensaje, MENSAJE_MAX_LENGTH, {
         message: `El mensaje no puede superar ${MENSAJE_MAX_LENGTH} caracteres.`,
       });
-      disabled(path.mensaje, { when: () => this.enviandoMensaje() });
+      disabled(path.mensaje, { when: () => this.enviandoMensaje() || this.cargandoSustitucion() });
     })
   );
-  protected readonly canEnviar = computed(() => this.chatForm().valid() && !this.enviandoMensaje());
+  protected readonly canEnviar = computed(
+    () => this.chatForm().valid() && !this.enviandoMensaje() && !this.cargandoSustitucion()
+  );
 
   /**
    * Saludo inicial del chat. A propósito NO es un `computed()` sobre `itinerario()`: cada
@@ -165,7 +168,7 @@ export class RefinamientoChatComponent {
   }
 
   private async enviarMensaje(texto: string): Promise<void> {
-    if (!texto || this.enviandoMensaje()) return;
+    if (!texto || this.enviandoMensaje() || this.cargandoSustitucion()) return;
 
     const historialPrevio = this.historial();
     const itinerarioActual = this.itinerario();
@@ -248,16 +251,11 @@ export class RefinamientoChatComponent {
     const actividadId = this.actividadSeleccionadaId();
     if (!actividadId) return;
 
-    const body: SustitucionRequest = {
-      nombre: alternativa.nombre,
-      descripcion: alternativa.descripcion,
-      costoAproximado: alternativa.costoAproximado,
-      moneda: alternativa.moneda,
-      establecimientoRecomendado: alternativa.establecimientoRecomendado,
-      ecoScore: alternativa.ecoScore,
-      categoriaTuristica: this.comparacionResponse()!.categoriaTuristica,
-      provincia: this.comparacionResponse()!.provincia,
-    };
+    const body = crearSustitucionRequest(
+      alternativa,
+      this.comparacionResponse()!.categoriaTuristica,
+      this.comparacionResponse()!.provincia
+    );
 
     this.cargandoSustitucion.set(true);
     // Reproduce la secuencia del wireframe: confirmación del usuario + mensaje transitorio del

@@ -60,6 +60,19 @@
   font-weight: 500;
 }
 
+.ch-recomendaciones__error {
+  display: flex;
+  align-items: center;
+  gap: var(--ch-space-2);
+  margin: 0;
+  padding: var(--ch-space-2) var(--ch-space-3);
+  border-radius: var(--ch-radius-md);
+  background: var(--ch-danger-bg);
+  color: var(--ch-danger);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 .ch-recomendaciones__lista {
   display: flex;
   flex-direction: column;

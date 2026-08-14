@@ -51,6 +51,8 @@ describe('PerfilPublicoAuditorService', () => {
         ],
         resenas: [
           {
+            id: 'cal-001',
+            empresaId: 'empresa-abc',
             calificacion: 5.0,
             comentario: 'Excelente trabajo.',
             fechaCalificacion: '2025-01-15',

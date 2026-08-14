@@ -11,7 +11,6 @@ import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell
 import { ToastService } from '../../../shared/services/toast.service';
 import { apiErrorMessage } from '../../../shared/utils/http-error.utils';
 import { formatCurrency } from '../../../shared/utils/currency.utils';
-import { PROVINCIA_OPTIONS } from '../models/preferencias-viaje.model';
 import { CertificacionesDetalleComponent } from './certificaciones-detalle/certificaciones-detalle.component';
 import { EcoRutaItinerariosService } from './ecoruta-itinerarios.service';
 import { EstablecimientosEvaluadosComponent } from './establecimientos-evaluados/establecimientos-evaluados.component';
@@ -19,27 +18,15 @@ import { Itinerario, ItinerarioActividad, ItinerarioDia } from './models/itinera
 import { PuntuacionAmbientalBadgeComponent } from './puntuacion-ambiental-badge/puntuacion-ambiental-badge.component';
 import { RecomendacionesAmbientalesComponent } from './recomendaciones-ambientales/recomendaciones-ambientales.component';
 import { RefinamientoChatComponent } from './refinamiento-chat/refinamiento-chat.component';
+import { ClasificacionInfo, INFO_POR_CLASIFICACION } from './utils/clasificacion-ambiental.utils';
+import { etiquetaProvincia } from './utils/provincia.utils';
 import { derivarEtiquetaRuta } from './utils/ruta-diaria.utils';
-
-type ClaveClasificacion = 'excelente' | 'buena' | 'moderada' | 'mejorable';
-
-interface ClasificacionInfo {
-  texto: string;
-  clave: ClaveClasificacion;
-}
 
 interface EscalaEcoScoreItem {
   clave: string;
   rango: string;
   texto: string;
 }
-
-const INFO_POR_CLASIFICACION: Record<string, ClasificacionInfo> = {
-  EXCELENTE: { texto: 'Excelente', clave: 'excelente' },
-  BUENA: { texto: 'Buena', clave: 'buena' },
-  MODERADA: { texto: 'Moderada', clave: 'moderada' },
-  MEJORABLE: { texto: 'Mejorable', clave: 'mejorable' },
-};
 
 const ERROR_CARGA = 'No se pudo cargar el itinerario. Intenta nuevamente.';
 const ERROR_ACCESO_DENEGADO = 'No tienes permiso para acceder a este itinerario.';
@@ -154,7 +141,7 @@ export class ItinerarioGeneradoPageComponent {
   }
 
   protected etiquetaProvincia(codigo: string): string {
-    return PROVINCIA_OPTIONS.find((option) => option.value === codigo)?.label ?? codigo;
+    return etiquetaProvincia(codigo);
   }
 
   protected toggleDia(numeroDia: number): void {

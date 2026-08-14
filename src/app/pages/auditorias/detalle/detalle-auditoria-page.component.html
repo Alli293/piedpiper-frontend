@@ -407,6 +407,20 @@
           </article>
         </aside>
       </div>
+
+      <!-- Sección de calificación: solo para admin empresa y auditoría completada -->
+      @if (esCertificacionEmitida() && !esAuditorAsignado()) {
+        <section class="ch-detalle-auditoria__calificacion" aria-labelledby="calificacion-title">
+          <app-calificacion-form
+            [auditoriaId]="idSolicitud()"
+            [auditorId]="detalle()!.auditor!.id"
+            [calificacionExistente]="calificacionExistente()"
+            [estadoAuditoria]="detalle()!.estado"
+            [empresaIdUsuario]="empresaIdUsuario()"
+            (calificacionActualizada)="onCalificacionActualizada($event)"
+          />
+        </section>
+      }
     }
   </section>
 </app-shell-layout>

@@ -5,6 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthSessionService } from '../../../core/auth-session.service';
+import { CalificacionResponse } from '../../../core/calificacion/calificacion.models';
+import { CalificacionService } from '../../../core/calificacion/calificacion.service';
 import {
   PerfilPublicoAuditorResponse,
   ResenaVerificada,
@@ -17,8 +19,10 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
+import { AuditoriasService } from '../../auditorias/auditorias.service';
 import { AuditoresService } from '../auditores.service';
 import { cargarCatalogoAuditor, mapaEtiquetasCatalogo } from '../catalogo-auditores.utils';
+import { CalificacionFormComponent } from './calificacion-form/calificacion-form.component';
 
 type ErrorTipo = 'none' | '404' | '5xx';
 
@@ -32,6 +36,7 @@ type ErrorTipo = 'none' | '404' | '5xx';
     CardComponent,
     IconComponent,
     ShellLayoutComponent,
+    CalificacionFormComponent,
   ],
   templateUrl: './perfil-publico-auditor-page.component.html',
   styleUrl: './perfil-publico-auditor-page.component.scss',
@@ -43,6 +48,8 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   private readonly auditoresService = inject(AuditoresService);
   private readonly toastService = inject(ToastService);
   private readonly authSession = inject(AuthSessionService);
+  private readonly auditoriasService = inject(AuditoriasService);
+  private readonly calificacionService = inject(CalificacionService);
 
   protected readonly cargando = signal(true);
   protected readonly perfil = signal<PerfilPublicoAuditorResponse | null>(null);
@@ -50,6 +57,12 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
   protected readonly errorTipo = signal<ErrorTipo>('none');
   protected readonly etiquetasEspecialidad = signal(new Map<string, string>());
   protected readonly etiquetasZona = signal(new Map<string, string>());
+
+  /** Datos de calificación para el componente CalificacionForm */
+  protected readonly auditoriaId = signal<string>('');
+  protected readonly estadoAuditoria = signal<string>('');
+  protected readonly calificacionExistente = signal<CalificacionResponse | null>(null);
+  protected readonly empresaIdUsuario = signal<string>('');
 
   protected readonly esAdminEmpresa = computed(() => this.authSession.isAdministradorEmpresa());
 
@@ -126,6 +139,13 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
     return estrellas;
   }
 
+  protected onCalificacionActualizada(cal: CalificacionResponse): void {
+    this.calificacionExistente.set(cal);
+    this.empresaIdUsuario.set(cal.empresaId);
+    const auditorId = this.route.snapshot.paramMap.get('id') ?? '';
+    void this.cargarPerfil(auditorId);
+  }
+
   private async cargarPerfil(auditorId: string): Promise<void> {
     this.cargando.set(true);
     this.error.set(false);
@@ -135,6 +155,10 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
     try {
       const resultado = await firstValueFrom(this.perfilService.obtenerPerfilPublico(auditorId));
       this.perfil.set(resultado);
+
+      if (this.esAdminEmpresa()) {
+        void this.cargarContextoCalificacion(auditorId);
+      }
     } catch (err: unknown) {
       this.error.set(true);
       if (err instanceof HttpErrorResponse && err.status === 404) {
@@ -149,6 +173,37 @@ export class PerfilPublicoAuditorPageComponent implements OnInit {
       }
     } finally {
       this.cargando.set(false);
+    }
+  }
+
+  /**
+   * Carga la auditoría con estado CERTIFICACION_EMITIDA del auditor actual
+   * y la calificación existente (si la hay) para alimentar el componente de calificación.
+   * También establece empresaIdUsuario para comparar con reseñas del perfil público.
+   */
+  private async cargarContextoCalificacion(auditorId: string): Promise<void> {
+    try {
+      const pagina = await firstValueFrom(
+        this.auditoriasService.listar({ filtroEstado: ['CERTIFICACION_EMITIDA'] })
+      );
+      const auditoriaCalificable = pagina.contenido.find(
+        (a) => a.idAuditor === auditorId && a.estado === 'CERTIFICACION_EMITIDA'
+      );
+
+      if (!auditoriaCalificable) return;
+
+      this.auditoriaId.set(auditoriaCalificable.id);
+      this.estadoAuditoria.set(auditoriaCalificable.estado);
+
+      const calificacion = await firstValueFrom(
+        this.calificacionService.obtenerPorAuditoria(auditoriaCalificable.id)
+      );
+      this.calificacionExistente.set(calificacion);
+      if (calificacion) {
+        this.empresaIdUsuario.set(calificacion.empresaId);
+      }
+    } catch {
+      // Si falla la carga de contexto de calificación, no mostrar el formulario.
     }
   }
 

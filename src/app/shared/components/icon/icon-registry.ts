@@ -34,6 +34,7 @@ export type IconName =
   | 'envios-carga'
   | 'error'
   | 'evolucion'
+  | 'favorito'
   | 'filter'
   | 'flota-vehicular'
   | 'goal'
@@ -191,6 +192,12 @@ export const ICONS: Record<IconName, string> = {
 </svg>`,
   evolucion: `<svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <path d="M0 15V13.3333L1.66667 11.6667V15H0ZM3.33333 15V10L5 8.33333V15H3.33333ZM6.66667 15V8.33333L8.33333 10.0208V15H6.66667ZM10 15V10.0208L11.6667 8.35417V15H10ZM13.3333 15V6.66667L15 5V15H13.3333ZM0 10.6875V8.33333L5.83333 2.5L9.16667 5.83333L15 0V2.35417L9.16667 8.1875L5.83333 4.85417L0 10.6875Z" fill="currentColor"/>
+</svg>`,
+  favorito: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path
+    d="M12 20.25C11.76 20.25 11.52 20.16 11.34 19.98L4.28 13.56C2.67 12.09 1.75 10.28 1.75 8.58C1.75 5.8 3.86 3.75 6.72 3.75C8.29 3.75 10.02 4.48 11.13 5.61L12 6.5L12.87 5.61C13.98 4.48 15.71 3.75 17.28 3.75C20.14 3.75 22.25 5.8 22.25 8.58C22.25 10.28 21.33 12.09 19.72 13.56L12.66 19.98C12.48 20.16 12.24 20.25 12 20.25Z"
+    fill="currentColor"
+  />
 </svg>`,
   filter: `<svg viewBox="0 0 10 7" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <path d="M3.64583 6.25V5.20833H5.72917V6.25H3.64583ZM1.5625 3.64583V2.60417H7.8125V3.64583H1.5625ZM0 1.04167V0H9.375V1.04167H0Z" fill="currentColor"/>

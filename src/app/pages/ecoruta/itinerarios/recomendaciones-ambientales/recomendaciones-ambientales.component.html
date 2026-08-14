@@ -9,14 +9,19 @@
       <span class="ch-recomendaciones__spinner" aria-hidden="true"></span>
       <p>Analizando tu itinerario en busca de mejoras...</p>
     </div>
+  } @else if (errorCarga()) {
+    <p class="ch-recomendaciones__error" role="alert">
+      <app-icon name="warning" [size]="16" aria-hidden="true" />
+      <span>{{ errorCarga() }}</span>
+    </p>
   } @else if (itinerarioOptimizado()) {
     <p class="ch-recomendaciones__optimizado" role="status">
       <app-icon name="info" [size]="16" aria-hidden="true" />
-      <span>{{ mensaje() }}</span>
+      <span>{{ mensajeMostrado() }}</span>
     </p>
   } @else {
     <ul class="ch-recomendaciones__lista">
-      @for (recomendacion of recomendaciones(); track recomendacion.actividadId) {
+      @for (recomendacion of recomendaciones(); track $index) {
         <li class="ch-recomendaciones__item">
           <div class="ch-recomendaciones__item-info">
             <p class="ch-recomendaciones__descripcion">{{ recomendacion.descripcion }}</p>
@@ -25,7 +30,7 @@
               +{{ recomendacion.incrementoEstimado | number: '1.0-1' }} EcoScore estimado
             </span>
           </div>
-          @if (recomendacion.alternativa) {
+          @if (puedeAplicar(recomendacion)) {
             <button
               type="button"
               class="ch-recomendaciones__boton-aplicar"

@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ToastService } from '../../../../shared/services/toast.service';
 import { EcoRutaRecomendacionesService } from '../ecoruta-recomendaciones.service';
 import { Itinerario } from '../models/itinerario.model';
 import { RecomendacionAmbiental, RecomendacionesResponse } from '../models/recomendaciones.model';
@@ -8,6 +9,7 @@ import { RecomendacionesAmbientalesComponent } from './recomendaciones-ambiental
 
 const ITINERARIO_ID = '11111111-1111-1111-1111-111111111111';
 const ACTIVIDAD_ID = '22222222-2222-2222-2222-222222222222';
+const OTRA_ACTIVIDAD_ID = '33333333-3333-3333-3333-333333333333';
 
 const RECOMENDACION_MOCK: RecomendacionAmbiental = {
   tipo: 'ACTIVIDAD_ALTERNATIVA',
@@ -27,6 +29,19 @@ const RECOMENDACION_MOCK: RecomendacionAmbiental = {
   },
   categoriaTuristica: 'AVENTURA',
   provincia: 'PUNTARENAS',
+};
+
+const OTRA_RECOMENDACION_MOCK: RecomendacionAmbiental = {
+  ...RECOMENDACION_MOCK,
+  actividadId: OTRA_ACTIVIDAD_ID,
+  actividadNombre: 'Paseo en bote',
+  descripcion: 'Sustituye "Paseo en bote" por "Kayak sostenible".',
+  incrementoEstimado: 3.2,
+};
+
+const RECOMENDACION_SIN_CATEGORIA_MOCK: RecomendacionAmbiental = {
+  ...RECOMENDACION_MOCK,
+  categoriaTuristica: null,
 };
 
 const ITINERARIO_ACTUALIZADO_MOCK: Itinerario = {
@@ -63,16 +78,19 @@ describe('RecomendacionesAmbientalesComponent', () => {
     return created;
   }
 
-  function flushRecomendaciones(response: RecomendacionesResponse): void {
+  function flushRecomendaciones(
+    response: RecomendacionesResponse,
+    itinerarioId = ITINERARIO_ID
+  ): void {
     const req = httpMock.expectOne(
-      `${EcoRutaRecomendacionesService.URL}/${ITINERARIO_ID}/recomendaciones`
+      `${EcoRutaRecomendacionesService.URL}/${itinerarioId}/recomendaciones`
     );
     expect(req.request.method).toBe('GET');
     req.flush(response);
   }
 
   afterEach(() => {
-    httpMock?.verify();
+    httpMock.verify();
   });
 
   describe('visualización de la lista de recomendaciones', () => {
@@ -153,6 +171,61 @@ describe('RecomendacionesAmbientalesComponent', () => {
       );
       expect(optimizado.textContent).not.toContain('excelente desempeño ambiental');
     });
+
+    it('muestra un texto de respaldo si el backend manda lista vacía sin mensaje', async () => {
+      fixture = await crearFixture();
+      httpMock = TestBed.inject(HttpTestingController);
+
+      fixture.detectChanges();
+      flushRecomendaciones({ recomendaciones: [], mensaje: null });
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const optimizado = fixture.nativeElement.querySelector('.ch-recomendaciones__optimizado');
+      expect(optimizado).not.toBeNull();
+      expect(optimizado.textContent?.trim()).not.toBe('');
+    });
+  });
+
+  describe('recomendación no aplicable por datos incompletos', () => {
+    it('no muestra el botón Aplicar cuando falta categoriaTuristica', async () => {
+      fixture = await crearFixture();
+      httpMock = TestBed.inject(HttpTestingController);
+
+      fixture.detectChanges();
+      flushRecomendaciones({ recomendaciones: [RECOMENDACION_SIN_CATEGORIA_MOCK], mensaje: null });
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const items = fixture.nativeElement.querySelectorAll('.ch-recomendaciones__item');
+      expect(items.length).toBe(1);
+      expect(items[0].querySelector('.ch-recomendaciones__boton-aplicar')).toBeNull();
+    });
+
+    it('muestra un toast de error si aplicar() se invoca igual con datos incompletos', async () => {
+      fixture = await crearFixture();
+      httpMock = TestBed.inject(HttpTestingController);
+      const toastService = TestBed.inject(ToastService);
+      const errorSpy = vi.spyOn(toastService, 'error');
+
+      fixture.detectChanges();
+      flushRecomendaciones({ recomendaciones: [RECOMENDACION_SIN_CATEGORIA_MOCK], mensaje: null });
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Defensa en profundidad: aunque el template no muestre el botón, aplicar() nunca debe
+      // fallar en silencio si algo lo invoca igual con datos incompletos.
+      (
+        fixture.componentInstance as unknown as {
+          aplicar: (r: RecomendacionAmbiental) => void;
+        }
+      ).aplicar(RECOMENDACION_SIN_CATEGORIA_MOCK);
+
+      expect(errorSpy).toHaveBeenCalled();
+      httpMock.expectNone(
+        `${EcoRutaRecomendacionesService.URL}/${ITINERARIO_ID}/recomendaciones/${ACTIVIDAD_ID}/aplicar`
+      );
+    });
   });
 
   describe('acción de aplicar recomendación', () => {
@@ -209,10 +282,95 @@ describe('RecomendacionesAmbientalesComponent', () => {
 
       expect(fixture.nativeElement.querySelectorAll('.ch-recomendaciones__item').length).toBe(0);
     });
+
+    it('trackea el estado de "aplicando" por fila: aplicar A no afecta el botón de B', async () => {
+      fixture = await crearFixture();
+      httpMock = TestBed.inject(HttpTestingController);
+
+      fixture.detectChanges();
+      flushRecomendaciones({
+        recomendaciones: [RECOMENDACION_MOCK, OTRA_RECOMENDACION_MOCK],
+        mensaje: null,
+      });
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const botones = fixture.nativeElement.querySelectorAll('.ch-recomendaciones__boton-aplicar');
+      expect(botones.length).toBe(2);
+
+      // Click en la primera recomendación (A) — su request queda en vuelo.
+      botones[0].click();
+      fixture.detectChanges();
+
+      const botonesTrasClickA = fixture.nativeElement.querySelectorAll(
+        '.ch-recomendaciones__boton-aplicar'
+      );
+      expect(botonesTrasClickA[0].disabled).toBe(true);
+      expect(botonesTrasClickA[0].textContent).toContain('Aplicando...');
+      // B no debería verse afectado por la request en vuelo de A.
+      expect(botonesTrasClickA[1].disabled).toBe(false);
+      expect(botonesTrasClickA[1].textContent).toContain('Aplicar');
+
+      // Click en B mientras A sigue pendiente: ambas requests en vuelo simultáneamente.
+      botonesTrasClickA[1].click();
+      fixture.detectChanges();
+
+      const putReqA = httpMock.expectOne(
+        `${EcoRutaRecomendacionesService.URL}/${ITINERARIO_ID}/recomendaciones/${ACTIVIDAD_ID}/aplicar`
+      );
+      const putReqB = httpMock.expectOne(
+        `${EcoRutaRecomendacionesService.URL}/${ITINERARIO_ID}/recomendaciones/${OTRA_ACTIVIDAD_ID}/aplicar`
+      );
+
+      // B resuelve primero: A debe seguir marcada como "aplicando", no debe pisarse el estado.
+      putReqB.flush({ ...ITINERARIO_ACTUALIZADO_MOCK });
+      fixture.detectChanges();
+
+      const botonATrasResolverB = fixture.nativeElement.querySelector(
+        '.ch-recomendaciones__boton-aplicar'
+      );
+      expect(botonATrasResolverB.disabled).toBe(true);
+      expect(botonATrasResolverB.textContent).toContain('Aplicando...');
+
+      putReqA.flush({ ...ITINERARIO_ACTUALIZADO_MOCK });
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelectorAll('.ch-recomendaciones__item').length).toBe(0);
+    });
   });
 
-  describe('toast de error', () => {
-    it('no muestra recomendaciones cuando la carga inicial falla con 403', async () => {
+  describe('carga obsoleta descartada', () => {
+    it('descarta la respuesta de un itinerarioId anterior si cambia mientras la petición está en vuelo', async () => {
+      fixture = await crearFixture();
+      httpMock = TestBed.inject(HttpTestingController);
+
+      fixture.detectChanges();
+      const primeraReq = httpMock.expectOne(
+        `${EcoRutaRecomendacionesService.URL}/${ITINERARIO_ID}/recomendaciones`
+      );
+
+      const OTRO_ITINERARIO_ID = '99999999-9999-9999-9999-999999999999';
+      fixture.componentRef.setInput('itinerarioId', OTRO_ITINERARIO_ID);
+      fixture.detectChanges();
+      const segundaReq = httpMock.expectOne(
+        `${EcoRutaRecomendacionesService.URL}/${OTRO_ITINERARIO_ID}/recomendaciones`
+      );
+
+      // La primera petición (obsoleta) resuelve después que la segunda.
+      segundaReq.flush({ recomendaciones: [OTRA_RECOMENDACION_MOCK], mensaje: null });
+      await fixture.whenStable();
+      primeraReq.flush({ recomendaciones: [RECOMENDACION_MOCK], mensaje: null });
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const items = fixture.nativeElement.querySelectorAll('.ch-recomendaciones__item');
+      expect(items.length).toBe(1);
+      expect(items[0].textContent).toContain('Paseo en bote');
+    });
+  });
+
+  describe('errores', () => {
+    it('muestra un estado de error inline persistente cuando la carga inicial falla con 403', async () => {
       fixture = await crearFixture();
       httpMock = TestBed.inject(HttpTestingController);
 
@@ -230,6 +388,13 @@ describe('RecomendacionesAmbientalesComponent', () => {
 
       expect(fixture.nativeElement.querySelectorAll('.ch-recomendaciones__item').length).toBe(0);
       expect(fixture.nativeElement.querySelector('.ch-recomendaciones__optimizado')).toBeNull();
+
+      const errorInline = fixture.nativeElement.querySelector('.ch-recomendaciones__error');
+      expect(errorInline).not.toBeNull();
+      expect(errorInline.getAttribute('role')).toBe('alert');
+      expect(errorInline.textContent).toContain(
+        'No tienes permiso para acceder a este itinerario.'
+      );
     });
 
     it('no falla cuando aplicar una recomendación devuelve error', async () => {
@@ -254,6 +419,9 @@ describe('RecomendacionesAmbientalesComponent', () => {
 
       // La recomendación sigue en la lista: no se remueve si la aplicación falló.
       expect(fixture.nativeElement.querySelectorAll('.ch-recomendaciones__item').length).toBe(1);
+      // Y el botón vuelve a estar habilitado (no queda "Aplicando..." colgado).
+      const boton = fixture.nativeElement.querySelector('.ch-recomendaciones__boton-aplicar');
+      expect(boton.disabled).toBe(false);
     });
   });
 });

@@ -26,6 +26,7 @@ describe('RefinamientoChatComponent', () => {
     clasificacionAmbiental: 'BUENA',
     ecoScoreParcial: false,
     ecoScoreCalculadoEn: '2026-07-30T20:00:00Z',
+    favorito: false,
     fechaGeneracion: '2026-07-30T20:00:00Z',
     generadoParcial: false,
     mensajeParcial: null,
@@ -87,6 +88,21 @@ describe('RefinamientoChatComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.querySelector('input')?.disabled).toBe(false);
+    expect(root.querySelector('button[type="submit"]')?.hasAttribute('disabled')).toBe(true);
+  });
+
+  it('bloquea el input y el boton mientras sustituye una actividad', async () => {
+    fixture = await crearFixture(itinerario);
+    const root = fixture.nativeElement as HTMLElement;
+
+    fixture.componentInstance.prellenarMensaje('Quiero ajustar el itinerario.');
+    fixture.detectChanges();
+    expect(root.querySelector('button[type="submit"]')?.hasAttribute('disabled')).toBe(false);
+
+    (fixture.componentInstance as any).cargandoSustitucion.set(true);
+    fixture.detectChanges();
+
+    expect(root.querySelector('input')?.disabled).toBe(true);
     expect(root.querySelector('button[type="submit"]')?.hasAttribute('disabled')).toBe(true);
   });
 
@@ -180,6 +196,7 @@ describe('RefinamientoChatComponent — integración con alternativas', () => {
     clasificacionAmbiental: 'BUENA',
     ecoScoreParcial: false,
     ecoScoreCalculadoEn: '2026-07-30T20:00:00Z',
+    favorito: false,
     fechaGeneracion: '2026-07-30T20:00:00Z',
     generadoParcial: false,
     mensajeParcial: null,
@@ -454,6 +471,7 @@ describe('RefinamientoChatComponent — conversación libre (PP-88)', () => {
     clasificacionAmbiental: 'BUENA',
     ecoScoreParcial: false,
     ecoScoreCalculadoEn: '2026-07-30T20:00:00Z',
+    favorito: false,
     fechaGeneracion: '2026-07-30T20:00:00Z',
     generadoParcial: false,
     mensajeParcial: null,
