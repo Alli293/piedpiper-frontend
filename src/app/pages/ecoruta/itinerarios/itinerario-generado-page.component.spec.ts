@@ -9,6 +9,7 @@ import { PerfilInicialService } from '../../../core/services/perfil-inicial.serv
 import { ToastService } from '../../../shared/services/toast.service';
 import { EcoRutaItinerariosService } from './ecoruta-itinerarios.service';
 import { EcoRutaRecomendacionesService } from './ecoruta-recomendaciones.service';
+import { EstablecimientoBannerService } from './establecimiento-banner.service';
 import { Itinerario } from './models/itinerario.model';
 import { ItinerarioGeneradoPageComponent } from './itinerario-generado-page.component';
 
@@ -226,6 +227,7 @@ describe('ItinerarioGeneradoPageComponent', () => {
       establecimientosEvaluados: [
         {
           nombreEstablecimiento: 'Reserva Selvatura',
+          empresaId: null,
           puntuacionAmbiental: {
             puntuacionTotal: 68,
             componenteCertificaciones: 30,
@@ -245,6 +247,52 @@ describe('ItinerarioGeneradoPageComponent', () => {
     const texto = fixture.nativeElement.textContent as string;
     expect(texto).toContain('Desglose por establecimiento');
     expect(texto).toContain('Reserva Selvatura');
+  });
+
+  it('pide y muestra el banner de origen cuando un establecimiento tiene empresaId (PP-95)', async () => {
+    const empresaId = '99999999-9999-9999-9999-999999999999';
+
+    await crearFixture();
+    httpMock.expectOne(`${EcoRutaItinerariosService.URL}/${ITINERARIO_ID}`).flush({
+      ...ITINERARIO_BASE,
+      establecimientosEvaluados: [
+        {
+          nombreEstablecimiento: 'Hotel Capitán Suizo',
+          empresaId,
+          puntuacionAmbiental: {
+            puntuacionTotal: 68,
+            componenteCertificaciones: 30,
+            componenteIma: 24,
+            componenteBenchmark: 14,
+            cantidadCertificacionesActivas: 3,
+            estimado: false,
+          },
+        },
+      ],
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    flushRecomendaciones();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const bannerReq = httpMock.expectOne(`${EstablecimientoBannerService.URL}/${empresaId}/banner`);
+    expect(bannerReq.request.method).toBe('GET');
+    bannerReq.flush({
+      banner: {
+        nombrePais: 'Costa Rica',
+        banderaEmoji: '🇨🇷',
+        banderaUrlSvg: 'https://flagcdn.com/cr.svg',
+        codigoIso: 'CR',
+      },
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const texto = fixture.nativeElement.textContent as string;
+    expect(texto).toContain('Hotel Capitán Suizo');
+    expect(texto).toContain('Costa Rica');
+    expect(fixture.nativeElement.querySelector('.ch-origen-banner')).not.toBeNull();
   });
 
   it('no revienta y omite el desglose cuando el backend envia establecimientosEvaluados null', async () => {
