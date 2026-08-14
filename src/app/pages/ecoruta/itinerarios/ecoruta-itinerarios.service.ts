@@ -2,7 +2,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { FiltroItinerarios, Itinerario, PaginaItinerarios } from './models/itinerario.model';
+import {
+  FiltroItinerarios,
+  Itinerario,
+  ItinerarioFavoritoResponse,
+  PaginaItinerarios,
+} from './models/itinerario.model';
 import { RefinamientoRequest, RefinamientoResponse } from './models/refinamiento.model';
 
 @Injectable({ providedIn: 'root' })
@@ -34,8 +39,19 @@ export class EcoRutaItinerariosService {
 
   /** Listado paginado de "Mis itinerarios" (PP-89). */
   listar(filtros: FiltroItinerarios = {}): Observable<PaginaItinerarios> {
-    const params = new HttpParams().set('pagina', filtros.pagina ?? 1);
+    let params = new HttpParams().set('pagina', filtros.pagina ?? 1);
+    if (filtros.soloFavoritos !== undefined) {
+      params = params.set('soloFavoritos', filtros.soloFavoritos);
+    }
     return this.http.get<PaginaItinerarios>(EcoRutaItinerariosService.URL, { params });
+  }
+
+  /** Actualiza el estado de favorito de un itinerario propio (PP-90). */
+  actualizarFavorito(id: string, favorito: boolean): Observable<ItinerarioFavoritoResponse> {
+    return this.http.put<ItinerarioFavoritoResponse>(
+      `${EcoRutaItinerariosService.URL}/${id}/favorito`,
+      { favorito }
+    );
   }
 
   /** Eliminar itinerario (PP-89, fuera del AC — pedido explícito del equipo). */

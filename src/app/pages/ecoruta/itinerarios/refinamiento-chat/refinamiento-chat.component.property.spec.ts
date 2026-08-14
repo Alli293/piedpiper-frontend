@@ -89,6 +89,7 @@ describe('Property 8: Failed substitution preserves original itinerary state', (
           clasificacionAmbiental: null,
           ecoScoreParcial: false,
           ecoScoreCalculadoEn: null,
+          favorito: false,
           fechaGeneracion: '2026-07-30T20:00:00Z',
           generadoParcial: generadoParcial as boolean,
           mensajeParcial: mensajeParcial as string | null,

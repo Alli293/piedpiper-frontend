@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { AuthSessionService } from '../../../../core/auth-session.service';
 import { PerfilInicial } from '../../../../core/models/perfil-inicial.model';
 import { PerfilInicialService } from '../../../../core/services/perfil-inicial.service';
@@ -12,7 +12,11 @@ import { MisItinerariosPageComponent } from './mis-itinerarios-page.component';
 
 describe('MisItinerariosPageComponent', () => {
   let fixture: ComponentFixture<MisItinerariosPageComponent>;
-  let itinerariosService: { listar: ReturnType<typeof vi.fn>; eliminar: ReturnType<typeof vi.fn> };
+  let itinerariosService: {
+    listar: ReturnType<typeof vi.fn>;
+    eliminar: ReturnType<typeof vi.fn>;
+    actualizarFavorito: ReturnType<typeof vi.fn>;
+  };
   let toastService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
   let router: Router;
 
@@ -25,6 +29,7 @@ describe('MisItinerariosPageComponent', () => {
       ecoScore: 82,
       clasificacionAmbiental: 'EXCELENTE',
       ecoScoreParcial: false,
+      favorito: false,
       provinciasVisitadas: ['SAN_JOSE'],
       fechaGeneracion: '2026-08-01T10:00:00Z',
       actualizadoEn: '2026-08-01T10:00:00Z',
@@ -58,13 +63,28 @@ describe('MisItinerariosPageComponent', () => {
     fixture.detectChanges();
   }
 
-  async function montar(opciones?: {
+  type MontarOpciones = {
     listar?: ReturnType<typeof vi.fn>;
     toastService?: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
-  }): Promise<void> {
+  };
+
+  function esPaginaItinerarios(
+    valor: PaginaItinerarios | MontarOpciones
+  ): valor is PaginaItinerarios {
+    return 'contenido' in valor;
+  }
+
+  async function montar(
+    config: PaginaItinerarios | MontarOpciones = pagina([itinerario('itin-1')])
+  ): Promise<void> {
+    const opciones = esPaginaItinerarios(config)
+      ? { listar: vi.fn().mockReturnValue(of(config)) }
+      : config;
+
     itinerariosService = {
       listar: opciones?.listar ?? vi.fn().mockReturnValue(of(pagina([itinerario('itin-1')]))),
       eliminar: vi.fn(),
+      actualizarFavorito: vi.fn().mockReturnValue(of({ id: 'itin-1', favorito: true })),
     };
     toastService = opciones?.toastService ?? { success: vi.fn(), error: vi.fn() };
 
@@ -93,7 +113,10 @@ describe('MisItinerariosPageComponent', () => {
   it('carga y muestra las tarjetas con el titulo derivado de las provincias', async () => {
     await montar();
 
-    expect(itinerariosService.listar).toHaveBeenCalledWith({ pagina: 1 });
+    expect(itinerariosService.listar).toHaveBeenCalledWith({
+      pagina: 1,
+      soloFavoritos: undefined,
+    });
     const texto = raiz().textContent as string;
     expect(texto).toContain('San José');
     expect(texto).toContain('5 días');
@@ -134,7 +157,10 @@ describe('MisItinerariosPageComponent', () => {
     botones[0]?.click();
     await estabilizar();
 
-    expect(itinerariosService.listar).toHaveBeenLastCalledWith({ pagina: 2 });
+    expect(itinerariosService.listar).toHaveBeenLastCalledWith({
+      pagina: 2,
+      soloFavoritos: undefined,
+    });
   });
 
   it('nuevo itinerario navega a preferencias', async () => {
@@ -239,9 +265,170 @@ describe('MisItinerariosPageComponent', () => {
       confirmar?.click();
       await estabilizar();
 
-      expect(itinerariosService.listar).toHaveBeenLastCalledWith({ pagina: 1 });
+      expect(itinerariosService.listar).toHaveBeenLastCalledWith({
+        pagina: 1,
+        soloFavoritos: undefined,
+      });
       expect(raiz().textContent).not.toContain('Todavía no tenés itinerarios guardados.');
       expect(raiz().textContent).toContain('San José');
+    });
+
+    it('en error 404 cierra el modal y recarga la lista', async () => {
+      await montar();
+      itinerariosService.eliminar.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 }))
+      );
+
+      raiz().querySelector<HTMLButtonElement>('.ch-mis-itinerarios__eliminar')?.click();
+      await estabilizar();
+      const confirmar = Array.from(raiz().querySelectorAll('button')).find(
+        (b) => b.textContent?.trim() === 'Eliminar'
+      );
+      confirmar?.click();
+      await estabilizar();
+
+      expect(toastService.error).toHaveBeenCalledWith(
+        'El itinerario solicitado no existe o ya no está disponible.'
+      );
+      expect(raiz().textContent).not.toContain('¿Eliminar este itinerario?');
+      expect(itinerariosService.listar).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('favoritos', () => {
+    it('filtra solo favoritos desde el toggle', async () => {
+      await montar();
+      itinerariosService.listar.mockReturnValueOnce(
+        of(pagina([itinerario('itin-1', { favorito: true })]))
+      );
+
+      raiz().querySelector<HTMLButtonElement>('.ch-mis-itinerarios__favoritos-toggle')?.click();
+      await estabilizar();
+
+      expect(itinerariosService.listar).toHaveBeenLastCalledWith({
+        pagina: 1,
+        soloFavoritos: true,
+      });
+      expect(raiz().textContent).toContain('1 favorito');
+    });
+
+    it('aclara que el conteo de favoritos es solo de la pagina cuando el filtro esta apagado', async () => {
+      await montar(
+        pagina([itinerario('itin-1', { favorito: true }), itinerario('itin-2')], {
+          totalResultados: 25,
+          totalPaginas: 3,
+        })
+      );
+
+      expect(raiz().textContent).toContain('25 itinerarios guardados');
+      expect(raiz().textContent).toContain('1 favorito en esta página');
+    });
+
+    it('marca favorito y actualiza el estado visual inmediatamente', async () => {
+      const respuesta = new Subject<{ id: string; favorito: boolean }>();
+      await montar();
+      itinerariosService.actualizarFavorito.mockReturnValue(respuesta.asObservable());
+
+      const botonFavorito = raiz().querySelector<HTMLButtonElement>(
+        '.ch-mis-itinerarios__favorito'
+      );
+      botonFavorito?.click();
+      fixture.detectChanges();
+
+      expect(itinerariosService.actualizarFavorito).toHaveBeenCalledWith('itin-1', true);
+      expect(botonFavorito?.classList.contains('ch-mis-itinerarios__favorito--active')).toBe(true);
+
+      respuesta.next({ id: 'itin-1', favorito: true });
+      respuesta.complete();
+      await estabilizar();
+    });
+
+    it('remueve favorito y deja de aparecer con el filtro activo', async () => {
+      await montar(pagina([itinerario('itin-1', { favorito: true })]));
+      itinerariosService.listar.mockReturnValueOnce(
+        of(pagina([itinerario('itin-1', { favorito: true })]))
+      );
+      itinerariosService.listar.mockReturnValueOnce(of(pagina([])));
+      itinerariosService.actualizarFavorito.mockReturnValueOnce(
+        of({ id: 'itin-1', favorito: false })
+      );
+
+      raiz().querySelector<HTMLButtonElement>('.ch-mis-itinerarios__favoritos-toggle')?.click();
+      await estabilizar();
+      raiz().querySelector<HTMLButtonElement>('.ch-mis-itinerarios__favorito')?.click();
+      await estabilizar();
+
+      expect(itinerariosService.actualizarFavorito).toHaveBeenCalledWith('itin-1', false);
+      expect(itinerariosService.listar).toHaveBeenLastCalledWith({
+        pagina: 1,
+        soloFavoritos: true,
+      });
+      expect(raiz().textContent).toContain('Todavía no tenés itinerarios favoritos.');
+    });
+
+    it('permite actualizar otro itinerario mientras uno distinto esta en vuelo', async () => {
+      const primeraRespuesta = new Subject<{ id: string; favorito: boolean }>();
+      await montar(pagina([itinerario('itin-1'), itinerario('itin-2')]));
+      itinerariosService.actualizarFavorito
+        .mockReturnValueOnce(primeraRespuesta.asObservable())
+        .mockReturnValueOnce(of({ id: 'itin-2', favorito: true }));
+
+      const botonesFavorito = raiz().querySelectorAll<HTMLButtonElement>(
+        '.ch-mis-itinerarios__favorito'
+      );
+      botonesFavorito[0]?.click();
+      fixture.detectChanges();
+      botonesFavorito[1]?.click();
+      await estabilizar();
+
+      expect(itinerariosService.actualizarFavorito).toHaveBeenCalledWith('itin-1', true);
+      expect(itinerariosService.actualizarFavorito).toHaveBeenCalledWith('itin-2', true);
+
+      primeraRespuesta.next({ id: 'itin-1', favorito: true });
+      primeraRespuesta.complete();
+      await estabilizar();
+    });
+
+    it('muestra toast de inexistente cuando el backend responde 404', async () => {
+      await montar();
+      itinerariosService.actualizarFavorito.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 }))
+      );
+
+      raiz().querySelector<HTMLButtonElement>('.ch-mis-itinerarios__favorito')?.click();
+      await estabilizar();
+
+      expect(toastService.error).toHaveBeenCalledWith(
+        'El itinerario solicitado no existe o ya no está disponible.'
+      );
+    });
+
+    it('muestra toast de permiso cuando el backend responde 403', async () => {
+      await montar();
+      itinerariosService.actualizarFavorito.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 403 }))
+      );
+
+      raiz().querySelector<HTMLButtonElement>('.ch-mis-itinerarios__favorito')?.click();
+      await estabilizar();
+
+      expect(toastService.error).toHaveBeenCalledWith(
+        'No tienes permiso para modificar este itinerario.'
+      );
+    });
+
+    it('muestra toast generico cuando falla la actualizacion', async () => {
+      await montar();
+      itinerariosService.actualizarFavorito.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 }))
+      );
+
+      raiz().querySelector<HTMLButtonElement>('.ch-mis-itinerarios__favorito')?.click();
+      await estabilizar();
+
+      expect(toastService.error).toHaveBeenCalledWith(
+        'No fue posible actualizar el estado del favorito.'
+      );
     });
   });
 });

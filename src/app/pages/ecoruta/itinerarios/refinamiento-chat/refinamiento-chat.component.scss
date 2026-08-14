@@ -91,7 +91,7 @@
 
   p {
     background: var(--ch-green);
-    color: #fff;
+    color: var(--ch-text-on-dark);
   }
 }
 
@@ -138,11 +138,6 @@
   transition:
     background 0.2s,
     color 0.2s;
-
-  &:hover {
-    background: var(--ch-green);
-    color: #fff;
-  }
 }
 
 .ch-refinamiento-chat__form {
@@ -182,7 +177,7 @@
   border: none;
   border-radius: var(--ch-radius-full);
   background: var(--ch-green);
-  color: #fff;
+  color: var(--ch-text-on-dark);
   cursor: pointer;
   transition: background 0.2s;
 
@@ -250,7 +245,7 @@
 .ch-refinamiento-chat__chip:hover,
 .ch-refinamiento-chat__btn-comparar:hover {
   background: var(--ch-green);
-  color: #fff;
+  color: var(--ch-text-on-dark);
 }
 
 .ch-refinamiento-chat__alternativas-mensaje {

@@ -34,6 +34,7 @@ export interface Itinerario {
   clasificacionAmbiental: 'EXCELENTE' | 'BUENA' | 'MODERADA' | 'MEJORABLE' | null;
   ecoScoreParcial: boolean;
   ecoScoreCalculadoEn: string | null;
+  favorito?: boolean;
   fechaGeneracion: string;
   generadoParcial: boolean;
   mensajeParcial: string | null;
@@ -50,14 +51,21 @@ export interface ItinerarioResumen {
   ecoScore: number | null;
   clasificacionAmbiental: Itinerario['clasificacionAmbiental'];
   ecoScoreParcial: boolean;
+  favorito: boolean;
   provinciasVisitadas: string[];
   fechaGeneracion: string;
   actualizadoEn: string;
 }
 
-/** Nombre genérico a propósito: PP-90 (favoritos, fuera de esta ronda) solo suma un campo acá. */
+/** Filtros disponibles para el listado paginado de "Mis itinerarios". */
 export interface FiltroItinerarios {
   pagina?: number;
+  soloFavoritos?: boolean;
+}
+
+export interface ItinerarioFavoritoResponse {
+  id: string;
+  favorito: boolean;
 }
 
 /** Misma forma que la paginación de solicitudes de auditoría, para paginar igual en toda la app. */

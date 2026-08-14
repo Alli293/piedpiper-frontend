@@ -15,12 +15,26 @@
             {{ totalResultados() }} itinerario{{ totalResultados() === 1 ? '' : 's' }} guardado{{
               totalResultados() === 1 ? '' : 's'
             }}
+            · {{ totalFavoritos() }} favorito{{ totalFavoritos() === 1 ? '' : 's'
+            }}{{ soloFavoritos() ? '' : ' en esta página' }}
           } @else {
             Todavía no tenés itinerarios guardados.
           }
         </p>
       </div>
-      <app-button (click)="nuevoItinerario()">+ Nuevo itinerario</app-button>
+      <div class="ch-mis-itinerarios__acciones">
+        <button
+          type="button"
+          class="ch-mis-itinerarios__favoritos-toggle"
+          [class.ch-mis-itinerarios__favoritos-toggle--active]="soloFavoritos()"
+          [attr.aria-pressed]="soloFavoritos()"
+          (click)="alternarSoloFavoritos()"
+        >
+          <app-icon name="favorito" [size]="14" />
+          Solo favoritos
+        </button>
+        <app-button (click)="nuevoItinerario()">+ Nuevo itinerario</app-button>
+      </div>
     </div>
 
     @if (cargando()) {
@@ -29,7 +43,13 @@
       <p class="ch-mis-itinerarios__error" role="alert">{{ error() }}</p>
     } @else if (itinerarios().length === 0) {
       <div class="ch-mis-itinerarios__vacio">
-        <p>Todavía no tenés itinerarios guardados.</p>
+        <p>
+          {{
+            soloFavoritos()
+              ? 'Todavía no tenés itinerarios favoritos.'
+              : 'Todavía no tenés itinerarios guardados.'
+          }}
+        </p>
         <app-button (click)="nuevoItinerario()">Planificar mi primer viaje</app-button>
       </div>
     } @else {
@@ -46,14 +66,30 @@
                     {{ item.ecoScore | number: '1.0-0' }} {{ textoClasificacion(item) }}
                   </app-badge>
                 }
-                <button
-                  type="button"
-                  class="ch-mis-itinerarios__eliminar"
-                  [attr.aria-label]="'Eliminar itinerario ' + tituloDe(item)"
-                  (click)="solicitarEliminar(item)"
-                >
-                  <app-icon name="delete" [size]="16" />
-                </button>
+                <div class="ch-mis-itinerarios__card-actions">
+                  <button
+                    type="button"
+                    class="ch-mis-itinerarios__favorito"
+                    [class.ch-mis-itinerarios__favorito--active]="item.favorito"
+                    [disabled]="favoritosActualizando().has(item.id)"
+                    [attr.aria-label]="
+                      (item.favorito ? 'Remover de favoritos ' : 'Agregar a favoritos ') +
+                      tituloDe(item)
+                    "
+                    [attr.aria-pressed]="item.favorito"
+                    (click)="alternarFavorito(item)"
+                  >
+                    <app-icon name="favorito" [size]="16" />
+                  </button>
+                  <button
+                    type="button"
+                    class="ch-mis-itinerarios__eliminar"
+                    [attr.aria-label]="'Eliminar itinerario ' + tituloDe(item)"
+                    (click)="solicitarEliminar(item)"
+                  >
+                    <app-icon name="delete" [size]="16" />
+                  </button>
+                </div>
               </div>
               <h3 class="ch-mis-itinerarios__titulo">{{ tituloDe(item) }}</h3>
               <p class="ch-mis-itinerarios__detalle">

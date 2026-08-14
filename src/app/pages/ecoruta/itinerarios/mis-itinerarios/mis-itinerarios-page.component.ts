@@ -50,6 +50,8 @@ export class MisItinerariosPageComponent implements OnInit {
   protected readonly pagina = signal(1);
   protected readonly totalPaginas = signal(0);
   protected readonly totalResultados = signal(0);
+  protected readonly soloFavoritos = signal(false);
+  protected readonly favoritosActualizando = signal<ReadonlySet<string>>(new Set<string>());
 
   protected readonly confirmTarget = signal<ItinerarioResumen | null>(null);
   protected readonly deletingId = signal<string | null>(null);
@@ -66,6 +68,11 @@ export class MisItinerariosPageComponent implements OnInit {
 
   protected readonly hayPaginaAnterior = computed(() => this.pagina() > 1);
   protected readonly hayPaginaSiguiente = computed(() => this.pagina() < this.totalPaginas());
+  protected readonly totalFavoritos = computed(() =>
+    this.soloFavoritos()
+      ? this.totalResultados()
+      : this.itinerarios().filter((itinerario) => itinerario.favorito).length
+  );
 
   async ngOnInit(): Promise<void> {
     await this.cargar();
@@ -79,6 +86,53 @@ export class MisItinerariosPageComponent implements OnInit {
 
   protected nuevoItinerario(): void {
     void this.router.navigateByUrl('/ecoruta/preferencias');
+  }
+
+  protected alternarSoloFavoritos(): void {
+    this.soloFavoritos.update((valor) => !valor);
+    this.pagina.set(1);
+    void this.cargar();
+  }
+
+  protected async alternarFavorito(item: ItinerarioResumen): Promise<void> {
+    if (this.favoritosActualizando().has(item.id)) return;
+
+    const itinerariosOriginales = this.itinerarios();
+    const totalOriginal = this.totalResultados();
+    const favorito = !item.favorito;
+
+    this.marcarFavoritoActualizando(item.id, true);
+    this.itinerarios.update((actuales) =>
+      actuales
+        .map((actual) => (actual.id === item.id ? { ...actual, favorito } : actual))
+        .filter((actual) => !this.soloFavoritos() || actual.favorito)
+    );
+    if (this.soloFavoritos() && !favorito) {
+      this.totalResultados.update((total) => Math.max(0, total - 1));
+    }
+
+    try {
+      const respuesta = await firstValueFrom(
+        this.itinerariosService.actualizarFavorito(item.id, favorito)
+      );
+      this.itinerarios.update((actuales) =>
+        actuales.map((actual) =>
+          actual.id === respuesta.id ? { ...actual, favorito: respuesta.favorito } : actual
+        )
+      );
+      if (this.soloFavoritos() && !respuesta.favorito) {
+        if (this.itinerarios().length === 0 && this.pagina() > 1) {
+          this.pagina.update((actual) => actual - 1);
+        }
+        await this.cargar();
+      }
+    } catch (err: unknown) {
+      this.itinerarios.set(itinerariosOriginales);
+      this.totalResultados.set(totalOriginal);
+      this.manejarErrorFavorito(err);
+    } finally {
+      this.marcarFavoritoActualizando(item.id, false);
+    }
   }
 
   protected abrir(itinerarioId: string): void {
@@ -138,7 +192,10 @@ export class MisItinerariosPageComponent implements OnInit {
     this.error.set(null);
     try {
       const respuesta = await firstValueFrom(
-        this.itinerariosService.listar({ pagina: this.pagina() })
+        this.itinerariosService.listar({
+          pagina: this.pagina(),
+          soloFavoritos: this.soloFavoritos() || undefined,
+        })
       );
       if (pedido !== this.ultimoPedido) return;
       this.itinerarios.set(respuesta.contenido);
@@ -176,5 +233,37 @@ export class MisItinerariosPageComponent implements OnInit {
       apiErrorMessage(error) ??
         'No fue posible actualizar el estado del itinerario. Intenta nuevamente.'
     );
+  }
+
+  private manejarErrorFavorito(error: unknown): void {
+    if (error instanceof HttpErrorResponse) {
+      if (error.status === 404) {
+        this.toastService.error(
+          apiErrorMessage(error) ?? 'El itinerario solicitado no existe o ya no está disponible.'
+        );
+        return;
+      }
+      if (error.status === 403) {
+        this.toastService.error(
+          apiErrorMessage(error) ?? 'No tienes permiso para modificar este itinerario.'
+        );
+        return;
+      }
+    }
+    this.toastService.error(
+      apiErrorMessage(error) ?? 'No fue posible actualizar el estado del favorito.'
+    );
+  }
+
+  private marcarFavoritoActualizando(id: string, actualizando: boolean): void {
+    this.favoritosActualizando.update((actuales) => {
+      const siguientes = new Set(actuales);
+      if (actualizando) {
+        siguientes.add(id);
+      } else {
+        siguientes.delete(id);
+      }
+      return siguientes;
+    });
   }
 }
