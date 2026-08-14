@@ -61,7 +61,6 @@ export class RevisionSolicitudAuditorPageComponent implements OnInit {
   protected readonly headerConfig: HeaderConfig = {
     sectionLabel: 'VALIDACIÓN',
     pageTitle: 'Revisión de solicitud',
-    showNotificationDot: false,
     showBackButton: true,
   };
 

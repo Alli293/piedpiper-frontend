@@ -6,7 +6,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { BadgeComponent, BadgeVariant } from '../../shared/components/badge/badge.component';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { CardStatComponent } from '../../shared/components/card-stat/card-stat.component';
-import { IconComponent, IconName } from '../../shared/components/icon/icon.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 import { PublicHeaderComponent } from '../../shared/components/public-header/public-header.component';
 import { capitalizar, esCostaRica, nombrePais } from '../../shared/utils/empresa-catalogos.utils';
 import { CompartirPerfilComponent } from './compartir-perfil/compartir-perfil.component';
@@ -21,23 +21,17 @@ import {
 } from './perfil-publico.models';
 import { PerfilPublicoService } from './perfil-publico.service';
 
-interface NivelConfig {
-  clase: string;
-  icono: IconName;
-  color: string;
-}
-
 interface RangoHuellaOption {
   valor: RangoPeriodoHuella;
   etiqueta: string;
 }
 
-const NIVEL_MAP: Record<string, NivelConfig> = {
-  'sin nivel': { clase: 'sin-nivel', icono: 'leaf-off', color: '#6b7280' },
-  bronce: { clase: 'bronce', icono: 'medal-bronze', color: '#cd7f32' },
-  plata: { clase: 'plata', icono: 'medal-silver', color: '#9ca3af' },
-  oro: { clase: 'oro', icono: 'medal-gold', color: '#d4a017' },
-  platino: { clase: 'platino', icono: 'medal-platinum', color: '#2ba6de' },
+const NIVEL_CLASES: Record<string, string> = {
+  'sin nivel': 'sin-nivel',
+  bronce: 'bronce',
+  plata: 'plata',
+  oro: 'oro',
+  platino: 'platino',
 };
 
 const NIVELES_ORDEN = ['bronce', 'plata', 'oro', 'platino'];
@@ -168,9 +162,9 @@ export class PerfilPublicoPageComponent {
     this.mostrarCompartir.set(false);
   }
 
-  protected readonly nivelConfig = computed(() => {
+  protected readonly nivelClase = computed(() => {
     const nivel = this.normalizarNivel(this.perfil()?.nivelEcologico).toLowerCase();
-    return NIVEL_MAP[nivel] ?? NIVEL_MAP['sin nivel'];
+    return NIVEL_CLASES[nivel] ?? NIVEL_CLASES['sin nivel'];
   });
 
   protected readonly nivelIndex = computed(() => {
@@ -275,7 +269,7 @@ export class PerfilPublicoPageComponent {
 
   protected getAnioVigencia(): string {
     const fecha = this.perfil()?.fechaActualizacionNivel;
-    if (!fecha) return new Date().getFullYear().toString();
+    if (!fecha) return '';
     return new Date(fecha).getFullYear().toString();
   }
 

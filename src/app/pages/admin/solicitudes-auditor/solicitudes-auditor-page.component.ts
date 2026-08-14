@@ -38,7 +38,6 @@ export class SolicitudesAuditorPageComponent {
   protected readonly headerConfig: HeaderConfig = {
     sectionLabel: 'ADMINISTRACIÓN',
     pageTitle: 'Solicitudes de auditores',
-    showNotificationDot: false,
   };
 
   private readonly validacionService = inject(ValidacionService);

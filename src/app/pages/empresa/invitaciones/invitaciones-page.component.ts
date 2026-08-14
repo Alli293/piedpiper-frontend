@@ -55,7 +55,6 @@ export class InvitacionesPageComponent {
   protected readonly headerConfig: HeaderConfig = {
     sectionLabel: 'PANEL EMPRESARIAL',
     pageTitle: 'Invitaciones de empresa',
-    showNotificationDot: true,
   };
 
   protected readonly invitaciones = signal<Invitacion[]>([]);

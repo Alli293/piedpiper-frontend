@@ -136,7 +136,6 @@ export class NuevaSolicitudPageComponent {
   protected readonly headerConfig: HeaderConfig = {
     sectionLabel: 'PANEL EMPRESARIAL',
     pageTitle: 'Nueva solicitud de auditoría',
-    showNotificationDot: true,
     showBackButton: true,
   };
 

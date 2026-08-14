@@ -98,7 +98,6 @@ export class InsigniasEcoRutaPageComponent {
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'ECORUTA / INSIGNIAS',
     pageTitle: 'Mis insignias',
-    showNotificationDot: true,
     userInitials: this.authSession.getUserInitials(),
   }));
 

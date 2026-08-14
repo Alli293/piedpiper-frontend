@@ -72,7 +72,6 @@ export class UiKitPageComponent {
   protected readonly headerConfig = signal<HeaderConfig>({
     sectionLabel: 'PANEL EMPRESARIAL',
     pageTitle: 'UI Kit',
-    showNotificationDot: true,
     userInitials: 'CA',
   });
 }

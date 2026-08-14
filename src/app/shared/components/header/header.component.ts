@@ -15,11 +15,9 @@ import { IconComponent } from '../icon/icon.component';
 export class HeaderComponent {
   sectionLabel = input('');
   pageTitle = input('');
-  showNotificationDot = input(false);
   userInitials = input('');
   showBackButton = input(false);
 
-  notificationClicked = output<void>();
   profileClicked = output<void>();
   backClicked = output<void>();
 }

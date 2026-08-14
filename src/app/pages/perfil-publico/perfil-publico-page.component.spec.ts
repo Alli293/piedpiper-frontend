@@ -142,6 +142,32 @@ describe('PerfilPublicoPageComponent', () => {
     expect(el.querySelector('.pub-nivel__nombre')?.textContent).toContain(expected);
   });
 
+  it('muestra la vigencia cuando hay nivel y fecha de actualizacion', () => {
+    fixture.detectChanges();
+    flushPerfil(PERFIL_MOCK);
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.pub-nivel__vigencia')?.textContent).toContain('Vigente 2025');
+  });
+
+  it('oculta la vigencia cuando el nivel es Sin nivel', () => {
+    fixture.detectChanges();
+    flushPerfil({ ...PERFIL_MOCK, nivelEcologico: '', fechaActualizacionNivel: null });
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.pub-nivel__nombre')?.textContent).toContain('Sin nivel');
+    expect(el.querySelector('.pub-nivel__vigencia')).toBeNull();
+  });
+
+  it('oculta la vigencia cuando hay nivel pero no hay fecha de actualizacion', () => {
+    fixture.detectChanges();
+    flushPerfil({ ...PERFIL_MOCK, fechaActualizacionNivel: null });
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.pub-nivel__nombre')?.textContent).toContain('Oro');
+    expect(el.querySelector('.pub-nivel__vigencia')).toBeNull();
+  });
+
   it('no muestra el boton de compartir del header mientras el perfil esta cargando', () => {
     fixture.detectChanges();
 
@@ -196,7 +222,7 @@ describe('PerfilPublicoPageComponent', () => {
 
     const el = fixture.nativeElement as HTMLElement;
     expect(el.textContent).toContain(
-      'Esta empresa aún no cuenta con datos de huella de carbono verificados.'
+      'Esta empresa aún no cuenta con periodos de huella de carbono verificados por un'
     );
     expect(el.querySelector('app-evolucion-huella-chart')).toBeNull();
   });

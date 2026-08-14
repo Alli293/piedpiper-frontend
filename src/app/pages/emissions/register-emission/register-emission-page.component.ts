@@ -454,7 +454,6 @@ export class RegisterEmissionPageComponent {
   protected readonly headerConfig = signal<HeaderConfig>({
     sectionLabel: 'Emisiones',
     pageTitle: 'Registrar emisión',
-    showNotificationDot: true,
     showBackButton: true,
   });
 

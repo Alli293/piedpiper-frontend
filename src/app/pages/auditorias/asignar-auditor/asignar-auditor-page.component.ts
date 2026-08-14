@@ -76,7 +76,6 @@ export class AsignarAuditorPageComponent implements OnInit {
   protected readonly headerConfig: HeaderConfig = {
     sectionLabel: 'PANEL EMPRESARIAL',
     pageTitle: 'Asignar auditor',
-    showNotificationDot: true,
     showBackButton: true,
   };
 

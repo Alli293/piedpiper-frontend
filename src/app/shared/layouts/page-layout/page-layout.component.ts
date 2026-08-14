@@ -17,7 +17,6 @@ export interface SidebarConfig {
 export interface HeaderConfig {
   sectionLabel: string;
   pageTitle: string;
-  showNotificationDot: boolean;
   userInitials?: string;
   showBackButton?: boolean;
 }
@@ -36,7 +35,6 @@ export class PageLayoutComponent {
   headerConfig = input.required<HeaderConfig>();
 
   menuItemClicked = output<string>();
-  notificationClicked = output<void>();
   profileClicked = output<void>();
   backClicked = output<void>();
 }

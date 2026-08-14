@@ -1,4 +1,4 @@
-<app-shell-layout [headerConfig]="headerConfig()">
+<app-shell-layout [headerConfig]="headerConfig()" activeId="auditores">
   <section class="ch-directorio" aria-label="Directorio de auditores">
     <div class="ch-directorio__toolbar">
       <div class="ch-directorio__buscador">
@@ -116,14 +116,29 @@
             <app-button variant="secondary" size="sm" (click)="reintentar()">Reintentar</app-button>
           </div>
         } @else if (sinResultados()) {
-          <p class="ch-directorio__estado">
+          <div class="ch-directorio__vacio">
+            <div class="ch-directorio__vacio-icono" aria-hidden="true">
+              <app-icon name="auditores-sin-resultados" [size]="27" />
+            </div>
+            <app-heading
+              level="h2"
+              class="ch-directorio__vacio-titulo"
+              text="No encontramos auditores con esos criterios"
+            />
+            <p class="ch-directorio__vacio-texto">
+              @if (hayFiltrosActivos()) {
+                No hay auditores certificados con los filtros seleccionados. Intenta ampliarlos.
+              } @else {
+                No se encontraron auditores que coincidan con tu búsqueda.
+              }
+            </p>
             @if (hayFiltrosActivos()) {
-              No hay auditores que cumplan con los filtros seleccionados. Intente ampliar los
-              criterios.
-            } @else {
-              No se encontraron auditores que coincidan con tu búsqueda.
+              <app-button size="sm" (click)="limpiarFiltros()">
+                <app-icon name="quitar-filtro" [size]="13" />
+                Limpiar filtros
+              </app-button>
             }
-          </p>
+          </div>
         } @else if (resultado(); as paginaAuditores) {
           <div class="ch-directorio__grid">
             @for (tarjeta of tarjetas(); track tarjeta.auditor.auditorId) {
@@ -135,6 +150,7 @@
                 <header class="ch-auditor-card__header">
                   <app-avatar
                     size="md"
+                    shape="square"
                     [initials]="tarjeta.iniciales"
                     [imageUrl]="tarjeta.auditor.fotoPerfil ?? ''"
                   />
@@ -187,7 +203,10 @@
                   </span>
                 </footer>
 
-                <span class="ch-auditor-card__perfil">Ver perfil</span>
+                <span class="ch-auditor-card__perfil">
+                  <app-icon name="perfil" [size]="12" />
+                  Ver perfil
+                </span>
               </a>
             }
           </div>

@@ -80,7 +80,6 @@ export class ListadoAuditoriasPageComponent implements OnInit {
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'AUDITORÍAS',
     pageTitle: this.esEmpresa() ? 'Auditorías' : 'Solicitudes asignadas',
-    showNotificationDot: true,
     userInitials: this.authSession.getUserInitials(),
   }));
 
