@@ -7,6 +7,7 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { routes } from './app.routes';
 import { jwtInterceptor } from './core/auth/jwt.interceptor';
 import { sesionInterceptor } from './core/auth/sesion.interceptor';
+import { ngrokInterceptor } from './core/http/ngrok.interceptor';
 
 // Sin esto, DatePipe (y cualquier formato de fecha en texto: "EEEE d MMM", nombres de mes/día)
 // cae al locale por defecto de Angular (en-US) — el resto de la app ya asume es-CR (ver
@@ -19,6 +20,9 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     { provide: LOCALE_ID, useValue: 'es-CR' },
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withFetch(), withInterceptors([jwtInterceptor, sesionInterceptor])),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([ngrokInterceptor, jwtInterceptor, sesionInterceptor])
+    ),
   ],
 };
