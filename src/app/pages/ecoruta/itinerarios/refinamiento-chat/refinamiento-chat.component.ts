@@ -25,7 +25,6 @@ import { ToastService } from '../../../../shared/services/toast.service';
 import { apiErrorMessage } from '../../../../shared/utils/http-error.utils';
 import { AlternativasComparacionComponent } from '../alternativas-comparacion/alternativas-comparacion.component';
 import { EcoRutaAlternativasService } from '../ecoruta-alternativas.service';
-import { AlternativaDTO, ComparacionResponse } from '../models/alternativas.model';
 import { crearSustitucionRequest } from '../utils/sustitucion.utils';
 import { EcoRutaItinerariosService } from '../ecoruta-itinerarios.service';
 import {
