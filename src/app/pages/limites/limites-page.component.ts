@@ -120,7 +120,6 @@ export class LimitesPageComponent {
   protected readonly headerConfig: HeaderConfig = {
     sectionLabel: 'PANEL EMPRESARIAL',
     pageTitle: 'Límite anual de emisiones',
-    showNotificationDot: true,
     showBackButton: true,
   };
 

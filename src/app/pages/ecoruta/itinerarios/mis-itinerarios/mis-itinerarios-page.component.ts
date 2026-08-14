@@ -62,7 +62,6 @@ export class MisItinerariosPageComponent implements OnInit {
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'ECORUTA',
     pageTitle: 'Mis itinerarios',
-    showNotificationDot: false,
     userInitials: this.authSession.getUserInitials(),
   }));
 

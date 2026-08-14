@@ -86,7 +86,6 @@ export class RecomendacionesAuditoresPageComponent {
   protected readonly headerConfig: HeaderConfig = {
     sectionLabel: 'Auditores',
     pageTitle: 'Recomendaciones',
-    showNotificationDot: false,
     showBackButton: true,
   };
 

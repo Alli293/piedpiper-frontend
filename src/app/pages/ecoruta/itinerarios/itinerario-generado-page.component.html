@@ -22,6 +22,11 @@
     <div class="ch-itinerario-generado">
       <div class="ch-itinerario-generado__contenido">
         <section class="ch-itinerario-generado__principal">
+          <a class="ch-itinerario-generado__volver" routerLink="/ecoruta/itinerarios" appLink>
+            <app-icon name="volver" [size]="14" aria-hidden="true" />
+            Volver a mis itinerarios
+          </a>
+
           <p class="ch-itinerario-generado__meta">
             Generado el {{ data.fechaGeneracion | date: 'dd/MM/yyyy - HH:mm' }} · Inicia el
             {{ data.fechaInicio | date: 'dd/MM/yyyy' }}

@@ -116,7 +116,6 @@ export class MadurezAmbientalPageComponent implements OnInit, OnDestroy {
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'BENCHMARK SECTORIAL',
     pageTitle: 'Madurez Ambiental',
-    showNotificationDot: true,
     userInitials: this.authSession.getUserInitials(),
   }));
 

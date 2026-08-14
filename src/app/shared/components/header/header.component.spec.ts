@@ -8,10 +8,8 @@ import { HeaderComponent } from './header.component';
     <app-header
       [sectionLabel]="sectionLabel"
       [pageTitle]="pageTitle"
-      [showNotificationDot]="showNotificationDot"
       [userInitials]="userInitials"
       [showBackButton]="showBackButton"
-      (notificationClicked)="notificaciones = notificaciones + 1"
       (profileClicked)="perfiles = perfiles + 1"
       (backClicked)="atras = atras + 1"
     />
@@ -20,10 +18,8 @@ import { HeaderComponent } from './header.component';
 class HostComponent {
   sectionLabel = 'EMPRESA';
   pageTitle = 'Dashboard';
-  showNotificationDot = false;
   userInitials = 'AC';
   showBackButton = false;
-  notificaciones = 0;
   perfiles = 0;
   atras = 0;
 }
@@ -61,27 +57,6 @@ describe('HeaderComponent', () => {
     boton.click();
 
     expect(fixture.componentInstance.atras).toBe(1);
-  });
-
-  it('emite notificationClicked al hacer click en el botón de notificaciones', () => {
-    const fixture = createFixture();
-    const root = fixture.nativeElement as HTMLElement;
-
-    root.querySelector<HTMLButtonElement>('.ch-header__icon-button')!.click();
-
-    expect(fixture.componentInstance.notificaciones).toBe(1);
-  });
-
-  it('no muestra el punto de notificación por defecto', () => {
-    const fixture = createFixture({ showNotificationDot: false });
-
-    expect(fixture.nativeElement.querySelector('.ch-header__notification-dot')).toBeNull();
-  });
-
-  it('muestra el punto de notificación cuando showNotificationDot() es true', () => {
-    const fixture = createFixture({ showNotificationDot: true });
-
-    expect(fixture.nativeElement.querySelector('.ch-header__notification-dot')).toBeTruthy();
   });
 
   it('emite profileClicked al hacer click en el botón de perfil', () => {

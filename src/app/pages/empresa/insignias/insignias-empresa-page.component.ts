@@ -38,7 +38,6 @@ export class InsigniasEmpresaPageComponent {
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'EMPRESA / INSIGNIAS',
     pageTitle: 'Insignias',
-    showNotificationDot: true,
   }));
 
   constructor() {

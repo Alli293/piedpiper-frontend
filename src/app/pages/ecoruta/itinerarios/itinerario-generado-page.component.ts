@@ -1,11 +1,12 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from '../../../core/auth-session.service';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { LinkDirective } from '../../../shared/components/link/link.directive';
 import { HeaderConfig } from '../../../shared/layouts/page-layout/page-layout.component';
 import { ShellLayoutComponent } from '../../../shared/layouts/shell-layout/shell-layout.component';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -41,9 +42,11 @@ const TOAST_DURATION_MS = 5000;
     DatePipe,
     EstablecimientosEvaluadosComponent,
     IconComponent,
+    LinkDirective,
     PuntuacionAmbientalBadgeComponent,
     RecomendacionesAmbientalesComponent,
     RefinamientoChatComponent,
+    RouterLink,
     ShellLayoutComponent,
   ],
   templateUrl: './itinerario-generado-page.component.html',
@@ -77,7 +80,6 @@ export class ItinerarioGeneradoPageComponent {
     pageTitle: this.itinerario()
       ? `Costa Rica sostenible · ${this.itinerario()!.cantidadDias} días`
       : 'Itinerario generado',
-    showNotificationDot: false,
     userInitials: this.authSession.getUserInitials(),
     showBackButton: true,
   }));

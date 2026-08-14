@@ -110,7 +110,6 @@ export class EmissionsListPageComponent {
   protected readonly headerConfig = computed<HeaderConfig>(() => ({
     sectionLabel: 'Emisiones',
     pageTitle: 'Mis Emisiones',
-    showNotificationDot: true,
   }));
 
   constructor() {

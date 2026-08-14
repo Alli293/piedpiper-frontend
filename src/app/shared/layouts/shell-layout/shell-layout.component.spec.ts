@@ -14,7 +14,6 @@ import { ToastService } from '../../services/toast.service';
 const HEADER_CONFIG: HeaderConfig = {
   sectionLabel: 'PANEL EMPRESARIAL',
   pageTitle: 'Dashboard',
-  showNotificationDot: true,
 };
 
 const PERFIL_ADMIN_EMPRESA = {

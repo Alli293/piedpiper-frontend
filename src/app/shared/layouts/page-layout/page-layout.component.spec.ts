@@ -13,7 +13,6 @@ const SIDEBAR_CONFIG: SidebarConfig = {
 const HEADER_CONFIG: HeaderConfig = {
   sectionLabel: 'EMPRESA',
   pageTitle: 'Dashboard',
-  showNotificationDot: false,
 };
 
 @Component({
@@ -23,7 +22,6 @@ const HEADER_CONFIG: HeaderConfig = {
       [sidebarConfig]="sidebarConfig"
       [headerConfig]="headerConfig"
       (menuItemClicked)="menuClicked = $event"
-      (notificationClicked)="notificaciones = notificaciones + 1"
       (profileClicked)="perfiles = perfiles + 1"
       (backClicked)="atras = atras + 1"
     >
@@ -36,7 +34,6 @@ class HostComponent {
   sidebarConfig = SIDEBAR_CONFIG;
   headerConfig = HEADER_CONFIG;
   menuClicked: string | null = null;
-  notificaciones = 0;
   perfiles = 0;
   atras = 0;
 }
@@ -78,14 +75,12 @@ describe('PageLayoutComponent', () => {
     expect(fixture.componentInstance.menuClicked).toBe('dashboard');
   });
 
-  it('reenvía los eventos del header (notificación, perfil, volver)', () => {
+  it('reenvía los eventos del header (perfil, volver)', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;
 
-    root.querySelector<HTMLButtonElement>('.ch-header__icon-button')!.click();
     root.querySelector<HTMLButtonElement>('.ch-header__profile-button')!.click();
 
-    expect(fixture.componentInstance.notificaciones).toBe(1);
     expect(fixture.componentInstance.perfiles).toBe(1);
   });
 });

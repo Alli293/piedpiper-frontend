@@ -225,7 +225,6 @@ export class DetalleAuditoriaPageComponent implements OnInit, OnDestroy {
   protected readonly headerConfig: HeaderConfig = {
     sectionLabel: 'AUDITORÍAS',
     pageTitle: 'Detalle de Auditoría',
-    showNotificationDot: true,
     showBackButton: true,
   };
 

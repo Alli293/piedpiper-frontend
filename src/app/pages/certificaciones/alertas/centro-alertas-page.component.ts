@@ -114,7 +114,6 @@ export class CentroAlertasPageComponent {
   protected readonly headerConfig: HeaderConfig = {
     sectionLabel: 'CERTIFICACIONES',
     pageTitle: 'Centro de Alertas',
-    showNotificationDot: false,
     showBackButton: true,
   };
 

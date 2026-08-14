@@ -19,7 +19,7 @@ class HostConStatComponent {}
 
 @Component({
   imports: [EncabezadoResumenComponent],
-  template: ` <app-encabezado-resumen icono="notificacion" tono="danger" titulo="Sin stat" /> `,
+  template: ` <app-encabezado-resumen icono="alert-solid" tono="danger" titulo="Sin stat" /> `,
 })
 class HostSinStatComponent {}
 
