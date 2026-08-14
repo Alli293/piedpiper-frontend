@@ -104,8 +104,7 @@ export class MisItinerariosPageComponent implements OnInit {
   protected async alternarFavorito(item: ItinerarioResumen): Promise<void> {
     if (this.favoritosActualizando().has(item.id)) return;
 
-    const itinerariosOriginales = this.itinerarios();
-    const totalOriginal = this.totalResultados();
+    const indiceOriginal = this.itinerarios().findIndex((actual) => actual.id === item.id);
     const favorito = !item.favorito;
 
     this.marcarFavoritoActualizando(item.id, true);
@@ -134,8 +133,7 @@ export class MisItinerariosPageComponent implements OnInit {
         await this.cargar();
       }
     } catch (err: unknown) {
-      this.itinerarios.set(itinerariosOriginales);
-      this.totalResultados.set(totalOriginal);
+      this.revertirFavorito(item, indiceOriginal);
       this.manejarErrorFavorito(err);
     } finally {
       this.marcarFavoritoActualizando(item.id, false);
@@ -260,6 +258,29 @@ export class MisItinerariosPageComponent implements OnInit {
     this.toastService.error(
       apiErrorMessage(error) ?? 'No fue posible actualizar el estado del favorito.'
     );
+  }
+
+  private revertirFavorito(item: ItinerarioResumen, indiceOriginal: number): void {
+    this.itinerarios.update((actuales) => {
+      const indiceActual = actuales.findIndex((actual) => actual.id === item.id);
+      if (indiceActual >= 0) {
+        return actuales.map((actual) =>
+          actual.id === item.id ? { ...actual, favorito: item.favorito } : actual
+        );
+      }
+
+      if (!this.soloFavoritos() || !item.favorito) {
+        return actuales;
+      }
+
+      const siguientes = [...actuales];
+      siguientes.splice(Math.min(indiceOriginal, siguientes.length), 0, item);
+      return siguientes;
+    });
+
+    if (this.soloFavoritos() && item.favorito) {
+      this.totalResultados.update((total) => total + 1);
+    }
   }
 
   private marcarFavoritoActualizando(id: string, actualizando: boolean): void {

@@ -324,6 +324,29 @@ describe('MisItinerariosPageComponent', () => {
       expect(raiz().textContent).toContain('1 favorito en esta página');
     });
 
+    it('muestra el total filtrado como favoritos cuando el filtro esta activo', async () => {
+      await montar(
+        pagina([itinerario('itin-1', { favorito: true }), itinerario('itin-2')], {
+          totalResultados: 25,
+          totalPaginas: 3,
+        })
+      );
+      itinerariosService.listar.mockReturnValueOnce(
+        of(
+          pagina(
+            [itinerario('itin-1', { favorito: true }), itinerario('itin-3', { favorito: true })],
+            { totalResultados: 2 }
+          )
+        )
+      );
+
+      raiz().querySelector<HTMLButtonElement>('.ch-mis-itinerarios__favoritos-toggle')?.click();
+      await estabilizar();
+
+      expect(raiz().textContent).toContain('2 favoritos');
+      expect(raiz().textContent).not.toContain('2 itinerarios guardados');
+    });
+
     it('marca favorito y actualiza el estado visual inmediatamente', async () => {
       const respuesta = new Subject<{ id: string; favorito: boolean }>();
       await montar();
@@ -374,6 +397,9 @@ describe('MisItinerariosPageComponent', () => {
 
       raiz().querySelector<HTMLButtonElement>('.ch-mis-itinerarios__favoritos-toggle')?.click();
       await estabilizar();
+      expect(raiz().textContent).toContain('Todavía no tenés itinerarios favoritos.');
+      expect(raiz().textContent).not.toContain('Todavía no tenés itinerarios guardados.');
+
       const botonVerTodos = Array.from(raiz().querySelectorAll('button')).find(
         (button) => button.textContent?.trim() === 'Ver todos los itinerarios'
       );
@@ -409,6 +435,32 @@ describe('MisItinerariosPageComponent', () => {
       primeraRespuesta.next({ id: 'itin-1', favorito: true });
       primeraRespuesta.complete();
       await estabilizar();
+    });
+
+    it('si falla un favorito en vuelo, no revierte otro favorito ya confirmado', async () => {
+      const primeraRespuesta = new Subject<{ id: string; favorito: boolean }>();
+      await montar(pagina([itinerario('itin-1'), itinerario('itin-2')]));
+      itinerariosService.actualizarFavorito
+        .mockReturnValueOnce(primeraRespuesta.asObservable())
+        .mockReturnValueOnce(of({ id: 'itin-2', favorito: true }));
+
+      let botonesFavorito = raiz().querySelectorAll<HTMLButtonElement>(
+        '.ch-mis-itinerarios__favorito'
+      );
+      botonesFavorito[0]?.click();
+      fixture.detectChanges();
+      botonesFavorito[1]?.click();
+      await estabilizar();
+
+      botonesFavorito = raiz().querySelectorAll<HTMLButtonElement>('.ch-mis-itinerarios__favorito');
+      expect(botonesFavorito[1]?.getAttribute('aria-pressed')).toBe('true');
+
+      primeraRespuesta.error(new HttpErrorResponse({ status: 500 }));
+      await estabilizar();
+
+      botonesFavorito = raiz().querySelectorAll<HTMLButtonElement>('.ch-mis-itinerarios__favorito');
+      expect(botonesFavorito[0]?.getAttribute('aria-pressed')).toBe('false');
+      expect(botonesFavorito[1]?.getAttribute('aria-pressed')).toBe('true');
     });
 
     it('muestra toast de inexistente cuando el backend responde 404', async () => {

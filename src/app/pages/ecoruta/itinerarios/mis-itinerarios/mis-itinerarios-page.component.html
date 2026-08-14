@@ -12,13 +12,21 @@
         <app-heading level="h2" text="Mis itinerarios" />
         <p class="ch-mis-itinerarios__descripcion">
           @if (totalResultados() > 0) {
-            {{ totalResultados() }} itinerario{{ totalResultados() === 1 ? '' : 's' }} guardado{{
-              totalResultados() === 1 ? '' : 's'
-            }}
-            · {{ totalFavoritos() }} favorito{{ totalFavoritos() === 1 ? '' : 's'
-            }}{{ soloFavoritos() ? '' : ' en esta página' }}
+            @if (soloFavoritos()) {
+              {{ totalResultados() }} favorito{{ totalResultados() === 1 ? '' : 's' }}
+            } @else {
+              {{ totalResultados() }} itinerario{{ totalResultados() === 1 ? '' : 's' }} guardado{{
+                totalResultados() === 1 ? '' : 's'
+              }}
+              · {{ totalFavoritos() }} favorito{{ totalFavoritos() === 1 ? '' : 's' }} en esta
+              página
+            }
           } @else {
-            Todavía no tenés itinerarios guardados.
+            {{
+              soloFavoritos()
+                ? 'Todavía no tenés itinerarios favoritos.'
+                : 'Todavía no tenés itinerarios guardados.'
+            }}
           }
         </p>
       </div>
